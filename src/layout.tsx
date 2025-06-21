@@ -49,15 +49,15 @@ export default function Layout({
         >
           <div className="h-screen flex flex-col">
             <Header />
-            <div className="flex flex-1">
-              <SidebarProvider>
-                <AppSidebar />
-                <main>
-                  <SidebarTrigger />
-                  {children}
-                </main>
-              </SidebarProvider>
-            </div>
+            {/* <div className="flex flex-1"> */}
+            <SidebarProvider>
+              <AppSidebar />
+              {/* <main> */}
+              <SidebarTrigger />
+              {children}
+              {/* </main> */}
+            </SidebarProvider>
+            {/* </div> */}
           </div>
         </ThemeProvider>
       </body>
