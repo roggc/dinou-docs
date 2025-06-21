@@ -3,8 +3,9 @@
 import type { ReactNode } from "react";
 import "./global.css";
 import Header from "@/components/header";
-// import { ThemeProvider } from "next-themes";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
 export default function Layout({
   children,
@@ -16,6 +17,7 @@ export default function Layout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>dinou app</title>
         <link rel="icon" type="image/png" href="/favicon.ico" />
         <link
@@ -48,9 +50,13 @@ export default function Layout({
           <div className="h-screen flex flex-col">
             <Header />
             <div className="flex flex-1">
-              {sidebar}
-
-              {children}
+              <SidebarProvider>
+                <AppSidebar />
+                <main>
+                  <SidebarTrigger />
+                  {children}
+                </main>
+              </SidebarProvider>
             </div>
           </div>
         </ThemeProvider>
