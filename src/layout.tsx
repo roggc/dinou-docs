@@ -2,10 +2,19 @@
 
 import type { ReactNode } from "react";
 import "./global.css";
+import Header from "@/components/header";
+// import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "@/components/theme-provider";
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function Layout({
+  children,
+  sidebar,
+}: {
+  children: ReactNode;
+  sidebar?: ReactNode;
+}) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <title>dinou app</title>
         <link rel="icon" type="image/png" href="/favicon.ico" />
@@ -29,7 +38,23 @@ export default function Layout({ children }: { children: ReactNode }) {
         <link rel="manifest" href="/site.webmanifest"></link>
         <link href="/styles.css" rel="stylesheet"></link>
       </head>
-      <body>{children}</body>
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="h-screen flex flex-col">
+            <Header />
+            <div className="flex flex-1">
+              {sidebar}
+
+              {children}
+            </div>
+          </div>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
