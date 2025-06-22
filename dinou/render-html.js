@@ -30,8 +30,8 @@ const { renderJSXToClientJSX } = require("./render-jsx-to-client-jsx");
 // Render the app to a stream
 async function renderToStream() {
   try {
-    const reqPath = process.argv[2];
-    const query = JSON.parse(process.argv[3]);
+    const reqPath = "/docs/"; //process.argv[2];
+    const query = {}; //JSON.parse(process.argv[3]);
 
     const jsx = Object.keys(query).length
       ? renderJSXToClientJSX(await getJSX(reqPath, query))
