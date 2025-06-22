@@ -1,12 +1,15 @@
 "use client";
 
 import type { ReactNode } from "react";
+import "./global.css";
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
-import Footer from "./components/footer";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
 export default function Layout({
   children,
+  sidebar,
 }: {
   children: ReactNode;
   sidebar?: ReactNode;
@@ -14,7 +17,6 @@ export default function Layout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>dinou app</title>
         <link rel="icon" type="image/png" href="/favicon.ico" />
@@ -45,10 +47,17 @@ export default function Layout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+          <div className="h-screen flex flex-col">
             <Header />
-            {children}
-            <Footer />
+            {/* <div className="flex flex-1"> */}
+            <SidebarProvider>
+              <AppSidebar />
+              {/* <main> */}
+              <SidebarTrigger />
+              {children}
+              {/* </main> */}
+            </SidebarProvider>
+            {/* </div> */}
           </div>
         </ThemeProvider>
       </body>
