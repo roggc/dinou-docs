@@ -31,12 +31,12 @@ const navigation = [
     items: [
       {
         title: "Introduction",
-        href: "/",
+        href: "/docs",
         icon: BookOpen,
       },
       {
         title: "Installation",
-        href: "/getting-started",
+        href: "/docs/getting-started",
         icon: Zap,
       },
     ],
@@ -46,22 +46,22 @@ const navigation = [
     items: [
       {
         title: "Routing System",
-        href: "/routing",
+        href: "/docs/routing",
         icon: Route,
       },
       {
         title: "Page Functions",
-        href: "/page-functions",
+        href: "/docs/page-functions",
         icon: FileText,
       },
       {
         title: "Data Fetching",
-        href: "/data-fetching",
+        href: "/docs/data-fetching",
         icon: Database,
       },
       {
         title: "Server Components",
-        href: "/server-components",
+        href: "/docs/server-components",
         icon: Server,
       },
     ],
@@ -71,27 +71,27 @@ const navigation = [
     items: [
       {
         title: "Dynamic Parameters",
-        href: "/dynamic-parameters",
+        href: "/docs/dynamic-parameters",
         icon: Code,
       },
       {
         title: "Query Parameters",
-        href: "/query-parameters",
+        href: "/docs/query-parameters",
         icon: Code,
       },
       {
         title: "Navigation",
-        href: "/navigation",
+        href: "/docs/navigation",
         icon: Globe,
       },
       {
         title: "Styles & CSS",
-        href: "/styles",
+        href: "/docs/styles",
         icon: Palette,
       },
       {
         title: "Images",
-        href: "/images",
+        href: "/docs/images",
         icon: ImageIcon,
       },
     ],
@@ -101,17 +101,17 @@ const navigation = [
     items: [
       {
         title: "Environment Variables",
-        href: "/environment",
+        href: "/docs/environment",
         icon: Settings,
       },
       {
         title: "Import Aliases",
-        href: "/import-aliases",
+        href: "/docs/import-aliases",
         icon: Code,
       },
       {
         title: "Ejecting",
-        href: "/ejecting",
+        href: "/docs/ejecting",
         icon: Settings,
       },
     ],
