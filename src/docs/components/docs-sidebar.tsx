@@ -91,7 +91,7 @@ const navigation = [
       },
       {
         title: "Images",
-        href: "/docs/images",
+        href: "/docs/images_",
         icon: ImageIcon,
       },
     ],
