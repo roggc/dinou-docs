@@ -5,10 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "dinou dev",
-    "build": "dinou build",
-    "start": "dinou start",
-    "eject": "dinou eject"
+    "dev": "node dinou/ssg.js && node --conditions react-server dinou/server.js",
+    "build": "node dinou/ssg.js && cross-env NODE_ENV=production webpack",
+    "start": "cross-env NODE_ENV=production node --conditions react-server dinou/server.js"
   },
   "keywords": [],
   "author": "",
