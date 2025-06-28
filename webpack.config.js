@@ -152,18 +152,6 @@ module.exports = {
         },
       },
     },
-    // ...(isDevelopment
-    //   ? {}
-    //   : {
-    //       minimize: true,
-    //       moduleIds: "named",
-    //       chunkIds: "named",
-    //       removeAvailableModules: true,
-    //       flagIncludedChunks: true,
-    //       usedExports: true,
-    //       concatenateModules: true,
-    //       sideEffects: false,
-    //     }),
   },
   watchOptions: {
     ignored: /____public____/,
@@ -171,18 +159,16 @@ module.exports = {
   ...(isDevelopment
     ? {
         devServer: {
-          static: {
-            directory: path.join(process.cwd(), "____public____"),
-          },
           port: 3001,
           hot: true,
+          devMiddleware: {
+            index: false,
+          },
           proxy: [
             {
-              context: (pathname) =>
-                !pathname.match(
-                  /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map)$/
-                ),
+              context: () => true,
               target: "http://localhost:3000",
+              changeOrigin: true,
             },
           ],
         },
