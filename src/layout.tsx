@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
-import Footer from "./components/footer";
+import Footer from "@/components/footer";
+import "@/globals.css";
 
 export default function Layout({
   children,

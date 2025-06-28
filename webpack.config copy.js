@@ -152,18 +152,18 @@ module.exports = {
         },
       },
     },
-    // ...(isDevelopment
-    //   ? {}
-    //   : {
-    //       minimize: true,
-    //       moduleIds: "named",
-    //       chunkIds: "named",
-    //       removeAvailableModules: true,
-    //       flagIncludedChunks: true,
-    //       usedExports: true,
-    //       concatenateModules: true,
-    //       sideEffects: false,
-    //     }),
+    ...(isDevelopment
+      ? {}
+      : {
+          minimize: true,
+          moduleIds: "named",
+          chunkIds: "named",
+          removeAvailableModules: true,
+          flagIncludedChunks: true,
+          usedExports: true,
+          concatenateModules: true,
+          sideEffects: false,
+        }),
   },
   watchOptions: {
     ignored: /____public____/,

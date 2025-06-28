@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { ThemeProvider } from "@/docs/components/theme-provider";
 import { DocsHeader } from "@/docs/components/docs-header";
 import { DocsSidebar } from "@/docs/components/docs-sidebar";
-import { SidebarProvider, SidebarInset } from "@/docs/components/ui/sidebar";
+import { SidebarProvider } from "@/docs/components/ui/sidebar";
 import "@/docs/globals.css";
 
 export default function Layout({
@@ -48,13 +48,6 @@ export default function Layout({
           disableTransitionOnChange
         >
           <SidebarProvider>
-            {/* <div className="flex min-h-screen">
-              <DocsSidebar />
-              <SidebarInset className="flex-1">
-                <DocsHeader />
-                <div className="flex-1">{children}</div>
-              </SidebarInset>
-            </div> */}
             <div className="sidebar-layout">
               <DocsSidebar />
               <div className="sidebar-content">
