@@ -29,10 +29,9 @@ const tocItems = [
   { id: "next-steps", title: "Next Steps", level: 2 },
 ];
 
-export default function Page({ data }: { data: number }) {
+export default function Page() {
   return (
     <div className="flex-1 flex">
-      {data}
       <main className="flex-1 py-6 lg:py-8">
         <div className="container max-w-4xl">
           <div className="flex items-center space-x-2 mb-6">
