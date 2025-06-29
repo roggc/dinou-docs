@@ -29,9 +29,10 @@ const tocItems = [
   { id: "next-steps", title: "Next Steps", level: 2 },
 ];
 
-export default function Page() {
+export default function Page({ data }: { data: number }) {
   return (
     <div className="flex-1 flex">
+      {data}
       <main className="flex-1 py-6 lg:py-8">
         <div className="container max-w-4xl">
           <div className="flex items-center space-x-2 mb-6">
@@ -228,7 +229,6 @@ export default function Page() {
           </div>
         </div>
       </main>
-
       <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8">
         <div className="sticky top-20">
           <TableOfContents items={tocItems} />

@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { PassThrough } = require("stream");
-const { getSSGJSXOrJSX } = require("./get-jsx.js");
+const getSSGJSXOrJSX = require("./get-ssg-jsx-or-jsx.js");
 const { renderToPipeableStream } = require("react-server-dom-webpack/server");
 
 const OUT_DIR = path.resolve("dist2");

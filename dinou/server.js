@@ -11,7 +11,7 @@ const {
 } = require("fs");
 const { renderToPipeableStream } = require("react-server-dom-webpack/server");
 const express = require("express");
-const { getSSGJSXOrJSX } = require("./get-jsx.js");
+const getSSGJSXOrJSX = require("./get-ssg-jsx-or-jsx.js");
 const { getErrorJSX } = require("./get-error-jsx.js");
 const addHook = require("./asset-require-hook.js");
 webpackRegister();
@@ -40,6 +40,7 @@ addHook({
 // const { PassThrough } = require("stream");
 const generateStatic = require("./generate-static.js");
 const renderAppToHtml = require("./render-app-to-html.js");
+const revalidating = require("./revalidating.js");
 
 const app = express();
 
@@ -127,6 +128,8 @@ app.get(/^\/.*\/?$/, async (req, res) => {
   try {
     const reqPath = req.path.endsWith("/") ? req.path : req.path + "/";
     const htmlPath = path.join("dist2", reqPath, "index.html");
+
+    revalidating(reqPath);
 
     if (existsSync(htmlPath)) {
       // console.log("Serving cached HTML:", htmlPath);

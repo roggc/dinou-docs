@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { PassThrough } = require("stream");
-const { getSSGJSXOrJSX } = require("./get-jsx.js");
+const getSSGJSXOrJSX = require("./get-ssg-jsx-or-jsx.js");
 const { renderToPipeableStream } = require("react-server-dom-webpack/server");
 
 const OUT_DIR = path.resolve("dist2");
@@ -14,7 +14,7 @@ async function generateStaticRSC(reqPath) {
 
   try {
     console.log("🔄 Generating RSC payload for:", finalReqPath);
-    const jsx = await getSSGJSXOrJSX(finalReqPath, {}, true);
+    const jsx = await getSSGJSXOrJSX(finalReqPath, {});
     console.log("✅ JSX retrieved for:", finalReqPath);
 
     fs.mkdirSync(path.dirname(payloadPath), { recursive: true });
