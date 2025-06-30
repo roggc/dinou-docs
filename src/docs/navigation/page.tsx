@@ -1,3 +1,5 @@
+"use client";
+
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { CodeBlock } from "@/docs/components/code-block";
 

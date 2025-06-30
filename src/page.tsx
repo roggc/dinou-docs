@@ -86,10 +86,8 @@ export default function Page() {
           </div>
         </div>
       </section>
-
       {/* Features Section */}
       <FeaturesSection />
-
       {/* Code Example Section */}
       <section id="development" className="w-full py-12 md:py-24 lg:py-32">
         <div className="px-4 md:px-6">
@@ -137,7 +135,6 @@ npm run build`}</code>
           </div>
         </div>
       </section>
-
       {/* Stats Section */}
       {/* <section className="w-full py-12 md:py-24 lg:py-32 bg-slate-50 dark:bg-slate-900/50">
         <div className="container px-4 md:px-6">
@@ -178,7 +175,6 @@ npm run build`}</code>
           </div>
         </div>
       </section> */}
-
       {/* Get Started Section */}
       {/* <section id="get-started" className="w-full py-12 md:py-24 lg:py-32">
         <div className="container px-4 md:px-6">

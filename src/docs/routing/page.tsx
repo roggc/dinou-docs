@@ -1,3 +1,5 @@
+"use client";
+
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { Alert, AlertDescription } from "@/docs/components/ui/alert";
 import {
@@ -37,9 +39,8 @@ export default function RoutingPage() {
               <h2>Overview</h2>
               <p>
                 dinou uses a file-based routing system where routes are defined
-                by creating
-                <code>page.tsx</code> files in folders. The routing system
-                supports:
+                by creating <code>page.tsx</code> files in folders. The routing
+                system supports:
               </p>
               <ul>
                 <li>Static routes</li>
@@ -48,6 +49,7 @@ export default function RoutingPage() {
                 <li>Catch-all routes</li>
                 <li>Nested layouts</li>
                 <li>Custom not found pages</li>
+                <li>Custom error pages</li>
               </ul>
             </section>
 
@@ -85,7 +87,7 @@ export default function RoutingPage() {
               <CodeBlock language="typescript">{`// src/about/page.tsx
 "use client";
 
-export default function AboutPage() {
+export default function Page() {
   return <h1>About Us</h1>;
 }`}</CodeBlock>
             </section>
@@ -111,7 +113,7 @@ export default function AboutPage() {
               <CodeBlock language="typescript">{`// src/blog/[id]/page.tsx
 "use client";
 
-export default function BlogPost({ 
+export default function Page({ 
   params 
 }: { 
   params: { id: string } 
@@ -150,7 +152,7 @@ export default function BlogPost({
               <CodeBlock language="typescript">{`// src/blog/[[category]]/page.tsx
 "use client";
 
-export default function BlogCategory({ 
+export default function Page({ 
   params 
 }: { 
   params: { category?: string } 
@@ -203,7 +205,7 @@ export default function BlogCategory({
               <CodeBlock language="typescript">{`// src/wiki/[[...slug]]/page.tsx
 "use client";
 
-export default function WikiPage({ 
+export default function Page({ 
   params 
 }: { 
   params: { slug: string[] } 
@@ -221,8 +223,7 @@ export default function WikiPage({
               <h2>Layouts</h2>
               <p>
                 Layouts wrap page content and can be nested. Create a{" "}
-                <code>layout.tsx</code>
-                file in any folder to define a layout:
+                <code>layout.tsx</code> file in any folder to define a layout:
               </p>
 
               <CodeBlock language="typescript">{`// src/blog/layout.tsx
@@ -230,7 +231,7 @@ export default function WikiPage({
 
 import type { ReactNode } from "react";
 
-export default function BlogLayout({ 
+export default function Layout({ 
   children 
 }: { 
   children: ReactNode 
@@ -243,12 +244,20 @@ export default function BlogLayout({
   );
 }`}</CodeBlock>
 
-              <Alert className="not-prose">
+              <Alert className="not-prose mt-2">
                 <AlertDescription>
                   Layouts automatically wrap all pages in their folder and
                   subfolders. You can skip layouts by adding a{" "}
                   <code>no_layout</code> file (without extension) in the same
                   folder as your page.
+                </AlertDescription>
+              </Alert>
+              <Alert className="not-prose mt-2">
+                <AlertDescription>
+                  You can add a <code>reset_layout</code> file (without
+                  extension) in the same folder as your nested layout to make it
+                  the first applied. This is useful for example when you have a
+                  landing page in <code>/</code>.
                 </AlertDescription>
               </Alert>
             </section>
@@ -263,7 +272,7 @@ export default function BlogLayout({
               <CodeBlock language="typescript">{`// src/not_found.tsx
 "use client";
 
-export default function NotFound() {
+export default function Page() {
   return (
     <div>
       <h1>404 - Page Not Found</h1>
@@ -276,6 +285,14 @@ export default function NotFound() {
                 If multiple <code>not_found.tsx</code> files exist in a route
                 hierarchy, the most nested one will be used.
               </p>
+              <Alert className="not-prose mt-2">
+                <AlertDescription>
+                  Layouts are applied to not found pages too, unless a{" "}
+                  <code>no_layout</code> or <code>no_layout_not_found</code>{" "}
+                  file (without extension) is found in the same folder as your
+                  not found page.
+                </AlertDescription>
+              </Alert>
             </section>
           </div>
         </div>

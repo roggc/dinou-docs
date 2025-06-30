@@ -1,3 +1,5 @@
+"use client";
+
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { Alert, AlertDescription } from "@/docs/components/ui/alert";
 import {
