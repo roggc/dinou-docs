@@ -40,7 +40,7 @@ export default function Page() {
             </div> */}
             <img src={dinou} alt="dinou logo" className="h-6 w-6" />
             <h1 className="text-3xl font-bold">dinou</h1>
-            <Badge variant="secondary">v1.0</Badge>
+            {/* <Badge variant="secondary">v1.0</Badge> */}
           </div>
 
           <div className="prose">
@@ -159,7 +159,7 @@ export default function Page() {
                 project
               </h3>
 
-              <CodeBlock language="bash">{`npx create-dinou@latest my-app cd my-app`}</CodeBlock>
+              <CodeBlock language="bash">{`npx create-dinou@latest my-app`}</CodeBlock>
 
               <p>
                 Or set up manually and get started with dinou in just a few

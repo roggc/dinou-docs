@@ -48,7 +48,7 @@ export default function Page() {
               <h3>2. Install dependencies</h3>
               <CodeBlock language="bash">npm i react react-dom dinou</CodeBlock>
 
-              <h3>3. Create scripts in package.json</h3>
+              <h3>3. Create scripts in package.json (optional)</h3>
               <CodeBlock language="json">
                 {`{
   "scripts": {
@@ -75,7 +75,10 @@ export default function Page() {
 
               <h3>5. Start development</h3>
               <CodeBlock language="bash">npm run dev</CodeBlock>
-              <p>Navigate to your browser to see the page in action.</p>
+              <p>
+                Wait for the logs of Webpack and the server and navigate to your
+                browser to see the page in action (localhost:3000).
+              </p>
             </section>
 
             <section id="project-structure">
@@ -126,7 +129,7 @@ export default function Page() {
               <CodeBlock language="bash">npm run eject</CodeBlock>
               <p>
                 Copies dinou's configuration files to your project for full
-                customization. This is irreversible!
+                customization.
               </p>
             </section>
           </div>
