@@ -56,13 +56,13 @@ export default function Page() {
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" className="text-base" asChild>
-                <a href="#get-started">
+                <a href="/docs">
                   <Rocket className="mr-2 h-5 w-5" />
                   Get Started
                 </a>
               </Button>
               <Button variant="outline" size="lg" className="text-base" asChild>
-                <a href="https://github.com/dinou/dinou">
+                <a href="https://github.com/roggc/dinou" target="_blank">
                   <Github className="mr-2 h-5 w-5" />
                   View on GitHub
                 </a>
@@ -108,7 +108,7 @@ export default function Page() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button asChild>
-                  <a href="#get-started">
+                  <a href="/docs">
                     <BookOpen className="mr-2 h-4 w-4" />
                     Read the docs
                   </a>

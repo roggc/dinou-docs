@@ -23,6 +23,7 @@ import {
   ImageIcon,
   Palette,
   Globe,
+  Copyright,
 } from "lucide-react";
 import { FaReact } from "react-icons/fa";
 
@@ -39,6 +40,11 @@ const navigation = [
         title: "Installation",
         href: "/docs/getting-started",
         icon: Zap,
+      },
+      {
+        title: "About",
+        href: "/docs/about",
+        icon: Copyright,
       },
     ],
   },

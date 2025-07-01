@@ -45,14 +45,14 @@ export default function Header() {
 
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
-            <a href="https://github.com/dinou/dinou">
+            <a href="https://github.com/roggc/dinou" target="_blank">
               <Github className="h-4 w-4" />
               <span className="sr-only">GitHub</span>
             </a>
           </Button>
           <ModeToggle />
           <Button size="sm" asChild>
-            <a href="#get-started">
+            <a href="/docs">
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </a>

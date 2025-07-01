@@ -19,16 +19,20 @@ export function DocsHeader() {
       <div className="flex h-14 items-center px-4">
         <div className="flex items-center gap-2 mr-4">
           <SidebarTrigger className="md:hidden" />
-          <a href="/docs" className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
             {/* <div className="flex h-6 w-6 items-center justify-center rounded bg-gradient-to-br from-blue-600 to-purple-600">
               <Sparkles className="h-3 w-3 text-white" />
             </div> */}
-            <img src={dinou} alt="dinou logo" className="h-6 w-6" />
+            <a href="/">
+              <img src={dinou} alt="dinou logo" className="h-6 w-6" />
+            </a>
             <span className="font-bold">dinou</span>
-            <Badge variant="secondary" className="text-xs">
-              docs
-            </Badge>
-          </a>
+            <a href="/docs">
+              <Badge variant="secondary" className="text-xs">
+                docs
+              </Badge>
+            </a>
+          </div>
         </div>
 
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
