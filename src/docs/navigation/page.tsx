@@ -6,6 +6,7 @@ import { CodeBlock } from "@/docs/components/code-block";
 const tocItems = [
   { id: "programmatic", title: "Programmatic Navigation", level: 2 },
   { id: "anchor-tags", title: "Anchor Tags", level: 2 },
+  { id: "use-pathname", title: "usePathname Hook", level: 2 },
 ];
 
 export default function NavigationPage() {
@@ -57,6 +58,84 @@ export default async function Page() {
   );
 }`}
               </CodeBlock>
+            </section>
+
+            <section id="use-pathname">
+              <h2>usePathname Hook</h2>
+              <p>
+                The <code>usePathname</code> hook returns the current URL
+                pathname and updates it when the user navigates with the browser
+                back/forward buttons.
+              </p>
+
+              <h3>Definition</h3>
+              <CodeBlock language="typescript">
+                {`import { useState, useEffect } from "react";
+
+export function usePathname(): string {
+  const [pathname, setPathname] = useState<string>("");
+
+  useEffect(() => {
+    setPathname(window.location.pathname);
+
+    const handleRouteChange = () => {
+      setPathname(window.location.pathname);
+    };
+
+    window.addEventListener("popstate", handleRouteChange);
+
+    return () => {
+      window.removeEventListener("popstate", handleRouteChange);
+    };
+  }, []);
+
+  return pathname;
+}`}
+              </CodeBlock>
+
+              <h3>Usage Example: Active Navigation Item</h3>
+              <p>
+                You can use <code>usePathname</code> to highlight the current
+                active menu item based on its <code>href</code>.
+              </p>
+
+              <CodeBlock language="tsx">
+                {`"use client";
+
+import { usePathname } from "@/hooks/use-pathname";
+
+const links = [
+  { href: "/home", label: "Home" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
+
+export default function NavMenu() {
+  const pathname = usePathname();
+
+  return (
+    <nav className="flex space-x-4">
+      {links.map((link) => {
+        const isActive = pathname === link.href;
+        return (
+          <a
+            key={link.href}
+            href={link.href}
+            className={isActive ? "text-blue-600 font-semibold" : "text-gray-700"}
+          >
+            {link.label}
+          </a>
+        );
+      })}
+    </nav>
+  );
+}`}
+              </CodeBlock>
+
+              <p>
+                This helps you keep your navigation UI in sync with the current
+                route.
+              </p>
             </section>
           </div>
         </div>

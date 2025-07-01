@@ -118,14 +118,40 @@ export default function Page() {
               <h3>Development server</h3>
               <CodeBlock language="bash">npm run dev</CodeBlock>
               <p>Starts the development server with hot reloading.</p>
+              <Alert className="not-prose mt-2">
+                <Lightbulb className="h-4 w-4" />
+                <AlertDescription>
+                  In development, webpack will emit his files in{" "}
+                  <code>____public____</code> folder.
+                </AlertDescription>
+              </Alert>
+              <Alert className="not-prose mt-2">
+                <Lightbulb className="h-4 w-4" />
+                <AlertDescription>
+                  In development, all pages are rendered dynamically.
+                </AlertDescription>
+              </Alert>
 
               <h3>Build for production</h3>
               <CodeBlock language="bash">npm run build</CodeBlock>
               <p>Creates an optimized production build.</p>
+              <Alert className="not-prose mt-2">
+                <Lightbulb className="h-4 w-4" />
+                <AlertDescription>
+                  In production, webpack will emit his files in{" "}
+                  <code>dist3</code> folder.
+                </AlertDescription>
+              </Alert>
 
               <h3>Start production server</h3>
               <CodeBlock language="bash">npm run start</CodeBlock>
               <p>Starts the production server (run after build).</p>
+              <Alert className="not-prose mt-2">
+                <Lightbulb className="h-4 w-4" />
+                <AlertDescription>
+                  At this point, all SSG pages will be generated.
+                </AlertDescription>
+              </Alert>
 
               <h3>Eject configuration</h3>
               <CodeBlock language="bash">npm run eject</CodeBlock>

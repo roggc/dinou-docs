@@ -39,7 +39,7 @@ export default function ImagesPage() {
                 <AlertDescription>
                   <strong>Important:</strong> Only images imported under{" "}
                   <code>"use client"</code> directive will be detected by
-                  Webpack and generated in <code>____public____</code> folder.
+                  Webpack and generated in webpack folder.
                 </AlertDescription>
               </Alert>
             </section>
@@ -55,7 +55,7 @@ export default function ImagesPage() {
 import image from "./image.png"; // import the image from where it is located (inside src folder)
 
 export default function Component() {
-  return <img src={image || "/placeholder.svg"} alt="image" />;
+  return <img src={image} alt="image" />;
 }`}
               </CodeBlock>
             </section>
@@ -83,7 +83,7 @@ import "./image.png";`}
 import image from "./image.png"; // import the image from where it is located (inside src folder)
 
 export default async function Component() {
-  return <img src={image || "/placeholder.svg"} alt="image" />;
+  return <img src={image} alt="image" />;
 }`}
               </CodeBlock>
             </section>
