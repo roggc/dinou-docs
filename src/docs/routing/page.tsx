@@ -19,6 +19,7 @@ const tocItems = [
   { id: "catch-all", title: "Catch-All Routes", level: 2 },
   { id: "layouts", title: "Layouts", level: 2 },
   { id: "not-found", title: "Not Found Pages", level: 2 },
+  { id: "error-handling", title: "Error Handling", level: 2 },
 ];
 
 export default function RoutingPage() {
@@ -293,6 +294,84 @@ export default function Page() {
                   not found page.
                 </AlertDescription>
               </Alert>
+            </section>
+
+            <section id="error-handling">
+              <h2>Error Handling</h2>
+              <p>
+                Create custom error pages by adding <code>error.tsx</code>{" "}
+                files:
+              </p>
+
+              <CodeBlock language="typescript">{`// src/error.tsx
+"use client";
+
+export default function Page({
+  error: { message, stack },
+}: {
+  error: Error;
+}) {
+  return (
+    <main className="flex-1 flex flex-col items-center justify-center p-4">
+      <div className="max-w-md w-full text-center space-y-6">
+        <h1 className="text-3xl font-bold text-red-600">Error</h1>
+        <p className="text-lg text-gray-700">
+          An unexpected error has occurred. Please try again later.
+        </p>
+        <a
+          href="/"
+          className="inline-block px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+        >
+          Go to Home
+        </a>
+      </div>
+      <div className="mt-6 text-sm text-gray-500">
+        <pre className="whitespace-pre-wrap break-words">{message}</pre>
+        <pre className="whitespace-pre-wrap break-words">{stack}</pre>
+      </div>
+    </main>
+  );
+}`}</CodeBlock>
+
+              <p>
+                The most nested <code>error.tsx</code> file in a route hierarchy
+                will be used. In production, if no error page is present, the
+                error will be written to the console. In development, a default
+                debug error page is shown.
+              </p>
+
+              <Alert className="not-prose mt-2">
+                <AlertDescription>
+                  Layouts are applied to error pages unless a{" "}
+                  <code>no_layout</code> or <code>no_layout_error</code> file
+                  (without extension) is present in the same folder as the{" "}
+                  <code>error.tsx</code> page.
+                </AlertDescription>
+              </Alert>
+
+              <Alert className="not-prose mt-2">
+                <AlertDescription>
+                  Avoid using <strong>async functions</strong> or fetching data
+                  directly in <code>error.tsx</code> pages. These are rendered
+                  dynamically and delaying rendering is discouraged. Use{" "}
+                  <code>Suspense</code> if needed.
+                </AlertDescription>
+              </Alert>
+
+              <Alert className="not-prose mt-2">
+                <AlertDescription>
+                  There is no <code>error_functions.ts</code> file. You can't
+                  use <code>getProps</code> for error pages. Use{" "}
+                  <code>Suspense</code> to fetch data if necessary.
+                </AlertDescription>
+              </Alert>
+
+              <p>
+                The error page receives three props: <code>params</code>,{" "}
+                <code>query</code>, and <code>error</code>. The{" "}
+                <code>error</code> object contains a <code>message</code> and a{" "}
+                <code>stack</code>, both strings.
+              </p>
             </section>
           </div>
         </div>

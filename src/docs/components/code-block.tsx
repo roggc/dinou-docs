@@ -9,12 +9,14 @@ interface CodeBlockProps {
   children: string;
   language?: string;
   className?: string;
+  containerClassName?: string;
 }
 
 export function CodeBlock({
   children,
   language = "typescript",
   className,
+  containerClassName,
 }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
@@ -25,7 +27,7 @@ export function CodeBlock({
   };
 
   return (
-    <div className="relative group">
+    <div className={`relative group ${containerClassName ?? ""}`}>
       <button
         onClick={copyToClipboard}
         className="absolute top-2 right-2 p-2 rounded-md bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-colors opacity-0 group-hover:opacity-100 z-10"

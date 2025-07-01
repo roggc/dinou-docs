@@ -13,6 +13,15 @@ const tocItems = [
     level: 2,
   },
   { id: "ssg-considerations", title: "SSG Considerations", level: 2 },
+  { id: "static-route", title: "Static Route", level: 3 },
+  { id: "dynamic-route", title: "Dynamic Route", level: 3 },
+  { id: "optional-dynamic-route", title: "Optional Dynamic Route", level: 3 },
+  { id: "catch-all-dynamic-route", title: "Catch-All Dynamic Route", level: 3 },
+  {
+    id: "optional-catch-all-dynamic-route",
+    title: "Optional Catch-All Dynamic Route",
+    level: 3,
+  },
 ];
 
 export default function DataFetchingPage() {
@@ -189,20 +198,20 @@ export default function Page({ data }: { data: string }) {
 
             <section id="ssg-considerations">
               <h2>SSG Considerations</h2>
-
-              <h3>Static Route Example</h3>
-              <CodeBlock language="typescript">
-                {`// src/static/page.tsx
+              <section id="static-route">
+                <h3>Static Route Example</h3>
+                <CodeBlock language="typescript" containerClassName="mb-2">
+                  {`// src/static/page.tsx
 
 "use client";
 
 export default function Page({ data }: { data: string }) {
   return <>{data}</>;
 }`}
-              </CodeBlock>
+                </CodeBlock>
 
-              <CodeBlock language="typescript">
-                {`// src/static/page_functions.ts
+                <CodeBlock language="typescript">
+                  {`// src/static/page_functions.ts
 
 export async function getProps() {
   const data = await new Promise<string>((r) =>
@@ -211,19 +220,20 @@ export async function getProps() {
 
   return { page: { data }, layout: { title: data } };
 }`}
-              </CodeBlock>
+                </CodeBlock>
 
-              <p>
-                In this case the static generated route will be{" "}
-                <code>/static</code>. If query params are passed to the route
-                (e.g. <code>/static?some-param</code>) the route will be
-                rendered dynamically, increasing the FCP by 2 secs (2000 ms) in
-                this particular case.
-              </p>
-
-              <h3>Dynamic Route Example</h3>
-              <CodeBlock language="typescript">
-                {`// src/dynamic/[name]/page.tsx
+                <p>
+                  In this case the static generated route will be{" "}
+                  <code>/static</code>. If query params are passed to the route
+                  (e.g. <code>/static?some-param</code>) the route will be
+                  rendered dynamically, increasing the FCP by 2 secs (2000 ms)
+                  in this particular case.
+                </p>
+              </section>
+              <section id="dynamic-route">
+                <h3>Dynamic Route Example</h3>
+                <CodeBlock language="typescript" containerClassName="mb-2">
+                  {`// src/dynamic/[name]/page.tsx
 
 "use client";
 
@@ -241,10 +251,10 @@ export default function Page({
     </>
   );
 }`}
-              </CodeBlock>
+                </CodeBlock>
 
-              <CodeBlock language="typescript">
-                {`// src/dynamic/[name]/page_functions.ts
+                <CodeBlock language="typescript">
+                  {`// src/dynamic/[name]/page_functions.ts
 
 export async function getProps(params: { name: string }) {
   const data = await new Promise<string>((r) =>
@@ -257,19 +267,225 @@ export async function getProps(params: { name: string }) {
 export function getStaticPaths() {
   return ["albert", "johan", "roger", "alex"];
 }`}
-              </CodeBlock>
+                </CodeBlock>
 
-              <p>
-                In this case statically generated routes will be{" "}
-                <code>/dynamic/albert</code>, <code>/dynamic/johan</code>,{" "}
-                <code>/dynamic/roger</code>, and <code>/dynamic/alex</code>.{" "}
-                <code>/dynamic</code> will render <code>not_found.tsx</code>{" "}
-                page (the more nested one existing in the route hierarchy) if no{" "}
-                <code>page.tsx</code> is defined in this route. Any other route
-                as <code>/dynamic/other-name</code> will be rendered
-                dynamically, increasing the FCP by 2 secs (2000 ms) in this
-                particular case.
-              </p>
+                <p>
+                  In this case statically generated routes will be{" "}
+                  <code>/dynamic/albert</code>, <code>/dynamic/johan</code>,{" "}
+                  <code>/dynamic/roger</code>, and <code>/dynamic/alex</code>.{" "}
+                  <code>/dynamic</code> will render <code>not_found.tsx</code>{" "}
+                  page (the more nested one existing in the route hierarchy) if
+                  no <code>page.tsx</code> is defined in this route. Any other
+                  route as <code>/dynamic/other-name</code> will be rendered
+                  dynamically, increasing the FCP by 2 secs (2000 ms) in this
+                  particular case.
+                </p>
+              </section>
+              <section id="optional-dynamic-route">
+                <h3>Optional Dynamic Route Example</h3>
+
+                <CodeBlock language="typescript" containerClassName="mb-2">
+                  {`// src/optional/[[name]]/page.tsx
+
+"use client";
+
+export default function Page({
+  params: { name },
+  data,
+}: {
+  params: { name: string };
+  data: string;
+}) {
+  return (
+    <>
+      {name}
+      {data}
+    </>
+  );
+}`}
+                </CodeBlock>
+
+                <CodeBlock language="typescript">
+                  {`// src/optional/[[name]]/page_functions.ts
+
+export async function getProps(params: { name: string }) {
+  const data = await new Promise<string>((r) =>
+    setTimeout(() => r(\`Hello \${params.name ?? ""}\`), 2000)
+  );
+
+  return { page: { data }, layout: { title: data } };
+}
+
+export function getStaticPaths() {
+  return ["albert", "johan", "roger", "alex"];
+}`}
+                </CodeBlock>
+
+                <p>
+                  In this case, statically generated routes will be{" "}
+                  <code>/optional</code>, <code>/optional/albert</code>,{" "}
+                  <code>/optional/johan</code>, <code>/optional/roger</code>,
+                  and <code>/optional/alex</code>. Any other route like{" "}
+                  <code>/optional/other-name</code> will be rendered dynamically
+                  at request time, increasing the FCP by 2 seconds (2000 ms) in
+                  this example.
+                </p>
+
+                <Alert className="not-prose mt-2">
+                  <AlertDescription>
+                    Unlike non-optional dynamic routes, the base route{" "}
+                    <code>/optional</code> also renders the same page component.
+                    The <code>name</code> param will be <code>undefined</code>{" "}
+                    in that case.
+                  </AlertDescription>
+                </Alert>
+
+                <Alert className="not-prose mt-2">
+                  <AlertDescription>
+                    This pattern works equally well with Server Components in{" "}
+                    <code>page.tsx</code>. Use <code>async</code> directly in
+                    the component if needed.
+                  </AlertDescription>
+                </Alert>
+              </section>
+              <section id="catch-all-dynamic-route">
+                <h3>Catch-All Dynamic Route Example</h3>
+
+                <CodeBlock language="typescript" containerClassName="mb-2">
+                  {`// src/catch-all/[...names]/page.tsx
+
+"use client";
+
+export default function Page({
+  params: { names },
+  data,
+}: {
+  params: { names: string[] };
+  data: string;
+}) {
+  return (
+    <>
+      {names}
+      {data}
+    </>
+  );
+}`}
+                </CodeBlock>
+
+                <CodeBlock language="typescript">
+                  {`// src/catch-all/[...names]/page_functions.ts
+
+export async function getProps(params: { names: string[] }) {
+  const data = await new Promise<string>((r) =>
+    setTimeout(() => r(\`Hello \${params.names.join(",")}\`), 2000)
+  );
+
+  return { page: { data }, layout: { title: data } };
+}
+
+export function getStaticPaths() {
+  return [["albert"], ["johan"], ["roger"], ["alex"], ["albert", "johan"]];
+}`}
+                </CodeBlock>
+
+                <p>
+                  In this case, statically generated routes will be{" "}
+                  <code>/catch-all/albert</code>, <code>/catch-all/johan</code>,{" "}
+                  <code>/catch-all/roger</code>, <code>/catch-all/alex</code>,
+                  and <code>/catch-all/albert/johan</code>. Any other route that
+                  starts with <code>/catch-all/</code> will be rendered
+                  dynamically at request time, increasing the FCP by 2 seconds
+                  (2000 ms) in this example.
+                </p>
+
+                <Alert className="not-prose mt-2">
+                  <AlertDescription>
+                    If the user visits <code>/catch-all</code> (i.e., with no
+                    segments), the
+                    <code>not_found.tsx</code> page will be rendered instead —
+                    the most nested one available in the route hierarchy.
+                  </AlertDescription>
+                </Alert>
+
+                <Alert className="not-prose mt-2">
+                  <AlertDescription>
+                    This pattern works seamlessly with Server Components in{" "}
+                    <code>page.tsx</code>. Use <code>async</code> directly if
+                    you need to fetch data from the server.
+                  </AlertDescription>
+                </Alert>
+              </section>
+              <section id="optional-catch-all-dynamic-route">
+                <h3>Optional Catch-All Dynamic Route Example</h3>
+
+                <CodeBlock language="typescript" containerClassName="mb-2">
+                  {`// src/catch-all-optional/[[..names]]/page.tsx
+
+"use client";
+
+export default function Page({
+  params: { names },
+  data,
+}: {
+  params: { names: string[] };
+  data: string;
+}) {
+  return (
+    <>
+      {names}
+      {data}
+    </>
+  );
+}`}
+                </CodeBlock>
+
+                <CodeBlock language="typescript">
+                  {`// src/catch-all-optional/[[..names]]/page_functions.ts
+
+export async function getProps(params: { names: string[] }) {
+  const data = await new Promise<string>((r) =>
+    setTimeout(() => r(\`Hello \${params.names.join(",")}\`), 2000)
+  );
+
+  return { page: { data }, layout: { title: data } };
+}
+
+export function getStaticPaths() {
+  return [["albert"], ["johan"], ["roger"], ["alex"], ["albert", "johan"]];
+}`}
+                </CodeBlock>
+
+                <p>
+                  In this case, statically generated routes will be{" "}
+                  <code>/catch-all-optional</code>,{" "}
+                  <code>/catch-all-optional/albert</code>,{" "}
+                  <code>/catch-all-optional/johan</code>,{" "}
+                  <code>/catch-all-optional/roger</code>,{" "}
+                  <code>/catch-all-optional/alex</code>, and{" "}
+                  <code>/catch-all-optional/albert/johan</code>. Any other route
+                  starting with <code>/catch-all-optional/</code> will be
+                  rendered dynamically, increasing the FCP by 2 seconds (2000
+                  ms) in this example.
+                </p>
+
+                <Alert className="not-prose mt-2">
+                  <AlertDescription>
+                    Unlike regular catch-all routes, this variant also handles
+                    the base path <code>/catch-all-optional</code> by rendering
+                    the page instead of a <code>not_found.tsx</code> fallback.
+                    The <code>params.names</code> array will be empty in that
+                    case.
+                  </AlertDescription>
+                </Alert>
+
+                <Alert className="not-prose mt-2">
+                  <AlertDescription>
+                    This setup also works with <code>page.tsx</code> as a Server
+                    Component. Use <code>async</code> directly if you need to
+                    fetch data on the server side.
+                  </AlertDescription>
+                </Alert>
+              </section>
             </section>
           </div>
         </div>

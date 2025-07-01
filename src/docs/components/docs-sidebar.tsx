@@ -24,6 +24,7 @@ import {
   Palette,
   Globe,
 } from "lucide-react";
+import { FaReact } from "react-icons/fa";
 
 const navigation = [
   {
@@ -64,19 +65,19 @@ const navigation = [
         href: "/docs/server-components",
         icon: Server,
       },
+      {
+        title: "Client Components",
+        href: "/docs/client-components",
+        icon: FaReact,
+      },
     ],
   },
   {
     title: "Features",
     items: [
       {
-        title: "Dynamic Parameters",
-        href: "/docs/dynamic-parameters",
-        icon: Code,
-      },
-      {
-        title: "Query Parameters",
-        href: "/docs/query-parameters",
+        title: "Dynamic & Query Parameters",
+        href: "/docs/parameters",
         icon: Code,
       },
       {

@@ -5,7 +5,7 @@ import { CodeBlock } from "@/docs/components/code-block";
 
 const tocItems = [{ id: "overview", title: "Overview", level: 2 }];
 
-export default function ServerComponentsPage() {
+export default function Page() {
   return (
     <div className="flex-1 flex">
       <main className="flex-1 py-6 lg:py-8">
@@ -33,7 +33,7 @@ export default function ServerComponentsPage() {
               </p>
 
               <h3>Example</h3>
-              <CodeBlock language="typescript">
+              <CodeBlock language="typescript" containerClassName="mb-2">
                 {`// Server Component example
 export default async function ServerComponent() {
   // This is a Server Component because it's async

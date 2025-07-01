@@ -67,8 +67,8 @@ export default function PageFunctionsPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Get the values of a dynamic param in the route for which
-                      SSG will be applied.
+                      Specify the values of a dynamic param in the route for
+                      which SSG will be applied.
                     </p>
                   </CardContent>
                 </Card>
