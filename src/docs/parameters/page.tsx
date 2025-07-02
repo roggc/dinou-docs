@@ -21,7 +21,7 @@ export default function Page() {
             </h1>
             <p className="text-xl text-muted-foreground">
               Learn how the <code>params</code> and <code>query</code> props
-              work in Dinou.
+              work in dinou.
             </p>
           </div>
 
@@ -29,8 +29,9 @@ export default function Page() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                Pages, layouts, and not found components in Dinou receive{" "}
-                <code>params</code> and <code>query</code> props.
+                Pages, layouts, slots, not found pages, and error pages in{" "}
+                <code>dinou</code> receive <code>params</code> and{" "}
+                <code>query</code> props.
               </p>
               <ul>
                 <li>

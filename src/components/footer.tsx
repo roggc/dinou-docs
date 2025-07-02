@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Sparkles, Github, Twitter } from "lucide-react";
+import { RiNpmjsFill } from "react-icons/ri";
 
 export default function Footer() {
   return (
@@ -20,6 +21,12 @@ export default function Footer() {
             A minimal React 19 framework for building modern web applications.
           </p>
           <div className="flex space-x-4">
+            <Button variant="ghost" size="sm" asChild>
+              <a href="https://www.npmjs.com/package/dinou" target="_blank">
+                <RiNpmjsFill className="h-4 w-4" />
+                <span className="sr-only">npm</span>
+              </a>
+            </Button>
             <Button variant="ghost" size="sm" asChild>
               <a href="https://github.com/roggc/dinou">
                 <Github className="h-4 w-4" />
@@ -135,15 +142,13 @@ export default function Footer() {
       </div>
 
       <div className="w-full flex flex-col gap-2 py-6 px-4 md:px-6 lg:flex-row lg:items-center border-t border-slate-200 dark:border-slate-800">
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          {/* © {new Date().getFullYear()} Roger Gomez Castells (@roggc). All rights
-          reserved. */}
+        {/* <p className="text-xs text-slate-500 dark:text-slate-400">
           © {new Date().getFullYear()} Roger Gomez Castells (@roggc).
-        </p>
-        <p className="text-xs text-slate-500 dark:text-slate-400 lg:ml-auto">
+        </p> */}
+        <p className="text-xs text-slate-500 dark:text-slate-400">
           dinou is licensed under the{" "}
           <a
-            href="https://opensource.org/licenses/MIT"
+            href="https://github.com/roggc/dinou/blob/master/LICENSE.md"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-slate-900 dark:hover:text-slate-100"

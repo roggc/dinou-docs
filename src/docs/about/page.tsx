@@ -25,7 +25,11 @@ export default function AboutPage() {
               <p>
                 For a detailed list of changes, enhancements, and bug fixes
                 across versions, see the{" "}
-                <a href="/CHANGELOG.md" className="text-blue-600 underline">
+                <a
+                  href="https://github.com/roggc/dinou/blob/master/CHANGELOG.md"
+                  className="text-blue-600 underline"
+                  target="_blank"
+                >
                   CHANGELOG.md
                 </a>
                 .
@@ -36,7 +40,15 @@ export default function AboutPage() {
               <h2>License</h2>
               <p>
                 <code>dinou</code> is made by Roger Gomez Castells (@roggc) and
-                is licensed under the MIT License.
+                is licensed under the{" "}
+                <a
+                  href="https://github.com/roggc/dinou/blob/master/LICENSE.md"
+                  className="text-blue-600 underline"
+                  target="_blank"
+                >
+                  MIT License
+                </a>
+                .
               </p>
             </section>
           </div>

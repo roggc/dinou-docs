@@ -24,8 +24,12 @@ import {
   Palette,
   Globe,
   Copyright,
+  Atom,
+  AtSign,
+  Plug,
+  Hexagon,
+  Star,
 } from "lucide-react";
-import { FaReact } from "react-icons/fa";
 
 const navigation = [
   {
@@ -74,7 +78,7 @@ const navigation = [
       {
         title: "Client Components",
         href: "/docs/client-components",
-        icon: FaReact,
+        icon: Atom,
       },
     ],
   },
@@ -101,6 +105,11 @@ const navigation = [
         href: "/docs/images_",
         icon: ImageIcon,
       },
+      {
+        title: "Favicons",
+        href: "/docs/favicons",
+        icon: Star,
+      },
     ],
   },
   {
@@ -109,17 +118,17 @@ const navigation = [
       {
         title: "Environment Variables",
         href: "/docs/environment",
-        icon: Settings,
+        icon: Hexagon,
       },
       {
         title: "Import Aliases",
         href: "/docs/import-aliases",
-        icon: Code,
+        icon: AtSign,
       },
       {
         title: "Ejecting",
         href: "/docs/ejecting",
-        icon: Settings,
+        icon: Plug,
       },
     ],
   },

@@ -13,13 +13,16 @@ import { CodeBlock } from "@/docs/components/code-block";
 
 const tocItems = [
   { id: "overview", title: "Overview", level: 2 },
+  { id: "base-directory", title: "Base Directory", level: 2 },
   { id: "static-routes", title: "Static Routes", level: 2 },
   { id: "dynamic-routes", title: "Dynamic Routes", level: 2 },
   { id: "optional-routes", title: "Optional Dynamic Routes", level: 2 },
   { id: "catch-all", title: "Catch-All Routes", level: 2 },
   { id: "layouts", title: "Layouts", level: 2 },
+  { id: "parallel-routes", title: "Parallel Routes (Slots)", level: 2 },
   { id: "not-found", title: "Not Found Pages", level: 2 },
   { id: "error-handling", title: "Error Handling", level: 2 },
+  { id: "route-groups", title: "Route Groups", level: 2 },
 ];
 
 export default function RoutingPage() {
@@ -51,7 +54,74 @@ export default function RoutingPage() {
                 <li>Nested layouts</li>
                 <li>Custom not found pages</li>
                 <li>Custom error pages</li>
+                <li>Parallel routes (slots)</li>
+                <li>Route groups</li>
               </ul>
+            </section>
+
+            <section id="base-directory">
+              <h2>Base Directory</h2>
+              <p>
+                All routing in <strong>dinou</strong> is defined relative to the{" "}
+                <code>src/</code> directory. The structure and naming of files
+                inside <code>src/</code> determine how routes are resolved and
+                rendered.
+              </p>
+
+              <p>Here's a summary of the special files used in routing:</p>
+
+              <ul>
+                <li>
+                  <strong>
+                    <code>page.tsx</code>
+                  </strong>
+                  : Defines a route. The file path corresponds to the route
+                  path.
+                </li>
+                <li>
+                  <strong>
+                    <code>layout.tsx</code>
+                  </strong>
+                  : Wraps a route or nested routes. Used for persistent UI such
+                  as headers or layouts.
+                </li>
+                <li>
+                  <strong>
+                    <code>not_found.tsx</code>
+                  </strong>
+                  : Defines a custom "not found" page for unmatched routes.
+                </li>
+                <li>
+                  <strong>
+                    <code>error.tsx</code>
+                  </strong>
+                  : Defines an error boundary for the route. It receives{" "}
+                  <code>params</code>, <code>query</code>, and{" "}
+                  <code>error</code> props.
+                </li>
+                <li>
+                  <strong>Slots</strong>: Folders starting with <code>@</code>,
+                  such as <code>@sidebar</code>, define parallel content and
+                  must contain a <code>page.tsx</code> file.
+                </li>
+              </ul>
+
+              <CodeBlock language="bash">{`src/
+├── page.tsx              # Route: /
+├── layout.tsx            # Layout for /
+├── not_found.tsx         # 404 page for /
+├── error.tsx             # Error page for /
+├── about/
+│   └── page.tsx          # Route: /about
+└── @sidebar/
+    └── page.tsx          # Slot for sidebar content
+`}</CodeBlock>
+
+              <p>
+                This convention keeps your routing declarative and consistent
+                while supporting advanced use cases like nested layouts and
+                error boundaries.
+              </p>
             </section>
 
             <section id="static-routes">
@@ -263,6 +333,65 @@ export default function Layout({
               </Alert>
             </section>
 
+            <section id="parallel-routes">
+              <h2>Parallel Routes (Slots)</h2>
+              <p>
+                Parallel routes, also known as <strong>slots</strong>, are
+                defined using directory names that start with <code>@</code>,
+                such as <code>@sidebar</code>. These slots are passed into
+                layouts as props, allowing you to render multiple parts of a
+                page in parallel.
+              </p>
+
+              <CodeBlock language="tsx">{`// File structure:
+src/@sidebar/page.tsx
+src/page.tsx
+src/layout.tsx`}</CodeBlock>
+
+              <p>
+                The content from <code>@sidebar/page.tsx</code> is passed into{" "}
+                <code>layout.tsx</code> as <code>props.sidebar</code>. You can
+                render the slot in your layout like this:
+              </p>
+
+              <CodeBlock language="tsx">{`"use client";
+
+import type { ReactNode } from "react";
+
+export default function Layout({
+  children,
+  sidebar,
+}: {
+  children: ReactNode;
+  sidebar: ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <head>
+        <title>dinou app</title>
+      </head>
+      <body>
+        {sidebar}
+        {children}
+      </body>
+    </html>
+  );
+}`}</CodeBlock>
+
+              <p>
+                Slots are especially useful when rendering persistent UI
+                components like sidebars, headers, or other parallel content
+                areas that accompany the main page content.
+              </p>
+
+              <Alert className="not-prose mt-2">
+                <AlertDescription>
+                  Slots receive query and dynamic parameters as the rest of
+                  pages (layouts, pages, not found pages, and error pages).
+                </AlertDescription>
+              </Alert>
+            </section>
+
             <section id="not-found">
               <h2>Not Found Pages</h2>
               <p>
@@ -372,6 +501,39 @@ export default function Page({
                 <code>error</code> object contains a <code>message</code> and a{" "}
                 <code>stack</code>, both strings.
               </p>
+            </section>
+
+            <section id="route-groups">
+              <h2>Route Groups</h2>
+              <p>
+                Route groups are defined using directory names wrapped in
+                parentheses, such as <code>(group)</code>. They allow you to
+                organize routes in your filesystem without affecting the URL
+                structure.
+              </p>
+
+              <CodeBlock language="tsx">{`// src/(auth)/login/page.tsx → "/login"
+// src/(auth)/signup/page.tsx → "/signup"`}</CodeBlock>
+
+              <p>
+                The directory name <code>(auth)</code> is ignored in the final
+                URL, so both pages above will be rendered at the root level:
+                <code>/login</code> and <code>/signup</code>.
+              </p>
+
+              <p>
+                This is useful for grouping related pages (like
+                authentication-related routes) together in the codebase without
+                adding a prefix to the URL path.
+              </p>
+
+              <Alert className="not-prose mt-2">
+                <AlertDescription>
+                  You can nest route groups or combine them with other routing
+                  features (like layouts or dynamic segments) to keep your
+                  routes clean and well-organized.
+                </AlertDescription>
+              </Alert>
             </section>
           </div>
         </div>
