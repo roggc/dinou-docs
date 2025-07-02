@@ -5,11 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"npm run start:express\" \"npm run start:dev-server\"",
-    "build": "cross-env NODE_ENV=production webpack",
-    "start": "cross-env NODE_ENV=production node --conditions react-server dinou/server.js",
-    "start:express": "node --conditions react-server dinou/server.js",
-    "start:dev-server": "webpack serve --config webpack.config.js"
+    "dev": "dinou dev",
+    "build": "dinou build",
+    "start": "dinou start",
+    "eject": "dinou eject"
   },
   "keywords": [],
   "author": "",
