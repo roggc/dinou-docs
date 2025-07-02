@@ -3,6 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, Github, Twitter } from "lucide-react";
 import { RiNpmjsFill } from "react-icons/ri";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function Footer() {
   return (
@@ -21,18 +26,33 @@ export default function Footer() {
             A minimal React 19 framework for building modern web applications.
           </p>
           <div className="flex space-x-4">
-            <Button variant="ghost" size="sm" asChild>
-              <a href="https://www.npmjs.com/package/dinou" target="_blank">
-                <RiNpmjsFill className="h-4 w-4" />
-                <span className="sr-only">npm</span>
-              </a>
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <a href="https://github.com/roggc/dinou">
-                <Github className="h-4 w-4" />
-                <span className="sr-only">GitHub</span>
-              </a>
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="sm" asChild>
+                  <a href="https://www.npmjs.com/package/dinou" target="_blank">
+                    <RiNpmjsFill className="h-4 w-4" />
+                    <span className="sr-only">npm</span>
+                  </a>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>npm</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="sm" asChild>
+                  <a href="https://github.com/roggc/dinou">
+                    <Github className="h-4 w-4" />
+                    <span className="sr-only">GitHub</span>
+                  </a>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>GitHub</p>
+              </TooltipContent>
+            </Tooltip>
+
             {/* <Button variant="ghost" size="sm" asChild>
               <a href="https://twitter.com/dinoujs">
                 <Twitter className="h-4 w-4" />
@@ -50,7 +70,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <a
-                  href="#"
+                  href="/docs"
                   className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                 >
                   Getting Started
@@ -58,18 +78,26 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/docs/routing"
                   className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                 >
-                  API Reference
+                  Core Concepts
                 </a>
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/docs/parameters"
                   className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                 >
-                  Examples
+                  Features
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/docs/environment"
+                  className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                >
+                  Configuration
                 </a>
               </li>
             </ul>

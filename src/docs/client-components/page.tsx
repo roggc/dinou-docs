@@ -8,8 +8,8 @@ const tocItems = [{ id: "overview", title: "Overview", level: 2 }];
 export default function Page() {
   return (
     <div className="flex-1 flex">
-      <main className="flex-1 py-6 lg:py-8">
-        <div className="container max-w-4xl">
+      <main className="flex-1 py-6 lg:py-8 min-w-0">
+        <div className="container max-w-4xl px-4">
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Client Components</h1>
             <p className="text-xl text-muted-foreground">
@@ -33,7 +33,7 @@ export default function Page() {
               </p>
               <p>
                 <strong>
-                  To avoid surprises, it’s recommended to include the{" "}
+                  To avoid surprises, it's recommended to include the{" "}
                   <code>"use client";</code> directive in all client components.
                 </strong>
               </p>

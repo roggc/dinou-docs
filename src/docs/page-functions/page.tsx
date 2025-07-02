@@ -22,8 +22,8 @@ const tocItems = [
 export default function PageFunctionsPage() {
   return (
     <div className="flex-1 flex">
-      <main className="flex-1 py-6 lg:py-8">
-        <div className="container max-w-4xl">
+      <main className="flex-1 py-6 lg:py-8 min-w-0">
+        <div className="container max-w-4xl px-4">
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Page Functions</h1>
             <p className="text-xl text-muted-foreground">

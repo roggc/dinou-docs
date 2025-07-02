@@ -6,6 +6,11 @@ import { ArrowRight, Sparkles, Github } from "lucide-react";
 import dinou from "@/images/dinou.png";
 import ModeToggle from "@/components/mode-toggle";
 import { RiNpmjsFill } from "react-icons/ri";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function Header() {
   return (
@@ -45,18 +50,34 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" asChild>
-            <a href="https://www.npmjs.com/package/dinou" target="_blank">
-              <RiNpmjsFill className="h-4 w-4" />
-              <span className="sr-only">npm</span>
-            </a>
-          </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <a href="https://github.com/roggc/dinou" target="_blank">
-              <Github className="h-4 w-4" />
-              <span className="sr-only">GitHub</span>
-            </a>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" asChild>
+                <a href="https://www.npmjs.com/package/dinou" target="_blank">
+                  <RiNpmjsFill className="h-4 w-4" />
+                  <span className="sr-only">npm</span>
+                </a>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>npm</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" asChild>
+                <a href="https://github.com/roggc/dinou" target="_blank">
+                  <Github className="h-4 w-4" />
+                  <span className="sr-only">GitHub</span>
+                </a>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>GitHub</p>
+            </TooltipContent>
+          </Tooltip>
+
           <ModeToggle />
           <Button size="sm" asChild>
             <a href="/docs">

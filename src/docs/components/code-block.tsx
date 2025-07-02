@@ -27,7 +27,11 @@ export function CodeBlock({
   };
 
   return (
-    <div className={`relative group ${containerClassName ?? ""}`}>
+    <div
+      className={`relative group w-full overflow-hidden ${
+        containerClassName ?? ""
+      }`}
+    >
       <button
         onClick={copyToClipboard}
         className="absolute top-2 right-2 p-2 rounded-md bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-colors opacity-0 group-hover:opacity-100 z-10"
@@ -43,8 +47,12 @@ export function CodeBlock({
           borderRadius: "0.5rem",
           fontSize: "0.875rem",
           lineHeight: "1.5",
+          maxWidth: "100%",
+          overflow: "auto",
         }}
         className={className}
+        wrapLines={false}
+        wrapLongLines={false}
       >
         {children}
       </SyntaxHighlighter>

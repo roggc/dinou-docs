@@ -15,8 +15,8 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex">
-      <main className="flex-1 py-6 lg:py-8">
-        <div className="container max-w-4xl">
+      <main className="flex-1 py-6 lg:py-8 min-w-0">
+        <div className="container max-w-4xl px-4">
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Getting Started</h1>
             <p className="text-xl text-muted-foreground">
@@ -24,14 +24,14 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="prose max-w-none">
+          <div className="prose overflow-hidden max-w-full">
             <section id="installation">
               <h2>Installation</h2>
               <p>
                 The fastest way to get started with dinou is using the create
                 command:
               </p>
-              <CodeBlock language="bash">
+              <CodeBlock language="bash" containerClassName="w-full">
                 npx create-dinou@latest my-app
               </CodeBlock>
               <p>
@@ -45,13 +45,17 @@ export default function Page() {
               <p>You can also set up a dinou project manually:</p>
 
               <h3>1. Create an npm project</h3>
-              <CodeBlock language="bash">npm init -y</CodeBlock>
+              <CodeBlock language="bash" containerClassName="w-full">
+                npm init -y
+              </CodeBlock>
 
               <h3>2. Install dependencies</h3>
-              <CodeBlock language="bash">npm i react react-dom dinou</CodeBlock>
+              <CodeBlock language="bash" containerClassName="w-full">
+                npm i react react-dom dinou
+              </CodeBlock>
 
               <h3>3. Create scripts in package.json (optional)</h3>
-              <CodeBlock language="json">
+              <CodeBlock language="json" containerClassName="w-full">
                 {`{
   "scripts": {
     "dev": "dinou dev",
@@ -67,7 +71,7 @@ export default function Page() {
                 Create an <code>src</code> folder with a <code>page.jsx</code>{" "}
                 (or <code>.tsx</code>):
               </p>
-              <CodeBlock language="typescript">
+              <CodeBlock language="typescript" containerClassName="w-full">
                 {`"use client";
 
 export default function Page() {
@@ -76,7 +80,9 @@ export default function Page() {
               </CodeBlock>
 
               <h3>5. Start development</h3>
-              <CodeBlock language="bash">npm run dev</CodeBlock>
+              <CodeBlock language="bash" containerClassName="w-full">
+                npm run dev
+              </CodeBlock>
               <p>
                 Wait for the logs of Webpack and the server and navigate to your
                 browser to see the page in action (localhost:3000).
@@ -86,7 +92,7 @@ export default function Page() {
             <section id="project-structure">
               <h2>Project Structure</h2>
               <p>A typical dinou project structure looks like this:</p>
-              <CodeBlock language="text">
+              <CodeBlock language="text" containerClassName="w-full">
                 {`my-app/
 ├── src/
 │   ├── page.tsx          # Home page (/)
@@ -116,7 +122,9 @@ export default function Page() {
               <p>Once your project is set up, you can use these commands:</p>
 
               <h3>Development server</h3>
-              <CodeBlock language="bash">npm run dev</CodeBlock>
+              <CodeBlock language="bash" containerClassName="w-full">
+                npm run dev
+              </CodeBlock>
               <p>Starts the development server with hot reloading.</p>
               <Alert className="not-prose mt-2">
                 <Lightbulb className="h-4 w-4" />
@@ -133,7 +141,9 @@ export default function Page() {
               </Alert>
 
               <h3>Build for production</h3>
-              <CodeBlock language="bash">npm run build</CodeBlock>
+              <CodeBlock language="bash" containerClassName="w-full">
+                npm run build
+              </CodeBlock>
               <p>Creates an optimized production build.</p>
               <Alert className="not-prose mt-2">
                 <Lightbulb className="h-4 w-4" />
@@ -144,7 +154,9 @@ export default function Page() {
               </Alert>
 
               <h3>Start production server</h3>
-              <CodeBlock language="bash">npm run start</CodeBlock>
+              <CodeBlock language="bash" containerClassName="w-full">
+                npm run start
+              </CodeBlock>
               <p>Starts the production server (run after build).</p>
               <Alert className="not-prose mt-2">
                 <Lightbulb className="h-4 w-4" />
@@ -154,7 +166,9 @@ export default function Page() {
               </Alert>
 
               <h3>Eject configuration</h3>
-              <CodeBlock language="bash">npm run eject</CodeBlock>
+              <CodeBlock language="bash" containerClassName="w-full">
+                npm run eject
+              </CodeBlock>
               <p>
                 Copies dinou's configuration files to your project for full
                 customization.

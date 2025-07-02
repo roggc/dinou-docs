@@ -32,8 +32,8 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex">
-      <main className="flex-1 py-6 lg:py-8">
-        <div className="container max-w-4xl">
+      <main className="flex-1 py-6 lg:py-8 min-w-0">
+        <div className="container max-w-4xl px-4">
           <div className="flex items-center space-x-2 mb-6">
             {/* <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
               <img src={dinou} alt="dinou logo" className="h-6 w-6" />
@@ -43,7 +43,7 @@ export default function Page() {
             {/* <Badge variant="secondary">v1.0</Badge> */}
           </div>
 
-          <div className="prose">
+          <div className="prose overflow-hidden max-w-full">
             <p className="text-xl text-muted-foreground mb-8">
               A minimal React 19 framework with file-based routing, SSR, SSG,
               and more.
@@ -57,7 +57,10 @@ export default function Page() {
                 latest features. You can create a dinou app by running:
               </p>
 
-              <CodeBlock language="bash">{`npx create-dinou@latest my-app`}</CodeBlock>
+              <CodeBlock
+                language="bash"
+                containerClassName="w-full"
+              >{`npx create-dinou@latest my-app`}</CodeBlock>
 
               <p>
                 dinou provides a streamlined development experience with zero
@@ -159,7 +162,10 @@ export default function Page() {
                 project
               </h3>
 
-              <CodeBlock language="bash">{`npx create-dinou@latest my-app`}</CodeBlock>
+              <CodeBlock
+                language="bash"
+                containerClassName="w-full"
+              >{`npx create-dinou@latest my-app`}</CodeBlock>
 
               <p>
                 Or set up manually and get started with dinou in just a few
@@ -168,9 +174,15 @@ export default function Page() {
 
               <h3>2. Set up manually</h3>
               <h4>2.1. Create a new directory</h4>
-              <CodeBlock language="bash">{`mkdir my-app && cd my-app`}</CodeBlock>
+              <CodeBlock
+                language="bash"
+                containerClassName="w-full"
+              >{`mkdir my-app && cd my-app`}</CodeBlock>
               <h4>2.2. Initialize npm and install dependencies</h4>
-              <CodeBlock language="bash">{`# Create an npm project
+              <CodeBlock
+                language="bash"
+                containerClassName="w-full"
+              >{`# Create an npm project
 npm init -y 
 # Install dependencies 
 npm i react react-dom dinou`}</CodeBlock>
@@ -179,7 +191,7 @@ npm i react react-dom dinou`}</CodeBlock>
                 2.3. Add scripts to package.json for convenience (optional)
               </h4>
 
-              <CodeBlock language="json">{`{
+              <CodeBlock language="json" containerClassName="w-full">{`{
   "scripts": {
     "dev": "dinou dev",
     "build": "dinou build",
@@ -192,7 +204,10 @@ npm i react react-dom dinou`}</CodeBlock>
               <p>
                 Create <code>src/page.jsx</code> (or <code>.tsx</code>):
               </p>
-              <CodeBlock language="typescript">{`"use client";
+              <CodeBlock
+                language="typescript"
+                containerClassName="w-full"
+              >{`"use client";
 
 export default function Page() {
   return <>Hello, dinou!</>;
@@ -204,7 +219,10 @@ export default function Page() {
               </p>
               <h3>3. Start developing</h3>
 
-              <CodeBlock language="bash">{`npm run dev # or npx dinou dev `}</CodeBlock>
+              <CodeBlock
+                language="bash"
+                containerClassName="w-full"
+              >{`npm run dev # or npx dinou dev `}</CodeBlock>
             </section>
 
             <section id="next-steps">

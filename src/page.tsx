@@ -128,8 +128,9 @@ npx create-dinou@latest my-app
 cd my-app
 npm run dev
 
-# Build for production
-npm run build`}</code>
+# Build for production and run it
+npm run build
+npm start`}</code>
               </pre>
             </Card>
           </div>
