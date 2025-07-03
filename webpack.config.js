@@ -55,7 +55,7 @@ module.exports = {
             ].filter(Boolean),
           },
         },
-        exclude: [/node_modules\/(?!dinou)/],
+        exclude: [/node_modules\/(?!(dinou|@radix-ui))/],
       },
       {
         test: /\.module\.css$/,

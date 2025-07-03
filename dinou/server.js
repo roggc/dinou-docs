@@ -152,3 +152,29 @@ app.listen(port, async () => {
   }
   console.log(`Listening on port ${port}`);
 });
+
+// FOR NETLIFY
+const serverless = require("serverless-http");
+
+// Ensure generateStatic runs once
+let initialized = false;
+
+async function initIfNeeded() {
+  if (!initialized) {
+    if (!isDevelopment) {
+      await generateStatic();
+    } else {
+      console.log("⚙️ Rendering dynamically in dev mode");
+    }
+    initialized = true;
+  }
+}
+
+// Export the Netlify handler
+const handler = async (event, context) => {
+  await initIfNeeded(); // ensure static generation happens once
+  const handler = serverless(app);
+  return handler(event, context);
+};
+
+module.exports = handler;
