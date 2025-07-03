@@ -51,7 +51,8 @@ export default function PageFunctionsPage() {
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
                       Fetch data in the server and pass this data as props to
-                      the page component and root layout.
+                      the page component (client or server component) and root
+                      layout.
                     </p>
                   </CardContent>
                 </Card>
@@ -67,7 +68,7 @@ export default function PageFunctionsPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Specify the values of a dynamic param in the route for
+                      Specify the values of dynamic params in the route for
                       which SSG will be applied.
                     </p>
                   </CardContent>
@@ -128,24 +129,18 @@ export async function getProps(params: { name: string }) {
               <h2>getStaticPaths Function</h2>
               <p>
                 Function to get the values of a dynamic param in the route for
-                which SSG will be applied. Fetching data in the server with{" "}
+                which SSG will be applied.{" "}
+                <strong>Fetching data in the server</strong> with{" "}
                 <code>getProps</code> or within the body of a Server Component
-                increases the FCP (First Contentful Paint), that is, when the
-                user sees something on the screen, when rendering dynamically,
-                that is, on the fly. So this technique must only be used if
-                accompanied by SSG (Static Site Generation).
+                <strong>increases the FCP (First Contentful Paint)</strong>,
+                that is, when the user sees something on the screen,{" "}
+                <strong>when rendering dynamically</strong>, that is, on the
+                fly. So this technique must only be used if accompanied by SSG
+                (Static Site Generation).
               </p>
 
               <CodeBlock language="typescript">
                 {`// src/dynamic/[name]/page_functions.ts
-
-export async function getProps(params: { name: string }) {
-  const data = await new Promise<string>((r) =>
-    setTimeout(() => r(\`Hello \${params.name}\`), 2000)
-  );
-
-  return { page: { data }, layout: { title: data } };
-}
 
 export function getStaticPaths() {
   return ["albert", "johan", "roger", "alex"];
@@ -157,10 +152,8 @@ export function getStaticPaths() {
               <h2>dynamic Function</h2>
               <p>
                 This function is for when we want the page to be rendered
-                dynamically, bypassing a possible statically generated file. It
-                must return <code>true</code> to render a page dynamically.
-                Otherwise the rendering system will use the statically generated
-                file if exists.
+                dynamically, bypassing SSG. It must return <code>true</code> to
+                render a page dynamically. Otherwise SSG will be used.
               </p>
 
               <CodeBlock language="typescript">
@@ -209,7 +202,7 @@ export function dynamic() {
 }
 
 export function revalidate() {
-  return 60000;
+  return 60000; // ms
 }`}
               </CodeBlock>
 

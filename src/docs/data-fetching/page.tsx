@@ -32,8 +32,8 @@ export default function DataFetchingPage() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Data Fetching</h1>
             <p className="text-xl text-muted-foreground">
-              Learn how to fetch data in dinou using Suspense and server-side
-              methods.
+              Learn how to fetch data in dinou using Suspense and Server
+              Functions.
             </p>
           </div>
 
@@ -47,9 +47,10 @@ export default function DataFetchingPage() {
                 mechanism of SSG of the page/s to not increase the FCP.
               </p>
               <p>
-                There is an alternative that do not increase FCP even when
-                rendering dynamically and that is to use <code>Suspense</code>{" "}
-                for data fetching, either in the server and in the client.
+                There is an alternative that do not increase FCP{" "}
+                <strong>even when rendering dynamically</strong> and that is to
+                use <code>Suspense</code> for data fetching, either in the
+                server and in the client.
               </p>
 
               <h3>Post Component</h3>
@@ -167,12 +168,12 @@ export default function Page({ data }: { data: string }) {
               </p>
 
               <p>
-                Pages in <strong>static routes</strong> (e.g.{" "}
-                <code>/some/route</code>) are statically generated (SSG) if no{" "}
-                <code>dynamic</code> function returning <code>true</code> is
-                defined and exported in a <code>page_functions.ts</code>.
-                Therefore, statically generated pages for static routes will be
-                served if no query params are present in the request.{" "}
+                Pages in static routes (e.g. <code>/some/route</code>) are
+                statically generated (SSG) if no <code>dynamic</code> function
+                returning <code>true</code> is defined and exported in a{" "}
+                <code>page_functions.ts</code>. Therefore, statically generated
+                pages for static routes will be served if no query params are
+                present in the request.{" "}
                 <strong>
                   If there are query params pages will be served dynamically
                 </strong>
@@ -180,14 +181,14 @@ export default function Page({ data }: { data: string }) {
               </p>
 
               <p>
-                Pages in <strong>dynamic routes</strong> (e.g.{" "}
-                <code>/[id]</code>, or <code>/[[id]]</code>,{" "}
-                <code>[...id]</code>, <code>[[...id]]</code>) are statically
-                generated (SSG) if no <code>dynamic</code> function returning{" "}
-                <code>true</code> is defined and exported in a{" "}
-                <code>page_functions.ts</code>, for those values of the dynamic
-                param returned by function <code>getStaticPaths</code> defined
-                and exported in <code>page_functions.ts</code>. Again, if{" "}
+                Pages in dynamic routes (e.g. <code>/[id]</code>, or{" "}
+                <code>/[[id]]</code>, <code>[...id]</code>,{" "}
+                <code>[[...id]]</code>) are statically generated (SSG) if no{" "}
+                <code>dynamic</code> function returning <code>true</code> is
+                defined and exported in a <code>page_functions.ts</code>, for
+                those values of the dynamic param returned by function{" "}
+                <code>getStaticPaths</code> defined and exported in{" "}
+                <code>page_functions.ts</code>. Again, if{" "}
                 <strong>query params</strong> are used in the request of the
                 page, then it will be <strong>rendered dynamically</strong>,
                 affecting the FCP (increasing it). Or those requests using
@@ -229,6 +230,12 @@ export async function getProps() {
                   rendered dynamically, increasing the FCP by 2 secs (2000 ms)
                   in this particular case.
                 </p>
+                <Alert className="not-prose mt-2">
+                  <AlertDescription>
+                    This pattern works equally well with <code>page.tsx</code>{" "}
+                    being a Server Component.
+                  </AlertDescription>
+                </Alert>
               </section>
               <section id="dynamic-route">
                 <h3>Dynamic Route Example</h3>
@@ -280,6 +287,12 @@ export function getStaticPaths() {
                   dynamically, increasing the FCP by 2 secs (2000 ms) in this
                   particular case.
                 </p>
+                <Alert className="not-prose mt-2">
+                  <AlertDescription>
+                    This pattern works equally well with <code>page.tsx</code>{" "}
+                    being a Server Component.
+                  </AlertDescription>
+                </Alert>
               </section>
               <section id="optional-dynamic-route">
                 <h3>Optional Dynamic Route Example</h3>
@@ -342,9 +355,8 @@ export function getStaticPaths() {
 
                 <Alert className="not-prose mt-2">
                   <AlertDescription>
-                    This pattern works equally well with Server Components in{" "}
-                    <code>page.tsx</code>. Use <code>async</code> directly in
-                    the component if needed.
+                    This pattern works equally well with <code>page.tsx</code>{" "}
+                    being a Server Component.
                   </AlertDescription>
                 </Alert>
               </section>
@@ -409,9 +421,8 @@ export function getStaticPaths() {
 
                 <Alert className="not-prose mt-2">
                   <AlertDescription>
-                    This pattern works seamlessly with Server Components in{" "}
-                    <code>page.tsx</code>. Use <code>async</code> directly if
-                    you need to fetch data from the server.
+                    This pattern works equally well with <code>page.tsx</code>{" "}
+                    being a Server Component.
                   </AlertDescription>
                 </Alert>
               </section>
@@ -480,9 +491,8 @@ export function getStaticPaths() {
 
                 <Alert className="not-prose mt-2">
                   <AlertDescription>
-                    This setup also works with <code>page.tsx</code> as a Server
-                    Component. Use <code>async</code> directly if you need to
-                    fetch data on the server side.
+                    This pattern works equally well with <code>page.tsx</code>{" "}
+                    being a Server Component.
                   </AlertDescription>
                 </Alert>
               </section>

@@ -155,7 +155,7 @@ export default function Page() {
 
               <h3>Start production server</h3>
               <CodeBlock language="bash" containerClassName="w-full">
-                npm run start
+                npm start
               </CodeBlock>
               <p>Starts the production server (run after build).</p>
               <Alert className="not-prose mt-2">
@@ -165,13 +165,12 @@ export default function Page() {
                 </AlertDescription>
               </Alert>
 
-              <h3>Eject configuration</h3>
+              <h3>Eject</h3>
               <CodeBlock language="bash" containerClassName="w-full">
                 npm run eject
               </CodeBlock>
               <p>
-                Copies dinou's configuration files to your project for full
-                customization.
+                Copies dinou's files to your project for full customization.
               </p>
             </section>
           </div>

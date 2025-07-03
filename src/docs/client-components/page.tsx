@@ -13,7 +13,7 @@ export default function Page() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Client Components</h1>
             <p className="text-xl text-muted-foreground">
-              Learn how to properly define Client Components in Dinou.
+              Learn how to properly define Client Components in dinou.
             </p>
           </div>
 
@@ -21,25 +21,23 @@ export default function Page() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                Client Components in Dinou must begin with the{" "}
+                Client Components in <code>dinou</code> must begin with the{" "}
                 <code>"use client";</code> directive at the top of the file if
                 they are not imported by other client components.
               </p>
               <p>
-                This applies to files like <strong>pages</strong>,{" "}
-                <strong>layouts</strong>, <strong>not_found.tsx</strong>, and{" "}
+                This applies to files like <strong>page.tsx</strong>,{" "}
+                <strong>layout.tsx</strong>, <strong>not_found.tsx</strong>, and{" "}
                 <strong>error.tsx</strong>, since they are entry points and not
                 imported by other components directly.
               </p>
               <p>
-                <strong>
-                  To avoid surprises, it's recommended to include the{" "}
-                  <code>"use client";</code> directive in all client components.
-                </strong>
+                To avoid surprises, it's recommended to include the{" "}
+                <code>"use client";</code> directive in all client components.
               </p>
 
               <h3>Example</h3>
-              <CodeBlock language="typescript" containerClassName="mb-2">
+              {/* <CodeBlock language="typescript" containerClassName="mb-2">
                 {`// Client Component page
 "use client";
 
@@ -55,16 +53,34 @@ export default function Page() {
     </div>
   );
 }`}
+              </CodeBlock> */}
+              <CodeBlock language="typescript" containerClassName="mb-2">
+                {`// Client Component page
+"use client";
+
+import { useState } from "react";
+
+export default function Page() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <h1>Counter Example</h1>
+      <p>Current count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+    </div>
+  );
+}`}
               </CodeBlock>
 
-              <CodeBlock language="typescript">
+              {/* <CodeBlock language="typescript">
                 {`// Client Component imported by another client component
 "use client";
 
 export function Button({ label }: { label: string }) {
   return <button>{label}</button>;
 }`}
-              </CodeBlock>
+              </CodeBlock> */}
             </section>
           </div>
         </div>

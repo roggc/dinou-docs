@@ -82,8 +82,9 @@ export default function RoutingPage() {
                   <strong>
                     <code>layout.tsx</code>
                   </strong>
-                  : Wraps a route or nested routes. Used for persistent UI such
-                  as headers or layouts.
+                  : Wraps a page or nested pages/layouts. Used for persistent UI
+                  such as headers, footers, sidebars, etc, or for defining the
+                  html document.
                 </li>
                 <li>
                   <strong>
@@ -95,7 +96,7 @@ export default function RoutingPage() {
                   <strong>
                     <code>error.tsx</code>
                   </strong>
-                  : Defines an error boundary for the route. It receives{" "}
+                  : Defines an error page for the route. It receives{" "}
                   <code>params</code>, <code>query</code>, and{" "}
                   <code>error</code> props.
                 </li>
@@ -153,7 +154,8 @@ export default function RoutingPage() {
               </div>
 
               <p>
-                Each <code>page.tsx</code> file exports a React component:
+                Each <code>page.tsx</code> file exports a React component
+                (client or server component):
               </p>
               <CodeBlock language="typescript">{`// src/about/page.tsx
 "use client";
@@ -202,8 +204,8 @@ export default function Page({
               <h2>Optional Dynamic Routes</h2>
               <p>
                 Optional dynamic routes use double square brackets{" "}
-                <code>[[param]]</code>
-                and match both with and without the parameter:
+                <code>[[param]]</code> and match both with and without the
+                parameter:
               </p>
 
               <CodeBlock language="bash">{`src/blog/[[category]]/page.tsx`}</CodeBlock>
@@ -338,9 +340,9 @@ export default function Layout({
               <p>
                 Parallel routes, also known as <strong>slots</strong>, are
                 defined using directory names that start with <code>@</code>,
-                such as <code>@sidebar</code>. These slots are passed into
-                layouts as props, allowing you to render multiple parts of a
-                page in parallel.
+                such as <code>@sidebar</code>. These slots{" "}
+                <strong>are passed into layouts as props</strong>, allowing you
+                to render multiple parts of a page in parallel.
               </p>
 
               <CodeBlock language="tsx">{`// File structure:
@@ -480,20 +482,21 @@ export default function Page({
 
               <Alert className="not-prose mt-2">
                 <AlertDescription>
-                  Avoid using <strong>async functions</strong> or fetching data
-                  directly in <code>error.tsx</code> pages. These are rendered
-                  dynamically and delaying rendering is discouraged. Use{" "}
+                  Avoid using <strong>async functions</strong> (server
+                  components) and fetching data directly in{" "}
+                  <code>error.tsx</code> pages. These are rendered dynamically
+                  and delaying rendering is discouraged. Use{" "}
                   <code>Suspense</code> if needed.
                 </AlertDescription>
               </Alert>
 
-              <Alert className="not-prose mt-2">
+              {/* <Alert className="not-prose mt-2">
                 <AlertDescription>
                   There is no <code>error_functions.ts</code> file. You can't
                   use <code>getProps</code> for error pages. Use{" "}
                   <code>Suspense</code> to fetch data if necessary.
                 </AlertDescription>
-              </Alert>
+              </Alert> */}
 
               <p>
                 The error page receives three props: <code>params</code>,{" "}
@@ -528,11 +531,7 @@ export default function Page({
               </p>
 
               <Alert className="not-prose mt-2">
-                <AlertDescription>
-                  You can nest route groups or combine them with other routing
-                  features (like layouts or dynamic segments) to keep your
-                  routes clean and well-organized.
-                </AlertDescription>
+                <AlertDescription>You can nest route groups.</AlertDescription>
               </Alert>
             </section>
           </div>
