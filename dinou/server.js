@@ -144,37 +144,24 @@ app.get(/^\/.*\/?$/, async (req, res) => {
 
 const port = process.env.PORT || 3000;
 
+let staticGenerationInProgress = null;
+
+async function generateStaticOnce() {
+  if (!staticGenerationInProgress) {
+    staticGenerationInProgress = (async () => {
+      console.log("🛠️ Generating static pages...");
+      await generateStatic();
+      console.log("✅ Static generation complete");
+    })();
+  }
+  return staticGenerationInProgress;
+}
+
 app.listen(port, async () => {
   if (!isDevelopment) {
-    await generateStatic();
+    await generateStaticOnce();
   } else {
     console.log("⚙️ Rendering dynamically in dev mode");
   }
   console.log(`Listening on port ${port}`);
 });
-
-// FOR NETLIFY
-const serverless = require("serverless-http");
-
-// Ensure generateStatic runs once
-let initialized = false;
-
-async function initIfNeeded() {
-  if (!initialized) {
-    if (!isDevelopment) {
-      await generateStatic();
-    } else {
-      console.log("⚙️ Rendering dynamically in dev mode");
-    }
-    initialized = true;
-  }
-}
-
-// Export the Netlify handler
-const handler = async (event, context) => {
-  await initIfNeeded(); // ensure static generation happens once
-  const handler = serverless(app);
-  return handler(event, context);
-};
-
-module.exports = handler;
