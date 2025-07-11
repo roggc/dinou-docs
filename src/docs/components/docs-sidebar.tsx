@@ -29,6 +29,7 @@ import {
   Plug,
   Hexagon,
   Star,
+  Rocket,
 } from "lucide-react";
 
 const navigation = [
@@ -129,6 +130,11 @@ const navigation = [
         title: "Ejecting",
         href: "/docs/ejecting",
         icon: Plug,
+      },
+      {
+        title: "Deployment",
+        href: "/docs/deployment",
+        icon: Rocket,
       },
     ],
   },
