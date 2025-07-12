@@ -102,8 +102,8 @@ const navigation = [
         icon: Palette,
       },
       {
-        title: "Images",
-        href: "/docs/images_",
+        title: "Assets",
+        href: "/docs/assets_",
         icon: ImageIcon,
       },
       {
