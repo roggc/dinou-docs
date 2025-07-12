@@ -119,10 +119,10 @@ export default function Page({ data }: { data: string }) {
   };
 
   return (
-    <>
+    <div>
       <Suspense fallback={<div>Loading...</div>}>{getPost()}</Suspense>
       <Suspense fallback={<div>Loading2...</div>}>{getPost2()}</Suspense>
-    </>
+    </div>
   );
 }`}
               </CodeBlock>
