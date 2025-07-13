@@ -30,6 +30,7 @@ import {
   Hexagon,
   Star,
   Rocket,
+  DraftingCompass,
 } from "lucide-react";
 
 const navigation = [
@@ -80,6 +81,11 @@ const navigation = [
         title: "Client Components",
         href: "/docs/client-components",
         icon: Atom,
+      },
+      {
+        title: "Advanced",
+        href: "/docs/advanced",
+        icon: DraftingCompass,
       },
     ],
   },
