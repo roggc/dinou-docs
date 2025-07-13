@@ -131,7 +131,7 @@ export async function getProps(params: { name: string }) {
                 Function to get the values of a dynamic param in the route for
                 which SSG will be applied.{" "}
                 <strong>Fetching data in the server</strong> with{" "}
-                <code>getProps</code> or within the body of a Server Component
+                <code>getProps</code> or within the body of a Server Component{" "}
                 <strong>increases the FCP (First Contentful Paint)</strong>,
                 that is, when the user sees something on the screen,{" "}
                 <strong>when rendering dynamically</strong>, that is, on the
