@@ -30,8 +30,8 @@ export default function StylesPage() {
               <p>
                 dinou is ready to use Tailwind.css, <code>.module.css</code>,
                 and <code>.css</code> styles. All styles will be generated in a
-                file in webpack folder named <code>styles.css</code>. So you
-                must include this in your <code>page.tsx</code> or{" "}
+                file in <code>public</code> folder named <code>styles.css</code>
+                . So you must include this in your <code>page.tsx</code> or{" "}
                 <code>layout.tsx</code> file, in the <code>head</code> tag:
               </p>
 
@@ -41,9 +41,9 @@ export default function StylesPage() {
                 <Info className="h-4 w-4" />
                 <AlertDescription>
                   <strong>Important:</strong> Only styles imported under{" "}
-                  <code>"use client"</code> directive will be detected by
-                  Webpack and generated in a <code>styles.css</code> in webpack
-                  folder.
+                  <code>"use client"</code> directive will be detected by dinou
+                  and generated in a <code>styles.css</code> in{" "}
+                  <code>public</code> folder.
                 </AlertDescription>
               </Alert>
             </section>

@@ -146,7 +146,7 @@ export default function Page() {
                       <li>• TypeScript or JavaScript</li>
                       <li>• Import aliases</li>
                       <li>• CSS modules & Tailwind</li>
-                      <li>• Use of images</li>
+                      <li>• Use of assets (images, videos, etc.)</li>
                     </ul>
                   </CardContent>
                 </Card>
