@@ -2,5 +2,5 @@ node_modules
 dist
 dist2
 dist3
-____public____
+public
 .env

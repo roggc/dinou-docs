@@ -63,8 +63,8 @@ export default function Component() {
                 <Info className="h-4 w-4" />
                 <AlertDescription>
                   <strong>Important:</strong> Only assets imported under a{" "}
-                  <code>"use client"</code> directive will be detected by
-                  Webpack and generated in the webpack output folder.
+                  <code>"use client"</code> directive will be detected by dinou
+                  and generated in the <code>public</code> folder.
                 </AlertDescription>
               </Alert>
             </section>
@@ -73,7 +73,7 @@ export default function Component() {
               <h2>With Server Components</h2>
               <p>
                 If you're using server components, you need to create a separate
-                client file (e.g. <code>assets.ts</code>) to trigger Webpack’s
+                client file (e.g. <code>assets.ts</code>) to trigger dinou's
                 detection:
               </p>
 
@@ -132,7 +132,7 @@ declare module "*.png" {
               </p>
               <ul>
                 <li>
-                  <code>webpack.config.js</code>
+                  <code>rollup.config.js</code>
                 </li>
                 <li>
                   <code>dinou/server.js</code>

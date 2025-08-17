@@ -84,8 +84,10 @@ export default function Page() {
                 npm run dev
               </CodeBlock>
               <p>
-                Wait for the logs of Webpack and the server and navigate to your
-                browser to see the page in action (localhost:3000).
+                Wait for the logs of the bundler (
+                <code>waiting for changes...</code>) and the server (
+                <code>Listening on port 3000</code>) and navigate to your
+                browser to see the page in action (<code>localhost:3000</code>).
               </p>
             </section>
 
@@ -129,8 +131,8 @@ export default function Page() {
               <Alert className="not-prose mt-2">
                 <Lightbulb className="h-4 w-4" />
                 <AlertDescription>
-                  In development, webpack will emit his files in{" "}
-                  <code>____public____</code> folder.
+                  In development, the bundler will emit its files in{" "}
+                  <code>public</code> folder.
                 </AlertDescription>
               </Alert>
               <Alert className="not-prose mt-2">
@@ -148,7 +150,7 @@ export default function Page() {
               <Alert className="not-prose mt-2">
                 <Lightbulb className="h-4 w-4" />
                 <AlertDescription>
-                  In production, webpack will emit his files in{" "}
+                  In production, the bundler will emit its files in{" "}
                   <code>dist3</code> folder.
                 </AlertDescription>
               </Alert>

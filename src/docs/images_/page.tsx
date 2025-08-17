@@ -38,8 +38,8 @@ export default function ImagesPage() {
                 <Info className="h-4 w-4" />
                 <AlertDescription>
                   <strong>Important:</strong> Only images imported under{" "}
-                  <code>"use client"</code> directive will be detected by
-                  Webpack and generated in webpack folder.
+                  <code>"use client"</code> directive will be detected by dinou
+                  and generated in <code>public</code> folder.
                 </AlertDescription>
               </Alert>
             </section>
