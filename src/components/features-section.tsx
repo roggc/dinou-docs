@@ -99,7 +99,8 @@ export function FeaturesSection() {
               <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
                 <li>&bull; Support for .css, .module.css, and Tailwind.css</li>
                 <li>
-                  &bull; Image support (.png, .jpeg, .jpg, .gif, .svg, .webp)
+                  &bull; Assets support (.png, .jpeg, .jpg, .gif, .svg, .webp,
+                  ...)
                 </li>
                 <li>&bull; Import alias in tsconfig.json/jsconfig.json</li>
               </ul>
