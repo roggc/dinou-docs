@@ -39,22 +39,21 @@ export default function Page() {
               <img src={dinou} alt="dinou logo" className="h-6 w-6" />
             </div> */}
             <img src={dinou} alt="dinou logo" className="h-6 w-6" />
-            <h1 className="text-3xl font-bold">dinou</h1>
+            <h1 className="text-3xl font-bold">Dinou</h1>
             {/* <Badge variant="secondary">v1.0</Badge> */}
           </div>
 
           <div className="prose overflow-hidden max-w-full">
             <p className="text-xl text-muted-foreground mb-8">
-              A minimal React 19 framework with file-based routing, SSR, SSG,
-              and more.
+              A React 19 framework with file-based routing, SSR, SSG, and more.
             </p>
 
             <section id="introduction">
               <h2>Introduction</h2>
               <p>
-                <strong>dinou</strong> is a minimal React 19 framework. The name
-                "dinou" means 19 in Catalan, reflecting its focus on React 19's
-                latest features. You can create a dinou app by running:
+                <strong>Dinou</strong> is a React 19 framework. The name "dinou"
+                means 19 in Catalan, reflecting its focus on React 19's latest
+                features. You can create a Dinou app by running:
               </p>
 
               <CodeBlock
@@ -63,7 +62,7 @@ export default function Page() {
               >{`npx create-dinou@latest my-app`}</CodeBlock>
 
               <p>
-                dinou provides a streamlined development experience with zero
+                Dinou provides a streamlined development experience with zero
                 configuration while giving you full control through ejection
                 when needed.
               </p>
@@ -168,7 +167,7 @@ export default function Page() {
               >{`npx create-dinou@latest my-app`}</CodeBlock>
 
               <p>
-                Or set up manually and get started with dinou in just a few
+                Or set up manually and get started with Dinou in just a few
                 steps:
               </p>
 
@@ -210,7 +209,7 @@ npm i react react-dom dinou`}</CodeBlock>
               >{`"use client";
 
 export default function Page() {
-  return <>Hello, dinou!</>;
+  return <>Hello, Dinou!</>;
 }`}</CodeBlock>
 
               <p>
@@ -228,7 +227,7 @@ export default function Page() {
             <section id="next-steps">
               <h2>Next Steps</h2>
               <p>
-                Now that you have dinou running, explore these key concepts:
+                Now that you have Dinou running, explore these key concepts:
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 not-prose">

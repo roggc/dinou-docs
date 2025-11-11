@@ -20,7 +20,7 @@ export default function StylesPage() {
             <h1 className="text-3xl font-bold mb-2">Styles & CSS</h1>
             <p className="text-xl text-muted-foreground">
               Learn how to use Tailwind.css, .module.css, and .css styles in
-              dinou.
+              Dinou.
             </p>
           </div>
 
@@ -28,7 +28,7 @@ export default function StylesPage() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                dinou is ready to use Tailwind.css, <code>.module.css</code>,
+                Dinou is ready to use Tailwind.css, <code>.module.css</code>,
                 and <code>.css</code> styles. All styles will be generated in a
                 file in <code>public</code> folder named <code>styles.css</code>
                 . So you must include this in your <code>page.tsx</code> or{" "}
@@ -41,7 +41,7 @@ export default function StylesPage() {
                 <Info className="h-4 w-4" />
                 <AlertDescription>
                   <strong>Important:</strong> Only styles imported under{" "}
-                  <code>"use client"</code> directive will be detected by dinou
+                  <code>"use client"</code> directive will be detected by Dinou
                   and generated in a <code>styles.css</code> in{" "}
                   <code>public</code> folder.
                 </AlertDescription>
@@ -63,7 +63,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <title>dinou app</title>
+        <title>Dinou app</title>
         <link rel="icon" type="image/png" href="/favicon.ico" />
         <link
           rel="apple-touch-icon"
@@ -157,7 +157,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <title>dinou app</title>
+        <title>Dinou app</title>
         <link rel="icon" type="image/png" href="/favicon.ico" />
         <link
           rel="apple-touch-icon"

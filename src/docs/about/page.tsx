@@ -39,8 +39,8 @@ export default function AboutPage() {
             <section id="license">
               <h2>License</h2>
               <p>
-                <code>dinou</code> is made by Roger Gomez Castells (@roggc) and
-                is licensed under the{" "}
+                <code>Dinou</code> is made by Roger Gomez (@roggc) and is
+                licensed under the{" "}
                 <a
                   href="https://github.com/roggc/dinou/blob/master/LICENSE.md"
                   className="text-blue-600 underline"

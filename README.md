@@ -1,1 +1,1 @@
-# Docs for dinou
+# Docs for Dinou

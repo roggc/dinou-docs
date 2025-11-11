@@ -13,7 +13,7 @@ export default function Page() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Client Components</h1>
             <p className="text-xl text-muted-foreground">
-              Learn how to properly define Client Components in dinou.
+              Learn how to properly define Client Components in Dinou.
             </p>
           </div>
 
@@ -21,7 +21,7 @@ export default function Page() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                Client Components in <code>dinou</code> must begin with the{" "}
+                Client Components in Dinou must begin with the{" "}
                 <code>"use client";</code> directive at the top of the file if
                 they are not imported by other client components.
               </p>

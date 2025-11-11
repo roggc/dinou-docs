@@ -32,7 +32,7 @@ export default function DataFetchingPage() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Data Fetching</h1>
             <p className="text-xl text-muted-foreground">
-              Learn how to fetch data in dinou using Suspense and Server
+              Learn how to fetch data in Dinou using Suspense and Server
               Functions.
             </p>
           </div>

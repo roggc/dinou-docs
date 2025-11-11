@@ -13,7 +13,7 @@ export default function Page() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Server Components</h1>
             <p className="text-xl text-muted-foreground">
-              Learn about Server Components in dinou.
+              Learn about Server Components in Dinou.
             </p>
           </div>
 
@@ -21,9 +21,8 @@ export default function Page() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                Server Components in this implementation are distinguished by
-                the fact they are <code>async</code> functions. So when defining
-                them,{" "}
+                Server Components in Dinou are distinguished by the fact they
+                are <code>async</code> functions. So when defining them,{" "}
                 <strong>
                   make them <code>async</code> always
                 </strong>

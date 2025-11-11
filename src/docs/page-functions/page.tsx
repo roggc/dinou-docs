@@ -28,7 +28,7 @@ export default function PageFunctionsPage() {
             <h1 className="text-3xl font-bold mb-2">Page Functions</h1>
             <p className="text-xl text-muted-foreground">
               Learn how to use page_functions.ts to define route-specific logic
-              in dinou.
+              in Dinou.
             </p>
           </div>
 

@@ -26,7 +26,7 @@ export function FeaturesSection() {
             Powerful tools for modern React development
           </h2>
           <p className="mx-auto max-w-[700px] text-slate-600 dark:text-slate-300 md:text-xl">
-            dinou equips you with everything needed to build fast, scalable, and
+            Dinou equips you with everything needed to build fast, scalable, and
             customizable React 19 applications with ease.
           </p>
         </div>

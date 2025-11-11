@@ -22,7 +22,7 @@ export default function Page() {
             <h1 className="text-3xl font-bold mb-2">Assets or Media Files</h1>
             <p className="text-xl text-muted-foreground">
               Learn how to use media files like images, video, and sound in
-              dinou.
+              Dinou.
             </p>
           </div>
 
@@ -30,7 +30,7 @@ export default function Page() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                dinou supports the use of media files in your components.
+                Dinou supports the use of media files in your components.
                 Supported file extensions are:
                 <code>.png</code>, <code>.jpeg</code>, <code>.jpg</code>,{" "}
                 <code>.gif</code>, <code>.svg</code>, <code>.webp</code>,{" "}
@@ -63,7 +63,7 @@ export default function Component() {
                 <Info className="h-4 w-4" />
                 <AlertDescription>
                   <strong>Important:</strong> Only assets imported under a{" "}
-                  <code>"use client"</code> directive will be detected by dinou
+                  <code>"use client"</code> directive will be detected by Dinou
                   and generated in the <code>public</code> folder.
                 </AlertDescription>
               </Alert>
@@ -73,7 +73,7 @@ export default function Component() {
               <h2>With Server Components</h2>
               <p>
                 If you're using server components, you need to create a separate
-                client file (e.g. <code>assets.ts</code>) to trigger dinou's
+                client file (e.g. <code>assets.ts</code>) to trigger Dinou's
                 detection:
               </p>
 
@@ -128,7 +128,7 @@ declare module "*.png" {
               <h2>Custom Extensions</h2>
               <p>
                 If you need to support a new file extension, you can eject and
-                customize dinou. Add the extension in these three places:
+                customize Dinou. Add the extension in these three places:
               </p>
               <ul>
                 <li>
