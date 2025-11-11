@@ -128,17 +128,11 @@ declare module "*.png" {
               <h2>Custom Extensions</h2>
               <p>
                 If you need to support a new file extension, you can eject and
-                customize Dinou. Add the extension in these three places:
+                customize Dinou. Add the extension in this place:
               </p>
-              <ul>
+              <ul className="list-disc">
                 <li>
-                  <code>rollup.config.js</code>
-                </li>
-                <li>
-                  <code>dinou/server.js</code>
-                </li>
-                <li>
-                  <code>dinou/render-html.js</code>
+                  <code>dinou/asset-extensions.js</code>
                 </li>
               </ul>
               <p>
