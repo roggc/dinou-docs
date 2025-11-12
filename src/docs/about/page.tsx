@@ -3,7 +3,7 @@
 import { TableOfContents } from "@/docs/components/table-of-contents";
 
 const tocItems = [
-  { id: "changelog", title: "📦 Changelog", level: 2 },
+  { id: "changelog", title: "Changelog", level: 2 },
   { id: "license", title: "License", level: 2 },
 ];
 
@@ -21,7 +21,7 @@ export default function AboutPage() {
 
           <div className="prose max-w-none space-y-6">
             <section id="changelog">
-              <h2>📦 Changelog</h2>
+              <h2>Changelog</h2>
               <p>
                 For a detailed list of changes, enhancements, and bug fixes
                 across versions, see the{" "}
