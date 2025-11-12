@@ -16,7 +16,7 @@ export default function EjectingPage() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Ejecting</h1>
             <p className="text-xl text-muted-foreground">
-              Learn how to eject dinou for full control and customization.
+              Learn how to eject Dinou for full control and customization.
             </p>
           </div>
 
@@ -24,9 +24,9 @@ export default function EjectingPage() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                You can eject dinou with the command <code>npm run eject</code>{" "}
+                You can eject Dinou with the command <code>npm run eject</code>{" "}
                 (or <code>npx dinou eject</code>). This will copy the files
-                defining dinou in the root folder of the project (grouped in a{" "}
+                defining Dinou in the root folder of the project (grouped in a{" "}
                 <code>dinou</code> folder). You will have full control and
                 customization capabilities.
               </p>
@@ -43,9 +43,10 @@ export default function EjectingPage() {
               <CodeBlock language="bash">npx dinou eject</CodeBlock>
 
               <p>
-                After ejecting, the dinou framework files will be copied to a{" "}
-                <code>dinou</code> folder in your project root, giving you
-                complete control over the build process and configuration.
+                After ejecting, the Dinou framework files will be copied to a{" "}
+                <code>dinou</code> folder in your <strong>project root</strong>,
+                giving you complete control over the build process and
+                configuration.
               </p>
             </section>
           </div>

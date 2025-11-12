@@ -33,7 +33,7 @@ export default function RoutingPage() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Routing System</h1>
             <p className="text-xl text-muted-foreground">
-              Learn about dinou's file-based routing system and how to create
+              Learn about Dinou's file-based routing system and how to create
               different types of routes.
             </p>
           </div>
@@ -42,7 +42,7 @@ export default function RoutingPage() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                dinou uses a file-based routing system where routes are defined
+                Dinou uses a file-based routing system where routes are defined
                 by creating <code>page.tsx</code> files in folders. The routing
                 system supports:
               </p>
@@ -62,7 +62,7 @@ export default function RoutingPage() {
             <section id="base-directory">
               <h2>Base Directory</h2>
               <p>
-                All routing in <strong>dinou</strong> is defined relative to the{" "}
+                All routing in <strong>Dinou</strong> is defined relative to the{" "}
                 <code>src/</code> directory. The structure and naming of files
                 inside <code>src/</code> determine how routes are resolved and
                 rendered.
@@ -154,8 +154,8 @@ export default function RoutingPage() {
               </div>
 
               <p>
-                Each <code>page.tsx</code> file exports a React component
-                (client or server component):
+                Each <code>page.tsx</code> file exports a React Component
+                (Client or Server Component):
               </p>
               <CodeBlock language="typescript">{`// src/about/page.tsx
 "use client";
@@ -370,7 +370,7 @@ export default function Layout({
   return (
     <html lang="en">
       <head>
-        <title>dinou app</title>
+        <title>Dinou app</title>
       </head>
       <body>
         {sidebar}
@@ -482,8 +482,8 @@ export default function Page({
 
               <Alert className="not-prose mt-2">
                 <AlertDescription>
-                  Avoid using <strong>async functions</strong> (server
-                  components) and fetching data directly in{" "}
+                  Avoid using <strong>async functions</strong> (Server
+                  Components) and fetching data directly in{" "}
                   <code>error.tsx</code> pages. These are rendered dynamically
                   and delaying rendering is discouraged. Use{" "}
                   <code>Suspense</code> if needed.

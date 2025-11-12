@@ -24,11 +24,11 @@ export default function PageFunctionsPage() {
     <div className="flex-1 flex">
       <main className="flex-1 py-6 lg:py-8 min-w-0">
         <div className="container max-w-4xl px-4">
-          <div className="mb-6">
+          <div className="mb-6 prose">
             <h1 className="text-3xl font-bold mb-2">Page Functions</h1>
             <p className="text-xl text-muted-foreground">
-              Learn how to use page_functions.ts to define route-specific logic
-              in dinou.
+              Learn how to use <code>page_functions.ts</code> (or{" "}
+              <code>.js</code>) to define route-specific logic in Dinou.
             </p>
           </div>
 
@@ -51,7 +51,7 @@ export default function PageFunctionsPage() {
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
                       Fetch data in the server and pass this data as props to
-                      the page component (client or server component) and root
+                      the page component (Client or Server Component) and root
                       layout.
                     </p>
                   </CardContent>
@@ -114,8 +114,11 @@ export default function PageFunctionsPage() {
 
               <CodeBlock language="typescript">
                 {`// src/dynamic/[name]/page_functions.ts
-
-export async function getProps(params: { name: string }) {
+export async function getProps(
+  params: Record<string, string>,
+  query: Record<string, string>,
+  cookies: Record<string, string>
+) {
   const data = await new Promise<string>((r) =>
     setTimeout(() => r(\`Hello \${params.name}\`), 2000)
   );
@@ -141,7 +144,6 @@ export async function getProps(params: { name: string }) {
 
               <CodeBlock language="typescript">
                 {`// src/dynamic/[name]/page_functions.ts
-
 export function getStaticPaths() {
   return ["albert", "johan", "roger", "alex"];
 }`}

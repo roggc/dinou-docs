@@ -20,7 +20,7 @@ export default function Page() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Getting Started</h1>
             <p className="text-xl text-muted-foreground">
-              Learn how to install and set up your first dinou application.
+              Learn how to install and set up your first Dinou application.
             </p>
           </div>
 
@@ -28,21 +28,21 @@ export default function Page() {
             <section id="installation">
               <h2>Installation</h2>
               <p>
-                The fastest way to get started with dinou is using the create
+                The fastest way to get started with Dinou is using the create
                 command:
               </p>
               <CodeBlock language="bash" containerClassName="w-full">
                 npx create-dinou@latest my-app
               </CodeBlock>
               <p>
-                This will create a new dinou application with all the necessary
+                This will create a new Dinou application with all the necessary
                 files and dependencies.
               </p>
             </section>
 
             <section id="manual-setup">
               <h2>Manual Setup</h2>
-              <p>You can also set up a dinou project manually:</p>
+              <p>You can also set up a Dinou project manually:</p>
 
               <h3>1. Create an npm project</h3>
               <CodeBlock language="bash" containerClassName="w-full">
@@ -93,7 +93,7 @@ export default function Page() {
 
             <section id="project-structure">
               <h2>Project Structure</h2>
-              <p>A typical dinou project structure looks like this:</p>
+              <p>A typical Dinou project structure looks like this:</p>
               <CodeBlock language="text" containerClassName="w-full">
                 {`my-app/
 ├── src/
@@ -172,7 +172,7 @@ export default function Page() {
                 npm run eject
               </CodeBlock>
               <p>
-                Copies dinou's files to your project for full customization.
+                Copies Dinou's files to your project for full customization.
               </p>
             </section>
           </div>

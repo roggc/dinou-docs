@@ -32,7 +32,7 @@ export default function QueryParametersPage() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Query Parameters</h1>
             <p className="text-xl text-muted-foreground">
-              Learn how to work with URL query parameters in dinou applications.
+              Learn how to work with URL query parameters in Dinou applications.
             </p>
           </div>
 
@@ -481,7 +481,7 @@ export default function ProductPage({
               <h2>SSG Behavior</h2>
               <p>
                 Query parameters affect how Static Site Generation (SSG) works
-                in dinou:
+                in Dinou:
               </p>
 
               <Alert className="not-prose">

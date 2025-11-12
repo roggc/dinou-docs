@@ -22,7 +22,7 @@ export default function Page() {
               Persisting In-Memory Values Between Renders (Dynamic Rendering)
             </h1>
             <p className="text-xl text-muted-foreground">
-              Learn why in-memory state doesn't survive HTML rendering in dinou
+              Learn why in-memory state doesn't survive HTML rendering in Dinou
               when rendering dynamically, and how to persist values like
               counters using external storage.
             </p>
@@ -32,7 +32,7 @@ export default function Page() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                dinou renders HTML in a <strong>child process</strong>, isolated
+                Dinou renders HTML in a <strong>child process</strong>, isolated
                 from the main server process. This means that any global state
                 or in-memory variables are not shared across HTML renders. While
                 the RSC server can retain memory, the HTML renderer cannot.

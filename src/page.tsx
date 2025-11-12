@@ -41,16 +41,16 @@ export default function Page() {
                 Built for React 19
               </Badge>
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-slate-900 dark:text-slate-100">
-                dinou: a minimal
+                Dinou: a
                 <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   {" "}
                   React 19 framework
                 </span>
               </h1>
               <p className="mx-auto max-w-[700px] text-lg text-slate-600 dark:text-slate-300 md:text-xl">
-                dinou is a minimal React 19 framework that leverages React 19's
-                latest features to help you build modern web applications with
-                zero configuration and maximum developer experience.
+                Dinou is a React 19 framework that leverages React 19's latest
+                features to help you build modern web applications with zero
+                configuration and maximum developer experience.
               </p>
             </div>
 
@@ -103,7 +103,7 @@ export default function Page() {
                 Get started in seconds
               </h2>
               <p className="text-slate-600 dark:text-slate-300 md:text-lg">
-                Create a new dinou app with a single command. No complex
+                Create a new Dinou app with a single command. No complex
                 configuration files or setup required.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -121,7 +121,7 @@ export default function Page() {
 
             <Card className="p-6 bg-slate-900 dark:bg-slate-950 text-slate-50 border-slate-700 dark:border-slate-800">
               <pre className="text-sm overflow-x-auto">
-                <code className="text-slate-100 dark:text-slate-200">{`# Create a new dinou app
+                <code className="text-slate-100 dark:text-slate-200">{`# Create a new Dinou app
 npx create-dinou@latest my-app
 
 # Start developing
@@ -170,7 +170,7 @@ npm start`}</code>
                 10k+
               </div>
               <div className="text-sm text-slate-500 dark:text-slate-400">
-                Developers using dinou
+                Developers using Dinou
               </div>
             </div>
           </div>
@@ -191,7 +191,7 @@ npm start`}</code>
             </h2>
             <p className="mx-auto max-w-[600px] text-slate-600 dark:text-slate-300 md:text-xl">
               Join thousands of developers who are already building the future
-              with dinou.
+              with Dinou.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" className="text-base" asChild>

@@ -8,7 +8,6 @@ import { Info } from "lucide-react";
 const tocItems = [
   { id: "overview", title: "Overview", level: 2 },
   { id: "usage", title: "Usage", level: 2 },
-  { id: "server-components", title: "With Server Components", level: 2 },
   { id: "typescript", title: "TypeScript Declaration", level: 2 },
   { id: "custom-extension", title: "Custom Extensions", level: 2 },
 ];
@@ -22,7 +21,7 @@ export default function Page() {
             <h1 className="text-3xl font-bold mb-2">Assets or Media Files</h1>
             <p className="text-xl text-muted-foreground">
               Learn how to use media files like images, video, and sound in
-              dinou.
+              Dinou.
             </p>
           </div>
 
@@ -30,7 +29,7 @@ export default function Page() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                dinou supports the use of media files in your components.
+                Dinou supports the use of media files in your components.
                 Supported file extensions are:
                 <code>.png</code>, <code>.jpeg</code>, <code>.jpg</code>,{" "}
                 <code>.gif</code>, <code>.svg</code>, <code>.webp</code>,{" "}
@@ -58,42 +57,13 @@ export default function Component() {
   return <img src={image} alt="image" />;
 }`}
               </CodeBlock>
-
               <Alert className="not-prose mt-2">
                 <Info className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Important:</strong> Only assets imported under a{" "}
-                  <code>"use client"</code> directive will be detected by dinou
-                  and generated in the <code>public</code> folder.
+                  With Server Components instead of Client Components works
+                  exactly the same.
                 </AlertDescription>
               </Alert>
-            </section>
-
-            <section id="server-components">
-              <h2>With Server Components</h2>
-              <p>
-                If you're using server components, you need to create a separate
-                client file (e.g. <code>assets.ts</code>) to trigger dinou's
-                detection:
-              </p>
-
-              <h3>Client Asset File</h3>
-              <CodeBlock language="typescript">
-                {`// src/assets.ts
-"use client";
-
-import "./image.png";`}
-              </CodeBlock>
-
-              <h3>Server Component</h3>
-              <CodeBlock language="typescript">
-                {`// src/component.tsx
-import image from "./image.png";
-
-export default async function Component() {
-  return <img src={image} alt="image" />;
-}`}
-              </CodeBlock>
             </section>
 
             <section id="typescript">
@@ -128,17 +98,11 @@ declare module "*.png" {
               <h2>Custom Extensions</h2>
               <p>
                 If you need to support a new file extension, you can eject and
-                customize dinou. Add the extension in these three places:
+                customize Dinou. Add the extension in this place:
               </p>
-              <ul>
+              <ul className="list-disc">
                 <li>
-                  <code>rollup.config.js</code>
-                </li>
-                <li>
-                  <code>dinou/server.js</code>
-                </li>
-                <li>
-                  <code>dinou/render-html.js</code>
+                  <code>dinou/asset-extensions.js</code>
                 </li>
               </ul>
               <p>

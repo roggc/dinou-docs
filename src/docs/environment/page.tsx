@@ -16,7 +16,7 @@ export default function EnvironmentPage() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Environment Variables</h1>
             <p className="text-xl text-muted-foreground">
-              Learn how to use environment variables in dinou.
+              Learn how to use environment variables in Dinou.
             </p>
           </div>
 
@@ -24,8 +24,8 @@ export default function EnvironmentPage() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                dinou is ready to manage env vars in the code that runs on the
-                Server side (Server Functions, Server Components, and{" "}
+                Dinou is ready to manage env vars in the code that runs on the
+                Server Side (Server Functions, Server Components, and{" "}
                 <code>getProps</code> function).
               </p>
             </section>

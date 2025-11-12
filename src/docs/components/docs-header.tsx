@@ -24,9 +24,9 @@ export function DocsHeader() {
               <Sparkles className="h-3 w-3 text-white" />
             </div> */}
             <a href="/">
-              <img src={dinou} alt="dinou logo" className="h-6 w-6" />
+              <img src={dinou} alt="Dinou logo" className="h-6 w-6" />
             </a>
-            <span className="font-bold">dinou</span>
+            <span className="font-bold">Dinou</span>
             <a href="/docs">
               <Badge variant="secondary" className="text-xs">
                 docs

@@ -20,7 +20,7 @@ export default function ImagesPage() {
             <h1 className="text-3xl font-bold mb-2">Images</h1>
             <p className="text-xl text-muted-foreground">
               Learn how to use images (.png, .jpeg, .jpg, .gif, .svg, and .webp)
-              in dinou.
+              in Dinou.
             </p>
           </div>
 
@@ -28,7 +28,7 @@ export default function ImagesPage() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                dinou is ready to support the use of images in your components.
+                Dinou is ready to support the use of images in your components.
                 Supported formats include <code>.png</code>, <code>.jpeg</code>,{" "}
                 <code>.jpg</code>, <code>.gif</code>, <code>.svg</code>, and{" "}
                 <code>.webp</code>.
@@ -38,7 +38,7 @@ export default function ImagesPage() {
                 <Info className="h-4 w-4" />
                 <AlertDescription>
                   <strong>Important:</strong> Only images imported under{" "}
-                  <code>"use client"</code> directive will be detected by dinou
+                  <code>"use client"</code> directive will be detected by Dinou
                   and generated in <code>public</code> folder.
                 </AlertDescription>
               </Alert>

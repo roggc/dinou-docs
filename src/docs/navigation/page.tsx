@@ -17,7 +17,7 @@ export default function NavigationPage() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Navigation</h1>
             <p className="text-xl text-muted-foreground">
-              Learn how to navigate between pages in dinou.
+              Learn how to navigate between pages in Dinou.
             </p>
           </div>
 

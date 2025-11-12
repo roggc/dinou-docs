@@ -32,7 +32,7 @@ export default function DataFetchingPage() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Data Fetching</h1>
             <p className="text-xl text-muted-foreground">
-              Learn how to fetch data in dinou using Suspense and Server
+              Learn how to fetch data in Dinou using Suspense and Server
               Functions.
             </p>
           </div>
@@ -51,6 +51,13 @@ export default function DataFetchingPage() {
                 <strong>even when rendering dynamically</strong> and that is to
                 use <code>Suspense</code> for data fetching, either in the
                 server and in the client.
+              </p>
+              <p>
+                It is recommended to use <code>Suspense</code> from{" "}
+                <code>react-enhanced-suspense</code> because through its prop{" "}
+                <code>resourceId</code> we can stabilize the promise between
+                re-renders and only re-fetch when <code>resourceId</code>{" "}
+                changes.
               </p>
 
               <h3>Post Component</h3>
@@ -95,33 +102,23 @@ export async function getPost() {
 }`}
               </CodeBlock>
 
-              <h3>Page with Suspense</h3>
+              <h3>
+                Page with <code>Suspense</code> from{" "}
+                <code>react-enhanced-suspense</code>
+              </h3>
               <CodeBlock language="typescript">
                 {`// src/posts/page.tsx
-
 "use client";
 
-import { Suspense } from "react";
+import Suspense from "react-enhanced-suspense";
 import { getPost } from "./get-post";
-import Post from "./post";
-import type { PostType } from "./post";
 
-export default function Page({ data }: { data: string }) {
-  const getPost2 = async () => {
-    const post = await new Promise<PostType>((r) =>
-      setTimeout(
-        () => r({ title: "Post Title2", content: "Post content2" }),
-        1000
-      )
-    );
-
-    return <Post post={post} />;
-  };
-
+export default function Page() {
   return (
     <div>
-      <Suspense fallback={<div>Loading...</div>}>{getPost()}</Suspense>
-      <Suspense fallback={<div>Loading2...</div>}>{getPost2()}</Suspense>
+      <Suspense fallback={<div>Loading...</div>} resourceId="get-post">
+        {() => getPost()}
+      </Suspense>
     </div>
   );
 }`}
@@ -129,7 +126,24 @@ export default function Page({ data }: { data: string }) {
 
               <p>
                 The same can be done with <code>page.tsx</code> being a Server
-                Component.
+                Component. In this case we would not use the{" "}
+                <code>resourceId</code> prop and we will call the Server
+                Function directly.
+              </p>
+              <CodeBlock language="typescript">{`// src/posts/page.tsx
+import Suspense from "react-enhanced-suspense";
+import { getPost } from "./get-post";
+
+export default async function Page() {
+  return (
+    <div>
+      <Suspense fallback={<div>Loading...</div>}>{getPost()}</Suspense>
+    </div>
+  );
+}`}</CodeBlock>
+              <p>
+                <code>Suspense</code> from <code>react-enhanced-suspense</code>{" "}
+                it's React's <code>Suspense</code> when no extra prop is used.
               </p>
             </section>
 
@@ -203,7 +217,6 @@ export default function Page({ data }: { data: string }) {
                 <h3>Static Route Example</h3>
                 <CodeBlock language="typescript" containerClassName="mb-2">
                   {`// src/static/page.tsx
-
 "use client";
 
 export default function Page({ data }: { data: string }) {
@@ -213,7 +226,6 @@ export default function Page({ data }: { data: string }) {
 
                 <CodeBlock language="typescript">
                   {`// src/static/page_functions.ts
-
 export async function getProps() {
   const data = await new Promise<string>((r) =>
     setTimeout(() => r(\`data\`), 2000)
@@ -241,7 +253,6 @@ export async function getProps() {
                 <h3>Dynamic Route Example</h3>
                 <CodeBlock language="typescript" containerClassName="mb-2">
                   {`// src/dynamic/[name]/page.tsx
-
 "use client";
 
 export default function Page({
@@ -262,7 +273,6 @@ export default function Page({
 
                 <CodeBlock language="typescript">
                   {`// src/dynamic/[name]/page_functions.ts
-
 export async function getProps(params: { name: string }) {
   const data = await new Promise<string>((r) =>
     setTimeout(() => r(\`Hello \${params.name}\`), 2000)
@@ -299,7 +309,6 @@ export function getStaticPaths() {
 
                 <CodeBlock language="typescript" containerClassName="mb-2">
                   {`// src/optional/[[name]]/page.tsx
-
 "use client";
 
 export default function Page({
@@ -320,7 +329,6 @@ export default function Page({
 
                 <CodeBlock language="typescript">
                   {`// src/optional/[[name]]/page_functions.ts
-
 export async function getProps(params: { name: string }) {
   const data = await new Promise<string>((r) =>
     setTimeout(() => r(\`Hello \${params.name ?? ""}\`), 2000)
@@ -365,7 +373,6 @@ export function getStaticPaths() {
 
                 <CodeBlock language="typescript" containerClassName="mb-2">
                   {`// src/catch-all/[...names]/page.tsx
-
 "use client";
 
 export default function Page({
@@ -386,7 +393,6 @@ export default function Page({
 
                 <CodeBlock language="typescript">
                   {`// src/catch-all/[...names]/page_functions.ts
-
 export async function getProps(params: { names: string[] }) {
   const data = await new Promise<string>((r) =>
     setTimeout(() => r(\`Hello \${params.names.join(",")}\`), 2000)
@@ -431,7 +437,6 @@ export function getStaticPaths() {
 
                 <CodeBlock language="typescript" containerClassName="mb-2">
                   {`// src/catch-all-optional/[[..names]]/page.tsx
-
 "use client";
 
 export default function Page({
@@ -452,7 +457,6 @@ export default function Page({
 
                 <CodeBlock language="typescript">
                   {`// src/catch-all-optional/[[..names]]/page_functions.ts
-
 export async function getProps(params: { names: string[] }) {
   const data = await new Promise<string>((r) =>
     setTimeout(() => r(\`Hello \${params.names.join(",")}\`), 2000)

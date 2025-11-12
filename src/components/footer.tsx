@@ -19,11 +19,11 @@ export default function Footer() {
               <Sparkles className="h-3 w-3 text-white" />
             </div> */}
             <span className="font-bold text-slate-900 dark:text-slate-100">
-              dinou
+              Dinou
             </span>
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs">
-            A minimal React 19 framework for building modern web applications.
+            A React 19 framework for building modern web applications.
           </p>
           <div className="flex space-x-4">
             <Tooltip>
@@ -174,7 +174,7 @@ export default function Footer() {
           © {new Date().getFullYear()} Roger Gomez Castells (@roggc).
         </p> */}
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          dinou is licensed under the{" "}
+          Dinou is licensed under the{" "}
           <a
             href="https://github.com/roggc/dinou/blob/master/LICENSE.md"
             target="_blank"

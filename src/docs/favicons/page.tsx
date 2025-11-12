@@ -18,7 +18,7 @@ export default function FaviconsPage() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Favicons</h1>
             <p className="text-xl text-muted-foreground">
-              Learn how to add a favicon and related icons to your dinou app.
+              Learn how to add a favicon and related icons to your Dinou app.
             </p>
           </div>
 
@@ -35,8 +35,8 @@ export default function FaviconsPage() {
 
               <p>
                 After downloading the icons, unzip the folder and rename it to{" "}
-                <code>favicons</code>. Then, move this folder to the root of
-                your project.
+                <code>favicons</code>. Then, move this folder to the{" "}
+                <strong>root of your project</strong>.
               </p>
 
               <Alert className="not-prose">
@@ -63,7 +63,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <title>dinou app</title>
+        <title>Dinou app</title>
         <link rel="icon" type="image/png" href="/favicon.ico" />
         <link
           rel="apple-touch-icon"

@@ -30,7 +30,7 @@ export default function DynamicParametersPage() {
             <h1 className="text-3xl font-bold mb-2">Dynamic Parameters</h1>
             <p className="text-xl text-muted-foreground">
               Learn how to work with dynamic route parameters and query strings
-              in dinou.
+              in Dinou.
             </p>
           </div>
 
@@ -38,7 +38,7 @@ export default function DynamicParametersPage() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                dinou components (<code>page.tsx</code>, <code>layout.tsx</code>
+                Dinou components (<code>page.tsx</code>, <code>layout.tsx</code>
                 , and <code>not_found.tsx</code>) automatically receive two
                 props:
               </p>

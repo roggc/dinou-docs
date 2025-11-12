@@ -20,7 +20,7 @@ export default function Page() {
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Deployment</h1>
             <p className="text-xl text-muted-foreground">
-              Learn how to deploy your dinou application to production.
+              Learn how to deploy your Dinou application to production.
             </p>
           </div>
 
@@ -28,9 +28,9 @@ export default function Page() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                Projects built with <strong>dinou</strong> can be deployed to
-                any platform that supports <code>Node.js</code> with custom
-                flags.
+                Projects built with <strong>Dinou</strong> can be deployed to
+                any platform that supports <code>Node.js</code> with{" "}
+                <strong>custom flags</strong>.
               </p>
               <p>
                 The most important requirement is that you can pass{" "}
@@ -42,7 +42,7 @@ export default function Page() {
             <section id="digitalocean">
               <h2>✅ DigitalOcean App Platform</h2>
               <p>
-                <strong>dinou</strong> works seamlessly on{" "}
+                <strong>Dinou</strong> works seamlessly on{" "}
                 <a
                   href="https://www.digitalocean.com/products/app-platform"
                   target="_blank"
@@ -79,15 +79,15 @@ export default function Page() {
               <h2>❌ Netlify</h2>
               <p>
                 At the moment, <strong>Netlify is not compatible</strong> with
-                dinou, because it does not allow passing{" "}
+                Dinou, because it does not allow passing{" "}
                 <code>--conditions react-server</code> to Node.js. This flag is
-                required for a dinou app to work.
+                required for a Dinou app to work.
               </p>
 
               <Alert className="not-prose mt-2 mb-2">
                 <AlertTriangle className="h-4 w-4 text-yellow-500" />
                 <AlertDescription>
-                  If Netlify adds support for custom flags in the future, dinou
+                  If Netlify adds support for custom flags in the future, Dinou
                   compatibility might become possible.
                 </AlertDescription>
               </Alert>
@@ -96,7 +96,7 @@ export default function Page() {
             <section id="other-platforms">
               <h2>🛠 Other Platforms</h2>
               <p>
-                You can also deploy dinou to other Node.js platforms like{" "}
+                You can also deploy Dinou to other Node.js platforms like{" "}
                 <code>Render</code>, <code>Fly.io</code>, <code>Railway</code>,
                 etc.
               </p>

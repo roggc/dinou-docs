@@ -21,7 +21,7 @@ export default function Page() {
             </h1>
             <p className="text-xl text-muted-foreground">
               Learn how the <code>params</code> and <code>query</code> props
-              work in dinou.
+              work in Dinou.
             </p>
           </div>
 
@@ -29,11 +29,10 @@ export default function Page() {
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                Pages, layouts, slots, not found pages, and error pages in{" "}
-                <code>dinou</code> receive <code>params</code> and{" "}
-                <code>query</code> props.
+                Pages, layouts, slots, not found pages, and error pages in Dinou
+                receive <code>params</code> and <code>query</code> props:
               </p>
-              <ul>
+              <ul className="list-disc list-inside">
                 <li>
                   <strong>params</strong> contains dynamic route segments like{" "}
                   <code>{`{ id: "123" }`}</code> for <code>/blog/[id]</code>.
