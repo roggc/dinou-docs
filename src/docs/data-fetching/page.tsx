@@ -52,6 +52,13 @@ export default function DataFetchingPage() {
                 use <code>Suspense</code> for data fetching, either in the
                 server and in the client.
               </p>
+              <p>
+                It is recommended to use <code>Suspense</code> from{" "}
+                <code>react-enhanced-suspense</code> because through its prop{" "}
+                <code>resourceId</code> we can stabilize the promise between
+                re-renders and only re-fetch when <code>resourceId</code>{" "}
+                changes.
+              </p>
 
               <h3>Post Component</h3>
               <CodeBlock language="typescript">
@@ -95,13 +102,16 @@ export async function getPost() {
 }`}
               </CodeBlock>
 
-              <h3>Page with Suspense</h3>
+              <h3>
+                Page with <code>Suspense</code> from{" "}
+                <code>react-enhanced-suspense</code>
+              </h3>
               <CodeBlock language="typescript">
                 {`// src/posts/page.tsx
 
 "use client";
 
-import { Suspense } from "react";
+import Suspense from "react-enhanced-suspense";
 import { getPost } from "./get-post";
 import Post from "./post";
 import type { PostType } from "./post";
@@ -120,8 +130,8 @@ export default function Page({ data }: { data: string }) {
 
   return (
     <div>
-      <Suspense fallback={<div>Loading...</div>}>{getPost()}</Suspense>
-      <Suspense fallback={<div>Loading2...</div>}>{getPost2()}</Suspense>
+      <Suspense fallback={<div>Loading...</div>} resourceId="get-post">{() => getPost()}</Suspense>
+      <Suspense fallback={<div>Loading2...</div>} resourceId="get-post-2">{() => getPost2()}</Suspense>
     </div>
   );
 }`}
@@ -129,7 +139,14 @@ export default function Page({ data }: { data: string }) {
 
               <p>
                 The same can be done with <code>page.tsx</code> being a Server
-                Component.
+                Component. In this case we would not use the{" "}
+                <code>resourceId</code> prop and will call the Server Function
+                directly.
+              </p>
+              <CodeBlock language="typescript">{`<Suspense fallback={<div>Loading...</div>}>{getPost()}</Suspense>`}</CodeBlock>
+              <p>
+                <code>Suspense</code> from <code>react-enhanced-suspense</code>{" "}
+                it's React's <code>Suspense</code> when no extra prop is used.
               </p>
             </section>
 
