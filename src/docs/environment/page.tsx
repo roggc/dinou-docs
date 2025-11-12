@@ -25,7 +25,7 @@ export default function EnvironmentPage() {
               <h2>Overview</h2>
               <p>
                 Dinou is ready to manage env vars in the code that runs on the
-                Server side (Server Functions, Server Components, and{" "}
+                Server Side (Server Functions, Server Components, and{" "}
                 <code>getProps</code> function).
               </p>
             </section>

@@ -102,7 +102,7 @@ export function FeaturesSection() {
                   &bull; Assets support (.png, .jpeg, .jpg, .gif, .svg, .webp,
                   ...)
                 </li>
-                <li>&bull; Import alias in tsconfig.json/jsconfig.json</li>
+                <li>&bull; Import alias in tsconfig.json</li>
               </ul>
             </CardContent>
           </Card>

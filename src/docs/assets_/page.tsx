@@ -8,7 +8,6 @@ import { Info } from "lucide-react";
 const tocItems = [
   { id: "overview", title: "Overview", level: 2 },
   { id: "usage", title: "Usage", level: 2 },
-  { id: "server-components", title: "With Server Components", level: 2 },
   { id: "typescript", title: "TypeScript Declaration", level: 2 },
   { id: "custom-extension", title: "Custom Extensions", level: 2 },
 ];
@@ -58,42 +57,13 @@ export default function Component() {
   return <img src={image} alt="image" />;
 }`}
               </CodeBlock>
-
               <Alert className="not-prose mt-2">
                 <Info className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Important:</strong> Only assets imported under a{" "}
-                  <code>"use client"</code> directive will be detected by Dinou
-                  and generated in the <code>public</code> folder.
+                  With Server Components instead of Client Components works
+                  exactly the same.
                 </AlertDescription>
               </Alert>
-            </section>
-
-            <section id="server-components">
-              <h2>With Server Components</h2>
-              <p>
-                If you're using server components, you need to create a separate
-                client file (e.g. <code>assets.ts</code>) to trigger Dinou's
-                detection:
-              </p>
-
-              <h3>Client Asset File</h3>
-              <CodeBlock language="typescript">
-                {`// src/assets.ts
-"use client";
-
-import "./image.png";`}
-              </CodeBlock>
-
-              <h3>Server Component</h3>
-              <CodeBlock language="typescript">
-                {`// src/component.tsx
-import image from "./image.png";
-
-export default async function Component() {
-  return <img src={image} alt="image" />;
-}`}
-              </CodeBlock>
             </section>
 
             <section id="typescript">

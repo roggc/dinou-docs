@@ -35,8 +35,8 @@ export default function FaviconsPage() {
 
               <p>
                 After downloading the icons, unzip the folder and rename it to{" "}
-                <code>favicons</code>. Then, move this folder to the root of
-                your project.
+                <code>favicons</code>. Then, move this folder to the{" "}
+                <strong>root of your project</strong>.
               </p>
 
               <Alert className="not-prose">

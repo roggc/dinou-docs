@@ -44,8 +44,9 @@ export default function EjectingPage() {
 
               <p>
                 After ejecting, the Dinou framework files will be copied to a{" "}
-                <code>dinou</code> folder in your project root, giving you
-                complete control over the build process and configuration.
+                <code>dinou</code> folder in your <strong>project root</strong>,
+                giving you complete control over the build process and
+                configuration.
               </p>
             </section>
           </div>

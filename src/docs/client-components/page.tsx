@@ -23,7 +23,7 @@ export default function Page() {
               <p>
                 Client Components in Dinou must begin with the{" "}
                 <code>"use client";</code> directive at the top of the file if
-                they are not imported by other client components.
+                they are not imported by other Client Components.
               </p>
               <p>
                 This applies to files like <strong>page.tsx</strong>,{" "}
@@ -33,27 +33,10 @@ export default function Page() {
               </p>
               <p>
                 To avoid surprises, it's recommended to include the{" "}
-                <code>"use client";</code> directive in all client components.
+                <code>"use client";</code> directive in all Client Components.
               </p>
 
               <h3>Example</h3>
-              {/* <CodeBlock language="typescript" containerClassName="mb-2">
-                {`// Client Component page
-"use client";
-
-export default function Page() {
-  const handleClick = () => {
-    alert("This is a client component!");
-  };
-
-  return (
-    <div>
-      <h1>Client Component</h1>
-      <button onClick={handleClick}>Click me</button>
-    </div>
-  );
-}`}
-              </CodeBlock> */}
               <CodeBlock language="typescript" containerClassName="mb-2">
                 {`// Client Component page
 "use client";
@@ -72,15 +55,6 @@ export default function Page() {
   );
 }`}
               </CodeBlock>
-
-              {/* <CodeBlock language="typescript">
-                {`// Client Component imported by another client component
-"use client";
-
-export function Button({ label }: { label: string }) {
-  return <button>{label}</button>;
-}`}
-              </CodeBlock> */}
             </section>
           </div>
         </div>

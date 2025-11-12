@@ -29,8 +29,8 @@ export default function Page() {
               <h2>Overview</h2>
               <p>
                 Projects built with <strong>Dinou</strong> can be deployed to
-                any platform that supports <code>Node.js</code> with custom
-                flags.
+                any platform that supports <code>Node.js</code> with{" "}
+                <strong>custom flags</strong>.
               </p>
               <p>
                 The most important requirement is that you can pass{" "}

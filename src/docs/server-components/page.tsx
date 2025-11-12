@@ -27,15 +27,15 @@ export default function Page() {
                   make them <code>async</code> always
                 </strong>
                 , whether or not they use <code>await</code> in their definition
-                or function body. This is necessary for the framework to know
-                they are Server Components and execute them.
+                or function body. This is necessary for Dinou to know they are
+                Server Components and execute them.
               </p>
 
               <h3>Example</h3>
               <CodeBlock language="typescript" containerClassName="mb-2">
                 {`// Server Component example
 export default async function ServerComponent() {
-  // This is a Server Component because it's async
+  // This is a Server Component because it's async and doesn't use directive "use client"
   const data = await fetch('https://api.example.com/data');
   const result = await data.json();
   

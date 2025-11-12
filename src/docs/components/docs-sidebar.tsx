@@ -31,6 +31,7 @@ import {
   Star,
   Rocket,
   DraftingCompass,
+  Package,
 } from "lucide-react";
 
 const navigation = [
@@ -45,7 +46,7 @@ const navigation = [
       {
         title: "Installation",
         href: "/docs/getting-started",
-        icon: Zap,
+        icon: Package,
       },
       {
         title: "About",
@@ -81,6 +82,11 @@ const navigation = [
         title: "Client Components",
         href: "/docs/client-components",
         icon: Atom,
+      },
+      {
+        title: "Server Functions",
+        href: "/docs/server-functions",
+        icon: Zap,
       },
       {
         title: "Advanced",

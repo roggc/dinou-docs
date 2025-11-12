@@ -27,8 +27,7 @@ export default function ImportAliasesPage() {
               <p>
                 Dinou is ready to support import alias, as{" "}
                 <code>import some from "@/..."</code>. If you want to use them
-                just define the options in <code>tsconfig.json</code> or{" "}
-                <code>jsconfig.json</code>.
+                just define the options in <code>tsconfig.json</code>.
               </p>
             </section>
 
@@ -38,14 +37,16 @@ export default function ImportAliasesPage() {
                 {`// tsconfig.json
 {
   "compilerOptions": {
-    // other options
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "allowJs": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true
   },
-  "include": ["src/**/*"]
-  // other configuration fields
+  "include": ["src"]
 }`}
               </CodeBlock>
             </section>
@@ -53,13 +54,15 @@ export default function ImportAliasesPage() {
             <section id="javascript">
               <h2>JavaScript Configuration</h2>
               <CodeBlock language="json">
-                {`// jsconfig.json
+                {`// tsconfig.json
 {
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "allowJs": true,
+    "noEmit": true
   },
   "include": ["src"]
 }`}

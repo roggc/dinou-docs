@@ -154,8 +154,8 @@ export default function RoutingPage() {
               </div>
 
               <p>
-                Each <code>page.tsx</code> file exports a React component
-                (client or server component):
+                Each <code>page.tsx</code> file exports a React Component
+                (Client or Server Component):
               </p>
               <CodeBlock language="typescript">{`// src/about/page.tsx
 "use client";
@@ -482,8 +482,8 @@ export default function Page({
 
               <Alert className="not-prose mt-2">
                 <AlertDescription>
-                  Avoid using <strong>async functions</strong> (server
-                  components) and fetching data directly in{" "}
+                  Avoid using <strong>async functions</strong> (Server
+                  Components) and fetching data directly in{" "}
                   <code>error.tsx</code> pages. These are rendered dynamically
                   and delaying rendering is discouraged. Use{" "}
                   <code>Suspense</code> if needed.
