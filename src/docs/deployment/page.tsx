@@ -73,6 +73,10 @@ export default function Page() {
                 You can deploy by connecting your GitHub/GitLab repository or
                 uploading your project manually.
               </p>
+              <p>
+                Just make sure to set the <code>NODE_ENV</code> environment
+                variable to <code>production</code>.
+              </p>
             </section>
 
             <section id="netlify">
