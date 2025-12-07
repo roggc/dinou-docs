@@ -3,4 +3,5 @@ dist
 dist2
 dist3
 public
+react_client_manifest
 .env
