@@ -25,9 +25,17 @@ import {
 import { CodeBlock } from "@/docs/components/code-block";
 
 const tocItems = [
-  { id: "layouts", title: "Layouts (`layout.jsx`)", level: 2 },
-  { id: "error-handling", title: "Error Handling (`error.jsx`)", level: 2 },
-  { id: "not-found", title: "Not Found (`not_found.jsx`)", level: 2 },
+  { id: "layouts", title: "Layouts (layout.tsx)", level: 2 },
+  {
+    id: "error-handling",
+    title: "Error Handling (error.tsx)",
+    level: 2,
+  },
+  {
+    id: "not-found",
+    title: "Not Found (not_found.tsx)",
+    level: 2,
+  },
   {
     id: "advanced-control",
     title: "Advanced Layout Control (Flags)",
@@ -56,7 +64,9 @@ export default function Page() {
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <section id="layouts">
-              <h2>Layouts (`layout.jsx`)</h2>
+              <h2>
+                Layouts (<code>layout.tsx</code>)
+              </h2>
               <p>
                 Layouts wrap pages and child layouts. They persist across
                 navigation, preserving state and preventing unnecessary
@@ -71,7 +81,7 @@ export default function Page() {
                 language="jsx"
                 containerClassName="w-full overflow-hidden rounded-lg"
               >
-                {`// src/dashboard/layout.jsx
+                {`// src/dashboard/layout.tsx
 export default async function Layout({ children, params, sidebar }) {
   return (
     <div className="dashboard-grid">
@@ -86,7 +96,7 @@ export default async function Layout({ children, params, sidebar }) {
               </CodeBlock>
               <p className="mt-4">
                 Layouts are nested by default. For example, a page at{" "}
-                <code>src/dashboard/settings/page.jsx</code> would be wrapped by
+                <code>src/dashboard/settings/page.tsx</code> would be wrapped by
                 the root layout and the dashboard layout.
               </p>
               <Alert className="not-prose mt-4">
@@ -100,10 +110,12 @@ export default async function Layout({ children, params, sidebar }) {
             </section>
 
             <section id="error-handling">
-              <h2>Error Handling (`error.jsx`)</h2>
+              <h2>
+                Error Handling (<code>error.tsx</code>)
+              </h2>
               <p>
-                Define an <code>error.jsx</code> file to handle errors in a
-                route segment. Dinou renders the closest <code>error.jsx</code>{" "}
+                Define an <code>error.tsx</code> file to handle errors in a
+                route segment. Dinou renders the closest <code>error.tsx</code>{" "}
                 bubbling up the hierarchy.
               </p>
               <p>
@@ -141,10 +153,12 @@ export default function ErrorPage({ error, params }) {
             </section>
 
             <section id="not-found">
-              <h2>Not Found (`not_found.jsx`)</h2>
+              <h2>
+                Not Found (<code>not_found.tsx</code>)
+              </h2>
               <p>
-                Define a <code>not_found.jsx</code> file to customize the 404
-                UI. Dinou renders the closest <code>not_found.jsx</code>{" "}
+                Define a <code>not_found.tsx</code> file to customize the 404
+                UI. Dinou renders the closest <code>not_found.tsx</code>{" "}
                 traversing up from the requested URL.
               </p>
               <p>
@@ -181,7 +195,7 @@ export default function ErrorPage({ error, params }) {
                   <tbody className="divide-y divide-border bg-card">
                     <tr>
                       <td className="p-4 font-mono text-xs">reset_layout</td>
-                      <td className="p-4 font-mono text-xs">layout.jsx</td>
+                      <td className="p-4 font-mono text-xs">layout.tsx</td>
                       <td className="p-4 text-xs">
                         Resets the layout tree. This layout becomes the new
                         root, ignoring parents.
@@ -190,7 +204,7 @@ export default function ErrorPage({ error, params }) {
                     <tr>
                       <td className="p-4 font-mono text-xs">no_layout</td>
                       <td className="p-4 font-mono text-xs">
-                        page.jsx, error.jsx, not_found.jsx
+                        page.tsx, error.tsx, not_found.tsx
                       </td>
                       <td className="p-4 text-xs">
                         Prevents any layout from wrapping this component.
@@ -198,7 +212,7 @@ export default function ErrorPage({ error, params }) {
                     </tr>
                     <tr>
                       <td className="p-4 font-mono text-xs">no_layout_error</td>
-                      <td className="p-4 font-mono text-xs">error.jsx</td>
+                      <td className="p-4 font-mono text-xs">error.tsx</td>
                       <td className="p-4 text-xs">
                         Prevents layouts for the error page only.
                       </td>
@@ -207,7 +221,7 @@ export default function ErrorPage({ error, params }) {
                       <td className="p-4 font-mono text-xs">
                         no_layout_not_found
                       </td>
-                      <td className="p-4 font-mono text-xs">not_found.jsx</td>
+                      <td className="p-4 font-mono text-xs">not_found.tsx</td>
                       <td className="p-4 text-xs">
                         Prevents layouts for the not found page only.
                       </td>
@@ -224,7 +238,7 @@ export default function ErrorPage({ error, params }) {
                     </div>
                   </CardHeader>
                   <CardContent className="text-sm font-mono">
-                    src/marketing/layout.jsx
+                    src/marketing/layout.tsx
                     <br />
                     src/marketing/reset_layout (empty file)
                     <br />

@@ -1,6 +1,7 @@
 "use client";
 
-import { usePathname } from "@/docs/hooks/use-pathname";
+// import { usePathname } from "@/docs/hooks/use-pathname";
+import { usePathname, Link } from "dinou";
 import {
   Sidebar,
   SidebarContent,
@@ -177,10 +178,10 @@ export function DocsSidebar() {
                       asChild
                       isActive={pathname === item.href}
                     >
-                      <a href={item.href}>
+                      <Link href={item.href}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
