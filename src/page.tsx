@@ -1,207 +1,88 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Zap,
-  Code2,
   Rocket,
-  Shield,
-  Sparkles,
   Github,
-  Twitter,
   BookOpen,
-  Download,
-  Star,
-  Users,
-  Activity,
+  Sparkles,
+  Check,
+  Copy,
+  Terminal,
 } from "lucide-react";
 import { FeaturesSection } from "@/components/features-section";
 
 export default function Page() {
+  const [copied, setCopied] = useState(false);
+  const installCommand = "npx create-dinou@latest my-app";
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(installCommand);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <main className="flex-1">
+    <main className="flex-1 overflow-hidden">
+      {/* Background Gradients */}
+      <div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-slate-950 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)]"></div>
+
       {/* Hero Section */}
-      <section id="main" className="w-full py-12 md:py-24 lg:py-32">
-        <div className="px-4 md:px-6">
+      <section id="main" className="w-full py-20 md:py-32 lg:py-40 relative">
+        <div className="container px-4 md:px-6 mx-auto">
           <div className="flex flex-col items-center space-y-8 text-center">
-            <div className="space-y-4">
-              <Badge
-                variant="outline"
-                className="px-3 py-1 border-slate-200 dark:border-slate-700"
-              >
-                <Sparkles className="mr-2 h-3 w-3" />
-                Built for React 19
-              </Badge>
-              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-slate-900 dark:text-slate-100">
-                Dinou: a
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  {" "}
-                  React 19 framework
+            <div className="space-y-4 max-w-4xl">
+              <div className="flex justify-center">
+                <Badge
+                  variant="secondary"
+                  className="px-4 py-1.5 text-sm border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm"
+                >
+                  <Sparkles className="mr-2 h-3.5 w-3.5 text-blue-500" />
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-semibold">
+                    Native React 19 Framework
+                  </span>
+                </Badge>
+              </div>
+
+              <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl text-slate-900 dark:text-white">
+                The future of
+                <span className="block mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  React Development
                 </span>
               </h1>
-              <p className="mx-auto max-w-[700px] text-lg text-slate-600 dark:text-slate-300 md:text-xl">
-                Dinou is a React 19 framework that leverages React 19's latest
-                features to help you build modern web applications with zero
-                configuration and maximum developer experience.
+
+              <p className="mx-auto max-w-[700px] text-lg text-slate-600 dark:text-slate-400 md:text-xl leading-relaxed">
+                Unlock the full potential of Server Components and Actions. Zero
+                configuration, blazing fast builds, and designed specifically
+                for the React 19 era.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="text-base" asChild>
+            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center pt-4">
+              <Button
+                size="lg"
+                className="text-base h-12 px-8 rounded-full"
+                asChild
+              >
                 <a href="/docs">
                   <Rocket className="mr-2 h-5 w-5" />
                   Get Started
                 </a>
               </Button>
-              <Button variant="outline" size="lg" className="text-base" asChild>
-                <a href="https://github.com/roggc/dinou" target="_blank">
-                  <Github className="mr-2 h-5 w-5" />
-                  View on GitHub
-                </a>
-              </Button>
-            </div>
-
-            {/* <div className="flex items-center space-x-8 text-sm text-slate-500 dark:text-slate-400">
-              <div className="flex items-center space-x-2">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span>2.1k stars</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Download className="h-4 w-4" />
-                <span>50k+ downloads</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Users className="h-4 w-4" />
-                <span>Active community</span>
-              </div>
-            </div> */}
-          </div>
-        </div>
-      </section>
-      {/* Features Section */}
-      <FeaturesSection />
-      {/* Code Example Section */}
-      <section id="development" className="w-full py-12 md:py-24 lg:py-32">
-        <div className="px-4 md:px-6">
-          <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
-            <div className="space-y-4">
-              {/* <Badge
+              <Button
                 variant="outline"
-                className="border-slate-200 dark:border-slate-700"
+                size="lg"
+                className="text-base h-12 px-8 rounded-full bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm"
+                asChild
               >
-                Simple API
-              </Badge> */}
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl text-slate-900 dark:text-slate-100">
-                Get started in seconds
-              </h2>
-              <p className="text-slate-600 dark:text-slate-300 md:text-lg">
-                Create a new Dinou app with a single command. No complex
-                configuration files or setup required.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button asChild>
-                  <a href="/docs">
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    Read the docs
-                  </a>
-                </Button>
-                {/* <Button variant="outline" asChild>
-                  <a href="https://github.com/dinou/examples">View examples</a>
-                </Button> */}
-              </div>
-            </div>
-
-            <Card className="p-6 bg-slate-900 dark:bg-slate-950 text-slate-50 border-slate-700 dark:border-slate-800">
-              <pre className="text-sm overflow-x-auto">
-                <code className="text-slate-100 dark:text-slate-200">{`# Create a new Dinou app
-npx create-dinou@latest my-app
-
-# Start developing
-cd my-app
-npm run dev
-
-# Build for production and run it
-npm run build
-npm start`}</code>
-              </pre>
-            </Card>
-          </div>
-        </div>
-      </section>
-      {/* Stats Section */}
-      {/* <section className="w-full py-12 md:py-24 lg:py-32 bg-slate-50 dark:bg-slate-900/50">
-        <div className="container px-4 md:px-6">
-          <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
-            <div className="flex flex-col items-center space-y-2 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20">
-                <Activity className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                99.9%
-              </div>
-              <div className="text-sm text-slate-500 dark:text-slate-400">
-                Uptime guarantee
-              </div>
-            </div>
-            <div className="flex flex-col items-center space-y-2 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
-                <Zap className="h-8 w-8 text-green-600 dark:text-green-400" />
-              </div>
-              <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                {"<100ms"}
-              </div>
-              <div className="text-sm text-slate-500 dark:text-slate-400">
-                Cold start time
-              </div>
-            </div>
-            <div className="flex flex-col items-center space-y-2 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/20">
-                <Users className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                10k+
-              </div>
-              <div className="text-sm text-slate-500 dark:text-slate-400">
-                Developers using Dinou
-              </div>
-            </div>
-          </div>
-        </div>
-      </section> */}
-      {/* Get Started Section */}
-      {/* <section id="get-started" className="w-full py-12 md:py-24 lg:py-32">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center space-y-4 text-center">
-            <Badge
-              variant="outline"
-              className="border-slate-200 dark:border-slate-700"
-            >
-              Get Started
-            </Badge>
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-slate-900 dark:text-slate-100">
-              Ready to build something amazing?
-            </h2>
-            <p className="mx-auto max-w-[600px] text-slate-600 dark:text-slate-300 md:text-xl">
-              Join thousands of developers who are already building the future
-              with Dinou.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="text-base" asChild>
-                <a href="https://docs.dinou.dev/getting-started">
-                  <Rocket className="mr-2 h-5 w-5" />
-                  Get Started Now
-                </a>
-              </Button>
-              <Button variant="outline" size="lg" className="text-base" asChild>
-                <a href="https://github.com/dinou/dinou">
+                <a
+                  href="https://github.com/roggc/dinou"
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   <Github className="mr-2 h-5 w-5" />
                   Star on GitHub
                 </a>
@@ -209,7 +90,136 @@ npm start`}</code>
             </div>
           </div>
         </div>
-      </section> */}
+      </section>
+
+      {/* Features Section (Untouched as requested) */}
+      <FeaturesSection />
+
+      {/* Quick Start / Code Section */}
+      <section
+        id="development"
+        className="w-full py-20 md:py-32 bg-slate-50/50 dark:bg-slate-900/20 border-y border-slate-200 dark:border-slate-800"
+      >
+        <div className="container px-4 md:px-6 mx-auto">
+          <div className="grid gap-12 lg:grid-cols-2 items-center">
+            {/* Text Content */}
+            <div className="space-y-6">
+              <div className="inline-flex items-center rounded-lg bg-blue-100 dark:bg-blue-900/30 px-3 py-1 text-sm font-medium text-blue-800 dark:text-blue-300">
+                <Terminal className="mr-2 h-4 w-4" />
+                Zero Configuration
+              </div>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-slate-900 dark:text-white">
+                From zero to production in seconds
+              </h2>
+              <p className="text-slate-600 dark:text-slate-400 md:text-lg leading-relaxed">
+                Don't waste time configuring bundlers. Dinou comes
+                pre-configured with the best defaults for modern React
+                applications. Just run the init command and start coding.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                <Button variant="default" asChild>
+                  <a href="/docs/installation">
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    Read the Guide
+                  </a>
+                </Button>
+              </div>
+            </div>
+
+            {/* Terminal Card */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+              <Card className="relative overflow-hidden bg-[#1e1e1e] text-slate-50 border-slate-800 shadow-2xl rounded-xl">
+                {/* Mac-like header */}
+                <div className="flex items-center justify-between px-4 py-3 bg-[#252526] border-b border-white/10">
+                  <div className="flex space-x-2">
+                    <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                    <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                    <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
+                  </div>
+                  <div className="text-xs text-slate-400 font-mono">bash</div>
+                </div>
+
+                {/* Code Content */}
+                <div className="p-6 font-mono text-sm relative">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-white hover:bg-white/10"
+                    onClick={handleCopy}
+                  >
+                    {copied ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                    <span className="sr-only">Copy command</span>
+                  </Button>
+
+                  <div className="space-y-4">
+                    <div className="flex items-start">
+                      <span className="text-green-500 mr-2">$</span>
+                      <span className="text-slate-300">{installCommand}</span>
+                    </div>
+                    <div className="text-slate-500">
+                      Creating a new Dinou app in{" "}
+                      <span className="text-blue-400">./my-app</span>...
+                    </div>
+                    <div className="text-slate-500">
+                      <span className="text-green-500">✔</span> Project
+                      initialized
+                    </div>
+                    <div className="flex items-start">
+                      <span className="text-green-500 mr-2">$</span>
+                      <span className="text-slate-300">
+                        cd my-app && npm run dev
+                      </span>
+                    </div>
+                    <div className="text-blue-400">
+                      ready started server on http://localhost:3000
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="w-full py-20 md:py-32 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-100/50 dark:to-slate-900/50 -z-10" />
+        <div className="container px-4 md:px-6 mx-auto text-center">
+          <div className="flex flex-col items-center space-y-6 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+              Ready to ship?
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400 md:text-xl">
+              Join the new wave of React developers building faster, lighter,
+              and simpler web applications.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center pt-4">
+              <Button size="lg" className="text-base rounded-full px-8" asChild>
+                <a href="/docs/getting-started">Get Started Now</a>
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-base rounded-full px-8"
+                asChild
+              >
+                <a
+                  href="https://github.com/roggc/dinou"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View Source
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

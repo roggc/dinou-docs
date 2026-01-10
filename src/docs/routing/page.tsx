@@ -1,544 +1,345 @@
 "use client";
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
-import { Alert, AlertDescription } from "@/docs/components/ui/alert";
+import { Badge } from "@/docs/components/ui/badge";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/docs/components/ui/card";
-import { Folder } from "lucide-react";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/docs/components/ui/alert";
+import {
+  Map,
+  Split,
+  Layers,
+  Link as LinkIcon,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  FolderTree,
+} from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
 const tocItems = [
   { id: "overview", title: "Overview", level: 2 },
-  { id: "base-directory", title: "Base Directory", level: 2 },
-  { id: "static-routes", title: "Static Routes", level: 2 },
-  { id: "dynamic-routes", title: "Dynamic Routes", level: 2 },
-  { id: "optional-routes", title: "Optional Dynamic Routes", level: 2 },
-  { id: "catch-all", title: "Catch-All Routes", level: 2 },
-  { id: "layouts", title: "Layouts", level: 2 },
-  { id: "parallel-routes", title: "Parallel Routes (Slots)", level: 2 },
-  { id: "not-found", title: "Not Found Pages", level: 2 },
-  { id: "error-handling", title: "Error Handling", level: 2 },
-  { id: "route-groups", title: "Route Groups", level: 2 },
+  { id: "route-types", title: "Route Types", level: 2 },
+  { id: "optional-segments", title: "Optional Segments Rules", level: 2 },
+  { id: "advanced-routing", title: "Advanced Routing", level: 2 },
+  { id: "navigation", title: "Navigation", level: 2 },
 ];
 
-export default function RoutingPage() {
+export default function Page() {
   return (
-    <div className="flex-1 flex">
-      <main className="flex-1 py-6 lg:py-8 min-w-0">
-        <div className="container max-w-4xl px-4">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">Routing System</h1>
-            <p className="text-xl text-muted-foreground">
-              Learn about Dinou's file-based routing system and how to create
-              different types of routes.
+    <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw] overflow-x-hidden">
+      <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
+        <div className="container max-w-4xl px-4 md:px-6 mx-auto">
+          {/* Header */}
+          <div className="mb-8 space-y-4">
+            <div className="flex items-center space-x-2">
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                Routing
+              </h1>
+            </div>
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              Dinou uses a file-system based router. Your file structure defines
+              your URL paths.
             </p>
           </div>
 
-          <div className="prose">
+          <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <section id="overview">
               <h2>Overview</h2>
               <p>
-                Dinou uses a file-based routing system where routes are defined
-                by creating <code>page.tsx</code> files in folders. The routing
-                system supports:
+                Any file named <code>page.jsx</code>, <code>page.tsx</code>,{" "}
+                <code>page.js</code>, or <code>page.ts</code> inside the{" "}
+                <code>src</code> directory automatically becomes a public route.
               </p>
-              <ul>
-                <li>Static routes</li>
-                <li>Dynamic routes with parameters</li>
-                <li>Optional dynamic routes</li>
-                <li>Catch-all routes</li>
-                <li>Nested layouts</li>
-                <li>Custom not found pages</li>
-                <li>Custom error pages</li>
-                <li>Parallel routes (slots)</li>
-                <li>Route groups</li>
-              </ul>
+              <div className="not-prose bg-muted/50 rounded-lg p-4 border border-border flex items-center gap-4">
+                <FolderTree className="h-10 w-10 text-muted-foreground" />
+                <div className="text-sm font-mono">
+                  <div>
+                    src/page.tsx &rarr;{" "}
+                    <span className="text-blue-600 dark:text-blue-400">/</span>
+                  </div>
+                  <div>
+                    src/blog/page.tsx &rarr;{" "}
+                    <span className="text-blue-600 dark:text-blue-400">
+                      /blog
+                    </span>
+                  </div>
+                  <div>
+                    src/blog/[slug]/page.tsx &rarr;{" "}
+                    <span className="text-blue-600 dark:text-blue-400">
+                      /blog/hello-world
+                    </span>
+                  </div>
+                </div>
+              </div>
             </section>
 
-            <section id="base-directory">
-              <h2>Base Directory</h2>
+            <section id="route-types">
+              <h2>Basic & Dynamic Routes</h2>
               <p>
-                All routing in <strong>Dinou</strong> is defined relative to the{" "}
-                <code>src/</code> directory. The structure and naming of files
-                inside <code>src/</code> determine how routes are resolved and
-                rendered.
+                Dinou supports various pattern matching strategies for dynamic
+                routing:
               </p>
 
-              <p>Here's a summary of the special files used in routing:</p>
-
-              <ul>
-                <li>
-                  <strong>
-                    <code>page.tsx</code>
-                  </strong>
-                  : Defines a route. The file path corresponds to the route
-                  path.
-                </li>
-                <li>
-                  <strong>
-                    <code>layout.tsx</code>
-                  </strong>
-                  : Wraps a page or nested pages/layouts. Used for persistent UI
-                  such as headers, footers, sidebars, etc, or for defining the
-                  html document.
-                </li>
-                <li>
-                  <strong>
-                    <code>not_found.tsx</code>
-                  </strong>
-                  : Defines a custom "not found" page for unmatched routes.
-                </li>
-                <li>
-                  <strong>
-                    <code>error.tsx</code>
-                  </strong>
-                  : Defines an error page for the route. It receives{" "}
-                  <code>params</code>, <code>query</code>, and{" "}
-                  <code>error</code> props.
-                </li>
-                <li>
-                  <strong>Slots</strong>: Folders starting with <code>@</code>,
-                  such as <code>@sidebar</code>, define parallel content and
-                  must contain a <code>page.tsx</code> file.
-                </li>
-              </ul>
-
-              <CodeBlock language="bash">{`src/
-├── page.tsx              # Route: /
-├── layout.tsx            # Layout for /
-├── not_found.tsx         # 404 page for /
-├── error.tsx             # Error page for /
-├── about/
-│   └── page.tsx          # Route: /about
-└── @sidebar/
-    └── page.tsx          # Slot for sidebar content
-`}</CodeBlock>
-
-              <p>
-                This convention keeps your routing declarative and consistent
-                while supporting advanced use cases like nested layouts and
-                error boundaries.
-              </p>
+              <div className="not-prose overflow-x-auto rounded-lg border border-border">
+                <table className="w-full text-sm text-left">
+                  <thead className="bg-muted text-muted-foreground font-medium">
+                    <tr>
+                      <th className="p-4">Pattern</th>
+                      <th className="p-4">File Path</th>
+                      <th className="p-4">URL Example</th>
+                      <th className="p-4">Params</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border bg-card">
+                    <tr>
+                      <td className="p-4 font-semibold">Static</td>
+                      <td className="p-4 font-mono text-xs">src/page.jsx</td>
+                      <td className="p-4 font-mono text-xs">/</td>
+                      <td className="p-4 font-mono text-xs text-muted-foreground">
+                        {"{}"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 font-semibold">Dynamic</td>
+                      <td className="p-4 font-mono text-xs">
+                        src/blog/[slug]/page.jsx
+                      </td>
+                      <td className="p-4 font-mono text-xs">/blog/hello</td>
+                      <td className="p-4 font-mono text-xs text-blue-600">
+                        {"{ slug: 'hello' }"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 font-semibold">Optional</td>
+                      <td className="p-4 font-mono text-xs">
+                        src/blog/[[slug]]/page.jsx
+                      </td>
+                      <td className="p-4 font-mono text-xs">/blog</td>
+                      <td className="p-4 font-mono text-xs text-blue-600">
+                        {"{ slug: undefined }"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 font-semibold">Catch-all</td>
+                      <td className="p-4 font-mono text-xs">
+                        src/blog/[...slug]/page.jsx
+                      </td>
+                      <td className="p-4 font-mono text-xs">/blog/a/b/c</td>
+                      <td className="p-4 font-mono text-xs text-purple-600">
+                        {"{ slug: ['a','b','c'] }"}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 font-semibold">Optional Catch-all</td>
+                      <td className="p-4 font-mono text-xs">
+                        src/blog/[[...slug]]/page.jsx
+                      </td>
+                      <td className="p-4 font-mono text-xs">/blog</td>
+                      <td className="p-4 font-mono text-xs text-purple-600">
+                        {"{ slug: [] }"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <Alert className="not-prose mt-4">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Note</AlertTitle>
+                <AlertDescription>
+                  Route parameters are passed as the <code>params</code> prop.
+                  Query parameters (e.g., <code>?q=hello</code>) are{" "}
+                  <strong>NOT</strong> passed as props; use the{" "}
+                  <code>useSearchParams()</code> hook instead.
+                </AlertDescription>
+              </Alert>
             </section>
 
-            <section id="static-routes">
-              <h2>Static Routes</h2>
+            <section id="optional-segments">
+              <h2>Optional Segments Rules</h2>
               <p>
-                Static routes are the simplest type of route, defined by folder
-                structure:
+                Dinou enforces a strict <strong>No-Gap Rule</strong> when using
+                deep nested optional segments like{" "}
+                <code>[[warehouse]]/[[aisle]]</code>.
               </p>
 
-              <div className="not-prose mb-6">
-                <Card>
+              <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
+                <Card className="border-green-500/20 bg-green-50/50 dark:bg-green-900/10">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Folder className="h-4 w-4" />
-                      File Structure
-                    </CardTitle>
+                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
+                      <CheckCircle2 className="h-5 w-5" />
+                      <span>Allowed: Trailing Omission</span>
+                    </div>
                   </CardHeader>
-                  <CardContent>
-                    <CodeBlock language="bash">{`src/
-├── page.tsx          # → /
-├── about/
-│   └── page.tsx      # → /about
-└── blog/
-    ├── page.tsx      # → /blog
-    └── post/
-        └── page.tsx  # → /blog/post`}</CodeBlock>
+                  <CardContent className="text-sm">
+                    <p className="mb-2">
+                      You can omit optional segments only if they are at the{" "}
+                      <strong>end</strong> of the URL.
+                    </p>
+                    <div className="font-mono bg-background/50 p-2 rounded text-xs">
+                      /inventory/main/a1 ✅<br />
+                      /inventory/main ✅<br />
+                      /inventory ✅
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-red-500/20 bg-red-50/50 dark:bg-red-900/10">
+                  <CardHeader>
+                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-semibold">
+                      <XCircle className="h-5 w-5" />
+                      <span>Forbidden: Intercalated Gaps</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-sm">
+                    <p className="mb-2">
+                      You cannot skip an earlier segment and define a later one.
+                    </p>
+                    <div className="font-mono bg-background/50 p-2 rounded text-xs">
+                      (Goal: Skip warehouse, set aisle)
+                      <br />❌ Impossible to represent in URL
+                    </div>
                   </CardContent>
                 </Card>
               </div>
 
+              <h3>Catch-all Constraints</h3>
               <p>
-                Each <code>page.tsx</code> file exports a React Component
-                (Client or Server Component):
-              </p>
-              <CodeBlock language="typescript">{`// src/about/page.tsx
-"use client";
-
-export default function Page() {
-  return <h1>About Us</h1>;
-}`}</CodeBlock>
-            </section>
-
-            <section id="dynamic-routes">
-              <h2>Dynamic Routes</h2>
-              <p>
-                Dynamic routes are created using square brackets in folder
-                names. The parameter value is passed to your component as props:
-              </p>
-
-              <div className="not-prose mb-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Dynamic Route Example</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CodeBlock language="bash">{`src/blog/[id]/page.tsx  # → /blog/:id`}</CodeBlock>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <CodeBlock language="typescript">{`// src/blog/[id]/page.tsx
-"use client";
-
-export default function Page({ 
-  params 
-}: { 
-  params: { id: string } 
-}) {
-  return <h1>Blog Post: {params.id}</h1>;
-}`}</CodeBlock>
-
-              <p>
-                Accessing <code>/blog/123</code> will pass{" "}
-                <code>{`{ params: { id: "123" } }`}</code> to the component.
+                Because Catch-all segments (<code>[...slug]</code>) consume the
+                rest of the URL, they must always be the{" "}
+                <strong>terminal (last) segment</strong> of a route definition.
+                You cannot place other static or dynamic folders inside a
+                Catch-all folder.
               </p>
             </section>
 
-            <section id="optional-routes">
-              <h2>Optional Dynamic Routes</h2>
-              <p>
-                Optional dynamic routes use double square brackets{" "}
-                <code>[[param]]</code> and match both with and without the
-                parameter:
-              </p>
+            <section id="advanced-routing">
+              <h2>Advanced Routing</h2>
 
-              <CodeBlock language="bash">{`src/blog/[[category]]/page.tsx`}</CodeBlock>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="flex items-center gap-2">
+                    <Layers className="h-5 w-5" />
+                    Route Groups
+                  </h3>
+                  <p>
+                    Wrap a folder name in parentheses <code>(folder)</code> to
+                    omit it from the URL. This allows you to organize your code
+                    without affecting the public path.
+                  </p>
+                  <ul className="list-none pl-0 space-y-2 font-mono text-sm bg-muted p-4 rounded-lg">
+                    <li>
+                      src/(auth)/login/page.jsx &rarr;{" "}
+                      <span className="font-bold">/login</span>
+                    </li>
+                    <li>
+                      src/(marketing)/about/page.jsx &rarr;{" "}
+                      <span className="font-bold">/about</span>
+                    </li>
+                  </ul>
+                </div>
 
-              <p>This matches both:</p>
-              <ul>
-                <li>
-                  <code>/blog</code> →{" "}
-                  <code>{`{ params: { category: undefined } }`}</code>
-                </li>
-                <li>
-                  <code>/blog/tech</code> →{" "}
-                  <code>{`{ params: { category: "tech" } }`}</code>
-                </li>
-              </ul>
-
-              <CodeBlock language="typescript">{`// src/blog/[[category]]/page.tsx
-"use client";
-
-export default function Page({ 
-  params 
-}: { 
-  params: { category?: string } 
-}) {
+                <div>
+                  <h3 className="flex items-center gap-2">
+                    <Split className="h-5 w-5" />
+                    Parallel Routes
+                  </h3>
+                  <p>
+                    Use slots starting with <code>@</code> (e.g.,{" "}
+                    <code>@sidebar</code>) to render multiple pages in the same
+                    layout simultaneously. This enables independent error
+                    containment.
+                  </p>
+                  <CodeBlock
+                    language="jsx"
+                    containerClassName="w-full overflow-hidden rounded-lg"
+                  >
+                    {`// src/dashboard/layout.jsx
+export default function Layout({ children, sidebar }) {
+  // 'sidebar' comes from src/dashboard/@sidebar/page.jsx
   return (
-    <h1>
-      {params.category ? \`Category: \${params.category}\` : 'All Posts'}
-    </h1>
-  );
-}`}</CodeBlock>
-            </section>
-
-            <section id="catch-all">
-              <h2>Catch-All Routes</h2>
-              <p>
-                Catch-all routes capture multiple path segments as an array:
-              </p>
-
-              <h3>
-                Catch-All Routes <code>[...param]</code>
-              </h3>
-              <CodeBlock language="bash">{`src/wiki/[...slug]/page.tsx  # → /wiki/*`}</CodeBlock>
-              <p>Examples:</p>
-              <ul>
-                <li>
-                  <code>/wiki/a</code> →{" "}
-                  <code>{`{ params: { slug: ["a"] } }`}</code>
-                </li>
-                <li>
-                  <code>/wiki/a/b/c</code> →{" "}
-                  <code>{`{ params: { slug: ["a", "b", "c"] } }`}</code>
-                </li>
-              </ul>
-
-              <h3>
-                Optional Catch-All Routes <code>[[...param]]</code>
-              </h3>
-              <CodeBlock language="bash">{`src/wiki/[[...slug]]/page.tsx  # → /wiki or /wiki/*`}</CodeBlock>
-              <p>Examples:</p>
-              <ul>
-                <li>
-                  <code>/wiki</code> → <code>{`{ params: { slug: [] } }`}</code>
-                </li>
-                <li>
-                  <code>/wiki/a/b</code> →{" "}
-                  <code>{`{ params: { slug: ["a", "b"] } }`}</code>
-                </li>
-              </ul>
-
-              <CodeBlock language="typescript">{`// src/wiki/[[...slug]]/page.tsx
-"use client";
-
-export default function Page({ 
-  params 
-}: { 
-  params: { slug: string[] } 
-}) {
-  return (
-    <div>
-      <h1>Wiki</h1>
-      <p>Path: /{params.slug.join('/')}</p>
-    </div>
-  );
-}`}</CodeBlock>
-            </section>
-
-            <section id="layouts">
-              <h2>Layouts</h2>
-              <p>
-                Layouts wrap page content and can be nested. Create a{" "}
-                <code>layout.tsx</code> file in any folder to define a layout:
-              </p>
-
-              <CodeBlock language="typescript">{`// src/blog/layout.tsx
-"use client";
-
-import type { ReactNode } from "react";
-
-export default function Layout({ 
-  children 
-}: { 
-  children: ReactNode 
-}) {
-  return (
-    <div>
-      <nav>Blog Navigation</nav>
+    <div className="grid">
+      <aside>{sidebar}</aside>
       <main>{children}</main>
     </div>
   );
-}`}</CodeBlock>
-
-              <Alert className="not-prose mt-2">
-                <AlertDescription>
-                  Layouts automatically wrap all pages in their folder and
-                  subfolders. You can skip layouts by adding a{" "}
-                  <code>no_layout</code> file (without extension) in the same
-                  folder as your page.
-                </AlertDescription>
-              </Alert>
-              <Alert className="not-prose mt-2">
-                <AlertDescription>
-                  You can add a <code>reset_layout</code> file (without
-                  extension) in the same folder as your nested layout to make it
-                  the first applied. This is useful for example when you have a
-                  landing page in <code>/</code>.
-                </AlertDescription>
-              </Alert>
+}`}
+                  </CodeBlock>
+                </div>
+              </div>
             </section>
 
-            <section id="parallel-routes">
-              <h2>Parallel Routes (Slots)</h2>
+            <section id="navigation">
+              <h2>Navigation</h2>
+
+              <h3>
+                Using <code>&lt;Link&gt;</code>
+              </h3>
               <p>
-                Parallel routes, also known as <strong>slots</strong>, are
-                defined using directory names that start with <code>@</code>,
-                such as <code>@sidebar</code>. These slots{" "}
-                <strong>are passed into layouts as props</strong>, allowing you
-                to render multiple parts of a page in parallel.
+                The primary way to navigate. It offers automatic prefetching and
+                optimized client-side transitions.
               </p>
+              <CodeBlock
+                language="jsx"
+                containerClassName="w-full overflow-hidden rounded-lg"
+              >
+                {`"use client";
+import { Link } from "dinou";
 
-              <CodeBlock language="tsx">{`// File structure:
-src/@sidebar/page.tsx
-src/page.tsx
-src/layout.tsx`}</CodeBlock>
-
-              <p>
-                The content from <code>@sidebar/page.tsx</code> is passed into{" "}
-                <code>layout.tsx</code> as <code>props.sidebar</code>. You can
-                render the slot in your layout like this:
-              </p>
-
-              <CodeBlock language="tsx">{`"use client";
-
-import type { ReactNode } from "react";
-
-export default function Layout({
-  children,
-  sidebar,
-}: {
-  children: ReactNode;
-  sidebar: ReactNode;
-}) {
+export default function Menu() {
   return (
-    <html lang="en">
-      <head>
-        <title>Dinou app</title>
-      </head>
-      <body>
-        {sidebar}
-        {children}
-      </body>
-    </html>
+    <nav>
+      {/* Standard navigation with prefetch */}
+      <Link href="/about">About Us</Link>
+
+      {/* Opt-in for fresh data (bypasses cache) */}
+      <Link href="/dashboard" fresh>Dashboard</Link>
+    </nav>
   );
-}`}</CodeBlock>
+}`}
+              </CodeBlock>
 
+              <h3>Programmatic Navigation</h3>
               <p>
-                Slots are especially useful when rendering persistent UI
-                components like sidebars, headers, or other parallel content
-                areas that accompany the main page content.
+                Use the <code>useRouter</code> hook inside Client Components.
               </p>
+              <CodeBlock
+                language="jsx"
+                containerClassName="w-full overflow-hidden rounded-lg"
+              >
+                {`"use client";
+import { useRouter } from "dinou";
 
-              <Alert className="not-prose mt-2">
-                <AlertDescription>
-                  Slots receive query and dynamic parameters as the rest of
-                  pages (layouts, pages, not found pages, and error pages).
-                </AlertDescription>
-              </Alert>
-            </section>
+export default function Controls() {
+  const router = useRouter();
 
-            <section id="not-found">
-              <h2>Not Found Pages</h2>
-              <p>
-                Create custom 404 pages by adding <code>not_found.tsx</code>{" "}
-                files:
-              </p>
-
-              <CodeBlock language="typescript">{`// src/not_found.tsx
-"use client";
-
-export default function Page() {
   return (
-    <div>
-      <h1>404 - Page Not Found</h1>
-      <p>The page you're looking for doesn't exist.</p>
-    </div>
+    <>
+      <button onClick={() => router.push("/home")}>Push</button>
+      <button onClick={() => router.replace("/home")}>Replace</button>
+      <button onClick={() => router.back()}>Go Back</button>
+      
+      {/* Soft Reload: Refetches server data without a browser refresh */}
+      <button onClick={() => router.refresh()}>Refresh Data</button>
+    </>
   );
-}`}</CodeBlock>
-
-              <p>
-                If multiple <code>not_found.tsx</code> files exist in a route
-                hierarchy, the most nested one will be used.
-              </p>
-              <Alert className="not-prose mt-2">
-                <AlertDescription>
-                  Layouts are applied to not found pages too, unless a{" "}
-                  <code>no_layout</code> or <code>no_layout_not_found</code>{" "}
-                  file (without extension) is found in the same folder as your
-                  not found page.
-                </AlertDescription>
-              </Alert>
-            </section>
-
-            <section id="error-handling">
-              <h2>Error Handling</h2>
-              <p>
-                Create custom error pages by adding <code>error.tsx</code>{" "}
-                files:
-              </p>
-
-              <CodeBlock language="typescript">{`// src/error.tsx
-"use client";
-
-export default function Page({
-  error: { message, stack },
-}: {
-  error: Error;
-}) {
-  return (
-    <main className="flex-1 flex flex-col items-center justify-center p-4">
-      <div className="max-w-md w-full text-center space-y-6">
-        <h1 className="text-3xl font-bold text-red-600">Error</h1>
-        <p className="text-lg text-gray-700">
-          An unexpected error has occurred. Please try again later.
-        </p>
-        <a
-          href="/"
-          className="inline-block px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-        >
-          Go to Home
-        </a>
-      </div>
-      <div className="mt-6 text-sm text-gray-500">
-        <pre className="whitespace-pre-wrap break-words">{message}</pre>
-        <pre className="whitespace-pre-wrap break-words">{stack}</pre>
-      </div>
-    </main>
-  );
-}`}</CodeBlock>
-
-              <p>
-                The most nested <code>error.tsx</code> file in a route hierarchy
-                will be used. In production, if no error page is present, the
-                error will be written to the console. In development, a default
-                debug error page is shown.
-              </p>
-
-              <Alert className="not-prose mt-2">
-                <AlertDescription>
-                  Layouts are applied to error pages unless a{" "}
-                  <code>no_layout</code> or <code>no_layout_error</code> file
-                  (without extension) is present in the same folder as the{" "}
-                  <code>error.tsx</code> page.
-                </AlertDescription>
-              </Alert>
-
-              <Alert className="not-prose mt-2">
-                <AlertDescription>
-                  Avoid using <strong>async functions</strong> (Server
-                  Components) and fetching data directly in{" "}
-                  <code>error.tsx</code> pages. These are rendered dynamically
-                  and delaying rendering is discouraged. Use{" "}
-                  <code>Suspense</code> if needed.
-                </AlertDescription>
-              </Alert>
-
-              {/* <Alert className="not-prose mt-2">
-                <AlertDescription>
-                  There is no <code>error_functions.ts</code> file. You can't
-                  use <code>getProps</code> for error pages. Use{" "}
-                  <code>Suspense</code> to fetch data if necessary.
-                </AlertDescription>
-              </Alert> */}
-
-              <p>
-                The error page receives three props: <code>params</code>,{" "}
-                <code>query</code>, and <code>error</code>. The{" "}
-                <code>error</code> object contains a <code>message</code> and a{" "}
-                <code>stack</code>, both strings.
-              </p>
-            </section>
-
-            <section id="route-groups">
-              <h2>Route Groups</h2>
-              <p>
-                Route groups are defined using directory names wrapped in
-                parentheses, such as <code>(group)</code>. They allow you to
-                organize routes in your filesystem without affecting the URL
-                structure.
-              </p>
-
-              <CodeBlock language="tsx">{`// src/(auth)/login/page.tsx → "/login"
-// src/(auth)/signup/page.tsx → "/signup"`}</CodeBlock>
-
-              <p>
-                The directory name <code>(auth)</code> is ignored in the final
-                URL, so both pages above will be rendered at the root level:
-                <code>/login</code> and <code>/signup</code>.
-              </p>
-
-              <p>
-                This is useful for grouping related pages (like
-                authentication-related routes) together in the codebase without
-                adding a prefix to the URL path.
-              </p>
-
-              <Alert className="not-prose mt-2">
-                <AlertDescription>You can nest route groups.</AlertDescription>
-              </Alert>
+}`}
+              </CodeBlock>
             </section>
           </div>
         </div>
       </main>
 
-      <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8">
+      {/* Sidebar TOC - Hidden on Mobile */}
+      <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">
         <div className="sticky top-20">
           <TableOfContents items={tocItems} />
         </div>
