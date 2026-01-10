@@ -203,6 +203,7 @@ export default function Page() {
 
               <div className="flex flex-col sm:flex-row flex-wrap gap-4 not-prose">
                 <Button
+                  variant="outline"
                   className="h-auto py-4 px-6 justify-start w-full sm:w-auto"
                   asChild
                 >
@@ -213,7 +214,7 @@ export default function Page() {
                     <span className="font-semibold flex items-center">
                       Get Started <ArrowRight className="ml-2 h-4 w-4" />
                     </span>
-                    <span className="text-xs text-blue-100 font-normal">
+                    <span className="text-xs text-muted-foreground font-normal">
                       Install and run your first app.
                     </span>
                   </a>

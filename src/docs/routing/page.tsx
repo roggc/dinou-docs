@@ -15,10 +15,8 @@ import {
   AlertTitle,
 } from "@/docs/components/ui/alert";
 import {
-  Map,
   Split,
   Layers,
-  Link as LinkIcon,
   AlertTriangle,
   CheckCircle2,
   XCircle,
@@ -31,7 +29,6 @@ const tocItems = [
   { id: "route-types", title: "Route Types", level: 2 },
   { id: "optional-segments", title: "Optional Segments Rules", level: 2 },
   { id: "advanced-routing", title: "Advanced Routing", level: 2 },
-  { id: "navigation", title: "Navigation", level: 2 },
 ];
 
 export default function Page() {
@@ -255,8 +252,8 @@ export default function Page() {
                   <p>
                     Use slots starting with <code>@</code> (e.g.,{" "}
                     <code>@sidebar</code>) to render multiple pages in the same
-                    layout simultaneously. This enables independent error
-                    containment.
+                    layout simultaneously. This enables independent UI sections
+                    and <strong>Error Containment</strong>.
                   </p>
                   <CodeBlock
                     language="jsx"
@@ -275,64 +272,6 @@ export default function Layout({ children, sidebar }) {
                   </CodeBlock>
                 </div>
               </div>
-            </section>
-
-            <section id="navigation">
-              <h2>Navigation</h2>
-
-              <h3>
-                Using <code>&lt;Link&gt;</code>
-              </h3>
-              <p>
-                The primary way to navigate. It offers automatic prefetching and
-                optimized client-side transitions.
-              </p>
-              <CodeBlock
-                language="jsx"
-                containerClassName="w-full overflow-hidden rounded-lg"
-              >
-                {`"use client";
-import { Link } from "dinou";
-
-export default function Menu() {
-  return (
-    <nav>
-      {/* Standard navigation with prefetch */}
-      <Link href="/about">About Us</Link>
-
-      {/* Opt-in for fresh data (bypasses cache) */}
-      <Link href="/dashboard" fresh>Dashboard</Link>
-    </nav>
-  );
-}`}
-              </CodeBlock>
-
-              <h3>Programmatic Navigation</h3>
-              <p>
-                Use the <code>useRouter</code> hook inside Client Components.
-              </p>
-              <CodeBlock
-                language="jsx"
-                containerClassName="w-full overflow-hidden rounded-lg"
-              >
-                {`"use client";
-import { useRouter } from "dinou";
-
-export default function Controls() {
-  const router = useRouter();
-
-  return (
-    <>
-      <button onClick={() => router.push("/home")}>Push</button>
-      <button onClick={() => router.replace("/home")}>Replace</button>
-      <button onClick={() => router.back()}>Go Back</button>
-      
-      {/* Soft Reload: Refetches server data without a browser refresh */}
-      <button onClick={() => router.refresh()}>Refresh Data</button>
-    </>
-  );
-}`}
-              </CodeBlock>
             </section>
           </div>
         </div>

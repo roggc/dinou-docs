@@ -48,11 +48,11 @@ const navigation = [
         href: "/docs/getting-started",
         icon: Package,
       },
-      {
-        title: "About",
-        href: "/docs/about",
-        icon: Copyright,
-      },
+      // {
+      //   title: "About",
+      //   href: "/docs/about",
+      //   icon: Copyright,
+      // },
     ],
   },
   {
@@ -64,24 +64,20 @@ const navigation = [
         icon: Route,
       },
       {
-        title: "Page Functions",
-        href: "/docs/page-functions",
+        title: "Layouts etc",
+        href: "/docs/layouts",
         icon: FileText,
       },
+      {
+        title: "Navigation",
+        href: "/docs/navigation",
+        icon: Globe,
+      },
+
       {
         title: "Data Fetching",
         href: "/docs/data-fetching",
         icon: Database,
-      },
-      {
-        title: "Server Components",
-        href: "/docs/server-components",
-        icon: Server,
-      },
-      {
-        title: "Client Components",
-        href: "/docs/client-components",
-        icon: Atom,
       },
       {
         title: "Server Functions",
@@ -89,8 +85,18 @@ const navigation = [
         icon: Zap,
       },
       {
-        title: "Advanced",
-        href: "/docs/advanced",
+        title: "Advanced Patterns",
+        href: "/docs/pattern",
+        icon: Server,
+      },
+      {
+        title: "API Reference 1",
+        href: "/docs/api-reference-1",
+        icon: Atom,
+      },
+      {
+        title: "API Reference 2",
+        href: "/docs/api-reference-2",
         icon: DraftingCompass,
       },
     ],
@@ -99,55 +105,50 @@ const navigation = [
     title: "Features",
     items: [
       {
-        title: "Dynamic & Query Parameters",
-        href: "/docs/parameters",
+        title: "Favicons, etc",
+        href: "/docs/favicons-etc",
         icon: Code,
       },
       {
-        title: "Navigation",
-        href: "/docs/navigation",
-        icon: Globe,
-      },
-      {
-        title: "Styles & CSS",
-        href: "/docs/styles",
+        title: "Assets, etc",
+        href: "/docs/assets-etc",
         icon: Palette,
       },
-      {
-        title: "Assets",
-        href: "/docs/assets_",
-        icon: ImageIcon,
-      },
-      {
-        title: "Favicons",
-        href: "/docs/favicons",
-        icon: Star,
-      },
+      // {
+      //   title: "Assets",
+      //   href: "/docs/assets_",
+      //   icon: ImageIcon,
+      // },
+      // {
+      //   title: "Favicons",
+      //   href: "/docs/favicons",
+      //   icon: Star,
+      // },
     ],
   },
   {
-    title: "Configuration",
+    title: "Settings",
     items: [
       {
-        title: "Environment Variables",
-        href: "/docs/environment",
+        title: "Bundlers, etc",
+        href: "/docs/bundlers-etc",
         icon: Hexagon,
       },
-      {
-        title: "Import Aliases",
-        href: "/docs/import-aliases",
-        icon: AtSign,
-      },
-      {
-        title: "Ejecting",
-        href: "/docs/ejecting",
-        icon: Plug,
-      },
-      {
-        title: "Deployment",
-        href: "/docs/deployment",
-        icon: Rocket,
-      },
+      // {
+      //   title: "Import Aliases",
+      //   href: "/docs/import-aliases",
+      //   icon: AtSign,
+      // },
+      // {
+      //   title: "Ejecting",
+      //   href: "/docs/ejecting",
+      //   icon: Plug,
+      // },
+      // {
+      //   title: "Deployment",
+      //   href: "/docs/deployment",
+      //   icon: Rocket,
+      // },
     ],
   },
 ];
