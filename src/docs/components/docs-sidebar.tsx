@@ -166,7 +166,7 @@ export function DocsSidebar() {
 
   return (
     <Sidebar className="border-r fixed left-0 top-0 h-full z-30">
-      <SidebarContent className="scrollbar-thin">
+      <SidebarContent className="scrollbar-thin md:pt-14">
         {navigation.map((section) => (
           <SidebarGroup key={section.title}>
             <SidebarGroupLabel>{section.title}</SidebarGroupLabel>

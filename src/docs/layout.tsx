@@ -40,21 +40,21 @@ export default function Layout({
         <link rel="manifest" href="/site.webmanifest"></link>
         <link href="/styles.css" rel="stylesheet"></link>
       </head>
-      <body>
+      <body className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <SidebarProvider>
-            {/* AÑADE ESTE CONTENEDOR CON EL GRADIENTE */}
-            <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
-              <div className="sidebar-layout">
+          <SidebarProvider /*style={{ "--sidebar-width": "8rem" }}*/>
+            {/* REMUEVE EL CONTENEDOR CON GRADIENTE AQUÍ - SE MUEVE AL BODY */}
+            <div className="flex flex-col min-h-screen w-full">
+              <DocsHeader />
+              <div className="sidebar-layout w-full">
                 <DocsSidebar />
-                <div className="sidebar-content">
-                  <DocsHeader />
-                  <main className="flex-1">{children}</main>
+                <div className="sidebar-content w-full ml-0">
+                  <main className="flex-1 w-full">{children}</main>
                 </div>
               </div>
             </div>

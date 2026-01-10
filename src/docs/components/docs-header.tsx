@@ -16,13 +16,11 @@ import {
 export function DocsHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-14 items-center px-4">
-        <div className="flex items-center gap-2 mr-4">
+      {/* CAMBIA EL CONTENEDOR PRINCIPAL - QUITA px-4 Y USA UN CONTENEDOR FLEX MÁS AMPLIO */}
+      <div className="flex h-14 items-center w-full">
+        <div className="flex items-center gap-2 pl-4 md:pl-6">
           <SidebarTrigger className="md:hidden" />
           <div className="flex items-center space-x-2">
-            {/* <div className="flex h-6 w-6 items-center justify-center rounded bg-gradient-to-br from-blue-600 to-purple-600">
-              <Sparkles className="h-3 w-3 text-white" />
-            </div> */}
             <a href="/">
               <img src={dinou} alt="Dinou logo" className="h-6 w-6" />
             </a>
@@ -35,28 +33,7 @@ export function DocsHeader() {
           </div>
         </div>
 
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          {/* <nav className="hidden md:flex items-center space-x-6">
-            <a
-              href="/getting-started"
-              className="text-sm font-medium transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Getting Started
-            </a>
-            <a
-              href="/routing"
-              className="text-sm font-medium transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Routing
-            </a>
-            <a
-              href="/api-reference"
-              className="text-sm font-medium transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              API Reference
-            </a>
-          </nav> */}
-
+        <div className="flex flex-1 items-center justify-end pr-4 md:pr-6">
           <div className="flex items-center space-x-2">
             <Tooltip>
               <TooltipTrigger asChild>
