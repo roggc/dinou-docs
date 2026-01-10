@@ -32,6 +32,9 @@ import {
   Rocket,
   DraftingCompass,
   Package,
+  Boxes,
+  BookMarked,
+  Brain,
 } from "lucide-react";
 
 const navigation = [
@@ -48,11 +51,11 @@ const navigation = [
         href: "/docs/getting-started",
         icon: Package,
       },
-      // {
-      //   title: "About",
-      //   href: "/docs/about",
-      //   icon: Copyright,
-      // },
+      {
+        title: "About",
+        href: "/docs/about",
+        icon: Copyright,
+      },
     ],
   },
   {
@@ -64,7 +67,7 @@ const navigation = [
         icon: Route,
       },
       {
-        title: "Layouts etc",
+        title: "Layouts",
         href: "/docs/layouts",
         icon: FileText,
       },
@@ -73,7 +76,11 @@ const navigation = [
         href: "/docs/navigation",
         icon: Globe,
       },
-
+      {
+        title: "Page Functions",
+        href: "/docs/page-functions",
+        icon: DraftingCompass,
+      },
       {
         title: "Data Fetching",
         href: "/docs/data-fetching",
@@ -87,17 +94,17 @@ const navigation = [
       {
         title: "Advanced Patterns",
         href: "/docs/pattern",
-        icon: Server,
+        icon: Brain,
       },
       {
-        title: "API Reference 1",
-        href: "/docs/api-reference-1",
+        title: "API Reference",
+        href: "/docs/api-reference",
+        icon: BookMarked,
+      },
+      {
+        title: "Cheatsheet",
+        href: "/docs/cheatsheet",
         icon: Atom,
-      },
-      {
-        title: "API Reference 2",
-        href: "/docs/api-reference-2",
-        icon: DraftingCompass,
       },
     ],
   },
@@ -105,50 +112,50 @@ const navigation = [
     title: "Features",
     items: [
       {
-        title: "Favicons, etc",
-        href: "/docs/favicons-etc",
+        title: "Favicons",
+        href: "/docs/favicons",
         icon: Code,
       },
       {
-        title: "Assets, etc",
-        href: "/docs/assets-etc",
+        title: "Styles",
+        href: "/docs/styles",
         icon: Palette,
       },
-      // {
-      //   title: "Assets",
-      //   href: "/docs/assets_",
-      //   icon: ImageIcon,
-      // },
-      // {
-      //   title: "Favicons",
-      //   href: "/docs/favicons",
-      //   icon: Star,
-      // },
+      {
+        title: "Assets",
+        href: "/docs/assets",
+        icon: ImageIcon,
+      },
     ],
   },
   {
     title: "Settings",
     items: [
       {
-        title: "Bundlers, etc",
-        href: "/docs/bundlers-etc",
+        title: "Env Vars",
+        href: "/docs/env-vars",
         icon: Hexagon,
       },
-      // {
-      //   title: "Import Aliases",
-      //   href: "/docs/import-aliases",
-      //   icon: AtSign,
-      // },
-      // {
-      //   title: "Ejecting",
-      //   href: "/docs/ejecting",
-      //   icon: Plug,
-      // },
-      // {
-      //   title: "Deployment",
-      //   href: "/docs/deployment",
-      //   icon: Rocket,
-      // },
+      {
+        title: "Alias",
+        href: "/docs/alias",
+        icon: AtSign,
+      },
+      {
+        title: "Eject",
+        href: "/docs/eject",
+        icon: Plug,
+      },
+      {
+        title: "Bundlers",
+        href: "/docs/bundlers",
+        icon: Boxes,
+      },
+      {
+        title: "Deployment",
+        href: "/docs/deployment",
+        icon: Rocket,
+      },
     ],
   },
 ];

@@ -1,0 +1,557 @@
+"use client";
+
+import { TableOfContents } from "@/docs/components/table-of-contents";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/docs/components/ui/alert";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/docs/components/ui/card";
+import {
+  Settings,
+  FileCode,
+  FolderTree,
+  Layers,
+  RefreshCw,
+  Zap,
+  Cpu,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  ArrowRight,
+} from "lucide-react";
+import { CodeBlock } from "@/docs/components/code-block";
+
+const tocItems = [
+  {
+    id: "page-configuration",
+    title: "Page Configuration (`page_functions.ts`)",
+    level: 2,
+  },
+  {
+    id: "getprops",
+    title: "1. `getProps` (Static/Layout Data Injection)",
+    level: 3,
+  },
+  {
+    id: "getstaticpaths",
+    title: "2. `getStaticPaths` (Static Generation)",
+    level: 3,
+  },
+  { id: "return-formats", title: "Return Format", level: 4 },
+  { id: "simple-routes", title: "Simple Dynamic Routes", level: 4 },
+  { id: "catch-all-routes", title: "Catch-all Routes", level: 4 },
+  {
+    id: "route-propagation",
+    title: "Automatic Route Propagation (Recursion)",
+    level: 4,
+  },
+  {
+    id: "chain-of-responsibility",
+    title: "Nested Pages & The 'Chain of Responsibility'",
+    level: 4,
+  },
+  {
+    id: "nested-complex-routes",
+    title: "Nested & Complex Routes (Pass-through Segments)",
+    level: 4,
+  },
+  { id: "normalization-guarantee", title: "Normalization Guarantee", level: 4 },
+  { id: "revalidate", title: "3. `revalidate` (ISR)", level: 3 },
+  { id: "dynamic", title: "4. `dynamic` (Force SSR)", level: 3 },
+];
+
+export default function Page() {
+  return (
+    <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw] overflow-x-hidden">
+      <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
+        <div className="container max-w-4xl px-4 md:px-6 mx-auto">
+          {/* Header */}
+          <div className="mb-8 space-y-4">
+            <div className="flex items-center space-x-2">
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                Page Configuration
+              </h1>
+            </div>
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              Advanced control over rendering behavior, data fetching, and
+              static generation with `page_functions.ts`.
+            </p>
+          </div>
+
+          <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
+            <section id="page-configuration">
+              <h2>Page Configuration (`page_functions.ts`)</h2>
+              <p>
+                For advanced control over rendering behavior, data fetching, and
+                static generation, you can create a `page_functions.ts` (or
+                `.js`) file next to your `page.jsx`.
+              </p>
+            </section>
+
+            <section id="getprops">
+              <h3>1. `getProps` (Static/Layout Data Injection)</h3>
+              <p>
+                Use this function to fetch data based on the{" "}
+                <strong>route parameters</strong> and inject it into your Page
+                and Layout.
+              </p>
+
+              <Alert className="not-prose mt-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Design Note</AlertTitle>
+                <AlertDescription>
+                  `getProps` only receives `params`. To use request-specific
+                  data like `searchParams` or `cookies`, fetch data directly
+                  inside your Server Components using `Suspense` or Hooks to
+                  avoid blocking the initial HTML render.
+                </AlertDescription>
+              </Alert>
+
+              <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                <div className="flex items-center gap-2 font-semibold mb-2">
+                  <FileCode className="h-5 w-5 text-blue-500" />
+                  <span>Function Signature</span>
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                  <li>
+                    <strong>Arguments:</strong> `{"{ params }"}` (The dynamic
+                    route parameters)
+                  </li>
+                  <li>
+                    <strong>Returns:</strong> An object with `page` and `layout`
+                    keys containing the props
+                  </li>
+                </ul>
+              </div>
+
+              <CodeBlock
+                language="typescript"
+                containerClassName="w-full overflow-hidden rounded-lg mt-4"
+              >
+                {`// src/blog/[slug]/page_functions.ts
+
+export async function getProps({ params }) {
+  // 1. Fetch data based on the URL path (e.g., /blog/my-post)
+  const post = await db.getPost(params.slug);
+
+  // 2. Return data.
+  // 'page' props go to page.jsx
+  // 'layout' props go to layout.jsx (useful for setting document titles dynamically)
+  return {
+    page: { post },
+    layout: { title: post.title },
+  };
+}`}
+              </CodeBlock>
+            </section>
+
+            <section id="getstaticpaths">
+              <h3>2. `getStaticPaths` (Static Generation)</h3>
+              <p>
+                Defines which dynamic paths should be pre-rendered at server
+                start (SSG).
+              </p>
+              <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                <div className="flex items-center gap-2 font-semibold mb-2">
+                  <Zap className="h-5 w-5 text-amber-500" />
+                  <span>ISG (Incremental Static Generation)</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Paths not returned here will be generated on-demand when
+                  requested for the first time.
+                </p>
+              </div>
+
+              <section id="return-formats">
+                <h4>Return Format</h4>
+                <p>
+                  Dinou is flexible with the return format depending on the
+                  complexity of your route:
+                </p>
+                <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-muted text-muted-foreground font-medium">
+                      <tr>
+                        <th className="p-4">Route Type</th>
+                        <th className="p-4">Best Format</th>
+                        <th className="p-4">Example Return</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border bg-card">
+                      <tr>
+                        <td className="p-4 font-mono text-xs">
+                          <strong>Simple</strong> (`[id]`)
+                        </td>
+                        <td className="p-4 font-mono text-xs">
+                          Array&lt;string&gt;
+                        </td>
+                        <td className="p-4 font-mono text-xs">["1", "2"]</td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs">
+                          <strong>Catch-all</strong> (`[...slug]`)
+                        </td>
+                        <td className="p-4 font-mono text-xs">
+                          Array&lt;Array&lt;string&gt;&gt;
+                        </td>
+                        <td className="p-4 font-mono text-xs">
+                          [["a", "b"], ["c"]]
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs">
+                          <strong>Nested / Complex</strong>
+                        </td>
+                        <td className="p-4 font-mono text-xs">
+                          Array&lt;Object&gt;
+                        </td>
+                        <td className="p-4 font-mono text-xs">
+                          [{'{"id": "1", "category": "tech"}'}]
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section id="simple-routes">
+                <h4>Simple Dynamic Routes</h4>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`// src/blog/[id]/page_functions.ts
+export function getStaticPaths() {
+  return ["1", "2", "hello"];
+  // Generates: /blog/1, /blog/2, /blog/hello
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="catch-all-routes">
+                <h4>Catch-all Routes</h4>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`// src/docs/[...slug]/page_functions.ts
+export function getStaticPaths() {
+  return [
+    ["intro"], // /docs/intro
+    ["api", "v1", "auth"], // /docs/api/v1/auth
+  ];
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="route-propagation">
+                <h4>Automatic Route Propagation (Recursion)</h4>
+                <p>
+                  One of Dinou's most powerful features is that{" "}
+                  <strong>static parameters propagate downwards</strong>. If you
+                  define values for a segment, Dinou will automatically generate
+                  all static sub-pages nested within that segment.
+                </p>
+
+                <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                  <div className="flex items-center gap-2 font-semibold mb-2">
+                    <FolderTree className="h-5 w-5 text-green-500" />
+                    <span>Example Structure</span>
+                  </div>
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <div className="font-mono">
+                      - `src/blog/[slug]/page.tsx` (+ `page_functions.ts`)
+                    </div>
+                    <div className="font-mono">
+                      - `src/blog/[slug]/details/page.tsx` (Nested static page)
+                    </div>
+                    <p className="mt-2">
+                      If `getStaticPaths` in `blog/[slug]` returns `["post-a",
+                      "post-b"]`, Dinou generates <strong>4 pages</strong>:
+                    </p>
+                    <ol className="list-decimal pl-4 space-y-1">
+                      <li>`/blog/post-a`</li>
+                      <li>`/blog/post-a/details`</li>
+                      <li>`/blog/post-b`</li>
+                      <li>`/blog/post-b/details`</li>
+                    </ol>
+                  </div>
+                </div>
+              </section>
+
+              <section id="chain-of-responsibility">
+                <h4>Nested Pages & The "Chain of Responsibility"</h4>
+                <p>
+                  When nesting routes,{" "}
+                  <strong>dependency flows downwards</strong>. If an
+                  intermediate segment (whether static or dynamic) contains a
+                  `page.tsx`, it becomes a required step in the generation
+                  chain.
+                </p>
+                <p>
+                  If a parent page fails to define its own paths (e.g., returns
+                  an empty array), <strong>the generator stops there</strong>.
+                  It will never reach the child pages, regardless of whether the
+                  children have valid `getStaticPaths` defined.
+                </p>
+
+                <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                  <div className="flex items-center gap-2 font-semibold mb-2">
+                    <Layers className="h-5 w-5 text-blue-500" />
+                    <span>Scenario</span>
+                  </div>
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <div className="font-mono break-words">
+                      - `src/case3/[slug]/page.tsx` (Parent Page)
+                    </div>
+                    <div className="font-mono break-words">
+                      - `src/case3/[slug]/[id]/page.tsx` (Child Page)
+                    </div>
+                    <p>
+                      In this structure, `[id]` depends physically on `[slug]`
+                      existing first.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Grid con scroll horizontal en móvil */}
+                <div className="flex flex-col md:grid md:grid-cols-2 md:gap-6 not-prose my-6">
+                  {/* Primera tarjeta - Broken Chain */}
+                  <div className="w-full mb-6 md:mb-0">
+                    <Card className="border-red-500/20 bg-red-50/50 dark:bg-red-900/10 h-full">
+                      <CardHeader>
+                        <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-semibold">
+                          <XCircle className="h-5 w-5 flex-shrink-0" />
+                          <span className="break-words">❌ Broken Chain</span>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="text-sm">
+                        <p className="break-words">
+                          If `src/case3/[slug]/page_functions.ts` returns `[]`
+                          (no paths):
+                        </p>
+                        <ol className="list-decimal pl-4 mt-2 space-y-1 break-words">
+                          <li>Dinou tries to build `/case3/[slug]`.</li>
+                          <li>
+                            No paths are returned. No folders are created.
+                          </li>
+                          <li>
+                            <strong>Result:</strong> The build process never
+                            attempts to generate `[id]`.
+                          </li>
+                        </ol>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Segunda tarjeta - Functional Chain */}
+                  <div className="w-full">
+                    <Card className="border-green-500/20 bg-green-50/50 dark:bg-green-900/10 h-full">
+                      <CardHeader>
+                        <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
+                          <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+                          <span className="break-words">
+                            ✅ Functional Chain
+                          </span>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="text-sm">
+                        <p className="break-words">
+                          The parent must resolve its own level for the children
+                          to run:
+                        </p>
+                        <div className="mt-2 overflow-x-auto">
+                          <div className="min-w-[280px]">
+                            {" "}
+                            {/* Ancho mínimo para el código */}
+                            <CodeBlock
+                              language="typescript"
+                              containerClassName="w-full overflow-hidden rounded-lg text-xs"
+                              hideHeader
+                            >
+                              {`// src/case3/[slug]/page_functions.ts
+export function getStaticPaths() {
+  // 1. Defines the parent folders
+  return ["foo", "bar"];
+}
+
+// src/case3/[slug]/[id]/page_functions.ts
+export function getStaticPaths() {
+  // 2. Now runs inside /case3/foo/ and /case3/bar/
+  return ["100", "200"];
+}`}
+                            </CodeBlock>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+
+                <Alert className="not-prose">
+                  <ArrowRight className="h-4 w-4" />
+                  <AlertTitle>Rule of Thumb</AlertTitle>
+                  <AlertDescription className="break-words">
+                    Every `page.tsx` in the hierarchy is responsible for
+                    "opening the door" to its children.
+                  </AlertDescription>
+                </Alert>
+              </section>
+
+              <section id="nested-complex-routes">
+                <h4>Nested & Complex Routes (Pass-through Segments)</h4>
+                <p>
+                  When you have multiple dynamic segments in a path{" "}
+                  <strong>without intermediate pages</strong>, you must return
+                  an <strong>Object</strong> to map values to all parameter
+                  names involved.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`// Structure: src/shop/[category]/[...specs]/[[brand]]/page_functions.ts
+// (Assuming [category] and [...specs] do NOT have their own page.tsx)
+
+export function getStaticPaths() {
+  return [
+    {
+      category: "electronics",
+      specs: ["m3", "16gb"],
+      brand: "apple",
+    },
+    {
+      category: "clothing",
+      specs: ["cotton", "white"],
+      brand: undefined, // Valid: optional and at the end of the route
+    },
+  ];
+}`}
+                </CodeBlock>
+                <Alert className="not-prose mt-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Reminder: No-Gap Rule</AlertTitle>
+                  <AlertDescription>
+                    According to the <strong>No-Gap Rule</strong>, you can use
+                    `undefined` for an intermediate optional segment{" "}
+                    <strong>
+                      only if all subsequent segments are also `undefined`
+                    </strong>
+                    . You cannot leave a "gap" (an undefined segment followed by
+                    a defined one).
+                  </AlertDescription>
+                </Alert>
+              </section>
+
+              <section id="normalization-guarantee">
+                <h4>Normalization Guarantee</h4>
+                <p>
+                  Dinou ensures that `params` are consistent between SSG and
+                  SSR:
+                </p>
+                <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center gap-2 font-semibold">
+                        <Cpu className="h-5 w-5 text-blue-500" />
+                        <span>Catch-all Segments</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-sm">
+                      Will always be an `Array` (e.g., `undefined` becomes `[]`,
+                      `"val"` becomes `["val"]`).
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center gap-2 font-semibold">
+                        <Settings className="h-5 w-5 text-purple-500" />
+                        <span>Optional Single Segments</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-sm">
+                      Remain `undefined` if omitted.
+                    </CardContent>
+                  </Card>
+                </div>
+              </section>
+            </section>
+
+            <section id="revalidate">
+              <h3>3. `revalidate` (ISR)</h3>
+              <p>
+                Enables Incremental Static Regeneration. Defines the cache
+                lifetime of a static page in milliseconds.
+              </p>
+              <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                <div className="flex items-center gap-2 font-semibold mb-2">
+                  <RefreshCw className="h-5 w-5 text-amber-500" />
+                  <span>Return Values</span>
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                  <li>
+                    <strong>Returns:</strong> `number` (milliseconds)
+                  </li>
+                  <li>
+                    If it returns `0` (or is not defined), the page remains
+                    static indefinitely (unless rebuilt)
+                  </li>
+                </ul>
+              </div>
+              <CodeBlock
+                language="typescript"
+                containerClassName="w-full overflow-hidden rounded-lg mt-4"
+              >
+                {`// src/dashboard/page_functions.ts
+export function revalidate() {
+  return 60000; // Regenerate at most once every 60 seconds
+}`}
+              </CodeBlock>
+            </section>
+
+            <section id="dynamic">
+              <h3>4. `dynamic` (Force SSR)</h3>
+              <p>
+                Forces a page to be rendered dynamically (Server-Side Rendering)
+                on every request, bypassing static generation.
+              </p>
+              <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                <div className="flex items-center gap-2 font-semibold mb-2">
+                  <Zap className="h-5 w-5 text-purple-500" />
+                  <span>Function Signature</span>
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                  <li>
+                    <strong>Returns:</strong> `boolean`
+                  </li>
+                </ul>
+              </div>
+              <CodeBlock
+                language="typescript"
+                containerClassName="w-full overflow-hidden rounded-lg mt-4"
+              >
+                {`// src/profile/page_functions.ts
+export function dynamic() {
+  return true; // Always render on demand (SSR)
+}`}
+              </CodeBlock>
+            </section>
+          </div>
+        </div>
+      </main>
+
+      {/* Sidebar TOC - Hidden on Mobile */}
+      <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">
+        <div className="sticky top-20">
+          <TableOfContents items={tocItems} />
+        </div>
+      </aside>
+    </div>
+  );
+}

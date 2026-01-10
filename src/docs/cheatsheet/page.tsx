@@ -28,18 +28,18 @@ import {
 import { CodeBlock } from "@/docs/components/code-block";
 
 const tocItems = [
+  { id: "file-conventions", title: "File Conventions Cheatsheet", level: 2 },
+  { id: "route-components", title: "Route Components", level: 3 },
+  { id: "layout-flags", title: "Layout Control Flags (Empty Files)", level: 3 },
   {
     id: "page-config-cheatsheet",
-    title: "4. Page Configuration (page_functions.ts) Cheatsheet",
+    title: "Page Configuration (`page_functions.ts`) Cheatsheet",
     level: 2,
   },
   { id: "getstaticpaths-ref", title: "getStaticPaths()", level: 3 },
   { id: "getprops-ref", title: "getProps({ params })", level: 3 },
   { id: "revalidate-ref", title: "revalidate()", level: 3 },
   { id: "dynamic-ref", title: "dynamic()", level: 3 },
-  { id: "file-conventions", title: "5. File Conventions Cheatsheet", level: 2 },
-  { id: "route-components", title: "Route Components", level: 3 },
-  { id: "layout-flags", title: "Layout Control Flags (Empty Files)", level: 3 },
 ];
 
 export default function Page() {
@@ -51,170 +51,18 @@ export default function Page() {
           <div className="mb-8 space-y-4">
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                📚 API Reference: Configuration & Conventions
+                Cheatsheet: Conventions & Configuration
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Complete reference for page configuration functions and file
-              naming conventions in Dinou.
+              Quick reference for file naming conventions and page configuration
+              functions in Dinou.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
-            <section id="page-config-cheatsheet">
-              <h2>4. Page Configuration (`page_functions.ts`) Cheatsheet</h2>
-              <p>
-                Export these functions from{" "}
-                <code>page_functions.{`{ts,js}`}</code> to configure the
-                associated <code>page.tsx</code>.
-              </p>
-
-              <section id="getstaticpaths-ref">
-                <h3>
-                  <code>getStaticPaths()</code>
-                </h3>
-                <p>
-                  Defines paths for Static Site Generation (SSG). Paths not
-                  returned will be generated on-demand (ISG).
-                </p>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-                  {`export function getStaticPaths() {
-  // Simple dynamic route
-  return ["1", "2", "hello"];
-  
-  // Catch-all route
-  return [["intro"], ["api", "v1", "auth"]];
-  
-  // Complex nested route
-  return [
-    { category: "electronics", specs: ["m3", "16gb"], brand: "apple" },
-    { category: "clothing", specs: ["cotton", "white"], brand: undefined },
-  ];
-}`}
-                </CodeBlock>
-                <div className="border rounded-lg p-4 bg-card not-prose mt-4">
-                  <div className="flex items-center gap-2 font-semibold mb-2">
-                    <Layers className="h-5 w-5 text-blue-500" />
-                    <span>Automatic Route Propagation</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Static parameters propagate downwards. If{" "}
-                    <code>blog/[slug]/page_functions.ts</code> returns
-                    <code>["post-a", "post-b"]</code>, Dinou automatically
-                    generates both
-                    <code>/blog/post-a</code> and{" "}
-                    <code>/blog/post-a/details</code> (if exists).
-                  </p>
-                </div>
-              </section>
-
-              <section id="getprops-ref">
-                <h3>
-                  <code>getProps({`{ params }`})</code>
-                </h3>
-                <p>
-                  <strong>Async</strong> function to fetch data on the server
-                  and pass props to Page and Root Layout.
-                </p>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-                  {`export async function getProps({ params }) {
-  const data = await db.getItem(params.id);
-  return {
-    page: { item: data },        // Props for page.tsx
-    layout: { title: data.title }, // Props for Root Layout
-  };
-}`}
-                </CodeBlock>
-                <Alert className="not-prose mt-4">
-                  <FileCode className="h-4 w-4" />
-                  <AlertTitle>Single Source of Truth</AlertTitle>
-                  <AlertDescription>
-                    Use <code>getProps</code> for data that depends only on
-                    route parameters. For request-specific data (cookies, search
-                    params), fetch directly in Server Components with Suspense.
-                  </AlertDescription>
-                </Alert>
-              </section>
-
-              <section id="revalidate-ref">
-                <h3>
-                  <code>revalidate()</code>
-                </h3>
-                <p>
-                  Sets the Incremental Static Regeneration (ISR) time in
-                  <strong>milliseconds</strong>.
-                </p>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-                  {`export function revalidate() {
-  return 60000; // Regenerate every 60 seconds
-}`}
-                </CodeBlock>
-                <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                  <Card className="border-green-500/20 bg-green-50/50 dark:bg-green-900/10">
-                    <CardHeader>
-                      <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
-                        <CheckCircle2 className="h-5 w-5" />
-                        <span>Value: 60000</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      Page regenerates at most once every 60 seconds
-                    </CardContent>
-                  </Card>
-                  <Card className="border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10">
-                    <CardHeader>
-                      <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
-                        <CheckCircle2 className="h-5 w-5" />
-                        <span>Value: 0</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      No revalidation (permanently static unless rebuilt)
-                    </CardContent>
-                  </Card>
-                </div>
-              </section>
-
-              <section id="dynamic-ref">
-                <h3>
-                  <code>dynamic()</code>
-                </h3>
-                <p>
-                  Forces a page to be Server-Side Rendered on every request,
-                  bypassing static generation.
-                </p>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-                  {`export function dynamic() {
-  return true; // Always SSR
-}`}
-                </CodeBlock>
-                <Alert className="not-prose mt-4">
-                  <Zap className="h-4 w-4" />
-                  <AlertTitle>Hybrid by Default</AlertTitle>
-                  <AlertDescription>
-                    Dinou is static by default. Only use <code>dynamic()</code>{" "}
-                    when you need explicit SSR behavior. The framework
-                    automatically switches to dynamic when request-specific APIs
-                    are used.
-                  </AlertDescription>
-                </Alert>
-              </section>
-            </section>
-
             <section id="file-conventions">
-              <h2>5. File Conventions Cheatsheet</h2>
+              <h2>File Conventions Cheatsheet</h2>
               <p>
                 Dinou recognizes specific filenames to build the routing
                 hierarchy and control layout behavior.
@@ -384,6 +232,158 @@ export default function Page() {
                     layout systems (e.g., marketing site vs. admin dashboard vs.
                     documentation). Each can have its own navigation, styles,
                     and state management.
+                  </AlertDescription>
+                </Alert>
+              </section>
+            </section>
+
+            <section id="page-config-cheatsheet">
+              <h2>Page Configuration (`page_functions.ts`) Cheatsheet</h2>
+              <p>
+                Export these functions from{" "}
+                <code>page_functions.{`{ts,js}`}</code> to configure the
+                associated <code>page.tsx</code>.
+              </p>
+
+              <section id="getstaticpaths-ref">
+                <h3>
+                  <code>getStaticPaths()</code>
+                </h3>
+                <p>
+                  Defines paths for Static Site Generation (SSG). Paths not
+                  returned will be generated on-demand (ISG).
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`export function getStaticPaths() {
+  // Simple dynamic route
+  return ["1", "2", "hello"];
+  
+  // Catch-all route
+  return [["intro"], ["api", "v1", "auth"]];
+  
+  // Complex nested route
+  return [
+    { category: "electronics", specs: ["m3", "16gb"], brand: "apple" },
+    { category: "clothing", specs: ["cotton", "white"], brand: undefined },
+  ];
+}`}
+                </CodeBlock>
+                <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                  <div className="flex items-center gap-2 font-semibold mb-2">
+                    <Layers className="h-5 w-5 text-blue-500" />
+                    <span>Automatic Route Propagation</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Static parameters propagate downwards. If{" "}
+                    <code>blog/[slug]/page_functions.ts</code> returns
+                    <code>["post-a", "post-b"]</code>, Dinou automatically
+                    generates both
+                    <code>/blog/post-a</code> and{" "}
+                    <code>/blog/post-a/details</code> (if exists).
+                  </p>
+                </div>
+              </section>
+
+              <section id="getprops-ref">
+                <h3>
+                  <code>getProps({`{ params }`})</code>
+                </h3>
+                <p>
+                  <strong>Async</strong> function to fetch data on the server
+                  and pass props to Page and Root Layout.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`export async function getProps({ params }) {
+  const data = await db.getItem(params.id);
+  return {
+    page: { item: data },        // Props for page.tsx
+    layout: { title: data.title }, // Props for Root Layout
+  };
+}`}
+                </CodeBlock>
+                <Alert className="not-prose mt-4">
+                  <FileCode className="h-4 w-4" />
+                  <AlertTitle>Single Source of Truth</AlertTitle>
+                  <AlertDescription>
+                    Use <code>getProps</code> for data that depends only on
+                    route parameters. For request-specific data (cookies, search
+                    params), fetch directly in Server Components with Suspense.
+                  </AlertDescription>
+                </Alert>
+              </section>
+
+              <section id="revalidate-ref">
+                <h3>
+                  <code>revalidate()</code>
+                </h3>
+                <p>
+                  Sets the Incremental Static Regeneration (ISR) time in
+                  <strong>milliseconds</strong>.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`export function revalidate() {
+  return 60000; // Regenerate every 60 seconds
+}`}
+                </CodeBlock>
+                <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
+                  <Card className="border-green-500/20 bg-green-50/50 dark:bg-green-900/10">
+                    <CardHeader>
+                      <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
+                        <CheckCircle2 className="h-5 w-5" />
+                        <span>Value: 60000</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-sm">
+                      Page regenerates at most once every 60 seconds
+                    </CardContent>
+                  </Card>
+                  <Card className="border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10">
+                    <CardHeader>
+                      <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
+                        <CheckCircle2 className="h-5 w-5" />
+                        <span>Value: 0</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-sm">
+                      No revalidation (permanently static unless rebuilt)
+                    </CardContent>
+                  </Card>
+                </div>
+              </section>
+
+              <section id="dynamic-ref">
+                <h3>
+                  <code>dynamic()</code>
+                </h3>
+                <p>
+                  Forces a page to be Server-Side Rendered on every request,
+                  bypassing static generation.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`export function dynamic() {
+  return true; // Always SSR
+}`}
+                </CodeBlock>
+                <Alert className="not-prose mt-4">
+                  <Zap className="h-4 w-4" />
+                  <AlertTitle>Hybrid by Default</AlertTitle>
+                  <AlertDescription>
+                    Dinou is static by default. Only use <code>dynamic()</code>{" "}
+                    when you need explicit SSR behavior. The framework
+                    automatically switches to dynamic when request-specific APIs
+                    are used.
                   </AlertDescription>
                 </Alert>
               </section>
