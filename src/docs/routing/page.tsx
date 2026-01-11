@@ -94,7 +94,9 @@ export default function Page() {
                       <th className="p-4">Pattern</th>
                       <th className="p-4">File Path</th>
                       <th className="p-4">URL Example</th>
-                      <th className="p-4">Params</th>
+                      <th className="p-4">
+                        Params (<code>params</code>)
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border bg-card">
@@ -153,10 +155,11 @@ export default function Page() {
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Note</AlertTitle>
                 <AlertDescription>
-                  Route parameters are passed as the <code>params</code> prop.
-                  Query parameters (e.g., <code>?q=hello</code>) are{" "}
-                  <strong>NOT</strong> passed as props; use the{" "}
-                  <code>useSearchParams()</code> hook instead.
+                  Route parameters are passed as the <code>params</code> prop to{" "}
+                  <code>page</code>, <code>layout</code>, <code>error</code>,
+                  and <code>not_found</code> pages. Query parameters (e.g.,{" "}
+                  <code>?q=hello</code>) are <strong>NOT</strong> passed as
+                  props; use the <code>useSearchParams()</code> hook instead.
                 </AlertDescription>
               </Alert>
             </section>
