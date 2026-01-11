@@ -147,9 +147,8 @@ export async function getProps({ params }) {
                       <code>getProps</code> only receives <code>params</code>.
                       For request-specific data like <code>searchParams</code>{" "}
                       or <code>cookies</code>, fetch data directly inside your
-                      Server Components using{" "}
-                      <code>Suspense with Server Functions</code> to avoid
-                      blocking the initial HTML render.
+                      components using <code>Suspense</code> with Server
+                      Functions to avoid blocking the initial HTML render.
                     </p>
                   </AlertDescription>
                 </Alert>

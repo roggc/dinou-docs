@@ -72,28 +72,17 @@ export default function Page() {
           <div className="mb-8 space-y-4">
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Page Configuration
+                Page Functions (<code>page_functions.ts</code>)
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Advanced control over rendering behavior, data fetching, and
-              static generation with <code>page_functions.ts</code>.
+              For advanced control over rendering behavior, data fetching, and
+              static generation, you can create a <code>page_functions.ts</code>{" "}
+              (or <code>.js</code>) file next to your <code>page.tsx</code>.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
-            <section id="page-configuration">
-              <h2>
-                Page Configuration (<code>page_functions.ts</code>)
-              </h2>
-              <p>
-                For advanced control over rendering behavior, data fetching, and
-                static generation, you can create a{" "}
-                <code>page_functions.ts</code> (or <code>.js</code>) file next
-                to your <code>page.jsx</code>.
-              </p>
-            </section>
-
             <section id="getprops">
               <h3>
                 1. <code>getProps</code> (Static/Layout Data Injection)
@@ -101,7 +90,7 @@ export default function Page() {
               <p>
                 Use this function to fetch data based on the{" "}
                 <strong>route parameters</strong> and inject it into your Page
-                and Layout.
+                and Root Layout.
               </p>
 
               <Alert className="not-prose mt-4">
@@ -110,9 +99,9 @@ export default function Page() {
                 <AlertDescription>
                   <code>getProps</code> only receives <code>params</code>. To
                   use request-specific data like <code>searchParams</code> or{" "}
-                  <code>cookies</code>, fetch data directly inside your Server
-                  Components using <code>Suspense</code> or Hooks to avoid
-                  blocking the initial HTML render.
+                  <code>cookies</code>, fetch data directly inside your
+                  components using <code>Suspense</code> and Server Functions to
+                  avoid blocking the initial HTML render.
                 </AlertDescription>
               </Alert>
 
@@ -145,7 +134,7 @@ export async function getProps({ params }) {
 
   // 2. Return data.
   // 'page' props go to page.jsx
-  // 'layout' props go to layout.jsx (useful for setting document titles dynamically)
+  // 'layout' props go to layout.jsx (Root Layout)
   return {
     page: { post },
     layout: { title: post.title },

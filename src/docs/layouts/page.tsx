@@ -52,13 +52,12 @@ export default function Page() {
           <div className="mb-8 space-y-4">
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Layouts & Hierarchical Rendering
+                Layouts, Error, and Not Found Pages
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
               Dinou uses a nested routing system. Layouts, error pages, and not
-              found pages cascade down the directory hierarchy, persisting
-              across navigations.
+              found pages cascade down the directory hierarchy.
             </p>
           </div>
 
@@ -97,7 +96,8 @@ export default async function Layout({ children, params, sidebar }) {
               <p className="mt-4">
                 Layouts are nested by default. For example, a page at{" "}
                 <code>src/dashboard/settings/page.tsx</code> would be wrapped by
-                the root layout and the dashboard layout.
+                the root layout (<code>src/layout.tsx</code>) if exists and the
+                dashboard layout (<code>src/dashboard/layout.tsx</code>).
               </p>
               <Alert className="not-prose mt-4">
                 <Info className="h-4 w-4" />
@@ -126,9 +126,10 @@ export default async function Layout({ children, params, sidebar }) {
                 language="jsx"
                 containerClassName="w-full overflow-hidden rounded-lg"
               >
-                {`"use client"; // Optional: Can be Server Component too
+                {`// src/some/route/[slug]/error.tsx
+"use client"; // Optional: Can be Server Component too
 
-export default function ErrorPage({ error, params }) {
+export default function Page({ error, params }) {
   return (
     <div>
       <h2>Something went wrong in {params.slug}!</h2>
@@ -229,7 +230,7 @@ export default function ErrorPage({ error, params }) {
                   </tbody>
                 </table>
               </div>
-              <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
+              <div className="grid gap-6 md:grid-cols-1 not-prose my-6">
                 <Card className="border-green-500/20 bg-green-50/50 dark:bg-green-900/10">
                   <CardHeader>
                     <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
@@ -242,19 +243,8 @@ export default function ErrorPage({ error, params }) {
                     <br />
                     src/marketing/reset_layout (empty file)
                     <br />
-                    Result: Ignores global root layout.
-                  </CardContent>
-                </Card>
-                <Card className="border-red-500/20 bg-red-50/50 dark:bg-red-900/10">
-                  <CardHeader>
-                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-semibold">
-                      <XCircle className="h-5 w-5" />
-                      <span>Use Cases</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-sm">
-                    Perfect for separating marketing pages from app pages
-                    without shared layouts.
+                    Result: Ignores global root layout (
+                    <code>src/layout.tsx</code>).
                   </CardContent>
                 </Card>
               </div>

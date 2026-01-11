@@ -37,7 +37,7 @@ export default function Page() {
           <div className="mb-8 space-y-4">
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Server Functions & Smart Suspense
+                Server Functions
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
@@ -49,7 +49,9 @@ export default function Page() {
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <section id="server-functions">
-              <h2>Server Functions (`"use server"`)</h2>
+              <h2>
+                Server Functions (<code>"use server"</code>)
+              </h2>
               <p>
                 Define functions with the <code>"use server"</code> directive to
                 execute server-side logic directly from your components. Unlike

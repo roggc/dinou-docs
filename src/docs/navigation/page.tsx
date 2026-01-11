@@ -82,8 +82,7 @@ export default function NavBar() {
                   </div>
                   <p className="text-sm text-muted-foreground">
                     By default, Dinou prefetches the code and data for the
-                    destination route when the user hovers over the link (or
-                    when it enters the viewport).
+                    destination route when the user hovers over the link.
                   </p>
                 </div>
                 <div className="border rounded-lg p-4 bg-card">
@@ -115,9 +114,8 @@ export default function NavBar() {
             <section id="programmatic-navigation">
               <h2>Programmatic Navigation</h2>
               <p>
-                To navigate imperatively (e.g., after submitting a form), use
-                the <code>useRouter</code> hook inside{" "}
-                <strong>Client Components</strong>.
+                To navigate imperatively, use the <code>useRouter</code> hook
+                inside <strong>Client Components</strong>.
               </p>
 
               <CodeBlock
@@ -189,9 +187,9 @@ export default function LoginButton() {
                       </td>
                       <td className="p-4">
                         <strong>Soft Reload:</strong> Re-fetches the current
-                        route's data from the server and re-renders Server
-                        Components without losing client-side state (like input
-                        values or scroll position).
+                        route's data from the server and re-renders the page
+                        without losing client-side state (like input values or
+                        scroll position).
                       </td>
                     </tr>
                   </tbody>
