@@ -27,7 +27,8 @@ const tocItems = [
 
 export default function Page() {
   return (
-    <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw] overflow-x-hidden">
+    /* CAMBIO AQUÍ: Eliminado 'overflow-x-hidden' para arreglar el sticky del TOC */
+    <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
       <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
