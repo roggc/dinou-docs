@@ -98,6 +98,17 @@ export async function getPost(postId) {
                   </CardContent>
                 </Card>
               </div>
+              <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                <div className="flex items-center gap-2 font-semibold mb-2">
+                  <Server className="h-5 w-5 text-orange-500" />
+                  <span>Server-Side Execution Guarantee</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Server Functions always execute on the server, even when
+                  called from Client Components. This keeps sensitive logic and
+                  database credentials secure.
+                </p>
+              </div>
             </section>
           </div>
         </div>
