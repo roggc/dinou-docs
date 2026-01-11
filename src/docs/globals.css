@@ -39,6 +39,10 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-accent: oklch(
+    0.95 0 0 / 0.5
+  ); /* Sutil gris claro semi-transparente para active/hover */
+  --sidebar-accent-foreground: oklch(0.145 0 0); /* Mantén el foreground */
 }
 
 .dark {
@@ -75,6 +79,10 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+  --sidebar-accent: oklch(
+    0.3 0 0 / 0.5
+  ); /* Sutil gris oscuro semi-transparente para dark mode */
+  --sidebar-accent-foreground: oklch(0.985 0 0);
 }
 
 @theme inline {

@@ -1,6 +1,5 @@
 "use client";
 
-// import { usePathname } from "@/docs/hooks/use-pathname";
 import { usePathname, Link } from "dinou";
 import {
   Sidebar,
@@ -83,14 +82,14 @@ const navigation = [
         icon: DraftingCompass,
       },
       {
-        title: "Data Fetching",
-        href: "/docs/data-fetching",
-        icon: Database,
-      },
-      {
         title: "Server Functions",
         href: "/docs/server-functions",
         icon: Zap,
+      },
+      {
+        title: "Data Fetching",
+        href: "/docs/data-fetching",
+        icon: Database,
       },
       {
         title: "Advanced Patterns",
