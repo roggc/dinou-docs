@@ -21,6 +21,9 @@ import {
   CheckCircle2,
   XCircle,
   FolderTree,
+  ShieldAlert,
+  Ghost,
+  Info,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -157,9 +160,9 @@ export default function Page() {
                 <AlertDescription>
                   Route parameters are passed as the <code>params</code> prop to{" "}
                   <code>page</code>, <code>layout</code>, <code>error</code>,
-                  and <code>not_found</code> pages. Query parameters (e.g.,{" "}
-                  <code>?q=hello</code>) are <strong>NOT</strong> passed as
-                  props; use the <code>useSearchParams()</code> hook instead.
+                  <code>not_found</code>, and slot pages. Query parameters
+                  (e.g., <code>?q=hello</code>) are <strong>NOT</strong> passed
+                  as props; use the <code>useSearchParams()</code> hook instead.
                 </AlertDescription>
               </Alert>
             </section>
@@ -224,18 +227,19 @@ export default function Page() {
             <section id="advanced-routing">
               <h2>Advanced Routing</h2>
 
-              <div className="space-y-6">
+              <div className="space-y-10">
+                {/* ROUTE GROUPS */}
                 <div>
                   <h3 className="flex items-center gap-2">
                     <Layers className="h-5 w-5" />
-                    Route Groups
+                    Route Groups <code>(folder)</code>
                   </h3>
+
                   <p>
-                    Wrap a folder name in parentheses <code>(folder)</code> to
-                    omit it from the URL. This allows you to organize your code
-                    without affecting the public path.
+                    Folders wrapped in parentheses are <strong>omitted</strong>{" "}
+                    from the URL path.
                   </p>
-                  <ul className="list-none pl-0 space-y-2 font-mono text-sm bg-muted p-4 rounded-lg">
+                  <ul className="list-none space-y-2 font-mono text-sm bg-muted p-4 rounded-lg ml-0!">
                     <li>
                       src/(auth)/login/page.jsx &rarr;{" "}
                       <span className="font-bold">/login</span>
@@ -244,35 +248,116 @@ export default function Page() {
                       src/(marketing)/about/page.jsx &rarr;{" "}
                       <span className="font-bold">/about</span>
                     </li>
+                    <li>
+                      src/(marketing)/(nested)/about/page.jsx &rarr;{" "}
+                      <span className="font-bold">/about</span>
+                    </li>
                   </ul>
+                  <p className="mt-4">
+                    <strong>Why use them?</strong>
+                    <br />
+                    Route Groups allow you to keep your project structure
+                    logical (e.g., grouping all authentication-related routes
+                    together) without affecting the public URL structure.
+                  </p>
                 </div>
 
+                {/* PARALLEL ROUTES */}
                 <div>
                   <h3 className="flex items-center gap-2">
                     <Split className="h-5 w-5" />
-                    Parallel Routes
+                    Parallel Routes <code>@slot</code>
                   </h3>
                   <p>
-                    Use slots starting with <code>@</code> (e.g.,{" "}
-                    <code>@sidebar</code>) to render multiple pages in the same
-                    layout simultaneously. This enables independent UI sections
-                    and <strong>Error Containment</strong>.
+                    You can define slots (e.g., <code>@sidebar</code>,{" "}
+                    <code>@header</code>) to render multiple pages in the same
+                    layout simultaneously.
                   </p>
-                  <CodeBlock
-                    language="jsx"
-                    containerClassName="w-full overflow-hidden rounded-lg"
-                  >
-                    {`// src/dashboard/layout.jsx
-export default function Layout({ children, sidebar }) {
-  // 'sidebar' comes from src/dashboard/@sidebar/page.jsx
-  return (
-    <div className="grid">
-      <aside>{sidebar}</aside>
-      <main>{children}</main>
-    </div>
-  );
-}`}
-                  </CodeBlock>
+
+                  <div className="grid md:grid-cols-2 gap-4 my-4 not-prose">
+                    <div className="bg-card border rounded-lg p-3 text-sm">
+                      <div className="font-semibold mb-1">File Structure</div>
+                      <ul className="space-y-1 text-muted-foreground font-mono text-xs">
+                        <li>src/dashboard/@sidebar/page.jsx</li>
+                        <li>src/dashboard/(group-a)/@bottom/page.jsx</li>
+                        <li>src/dashboard/layout.jsx</li>
+                      </ul>
+                    </div>
+                    <div className="bg-card border rounded-lg p-3 text-sm">
+                      <div className="font-semibold mb-1">Layout Props</div>
+                      <p className="text-muted-foreground text-xs">
+                        The <code>layout.jsx</code> receives the slots as props
+                        alongside children:
+                      </p>
+                      <code className="text-xs bg-muted p-1 rounded mt-1 block">
+                        {"function Layout({ children, sidebar, bottom })"}
+                      </code>
+                    </div>
+                  </div>
+
+                  <Alert className="not-prose my-4">
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Requirement</AlertTitle>
+                    <AlertDescription>
+                      Slots must be located in the{" "}
+                      <strong>same logical folder</strong> as the layout they
+                      serve.
+                    </AlertDescription>
+                  </Alert>
+
+                  <h4 className="mt-6 mb-2">Why use them?</h4>
+                  <p>
+                    Parallel routes allow independent UI sections and,
+                    crucially, <strong>Error Containment</strong>. If one
+                    section fails, it doesn't have to break the entire page.
+                  </p>
+
+                  <h4 className="mt-6 mb-4">Error Containment Behavior</h4>
+                  <div className="grid gap-4 md:grid-cols-3 not-prose">
+                    {/* Scenario 1 */}
+                    <Card className="border-l-4 border-l-blue-500">
+                      <CardHeader className="p-4 pb-2">
+                        <div className="flex items-center gap-2 font-bold text-sm">
+                          <ShieldAlert className="h-4 w-4 text-blue-500" />
+                          Server Component with error.tsx
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-2 text-xs text-muted-foreground">
+                        If the slot fails, only that{" "}
+                        <strong>specific slot</strong> renders its error UI. The
+                        rest of the page remains interactive.
+                      </CardContent>
+                    </Card>
+
+                    {/* Scenario 2 */}
+                    <Card className="border-l-4 border-l-orange-500">
+                      <CardHeader className="p-4 pb-2">
+                        <div className="flex items-center gap-2 font-bold text-sm">
+                          <Ghost className="h-4 w-4 text-orange-500" />
+                          Server Component w/o error.tsx
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-2 text-xs text-muted-foreground">
+                        If the slot fails and has no error page, it safely
+                        renders <strong>null</strong>. The slot disappears, but
+                        the page works.
+                      </CardContent>
+                    </Card>
+
+                    {/* Scenario 3 */}
+                    <Card className="border-l-4 border-l-red-500">
+                      <CardHeader className="p-4 pb-2">
+                        <div className="flex items-center gap-2 font-bold text-sm">
+                          <XCircle className="h-4 w-4 text-red-500" />
+                          Client Component
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-2 text-xs text-muted-foreground">
+                        Without an explicit React Error Boundary, an unhandled
+                        error here will <strong>crash the entire page</strong>.
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
               </div>
             </section>
