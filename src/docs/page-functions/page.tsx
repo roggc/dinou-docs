@@ -6,14 +6,8 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/docs/components/ui/alert";
+import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/docs/components/ui/card";
-import {
-  Settings,
   FileCode,
   FolderTree,
   Layers,
@@ -24,6 +18,8 @@ import {
   CheckCircle2,
   XCircle,
   ArrowRight,
+  Settings,
+  Database,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -62,6 +58,7 @@ const tocItems = [
     level: 4,
   },
   { id: "normalization-guarantee", title: "Normalization Guarantee", level: 4 },
+  { id: "async-support", title: "Async Support", level: 4 },
   { id: "revalidate", title: "3. `revalidate` (ISR)", level: 3 },
   { id: "dynamic", title: "4. `dynamic` (Force SSR)", level: 3 },
 ];
@@ -336,6 +333,7 @@ export function getStaticPaths() {
                           If `src/case3/[slug]/page_functions.ts` returns `[]`
                           (no paths):
                         </p>
+
                         <ol className="list-decimal pl-4 mt-2 space-y-1 break-words">
                           <li>Dinou tries to build `/case3/[slug]`.</li>
                           <li>
@@ -366,6 +364,7 @@ export function getStaticPaths() {
                           The parent must resolve its own level for the children
                           to run:
                         </p>
+
                         <div className="mt-2 overflow-x-auto">
                           <div className="min-w-[280px]">
                             {" "}
@@ -480,6 +479,41 @@ export function getStaticPaths() {
                     </CardContent>
                   </Card>
                 </div>
+              </section>
+
+              <section id="async-support">
+                <h4>Async Support</h4>
+                <p>
+                  <code>getStaticPaths</code> can be an <strong>async</strong>{" "}
+                  function. This allows you to fetch data from a database or API
+                  during the build process to determine which paths to render.
+                </p>
+                <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                  <div className="flex items-center gap-2 font-semibold mb-2">
+                    <Database className="h-5 w-5 text-indigo-500" />
+                    <span>Database Integration</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Perfect for generating product pages, blog posts, or
+                    categories based on your CMS content.
+                  </p>
+                </div>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg mt-4"
+                >
+                  {`// src/products/[id]/page_functions.ts
+
+export async function getStaticPaths() {
+  // Only generate the top 10 products at build time
+  const topProducts = await db.getTopProducts(10);
+  
+  return topProducts.map(p => p.id);
+  
+  // Any ID not in this list will be generated 
+  // on-demand when a user visits /products/999
+}`}
+                </CodeBlock>
               </section>
             </section>
 
