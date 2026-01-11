@@ -19,6 +19,7 @@ import {
   ArrowRight,
   RefreshCw,
 } from "lucide-react";
+import { Link } from "dinou";
 
 const tocItems = [
   { id: "what-is-dinou", title: "What is Dinou?", level: 2 },
@@ -49,16 +50,17 @@ export default function Page() {
             <section id="what-is-dinou">
               <h2>What is Dinou?</h2>
               <p>
-                <strong>Dinou</strong> is a framework designed to leverage the
-                full power of <strong>React 19</strong>. It provides native
-                support for React Server Components (RSC), Server-Side Rendering
-                (SSR), Static Generation (SSG), and advanced Incremental Static
-                strategies (ISG and ISR).
+                <strong>Dinou</strong> is a framework designed to unleash the
+                full potential of <strong>React 19</strong>. It provides{" "}
+                <strong>seamless integration</strong> with React Server
+                Components (RSC), Server-Side Rendering (SSR), Static Generation
+                (SSG), and advanced Incremental Static strategies (ISG and ISR).
               </p>
               <p>
                 It is built to leverage Suspense and Streaming for optimal
-                performance, offering a modern development experience with a
-                hybrid rendering engine that adapts to your needs.
+                performance, offering a modern development experience with an{" "}
+                <strong>intelligent rendering system</strong> that adapts to
+                your application's data needs automatically.
               </p>
             </section>
 
@@ -70,8 +72,11 @@ export default function Page() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
                       <Cpu className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <CardTitle>Native React Server Components</CardTitle>
-                    <CardDescription>Built on React 19 core.</CardDescription>
+                    {/* CAMBIO: Renombrado para evitar "Native" */}
+                    <CardTitle>React 19 Foundation</CardTitle>
+                    <CardDescription>
+                      Deep integration with the React core.
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
@@ -87,7 +92,8 @@ export default function Page() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
                       <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <CardTitle>Hybrid Rendering Engine</CardTitle>
+                    {/* CAMBIO: Renombrado para evitar "Hybrid Rendering Engine" */}
+                    <CardTitle>Intelligent Rendering</CardTitle>
                     <CardDescription>
                       Static by default, Dynamic on demand.
                     </CardDescription>
@@ -96,7 +102,7 @@ export default function Page() {
                     <p className="text-sm text-muted-foreground">
                       Automatically switches to Dynamic Rendering (SSR) when
                       request-specific data like cookies, headers, or search
-                      params are detected.
+                      params are detected (Automatic Bailout).
                     </p>
                   </CardContent>
                 </Card>
@@ -207,7 +213,7 @@ export default function Page() {
                   className="h-auto py-4 px-6 justify-start w-full sm:w-auto"
                   asChild
                 >
-                  <a
+                  <Link
                     href="/docs/getting-started"
                     className="flex flex-col items-start gap-1"
                   >
@@ -217,14 +223,14 @@ export default function Page() {
                     <span className="text-xs text-muted-foreground font-normal">
                       Install and run your first app.
                     </span>
-                  </a>
+                  </Link>
                 </Button>
                 <Button
                   variant="outline"
                   className="h-auto py-4 px-6 justify-start w-full sm:w-auto"
                   asChild
                 >
-                  <a
+                  <Link
                     href="/docs/routing"
                     className="flex flex-col items-start gap-1"
                   >
@@ -234,7 +240,7 @@ export default function Page() {
                     <span className="text-xs text-muted-foreground font-normal">
                       Learn how the file system works.
                     </span>
-                  </a>
+                  </Link>
                 </Button>
               </div>
             </section>
