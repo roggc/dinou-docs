@@ -6,23 +6,18 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/docs/components/ui/alert";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/docs/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
 import {
   Scale,
   GitBranch,
   User,
   Heart,
   Github,
-  FileText,
   Package,
   Calendar,
+  ExternalLink,
+  FileText,
 } from "lucide-react";
-import { CodeBlock } from "@/docs/components/code-block";
 
 const tocItems = [
   { id: "license", title: "📄 License", level: 2 },
@@ -71,32 +66,30 @@ export default function Page() {
                 </ul>
               </div>
 
-              <CodeBlock
-                language="text"
-                containerClassName="w-full overflow-hidden rounded-lg mt-4"
-              >
-                {`MIT License
-
-Copyright (c) 2024 @roggc
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.`}
-              </CodeBlock>
+              {/* Nueva Card para la Licencia */}
+              <div className="not-prose mt-6">
+                <a
+                  href="https://github.com/roggc/dinou/blob/master/LICENSE.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block group"
+                >
+                  <Card className="hover:border-blue-500 transition-colors cursor-pointer border-l-4 border-l-blue-500">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <div className="flex items-center gap-2 font-semibold">
+                        <FileText className="h-5 w-5 text-blue-500" />
+                        <span>Read Full License</span>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors" />
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">
+                        View the full MIT License text on GitHub (LICENSE.md)
+                      </p>
+                    </CardContent>
+                  </Card>
+                </a>
+              </div>
             </section>
 
             <section id="changelog">
@@ -134,43 +127,30 @@ SOFTWARE.`}
                 </Card>
               </div>
 
-              <Alert className="not-prose mt-4">
-                <FileText className="h-4 w-4" />
-                <AlertTitle>Accessing the Changelog</AlertTitle>
-                <AlertDescription>
-                  The changelog is available in the project repository at{" "}
-                  <code>./CHANGELOG.md</code>. You can also view it on GitHub
-                  for easier reading.
-                </AlertDescription>
-              </Alert>
-
-              <div className="border rounded-lg p-4 bg-card not-prose mt-4">
-                <div className="flex items-center gap-2 font-semibold mb-2">
-                  <GitBranch className="h-5 w-5 text-purple-500" />
-                  <span>Recent Version Highlights</span>
-                </div>
-                <div className="text-sm text-muted-foreground space-y-2">
-                  <div className="flex items-start gap-2">
-                    <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
-                      v1.0.0
-                    </span>
-                    <span>Initial stable release with React 19 support</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
-                      v0.9.0
-                    </span>
-                    <span>Added incremental static regeneration (ISR)</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
-                      v0.8.0
-                    </span>
-                    <span>
-                      Introduced the Dinou Pattern for state management
-                    </span>
-                  </div>
-                </div>
+              {/* Nueva Card para el Changelog */}
+              <div className="not-prose mt-6">
+                <a
+                  href="https://github.com/roggc/dinou/blob/master/CHANGELOG.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block group"
+                >
+                  <Card className="hover:border-purple-500 transition-colors cursor-pointer border-l-4 border-l-purple-500">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <div className="flex items-center gap-2 font-semibold">
+                        <GitBranch className="h-5 w-5 text-purple-500" />
+                        <span>View Full Changelog</span>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-purple-500 transition-colors" />
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">
+                        See version history and release notes on GitHub
+                        (CHANGELOG.md)
+                      </p>
+                    </CardContent>
+                  </Card>
+                </a>
               </div>
             </section>
 
@@ -269,17 +249,6 @@ SOFTWARE.`}
                       className="font-mono text-xs hover:underline"
                     >
                       GitHub Issues
-                    </a>
-                  </div>
-                  <div>
-                    <strong>Discussions:</strong>{" "}
-                    <a
-                      href="https://github.com/roggc/dinou/discussions"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-mono text-xs hover:underline"
-                    >
-                      GitHub Discussions
                     </a>
                   </div>
                 </div>
