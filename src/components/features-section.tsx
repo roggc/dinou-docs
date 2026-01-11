@@ -6,7 +6,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Cpu, Boxes, Unlock, CheckCircle2 } from "lucide-react";
+import {
+  Cpu,
+  Boxes,
+  Map,
+  Zap,
+  CheckCircle2,
+  Layers,
+  ArrowRightLeft,
+} from "lucide-react";
 
 export function FeaturesSection() {
   return (
@@ -35,7 +43,8 @@ export function FeaturesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        {/* Changed to 2 columns to accommodate 4 distinct pillars comfortably */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {/* Card 1: React 19 Core */}
           <Card className="relative overflow-hidden bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 transition-all hover:shadow-lg hover:-translate-y-1 duration-300">
             <div className="absolute top-0 right-0 p-4 opacity-10">
@@ -46,20 +55,19 @@ export function FeaturesSection() {
                 <Cpu className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <CardTitle className="text-xl text-slate-900 dark:text-slate-100">
-                React 19 Native
+                React 19 Foundation
               </CardTitle>
               <CardDescription className="text-slate-600 dark:text-slate-400">
-                Built from the ground up to leverage the new React Server
-                Components architecture.
+                Built from the ground up to leverage the new Server Components
+                architecture.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
                 {[
-                  "RSC & Suspense Streaming",
-                  "Server Functions (RPC actions)",
-                  "Automatic hydration splitting",
-                  "Hybrid Rendering (SSR, SSG, ISR)",
+                  "React Server Components (RSC)",
+                  "Server Functions",
+                  "Suspense Streaming",
                 ].map((item) => (
                   <li
                     key={item}
@@ -73,7 +81,80 @@ export function FeaturesSection() {
             </CardContent>
           </Card>
 
-          {/* Card 2: Bundler Agnostic (La joya de la corona) */}
+          {/* Card 2: Rendering Strategies */}
+          <Card className="relative overflow-hidden bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 transition-all hover:shadow-lg hover:-translate-y-1 duration-300">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Zap className="w-24 h-24" />
+            </div>
+            <CardHeader>
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-yellow-100 dark:bg-yellow-900/30 mb-4">
+                <Zap className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+              </div>
+              <CardTitle className="text-xl text-slate-900 dark:text-slate-100">
+                Intelligent Rendering
+              </CardTitle>
+              <CardDescription className="text-slate-600 dark:text-slate-400">
+                Static by default, dynamic when needed. Optimized for
+                performance.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {[
+                  "Automatic Static Bailout",
+                  "Incremental Static Generation (ISG)",
+                  "ISR (Revalidation)",
+                  "Force Dynamic Mode",
+                ].map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start text-sm text-slate-600 dark:text-slate-300"
+                  >
+                    <CheckCircle2 className="mr-2 h-4 w-4 text-yellow-500 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+
+          {/* Card 3: Routing & Navigation */}
+          <Card className="relative overflow-hidden bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 transition-all hover:shadow-lg hover:-translate-y-1 duration-300">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Map className="w-24 h-24" />
+            </div>
+            <CardHeader>
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30 mb-4">
+                <Map className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+              <CardTitle className="text-xl text-slate-900 dark:text-slate-100">
+                Routing & Navigation
+              </CardTitle>
+              <CardDescription className="text-slate-600 dark:text-slate-400">
+                Intuitive routing with a SPA-like experience for the end user.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {[
+                  "File-based Routing System",
+                  "Soft Navigation (SPA Experience)",
+                  "Nested Layouts",
+                  "Dynamic & Catch-all Routes",
+                ].map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start text-sm text-slate-600 dark:text-slate-300"
+                  >
+                    <CheckCircle2 className="mr-2 h-4 w-4 text-green-500 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+
+          {/* Card 4: Bundler Agnostic */}
           <Card className="relative overflow-hidden bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 transition-all hover:shadow-lg hover:-translate-y-1 duration-300">
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <Boxes className="w-24 h-24" />
@@ -86,60 +167,22 @@ export function FeaturesSection() {
                 Bundler Agnostic
               </CardTitle>
               <CardDescription className="text-slate-600 dark:text-slate-400">
-                The only framework that lets you choose your build engine. Don't
-                fight your tools.
+                The only framework that lets you choose your build engine via
+                commands.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
                 {[
-                  "Webpack (Production stability)",
-                  "Rollup (Library standards)",
-                  "Esbuild (Lightning fast dev)",
-                  "Seamless switching via config",
+                  "Switch via script (e.g. npm run dev:rollup)",
+                  "Support for Webpack, Rollup & Esbuild",
+                  "Full 'Eject' support",
                 ].map((item) => (
                   <li
                     key={item}
                     className="flex items-start text-sm text-slate-600 dark:text-slate-300"
                   >
                     <CheckCircle2 className="mr-2 h-4 w-4 text-purple-500 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-
-          {/* Card 3: No Lock-in */}
-          <Card className="relative overflow-hidden bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 transition-all hover:shadow-lg hover:-translate-y-1 duration-300">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Unlock className="w-24 h-24" />
-            </div>
-            <CardHeader>
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30 mb-4">
-                <Unlock className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
-              <CardTitle className="text-xl text-slate-900 dark:text-slate-100">
-                No Vendor Lock-in
-              </CardTitle>
-              <CardDescription className="text-slate-600 dark:text-slate-400">
-                Start with zero-config, but take full control whenever you need
-                it.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {[
-                  "Full 'Eject' support",
-                  "Standard Request/Response API",
-                  "Own your configuration files",
-                  "Standard CSS & Modules support",
-                ].map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-start text-sm text-slate-600 dark:text-slate-300"
-                  >
-                    <CheckCircle2 className="mr-2 h-4 w-4 text-green-500 shrink-0" />
                     {item}
                   </li>
                 ))}

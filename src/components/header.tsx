@@ -17,15 +17,9 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm border-slate-200 dark:border-slate-800">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center space-x-2">
-          {/* <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
-            <Sparkles className="h-4 w-4 text-white" />
-          </div> */}
           <a href="/">
-            <img src={dinou} className="w-10" />
+            <img src={dinou} className="w-10" alt="Dinou Logo" />
           </a>
-          {/* <Badge variant="secondary" className="text-xs">
-            v1.0
-          </Badge> */}
         </div>
 
         <nav className="hidden md:flex items-center space-x-6">
@@ -33,7 +27,7 @@ export default function Header() {
             href="#main"
             className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
           >
-            Main
+            Home
           </a>
           <a
             href="#features"
@@ -45,7 +39,13 @@ export default function Header() {
             href="#development"
             className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
           >
-            Development
+            Quick Start
+          </a>
+          <a
+            href="#ready"
+            className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
+          >
+            Ready to Ship
           </a>
         </nav>
 

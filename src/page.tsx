@@ -14,6 +14,7 @@ import {
   Terminal,
 } from "lucide-react";
 import { FeaturesSection } from "@/components/features-section";
+import { Link } from "dinou";
 
 export default function Page() {
   const [copied, setCopied] = useState(false);
@@ -41,23 +42,26 @@ export default function Page() {
                   className="px-4 py-1.5 text-sm border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm"
                 >
                   <Sparkles className="mr-2 h-3.5 w-3.5 text-blue-500" />
+                  {/* CAMBIO: De "Native" a "Built for" para evitar confusión con React Native */}
                   <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-semibold">
-                    Native React 19 Framework
+                    Built for React 19
                   </span>
                 </Badge>
               </div>
 
+              {/* CAMBIO: Título más sobrio y descriptivo */}
               <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl text-slate-900 dark:text-white">
-                The future of
+                Modern Full-Stack
                 <span className="block mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  React Development
+                  React Framework
                 </span>
               </h1>
 
               <p className="mx-auto max-w-[700px] text-lg text-slate-600 dark:text-slate-400 md:text-xl leading-relaxed">
-                Unlock the full potential of Server Components and Actions. Zero
-                configuration, blazing fast builds, and designed specifically
-                for the React 19 era.
+                {/* CAMBIO: Actions -> Server Functions */}
+                Unlock the full potential of Server Components and Server
+                Functions. Zero configuration, blazing fast builds, and designed
+                specifically for the React 19 era.
               </p>
             </div>
 
@@ -67,10 +71,10 @@ export default function Page() {
                 className="text-base h-12 px-8 rounded-full"
                 asChild
               >
-                <a href="/docs">
+                <Link href="/docs">
                   <Rocket className="mr-2 h-5 w-5" />
                   Get Started
-                </a>
+                </Link>
               </Button>
               <Button
                 variant="outline"
@@ -92,7 +96,7 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Features Section (Untouched as requested) */}
+      {/* Features Section */}
       <FeaturesSection />
 
       {/* Quick Start / Code Section */}
@@ -109,19 +113,19 @@ export default function Page() {
                 Zero Configuration
               </div>
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-slate-900 dark:text-white">
-                From zero to production in seconds
+                Start coding in seconds
               </h2>
               <p className="text-slate-600 dark:text-slate-400 md:text-lg leading-relaxed">
-                Don't waste time configuring bundlers. Dinou comes
+                Don&apos;t waste time configuring bundlers. Dinou comes
                 pre-configured with the best defaults for modern React
                 applications. Just run the init command and start coding.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-2">
                 <Button variant="default" asChild>
-                  <a href="/docs/installation">
+                  <Link href="/docs">
                     <BookOpen className="mr-2 h-4 w-4" />
                     Read the Guide
-                  </a>
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -187,7 +191,11 @@ export default function Page() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="w-full py-20 md:py-32 relative overflow-hidden">
+      {/* CAMBIO: Añadido ID "ready" para posible link en el header */}
+      <section
+        id="ready"
+        className="w-full py-20 md:py-32 relative overflow-hidden"
+      >
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-100/50 dark:to-slate-900/50 -z-10" />
         <div className="container px-4 md:px-6 mx-auto text-center">
           <div className="flex flex-col items-center space-y-6 max-w-2xl mx-auto">
@@ -200,7 +208,7 @@ export default function Page() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 w-full justify-center pt-4">
               <Button size="lg" className="text-base rounded-full px-8" asChild>
-                <a href="/docs/getting-started">Get Started Now</a>
+                <Link href="/docs">Get Started Now</Link>
               </Button>
               <Button
                 variant="outline"
