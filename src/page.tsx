@@ -42,23 +42,20 @@ export default function Page() {
                   className="px-4 py-1.5 text-sm border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm"
                 >
                   <Sparkles className="mr-2 h-3.5 w-3.5 text-blue-500" />
-                  {/* CAMBIO: De "Native" a "Built for" para evitar confusión con React Native */}
                   <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-semibold">
                     Built for React 19
                   </span>
                 </Badge>
               </div>
 
-              {/* CAMBIO: Título más sobrio y descriptivo */}
               <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl text-slate-900 dark:text-white">
-                Modern Full-Stack
-                <span className="block mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  React Framework
+                Dinou
+                <span className="block mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight pb-2">
+                  Modern Full-Stack React 19 Framework
                 </span>
               </h1>
 
               <p className="mx-auto max-w-[700px] text-lg text-slate-600 dark:text-slate-400 md:text-xl leading-relaxed">
-                {/* CAMBIO: Actions -> Server Functions */}
                 Unlock the full potential of Server Components and Server
                 Functions. Zero configuration, blazing fast builds, and designed
                 specifically for the React 19 era.
@@ -191,7 +188,6 @@ export default function Page() {
       </section>
 
       {/* Final CTA Section */}
-      {/* CAMBIO: Añadido ID "ready" para posible link en el header */}
       <section
         id="ready"
         className="w-full py-20 md:py-32 relative overflow-hidden"
