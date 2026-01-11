@@ -38,7 +38,7 @@ export default function Page() {
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Introduction
               </h1>
-              <Badge variant="secondary">v1.0.0</Badge>
+              <Badge variant="secondary">v4</Badge>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
               A Full-Stack React 19 Framework built for the modern web.

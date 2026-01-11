@@ -32,7 +32,8 @@ export default function Page() {
       <div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-slate-950 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)]"></div>
 
       {/* Hero Section */}
-      <section id="main" className="w-full py-20 md:py-32 lg:py-40 relative">
+      {/* CAMBIO: Reducido el padding vertical (py) para subir el contenido */}
+      <section id="main" className="w-full py-12 md:py-20 lg:py-24 relative">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="flex flex-col items-center space-y-8 text-center">
             <div className="space-y-4 max-w-4xl">
@@ -48,7 +49,8 @@ export default function Page() {
                 </Badge>
               </div>
 
-              <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl text-slate-900 dark:text-white">
+              {/* CAMBIO: Reducido tamaño de fuente (de 8xl/7xl a 7xl/6xl) */}
+              <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-slate-900 dark:text-white">
                 Dinou
                 <span className="block mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight pb-2">
                   Modern Full-Stack React 19 Framework

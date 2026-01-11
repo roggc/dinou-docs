@@ -8,6 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Link } from "dinou";
 
 export default function Footer() {
   return (
@@ -69,36 +70,36 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a
+                <Link
                   href="/docs"
                   className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                 >
                   Getting Started
-                </a>
+                </Link>
               </li>
               <li>
-                <a
+                <Link
                   href="/docs/routing"
                   className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                 >
                   Core Concepts
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="/docs/parameters"
+                <Link
+                  href="/docs/favicons"
                   className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                 >
                   Features
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="/docs/environment"
+                <Link
+                  href="/docs/env-vars"
                   className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                 >
                   Configuration
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

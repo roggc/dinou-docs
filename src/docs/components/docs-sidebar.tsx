@@ -135,7 +135,7 @@ const navigation = [
     ],
   },
   {
-    title: "Settings",
+    title: "Configuration",
     items: [
       {
         title: "Env Vars",

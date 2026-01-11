@@ -11,15 +11,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Link } from "dinou";
 
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm border-slate-200 dark:border-slate-800">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center space-x-2">
-          <a href="/">
+          <Link href="/">
             <img src={dinou} className="w-10" alt="Dinou Logo" />
-          </a>
+          </Link>
         </div>
 
         <nav className="hidden md:flex items-center space-x-6">
@@ -80,10 +81,10 @@ export default function Header() {
 
           <ModeToggle />
           <Button size="sm" asChild>
-            <a href="/docs">
+            <Link href="/docs">
               Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
-            </a>
+            </Link>
           </Button>
         </div>
       </div>
