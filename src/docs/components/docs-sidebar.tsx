@@ -35,6 +35,7 @@ import {
   Boxes,
   BookMarked,
   Brain,
+  Shredder,
 } from "lucide-react";
 
 const navigation = [
@@ -95,6 +96,11 @@ const navigation = [
         title: "Advanced Patterns",
         href: "/docs/pattern",
         icon: Brain,
+      },
+      {
+        title: "Rendering",
+        href: "/docs/rendering",
+        icon: Shredder,
       },
       {
         title: "API Reference",

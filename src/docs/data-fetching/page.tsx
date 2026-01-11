@@ -21,6 +21,8 @@ import {
   Info,
   Globe,
   Code,
+  Cpu,
+  ArrowRightLeft,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -30,9 +32,8 @@ const tocItems = [
     title: "Server Components (Async Data)",
     level: 2,
   },
-  { id: "hybrid-rendering", title: "Hybrid Rendering Engine", level: 2 },
-  { id: "isr", title: "Incremental Static Regeneration (ISR)", level: 2 },
-  { id: "client-components", title: "Client Components", level: 2 },
+  { id: "client-reactive", title: "Client Components (Reactive)", level: 2 },
+  { id: "server-streaming", title: "Server Components (Streaming)", level: 2 },
 ];
 
 export default function Page() {
@@ -92,109 +93,120 @@ export default async function Page() {
               </div>
             </section>
 
-            <section id="hybrid-rendering">
-              <h2>Hybrid Rendering Engine</h2>
+            <section id="client-reactive">
+              <h2>Usage in Client Components (Reactive)</h2>
               <p>
-                Dinou uses a zero-config hybrid model: Static (SSG) by default,
-                switching to Dynamic (SSR) when request-specific data is used.
+                In Client Components, use <code>react-enhanced-suspense</code>{" "}
+                to automatically re-fetch Server Functions when dependencies
+                change via the <code>resourceId</code> prop.
               </p>
               <CodeBlock
                 language="jsx"
                 containerClassName="w-full overflow-hidden rounded-lg"
               >
-                {`import { getContext } from "dinou";
+                {`// src/[id]/page.jsx
+"use client";
+import { getPost } from "@/server-functions/get-post";
+import Suspense from "react-enhanced-suspense";
 
-export default async function Profile() {
-  const ctx = getContext();
-  if (!ctx) return null;
-
-  // Accessing cookies switches to SSR
-  const token = ctx.req.cookies.session_token;
-
-  const user = await fetchUser(token);
-  return <h1>Hello, {user.name}</h1>;
+export default function Page({ params: { id } }) {
+  return (
+    <Suspense fallback="Loading post..." resourceId={\`get-post-\${id}\`}>
+      {() => getPost(id)}
+    </Suspense>
+  );
 }`}
               </CodeBlock>
               <Alert className="not-prose mt-4">
-                <Zap className="h-4 w-4" />
-                <AlertTitle>Automatic Detection</AlertTitle>
+                <RefreshCw className="h-4 w-4" />
+                <AlertTitle>react-enhanced-suspense Behavior</AlertTitle>
                 <AlertDescription>
-                  No manual configuration needed. Dinou detects usage of
-                  cookies, headers, or search params to opt into dynamic
-                  rendering.
+                  <div className="space-y-2">
+                    <p>
+                      <strong>Standard Mode:</strong> With only{" "}
+                      <code>children</code> (React Nodes) and{" "}
+                      <code>fallback</code>, behaves like React's native
+                      Suspense.
+                    </p>
+                    <p>
+                      <strong>Enhanced Mode:</strong> With{" "}
+                      <code>resourceId</code> and <code>children</code> as a
+                      function, automatically re-evaluates when{" "}
+                      <code>resourceId</code> changes. No useEffect needed!
+                    </p>
+                  </div>
                 </AlertDescription>
               </Alert>
+              <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                <div className="flex items-center gap-2 font-semibold mb-2">
+                  <Cpu className="h-5 w-5 text-green-500" />
+                  <span>Automatic Dependency Tracking</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  The <code>resourceId</code> acts as a cache key. Change it to
+                  trigger fresh data fetching without manual cleanup or effect
+                  dependencies.
+                </p>
+              </div>
             </section>
 
-            <section id="isr">
-              <h2>Incremental Static Regeneration (ISR)</h2>
+            <section id="server-streaming">
+              <h2>Usage in Server Components (Streaming)</h2>
               <p>
-                Update static pages in the background without full rebuilds
-                using the <code>revalidate</code> function in{" "}
-                <code>page_functions.ts</code>.
+                In Server Components, wrap async Server Function calls to stream
+                results to the client as they become available.
               </p>
               <CodeBlock
-                language="typescript"
+                language="jsx"
                 containerClassName="w-full overflow-hidden rounded-lg"
               >
-                {`// src/blog/page_functions.ts
-export function revalidate() {
-  return 60000; // Regenerate every 60 seconds
+                {`// src/[id]/page.jsx
+import { getPost } from "@/server-functions/get-post";
+import Suspense from "react-enhanced-suspense";
+
+export default async function Page({ params: { id } }) {
+  return (
+    <div>
+      <Suspense fallback="Loading post...">
+        {getPost(id)}
+      </Suspense>
+    </div>
+  );
 }`}
               </CodeBlock>
               <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                <Card className="border-green-500/20 bg-green-50/50 dark:bg-green-900/10">
+                <Card className="border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10">
                   <CardHeader>
-                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
-                      <RefreshCw className="h-5 w-5" />
-                      <span>Background Updates</span>
+                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
+                      <ArrowRightLeft className="h-5 w-5" />
+                      <span>Progressive Loading</span>
                     </div>
                   </CardHeader>
                   <CardContent className="text-sm">
-                    Regenerate stale pages on-demand or at intervals without
-                    affecting other pages.
+                    Content streams to the browser incrementally, improving
+                    perceived performance.
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader>
                     <div className="flex items-center gap-2 font-semibold">
-                      <Info className="h-5 w-5 text-blue-500" />
-                      <span>Cache Lifetime</span>
+                      <Smartphone className="h-5 w-5 text-purple-500" />
+                      <span>Consistent API</span>
                     </div>
                   </CardHeader>
                   <CardContent className="text-sm">
-                    Specify time in milliseconds. Use 0 for indefinite static
-                    caching.
+                    Same <code>Suspense</code> component works identically in
+                    Server and Client Components for predictable behavior.
                   </CardContent>
                 </Card>
               </div>
-            </section>
-
-            <section id="client-components">
-              <h2>Client Components</h2>
-              <p>
-                Add interactivity with the <code>"use client"</code> directive
-                for hooks like useState and useEffect.
-              </p>
-              <CodeBlock
-                language="jsx"
-                containerClassName="w-full overflow-hidden rounded-lg"
-              >
-                {`"use client";
-
-import { useState } from "react";
-
-export default function Counter() {
-  const [count, setCount] = useState(0);
-  return <button onClick={() => setCount((c) => c + 1)}>{count}</button>;
-}`}
-              </CodeBlock>
               <Alert className="not-prose mt-4">
-                <Smartphone className="h-4 w-4" />
-                <AlertTitle>Client-Side Interactivity</AlertTitle>
+                <Zap className="h-4 w-4" />
+                <AlertTitle>Performance Tip</AlertTitle>
                 <AlertDescription>
-                  Use for event handlers, state management, and browser APIs.
-                  Server Components handle static content.
+                  Combine Server Functions with Dinou's hybrid rendering. Static
+                  pages can use Server Functions for dynamic parts while
+                  maintaining overall static performance.
                 </AlertDescription>
               </Alert>
             </section>
