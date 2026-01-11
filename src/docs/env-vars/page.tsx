@@ -45,7 +45,9 @@ export default function Page() {
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <section id="environment-variables">
-              <h2>🔐 Environment Variables (`.env`)</h2>
+              <h2>
+                🔐 Environment Variables (<code>.env</code>)
+              </h2>
               <p>
                 Dinou automatically loads environment variables from a{" "}
                 <code>.env</code> file for server-side code.
@@ -92,9 +94,9 @@ DATABASE_URL=postgresql://user:pass@localhost:5432/db`}
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm">
-                      Available in Server Components, Server Functions, and
-                      `getProps`. Not accessible in Client Components for
-                      security.
+                      Available in Server Components, Server Functions, and{" "}
+                      <code>getProps</code>. Not accessible in Client Components
+                      for security.
                     </CardContent>
                   </Card>
                   <Card>
@@ -105,8 +107,8 @@ DATABASE_URL=postgresql://user:pass@localhost:5432/db`}
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm">
-                      Use `process.env.VARIABLE_NAME` in server-side code.
-                      Variables are injected at runtime.
+                      Use <code>process.env.VARIABLE_NAME</code> in server-side
+                      code. Variables are injected at runtime.
                     </CardContent>
                   </Card>
                 </div>

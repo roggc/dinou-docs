@@ -18,7 +18,6 @@ import { CodeBlock } from "@/docs/components/code-block";
 const tocItems = [
   { id: "deployment", title: "🚀 Deployment", level: 2 },
   { id: "supported-platforms", title: "Supported Platforms", level: 3 },
-  { id: "runtime-command", title: "Runtime Command", level: 3 },
   { id: "deployment-checklist", title: "Deployment Checklist", level: 3 },
 ];
 
@@ -92,33 +91,6 @@ export default function Page() {
                 </div>
               </section>
 
-              <section id="runtime-command">
-                <h3>Runtime Command</h3>
-                <p>
-                  Your production start command must include the React Server
-                  Components condition flag.
-                </p>
-                <CodeBlock
-                  language="bash"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-                  {`node --conditions react-server dist3/index.js`}
-                </CodeBlock>
-                <p className="mt-4">
-                  In your <code>package.json</code> scripts:
-                </p>
-                <CodeBlock
-                  language="json"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-                  {`{
-  "scripts": {
-    "start": "node --conditions react-server dist3/index.js"
-  }
-}`}
-                </CodeBlock>
-              </section>
-
               <section id="deployment-checklist">
                 <h3>Deployment Checklist</h3>
                 <Alert className="not-prose mt-6">
@@ -132,11 +104,6 @@ export default function Page() {
                       <li>
                         ✅ Set environment variables on your hosting platform
                       </li>
-                      <li>
-                        ✅ Configure the start command with{" "}
-                        <code>--conditions react-server</code>
-                      </li>
-                      <li>✅ Ensure Node.js version 18+ is available</li>
                       <li>
                         ✅ Test the production build locally before deploying
                       </li>

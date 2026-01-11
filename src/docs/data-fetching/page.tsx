@@ -313,7 +313,7 @@ export default async function Page({ params: { id } }) {
                   <Zap className="h-4 w-4" />
                   <AlertTitle>Performance Tip with Server Functions</AlertTitle>
                   <AlertDescription>
-                    Combine Server Functions with Dinou's hybrid rendering.
+                    Combine Server Functions with Dinou's static rendering.
                     Static pages can use Server Functions for dynamic parts
                     while maintaining overall static performance. Server
                     Functions ensure server-side execution with client-side

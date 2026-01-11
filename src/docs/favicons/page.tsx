@@ -94,8 +94,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                   </div>
                   <p className="text-sm text-muted-foreground">
                     The <code>favicons</code> folder should be at the same level
-                    as your <code>src</code> directory. Dinou automatically
-                    serves files from the root at <code>/</code>.
+                    as your <code>src</code> directory.
                   </p>
                 </div>
               </section>

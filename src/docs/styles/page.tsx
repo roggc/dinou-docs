@@ -128,7 +128,9 @@ export default function Layout({ children }: { children: ReactNode }) {
 }`}
                 </CodeBlock>
 
-                <h4>Page with CSS Modules (`src/page.tsx`)</h4>
+                <h4>
+                  Page with CSS Modules (<code>src/page.tsx</code>)
+                </h4>
                 <CodeBlock
                   language="tsx"
                   containerClassName="w-full overflow-hidden rounded-lg"
@@ -147,7 +149,9 @@ export default function Page() {
 }`}
                 </CodeBlock>
 
-                <h4>CSS Module (`src/page.module.css`)</h4>
+                <h4>
+                  CSS Module (<code>src/page.module.css</code>)
+                </h4>
                 <CodeBlock
                   language="css"
                   containerClassName="w-full overflow-hidden rounded-lg"
@@ -158,7 +162,9 @@ export default function Page() {
 }`}
                 </CodeBlock>
 
-                <h4>TypeScript Declarations (`src/css.d.ts`)</h4>
+                <h4>
+                  TypeScript Declarations (<code>src/css.d.ts</code>)
+                </h4>
                 <p>For TypeScript support with CSS Modules:</p>
                 <CodeBlock
                   language="typescript"
@@ -179,8 +185,7 @@ export default function Page() {
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm">
-                      Utility-first framework. Configure via{" "}
-                      <code>tailwind.config.js</code>.
+                      Utility-first framework.
                     </CardContent>
                   </Card>
                   <Card>

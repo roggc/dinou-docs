@@ -126,10 +126,10 @@ export default function Page() {
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Dinou searches up the directory tree for the closest
-                    matching file. A <code>not_found.jsx</code> in{" "}
-                    <code>/blog/[slug]</code>
+                    matching file. A <code>not_found.tsx</code> in{" "}
+                    <code>/blog/[slug]/not_found.tsx</code>
                     takes precedence over one in the root for{" "}
-                    <code>/blog/non-existent</code>.
+                    <code>/blog/not_found.tsx</code>.
                   </p>
                 </div>
               </section>
@@ -238,7 +238,9 @@ export default function Page() {
             </section>
 
             <section id="page-config-cheatsheet">
-              <h2>Page Configuration (`page_functions.ts`) Cheatsheet</h2>
+              <h2>
+                Page Configuration (<code>page_functions.ts</code>) Cheatsheet
+              </h2>
               <p>
                 Export these functions from{" "}
                 <code>page_functions.{`{ts,js}`}</code> to configure the
@@ -313,7 +315,7 @@ export default function Page() {
                   <AlertDescription>
                     Use <code>getProps</code> for data that depends only on
                     route parameters. For request-specific data (cookies, search
-                    params), fetch directly in Server Components with Suspense.
+                    params), fetch directly in Components with Suspense.
                   </AlertDescription>
                 </Alert>
               </section>
@@ -323,7 +325,7 @@ export default function Page() {
                   <code>revalidate()</code>
                 </h3>
                 <p>
-                  Sets the Incremental Static Regeneration (ISR) time in
+                  Sets the Incremental Static Regeneration (ISR) time in{" "}
                   <strong>milliseconds</strong>.
                 </p>
                 <CodeBlock
@@ -343,7 +345,7 @@ export default function Page() {
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm">
-                      Page regenerates at most once every 60 seconds
+                      Regeneration is triggered by the first request after 60s.
                     </CardContent>
                   </Card>
                   <Card className="border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10">
@@ -378,7 +380,7 @@ export default function Page() {
                 </CodeBlock>
                 <Alert className="not-prose mt-4">
                   <Zap className="h-4 w-4" />
-                  <AlertTitle>Hybrid by Default</AlertTitle>
+                  <AlertTitle>Automatic Bailout</AlertTitle>
                   <AlertDescription>
                     Dinou is static by default. Only use <code>dynamic()</code>{" "}
                     when you need explicit SSR behavior. The framework

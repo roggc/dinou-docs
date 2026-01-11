@@ -20,6 +20,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
+import { Link } from "dinou";
 
 const tocItems = [
   { id: "assets-media", title: "🖼️ Assets & Media", level: 2 },
@@ -93,9 +94,12 @@ export default function Page() {
                   <AlertTitle>Custom Extensions</AlertTitle>
                   <AlertDescription>
                     Need support for additional formats? You can{" "}
-                    <a href="#eject-dinou" className="font-semibold underline">
+                    <Link
+                      href="/docs/eject"
+                      className="font-semibold underline"
+                    >
                       eject Dinou
-                    </a>{" "}
+                    </Link>{" "}
                     and modify <code>dinou/core/asset-extensions.js</code>.
                   </AlertDescription>
                 </Alert>

@@ -18,7 +18,6 @@ import { CodeBlock } from "@/docs/components/code-block";
 const tocItems = [
   { id: "import-aliases", title: "🔗 Import Aliases (`@/`)", level: 2 },
   { id: "tsconfig-setup", title: "TypeScript Configuration", level: 3 },
-  { id: "jsconfig-setup", title: "JavaScript Configuration", level: 3 },
 ];
 
 export default function Page() {
@@ -44,8 +43,8 @@ export default function Page() {
               <h2>🔗 Import Aliases (`@/`)</h2>
               <p>
                 Dinou supports import aliases for cleaner, more maintainable
-                import paths. Configure paths in your <code>tsconfig.json</code>{" "}
-                or <code>jsconfig.json</code>.
+                import paths. Configure paths in your <code>tsconfig.json</code>
+                .
               </p>
 
               <section id="tsconfig-setup">
@@ -60,9 +59,6 @@ export default function Page() {
     "baseUrl": ".", // Important: root of your project
     "paths": {
       "@/*": ["src/*"], // Maps @/ to src/
-      "@/components/*": ["src/components/*"],
-      "@/lib/*": ["src/lib/*"],
-      "@/styles/*": ["src/styles/*"]
     },
     "allowJs": true,
     "noEmit": true,
@@ -70,25 +66,6 @@ export default function Page() {
     "strict": true
   },
   "include": ["src", "src/assets.d.ts"] // Include your declaration files
-}`}
-                </CodeBlock>
-              </section>
-
-              <section id="jsconfig-setup">
-                <h3>JavaScript Configuration</h3>
-                <CodeBlock
-                  language="json"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-                  {`// jsconfig.json
-{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
-  },
-  "include": ["src"]
 }`}
                 </CodeBlock>
               </section>
@@ -129,9 +106,8 @@ export default function Page() {
                 <AlertTitle>IDE Support</AlertTitle>
                 <AlertDescription>
                   Most modern IDEs (VSCode, WebStorm, etc.) automatically detect
-                  import aliases from <code>tsconfig.json</code> or{" "}
-                  <code>jsconfig.json</code>, providing autocomplete and
-                  jump-to-definition features.
+                  import aliases from <code>tsconfig.json</code>, providing
+                  autocomplete and jump-to-definition features.
                 </AlertDescription>
               </Alert>
             </section>

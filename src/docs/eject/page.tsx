@@ -74,9 +74,6 @@ npx dinou eject`}
                     <li>
                       Gives you complete freedom to customize the framework
                     </li>
-                    <li>
-                      <strong>Note:</strong> This action is irreversible
-                    </li>
                   </ul>
                 </div>
               </section>

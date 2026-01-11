@@ -44,7 +44,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Combine Server Functions, Global State, and Smart Suspense for
+              Combine Server Functions, Global State, and Enhanced Suspense for
               granular reactivity. Handle mutations and list updates without
               full page reloads.
             </p>
@@ -59,11 +59,7 @@ export default function Page() {
                 return a "Headless State Updater" component that:
               </p>
               <ol>
-                <li>Performs the database operation on the server</li>
-                <li>
-                  Returns a Client Component that updates global state when it
-                  mounts
-                </li>
+                <li>Updates global state when it mounts</li>
                 <li>
                   Triggers re-fetching of dependent data through{" "}
                   <code>resourceId</code> changes
@@ -77,7 +73,7 @@ export default function Page() {
                 <div className="text-sm space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                    <span>Mutation triggers Server Function</span>
+                    <span>Client triggers Server Function</span>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
                     <div className="w-2 h-2 rounded-full bg-blue-500"></div>
@@ -112,7 +108,8 @@ export default function Page() {
                 <h3>1. The Global Store (Atoms)</h3>
                 <p>
                   Define atoms for state management using{" "}
-                  <code>jotai-wrapper</code>.
+                  <code>jotai-wrapper</code> (or any other Global State
+                  Management library).
                 </p>
                 <CodeBlock
                   language="javascript"
@@ -125,7 +122,7 @@ import getAPIFromAtoms from "jotai-wrapper";
 export const { useAtom, useSetAtom, useAtomValue, getAtom, selectAtom } =
   getAPIFromAtoms({
     tasksListKey: atom(0), // Cache buster for tasks list
-    isAddTask: atom(false), // Flag to show add task UI
+    isAddTask: atom(false), // Flag to trigger add task mutation
     // Add other atoms as needed...
   });`}
                 </CodeBlock>

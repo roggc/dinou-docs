@@ -65,7 +65,9 @@ export default function Page() {
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <section id="components">
-              <h2>1. Components (`dinou`)</h2>
+              <h2>
+                1. Components (<code>dinou</code>)
+              </h2>
 
               <section id="link">
                 <h3>
@@ -201,7 +203,9 @@ return <ClientRedirect to="/" />;`}
             </section>
 
             <section id="hooks-utilities">
-              <h2>2. Hooks & Utilities (`dinou`)</h2>
+              <h2>
+                2. Hooks & Utilities (<code>dinou</code>)
+              </h2>
               <p>Functions available in both Server and Client environments.</p>
 
               <section id="redirect">
@@ -210,8 +214,7 @@ return <ClientRedirect to="/" />;`}
                 </h3>
                 <p>
                   Stops execution and redirects the user. Works on both server
-                  (sets HTTP 307) and client (renders{" "}
-                  <code>&lt;ClientRedirect&gt;</code>).
+                  and client (renders <code>&lt;ClientRedirect&gt;</code>).
                 </p>
                 <CodeBlock
                   language="javascript"
@@ -408,7 +411,9 @@ export default function Header() {
             </section>
 
             <section id="server-utilities">
-              <h2>3. Server-Only Utilities (`dinou`)</h2>
+              <h2>
+                3. Server-Only Utilities (<code>dinou</code>)
+              </h2>
 
               <section id="getcontext">
                 <h3>
@@ -446,7 +451,7 @@ export default async function Profile() {
                     </CardHeader>
                     <CardContent className="text-sm font-mono text-xs">
                       <div>headers, cookies, query,</div>
-                      <div>path, method, body</div>
+                      <div>path, method</div>
                     </CardContent>
                   </Card>
                   <Card>
@@ -457,8 +462,8 @@ export default async function Profile() {
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm font-mono text-xs">
-                      <div>status(), setHeader(),</div>
-                      <div>redirect(), cookie()</div>
+                      <div>status(), setHeader(), redirect(),</div>
+                      <div>cookie(), clearCookie()</div>
                     </CardContent>
                   </Card>
                 </div>

@@ -63,7 +63,7 @@ const navigation = [
     title: "Core Concepts",
     items: [
       {
-        title: "Routing System",
+        title: "Routing",
         href: "/docs/routing",
         icon: Route,
       },
