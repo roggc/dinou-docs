@@ -26,17 +26,17 @@ import { CodeBlock } from "@/docs/components/code-block";
 const tocItems = [
   {
     id: "page-configuration",
-    title: "Page Configuration (`page_functions.ts`)",
+    title: "Page Configuration (page_functions.ts)",
     level: 2,
   },
   {
     id: "getprops",
-    title: "1. `getProps` (Static/Layout Data Injection)",
+    title: "1. getProps (Static/Layout Data Injection)",
     level: 3,
   },
   {
     id: "getstaticpaths",
-    title: "2. `getStaticPaths` (Static Generation)",
+    title: "2. getStaticPaths (Static Generation)",
     level: 3,
   },
   { id: "return-formats", title: "Return Format", level: 4 },
@@ -59,8 +59,8 @@ const tocItems = [
   },
   { id: "normalization-guarantee", title: "Normalization Guarantee", level: 4 },
   { id: "async-support", title: "Async Support", level: 4 },
-  { id: "revalidate", title: "3. `revalidate` (ISR)", level: 3 },
-  { id: "dynamic", title: "4. `dynamic` (Force SSR)", level: 3 },
+  { id: "revalidate", title: "3. revalidate (ISR)", level: 3 },
+  { id: "dynamic", title: "4. dynamic (Force SSR)", level: 3 },
 ];
 
 export default function Page() {
@@ -77,22 +77,27 @@ export default function Page() {
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
               Advanced control over rendering behavior, data fetching, and
-              static generation with `page_functions.ts`.
+              static generation with <code>page_functions.ts</code>.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <section id="page-configuration">
-              <h2>Page Configuration (`page_functions.ts`)</h2>
+              <h2>
+                Page Configuration (<code>page_functions.ts</code>)
+              </h2>
               <p>
                 For advanced control over rendering behavior, data fetching, and
-                static generation, you can create a `page_functions.ts` (or
-                `.js`) file next to your `page.jsx`.
+                static generation, you can create a{" "}
+                <code>page_functions.ts</code> (or <code>.js</code>) file next
+                to your <code>page.jsx</code>.
               </p>
             </section>
 
             <section id="getprops">
-              <h3>1. `getProps` (Static/Layout Data Injection)</h3>
+              <h3>
+                1. <code>getProps</code> (Static/Layout Data Injection)
+              </h3>
               <p>
                 Use this function to fetch data based on the{" "}
                 <strong>route parameters</strong> and inject it into your Page
@@ -103,10 +108,11 @@ export default function Page() {
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Design Note</AlertTitle>
                 <AlertDescription>
-                  `getProps` only receives `params`. To use request-specific
-                  data like `searchParams` or `cookies`, fetch data directly
-                  inside your Server Components using `Suspense` or Hooks to
-                  avoid blocking the initial HTML render.
+                  <code>getProps</code> only receives <code>params</code>. To
+                  use request-specific data like <code>searchParams</code> or{" "}
+                  <code>cookies</code>, fetch data directly inside your Server
+                  Components using <code>Suspense</code> or Hooks to avoid
+                  blocking the initial HTML render.
                 </AlertDescription>
               </Alert>
 
@@ -117,12 +123,12 @@ export default function Page() {
                 </div>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
                   <li>
-                    <strong>Arguments:</strong> `{"{ params }"}` (The dynamic
-                    route parameters)
+                    <strong>Arguments:</strong> <code>{"{ params }"}</code> (The
+                    dynamic route parameters)
                   </li>
                   <li>
-                    <strong>Returns:</strong> An object with `page` and `layout`
-                    keys containing the props
+                    <strong>Returns:</strong> An object with <code>page</code>{" "}
+                    and <code>layout</code> keys containing the props
                   </li>
                 </ul>
               </div>
@@ -149,7 +155,9 @@ export async function getProps({ params }) {
             </section>
 
             <section id="getstaticpaths">
-              <h3>2. `getStaticPaths` (Static Generation)</h3>
+              <h3>
+                2. <code>getStaticPaths</code> (Static Generation)
+              </h3>
               <p>
                 Defines which dynamic paths should be pre-rendered at server
                 start (SSG).
@@ -183,22 +191,26 @@ export async function getProps({ params }) {
                     <tbody className="divide-y divide-border bg-card">
                       <tr>
                         <td className="p-4 font-mono text-xs">
-                          <strong>Simple</strong> (`[id]`)
+                          <strong>Simple</strong> (<code>[id]</code>)
                         </td>
                         <td className="p-4 font-mono text-xs">
                           Array&lt;string&gt;
                         </td>
-                        <td className="p-4 font-mono text-xs">["1", "2"]</td>
+                        <td className="p-4 font-mono text-xs">
+                          <code>["1", "2"]</code>
+                        </td>
                       </tr>
                       <tr>
                         <td className="p-4 font-mono text-xs">
-                          <strong>Catch-all</strong> (`[...slug]`)
+                          <strong>Catch-all</strong> (<code>[...slug]</code>)
                         </td>
                         <td className="p-4 font-mono text-xs">
                           Array&lt;Array&lt;string&gt;&gt;
                         </td>
                         <td className="p-4 font-mono text-xs">
-                          [["a", "b"], ["c"]]
+                          <code>
+                            [[&quot;a&quot;, &quot;b&quot;], [&quot;c&quot;]]
+                          </code>
                         </td>
                       </tr>
                       <tr>
@@ -209,7 +221,12 @@ export async function getProps({ params }) {
                           Array&lt;Object&gt;
                         </td>
                         <td className="p-4 font-mono text-xs">
-                          [{'{"id": "1", "category": "tech"}'}]
+                          <code>
+                            [{"{"}
+                            &quot;id&quot;: &quot;1&quot;, &quot;category&quot;:
+                            &quot;tech&quot;
+                            {"}"}]
+                          </code>
                         </td>
                       </tr>
                     </tbody>
@@ -263,39 +280,51 @@ export function getStaticPaths() {
                   </div>
                   <div className="text-sm text-muted-foreground space-y-2">
                     <div className="font-mono">
-                      - `src/blog/[slug]/page.tsx` (+ `page_functions.ts`)
+                      - <code>src/blog/[slug]/page.tsx</code> (+{" "}
+                      <code>page_functions.ts</code>)
                     </div>
                     <div className="font-mono">
-                      - `src/blog/[slug]/details/page.tsx` (Nested static page)
+                      - <code>src/blog/[slug]/details/page.tsx</code> (Nested
+                      static page)
                     </div>
                     <p className="mt-2">
-                      If `getStaticPaths` in `blog/[slug]` returns `["post-a",
-                      "post-b"]`, Dinou generates <strong>4 pages</strong>:
+                      If <code>getStaticPaths</code> in <code>blog/[slug]</code>{" "}
+                      returns{" "}
+                      <code>[&quot;post-a&quot;, &quot;post-b&quot;]</code>,
+                      Dinou generates <strong>4 pages</strong>:
                     </p>
                     <ol className="list-decimal pl-4 space-y-1">
-                      <li>`/blog/post-a`</li>
-                      <li>`/blog/post-a/details`</li>
-                      <li>`/blog/post-b`</li>
-                      <li>`/blog/post-b/details`</li>
+                      <li>
+                        <code>/blog/post-a</code>
+                      </li>
+                      <li>
+                        <code>/blog/post-a/details</code>
+                      </li>
+                      <li>
+                        <code>/blog/post-b</code>
+                      </li>
+                      <li>
+                        <code>/blog/post-b/details</code>
+                      </li>
                     </ol>
                   </div>
                 </div>
               </section>
 
               <section id="chain-of-responsibility">
-                <h4>Nested Pages & The "Chain of Responsibility"</h4>
+                <h4>Nested Pages & The &quot;Chain of Responsibility&quot;</h4>
                 <p>
                   When nesting routes,{" "}
                   <strong>dependency flows downwards</strong>. If an
                   intermediate segment (whether static or dynamic) contains a
-                  `page.tsx`, it becomes a required step in the generation
-                  chain.
+                  <code>page.tsx</code>, it becomes a required step in the
+                  generation chain.
                 </p>
                 <p>
                   If a parent page fails to define its own paths (e.g., returns
                   an empty array), <strong>the generator stops there</strong>.
                   It will never reach the child pages, regardless of whether the
-                  children have valid `getStaticPaths` defined.
+                  children have valid <code>getStaticPaths</code> defined.
                 </p>
 
                 <div className="border rounded-lg p-4 bg-card not-prose mt-4">
@@ -305,14 +334,14 @@ export function getStaticPaths() {
                   </div>
                   <div className="text-sm text-muted-foreground space-y-2">
                     <div className="font-mono break-words">
-                      - `src/case3/[slug]/page.tsx` (Parent Page)
+                      - <code>src/case3/[slug]/page.tsx</code> (Parent Page)
                     </div>
                     <div className="font-mono break-words">
-                      - `src/case3/[slug]/[id]/page.tsx` (Child Page)
+                      - <code>src/case3/[slug]/[id]/page.tsx</code> (Child Page)
                     </div>
                     <p>
-                      In this structure, `[id]` depends physically on `[slug]`
-                      existing first.
+                      In this structure, <code>[id]</code> depends physically on{" "}
+                      <code>[slug]</code> existing first.
                     </p>
                   </div>
                 </div>
@@ -330,18 +359,20 @@ export function getStaticPaths() {
                       </CardHeader>
                       <CardContent className="text-sm">
                         <p className="break-words">
-                          If `src/case3/[slug]/page_functions.ts` returns `[]`
-                          (no paths):
+                          If <code>src/case3/[slug]/page_functions.ts</code>{" "}
+                          returns <code>[]</code> (no paths):
                         </p>
 
                         <ol className="list-decimal pl-4 mt-2 space-y-1 break-words">
-                          <li>Dinou tries to build `/case3/[slug]`.</li>
+                          <li>
+                            Dinou tries to build <code>/case3/[slug]</code>.
+                          </li>
                           <li>
                             No paths are returned. No folders are created.
                           </li>
                           <li>
                             <strong>Result:</strong> The build process never
-                            attempts to generate `[id]`.
+                            attempts to generate <code>[id]</code>.
                           </li>
                         </ol>
                       </CardContent>
@@ -397,8 +428,8 @@ export function getStaticPaths() {
                   <ArrowRight className="h-4 w-4" />
                   <AlertTitle>Rule of Thumb</AlertTitle>
                   <AlertDescription className="break-words">
-                    Every `page.tsx` in the hierarchy is responsible for
-                    "opening the door" to its children.
+                    Every <code>page.tsx</code> in the hierarchy is responsible
+                    for &quot;opening the door&quot; to its children.
                   </AlertDescription>
                 </Alert>
               </section>
@@ -437,13 +468,14 @@ export function getStaticPaths() {
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Reminder: No-Gap Rule</AlertTitle>
                   <AlertDescription>
-                    According to the <strong>No-Gap Rule</strong>, you can use
-                    `undefined` for an intermediate optional segment{" "}
+                    According to the <strong>No-Gap Rule</strong>, you can use{" "}
+                    <code>undefined</code> for an intermediate optional segment{" "}
                     <strong>
-                      only if all subsequent segments are also `undefined`
+                      only if all subsequent segments are also{" "}
+                      <code>undefined</code>
                     </strong>
-                    . You cannot leave a "gap" (an undefined segment followed by
-                    a defined one).
+                    . You cannot leave a &quot;gap&quot; (an undefined segment
+                    followed by a defined one).
                   </AlertDescription>
                 </Alert>
               </section>
@@ -451,8 +483,8 @@ export function getStaticPaths() {
               <section id="normalization-guarantee">
                 <h4>Normalization Guarantee</h4>
                 <p>
-                  Dinou ensures that `params` are consistent between SSG and
-                  SSR:
+                  Dinou ensures that <code>params</code> are consistent between
+                  SSG and SSR:
                 </p>
                 <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
                   <Card>
@@ -463,8 +495,10 @@ export function getStaticPaths() {
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm">
-                      Will always be an `Array` (e.g., `undefined` becomes `[]`,
-                      `"val"` becomes `["val"]`).
+                      Will always be an <code>Array</code> (e.g.,{" "}
+                      <code>undefined</code> becomes <code>[]</code>,{" "}
+                      <code>&quot;val&quot;</code> becomes{" "}
+                      <code>[&quot;val&quot;]</code>).
                     </CardContent>
                   </Card>
                   <Card>
@@ -475,7 +509,7 @@ export function getStaticPaths() {
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm">
-                      Remain `undefined` if omitted.
+                      Remain <code>undefined</code> if omitted.
                     </CardContent>
                   </Card>
                 </div>
@@ -518,7 +552,9 @@ export async function getStaticPaths() {
             </section>
 
             <section id="revalidate">
-              <h3>3. `revalidate` (ISR)</h3>
+              <h3>
+                3. <code>revalidate</code> (ISR)
+              </h3>
               <p>
                 Enables Incremental Static Regeneration. Defines the cache
                 lifetime of a static page in milliseconds.
@@ -530,11 +566,11 @@ export async function getStaticPaths() {
                 </div>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
                   <li>
-                    <strong>Returns:</strong> `number` (milliseconds)
+                    <strong>Returns:</strong> <code>number</code> (milliseconds)
                   </li>
                   <li>
-                    If it returns `0` (or is not defined), the page remains
-                    static indefinitely (unless rebuilt)
+                    If it returns <code>0</code> (or is not defined), the page
+                    remains static indefinitely (unless rebuilt)
                   </li>
                 </ul>
               </div>
@@ -550,7 +586,9 @@ export function revalidate() {
             </section>
 
             <section id="dynamic">
-              <h3>4. `dynamic` (Force SSR)</h3>
+              <h3>
+                4. <code>dynamic</code> (Force SSR)
+              </h3>
               <p>
                 Forces a page to be rendered dynamically (Server-Side Rendering)
                 on every request, bypassing static generation.
@@ -562,7 +600,7 @@ export function revalidate() {
                 </div>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
                   <li>
-                    <strong>Returns:</strong> `boolean`
+                    <strong>Returns:</strong> <code>boolean</code>
                   </li>
                 </ul>
               </div>
