@@ -1,127 +1,122 @@
 "use client";
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/docs/components/ui/alert";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/docs/components/ui/card";
+import { Rocket, CheckCircle2, XCircle, Zap, Cpu } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
-import { Alert, AlertDescription } from "@/docs/components/ui/alert";
-import { Lightbulb, AlertTriangle } from "lucide-react";
 
 const tocItems = [
-  { id: "overview", title: "Overview", level: 2 },
-  { id: "digitalocean", title: "DigitalOcean App Platform", level: 2 },
-  { id: "netlify", title: "Netlify", level: 2 },
-  { id: "other-platforms", title: "Other Platforms", level: 2 },
+  { id: "deployment", title: "🚀 Deployment", level: 2 },
+  { id: "supported-platforms", title: "Supported Platforms", level: 3 },
+  { id: "deployment-checklist", title: "Deployment Checklist", level: 3 },
 ];
 
 export default function Page() {
   return (
-    <div className="flex-1 flex">
-      <main className="flex-1 py-6 lg:py-8 min-w-0">
-        <div className="container max-w-4xl px-4">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">Deployment</h1>
-            <p className="text-xl text-muted-foreground">
-              Learn how to deploy your Dinou application to production.
+    <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
+      <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
+        <div className="container max-w-4xl px-4 md:px-6 mx-auto">
+          <div className="mb-8 space-y-4">
+            <div className="flex items-center space-x-2">
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                Deployment
+              </h1>
+            </div>
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              Deploy your Dinou application to production on supported
+              platforms.
             </p>
           </div>
 
-          <div className="prose overflow-hidden max-w-full">
-            <section id="overview">
-              <h2>Overview</h2>
+          <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
+            <section id="deployment">
+              <h2>🚀 Deployment</h2>
               <p>
-                Projects built with <strong>Dinou</strong> can be deployed to
-                any platform that supports <code>Node.js</code> with{" "}
-                <strong>custom flags</strong>.
-              </p>
-              <p>
-                The most important requirement is that you can pass{" "}
-                <code>--conditions react-server</code> to Node.js command that
-                starts the app.
-              </p>
-            </section>
-
-            <section id="digitalocean">
-              <h2>✅ DigitalOcean App Platform</h2>
-              <p>
-                <strong>Dinou</strong> works seamlessly on{" "}
-                <a
-                  href="https://www.digitalocean.com/products/app-platform"
-                  target="_blank"
-                >
-                  DigitalOcean App Platform
-                </a>
-                . You can deploy your project easily without needing any special
-                configuration.
+                Dinou apps can be deployed to any platform supporting Node.js,
+                provided you can pass the required custom flags.
               </p>
 
-              {/* <Alert className="not-prose mt-2 mb-2">
-                <Lightbulb className="h-4 w-4" />
-                <AlertDescription>
-                  Make sure your <code>start</code> script in{" "}
-                  <code>package.json</code> includes the required flag:
-                </AlertDescription>
-              </Alert>
+              <section id="supported-platforms">
+                <h3>Supported Platforms</h3>
+                <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
+                  <Card className="border-green-500/20 bg-green-50/50 dark:bg-green-900/10">
+                    <CardHeader>
+                      <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
+                        <CheckCircle2 className="h-5 w-5" />
+                        <span>✅ Recommended: DigitalOcean App Platform</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-sm">
+                      Works seamlessly. Allows full control over the runtime
+                      command, essential for the required{" "}
+                      <code>--conditions react-server</code> flag.
+                    </CardContent>
+                  </Card>
+                  <Card className="border-red-500/20 bg-red-50/50 dark:bg-red-900/10">
+                    <CardHeader>
+                      <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-semibold">
+                        <XCircle className="h-5 w-5" />
+                        <span>❌ Not Supported: Netlify</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-sm">
+                      Currently incompatible because it does not support passing
+                      custom Node.js flags (
+                      <code>--conditions react-server</code>) during runtime.
+                    </CardContent>
+                  </Card>
+                </div>
+                <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                  <div className="flex items-center gap-2 font-semibold mb-2">
+                    <Cpu className="h-5 w-5 text-blue-500" />
+                    <span>
+                      Other Platforms (Render, Fly.io, Railway, Vercel, etc.)
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Ensure your platform allows customization of the start
+                    command. The key requirement is the ability to pass the{" "}
+                    <code>--conditions react-server</code> flag to Node.js.
+                  </p>
+                </div>
+              </section>
 
-              <CodeBlock language="json" containerClassName="w-full">
-                {`{
-  "scripts": {
-    "start": "node --conditions react-server server.js"
-  }
-}`}
-              </CodeBlock> */}
-
-              <p>
-                You can deploy by connecting your GitHub/GitLab repository or
-                uploading your project manually.
-              </p>
-              <p>
-                Just make sure to set the <code>NODE_ENV</code> environment
-                variable to <code>production</code>.
-              </p>
-            </section>
-
-            <section id="netlify">
-              <h2>❌ Netlify</h2>
-              <p>
-                At the moment, <strong>Netlify is not compatible</strong> with
-                Dinou, because it does not allow passing{" "}
-                <code>--conditions react-server</code> to Node.js. This flag is
-                required for a Dinou app to work.
-              </p>
-
-              <Alert className="not-prose mt-2 mb-2">
-                <AlertTriangle className="h-4 w-4 text-yellow-500" />
-                <AlertDescription>
-                  If Netlify adds support for custom flags in the future, Dinou
-                  compatibility might become possible.
-                </AlertDescription>
-              </Alert>
-            </section>
-
-            <section id="other-platforms">
-              <h2>🛠 Other Platforms</h2>
-              <p>
-                You can also deploy Dinou to other Node.js platforms like{" "}
-                <code>Render</code>, <code>Fly.io</code>, <code>Railway</code>,
-                etc.
-              </p>
-              <p>
-                Just make sure the platform lets you pass{" "}
-                <code>--conditions react-server</code> to the Node.js process.
-              </p>
-
-              {/* <Alert className="not-prose mt-2">
-                <Lightbulb className="h-4 w-4" />
-                <AlertDescription>
-                  Let us know if you deploy Dinou on another platform so we can
-                  add it to the docs!
-                </AlertDescription>
-              </Alert> */}
+              <section id="deployment-checklist">
+                <h3>Deployment Checklist</h3>
+                <Alert className="not-prose mt-6">
+                  <Zap className="h-4 w-4" />
+                  <AlertTitle>Deployment Checklist</AlertTitle>
+                  <AlertDescription>
+                    <ul className="list-disc pl-4 mt-2 space-y-1">
+                      <li>
+                        ✅ Build your app with <code>npm run build</code>
+                      </li>
+                      <li>
+                        ✅ Set environment variables on your hosting platform
+                      </li>
+                      <li>
+                        ✅ Test the production build locally before deploying
+                      </li>
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+              </section>
             </section>
           </div>
         </div>
       </main>
 
-      <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8">
+      <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">
         <div className="sticky top-20">
           <TableOfContents items={tocItems} />
         </div>

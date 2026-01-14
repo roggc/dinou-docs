@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "@/docs/hooks/use-pathname";
+import { usePathname, Link } from "dinou";
 import {
   Sidebar,
   SidebarContent,
@@ -32,6 +32,10 @@ import {
   Rocket,
   DraftingCompass,
   Package,
+  Boxes,
+  BookMarked,
+  Brain,
+  Shredder,
 } from "lucide-react";
 
 const navigation = [
@@ -59,49 +63,14 @@ const navigation = [
     title: "Core Concepts",
     items: [
       {
-        title: "Routing System",
+        title: "Routing",
         href: "/docs/routing",
         icon: Route,
       },
       {
-        title: "Page Functions",
-        href: "/docs/page-functions",
+        title: "Layouts",
+        href: "/docs/layouts",
         icon: FileText,
-      },
-      {
-        title: "Data Fetching",
-        href: "/docs/data-fetching",
-        icon: Database,
-      },
-      {
-        title: "Server Components",
-        href: "/docs/server-components",
-        icon: Server,
-      },
-      {
-        title: "Client Components",
-        href: "/docs/client-components",
-        icon: Atom,
-      },
-      {
-        title: "Server Functions",
-        href: "/docs/server-functions",
-        icon: Zap,
-      },
-      {
-        title: "Advanced",
-        href: "/docs/advanced",
-        icon: DraftingCompass,
-      },
-    ],
-  },
-  {
-    title: "Features",
-    items: [
-      {
-        title: "Dynamic & Query Parameters",
-        href: "/docs/parameters",
-        icon: Code,
       },
       {
         title: "Navigation",
@@ -109,19 +78,59 @@ const navigation = [
         icon: Globe,
       },
       {
-        title: "Styles & CSS",
+        title: "Page Functions",
+        href: "/docs/page-functions",
+        icon: DraftingCompass,
+      },
+      {
+        title: "Server Functions",
+        href: "/docs/server-functions",
+        icon: Zap,
+      },
+      {
+        title: "Data Fetching",
+        href: "/docs/data-fetching",
+        icon: Database,
+      },
+      {
+        title: "Advanced Patterns",
+        href: "/docs/pattern",
+        icon: Brain,
+      },
+      {
+        title: "Rendering",
+        href: "/docs/rendering",
+        icon: Shredder,
+      },
+      {
+        title: "API Reference",
+        href: "/docs/api-reference",
+        icon: BookMarked,
+      },
+      {
+        title: "Cheatsheet",
+        href: "/docs/cheatsheet",
+        icon: Atom,
+      },
+    ],
+  },
+  {
+    title: "Features",
+    items: [
+      {
+        title: "Favicons",
+        href: "/docs/favicons",
+        icon: Code,
+      },
+      {
+        title: "Styles",
         href: "/docs/styles",
         icon: Palette,
       },
       {
         title: "Assets",
-        href: "/docs/assets_",
+        href: "/docs/assets",
         icon: ImageIcon,
-      },
-      {
-        title: "Favicons",
-        href: "/docs/favicons",
-        icon: Star,
       },
     ],
   },
@@ -129,19 +138,24 @@ const navigation = [
     title: "Configuration",
     items: [
       {
-        title: "Environment Variables",
-        href: "/docs/environment",
+        title: "Env Vars",
+        href: "/docs/env-vars",
         icon: Hexagon,
       },
       {
-        title: "Import Aliases",
-        href: "/docs/import-aliases",
+        title: "Alias",
+        href: "/docs/alias",
         icon: AtSign,
       },
       {
-        title: "Ejecting",
-        href: "/docs/ejecting",
+        title: "Eject",
+        href: "/docs/eject",
         icon: Plug,
+      },
+      {
+        title: "Bundlers",
+        href: "/docs/bundlers",
+        icon: Boxes,
       },
       {
         title: "Deployment",
@@ -157,7 +171,7 @@ export function DocsSidebar() {
 
   return (
     <Sidebar className="border-r fixed left-0 top-0 h-full z-30">
-      <SidebarContent className="scrollbar-thin">
+      <SidebarContent className="scrollbar-thin md:pt-14">
         {navigation.map((section) => (
           <SidebarGroup key={section.title}>
             <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
@@ -169,10 +183,10 @@ export function DocsSidebar() {
                       asChild
                       isActive={pathname === item.href}
                     >
-                      <a href={item.href}>
+                      <Link href={item.href}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
-                      </a>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

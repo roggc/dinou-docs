@@ -11,241 +11,245 @@ import {
   CardTitle,
 } from "@/docs/components/ui/card";
 import {
+  Cpu,
   Zap,
-  Code2,
-  Server,
-  Shield,
-  Sparkles,
+  Route,
+  Database,
+  FolderTree,
   ArrowRight,
-  Code,
+  RefreshCw,
 } from "lucide-react";
-import { CodeBlock } from "@/docs/components/code-block";
-import dinou from "@/docs/images/dinou.png";
+import { Link } from "dinou";
 
 const tocItems = [
-  { id: "introduction", title: "Introduction", level: 2 },
-  { id: "features", title: "Features", level: 2 },
-  { id: "quick-start", title: "Quick Start", level: 2 },
+  { id: "what-is-dinou", title: "What is Dinou?", level: 2 },
+  { id: "key-features", title: "Key Features", level: 2 },
+  { id: "rendering-philosophy", title: "Rendering Philosophy", level: 2 },
   { id: "next-steps", title: "Next Steps", level: 2 },
 ];
 
 export default function Page() {
   return (
-    <div className="flex-1 flex">
-      <main className="flex-1 py-6 lg:py-8 min-w-0">
-        <div className="container max-w-4xl px-4">
-          <div className="flex items-center space-x-2 mb-6">
-            {/* <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
-              <img src={dinou} alt="dinou logo" className="h-6 w-6" />
-            </div> */}
-            <img src={dinou} alt="dinou logo" className="h-6 w-6" />
-            <h1 className="text-3xl font-bold">Dinou</h1>
-            {/* <Badge variant="secondary">v1.0</Badge> */}
+    <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
+      <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
+        <div className="container max-w-4xl px-4 md:px-6 mx-auto">
+          {/* Header */}
+          <div className="mb-8 space-y-4">
+            <div className="flex items-center space-x-2">
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                Introduction
+              </h1>
+              <Badge variant="secondary">v4</Badge>
+            </div>
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              A Full-Stack React 19 Framework built for the modern web.
+            </p>
           </div>
 
-          <div className="prose overflow-hidden max-w-full">
-            <p className="text-xl text-muted-foreground mb-8">
-              A React 19 framework with file-based routing, SSR, SSG, and more.
-            </p>
-
-            <section id="introduction">
-              <h2>Introduction</h2>
+          <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
+            <section id="what-is-dinou">
+              <h2>What is Dinou?</h2>
               <p>
-                <strong>Dinou</strong> is a React 19 framework. The name "dinou"
-                means 19 in Catalan, reflecting its focus on React 19's latest
-                features. You can create a Dinou app by running:
+                <strong>Dinou</strong> is a framework designed to unleash the
+                full potential of <strong>React 19</strong>. It provides{" "}
+                <strong>seamless integration</strong> with React Server
+                Components (RSC), Server-Side Rendering (SSR), Static Generation
+                (SSG), and advanced Incremental Static strategies (ISG and ISR).
               </p>
-
-              <CodeBlock
-                language="bash"
-                containerClassName="w-full"
-              >{`npx create-dinou@latest my-app`}</CodeBlock>
-
               <p>
-                Dinou provides a streamlined development experience with zero
-                configuration while giving you full control through ejection
-                when needed.
+                It is built to leverage Suspense and Streaming for optimal
+                performance, offering a modern development experience with an{" "}
+                <strong>intelligent rendering system</strong> that adapts to
+                your application's data needs automatically.
               </p>
             </section>
 
-            <section id="features">
-              <h2>Features</h2>
+            <section id="key-features">
+              <h2>Key Features</h2>
               <div className="grid gap-6 md:grid-cols-2 not-prose mb-8">
                 <Card>
                   <CardHeader>
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
-                      <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      <Cpu className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <CardTitle>File-based Routing</CardTitle>
+                    {/* CAMBIO: Renombrado para evitar "Native" */}
+                    <CardTitle>React 19 Foundation</CardTitle>
                     <CardDescription>
-                      Intuitive routing system based on your file structure
+                      Deep integration with the React core.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• Static and dynamic routes</li>
-                      <li>• Nested layouts</li>
-                      <li>• Catch-all routes</li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
-                      <Server className="h-5 w-5 text-green-600 dark:text-green-400" />
-                    </div>
-                    <CardTitle>Pure React 19</CardTitle>
-                    <CardDescription>
-                      Built for React 19's server functions, suspense, and
-                      server components
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• Server Functions</li>
-                      <li>• Suspense support</li>
-                      <li>• Server Components</li>
-                    </ul>
+                    <p className="text-sm text-muted-foreground">
+                      Leverages Suspense and Streaming for optimal performance.
+                      Fetch data directly in your components without client-side
+                      waterfalls.
+                    </p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
-                      <Code2 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                      <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <CardTitle>Rendering Modes</CardTitle>
+                    {/* CAMBIO: Renombrado para evitar "Hybrid Rendering Engine" */}
+                    <CardTitle>Intelligent Rendering</CardTitle>
                     <CardDescription>
-                      Multiple rendering strategies for optimal performance
+                      Static by default, Dynamic on demand.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• SSR (Server Side Rendering)</li>
-                      <li>• SSG (Static Site Generation)</li>
-                      <li>• ISR (Incremental Static Regeneration)</li>
-                      <li>• Dynamic rendering (bypass SSG)</li>
-                    </ul>
+                    <p className="text-sm text-muted-foreground">
+                      Automatically switches to Dynamic Rendering (SSR) when
+                      request-specific data like cookies, headers, or search
+                      params are detected (Automatic Bailout).
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
+                      <Route className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <CardTitle>Full-Featured Router</CardTitle>
+                    <CardDescription>
+                      Soft navigation & Smart Links.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Client-side soft navigation including <code>push</code>,{" "}
+                      <code>replace</code>, <code>back</code>, and{" "}
+                      <code>refresh</code>. The <code>&lt;Link&gt;</code>{" "}
+                      component supports automatic prefetching.
+                    </p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/20">
-                      <Shield className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                      <RefreshCw className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                     </div>
-                    <CardTitle>Full Control</CardTitle>
+                    <CardTitle>Generation Strategies</CardTitle>
                     <CardDescription>
-                      Eject when you need complete customization
+                      Comprehensive ISR & ISG support.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• TypeScript or JavaScript</li>
-                      <li>• Import aliases</li>
-                      <li>• CSS modules & Tailwind</li>
-                      <li>• Use of assets (images, videos, etc.)</li>
-                    </ul>
+                    <p className="text-sm text-muted-foreground">
+                      Update static content after deployment with Incremental
+                      Static Regeneration (ISR) and generate new pages on demand
+                      with Incremental Static Generation (ISG).
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/20">
+                      <Database className="h-5 w-5 text-red-600 dark:text-red-400" />
+                    </div>
+                    <CardTitle>Data Fetching & State</CardTitle>
+                    <CardDescription>
+                      Seamless server-client sync.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Optimized patterns using{" "}
+                      <code>react-enhanced-suspense</code> and{" "}
+                      <code>jotai-wrapper</code> for seamless state
+                      synchronization and mutations.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800">
+                      <FolderTree className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                    </div>
+                    <CardTitle>File-System Routing</CardTitle>
+                    <CardDescription>
+                      Intuitive project structure.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Automatic routing based on{" "}
+                      <code>page.&#123;jsx,tsx&#125;</code> files located within
+                      the <code>src</code> directory structure.
+                    </p>
                   </CardContent>
                 </Card>
               </div>
             </section>
 
-            <section id="quick-start">
-              <h2>Quick Start</h2>
-              <p>You have two options:</p>
-
-              <h3>
-                1. Use the command <code>create-dinou</code> to create a new
-                project
-              </h3>
-
-              <CodeBlock
-                language="bash"
-                containerClassName="w-full"
-              >{`npx create-dinou@latest my-app`}</CodeBlock>
-
+            <section id="rendering-philosophy">
+              <h2>Rendering Philosophy</h2>
               <p>
-                Or set up manually and get started with Dinou in just a few
-                steps:
+                Dinou prioritizes a <strong>Static First</strong> approach. By
+                default, pages are pre-rendered as Static Site Generation (SSG).
+                However, the engine is smart enough to "bail out" to Server-Side
+                Rendering (SSR) instantly if your code accesses dynamic data
+                sources.
               </p>
-
-              <h3>2. Set up manually</h3>
-              <h4>2.1. Create a new directory</h4>
-              <CodeBlock
-                language="bash"
-                containerClassName="w-full"
-              >{`mkdir my-app && cd my-app`}</CodeBlock>
-              <h4>2.2. Initialize npm and install dependencies</h4>
-              <CodeBlock
-                language="bash"
-                containerClassName="w-full"
-              >{`# Create an npm project
-npm init -y 
-# Install dependencies 
-npm i react react-dom dinou`}</CodeBlock>
-
-              <h4>
-                2.3. Add scripts to package.json for convenience (optional)
-              </h4>
-
-              <CodeBlock language="json" containerClassName="w-full">{`{
-  "scripts": {
-    "dev": "dinou dev",
-    "build": "dinou build",
-    "start": "dinou start",
-    "eject": "dinou eject"
-  }
-}`}</CodeBlock>
-
-              <h4>2.4. Create your first page</h4>
               <p>
-                Create <code>src/page.jsx</code> (or <code>.tsx</code>):
+                This ensures you get the performance of a static site where
+                possible, and the flexibility of a dynamic server when needed,
+                without complex configuration files.
               </p>
-              <CodeBlock
-                language="typescript"
-                containerClassName="w-full"
-              >{`"use client";
-
-export default function Page() {
-  return <>Hello, Dinou!</>;
-}`}</CodeBlock>
-
-              <p>
-                Once you have the project created either with the command or
-                manually you can start developing:
-              </p>
-              <h3>3. Start developing</h3>
-
-              <CodeBlock
-                language="bash"
-                containerClassName="w-full"
-              >{`npm run dev # or npx dinou dev `}</CodeBlock>
             </section>
 
             <section id="next-steps">
               <h2>Next Steps</h2>
-              <p>
-                Now that you have Dinou running, explore these key concepts:
-              </p>
+              <p>Ready to start building?</p>
 
-              <div className="flex flex-col sm:flex-row gap-4 not-prose">
-                <Button variant="outline" asChild>
-                  <a href="/docs/routing">Routing</a>
+              <div className="flex flex-col sm:flex-row flex-wrap gap-4 not-prose">
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 px-6 justify-start w-full sm:w-auto"
+                  asChild
+                >
+                  <Link
+                    href="/docs/getting-started"
+                    className="flex flex-col items-start gap-1"
+                  >
+                    <span className="font-semibold flex items-center">
+                      Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                    </span>
+                    <span className="text-xs text-muted-foreground font-normal">
+                      Install and run your first app.
+                    </span>
+                  </Link>
                 </Button>
-                <Button variant="outline" asChild>
-                  <a href="/docs/data-fetching">Data Fetching</a>
-                </Button>
-                <Button variant="outline" asChild>
-                  <a href="/docs/page-functions">Page Functions</a>
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 px-6 justify-start w-full sm:w-auto"
+                  asChild
+                >
+                  <Link
+                    href="/docs/routing"
+                    className="flex flex-col items-start gap-1"
+                  >
+                    <span className="font-semibold flex items-center">
+                      Routing Guide <ArrowRight className="ml-2 h-4 w-4" />
+                    </span>
+                    <span className="text-xs text-muted-foreground font-normal">
+                      Learn how the file system works.
+                    </span>
+                  </Link>
                 </Button>
               </div>
             </section>
           </div>
         </div>
       </main>
-      <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8">
+
+      {/* Sidebar TOC - Visible on Desktop */}
+      <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">
         <div className="sticky top-20">
           <TableOfContents items={tocItems} />
         </div>

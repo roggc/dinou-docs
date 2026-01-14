@@ -1,61 +1,68 @@
 "use client";
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/docs/components/ui/card";
+import { Image, Globe } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
-import { Alert, AlertDescription } from "@/docs/components/ui/alert";
-import { Info } from "lucide-react";
 
 const tocItems = [
-  { id: "overview", title: "Overview", level: 2 },
-  { id: "layout-update", title: "Updating the Layout", level: 2 },
+  { id: "favicons", title: "🎨 Favicons", level: 2 },
+  { id: "asset-placement", title: "Asset Placement", level: 3 },
 ];
 
-export default function FaviconsPage() {
+export default function Page() {
   return (
-    <div className="flex-1 flex">
-      <main className="flex-1 py-6 lg:py-8 min-w-0">
-        <div className="container max-w-4xl px-4">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">Favicons</h1>
-            <p className="text-xl text-muted-foreground">
-              Learn how to add a favicon and related icons to your Dinou app.
+    <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
+      <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
+        <div className="container max-w-4xl px-4 md:px-6 mx-auto">
+          {/* Header */}
+          <div className="mb-8 space-y-4">
+            <div className="flex items-center space-x-2">
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                Favicons
+              </h1>
+            </div>
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              Configure favicons and app icons for proper branding across
+              browsers and devices in Dinou.
             </p>
           </div>
 
-          <div className="prose max-w-none">
-            <section id="overview">
-              <h2>Overview</h2>
+          <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
+            <section id="favicons">
+              <h2>🎨 Favicons</h2>
               <p>
-                To add a favicon to your app, you can use an online tool such as{" "}
-                <a href="https://favicon.io" target="_blank">
-                  favicon.io
-                </a>{" "}
-                to generate all the required icons.
+                Add a favicon and app icons to your Dinou application for proper
+                branding across browsers and devices.
               </p>
-
-              <p>
-                After downloading the icons, unzip the folder and rename it to{" "}
-                <code>favicons</code>. Then, move this folder to the{" "}
-                <strong>root of your project</strong>.
-              </p>
-
-              <Alert className="not-prose">
-                <Info className="h-4 w-4" />
-                <AlertDescription>
-                  Make sure the favicons folder is placed at the root level.
-                </AlertDescription>
-              </Alert>
-            </section>
-
-            <section id="layout-update">
-              <h2>Updating the Layout</h2>
-              <p>
-                Update your <code>layout.tsx</code> (or <code>page.tsx</code> if
-                you're not using layouts) to include the favicon and related
-                icons in the <code>&lt;head&gt;</code> tag:
-              </p>
-
-              <CodeBlock language="typescript">{`"use client";
+              <ol>
+                <li>
+                  Generate assets using a tool like{" "}
+                  <a href="https://favicon.io" target="_blank">
+                    favicon.io
+                  </a>
+                  .
+                </li>
+                <li>Unzip the downloaded folder.</li>
+                <li>
+                  Rename it to <code>favicons</code> and place it in your
+                  project <strong>root</strong>.
+                </li>
+                <li>
+                  Update your root layout to include the references in the{" "}
+                  <code>&lt;head&gt;</code> tag.
+                </li>
+              </ol>
+              <CodeBlock
+                language="tsx"
+                containerClassName="w-full overflow-hidden rounded-lg"
+              >
+                {`"use client";
 
 import type { ReactNode } from "react";
 
@@ -63,42 +70,40 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <title>Dinou app</title>
+        <title>Dinou App</title>
+        {/* Favicon references */}
         <link rel="icon" type="image/png" href="/favicon.ico" />
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href="/apple-touch-icon.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href="/favicon-32x32.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href="/favicon-16x16.png"
-        />
-        <link rel="manifest" href="/site.webmanifest"></link>
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+        {/* Don't forget your stylesheet! */}
+        <link href="/styles.css" rel="stylesheet" />
       </head>
       <body>{children}</body>
     </html>
   );
-}`}</CodeBlock>
-
-              <p>
-                Once you've added the icons and updated your layout, your web
-                app will show the favicon across all pages and devices.
-              </p>
+}`}
+              </CodeBlock>
+              <section id="asset-placement">
+                <h3>Asset Placement</h3>
+                <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                  <div className="flex items-center gap-2 font-semibold mb-2">
+                    <Image className="h-5 w-5 text-blue-500" />
+                    <span>Directory Structure</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    The <code>favicons</code> folder should be at the same level
+                    as your <code>src</code> directory.
+                  </p>
+                </div>
+              </section>
             </section>
           </div>
         </div>
       </main>
 
-      <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8">
+      <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">
         <div className="sticky top-20">
           <TableOfContents items={tocItems} />
         </div>
