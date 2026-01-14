@@ -53,7 +53,7 @@ export default function Page() {
               <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-slate-900 dark:text-white">
                 Dinou
                 <span className="block mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight pb-2">
-                  Modern Full-Stack React 19 Framework
+                  Full-Stack React 19 Framework
                 </span>
               </h1>
 
