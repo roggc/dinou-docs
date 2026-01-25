@@ -172,7 +172,7 @@ export default function Page() {
               <p>
                 Dinou enforces a strict <strong>No-Gap Rule</strong> when using
                 deep nested optional segments like{" "}
-                <code>[[warehouse]]/[[aisle]]</code>.
+                <code>/inventory/[[warehouse]]/[[aisle]]</code>.
               </p>
 
               <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
