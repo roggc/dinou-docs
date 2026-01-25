@@ -36,6 +36,7 @@ import {
   BookMarked,
   Brain,
   Shredder,
+  ClipboardList,
 } from "lucide-react";
 
 const navigation = [
@@ -103,6 +104,11 @@ const navigation = [
         icon: Shredder,
       },
       {
+        title: "React Compiler",
+        href: "/docs/compiler",
+        icon: Atom,
+      },
+      {
         title: "API Reference",
         href: "/docs/api-reference",
         icon: BookMarked,
@@ -110,7 +116,7 @@ const navigation = [
       {
         title: "Cheatsheet",
         href: "/docs/cheatsheet",
-        icon: Atom,
+        icon: ClipboardList,
       },
     ],
   },

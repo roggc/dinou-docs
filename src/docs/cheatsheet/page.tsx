@@ -33,7 +33,7 @@ const tocItems = [
   { id: "layout-flags", title: "Layout Control Flags (Empty Files)", level: 3 },
   {
     id: "page-config-cheatsheet",
-    title: "Page Configuration (`page_functions.ts`) Cheatsheet",
+    title: "Page Configuration (page_functions.ts) Cheatsheet",
     level: 2,
   },
   { id: "getstaticpaths-ref", title: "getStaticPaths()", level: 3 },

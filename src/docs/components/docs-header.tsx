@@ -12,6 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/docs/components/ui/tooltip";
+import { Link } from "dinou";
 
 export function DocsHeader() {
   return (
@@ -21,15 +22,15 @@ export function DocsHeader() {
         <div className="flex items-center gap-2 pl-4 md:pl-6">
           <SidebarTrigger className="md:hidden" />
           <div className="flex items-center space-x-2">
-            <a href="/">
-              <img src={dinou} alt="Dinou logo" className="h-6 w-6" />
-            </a>
+            <Link href="/">
+              <img src={dinou} alt="Dinou logo" className="w-6" width={24} />
+            </Link>
             <span className="font-bold">Dinou</span>
-            <a href="/docs">
+            <Link href="/docs">
               <Badge variant="secondary" className="text-xs">
                 docs
               </Badge>
-            </a>
+            </Link>
           </div>
         </div>
 

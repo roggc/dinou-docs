@@ -19,7 +19,7 @@ export default function Header() {
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center space-x-2">
           <Link href="/">
-            <img src={dinou} className="w-10" alt="Dinou Logo" />
+            <img src={dinou} className="w-10" alt="Dinou Logo" width={40} />
           </Link>
         </div>
 
