@@ -36,8 +36,9 @@ export default function Layout({
           sizes="16x16"
           href="/favicon-16x16.png"
         />
-        <link rel="manifest" href="/site.webmanifest"></link>
-        <link href="/styles.css" rel="stylesheet"></link>
+        <link rel="manifest" href="/site.webmanifest" />
+        {/* <link rel="preload" href="/styles.css" as="style" /> */}
+        <link rel="stylesheet" href="/styles.css" precedence="default" />
       </head>
       <body>
         <ThemeProvider
