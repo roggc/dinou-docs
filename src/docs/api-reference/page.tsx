@@ -557,8 +557,7 @@ export default function Header() {
                   <code>getContext()</code>
                 </h3>
                 <p>
-                  Retrieves the request/response context.{" "}
-                  <strong>Server Components Only</strong>.
+                  Retrieves the request/response context. <strong>Server-side execution contexts only</strong> (Server Components, <code>page_functions</code>/<code>getProps</code>, and <code>"use server"</code> Server Functions).
                 </p>
                 <CodeBlock
                   language="javascript"
