@@ -333,10 +333,61 @@ export default function SearchPage() {
 }`}
                         </CodeBlock>
                       </li>
-                      <li><strong>Option 2 (Forced Dynamic SSR):</strong> Switch the page to dynamic rendering on every request by exporting <code>export function dynamic() &#123; return true; &#125;</code> from its <code>page_functions.ts</code>. This ensures the server always renders with the actual query parameters, avoiding mismatches.</li>
+                      <li><strong>Option 2 (Forced Dynamic Rendering):</strong> Switch the route to dynamic rendering on every request by exporting <code>export function dynamic() &#123; return true; &#125;</code> from its <code>page_functions.ts</code>. This ensures the server always generates the content dynamically with the actual query parameters, avoiding mismatches.</li>
                     </ul>
                   </AlertDescription>
                 </Alert>
+                
+                <div className="border border-amber-500/20 bg-amber-500/5 dark:bg-amber-500/10 rounded-lg p-4 bg-card not-prose mt-4 space-y-3">
+                  <div className="flex items-center gap-2 font-semibold text-amber-600 dark:text-amber-400">
+                    <AlertTriangle className="h-5 w-5" />
+                    <span>How Static Generation & Bailouts Work</span>
+                  </div>
+                  <div className="text-xs leading-relaxed text-muted-foreground space-y-3">
+                    <p>
+                      At server startup in production, Dinou pre-renders static pages. If a <strong>Server Component</strong> reads dynamic request data (like search params or cookies), Dinou automatically bails out and marks the route as <strong>Dynamic</strong>. However, since <strong>Client Components</strong> do not execute their component functions on the server during pre-rendering, their hooks cannot trigger a bailout. As a result, routes using search params only in Client Components remain static, rendering with empty params at build time and causing hydration mismatches in the browser unless handled properly (e.g. using Option 1).
+                    </p>
+                    <details className="group mt-3 border-t border-amber-500/10 pt-3">
+                      <summary className="cursor-pointer font-semibold text-xs text-amber-700 dark:text-amber-400 select-none hover:underline">
+                        Show Technical Details (for Ejected Code)
+                      </summary>
+                      <div className="mt-3 space-y-3">
+                        <p>
+                          Dinou executes a three-phase static generation pipeline (via the <code>generateStatic</code> process in <code>generate-static.js</code>):
+                        </p>
+                        <ol className="list-decimal pl-5 space-y-3">
+                          <li>
+                            <strong>Phase 1: Analysis &amp; Bailout Discovery (<code>buildStaticPages</code> in <code>build-static-pages.js</code>)</strong>
+                            <p className="mt-1">
+                              The generator crawls all routes and resolves their layout/page component tree. It mock-renders the tree using <code>asyncRenderJSXToClientJSX</code> in-memory.
+                            </p>
+                            <ul className="list-disc pl-5 mt-1 space-y-1">
+                              <li>
+                                <strong>Server Components:</strong> If a Server Component accesses the request context (e.g., <code>getContext().req.query</code>), a Proxy trap intercepts the access and triggers an <strong>Automatic Static Bailout</strong>. The route is marked as <strong>Dynamic</strong> and no static files are generated.
+                              </li>
+                              <li>
+                                <strong>Client Components:</strong> Client Components represent client-side code. During layout nesting and component resolution via <code>asyncRenderJSXToClientJSX</code>, they are treated as reference points and their function bodies are <strong>not executed</strong>. Because their component logic is not run, they cannot trigger the request context Proxy traps, and <strong>no static bailout occurs</strong> (the route remains marked as Static).
+                              </li>
+                            </ul>
+                          </li>
+                          <li>
+                            <strong>Phase 2: RSC Payload Generation (<code>generateStaticRSCs</code> in <code>generate-static-rscs.js</code>)</strong>
+                            <p className="mt-1">
+                              For all routes successfully marked as static in Phase 1, the generator renders the JSX tree using React's native <code>renderToPipeableStream</code> and saves the React Flight binary payload to disk as <code>rsc.rsc</code>.
+                            </p>
+                          </li>
+                          <li>
+                            <strong>Phase 3: Static HTML Generation (<code>generateStaticPages</code> in <code>generate-static-pages.js</code>)</strong>
+                            <p className="mt-1">
+                              Finally, the generator reads each <code>rsc.rsc</code> file from disk, reconstructs the JSX tree using React's <code>createFromNodeStream</code>, renders the markup to static HTML using React's <code>renderToPipeableStream</code> (from <code>react-dom/server</code>), and writes it to disk as <code>index.html</code>.
+                            </p>
+                          </li>
+                        </ol>
+                      </div>
+                    </details>
+                  </div>
+                </div>
+
                 <div className="border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/10 rounded-lg p-4 bg-card not-prose mt-4">
                   <div className="flex items-center gap-2 font-semibold mb-2 text-blue-600 dark:text-blue-400">
                     <Server className="h-5 w-5 text-blue-500" />
