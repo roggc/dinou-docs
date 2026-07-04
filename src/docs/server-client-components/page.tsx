@@ -220,27 +220,37 @@ export function Counter() {
             </section>
 
             <section id="best-practices">
-              <h2>Best Practices</h2>
-              <ol className="list-decimal pl-5 space-y-3">
-                <li>
-                  <strong>Keep Client Components at the Leaves:</strong>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    To maintain a lightweight client-side bundle, push interactivity down to the leaves of your component tree. For example, render a static layout/header on the server, and only make the actual search input bar a Client Component.
+              <h2>Choosing Your Architecture</h2>
+              <p>
+                Dinou does not force a single "correct" pattern. Depending on your goals and preferences, you can choose the paradigm that best fits your development flow:
+              </p>
+              
+              <div className="space-y-6 mt-6">
+                <div>
+                  <h4>Pattern A: The Client-First Model (<code>getProps</code> + Client Components)</h4>
+                  <p className="text-sm text-muted-foreground">
+                    If you prefer the mental simplicity and freedom of standard React, you can build your pages entirely as Client Components and fetch server-side data using the <code>getProps</code> function of <code>page_functions</code>.
                   </p>
-                </li>
-                <li>
-                  <strong>Pass Server Components as Children:</strong>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    If you have a Client Component layout, you can still nest Server Components inside it. Simply pass the Server Component as the <code>children</code> prop to the Client Component. The Server Component will execute on the server, and its pre-rendered output will be rendered inside the Client Component layout.
+                  <ul className="list-disc pl-5 mt-2 text-xs text-muted-foreground space-y-1">
+                    <li><strong>Freedom &amp; Interactivity:</strong> You write familiar React code with full access to hooks and browser event listeners (like <code>onClick</code>) anywhere in the file.</li>
+                    <li><strong>No Mental Splitting:</strong> No need to separate server and client boundaries inside the page file.</li>
+                    <li><strong>Secure Data Fetching:</strong> The data in <code>getProps</code> still executes securely on the server (accessing databases/keys) and passes the results as props.</li>
+                    <li><em>Trade-off:</em> The JavaScript bundle shipped to the browser includes the component logic and its imports.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4>Pattern B: The Server-First Model (Server Components)</h4>
+                  <p className="text-sm text-muted-foreground">
+                    If you are building content-heavy pages (like blogs, documentation, or landing pages) and want to minimize the JavaScript payload sent to the client, you can write them as Server Components.
                   </p>
-                </li>
-                <li>
-                  <strong>Separate Client Logic into Hooks or Components:</strong>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    If a page requires some interactivity, do not mark the entire page file as <code>"use client"</code>. Leave the page as a Server Component to perform data fetching, and import a separate Client Component for the interactive parts.
-                  </p>
-                </li>
-              </ol>
+                  <ul className="list-disc pl-5 mt-2 text-xs text-muted-foreground space-y-1">
+                    <li><strong>Ultra-Lightweight:</strong> The code for Server Components is never sent to the browser. Only the rendered HTML elements are shipped.</li>
+                    <li><strong>Zero Bundle Overhead:</strong> Heavy libraries imported inside Server Components do not inflate the client bundle.</li>
+                    <li><em>Trade-off:</em> You must explicitly split interactive elements (like custom buttons or input fields) into separate files marked with <code>"use client"</code>.</li>
+                  </ul>
+                </div>
+              </div>
             </section>
           </div>
         </div>
