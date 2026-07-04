@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname, Link } from "dinou";
 import {
   Sidebar,
@@ -11,6 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/docs/components/ui/sidebar";
 import {
   BookOpen,
@@ -182,10 +183,20 @@ const navigation = [
 export function DocsSidebar() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const { setOpenMobile } = useSidebar();
+  const prevPathname = useRef(pathname);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Close the mobile sidebar drawer automatically when navigation occurs (pathname changes)
+  useEffect(() => {
+    if (prevPathname.current !== pathname) {
+      setOpenMobile(false);
+      prevPathname.current = pathname;
+    }
+  }, [pathname, setOpenMobile]);
 
   return (
     <Sidebar className="border-r fixed left-0 top-0 h-full z-30">
