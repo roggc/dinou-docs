@@ -53,15 +53,15 @@ export default function Page() {
               <h2>Automatic Static Bailout</h2>
               <p>
                 You don't need to manually configure pages as "Static" or
-                "Dynamic". Dinou analyzes your code at build time. By default,
-                pages are pre-rendered (SSG).
+                "Dynamic". Dinou analyzes your code to determine the appropriate strategy. By default,
+                pages are pre-rendered (Static Rendering) at server startup.
               </p>
               <p>
                 However, if your component accesses{" "}
                 <strong>request-specific data</strong> (cookies, headers, or
                 search params), Dinou automatically "bails out" of static
                 generation and switches to{" "}
-                <strong>Server-Side Rendering (SSR)</strong> for that specific
+                <strong>Dynamic Rendering</strong> for that specific
                 route.
               </p>
 
@@ -76,7 +76,7 @@ export default async function Profile() {
   const ctx = getContext();
   
   // ⚠️ Accessing cookies triggers the Automatic Static Bailout
-  // This page will now be rendered on every request (SSR)
+  // This page will now be rendered on every request (dynamic)
   const token = ctx.req.cookies.session_token;
 
   const user = await fetchUser(token);
@@ -103,7 +103,7 @@ export default async function Profile() {
                 data, or always-fresh DB content without caching).
               </p>
               <p>
-                You can force SSR by exporting a <code>dynamic</code> function
+                You can force dynamic rendering by exporting a <code>dynamic</code> function
                 from your <code>page_functions.ts</code> file.
               </p>
 
@@ -114,7 +114,7 @@ export default async function Profile() {
                 >
                   {`// src/random/page_functions.ts
 export function dynamic() {
-  return true; // Forces SSR on every request
+  return true; // Forces Dynamic Rendering on every request
 }`}
                 </CodeBlock>
                 <CodeBlock
@@ -122,20 +122,20 @@ export function dynamic() {
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
                   {`// src/random/page.tsx
-export default async function Page() {
+// Note: Server Components do not need to be async if they don't use await
+export default function Page() {
   return <div suppressHydrationWarning>Random: {Math.random()}</div>;
 }`}
                 </CodeBlock>
               </div>
             </section>
 
-            <section id="isr">
+            <section id="isr" className="mt-12 pt-8 border-t">
               <h2>Incremental Static Regeneration (ISR)</h2>
               <p>
-                ISR allows you to update static pages after you've built your
-                site. You can rebuild specific pages in the background as
+                ISR allows you to update static pages after the server has started. You can rebuild specific pages in the background as
                 traffic comes in, ensuring users always see relatively fresh
-                content without rebuilding the entire project.
+                content without restarting the server or rebuilding the entire project.
               </p>
               <CodeBlock
                 language="typescript"
@@ -147,8 +147,8 @@ export function revalidate() {
 }`}
               </CodeBlock>
 
-              <div className="not-prose mt-6 grid gap-6 md:grid-cols-2">
-                <Card className="bg-muted/50 border-border">
+              <div className="not-prose mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="bg-muted/50 border-border min-w-0 w-full">
                   <CardHeader>
                     <div className="flex items-center gap-2 font-semibold">
                       <RefreshCw className="h-5 w-5 text-blue-500" />
@@ -161,7 +161,7 @@ export function revalidate() {
                     Subsequent requests will see the new version.
                   </CardContent>
                 </Card>
-                <Card className="bg-muted/50 border-border">
+                <Card className="bg-muted/50 border-border min-w-0 w-full">
                   <CardHeader>
                     <div className="flex items-center gap-2 font-semibold">
                       <Info className="h-5 w-5 text-orange-500" />
@@ -177,17 +177,17 @@ export function revalidate() {
               </div>
             </section>
 
-            <section id="isg">
+            <section id="isg" className="mt-12 pt-8 border-t">
               <h2>Incremental Static Generation (ISG)</h2>
               <p>
                 While ISR updates <em>existing</em> pages, <strong>ISG</strong>{" "}
-                allows you to generate <em>new</em> pages that weren't present
-                at build time.
+                allows you to generate <em>new</em> pages that weren't pre-rendered
+                at server startup.
               </p>
               <p>
                 This is particularly useful for large e-commerce sites or blogs
                 where building thousands of pages upfront is too slow. You can
-                build the most popular pages at build time and let the rest be
+                pre-render the most popular pages at server startup and let the rest be
                 generated on demand.
               </p>
 
@@ -206,7 +206,7 @@ export function revalidate() {
                   {`// src/products/[id]/page_functions.ts
 
 export async function getStaticPaths() {
-  // Only generate the top 10 products at build time
+  // Only generate the top 10 products at server startup
   const topProducts = await db.getTopProducts(10);
   
   return topProducts.map(p => p.id);
@@ -223,7 +223,7 @@ export async function getStaticPaths() {
                       The First Visit & Revalidation
                     </h4>
                     <p className="text-sm text-muted-foreground">
-                      When a user requests a path that wasn't pre-built, Dinou
+                      When a user requests a path that wasn't pre-rendered at server startup, Dinou
                       renders it on the server (like SSR), caches the result,
                       and serves it as static HTML for all future visitors.
                     </p>
@@ -234,6 +234,48 @@ export async function getStaticPaths() {
                       {">"} 0), the generated page will not be static forever—it
                       will regenerate in the background when stale.
                     </p>
+                  </div>
+                </div>
+
+                <div className="mt-8 border-t pt-6">
+                  <h3 className="text-lg font-semibold">Advanced Control APIs for ISG</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Dinou v5 introduces advanced validation exports in <code>page_functions.ts</code> to secure dynamic route parameters and generation:
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose mt-4">
+                    <Card className="min-w-0 w-full">
+                      <CardHeader>
+                        <CardTitle className="text-sm font-semibold">validateParams(params)</CardTitle>
+                      </CardHeader>
+                      <CardContent className="text-sm space-y-2">
+                        <p className="text-muted-foreground">
+                          Validates route parameters before serving or generating. Returning <code>false</code> aborts the request with a 404, preventing invalid generation.
+                        </p>
+                        <CodeBlock language="typescript" hideHeader>
+                          {`export function validateParams(params) {
+  // Reject route parameter and return 404 instantly
+  return typeof params.id === "string" && /^\\d+$/.test(params.id);
+}`}
+                        </CodeBlock>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="min-w-0 w-full">
+                      <CardHeader>
+                        <CardTitle className="text-sm font-semibold">allowISG()</CardTitle>
+                      </CardHeader>
+                      <CardContent className="text-sm space-y-2">
+                        <p className="text-muted-foreground">
+                          Optionally disables ISG completely. If it returns <code>false</code>, any route parameters not returned by <code>getStaticPaths</code> yield a 404 instantly.
+                        </p>
+                        <CodeBlock language="typescript" hideHeader>
+                          {`export function allowISG() {
+  // Disable dynamic on-demand generation; serve getStaticPaths ONLY
+  return false;
+}`}
+                        </CodeBlock>
+                      </CardContent>
+                    </Card>
                   </div>
                 </div>
               </div>
