@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { usePathname, Link } from "dinou";
 import {
   Sidebar,
@@ -37,6 +38,7 @@ import {
   Brain,
   Shredder,
   ClipboardList,
+  RefreshCw,
 } from "lucide-react";
 
 const navigation = [
@@ -57,6 +59,11 @@ const navigation = [
         title: "About",
         href: "/docs/about",
         icon: Copyright,
+      },
+      {
+        title: "Migration from v4",
+        href: "/docs/migration",
+        icon: RefreshCw,
       },
     ],
   },
@@ -174,6 +181,11 @@ const navigation = [
 
 export function DocsSidebar() {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <Sidebar className="border-r fixed left-0 top-0 h-full z-30">
@@ -187,7 +199,7 @@ export function DocsSidebar() {
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       asChild
-                      isActive={pathname === item.href}
+                      isActive={mounted ? pathname === item.href : false}
                     >
                       <Link href={item.href}>
                         <item.icon className="h-4 w-4" />
