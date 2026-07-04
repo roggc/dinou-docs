@@ -1,7 +1,6 @@
 "use client";
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
-import { Badge } from "@/docs/components/ui/badge";
 import { Button } from "@/docs/components/ui/button";
 import {
   Card,
@@ -35,14 +34,10 @@ export default function Page() {
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
       <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
-          {/* Header */}
           <div className="mb-8 space-y-4">
-            <div className="flex items-center space-x-2">
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Introduction
-              </h1>
-              <Badge variant="secondary">v5</Badge>
-            </div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              Introduction
+            </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
               A lightweight, ejectable Full-Stack React 19 Framework built for the modern web.
             </p>
