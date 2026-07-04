@@ -208,18 +208,72 @@ return <ClientRedirect to="/" />;`}
                   <code>redirect(destination)</code>
                 </h3>
                 <p>
-                  Stops execution and redirects the user. Works on both server
-                  and client (renders <code>&lt;ClientRedirect&gt;</code>).
+                  A polymorphic redirect utility that immediately halts execution and redirects the user. Works everywhere across the framework: in **Server Components**, **Client Components**, **Server Functions** (Server Actions), and page functions lifecycle hooks (like <code>getProps</code>).
                 </p>
+                <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-muted text-muted-foreground font-medium">
+                      <tr>
+                        <th className="p-4">Context</th>
+                        <th className="p-4">Behavior</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border bg-card">
+                      <tr>
+                        <td className="p-4 font-mono text-xs">Initial SSR (Headers unsent)</td>
+                        <td className="p-4 text-xs">
+                          Performs a native HTTP 307 redirect directly on the server (critical for SEO and fast hard-navigations).
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs">Active Stream / Client-side</td>
+                        <td className="p-4 text-xs">
+                          Renders <code>&lt;ClientRedirect&gt;</code> to perform a fast client-side transition without browser reloads.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div className="border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/10 rounded-lg p-4 bg-card not-prose mb-4">
+                  <div className="flex items-center gap-2 font-semibold mb-2 text-blue-600 dark:text-blue-400">
+                    <Replace className="h-5 w-5 text-blue-500" />
+                    <span>Path Resolution & Features</span>
+                  </div>
+                  <ul className="text-sm text-muted-foreground space-y-2 list-disc pl-5">
+                    <li><strong>Absolute Paths:</strong> Supports routing to absolute paths (e.g. <code>/dashboard</code>) and fully qualified external URLs (e.g. <code>https://google.com</code>).</li>
+                    <li><strong>Relative Paths:</strong> Resolves relative paths automatically relative to the current route (e.g., redirecting to <code>./success</code> from <code>/checkout</code> navigates to <code>/checkout/success</code>).</li>
+                    <li><strong>Server Functions:</strong> Can be thrown or returned in Server Functions to trigger redirects in response to client interactions.</li>
+                    <li><strong>Lifecycle Hooks:</strong> Can be used within <code>getProps</code> in <code>page_functions.ts</code> to shield pages and redirect users before they render.</li>
+                  </ul>
+                </div>
                 <CodeBlock
                   language="javascript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
                   {`import { redirect } from "dinou";
 
-// In a Server Component or Server Function
-if (!user) {
-  return redirect("/login");
+// 1. In a Server Component or Client Component
+export default function Page() {
+  if (!isAuthenticated) {
+    return redirect("/login");
+  }
+  return <div>Welcome!</div>;
+}
+
+// 2. In a page_functions.ts hook
+export async function getProps() {
+  const user = await checkSession();
+  if (!user) {
+    return redirect("../login"); // Relative redirect
+  }
+  return { user };
+}
+
+// 3. In a Server Function ("use server")
+export async function handleFormSubmit() {
+  "use server";
+  await savePreferences();
+  return redirect("./profile"); // Redirect relative to the form route
 }`}
                 </CodeBlock>
               </section>
