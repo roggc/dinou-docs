@@ -24,6 +24,7 @@ import {
   CheckCircle2,
   XCircle,
   File,
+  ShieldCheck,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -40,6 +41,8 @@ const tocItems = [
   { id: "getprops-ref", title: "getProps({ params })", level: 3 },
   { id: "revalidate-ref", title: "revalidate()", level: 3 },
   { id: "dynamic-ref", title: "dynamic()", level: 3 },
+  { id: "validateparams-ref", title: "validateParams()", level: 3 },
+  { id: "allowisg-ref", title: "allowISG()", level: 3 },
 ];
 
 export default function Page() {
@@ -289,7 +292,7 @@ export default function Page() {
                 </div>
               </section>
 
-              <section id="getprops-ref">
+              <section id="getprops-ref" className="mt-12 pt-8 border-t">
                 <h3>
                   <code>getProps({`{ params }`})</code>
                 </h3>
@@ -320,7 +323,7 @@ export default function Page() {
                 </Alert>
               </section>
 
-              <section id="revalidate-ref">
+              <section id="revalidate-ref" className="mt-12 pt-8 border-t">
                 <h3>
                   <code>revalidate()</code>
                 </h3>
@@ -362,7 +365,7 @@ export default function Page() {
                 </div>
               </section>
 
-              <section id="dynamic-ref">
+              <section id="dynamic-ref" className="mt-12 pt-8 border-t">
                 <h3>
                   <code>dynamic()</code>
                 </h3>
@@ -388,6 +391,42 @@ export default function Page() {
                     are used.
                   </AlertDescription>
                 </Alert>
+              </section>
+
+              <section id="validateparams-ref" className="mt-12 pt-8 border-t">
+                <h3>
+                  <code>validateParams(params)</code>
+                </h3>
+                <p>
+                  Validates dynamic parameters on the server prior to rendering. Returning <code>false</code> immediately blocks the request and returns a 404 response.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`export function validateParams(params) {
+  // Reject route parameter and return 404 instantly
+  return typeof params.id === "string" && /^\\d+$/.test(params.id);
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="allowisg-ref" className="mt-12 pt-8 border-t">
+                <h3>
+                  <code>allowISG()</code>
+                </h3>
+                <p>
+                  Enables or disables Incremental Static Generation (ISG) on-demand for dynamic routes not generated at server startup (via <code>getStaticPaths</code>).
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`export function allowISG() {
+  // Disable dynamic on-demand generation; serve getStaticPaths ONLY
+  return false;
+}`}
+                </CodeBlock>
               </section>
             </section>
           </div>
