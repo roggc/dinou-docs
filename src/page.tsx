@@ -44,23 +44,20 @@ export default function Page() {
                 >
                   <Sparkles className="mr-2 h-3.5 w-3.5 text-blue-500" />
                   <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-semibold">
-                    Built for React 19
+                    Dinou v5
                   </span>
                 </Badge>
               </div>
 
-              {/* CAMBIO: Reducido tamaño de fuente (de 8xl/7xl a 7xl/6xl) */}
               <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-slate-900 dark:text-white">
                 Dinou
-                <span className="block mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight pb-2">
-                  Full-Stack React 19 Framework
+                <span className="block mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight pb-2 text-3xl sm:text-4xl md:text-5xl lg:text-6xl">
+                  Lightweight-Ejectable Full-Stack React 19 Framework
                 </span>
               </h1>
 
-              <p className="mx-auto max-w-[700px] text-lg text-slate-600 dark:text-slate-400 md:text-xl leading-relaxed">
-                Unlock the full potential of Server Components and Server
-                Functions. Zero configuration, blazing fast builds, and designed
-                specifically for the React 19 era.
+              <p className="mx-auto max-w-[750px] text-lg text-slate-600 dark:text-slate-400 md:text-xl leading-relaxed">
+                Choose your build engine with esbuild, Rollup, or Webpack. Extract the entire core with a single command when you need complete customization. No lock-in, just pure React 19 power.
               </p>
             </div>
 
@@ -115,9 +112,7 @@ export default function Page() {
                 Start coding in seconds
               </h2>
               <p className="text-slate-600 dark:text-slate-400 md:text-lg leading-relaxed">
-                Don&apos;t waste time configuring bundlers. Dinou comes
-                pre-configured with the best defaults for modern React
-                applications. Just run the init command and start coding.
+                Start with a zero-config setup using esbuild, or seamlessly switch to Rollup or Webpack using standard scripts. If you ever need to customize the internals, just run the eject script to take full ownership.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-2">
                 <Button variant="default" asChild>
@@ -201,8 +196,7 @@ export default function Page() {
               Ready to ship?
             </h2>
             <p className="text-slate-600 dark:text-slate-400 md:text-xl">
-              Join the new wave of React developers building faster, lighter,
-              and simpler web applications.
+              Build lightweight, robust React 19 apps with zero constraints and absolute builder flexibility.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 w-full justify-center pt-4">
               <Button size="lg" className="text-base rounded-full px-8" asChild>
