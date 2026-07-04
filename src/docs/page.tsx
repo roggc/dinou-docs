@@ -102,7 +102,7 @@ export default function Page() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Automatically switches to Dynamic Rendering (SSR) when
+                      Automatically switches to Dynamic Rendering when
                       request-specific data like cookies, headers, or search
                       params are detected (Automatic Bailout).
                     </p>
@@ -209,14 +209,14 @@ export default function Page() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900/20">
                       <ShieldCheck className="h-5 w-5 text-teal-600 dark:text-teal-400" />
                     </div>
-                    <CardTitle>Route Guarding & WAF</CardTitle>
+                    <CardTitle>Route Guarding &amp; Security</CardTitle>
                     <CardDescription>
                       Built-in validation and security.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Validate dynamic parameter segments before render via <code>validateParams</code> / <code>allowISG</code>, and shield your application from bot probes using the lightweight regex WAF.
+                      Validate dynamic parameter segments before rendering via <code>validateParams</code> / <code>allowISG</code>, and shield your application from bot probes using the built-in Anti-Bot Shield middleware.
                     </p>
                   </CardContent>
                 </Card>
