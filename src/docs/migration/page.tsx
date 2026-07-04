@@ -84,6 +84,24 @@ export default function Page() {
                   <li><strong>True Stream Processing:</strong> The child process can now parse and render HTML chunks incrementally as they arrive, rather than waiting for a full JSON payload to be fully generated and deserialized.</li>
                   <li><strong>Improved Robustness:</strong> Eliminates the custom JSX-to-JSON serialization code, delegating all prop serialization (including complex nested structures or React references) directly to React's native, battle-tested engine.</li>
                 </ul>
+                <details className="group mt-3 border-t border-blue-500/10 pt-3">
+                  <summary className="cursor-pointer font-semibold text-xs text-blue-700 dark:text-blue-400 select-none hover:underline">
+                    Show Technical Details (for Ejected Code)
+                  </summary>
+                  <div className="mt-3 text-xs leading-relaxed text-muted-foreground space-y-2">
+                    <p>
+                      In an ejected Dinou v5 project, the React Flight rendering and IPC pipeline is implemented across the following modules in <code>dinou/core/</code>:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>
+                        <strong><code>dinou/core/server.js</code>:</strong> Serves as the main HTTP entry. When a page request arrives, it obtains the JSX tree (via <code>get-jsx.js</code>) and serializes it using <code>renderToPipeableStream</code> from <code>@roggc/react-server-dom-esm/server</code>.
+                      </li>
+                      <li>
+                        <strong><code>dinou/core/render-html.js</code>:</strong> Runs as a child process. It receives the streamed Flight payload from the parent process over the child process IPC, deserializes it using <code>createFromNodeStream</code> from <code>@roggc/react-server-dom-esm/client</code>, and pipe-renders it to HTML using ReactDOM's server renderer.
+                      </li>
+                    </ul>
+                  </div>
+                </details>
               </div>
 
               <Alert className="not-prose mt-6 border-amber-500/20 bg-amber-500/5 dark:bg-amber-500/10">
@@ -201,6 +219,27 @@ export function allowISG() {
                     </CodeBlock>
                   </CardContent>
                 </Card>
+
+                <div className="border rounded-lg p-4 bg-card not-prose">
+                  <details className="group">
+                    <summary className="cursor-pointer font-semibold text-xs text-slate-700 dark:text-slate-400 select-none hover:underline">
+                      Show Technical Details (for Ejected Code)
+                    </summary>
+                    <div className="mt-3 text-xs leading-relaxed text-muted-foreground space-y-2">
+                      <p>
+                        In the ejected core, these control flags are processed inside the routing middleware in <code>dinou/core/server.js</code>:
+                      </p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>
+                          <strong>Caching:</strong> The page functions are imported dynamically and cached inside <code>pageFunctionsConfigCache</code> to avoid redundant disk reads during production requests.
+                        </li>
+                        <li>
+                          <strong>Request Interception:</strong> The Express route handler checks the parsed <code>validateParams</code> and <code>allowISG</code> configurations before calling the rendering child processes. If a block is triggered, it exits early with a 404.
+                        </li>
+                      </ul>
+                    </div>
+                  </details>
+                </div>
               </div>
             </section>
 
@@ -235,6 +274,18 @@ export function allowISG() {
               <p className="mt-4">
                 If you are developing a route that matches these patterns (for instance, if you require a page ending in <code>.php</code> or using paths like <code>wp-admin</code>), the server will block it and return a 404 by default. You can adjust the <code>botGarbagePatterns</code> list in <code>dinou/core/server.js</code> if you need to bypass this protection for specific routes.
               </p>
+              <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                <details className="group">
+                  <summary className="cursor-pointer font-semibold text-xs text-slate-700 dark:text-slate-400 select-none hover:underline">
+                    Show Technical Details (for Ejected Code)
+                  </summary>
+                  <div className="mt-3 text-xs leading-relaxed text-muted-foreground space-y-2">
+                    <p>
+                      In the ejected <code>dinou/core/server.js</code>, the bot shield is implemented as an Express middleware placed immediately after <code>cookieParser()</code> and before any dynamic route resolution logic.
+                    </p>
+                  </div>
+                </details>
+              </div>
             </section>
 
             {/* 5. Import Extension Fixes */}
