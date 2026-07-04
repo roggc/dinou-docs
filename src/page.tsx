@@ -174,7 +174,10 @@ export default function Page() {
                       </span>
                     </div>
                     <div className="text-blue-400">
-                      ready started server on http://localhost:3000
+                      🚀 Dinou Server is ready and listening on http://localhost:3000
+                    </div>
+                    <div className="text-slate-500">
+                      &nbsp;&nbsp;&nbsp;Environment: Development
                     </div>
                   </div>
                 </div>

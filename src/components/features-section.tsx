@@ -167,7 +167,7 @@ export function FeaturesSection() {
             <CardContent>
               <ul className="space-y-3">
                 {[
-                  "Static site generation (SSG) with automatic dynamic bailout (SSR)",
+                  "Static site generation (SSG) with automatic dynamic bailout (Dynamic Rendering)",
                   "Incremental Static Regeneration (ISR) & dynamic-demand generation (ISG)",
                   "File-based routing with layout isolation flags (no_layout, reset_layout)",
                   "SPA experience with client-side soft navigation & link prefetching",
