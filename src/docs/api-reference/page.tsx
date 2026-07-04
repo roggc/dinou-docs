@@ -226,17 +226,18 @@ if (!user) {
 
               <section id="usesearchparams">
                 <h3>
-                  <code>useSearchParams()</code>
+                  <code>useSearchParams()</code> (Client Only)
                 </h3>
                 <p>
                   Returns a standard <code>URLSearchParams</code> object to read
-                  query string parameters.
+                  query string parameters inside Client Components.
                 </p>
                 <CodeBlock
                   language="jsx"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-                  {`import { useSearchParams } from "dinou";
+                  {`"use client";
+import { useSearchParams } from "dinou";
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
@@ -244,67 +245,73 @@ export default function SearchPage() {
   return <div>Result: {query}</div>;
 }`}
                 </CodeBlock>
-                <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-muted text-muted-foreground font-medium">
-                      <tr>
-                        <th className="p-4">Component Type</th>
-                        <th className="p-4">Build Behavior</th>
-                        <th className="p-4">Result</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border bg-card">
-                      <tr>
-                        <td className="p-4 font-mono text-xs">
-                          Server Component
-                        </td>
-                        <td className="p-4 text-xs">Triggers Static Bailout</td>
-                        <td className="p-4 text-xs">
-                          Switches to Dynamic Rendering (SSR)
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="p-4 font-mono text-xs">
-                          Client Component
-                        </td>
-                        <td className="p-4 text-xs">No Bailout</td>
-                        <td className="p-4 text-xs">
-                          Remains Static (SSG). Initial HTML has empty params.
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
                 <Alert className="not-prose mt-4">
                   <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>⚠️ Hydration Warning</AlertTitle>
+                  <AlertTitle>⚠️ Hydration Behavior</AlertTitle>
                   <AlertDescription>
-                    In Client Components on static pages, server renders with
-                    empty params (build time). For UI that depends heavily on
-                    params, pass them as props from a Server Component.
+                    On statically pre-rendered pages (SSG), the server renders Client Components with
+                    empty search params at build time. On the client, they will hydrate with the actual browser URL params.
                   </AlertDescription>
                 </Alert>
+                <div className="border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/10 rounded-lg p-4 bg-card not-prose mt-4">
+                  <div className="flex items-center gap-2 font-semibold mb-2 text-blue-600 dark:text-blue-400">
+                    <Server className="h-5 w-5 text-blue-500" />
+                    <span>In Server Components</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    This hook cannot be called in Server Components because React Flight prohibits running Client Module functions on the server. To read query parameters in a Server Component, use <code>getContext()</code> instead:
+                  </p>
+                  <CodeBlock language="javascript" containerClassName="mt-2 rounded-md">
+                    {`import { getContext } from "dinou";
+
+export default async function Page() {
+  const ctx = getContext();
+  const query = ctx.req.query; // Object containing query params
+  const q = query.q;
+  return <div>Result: {q}</div>;
+}`}
+                  </CodeBlock>
+                </div>
               </section>
 
               <section id="usepathname">
                 <h3>
-                  <code>usePathname()</code>
+                  <code>usePathname()</code> (Client Only)
                 </h3>
                 <p>
                   Returns the current URL pathname as a string (e.g.,{" "}
-                  <code>/blog/post-1</code>).
+                  <code>/blog/post-1</code>) inside Client Components.
                 </p>
                 <CodeBlock
                   language="jsx"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-                  {`import { usePathname } from "dinou";
+                  {`"use client";
+import { usePathname } from "dinou";
 
 export default function Navigation() {
   const pathname = usePathname();
   return <div>Current path: {pathname}</div>;
 }`}
                 </CodeBlock>
+                <div className="border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/10 rounded-lg p-4 bg-card not-prose mt-4">
+                  <div className="flex items-center gap-2 font-semibold mb-2 text-blue-600 dark:text-blue-400">
+                    <Server className="h-5 w-5 text-blue-500" />
+                    <span>In Server Components</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    This hook cannot be called in Server Components. To read the pathname in a Server Component, use <code>getContext()</code>:
+                  </p>
+                  <CodeBlock language="javascript" containerClassName="mt-2 rounded-md">
+                    {`import { getContext } from "dinou";
+
+export default async function Page() {
+  const ctx = getContext();
+  const pathname = ctx.req.path; // Current URL path
+  return <div>Current path: {pathname}</div>;
+}`}
+                  </CodeBlock>
+                </div>
               </section>
 
               <section id="userouter">

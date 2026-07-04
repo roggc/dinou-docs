@@ -162,7 +162,7 @@ export default function Page() {
                   <code>page</code>, <code>layout</code>, <code>error</code>,
                   <code>not_found</code>, and slot pages. Query parameters
                   (e.g., <code>?q=hello</code>) are <strong>NOT</strong> passed
-                  as props; use the <code>useSearchParams()</code> hook instead.
+                  as props. Use the <code>useSearchParams()</code> hook in Client Components, or <code>getContext().req.query</code> in Server Components.
                 </AlertDescription>
               </Alert>
             </section>

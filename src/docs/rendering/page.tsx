@@ -89,7 +89,7 @@ export default async function Profile() {
                 <AlertTitle>Triggers</AlertTitle>
                 <AlertDescription>
                   The bailout occurs when using: <code>getContext()</code>{" "}
-                  (cookies/headers) or <code>useSearchParams()</code> in a
+                  (to read cookies, headers, or query parameters) in a
                   Server Component.
                 </AlertDescription>
               </Alert>

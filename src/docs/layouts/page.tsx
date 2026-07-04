@@ -164,7 +164,7 @@ export default function Page({ error, params }) {
               </p>
               <p>
                 It receives <code>params</code> as a prop. Use{" "}
-                <code>useSearchParams()</code> for search parameters.
+                <code>useSearchParams()</code> in Client Components, or <code>getContext().req.query</code> in Server Components for search parameters.
               </p>
               <div className="border rounded-lg p-4 bg-card not-prose mt-4">
                 <div className="flex items-center gap-2 font-semibold mb-2">
