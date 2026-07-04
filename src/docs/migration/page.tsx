@@ -84,6 +84,20 @@ export default function Page() {
                   <li><strong>Improved Robustness:</strong> Eliminates the custom JSX-to-JSON serialization code, delegating all prop serialization (including complex nested structures or React references) directly to React's native, battle-tested engine.</li>
                 </ul>
               </div>
+
+              <Alert className="not-prose mt-6 border-amber-500/20 bg-amber-500/5 dark:bg-amber-500/10">
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                <AlertTitle className="text-amber-600 dark:text-amber-400">⚠️ Breaking Change: useSearchParams() & usePathname() are Client-Only</AlertTitle>
+                <AlertDescription className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  Because v5 strictly enforces React Flight module boundaries (under the <code>react-server</code> condition), modules marked with <code>"use client"</code> cannot be executed on the server by Server Components.
+                  Calling <code>useSearchParams()</code> or <code>usePathname()</code> inside a Server Component will now throw a runtime crash.
+                  <div className="mt-2 font-semibold">Migration Path:</div>
+                  <ul className="list-disc pl-5 mt-1 space-y-1 text-xs">
+                    <li><strong>In Client Components:</strong> These hooks continue to work normally (ensure <code>"use client";</code> is declared at the top of the file).</li>
+                    <li><strong>In Server Components:</strong> Access the pathname via <code>getContext().req.path</code> and query parameters via <code>getContext().req.query</code> instead of calling the hooks.</li>
+                  </ul>
+                </AlertDescription>
+              </Alert>
             </section>
 
 
