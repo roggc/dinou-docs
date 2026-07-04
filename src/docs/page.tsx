@@ -153,17 +153,14 @@ export default function Page() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/20">
                       <Database className="h-5 w-5 text-red-600 dark:text-red-400" />
                     </div>
-                    <CardTitle>Data Fetching & State</CardTitle>
+                    <CardTitle>Data Fetching &amp; Server Functions</CardTitle>
                     <CardDescription>
-                      Seamless server-client sync.
+                      Seamless client-to-server operations.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Optimized patterns using{" "}
-                      <code>react-enhanced-suspense</code> and{" "}
-                      <code>jotai-wrapper</code> for seamless state
-                      synchronization and mutations.
+                      Includes native support for React 19 Server Functions (<code>'use server'</code>) to invoke server-side logic directly from the client. Combined with <code>react-enhanced-suspense</code> and <code>jotai-wrapper</code> for clean state synchronization and mutations.
                     </p>
                   </CardContent>
                 </Card>
