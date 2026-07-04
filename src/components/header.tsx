@@ -14,11 +14,15 @@ import {
 import { Link } from "dinou";
 
 export default function Header() {
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm border-slate-200 dark:border-slate-800">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center space-x-2">
-          <Link href="/">
+          <Link href="/" onClick={handleLogoClick}>
             <img src={dinou} className="w-10" alt="Dinou Logo" width={40} />
           </Link>
         </div>
