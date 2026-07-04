@@ -81,6 +81,21 @@ export default function Page() {
                   </div>
                 </div>
               </div>
+              <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                <details className="group">
+                  <summary className="cursor-pointer font-semibold text-xs text-slate-700 dark:text-slate-400 select-none hover:underline">
+                    Show Technical Details (for Ejected Code)
+                  </summary>
+                  <div className="mt-3 text-xs leading-relaxed text-muted-foreground space-y-2">
+                    <p>
+                      In the ejected core, the URL path to file system mapping is fully resolved by the module <code>dinou/core/get-file-path-and-dynamic-params.js</code>.
+                    </p>
+                    <p>
+                      This module traverses the <code>src/</code> directory structure at request time, parsing folder structures to match bracket parameters (<code>[param]</code>), optional parameters (<code>[[param]]</code>), catch-all directories (<code>[...param]</code>), route groups (<code>(group)</code>), and layout slots (<code>@slot</code>). It returns the resolved file path along with the parsed parameters dictionary.
+                    </p>
+                  </div>
+                </details>
+              </div>
             </section>
 
             <section id="route-types">
@@ -357,6 +372,26 @@ export default function Page() {
                         error here will <strong>crash the entire page</strong>.
                       </CardContent>
                     </Card>
+                  </div>
+                  <div className="border rounded-lg p-4 bg-card not-prose mt-6">
+                    <details className="group">
+                      <summary className="cursor-pointer font-semibold text-xs text-slate-700 dark:text-slate-400 select-none hover:underline">
+                        Show Technical Details (for Ejected Code)
+                      </summary>
+                      <div className="mt-3 text-xs leading-relaxed text-muted-foreground space-y-2">
+                        <p>
+                          Parallel routes and slot resolutions are handled within <code>dinou/core/get-jsx.js</code>:
+                        </p>
+                        <ul className="list-disc pl-5 space-y-1">
+                          <li>
+                            <strong>Layout Slot Injection:</strong> The layouts resolved by <code>getFilePathAndDynamicParams</code> return their associated slots as properties. These are mapped and injected as props into the parent <code>Layout</code> component (e.g. <code>Layout(&#123; sidebar, bottom, children &#125;)</code>).
+                          </li>
+                          <li>
+                            <strong>Error Containment Mechanism:</strong> During layout resolution, the generator attempts to render each slot component individually using <code>asyncRenderJSXToClientJSX</code> inside a <code>try/catch</code> block. If a slot component fails, it catches the error, searches for a local <code>error.tsx</code> within the slot's folder, and substitutes the slot's content with that error UI, leaving the rest of the page un-crashed.
+                          </li>
+                        </ul>
+                      </div>
+                    </details>
                   </div>
                 </div>
               </div>
