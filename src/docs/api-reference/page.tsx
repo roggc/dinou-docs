@@ -312,7 +312,27 @@ export default function SearchPage() {
                     </p>
                     <div>To prevent hydration mismatches, choose one of these patterns:</div>
                     <ul className="list-disc pl-5 space-y-1">
-                      <li><strong>Option 1 (Defer State - Recommended):</strong> Defer rendering or using the search parameters until the component has mounted in the browser (e.g., by copying the search params to state inside a <code>useEffect</code>).</li>
+                      <li className="space-y-2">
+                        <span><strong>Option 1 (Defer State - Recommended):</strong> Defer rendering or using the search parameters until the component has mounted in the browser (by copying the search params to local state inside a <code>useEffect</code>):</span>
+                        <CodeBlock language="jsx" containerClassName="mt-2 rounded-md">
+                          {`"use client";
+import { useSearchParams } from "dinou";
+import { useState, useEffect } from "react";
+
+export default function SearchPage() {
+  const rawSearchParams = useSearchParams();
+  const [searchParams, setSearchParams] = useState(new URLSearchParams());
+
+  useEffect(() => {
+    // Only updates in the client after hydration is complete
+    setSearchParams(rawSearchParams);
+  }, [rawSearchParams]);
+
+  const query = searchParams.get("q");
+  return <div>Result: {query}</div>;
+}`}
+                        </CodeBlock>
+                      </li>
                       <li><strong>Option 2 (Forced Dynamic SSR):</strong> Switch the page to dynamic rendering on every request by exporting <code>export function dynamic() &#123; return true; &#125;</code> from its <code>page_functions.ts</code>. This ensures the server always renders with the actual query parameters, avoiding mismatches.</li>
                     </ul>
                   </AlertDescription>
