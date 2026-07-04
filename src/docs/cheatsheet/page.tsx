@@ -41,7 +41,7 @@ const tocItems = [
   { id: "getprops-ref", title: "getProps(params)", level: 3 },
   { id: "revalidate-ref", title: "revalidate()", level: 3 },
   { id: "dynamic-ref", title: "dynamic()", level: 3 },
-  { id: "validateparams-ref", title: "validateParams()", level: 3 },
+  { id: "validateparams-ref", title: "validateParams(params)", level: 3 },
   { id: "allowisg-ref", title: "allowISG()", level: 3 },
 ];
 
@@ -313,12 +313,10 @@ export default function Page() {
 }`}
                 </CodeBlock>
                 <Alert className="not-prose mt-4">
-                  <FileCode className="h-4 w-4" />
-                  <AlertTitle>Single Source of Truth</AlertTitle>
+                  <FileCode className="h-4 w-4 text-blue-500" />
+                  <AlertTitle>Performance Tip: Blocking vs. Streaming</AlertTitle>
                   <AlertDescription>
-                    Use <code>getProps</code> for data that depends only on
-                    route parameters. For request-specific data (cookies, search
-                    params), fetch directly in Components with Suspense.
+                    Because <code>getProps</code> blocks the initial render at request time, keep it fast for dynamic routes. Note that this does not affect pre-rendered static pages (SSG) since their data is fetched at server startup. In Incremental Static Generation (ISG), it only blocks the very first request by the first visitor before the page is cached. If you need slow dynamic fetches on dynamic routes, defer them to a <code>Suspense</code> boundary wrapping a Server Function.
                   </AlertDescription>
                 </Alert>
               </section>

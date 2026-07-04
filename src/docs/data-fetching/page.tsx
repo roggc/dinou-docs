@@ -150,7 +150,7 @@ export async function getProps(params) {
                       Performance Trade-off:
                     </p>
                     <p className="mt-0.5">
-                      Because <code>getProps</code> blocks the rendering process, the server waits for it to resolve before sending the initial HTML. If you want to load slow/dynamic request-specific data without delaying the initial page paint, keep <code>getProps</code> fast and defer the slow fetch to a <code>Suspense</code> boundary wrapping a Server Function.
+                      Because <code>getProps</code> blocks the rendering process at request time, the server waits for it to resolve before starting the render. Keep it fast for dynamic routes; pre-rendered static pages (SSG) are unaffected since their data is fetched at server startup. In Incremental Static Generation (ISG), it only blocks the very first request by the first visitor before the page is cached. If you need slow dynamic fetches on dynamic routes, defer them to a <code>Suspense</code> boundary wrapping a Server Function.
                     </p>
                   </AlertDescription>
                 </Alert>
