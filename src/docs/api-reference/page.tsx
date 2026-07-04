@@ -301,10 +301,20 @@ export default function SearchPage() {
                 </CodeBlock>
                 <Alert className="not-prose mt-4">
                   <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>⚠️ Hydration Behavior</AlertTitle>
-                  <AlertDescription>
-                    On statically pre-rendered pages (SSG), the server renders Client Components with
-                    empty search params at build time. On the client, they will hydrate with the actual browser URL params.
+                  <AlertTitle>⚠️ Hydration Behavior & Mismatch Warning</AlertTitle>
+                  <AlertDescription className="space-y-2 text-xs leading-relaxed text-muted-foreground mt-1">
+                    <p>
+                      On statically pre-rendered pages (SSG), the server renders Client Components with
+                      empty search parameters at build time. On the client, they will hydrate with the actual browser URL search parameters.
+                    </p>
+                    <p className="font-semibold text-amber-600 dark:text-amber-400">
+                      If the UI immediately renders elements or text depending on the search parameters, this will trigger a React hydration mismatch error (Error #418).
+                    </p>
+                    <div>To prevent hydration mismatches, choose one of these patterns:</div>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li><strong>Option 1 (Defer state):</strong> Defer using the search parameters until the component has mounted in the browser (e.g., using a <code>useState</code> and copying the search params inside a <code>useEffect</code>).</li>
+                      <li><strong>Option 2 (Forced Dynamic SSR):</strong> Switch the page to dynamic rendering on every request by exporting <code>export function dynamic() &#123; return true; &#125;</code> from its <code>page_functions.ts</code>.</li>
+                    </ul>
                   </AlertDescription>
                 </Alert>
                 <div className="border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/10 rounded-lg p-4 bg-card not-prose mt-4">
