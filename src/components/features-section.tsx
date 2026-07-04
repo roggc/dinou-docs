@@ -62,7 +62,7 @@ export function FeaturesSection() {
                   "esbuild (default) for blazing fast development startup",
                   "Rollup for highly optimized production bundling",
                   "Webpack for legacy plugin support and ecosystem maturity",
-                  "Seamless switching via script commands (e.g. dev:rollup)",
+                  "Seamless switching via npm scripts (e.g. npm run dev:rollup)",
                 ].map((item) => (
                   <li
                     key={item}

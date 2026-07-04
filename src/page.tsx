@@ -112,7 +112,7 @@ export default function Page() {
                 Start coding in seconds
               </h2>
               <p className="text-slate-600 dark:text-slate-400 md:text-lg leading-relaxed">
-                Start with a zero-config setup using esbuild, or seamlessly switch to Rollup or Webpack using standard scripts. If you ever need to customize the internals, just run the eject script to take full ownership.
+                Start with a zero-config setup using esbuild, or seamlessly switch to Rollup or Webpack using standard npm scripts. If you ever need to customize the internals, just run the eject command to take full ownership.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-2">
                 <Button variant="default" asChild>
