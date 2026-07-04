@@ -31,7 +31,7 @@ const tocItems = [
   { id: "client-components", title: "Client Components", level: 2 },
   { id: "use-client", title: "The 'use client' Directive", level: 2 },
   { id: "props-serialization", title: "Data Serialization Boundary", level: 2 },
-  { id: "best-practices", title: "Best Practices", level: 2 },
+  { id: "best-practices", title: "Choosing Your Architecture", level: 2 },
 ];
 
 export default function Page() {
