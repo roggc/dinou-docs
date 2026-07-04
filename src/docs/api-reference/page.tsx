@@ -14,14 +14,9 @@ import {
 } from "@/docs/components/ui/card";
 import {
   Link as LinkIcon,
-  Search,
-  MapPin,
-  Navigation,
-  Loader,
   Server,
   Shield,
   AlertTriangle,
-  Code,
   FileText,
   Replace,
 } from "lucide-react";
@@ -351,15 +346,15 @@ export default function Controls() {
                     </thead>
                     <tbody className="divide-y divide-border bg-card">
                       <tr>
-                        <td className="p-4 font-mono text-xs">push(href)</td>
+                        <td className="p-4 font-mono text-xs">push(href, options?)</td>
                         <td className="p-4 text-xs">
-                          Navigates to new URL (adds to history)
+                          Navigates to new URL (adds to history). Supports <code>options.fresh</code> (boolean) to bypass the cache.
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-4 font-mono text-xs">replace(href)</td>
+                        <td className="p-4 font-mono text-xs">replace(href, options?)</td>
                         <td className="p-4 text-xs">
-                          Replaces current URL in history
+                          Replaces current URL in history. Supports <code>options.fresh</code> (boolean) to bypass the cache.
                         </td>
                       </tr>
                       <tr>
