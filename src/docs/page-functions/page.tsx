@@ -20,6 +20,7 @@ import {
   ArrowRight,
   Settings,
   Database,
+  ShieldCheck,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -61,6 +62,16 @@ const tocItems = [
   { id: "async-support", title: "Async Support", level: 4 },
   { id: "revalidate", title: "3. revalidate (ISR)", level: 3 },
   { id: "dynamic", title: "4. dynamic (Force SSR)", level: 3 },
+  {
+    id: "validateparams",
+    title: "5. validateParams (Route Parameter Validation)",
+    level: 3,
+  },
+  {
+    id: "allowisg",
+    title: "6. allowISG (Incremental Static Opt-Out)",
+    level: 3,
+  },
 ];
 
 export default function Page() {
@@ -143,7 +154,7 @@ export async function getProps({ params }) {
               </CodeBlock>
             </section>
 
-            <section id="getstaticpaths">
+            <section id="getstaticpaths" className="mt-12 pt-8 border-t">
               <h3>
                 2. <code>getStaticPaths</code> (Static Generation)
               </h3>
@@ -540,7 +551,7 @@ export async function getStaticPaths() {
               </section>
             </section>
 
-            <section id="revalidate">
+            <section id="revalidate" className="mt-12 pt-8 border-t">
               <h3>
                 3. <code>revalidate</code> (ISR)
               </h3>
@@ -574,7 +585,7 @@ export function revalidate() {
               </CodeBlock>
             </section>
 
-            <section id="dynamic">
+            <section id="dynamic" className="mt-12 pt-8 border-t">
               <h3>
                 4. <code>dynamic</code> (Force SSR)
               </h3>
@@ -600,6 +611,79 @@ export function revalidate() {
                 {`// src/profile/page_functions.ts
 export function dynamic() {
   return true; // Always render on demand (SSR)
+}`}
+              </CodeBlock>
+            </section>
+
+            <section id="validateparams" className="mt-12 pt-8 border-t">
+              <h3>
+                5. <code>validateParams</code> (Route Parameter Validation)
+              </h3>
+              <p>
+                Validates dynamic parameters (e.g., <code>[id]</code> or <code>[...slug]</code>) on the server prior to rendering. If the validation function returns <code>false</code> (or a falsy value), Dinou immediately blocks the request and returns a 404 response.
+              </p>
+              <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                <div className="flex items-center gap-2 font-semibold mb-2">
+                  <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <span>Function Signature</span>
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                  <li>
+                    <strong>Arguments:</strong> <code>params</code> (The dynamic route parameters object)
+                  </li>
+                  <li>
+                    <strong>Returns:</strong> <code>boolean | Promise&lt;boolean&gt;</code> (Return <code>false</code> to block the route and return a 404)
+                  </li>
+                </ul>
+              </div>
+              <CodeBlock
+                language="typescript"
+                containerClassName="w-full overflow-hidden rounded-lg mt-4"
+              >
+                {`// src/posts/[id]/page_functions.ts
+
+export async function validateParams(params) {
+  // Example: Only allow numeric IDs
+  const id = params.id;
+  return typeof id === "string" && /^\\d+$/.test(id);
+}`}
+              </CodeBlock>
+            </section>
+
+            <section id="allowisg" className="mt-12 pt-8 border-t">
+              <h3>
+                6. <code>allowISG</code> (Incremental Static Opt-Out)
+              </h3>
+              <p>
+                Enables or disables Incremental Static Generation (ISG) on-demand for dynamic routes that were not pre-rendered at server startup (via <code>getStaticPaths</code>).
+              </p>
+              <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                <div className="flex items-center gap-2 font-semibold mb-2">
+                  <Settings className="h-5 w-5 text-blue-500" />
+                  <span>Opt-Out Behavior</span>
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                  <li>
+                    <strong>Default:</strong> <code>true</code>. Any dynamic path not pre-rendered at server startup is generated on-demand when first requested.
+                  </li>
+                  <li>
+                    <strong>Opt-Out:</strong> Returning <code>false</code> disables on-demand generation. Any request to a path not returned by <code>getStaticPaths</code> immediately returns a 404.
+                  </li>
+                  <li>
+                    <strong>Returns:</strong> <code>boolean | Promise&lt;boolean&gt;</code>
+                  </li>
+                </ul>
+              </div>
+              <CodeBlock
+                language="typescript"
+                containerClassName="w-full overflow-hidden rounded-lg mt-4"
+              >
+                {`// src/blog/[slug]/page_functions.ts
+
+export function allowISG() {
+  // Disable dynamic on-demand page generation.
+  // Only serve paths pre-generated by getStaticPaths().
+  return false;
 }`}
               </CodeBlock>
             </section>
