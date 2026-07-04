@@ -75,14 +75,6 @@ cd my-app
 npm run dev`}
               </CodeBlock>
 
-              <Alert className="not-prose mt-4">
-                <Cpu className="h-4 w-4" />
-                <AlertTitle>Zero Configuration Required</AlertTitle>
-                <AlertDescription>
-                  The CLI sets up everything you need. You can start coding
-                  immediately.
-                </AlertDescription>
-              </Alert>
             </section>
 
             <section id="manual-setup">
@@ -117,19 +109,16 @@ npm install react react-dom dinou`}
                 <div>
                   <h4>2. Create Project Structure</h4>
                   <p>
-                    Create the <code>src</code> directory and your first page:
+                    Create a <code>src</code> directory in the root of your project, and create a file named <code>page.jsx</code> (or <code>page.tsx</code>) inside it:
                   </p>
                   <CodeBlock
-                    language="bash"
+                    language="javascript"
                     containerClassName="w-full overflow-hidden rounded-lg"
                   >
-                    {`# Create the source directory
-mkdir src
-
-# Create your first page
-echo 'export default async function Page() {
+                    {`// src/page.jsx
+export default function Page() {
   return <h1>Hello, Dinou!</h1>;
-}' > src/page.jsx`}
+}`}
                   </CodeBlock>
 
                   <div className="border rounded-lg p-4 bg-card not-prose mt-4">
@@ -160,10 +149,47 @@ echo 'export default async function Page() {
                     {`{
   "scripts": {
     "dev": "dinou dev",
+    "dev:rollup": "dinou dev:rollup",
+    "dev:webpack": "dinou dev:webpack",
     "build": "dinou build",
-    "start": "dinou start"
+    "build:rollup": "dinou build:rollup",
+    "build:webpack": "dinou build:webpack",
+    "start": "dinou start",
+    "eject": "dinou eject"
   }
 }`}
+                  </CodeBlock>
+                </div>
+
+                <div>
+                  <h4>4. Run the Development Server</h4>
+                  <p>
+                    Start the development server using the configured scripts:
+                  </p>
+                  <CodeBlock
+                    language="bash"
+                    containerClassName="w-full overflow-hidden rounded-lg"
+                  >
+                    {`# Start development server (esbuild default)
+npm run dev
+
+# Or start with a specific bundler
+npm run dev:rollup
+npm run dev:webpack`}
+                  </CodeBlock>
+                  <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+                    Alternatively, you can run the CLI tool directly without adding scripts to your <code>package.json</code> using <code>npx</code>:
+                  </p>
+                  <CodeBlock
+                    language="bash"
+                    containerClassName="w-full overflow-hidden rounded-lg mt-2"
+                  >
+                    {`# Run the development server (esbuild default)
+npx dinou dev
+
+# Or run with a specific bundler
+npx dinou dev:rollup
+npx dinou dev:webpack`}
                   </CodeBlock>
                 </div>
               </div>
@@ -176,7 +202,7 @@ echo 'export default async function Page() {
                 to explore next:
               </p>
 
-              <div className="grid gap-4 md:grid-cols-2 not-prose mt-6">
+              <div className="grid gap-4 md:grid-cols-3 not-prose mt-6">
                 <Card className="hover:border-primary transition-colors cursor-pointer">
                   <Link href="/docs/routing" className="block h-full">
                     <CardHeader>
@@ -219,6 +245,30 @@ echo 'export default async function Page() {
                           <p className="text-sm text-muted-foreground">
                             With Suspense + Server Functions Or Without Suspense
                             (Server Components and/or <code>getProps</code>)
+                          </p>
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Link>
+                </Card>
+
+                <Card className="hover:border-primary transition-colors cursor-pointer">
+                  <Link href="/docs/bundlers" className="block h-full">
+                    <CardHeader>
+                      <div className="flex flex-col gap-4">
+                        {/* Fila Superior: Icono (Izq) y Flecha (Der) */}
+                        <div className="flex items-start justify-between w-full">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
+                            <Wrench className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                          </div>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground mt-1" />
+                        </div>
+
+                        {/* Fila Inferior: Texto */}
+                        <div>
+                          <CardTitle className="mb-1">Bundlers & Eject</CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            Configure Webpack, Rollup, or esbuild, and customize logic via Eject.
                           </p>
                         </div>
                       </div>
