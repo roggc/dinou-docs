@@ -12,13 +12,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/docs/components/ui/card";
-import { Download, Hammer, AlertTriangle } from "lucide-react";
+import { Download, Hammer, AlertTriangle, Sparkles } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
 const tocItems = [
   { id: "eject-dinou", title: "⏏️ Eject Dinou", level: 2 },
   { id: "what-happens", title: "What Happens When You Eject?", level: 3 },
   { id: "when-to-eject", title: "When to Consider Ejecting", level: 3 },
+  { id: "ai-era", title: "Ejection in the AI Era (Vibe-Coding)", level: 3 },
 ];
 
 export default function Page() {
@@ -94,6 +95,31 @@ npx dinou eject`}
                     </ul>
                   </AlertDescription>
                 </Alert>
+              </section>
+              <section id="ai-era" className="mt-8">
+                <h3>Ejection in the AI Era (Vibe-Coding)</h3>
+                <p>
+                  In the era of AI coding agents (such as Cursor, Gemini Antigravity, or Copilot Workspace) and the <strong>"Vibe-Coding"</strong> workflow, the ability to eject the framework core transforms how you customize your application:
+                </p>
+                <div className="border border-purple-500/20 bg-purple-50/30 dark:bg-purple-950/10 rounded-lg p-4 bg-card not-prose space-y-3 mt-4">
+                  <div className="flex items-center gap-2 font-semibold text-purple-600 dark:text-purple-400">
+                    <Sparkles className="h-5 w-5 animate-pulse" />
+                    <span>Empowering Your AI Co-Pilot</span>
+                  </div>
+                  <div className="text-xs leading-relaxed text-muted-foreground space-y-2">
+                    <p>
+                      Traditional frameworks are hidden inside <code>node_modules/</code> as pre-compiled black boxes. Because AI agents cannot inspect, debug, or modify them directly, they have to work around the framework's limitations.
+                    </p>
+                    <p>
+                      By running <code>npm run eject</code>, the entire Dinou core is exposed in plain, readable source code inside <code>dinou/core/</code>:
+                    </p>
+                    <ul className="list-disc pl-5 mt-1 space-y-1">
+                      <li><strong>Instant Context:</strong> AI agents can read and understand the entire routing, build, and server pipeline in seconds.</li>
+                      <li><strong>Seamless Modifications:</strong> Your AI assistant can directly implement custom middleware, extend asset compilation, or modify parallel route slots resolution directly within the framework core.</li>
+                      <li><strong>Zero Constraints:</strong> The boundary between "application code" and "framework code" is eliminated, enabling fluid and efficient full-stack vibe-coding.</li>
+                    </ul>
+                  </div>
+                </div>
               </section>
             </section>
           </div>

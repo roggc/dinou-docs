@@ -109,6 +109,26 @@ export default function NavBar() {
                   <code>&lt;Link&gt;</code> component.
                 </AlertDescription>
               </Alert>
+              <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                <details className="group">
+                  <summary className="cursor-pointer font-semibold text-xs text-slate-700 dark:text-slate-400 select-none hover:underline">
+                    Show Technical Details (for Ejected Code)
+                  </summary>
+                  <div className="mt-3 text-xs leading-relaxed text-muted-foreground space-y-2">
+                    <p>
+                      In the ejected core, the link and global navigation logic are managed by the following modules:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>
+                        <strong><code>dinou/core/link.jsx</code>:</strong> The <code>&lt;Link&gt;</code> component intercepts clicks (preventing default browser reloads) and forwards navigations to the Router via <code>useRouter().push(href, &#123; fresh &#125;)</code>. It also binds to <code>onMouseEnter</code> to run <code>window.__DINOU_PREFETCH__(resolvedHref)</code> when hovered.
+                      </li>
+                      <li>
+                        <strong><code>dinou/core/navigation.js</code>:</strong> Implements the client-side context hooks (<code>useRouter</code>, <code>usePathname</code>, and <code>useSearchParams</code>). Note how these hooks share code pathways between server-side SSR execution (falling back to reading request context dynamically) and client-side execution (reading from <code>RouterContext</code>).
+                      </li>
+                    </ul>
+                  </div>
+                </details>
+              </div>
             </section>
 
             <section id="programmatic-navigation">

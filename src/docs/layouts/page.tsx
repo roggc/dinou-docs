@@ -248,6 +248,27 @@ export default function Page({ error, params }) {
                   </CardContent>
                 </Card>
               </div>
+
+              <div className="border rounded-lg p-4 bg-card not-prose">
+                <details className="group">
+                  <summary className="cursor-pointer font-semibold text-xs text-slate-700 dark:text-slate-400 select-none hover:underline">
+                    Show Technical Details (for Ejected Code)
+                  </summary>
+                  <div className="mt-3 text-xs leading-relaxed text-muted-foreground space-y-2">
+                    <p>
+                      In the ejected core, the layout resolving and flag checks are implemented in <code>dinou/core/get-jsx.js</code>:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>
+                        <strong><code>no_layout</code> check:</strong> Before crawling layouts, the engine runs a quick search for a <code>no_layout</code> flag in the page folder. If it exists, it immediately returns the raw Page JSX, bypassing the layout wrapper pipeline entirely.
+                      </li>
+                      <li>
+                        <strong>Layout Traversal &amp; <code>reset_layout</code> check:</strong> If not bypassed, it crawls the directory hierarchy upwards from the page folder, collecting all <code>layout.tsx</code> paths. It wraps them from the bottom up. Inside this loop, it checks for a <code>reset_layout</code> flag file in each layout's directory. If found, it wraps in that layout and immediately <code>breaks</code> the loop, skipping all remaining parent layouts.
+                      </li>
+                    </ul>
+                  </div>
+                </details>
+              </div>
             </section>
           </div>
         </div>
