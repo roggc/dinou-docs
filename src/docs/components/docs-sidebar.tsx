@@ -28,6 +28,7 @@ import {
   Copyright,
   Atom,
   AtSign,
+  Fingerprint,
   Plug,
   Hexagon,
   Star,
@@ -85,6 +86,11 @@ const navigation = [
         title: "Layouts",
         href: "/docs/layouts",
         icon: FileText,
+      },
+      {
+        title: "Route Parameters",
+        href: "/docs/route-parameters",
+        icon: Fingerprint,
       },
       {
         title: "Server & Client Components",
