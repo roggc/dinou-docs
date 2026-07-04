@@ -208,7 +208,7 @@ return <ClientRedirect to="/" />;`}
                   <code>redirect(destination)</code>
                 </h3>
                 <p>
-                  A polymorphic redirect utility that immediately halts execution and redirects the user. Works everywhere across the framework: in **Server Components**, **Client Components**, **Server Functions** (Server Actions), and page functions lifecycle hooks (like <code>getProps</code>).
+                  A polymorphic redirect utility that immediately halts execution and redirects the user. Works everywhere across the framework: in <strong>Server Components</strong>, <strong>Client Components</strong>, <strong>Server Functions</strong> (Server Actions), and page functions lifecycle hooks (like <code>getProps</code>).
                 </p>
                 <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
                   <table className="w-full text-sm text-left">
