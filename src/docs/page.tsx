@@ -55,8 +55,9 @@ export default function Page() {
                 <strong>Dinou</strong> is a framework designed to unleash the
                 full potential of <strong>React 19</strong>. It provides{" "}
                 <strong>seamless integration</strong> with React Server
-                Components (RSC), Server-Side Rendering (SSR), Static Generation
-                (SSG), and advanced Incremental Static strategies (ISG and ISR).
+                Components (RSC), Server Functions (<code>'use server'</code>),
+                Server-Side Rendering (SSR), Static Generation (SSG), and advanced
+                Incremental Static strategies (ISG and ISR).
               </p>
               <p>
                 It is built to leverage Suspense and Streaming for optimal
