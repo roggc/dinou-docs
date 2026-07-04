@@ -308,13 +308,12 @@ export default function SearchPage() {
                       empty search parameters at build time. On the client, they will hydrate with the actual browser URL search parameters.
                     </p>
                     <p className="font-semibold text-amber-600 dark:text-amber-400">
-                      If the UI immediately renders elements or text depending on the search parameters, this will trigger a React hydration mismatch error (Error #418). This can also happen on dynamic (SSR) pages for Client Components that read search params while the enrutador is suspended fetching the initial RSC payload.
+                      If the UI immediately renders elements or text depending on the search parameters, this will trigger a React hydration mismatch error (Error #418).
                     </p>
                     <div>To prevent hydration mismatches, choose one of these patterns:</div>
                     <ul className="list-disc pl-5 space-y-1">
-                      <li><strong>Option 1 (Suspense boundary - Recommended):</strong> Wrap the Client Component using the hook in a React <code>&lt;Suspense&gt;</code> boundary. This defers hydration of the component until the client-side router is ready, bypassing mismatch warnings.</li>
-                      <li><strong>Option 2 (Defer state):</strong> Defer using the search parameters until the component has mounted in the browser (e.g., using a <code>useState</code> and copying the search params inside a <code>useEffect</code>).</li>
-                      <li><strong>Option 3 (Forced Dynamic SSR):</strong> Switch the page to dynamic rendering on every request by exporting <code>export function dynamic() &#123; return true; &#125;</code> from its <code>page_functions.ts</code> (only prevents mismatch for Server Components, not Client Components).</li>
+                      <li><strong>Option 1 (Defer State - Recommended):</strong> Defer rendering or using the search parameters until the component has mounted in the browser (e.g., by copying the search params to state inside a <code>useEffect</code>).</li>
+                      <li><strong>Option 2 (Forced Dynamic SSR):</strong> Switch the page to dynamic rendering on every request by exporting <code>export function dynamic() &#123; return true; &#125;</code> from its <code>page_functions.ts</code>. This ensures the server always renders with the actual query parameters, avoiding mismatches.</li>
                     </ul>
                   </AlertDescription>
                 </Alert>
