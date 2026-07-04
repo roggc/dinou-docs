@@ -77,6 +77,11 @@ const navigation = [
         icon: Route,
       },
       {
+        title: "Server & Client Components",
+        href: "/docs/server-client-components",
+        icon: Server,
+      },
+      {
         title: "Layouts",
         href: "/docs/layouts",
         icon: FileText,
