@@ -20,7 +20,8 @@ const tocItems = [
   { id: "architecture-refactor", title: "1. React Flight Architecture", level: 2 },
   { id: "server-components", title: "2. Synchronous Server Components", level: 2 },
   { id: "new-apis", title: "3. New page_functions APIs", level: 2 },
-  { id: "imports-adjustments", title: "4. Import Extension Fixes", level: 2 },
+  { id: "anti-bot-shield", title: "4. Anti-Bot Shield Middleware", level: 2 },
+  { id: "imports-adjustments", title: "5. Import Extension Fixes", level: 2 },
 ];
 
 export default function Page() {
@@ -203,9 +204,42 @@ export function allowISG() {
               </div>
             </section>
 
-            {/* 4. Import Extension Fixes */}
+            {/* 4. Anti-Bot Shield Middleware */}
+            <section id="anti-bot-shield" className="mt-12 pt-8 border-t">
+              <h2>4. Built-in Anti-Bot Shield (Express Middleware)</h2>
+              <p>
+                Dinou v5 introduces an integrated <strong>Anti-Bot Shield</strong> middleware inside <code>server.js</code> to protect applications using dynamic Incremental Static Generation (ISG).
+              </p>
+              <Alert className="not-prose mt-4 border-blue-500/20 bg-blue-500/5 dark:bg-blue-500/10">
+                <ShieldCheck className="h-4 w-4 text-blue-500" />
+                <AlertTitle className="text-blue-600 dark:text-blue-400">Security & Performance Protection</AlertTitle>
+                <AlertDescription className="text-xs leading-relaxed mt-1 text-muted-foreground space-y-2">
+                  <p>
+                    Vulnerability scanning bots routinely crawl web servers searching for typical targets (like <code>.php</code> scripts, <code>.env</code> files, backup files, or paths like <code>/wp-admin</code>).
+                  </p>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">The Risks in ISG:</p>
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>
+                      <strong>CPU &amp; Memory Exhaustion (Short Term):</strong> Since ISG attempts to compile unknown paths on-demand by spawning background child processes, a concurrent bot scan of thousands of fake routes would fork too many processes at once, spiking CPU usage to 100% and causing a Denial of Service (DoS).
+                    </li>
+                    <li>
+                      <strong>Disk Space Inflation (Long Term):</strong> Successful ISG builds are written to the server's filesystem (saving both <code>index.html</code> and <code>rsc.rsc</code> files). Letting bots generate static files for thousands of arbitrary garbage paths would eventually fill up the server's disk space.
+                    </li>
+                  </ul>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">The Shield Solution:</p>
+                  <p>
+                    The middleware intercepts requests matching common bot scanning patterns and returns an instant <strong>404 Not Found</strong>, completely bypassing the ISG compilation process and safeguarding system stability.
+                  </p>
+                </AlertDescription>
+              </Alert>
+              <p className="mt-4">
+                If you are developing a route that matches these patterns (for instance, if you require a page ending in <code>.php</code> or using paths like <code>wp-admin</code>), the server will block it and return a 404 by default. You can adjust the <code>botGarbagePatterns</code> list in <code>dinou/core/server.js</code> if you need to bypass this protection for specific routes.
+              </p>
+            </section>
+
+            {/* 5. Import Extension Fixes */}
             <section id="imports-adjustments" className="mt-12 pt-8 border-t">
-              <h2>4. Minor Adjustments for Legacy Imports (Isolated Cases)</h2>
+              <h2>5. Minor Adjustments for Legacy Imports (Isolated Cases)</h2>
               <p>
                 Dinou v5 enforces modern ES Modules (ESM) resolution standards.
               </p>
