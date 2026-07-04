@@ -123,7 +123,7 @@ export default function Page() {
                 </div>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
                   <li>
-                    <strong>Arguments:</strong> <code>{"{ params }"}</code> (The
+                    <strong>Arguments:</strong> <code>params</code> (The
                     dynamic route parameters)
                   </li>
                   <li>
@@ -139,7 +139,7 @@ export default function Page() {
               >
                 {`// src/blog/[slug]/page_functions.ts
 
-export async function getProps({ params }) {
+export async function getProps(params) {
   // 1. Fetch data based on the URL path (e.g., /blog/my-post)
   const post = await db.getPost(params.slug);
 

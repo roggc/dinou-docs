@@ -38,7 +38,7 @@ const tocItems = [
     level: 2,
   },
   { id: "getstaticpaths-ref", title: "getStaticPaths()", level: 3 },
-  { id: "getprops-ref", title: "getProps({ params })", level: 3 },
+  { id: "getprops-ref", title: "getProps(params)", level: 3 },
   { id: "revalidate-ref", title: "revalidate()", level: 3 },
   { id: "dynamic-ref", title: "dynamic()", level: 3 },
   { id: "validateparams-ref", title: "validateParams()", level: 3 },
@@ -294,7 +294,7 @@ export default function Page() {
 
               <section id="getprops-ref" className="mt-12 pt-8 border-t">
                 <h3>
-                  <code>getProps({`{ params }`})</code>
+                  <code>getProps(params)</code>
                 </h3>
                 <p>
                   <strong>Async</strong> function to fetch data on the server
@@ -304,7 +304,7 @@ export default function Page() {
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-                  {`export async function getProps({ params }) {
+                  {`export async function getProps(params) {
   const data = await db.getItem(params.id);
   return {
     page: { item: data },        // Props for page.tsx
