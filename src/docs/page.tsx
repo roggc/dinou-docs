@@ -172,14 +172,12 @@ export default function Page() {
                     </div>
                     <CardTitle>File-System Routing</CardTitle>
                     <CardDescription>
-                      Intuitive project structure.
+                      Flexible structures with layout overrides.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Automatic routing based on{" "}
-                      <code>page.&#123;jsx,tsx&#125;</code> files located within
-                      the <code>src</code> directory structure.
+                      Automatic routing mapped to <code>page.&#123;jsx,tsx&#125;</code> paths. Supports dynamic segment matches (<code>[id]</code>), route grouping folder syntax (<code>(group)</code>), and precise layout overrides using <code>no_layout</code> or <code>reset_layout</code> flags.
                     </p>
                   </CardContent>
                 </Card>
