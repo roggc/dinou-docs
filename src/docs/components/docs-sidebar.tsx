@@ -61,6 +61,11 @@ const navigation = [
         href: "/docs/about",
         icon: Copyright,
       },
+    ],
+  },
+  {
+    title: "Upgrade Guides",
+    items: [
       {
         title: "Migration from v4",
         href: "/docs/migration",
