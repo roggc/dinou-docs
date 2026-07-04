@@ -204,8 +204,8 @@ export function Counter() {
                   </div>
                   <ul className="text-xs space-y-1 list-disc pl-4 text-muted-foreground">
                     <li>Functions (cannot pass callback event handlers directly)</li>
-                    <li>Class instances</li>
-                    <li>Browser-only objects</li>
+                    <li>Class instances (prototypes and methods are lost; React throws serialization errors)</li>
+                    <li>Browser-only globals and DOM elements (e.g., <code>window</code>, <code>document</code>, HTML nodes)</li>
                   </ul>
                 </div>
               </div>
