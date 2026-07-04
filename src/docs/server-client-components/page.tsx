@@ -181,7 +181,7 @@ export function Counter() {
             <section id="props-serialization">
               <h2>Data Serialization Boundary</h2>
               <p>
-                When passing data across the network boundary from a Server Component to a Client Component, the props must be **serializable**.
+                When passing data across the network boundary from a Server Component to a Client Component, the props must be <strong>serializable</strong>.
               </p>
 
               <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
