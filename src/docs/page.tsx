@@ -18,6 +18,8 @@ import {
   FolderTree,
   ArrowRight,
   RefreshCw,
+  Boxes,
+  ShieldCheck,
 } from "lucide-react";
 import { Link } from "dinou";
 
@@ -39,10 +41,10 @@ export default function Page() {
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Introduction
               </h1>
-              <Badge variant="secondary">v4</Badge>
+              <Badge variant="secondary">v5</Badge>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              A Full-Stack React 19 Framework built for the modern web.
+              A lightweight, ejectable Full-Stack React 19 Framework built for the modern web.
             </p>
           </div>
 
@@ -184,6 +186,40 @@ export default function Page() {
                     </p>
                   </CardContent>
                 </Card>
+
+                <Card>
+                  <CardHeader>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
+                      <Boxes className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <CardTitle>Ejectable & Bundler Agnostic</CardTitle>
+                    <CardDescription>
+                      Complete control over your build.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Swap between esbuild, Rollup, or Webpack using simple npm commands, or extract the entire framework core directly to your repository with a single eject command.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900/20">
+                      <ShieldCheck className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+                    </div>
+                    <CardTitle>Route Guarding & WAF</CardTitle>
+                    <CardDescription>
+                      Built-in validation and security.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Validate dynamic parameter segments before render via <code>validateParams</code> / <code>allowISG</code>, and shield your application from bot probes using the lightweight regex WAF.
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
             </section>
 
@@ -191,15 +227,14 @@ export default function Page() {
               <h2>Rendering Philosophy</h2>
               <p>
                 Dinou prioritizes a <strong>Static First</strong> approach. By
-                default, pages are pre-rendered as Static Site Generation (SSG).
-                However, the engine is smart enough to "bail out" to Server-Side
-                Rendering (SSR) instantly if your code accesses dynamic data
-                sources.
+                default, pages are pre-rendered using <strong>Static Rendering</strong>.
+                However, the engine automatically switches to <strong>Dynamic Rendering</strong> (request-time evaluation)
+                if your code accesses request-specific dynamic data sources (such as cookies, headers, or query parameters).
               </p>
               <p>
-                This ensures you get the performance of a static site where
-                possible, and the flexibility of a dynamic server when needed,
-                without complex configuration files.
+                This ensures you get the caching and load-time benefits of static delivery where
+                possible, and the flexibility of dynamic request evaluation when needed,
+                all without complex configuration files.
               </p>
             </section>
 
