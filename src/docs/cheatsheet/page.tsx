@@ -24,6 +24,7 @@ import {
   CheckCircle2,
   XCircle,
   File,
+  ShieldCheck,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -37,9 +38,11 @@ const tocItems = [
     level: 2,
   },
   { id: "getstaticpaths-ref", title: "getStaticPaths()", level: 3 },
-  { id: "getprops-ref", title: "getProps({ params })", level: 3 },
+  { id: "getprops-ref", title: "getProps(params)", level: 3 },
   { id: "revalidate-ref", title: "revalidate()", level: 3 },
   { id: "dynamic-ref", title: "dynamic()", level: 3 },
+  { id: "validateparams-ref", title: "validateParams(params)", level: 3 },
+  { id: "allowisg-ref", title: "allowISG()", level: 3 },
 ];
 
 export default function Page() {
@@ -289,9 +292,9 @@ export default function Page() {
                 </div>
               </section>
 
-              <section id="getprops-ref">
+              <section id="getprops-ref" className="mt-12 pt-8 border-t">
                 <h3>
-                  <code>getProps({`{ params }`})</code>
+                  <code>getProps(params)</code>
                 </h3>
                 <p>
                   <strong>Async</strong> function to fetch data on the server
@@ -301,7 +304,7 @@ export default function Page() {
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-                  {`export async function getProps({ params }) {
+                  {`export async function getProps(params) {
   const data = await db.getItem(params.id);
   return {
     page: { item: data },        // Props for page.tsx
@@ -310,17 +313,15 @@ export default function Page() {
 }`}
                 </CodeBlock>
                 <Alert className="not-prose mt-4">
-                  <FileCode className="h-4 w-4" />
-                  <AlertTitle>Single Source of Truth</AlertTitle>
+                  <FileCode className="h-4 w-4 text-blue-500" />
+                  <AlertTitle>Performance Tip: Blocking vs. Streaming</AlertTitle>
                   <AlertDescription>
-                    Use <code>getProps</code> for data that depends only on
-                    route parameters. For request-specific data (cookies, search
-                    params), fetch directly in Components with Suspense.
+                    Because <code>getProps</code> blocks the initial render at request time, keep it fast for dynamic routes. Note that this does not affect pre-rendered static pages (SSG) since their data is fetched at server startup. In Incremental Static Generation (ISG), it only blocks the very first request by the first visitor before the page is cached. If you need slow dynamic fetches on dynamic routes, defer them to a <code>Suspense</code> boundary wrapping a Server Function.
                   </AlertDescription>
                 </Alert>
               </section>
 
-              <section id="revalidate-ref">
+              <section id="revalidate-ref" className="mt-12 pt-8 border-t">
                 <h3>
                   <code>revalidate()</code>
                 </h3>
@@ -362,7 +363,7 @@ export default function Page() {
                 </div>
               </section>
 
-              <section id="dynamic-ref">
+              <section id="dynamic-ref" className="mt-12 pt-8 border-t">
                 <h3>
                   <code>dynamic()</code>
                 </h3>
@@ -388,6 +389,42 @@ export default function Page() {
                     are used.
                   </AlertDescription>
                 </Alert>
+              </section>
+
+              <section id="validateparams-ref" className="mt-12 pt-8 border-t">
+                <h3>
+                  <code>validateParams(params)</code>
+                </h3>
+                <p>
+                  Validates dynamic parameters on the server prior to rendering. Returning <code>false</code> immediately blocks the request and returns a 404 response.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`export function validateParams(params) {
+  // Reject route parameter and return 404 instantly
+  return typeof params.id === "string" && /^\\d+$/.test(params.id);
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="allowisg-ref" className="mt-12 pt-8 border-t">
+                <h3>
+                  <code>allowISG()</code>
+                </h3>
+                <p>
+                  Enables or disables Incremental Static Generation (ISG) on-demand for dynamic routes not generated at server startup (via <code>getStaticPaths</code>).
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`export function allowISG() {
+  // Disable dynamic on-demand generation; serve getStaticPaths ONLY
+  return false;
+}`}
+                </CodeBlock>
               </section>
             </section>
           </div>

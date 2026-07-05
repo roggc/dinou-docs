@@ -75,14 +75,6 @@ cd my-app
 npm run dev`}
               </CodeBlock>
 
-              <Alert className="not-prose mt-4">
-                <Cpu className="h-4 w-4" />
-                <AlertTitle>Zero Configuration Required</AlertTitle>
-                <AlertDescription>
-                  The CLI sets up everything you need. You can start coding
-                  immediately.
-                </AlertDescription>
-              </Alert>
             </section>
 
             <section id="manual-setup">
@@ -117,19 +109,16 @@ npm install react react-dom dinou`}
                 <div>
                   <h4>2. Create Project Structure</h4>
                   <p>
-                    Create the <code>src</code> directory and your first page:
+                    Create a <code>src</code> directory in the root of your project, and create a file named <code>page.jsx</code> (or <code>page.tsx</code>) inside it:
                   </p>
                   <CodeBlock
-                    language="bash"
+                    language="javascript"
                     containerClassName="w-full overflow-hidden rounded-lg"
                   >
-                    {`# Create the source directory
-mkdir src
-
-# Create your first page
-echo 'export default async function Page() {
+                    {`// src/page.jsx
+export default function Page() {
   return <h1>Hello, Dinou!</h1>;
-}' > src/page.jsx`}
+}`}
                   </CodeBlock>
 
                   <div className="border rounded-lg p-4 bg-card not-prose mt-4">
@@ -160,11 +149,79 @@ echo 'export default async function Page() {
                     {`{
   "scripts": {
     "dev": "dinou dev",
+    "dev:rollup": "dinou dev:rollup",
+    "dev:webpack": "dinou dev:webpack",
     "build": "dinou build",
-    "start": "dinou start"
+    "build:rollup": "dinou build:rollup",
+    "build:webpack": "dinou build:webpack",
+    "start": "dinou start",
+    "eject": "dinou eject"
   }
 }`}
                   </CodeBlock>
+                </div>
+
+                <div>
+                  <h4>4. Run the Development Server</h4>
+                  <p>
+                    Start the development server using the configured scripts:
+                  </p>
+                  <CodeBlock
+                    language="bash"
+                    containerClassName="w-full overflow-hidden rounded-lg"
+                  >
+                    {`# Start development server (esbuild default)
+npm run dev
+
+# Or start with a specific bundler
+npm run dev:rollup
+npm run dev:webpack`}
+                  </CodeBlock>
+                  <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+                    Alternatively, you can run the CLI tool directly without adding scripts to your <code>package.json</code> using <code>npx</code>:
+                  </p>
+                  <CodeBlock
+                    language="bash"
+                    containerClassName="w-full overflow-hidden rounded-lg mt-2"
+                  >
+                    {`# Run the development server (esbuild default)
+npx dinou dev
+ 
+# Or run with a specific bundler
+npx dinou dev:rollup
+npx dinou dev:webpack`}
+                  </CodeBlock>
+                  <Alert className="not-prose mt-4 border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/10">
+                    <Zap className="h-4 w-4 text-amber-500" />
+                    <AlertTitle className="text-amber-700 dark:text-amber-400 font-bold">
+                      ⚡ When is the project ready in dev?
+                    </AlertTitle>
+                    <AlertDescription className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                      Dinou runs two concurrent tasks in development: the server process <code>[0]</code> and the bundler compiler <code>[1]</code>. 
+                      <strong>Wait until both logs are fully initialized</strong> (showing that compilation has finished and the server is listening) before opening the page in your browser. Opening too early can result in hydration mismatches or connection errors.
+                    </AlertDescription>
+                  </Alert>
+                </div>
+
+                <div>
+                  <h4>5. Configure .gitignore (Recommended)</h4>
+                  <p>
+                    Dinou generates temporary cache manifests, build outputs, and development directories that should not be committed to version control. Add the following folders to your <code>.gitignore</code> file:
+                  </p>
+                  <CodeBlock
+                    language="text"
+                    containerClassName="w-full overflow-hidden rounded-lg"
+                  >
+                    {`# Dinou build & cache directories
+dist2/
+dist3/
+public/
+react_client_manifest/
+server_functions_manifest/`}
+                  </CodeBlock>
+                  <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+                    These folders contain compilation outputs (such as development files in <code>public/</code> and production builds in <code>dist3/</code>) or client/server manifests mapped dynamically during server execution.
+                  </p>
                 </div>
               </div>
             </section>
@@ -176,7 +233,7 @@ echo 'export default async function Page() {
                 to explore next:
               </p>
 
-              <div className="grid gap-4 md:grid-cols-2 not-prose mt-6">
+              <div className="grid gap-4 md:grid-cols-3 not-prose mt-6">
                 <Card className="hover:border-primary transition-colors cursor-pointer">
                   <Link href="/docs/routing" className="block h-full">
                     <CardHeader>
@@ -219,6 +276,30 @@ echo 'export default async function Page() {
                           <p className="text-sm text-muted-foreground">
                             With Suspense + Server Functions Or Without Suspense
                             (Server Components and/or <code>getProps</code>)
+                          </p>
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Link>
+                </Card>
+
+                <Card className="hover:border-primary transition-colors cursor-pointer">
+                  <Link href="/docs/bundlers" className="block h-full">
+                    <CardHeader>
+                      <div className="flex flex-col gap-4">
+                        {/* Fila Superior: Icono (Izq) y Flecha (Der) */}
+                        <div className="flex items-start justify-between w-full">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
+                            <Wrench className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                          </div>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground mt-1" />
+                        </div>
+
+                        {/* Fila Inferior: Texto */}
+                        <div>
+                          <CardTitle className="mb-1">Bundlers & Eject</CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            Configure Webpack, Rollup, or esbuild, and customize logic via Eject.
                           </p>
                         </div>
                       </div>

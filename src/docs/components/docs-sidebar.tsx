@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import { usePathname, Link } from "dinou";
 import {
   Sidebar,
@@ -10,6 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/docs/components/ui/sidebar";
 import {
   BookOpen,
@@ -26,6 +28,7 @@ import {
   Copyright,
   Atom,
   AtSign,
+  Fingerprint,
   Plug,
   Hexagon,
   Star,
@@ -37,6 +40,7 @@ import {
   Brain,
   Shredder,
   ClipboardList,
+  RefreshCw,
 } from "lucide-react";
 
 const navigation = [
@@ -61,6 +65,16 @@ const navigation = [
     ],
   },
   {
+    title: "Upgrade Guides",
+    items: [
+      {
+        title: "Migration from v4",
+        href: "/docs/migration",
+        icon: RefreshCw,
+      },
+    ],
+  },
+  {
     title: "Core Concepts",
     items: [
       {
@@ -72,6 +86,16 @@ const navigation = [
         title: "Layouts",
         href: "/docs/layouts",
         icon: FileText,
+      },
+      {
+        title: "Route Parameters",
+        href: "/docs/route-parameters",
+        icon: Fingerprint,
+      },
+      {
+        title: "Server & Client Components",
+        href: "/docs/server-client-components",
+        icon: Server,
       },
       {
         title: "Navigation",
@@ -174,6 +198,21 @@ const navigation = [
 
 export function DocsSidebar() {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+  const { setOpenMobile } = useSidebar();
+  const prevPathname = useRef(pathname);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Close the mobile sidebar drawer automatically when navigation occurs (pathname changes)
+  useEffect(() => {
+    if (prevPathname.current !== pathname) {
+      setOpenMobile(false);
+      prevPathname.current = pathname;
+    }
+  }, [pathname, setOpenMobile]);
 
   return (
     <Sidebar className="border-r fixed left-0 top-0 h-full z-30">
@@ -187,7 +226,7 @@ export function DocsSidebar() {
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       asChild
-                      isActive={pathname === item.href}
+                      isActive={mounted ? pathname === item.href : false}
                     >
                       <Link href={item.href}>
                         <item.icon className="h-4 w-4" />

@@ -1,7 +1,6 @@
 "use client";
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
-import { Badge } from "@/docs/components/ui/badge";
 import { Button } from "@/docs/components/ui/button";
 import {
   Card,
@@ -18,6 +17,8 @@ import {
   FolderTree,
   ArrowRight,
   RefreshCw,
+  Boxes,
+  ShieldCheck,
 } from "lucide-react";
 import { Link } from "dinou";
 
@@ -33,16 +34,12 @@ export default function Page() {
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
       <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
-          {/* Header */}
           <div className="mb-8 space-y-4">
-            <div className="flex items-center space-x-2">
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Introduction
-              </h1>
-              <Badge variant="secondary">v4</Badge>
-            </div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              Introduction
+            </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              A Full-Stack React 19 Framework built for the modern web.
+              A lightweight, ejectable Full-Stack React 19 Framework built for the modern web.
             </p>
           </div>
 
@@ -53,8 +50,9 @@ export default function Page() {
                 <strong>Dinou</strong> is a framework designed to unleash the
                 full potential of <strong>React 19</strong>. It provides{" "}
                 <strong>seamless integration</strong> with React Server
-                Components (RSC), Server-Side Rendering (SSR), Static Generation
-                (SSG), and advanced Incremental Static strategies (ISG and ISR).
+                Components (RSC), Server Functions (<code>'use server'</code>),
+                Server-Side Rendering (SSR), Static Generation (SSG), and advanced
+                Incremental Static strategies (ISG and ISR).
               </p>
               <p>
                 It is built to leverage Suspense and Streaming for optimal
@@ -100,7 +98,7 @@ export default function Page() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Automatically switches to Dynamic Rendering (SSR) when
+                      Automatically switches to Dynamic Rendering when
                       request-specific data like cookies, headers, or search
                       params are detected (Automatic Bailout).
                     </p>
@@ -151,17 +149,14 @@ export default function Page() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/20">
                       <Database className="h-5 w-5 text-red-600 dark:text-red-400" />
                     </div>
-                    <CardTitle>Data Fetching & State</CardTitle>
+                    <CardTitle>Data Fetching &amp; Server Functions</CardTitle>
                     <CardDescription>
-                      Seamless server-client sync.
+                      Seamless client-to-server operations.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Optimized patterns using{" "}
-                      <code>react-enhanced-suspense</code> and{" "}
-                      <code>jotai-wrapper</code> for seamless state
-                      synchronization and mutations.
+                      Includes native support for React 19 Server Functions (<code>'use server'</code>) to invoke server-side logic directly from the client. Combined with <code>react-enhanced-suspense</code> and <code>jotai-wrapper</code> for clean state synchronization and mutations.
                     </p>
                   </CardContent>
                 </Card>
@@ -173,14 +168,46 @@ export default function Page() {
                     </div>
                     <CardTitle>File-System Routing</CardTitle>
                     <CardDescription>
-                      Intuitive project structure.
+                      Flexible structures with layout overrides.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Automatic routing based on{" "}
-                      <code>page.&#123;jsx,tsx&#125;</code> files located within
-                      the <code>src</code> directory structure.
+                      Automatic routing mapped to <code>page.&#123;jsx,tsx&#125;</code> paths. Supports dynamic segment matches (<code>[id]</code>), route grouping folder syntax (<code>(group)</code>), and precise layout overrides using <code>no_layout</code> or <code>reset_layout</code> flags.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
+                      <Boxes className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <CardTitle>Ejectable & Bundler Agnostic</CardTitle>
+                    <CardDescription>
+                      Complete control over your build.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Swap between esbuild, Rollup, or Webpack using simple npm commands, or extract the entire framework core directly to your repository with a single eject command.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-100 dark:bg-teal-900/20">
+                      <ShieldCheck className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+                    </div>
+                    <CardTitle>Route Guarding &amp; Security</CardTitle>
+                    <CardDescription>
+                      Built-in validation and security.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      Validate dynamic parameter segments before rendering via <code>validateParams</code> / <code>allowISG</code>, and shield your application from bot probes using the built-in Anti-Bot Shield middleware.
                     </p>
                   </CardContent>
                 </Card>
@@ -191,15 +218,14 @@ export default function Page() {
               <h2>Rendering Philosophy</h2>
               <p>
                 Dinou prioritizes a <strong>Static First</strong> approach. By
-                default, pages are pre-rendered as Static Site Generation (SSG).
-                However, the engine is smart enough to "bail out" to Server-Side
-                Rendering (SSR) instantly if your code accesses dynamic data
-                sources.
+                default, pages are pre-rendered using <strong>Static Rendering</strong>.
+                However, the engine automatically switches to <strong>Dynamic Rendering</strong> (request-time evaluation)
+                if your code accesses request-specific dynamic data sources (such as cookies, headers, or query parameters).
               </p>
               <p>
-                This ensures you get the performance of a static site where
-                possible, and the flexibility of a dynamic server when needed,
-                without complex configuration files.
+                This ensures you get the caching and load-time benefits of static delivery where
+                possible, and the flexibility of dynamic request evaluation when needed,
+                all without complex configuration files.
               </p>
             </section>
 

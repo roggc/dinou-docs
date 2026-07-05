@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 // const ReactMarkdown = (await import("react-markdown")).default;
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism/index.js";
 
 interface MarkdownRendererProps {
   content: string;

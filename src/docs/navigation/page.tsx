@@ -20,6 +20,7 @@ import { CodeBlock } from "@/docs/components/code-block";
 const tocItems = [
   { id: "link-component", title: "<Link> Component", level: 2 },
   { id: "programmatic-navigation", title: "Programmatic Navigation", level: 2 },
+  { id: "relative-routing", title: "Relative Routing Rules", level: 2 },
 ];
 
 export default function Page() {
@@ -109,9 +110,29 @@ export default function NavBar() {
                   <code>&lt;Link&gt;</code> component.
                 </AlertDescription>
               </Alert>
+              <div className="border rounded-lg p-4 bg-card not-prose mt-4">
+                <details className="group">
+                  <summary className="cursor-pointer font-semibold text-xs text-slate-700 dark:text-slate-400 select-none hover:underline">
+                    Show Technical Details (for Ejected Code)
+                  </summary>
+                  <div className="mt-3 text-xs leading-relaxed text-muted-foreground space-y-2">
+                    <p>
+                      In the ejected core, the link and global navigation logic are managed by the following modules:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>
+                        <strong><code>dinou/core/link.jsx</code>:</strong> The <code>&lt;Link&gt;</code> component intercepts clicks (preventing default browser reloads) and forwards navigations to the Router via <code>useRouter().push(href, &#123; fresh &#125;)</code>. It also binds to <code>onMouseEnter</code> to run <code>window.__DINOU_PREFETCH__(resolvedHref)</code> when hovered.
+                      </li>
+                      <li>
+                        <strong><code>dinou/core/navigation.js</code>:</strong> Implements the client-side context hooks (<code>useRouter</code>, <code>usePathname</code>, and <code>useSearchParams</code>). Note how these hooks share code pathways between server-side SSR execution (falling back to reading request context dynamically) and client-side execution (reading from <code>RouterContext</code>).
+                      </li>
+                    </ul>
+                  </div>
+                </details>
+              </div>
             </section>
 
-            <section id="programmatic-navigation">
+            <section id="programmatic-navigation" className="mt-12 pt-8 border-t">
               <h2>Programmatic Navigation</h2>
               <p>
                 To navigate imperatively, use the <code>useRouter</code> hook
@@ -195,6 +216,58 @@ export default function LoginButton() {
                   </tbody>
                 </table>
               </div>
+            </section>
+
+            <section id="relative-routing" className="mt-12 pt-8 border-t">
+              <h2>Relative Routing Rules</h2>
+              <p>
+                Dinou resolves relative navigation paths (e.g., <code>about</code>, <code>./about</code>, or <code>../dashboard</code>) using a <strong>File-System Directory Convention</strong>. This differs from standard browser URL resolution:
+              </p>
+              
+              <div className="border border-indigo-500/20 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-lg p-4 my-6 not-prose space-y-3">
+                <div className="flex items-center gap-2 font-semibold text-indigo-700 dark:text-indigo-400">
+                  <Globe className="h-5 w-5" />
+                  <span>Directory-First Resolution</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  In a standard web browser, a URL like <code>/blog/hello</code> (lacking a trailing slash) treats <code>hello</code> as a file name. A relative link <code>about</code> resolves by replacing it, yielding <code>/blog/about</code>.
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  <strong>Dinou's Convention:</strong> Every route is treated as a <strong>directory</strong> because physically, pages are folders containing a <code>page.tsx</code> component (e.g. <code>src/blog/hello/page.tsx</code>). Resolving relatively relative to the page mimics navigating the file structure of your project.
+                </p>
+              </div>
+
+              <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
+                <table className="w-full text-sm text-left">
+                  <thead className="bg-muted text-muted-foreground font-medium">
+                    <tr>
+                      <th className="p-4 w-1/3">Current Path</th>
+                      <th className="p-4 w-1/3">Relative Target</th>
+                      <th className="p-4 w-1/3">Resolved Path</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border bg-card font-mono text-xs">
+                    <tr>
+                      <td className="p-4">/blog/hello</td>
+                      <td className="p-4 text-indigo-600 dark:text-indigo-400">about</td>
+                      <td className="p-4 font-bold text-slate-800 dark:text-slate-100">/blog/hello/about</td>
+                    </tr>
+                    <tr>
+                      <td className="p-4">/blog/hello</td>
+                      <td className="p-4 text-indigo-600 dark:text-indigo-400">./about</td>
+                      <td className="p-4 font-bold text-slate-800 dark:text-slate-100">/blog/hello/about</td>
+                    </tr>
+                    <tr>
+                      <td className="p-4">/blog/hello</td>
+                      <td className="p-4 text-purple-600 dark:text-purple-400">../about</td>
+                      <td className="p-4 font-bold text-slate-800 dark:text-slate-100">/blog/about</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-4 text-sm text-muted-foreground">
+                This rule applies uniformly across all navigation methods, including the <code>&lt;Link&gt;</code> component and programmatic calls like <code>router.push()</code>.
+              </p>
             </section>
           </div>
         </div>

@@ -125,7 +125,7 @@ export default async function Page() {
                 >
                   {`// src/blog/[slug]/page_functions.ts
 
-export async function getProps({ params }) {
+export async function getProps(params) {
   // 1. Fetch data based on the URL path (e.g., /blog/my-post)
   const post = await db.getPost(params.slug);
 
@@ -141,41 +141,41 @@ export async function getProps({ params }) {
 
                 <Alert className="not-prose mt-4">
                   <Info className="h-4 w-4" />
-                  <AlertTitle>Design Note</AlertTitle>
+                  <AlertTitle>Design Note: Parameter vs. Server Context</AlertTitle>
                   <AlertDescription>
                     <p>
-                      <code>getProps</code> only receives <code>params</code>.
-                      For request-specific data like <code>searchParams</code>{" "}
-                      or <code>cookies</code>, fetch data directly inside your
-                      components using <code>Suspense</code> with Server
-                      Functions to avoid blocking the initial HTML render.
+                      While <code>getProps</code> only receives the route <code>params</code> as its parameter, you can still read cookies, headers, or query parameters by calling <code>getContext()</code> since the function executes on the server.
+                    </p>
+                    <p className="mt-2 font-semibold">
+                      Performance Trade-off:
+                    </p>
+                    <p className="mt-0.5">
+                      Because <code>getProps</code> blocks the rendering process at request time, the server waits for it to resolve before starting the render. Keep it fast for dynamic routes; pre-rendered static pages (SSG) are unaffected since their data is fetched at server startup. In Incremental Static Generation (ISG), it only blocks the very first request by the first visitor before the page is cached. If you need slow dynamic fetches on dynamic routes, defer them to a <code>Suspense</code> boundary wrapping a Server Function.
                     </p>
                   </AlertDescription>
                 </Alert>
 
-                <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
+                 <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
                   <Card>
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold">
                         <Server className="h-5 w-5 text-blue-500" />
-                        <span>For Static Pages</span>
+                        <span>For Static Pages (SSG / ISG)</span>
                       </div>
                     </CardHeader>
-                    <CardContent className="text-sm">
-                      Ideal for generating static pages during build or with
-                      incremental regeneration.
+                    <CardContent className="text-sm text-muted-foreground">
+                      Ideal for generating static pages at server startup (SSG) or on-demand via Incremental Static Generation (ISG).
                     </CardContent>
                   </Card>
                   <Card className="border-green-500/20 bg-green-50/50 dark:bg-green-900/10">
                     <CardHeader>
                       <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
                         <Globe className="h-5 w-5" />
-                        <span>Layout Injection</span>
+                        <span>Root Layout Injection</span>
                       </div>
                     </CardHeader>
-                    <CardContent className="text-sm">
-                      You can inject data to layout (page titles, metadata,
-                      etc.) in addition to the page itself.
+                    <CardContent className="text-sm text-muted-foreground">
+                      Allows injecting props directly into the resolved Root Layout for that route, in addition to the page itself.
                     </CardContent>
                   </Card>
                 </div>
@@ -300,24 +300,24 @@ export default async function Page({ params: { id } }) {
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold">
                         <FunctionSquare className="h-5 w-5 text-purple-500" />
-                        <span>Consistent Server Function API</span>
+                        <span>react-enhanced-suspense: Server vs. Client</span>
                       </div>
                     </CardHeader>
-                    <CardContent className="text-sm">
-                      The same Server Functions work identically in both Server
-                      and Client Components when wrapped with Suspense.
+                    <CardContent className="text-sm text-muted-foreground space-y-2">
+                      <div>
+                        <strong>Client Components:</strong> Requires a <code>resourceId</code> key and passing <code>children</code> as a <em>function</em> (e.g. <code>&#123;() =&gt; getPost(id)&#125;</code>) to trigger client-side reactive re-fetches when dependencies change.
+                      </div>
+                      <div>
+                        <strong>Server Components:</strong> Does not use <code>resourceId</code>, and wraps the direct <em>Promise</em> invocation as a child (e.g. <code>&#123;getPost(id)&#125;</code>) to perform server-side HTML streaming.
+                      </div>
                     </CardContent>
                   </Card>
                 </div>
-                <Alert className="not-prose mt-4">
-                  <Zap className="h-4 w-4" />
-                  <AlertTitle>Performance Tip with Server Functions</AlertTitle>
+                <Alert className="not-prose mt-4 border-indigo-500/20 bg-indigo-50/50 dark:bg-indigo-950/10">
+                  <Zap className="h-4 w-4 text-indigo-500" />
+                  <AlertTitle>Performance Tip: Static Shell + Dynamic Fetching</AlertTitle>
                   <AlertDescription>
-                    Combine Server Functions with Dinou's static rendering.
-                    Static pages can use Server Functions for dynamic parts
-                    while maintaining overall static performance. Server
-                    Functions ensure server-side execution with client-side
-                    reactivity when needed.
+                    If a page is statically generated (SSG), you can still fetch dynamic or user-specific data on the client (like inventory stock or shopping carts) using a Server Function wrapped in <code>Suspense</code>. The browser downloads the static page shell instantly, and the Server Function fetches the dynamic parts on-demand.
                   </AlertDescription>
                 </Alert>
               </section>
