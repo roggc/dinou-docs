@@ -186,11 +186,32 @@ npm run dev:webpack`}
                   >
                     {`# Run the development server (esbuild default)
 npx dinou dev
-
+ 
 # Or run with a specific bundler
 npx dinou dev:rollup
 npx dinou dev:webpack`}
                   </CodeBlock>
+                </div>
+
+                <div>
+                  <h4>5. Configure .gitignore (Recommended)</h4>
+                  <p>
+                    Dinou generates temporary cache manifests, build outputs, and development directories that should not be committed to version control. Add the following folders to your <code>.gitignore</code> file:
+                  </p>
+                  <CodeBlock
+                    language="text"
+                    containerClassName="w-full overflow-hidden rounded-lg"
+                  >
+                    {`# Dinou build & cache directories
+dist2/
+dist3/
+public/
+react_client_manifest/
+server_functions_manifest/`}
+                  </CodeBlock>
+                  <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+                    These folders contain compilation outputs (such as development files in <code>public/</code> and production builds in <code>dist3/</code>) or client/server manifests mapped dynamically during server execution.
+                  </p>
                 </div>
               </div>
             </section>
