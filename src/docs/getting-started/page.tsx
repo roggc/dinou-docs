@@ -191,6 +191,16 @@ npx dinou dev
 npx dinou dev:rollup
 npx dinou dev:webpack`}
                   </CodeBlock>
+                  <Alert className="not-prose mt-4 border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/10">
+                    <Zap className="h-4 w-4 text-amber-500" />
+                    <AlertTitle className="text-amber-700 dark:text-amber-400 font-bold">
+                      ⚡ When is the project ready in dev?
+                    </AlertTitle>
+                    <AlertDescription className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                      Dinou runs two concurrent tasks in development: the server process <code>[0]</code> and the bundler compiler <code>[1]</code>. 
+                      <strong>Wait until both logs are fully initialized</strong> (showing that compilation has finished and the server is listening) before opening the page in your browser. Opening too early can result in hydration mismatches or connection errors.
+                    </AlertDescription>
+                  </Alert>
                 </div>
 
                 <div>
