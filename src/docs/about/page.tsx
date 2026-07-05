@@ -17,12 +17,14 @@ import {
   Calendar,
   ExternalLink,
   FileText,
+  Star,
 } from "lucide-react";
 
 const tocItems = [
   { id: "license", title: "📄 License", level: 2 },
   { id: "changelog", title: "📦 Changelog", level: 2 },
   { id: "credits", title: "👨💻 Credits", level: 2 },
+  { id: "support", title: "⭐ Star on GitHub", level: 2 },
 ];
 
 export default function Page() {
@@ -253,6 +255,37 @@ export default function Page() {
                     </a>
                   </div>
                 </div>
+              </div>
+            </section>
+
+            <section id="support">
+              <h2>⭐ Star on GitHub</h2>
+              <p>
+                If you like Dinou and find it useful, please consider giving it a star on GitHub! It helps increase visibility, attracts other developers to contribute, and motivates the creator to keep improving the framework.
+              </p>
+
+              <div className="not-prose mt-6">
+                <a
+                  href="https://github.com/roggc/dinou"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block group"
+                >
+                  <Card className="hover:border-amber-500 transition-colors cursor-pointer border-l-4 border-l-amber-500">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <div className="flex items-center gap-2 font-semibold">
+                        <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+                        <span>Star roggc/dinou on GitHub</span>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-amber-500 transition-colors" />
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">
+                        Show your support by starring the repository. Every star counts!
+                      </p>
+                    </CardContent>
+                  </Card>
+                </a>
               </div>
             </section>
           </div>
