@@ -29,6 +29,7 @@ import {
 import { CodeBlock } from "@/docs/components/code-block";
 
 const tocItems = [
+  { id: "prerequisites", title: "Prerequisites", level: 2 },
   { id: "quick-start", title: "Quick Start (CLI)", level: 2 },
   { id: "manual-setup", title: "Manual Setup", level: 2 },
   { id: "next-steps", title: "Next Steps", level: 2 },
@@ -53,7 +54,19 @@ export default function Page() {
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
-            <section id="quick-start">
+            <section id="prerequisites">
+              <h2>Prerequisites</h2>
+              <p>
+                Before getting started, ensure you have the following requirements installed:
+              </p>
+              <ul>
+                <li>
+                  <strong>Node.js:</strong> Version <strong>20.6.0</strong> or higher is required. Dinou uses the native ES module loader hook registration (via the <code>--import</code> flag) introduced in Node.js v20.6.0 to compile TSX/JSX, resolve aliases, and load static assets in real-time on the server.
+                </li>
+              </ul>
+            </section>
+
+            <section id="quick-start" className="mt-8">
               <h2>Quick Start (CLI)</h2>
               <p>
                 The fastest way to scaffold a new Dinou application is using the
@@ -75,6 +88,16 @@ cd my-app
 npm run dev`}
               </CodeBlock>
 
+              <Alert className="not-prose mt-6 border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/10">
+                <Zap className="h-4 w-4 text-amber-500" />
+                <AlertTitle className="text-amber-700 dark:text-amber-400 font-bold">
+                  ⚡ When is the project ready in dev?
+                </AlertTitle>
+                <AlertDescription className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                  Dinou runs two concurrent tasks in development: the server process <code>[0]</code> and the bundler compiler <code>[1]</code>. 
+                  <strong>Wait until both logs are fully initialized</strong> (showing that compilation has finished and the server is listening) before opening the page in your browser. Opening too early can result in hydration mismatches or connection errors.
+                </AlertDescription>
+              </Alert>
             </section>
 
             <section id="manual-setup">
@@ -191,16 +214,6 @@ npx dinou dev
 npx dinou dev:rollup
 npx dinou dev:webpack`}
                   </CodeBlock>
-                  <Alert className="not-prose mt-4 border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/10">
-                    <Zap className="h-4 w-4 text-amber-500" />
-                    <AlertTitle className="text-amber-700 dark:text-amber-400 font-bold">
-                      ⚡ When is the project ready in dev?
-                    </AlertTitle>
-                    <AlertDescription className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-                      Dinou runs two concurrent tasks in development: the server process <code>[0]</code> and the bundler compiler <code>[1]</code>. 
-                      <strong>Wait until both logs are fully initialized</strong> (showing that compilation has finished and the server is listening) before opening the page in your browser. Opening too early can result in hydration mismatches or connection errors.
-                    </AlertDescription>
-                  </Alert>
                 </div>
 
                 <div>
