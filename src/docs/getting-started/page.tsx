@@ -251,7 +251,7 @@ server_functions_manifest/`}
                 to explore next:
               </p>
 
-              <div className="grid gap-4 md:grid-cols-3 not-prose mt-6">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 not-prose mt-6">
                 <Card className="hover:border-primary transition-colors cursor-pointer">
                   <Link href="/docs/routing" className="block h-full">
                     <CardHeader>
@@ -315,9 +315,33 @@ server_functions_manifest/`}
 
                         {/* Fila Inferior: Texto */}
                         <div>
-                          <CardTitle className="mb-1">Bundlers & Eject</CardTitle>
+                          <CardTitle className="mb-1">Bundlers</CardTitle>
                           <p className="text-sm text-muted-foreground">
-                            Configure Webpack, Rollup, or esbuild, and customize logic via Eject.
+                            Build and run your application using esbuild, Rollup, or Webpack.
+                          </p>
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Link>
+                </Card>
+
+                <Card className="hover:border-primary transition-colors cursor-pointer">
+                  <Link href="/docs/eject" className="block h-full">
+                    <CardHeader>
+                      <div className="flex flex-col gap-4">
+                        {/* Fila Superior: Icono (Izq) y Flecha (Der) */}
+                        <div className="flex items-start justify-between w-full">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/20">
+                            <Rocket className="h-5 w-5 text-red-600 dark:text-red-400" />
+                          </div>
+                          <ArrowRight className="h-4 w-4 text-muted-foreground mt-1" />
+                        </div>
+
+                        {/* Fila Inferior: Texto */}
+                        <div>
+                          <CardTitle className="mb-1">Eject</CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            Copy the entire framework codebase (including core and all bundler configurations) into your project root.
                           </p>
                         </div>
                       </div>
