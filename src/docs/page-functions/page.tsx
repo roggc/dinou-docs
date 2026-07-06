@@ -61,7 +61,7 @@ const tocItems = [
   { id: "normalization-guarantee", title: "Normalization Guarantee", level: 4 },
   { id: "async-support", title: "Async Support", level: 4 },
   { id: "revalidate", title: "3. revalidate (ISR)", level: 3 },
-  { id: "dynamic", title: "4. dynamic (Force SSR)", level: 3 },
+  { id: "dynamic", title: "4. dynamic (Force Dynamic Rendering)", level: 3 },
   {
     id: "validateparams",
     title: "5. validateParams (Route Parameter Validation)",
@@ -587,11 +587,12 @@ export function revalidate() {
 
             <section id="dynamic" className="mt-12 pt-8 border-t">
               <h3>
-                4. <code>dynamic</code> (Force SSR)
+                4. <code>dynamic</code> (Force Dynamic Rendering)
               </h3>
               <p>
-                Forces a page to be rendered dynamically (Server-Side Rendering)
-                on every request, bypassing static generation.
+                Forces a page to be evaluated dynamically on every request, bypassing
+                static generation. This disables static caching and forces request-time
+                evaluation (which can stream RSC payloads or render HTML dynamically depending on the navigation context).
               </p>
               <div className="border rounded-lg p-4 bg-card not-prose mt-4">
                 <div className="flex items-center gap-2 font-semibold mb-2">
@@ -610,7 +611,7 @@ export function revalidate() {
               >
                 {`// src/profile/page_functions.ts
 export function dynamic() {
-  return true; // Always render on demand (SSR)
+  return true; // Always render dynamically at request time
 }`}
               </CodeBlock>
             </section>
