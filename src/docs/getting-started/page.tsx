@@ -172,12 +172,17 @@ export default function Page() {
                     {`{
   "scripts": {
     "dev": "dinou dev",
+    "dev:esbuild": "dinou dev:esbuild",
     "dev:rollup": "dinou dev:rollup",
     "dev:webpack": "dinou dev:webpack",
     "build": "dinou build",
+    "build:esbuild": "dinou build:esbuild",
     "build:rollup": "dinou build:rollup",
     "build:webpack": "dinou build:webpack",
     "start": "dinou start",
+    "start:esbuild": "dinou start:esbuild",
+    "start:rollup": "dinou start:rollup",
+    "start:webpack": "dinou start:webpack",
     "eject": "dinou eject"
   }
 }`}
