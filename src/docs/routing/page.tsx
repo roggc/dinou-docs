@@ -364,12 +364,11 @@ export default function Page() {
                       <CardHeader className="p-4 pb-2">
                         <div className="flex items-center gap-2 font-bold text-sm">
                           <XCircle className="h-4 w-4 text-red-500" />
-                          Client Component
+                          Client Component (Client-side)
                         </div>
                       </CardHeader>
                       <CardContent className="p-4 pt-2 text-xs text-muted-foreground">
-                        Without an explicit React Error Boundary, an unhandled
-                        error here will <strong>crash the entire page</strong>.
+                        An error during client-side interaction crashes the layout without a React Error Boundary. However, initial render crashes (during SSR) are safely contained by Dinou, falling back to <strong>null</strong> or <strong>error.tsx</strong>.
                       </CardContent>
                     </Card>
                   </div>
