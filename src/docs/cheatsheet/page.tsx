@@ -429,8 +429,11 @@ export default function Page() {
               </section>
 
               <section id="getcachetags-ref" className="mt-12 pt-8 border-t">
-                <h3>
+                <h3 className="flex items-center gap-3">
                   <code>getCacheTags(params)</code>
+                  <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
+                    v5.1.0+
+                  </span>
                 </h3>
                 <p>
                   Defines the static cache tags for the generated page. Can be sync or async (supporting database or CMS queries), allowing on-demand invalidation via <code>revalidateTag</code>.

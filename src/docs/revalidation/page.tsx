@@ -40,10 +40,13 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 On-Demand Revalidation
               </h1>
+              <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
+                v5.1.0+
+              </span>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
               Purge and regenerate the static page cache of your application on-demand in production when data changes, without rebuilding the whole site.

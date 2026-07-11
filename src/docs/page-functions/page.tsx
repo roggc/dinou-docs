@@ -695,8 +695,11 @@ export function allowISG() {
             </section>
 
             <section id="getcachetags" className="mt-12 pt-8 border-t">
-              <h3>
+              <h3 className="flex items-center gap-3">
                 7. <code>getCacheTags</code> (Cache Tagging)
+                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
+                  v5.1.0+
+                </span>
               </h3>
               <p>
                 Assigns custom tags to the static page cache files, allowing the page to be invalidated and regenerated on-demand using <code>revalidateTag</code>. This function can be sync or async (supporting database or CMS queries at build time).
