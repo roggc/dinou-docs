@@ -128,6 +128,11 @@ const navigation = [
         icon: Shredder,
       },
       {
+        title: "On-Demand Revalidation",
+        href: "/docs/revalidation",
+        icon: RefreshCw,
+      },
+      {
         title: "React Compiler",
         href: "/docs/compiler",
         icon: Atom,
