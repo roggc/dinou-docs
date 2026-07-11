@@ -281,9 +281,14 @@ export default function Page() {
 }`}
               </CodeBlock>
 
-              <h3>3. Use in Server Components (New in v5.0.3)</h3>
+              <h3 className="flex items-center gap-3">
+                3. Use in Server Components
+                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
+                  v5.0.3+
+                </span>
+              </h3>
               <p>
-                Dinou v5.0.3 introduces full native support for using Server Actions inside <strong>Server Components</strong> (without the <code>"use client"</code> directive). This provides progressive enhancement out of the box—the form submits and processes the action on the server even if JavaScript is disabled in the browser.
+                Dinou introduces full native support for using Server Actions inside <strong>Server Components</strong> (without the <code>"use client"</code> directive). This provides progressive enhancement out of the box—the form submits and processes the action on the server even if JavaScript is disabled in the browser.
               </p>
 
               <CodeBlock
