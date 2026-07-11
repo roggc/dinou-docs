@@ -167,7 +167,7 @@ export async function addNewProduct(data) {
             <section id="get-cache-tags" className="mt-12">
               <h2>getCacheTags Function</h2>
               <p>
-                To assign cache tags to a route, export the <code>getCacheTags</code> function from the route's <code>page_functions.ts</code> file. This function receives the route parameters and runs on the server.
+                To assign cache tags to a route, export the <code>getCacheTags</code> function from the route's <code>page_functions.ts</code> file. This function can be sync or async, receives the route parameters and runs on the server.
               </p>
               <CodeBlock
                 language="typescript"

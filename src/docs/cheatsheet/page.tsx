@@ -433,15 +433,16 @@ export default function Page() {
                   <code>getCacheTags(params)</code>
                 </h3>
                 <p>
-                  Defines the static cache tags for the generated page, allowing it to be revalidated on-demand using <code>revalidateTag</code>.
+                  Defines the static cache tags for the generated page. Can be sync or async (supporting database or CMS queries), allowing on-demand invalidation via <code>revalidateTag</code>.
                 </p>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-                  {`export function getCacheTags(params) {
-  // Associate page with general and param-specific tags
-  return ["products", \`product-\${params.id}\`];
+                  {`export async function getCacheTags(params) {
+  // Can fetch data from a DB or CMS to determine tags
+  const product = await db.getProduct(params.id);
+  return ["products", product.category, \`product-\${params.id}\`];
 }`}
                 </CodeBlock>
               </section>

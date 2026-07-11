@@ -699,7 +699,7 @@ export function allowISG() {
                 7. <code>getCacheTags</code> (Cache Tagging)
               </h3>
               <p>
-                Assigns custom tags to the static page cache files, allowing the page to be invalidated and regenerated on-demand using <code>revalidateTag</code>.
+                Assigns custom tags to the static page cache files, allowing the page to be invalidated and regenerated on-demand using <code>revalidateTag</code>. This function can be sync or async (supporting database or CMS queries at build time).
               </p>
               <div className="border rounded-lg p-4 bg-card not-prose mt-4">
                 <div className="flex items-center gap-2 font-semibold mb-2">
@@ -711,7 +711,7 @@ export function allowISG() {
                     <strong>Arguments:</strong> <code>params</code> (The dynamic route parameters object)
                   </li>
                   <li>
-                    <strong>Returns:</strong> <code>Array&lt;string&gt;</code> (An array of custom cache tags for the generated page)
+                    <strong>Returns:</strong> <code>Array&lt;string&gt; | Promise&lt;Array&lt;string&gt;&gt;</code> (An array of custom cache tags for the generated page)
                   </li>
                 </ul>
               </div>
