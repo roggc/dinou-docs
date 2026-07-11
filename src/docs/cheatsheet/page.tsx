@@ -43,6 +43,7 @@ const tocItems = [
   { id: "dynamic-ref", title: "dynamic()", level: 3 },
   { id: "validateparams-ref", title: "validateParams(params)", level: 3 },
   { id: "allowisg-ref", title: "allowISG()", level: 3 },
+  { id: "getcachetags-ref", title: "getCacheTags(params)", level: 3 },
 ];
 
 export default function Page() {
@@ -423,6 +424,24 @@ export default function Page() {
                   {`export function allowISG() {
   // Disable dynamic on-demand generation; serve getStaticPaths ONLY
   return false;
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="getcachetags-ref" className="mt-12 pt-8 border-t">
+                <h3>
+                  <code>getCacheTags(params)</code>
+                </h3>
+                <p>
+                  Defines the static cache tags for the generated page, allowing it to be revalidated on-demand using <code>revalidateTag</code>.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`export function getCacheTags(params) {
+  // Associate page with general and param-specific tags
+  return ["products", \`product-\${params.id}\`];
 }`}
                 </CodeBlock>
               </section>
