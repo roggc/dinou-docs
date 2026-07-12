@@ -58,6 +58,11 @@ const navigation = [
         icon: Package,
       },
       {
+        title: "Why Dinou",
+        href: "/docs/why-dinou",
+        icon: Rocket,
+      },
+      {
         title: "About",
         href: "/docs/about",
         icon: Copyright,
