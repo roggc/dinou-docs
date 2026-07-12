@@ -61,7 +61,7 @@ export default function Page() {
                   language="html"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-                  {`<link href="/styles.css" rel="stylesheet" />`}
+                  {`<link href="/styles.css" rel="stylesheet" precedence="default" />`}
                 </CodeBlock>
               </section>
 
@@ -87,7 +87,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <title>Dinou App</title>
-        <link href="/styles.css" rel="stylesheet" />
+        <link href="/styles.css" rel="stylesheet" precedence="default" />
       </head>
       <body className="min-h-screen bg-background">
         {children}

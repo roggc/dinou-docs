@@ -78,7 +78,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="manifest" href="/site.webmanifest" />
         {/* Don't forget your stylesheet! */}
-        <link href="/styles.css" rel="stylesheet" />
+        <link href="/styles.css" rel="stylesheet" precedence="default" />
       </head>
       <body>{children}</body>
     </html>
