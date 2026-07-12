@@ -204,6 +204,16 @@ const navigation = [
       },
     ],
   },
+  {
+    title: "Guides",
+    items: [
+      {
+        title: "Internationalization (Custom)",
+        href: "/docs/i18n",
+        icon: Globe,
+      },
+    ],
+  },
 ];
 
 export function DocsSidebar() {
