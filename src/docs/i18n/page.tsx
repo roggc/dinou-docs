@@ -6,14 +6,14 @@ import { CodeBlock } from "@/docs/components/code-block";
 import {
   Globe,
   Cpu,
+  Boxes,
 } from "lucide-react";
 
 const tocItems = [
   { id: "concept", title: "💡 Core Concept", level: 2 },
-  { id: "server-middleware", title: "🌐 1. Server Middleware & URL Rewriting", level: 2 },
-  { id: "context-propagation", title: "📦 2. Propagating Context to RSC", level: 2 },
-  { id: "consuming-translations", title: " Consuming Translations", level: 2 },
-  { id: "routing-links", title: "🔗 4. Creating Router Links", level: 2 },
+  { id: "server-setup", title: "🌐 1. Server Setup (Common)", level: 2 },
+  { id: "option-a", title: "🟢 Option A: Custom Lightweight i18n", level: 2 },
+  { id: "option-b", title: "🔵 Option B: Standard Package-Based i18n", level: 2 },
 ];
 
 export default function Page() {
@@ -25,72 +25,74 @@ export default function Page() {
           <div className="mb-8 space-y-4">
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Custom Internationalization
+                Internationalization (i18n)
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Learn how to implement a native, lightweight, and zero-client-bundle internationalization routing system in an ejected Dinou application.
+              Explore how to build prefix-based, search-engine-friendly localized routing in Dinou using either custom lightweight structures or standard industry packages.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <blockquote>
-              <strong>In Dinou, internationalization is built on standard web primitives. Instead of adding heavy client-side libraries, i18n is achieved simply by intercepting and rewriting requests in Express.js.</strong>
+              <strong>Dinou gives you total control over the server. By intercepting paths in Express, you can extract locales, manage cookies, and serve localized pages via dynamic Server Components and hydrated Client Components.</strong>
             </blockquote>
-
-            <p className="lead">
-              Since Dinou is fully ejectable, the entire server implementation is at your disposal. By writing a small middleware in Express, you can intercept language prefixes, handle routing, persist the language in cookies, and supply the active locale to React Server Components with zero JavaScript bundle overhead on the client.
-            </p>
-
-            <hr className="my-8" />
 
             <section id="concept">
               <h2>💡 Core Concept</h2>
-              <p>
-                The i18n implementation operates entirely at the server level:
+              <p className="lead">
+                Depending on the scope of your application, you can adopt two different paradigms for localization:
               </p>
+
               <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
                 <Card>
                   <CardHeader>
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
-                      <Globe className="h-5 w-5" />
-                      <span>URL Rewriting</span>
+                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
+                      <Cpu className="h-5 w-5" />
+                      <span>🟢 Custom Lightweight (Server Only)</span>
                     </div>
                   </CardHeader>
                   <CardContent className="text-sm text-muted-foreground">
-                    Express middleware intercepts incoming requests containing language prefixes (like <code>/es/about</code> or <code>/en/about</code>), extracts the locale, updates cookies, and rewrites the request path to clean segments (e.g. <code>/about</code>) for the file-system router.
+                    Best for simple sites. Zero bundle-size footprint. Translation lookup files are resolved exclusively on the server, injecting pre-translated texts straight into Server Components.
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold">
-                      <Cpu className="h-5 w-5" />
-                      <span>Zero Client Overhead</span>
+                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
+                      <Boxes className="h-5 w-5" />
+                      <span>🔵 Standard (i18next & Client Hooks)</span>
                     </div>
                   </CardHeader>
                   <CardContent className="text-sm text-muted-foreground">
-                    Translations are resolved and injected as static text on the server (RSC). The client browser receives pre-translated texts directly, eliminating the need to bundle complex translation libraries or localization catalog files in client-side bundles.
+                    Best for complex apps. Connects the robust <code>i18next</code> engine to React Server Components and exposes standard hooks like <code>useTranslation()</code> in Client Components.
                   </CardContent>
                 </Card>
               </div>
             </section>
 
-            <section id="server-middleware">
-              <h2>🌐 1. Server Middleware & URL Rewriting</h2>
+            <hr className="my-8" />
+
+            {/* SECTION 1: COMMON SERVER SETUP */}
+            <section id="server-setup">
+              <h2>🌐 1. Server Setup (Common)</h2>
               <p>
-                After running <code>npm run eject</code>, open your local <code className="text-amber-500">dinou/core/server.js</code> file. Add the native internationalization middleware directly after the cookie parser middleware:
+                Both options rely on the same fundamental server middleware to intercept URL language segments (like <code>/es/dashboard</code> or <code>/en/dashboard</code>), rewrite paths internally for the router, and pass the detected locale to the page compiler.
+              </p>
+
+              <h3>Express Routing Middleware</h3>
+              <p>
+                Eject the framework with <code>npm run eject</code>, then open <code className="text-amber-500">dinou/core/server.js</code>. Insert this prefix-aware middleware immediately after the cookie parser middleware:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`// dinou/core/server.js
-
 app.use(appUseCookieParser);
 
 // ============================================================
-// 🌐 NATIVE INTERNATIONALIZATION (i18n) MIDDLEWARE
+// 🌐 PREFIX-AWARE i18n ROUTING MIDDLEWARE
 // ============================================================
 app.use((req, res, next) => {
-  // Matches language prefix, supporting both HTML routes and client-side RSC payload fetches
+  // Matches language prefix, supporting HTML requests and RSC payload transitions
   const match = req.path.match(/^(\/____rsc_payload(?:_old)?(?:_static)?____)?\/(es|en)(\/|$)/);
   let locale = req.cookies?.locale || "en";
 
@@ -100,7 +102,7 @@ app.use((req, res, next) => {
     if (req.cookies?.locale !== locale) {
       res.cookie("locale", locale, { maxAge: 31536000000, httpOnly: true });
     }
-    // Rewrite path to remove the language prefix for the internal routing engine
+    // Remove the language prefix internally to match file-system routes
     const remaining = req.url.substring(match[0].length - 1) || "/";
     req.url = prefix + remaining;
   }
@@ -109,16 +111,10 @@ app.use((req, res, next) => {
   next();
 });`}</CodeBlock>
               </div>
-            </section>
 
-            <section id="context-propagation">
-              <h2>📦 2. Propagating Context to RSC</h2>
+              <h3>Context Configuration</h3>
               <p>
-                To access the active language from React Server Components, we expose the detected <code>req.locale</code> property in the AsyncLocalStorage context inside <code className="text-amber-500">dinou/core/server.js</code>.
-              </p>
-              <h3>Updating getContext Functions</h3>
-              <p>
-                Locate <code>getContext</code> and <code>getContextForServerFunctionEndpoint</code> in <code>server.js</code> and add the <code>locale: req.locale</code> property:
+                Propagate the resolved <code>locale</code> context down to the AsyncLocalStorage request scope. In <code className="text-amber-500">dinou/core/server.js</code>, update <code>getContext</code> and <code>getContextForServerFunctionEndpoint</code>:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`function getContext(req, res) {
@@ -129,19 +125,32 @@ app.use((req, res, next) => {
       query: { ...req.query },
       path: req.path,
       method: req.method,
-      locale: req.locale, // 👈 Propagate locale here
+      locale: req.locale, // 👈 Add locale to request context
+    },
+    res: { ... }
+  };
+}
+
+function getContextForServerFunctionEndpoint(req, res) {
+  return {
+    req: {
+      cookies: { ...req.cookies },
+      headers: { ... },
+      query: { ...req.query },
+      path: req.path,
+      method: req.method,
+      locale: req.locale, // 👈 Add locale to request context
     },
     res: { ... }
   };
 }`}</CodeBlock>
               </div>
 
-              <h3>Updating Subprocess Context for dynamic HTML Rendering</h3>
               <p>
-                In the wildcard route handler where <code>contextForChild</code> is created, ensure <code>locale: req.locale</code> is serialized so that the HTML compiler subprocess is aware of the active language:
+                Additionally, pass the locale down to the HTML compilation subprocess in the Express wildcard GET handler (<code>app.get(/^\/.*\/?$/)</code>) to prevent hydration mismatches during hard-reloads:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`// In server.js wildcard handler (app.get(/^\/.*\/?$/))
+                <CodeBlock language="javascript">{`// In server.js wildcard route handler
 const contextForChild = {
   req: {
     query: { ...req.query },
@@ -149,33 +158,37 @@ const contextForChild = {
     headers: { ... },
     path: req.path,
     method: req.method,
-    locale: req.locale, // 👈 Map locale for the child process
+    locale: req.locale, // 👈 Propagate locale here
   },
 };`}</CodeBlock>
               </div>
             </section>
 
-            <section id="consuming-translations">
-              <h2> Consuming Translations</h2>
+            <hr className="my-8" />
+
+            {/* SECTION 2: OPTION A: CUSTOM */}
+            <section id="option-a">
+              <h2>🟢 Option A: Custom Lightweight i18n</h2>
               <p>
-                Now you can read the active locale in any Server Component or Page Function using the native <code>getContext</code> API.
+                A zero-dependency server lookup system. Best when translations are only used to present static text content inside Server Components.
               </p>
-              <h3>Inside page_functions.ts</h3>
+
+              <h3>1. Defining page_functions.ts</h3>
               <div className="not-prose my-4">
                 <CodeBlock language="typescript">{`import { getContext } from "dinou";
 
 export function dynamic() {
-  return true; // Force SSR at request-time to load dynamic locale from context
+  return true; // Force request-time rendering to access context dynamically
 }
 
 const translations = {
   en: {
-    title: "Internationalization Demo",
-    description: "Welcome to the Dinou framework internationalization showcase page.",
+    title: "Custom i18n Showcase",
+    welcome: "Welcome!",
   },
   es: {
-    title: "Demostración de Internacionalización",
-    description: "Bienvenido a la página de demostración de internacionalización del framework Dinou.",
+    title: "Showcase de i18n Custom",
+    welcome: "¡Bienvenido!",
   },
 };
 
@@ -193,38 +206,195 @@ export async function getProps() {
 }`}</CodeBlock>
               </div>
 
-              <h3>Inside page.tsx</h3>
+              <h3>2. Rendering inside page.tsx</h3>
               <div className="not-prose my-4">
-                <CodeBlock language="tsx">{`export default function Page({ t, currentLocale }) {
+                <CodeBlock language="tsx">{`import { Link } from "dinou";
+
+export default function Page({ t, currentLocale }) {
   return (
     <div>
       <h1>{t.title}</h1>
-      <p>{t.description}</p>
-      <span>Active Language: {currentLocale}</span>
+      <p>{t.welcome}</p>
+      
+      {/* Switch locales via standard SPA soft transitions */}
+      <div className="flex gap-4">
+        <Link href="/en/i18n-demo">English</Link>
+        <Link href="/es/i18n-demo">Español</Link>
+      </div>
     </div>
   );
 }`}</CodeBlock>
               </div>
             </section>
 
-            <section id="routing-links">
-              <h2>🔗 4. Creating Router Links</h2>
+            <hr className="my-8" />
+
+            {/* SECTION 3: OPTION B: STANDARD */}
+            <section id="option-b">
+              <h2>🔵 Option B: Standard Package-Based i18n</h2>
               <p>
-                To change language, simply use the native <code>Link</code> component from <code>dinou</code>. Because the client-side router and Express middleware support prefix rewrites, soft SPA transitions will work automatically:
+                Integrates the official <code>i18next</code> engine. Exposes translation hooks to Client Components so they can dynamically translate strings after hydration.
+              </p>
+
+              <h3>1. Installation</h3>
+              <div className="not-prose my-4">
+                <CodeBlock language="bash">{`npm install i18next react-i18next`}</CodeBlock>
+              </div>
+
+              <h3>2. Server Configuration (i18n.ts)</h3>
+              <p>
+                Initialize the server instance of <code>i18next</code>. Provide a helper <code>getT()</code> to obtain request-scoped fixed translation functions locked to the active request context:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="tsx">{`import { Link } from "dinou";
+                <CodeBlock language="typescript">{`// src/i18n-real/i18n.ts
+import i18next from "i18next";
+import { getContext } from "dinou";
 
-export default function LanguageSelector({ currentLocale }) {
+if (!i18next.isInitialized) {
+  i18next.init({
+    resources: {
+      en: {
+        translation: {
+          title: "Standard i18n Demo",
+          clientText: "This text is translated inside a CLIENT component using useTranslation!",
+        },
+      },
+      es: {
+        translation: {
+          title: "Demostración de i18n Estándar",
+          clientText: "¡Este texto se traduce dentro de un componente de CLIENTE usando useTranslation!",
+        },
+      },
+    },
+    fallbackLng: "en",
+    interpolation: { escapeValue: false },
+  });
+}
+
+export function getT() {
+  const ctx = getContext();
+  const locale = ctx?.req?.locale || "en";
+  return i18next.getFixedT(locale);
+}`}</CodeBlock>
+              </div>
+
+              <h3>3. Page Functions (page_functions.ts)</h3>
+              <p>
+                Read the active locale from the request context and resolve translations on the server using <code>getT()</code>:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="typescript">{`// src/i18n-real/page_functions.ts
+import { getContext } from "dinou";
+import { getT } from "./i18n";
+
+export function dynamic() {
+  return true; // Force SSR at request-time to load dynamic locale from context
+}
+
+export async function getProps() {
+  const ctx = getContext();
+  const locale = ctx?.req?.locale || "en";
+  const t = getT();
+
+  return {
+    page: {
+      title: t("title"),
+      currentLocale: locale,
+    },
+  };
+}`}</CodeBlock>
+              </div>
+
+              <h3>4. Client Context Provider (I18nProvider.tsx)</h3>
+              <p>
+                Create a Client Component wrapping the app tree. Synchronize the locale within a <code>useEffect</code> hook to prevent React state update warnings during render phase transitions:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="tsx">{`// src/i18n-real/I18nProvider.tsx
+"use client";
+
+import { ReactNode, useEffect } from "react";
+import i18next from "i18next";
+import { I18nextProvider } from "react-i18next";
+
+const clientResources = {
+  en: {
+    translation: {
+      title: "Standard i18n Demo",
+      clientText: "This text is translated inside a CLIENT component using useTranslation!",
+    },
+  },
+  es: {
+    translation: {
+      title: "Demostración de i18n Estándar",
+      clientText: "¡Este texto se traduce dentro de un componente de CLIENTE usando useTranslation!",
+    },
+  },
+};
+
+const i18nInstance = i18next.createInstance();
+
+export function I18nProvider({ locale, children }: { locale: string; children: ReactNode }) {
+  if (!i18nInstance.isInitialized) {
+    i18nInstance.init({
+      resources: clientResources,
+      lng: locale,
+      fallbackLng: "en",
+      interpolation: { escapeValue: false },
+    });
+  }
+
+  useEffect(() => {
+    if (i18nInstance.language !== locale) {
+      i18nInstance.changeLanguage(locale);
+    }
+  }, [locale]);
+
+  return <I18nextProvider i18n={i18nInstance}>{children}</I18nextProvider>;
+}`}</CodeBlock>
+              </div>
+
+              <h3>5. Consuming in Client Components (ClientComponent.tsx)</h3>
+              <p>
+                You can now use standard <code>useTranslation</code> hooks from <code>react-i18next</code>:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="tsx">{`// src/i18n-real/ClientComponent.tsx
+"use client";
+
+import { useTranslation } from "react-i18next";
+
+export default function ClientComponent() {
+  const { t } = useTranslation();
+  return <div>{t("clientText")}</div>;
+}`}</CodeBlock>
+              </div>
+
+              <h3>6. Page Integration (page.tsx)</h3>
+              <p>
+                In the page file, wrap the component tree with the <code>I18nProvider</code>:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="tsx">{`// src/i18n-real/page.tsx
+import { Link } from "dinou";
+import { I18nProvider } from "./I18nProvider";
+import ClientComponent from "./ClientComponent";
+
+export default function Page({ title, currentLocale }) {
   return (
-    <div className="flex gap-4">
-      <Link href="/en/about" className={currentLocale === 'en' ? 'active' : ''}>
-        English
-      </Link>
-      <Link href="/es/about" className={currentLocale === 'es' ? 'active' : ''}>
-        Español
-      </Link>
-    </div>
+    <I18nProvider locale={currentLocale}>
+      <div>
+        <h1>{title}</h1>
+        
+        {/* Render interactive client component using translation hooks */}
+        <ClientComponent />
+
+        <div className="flex gap-4">
+          <Link href="/en/i18n-real">English</Link>
+          <Link href="/es/i18n-real">Español</Link>
+        </div>
+      </div>
+    </I18nProvider>
   );
 }`}</CodeBlock>
               </div>

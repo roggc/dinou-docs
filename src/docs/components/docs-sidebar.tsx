@@ -208,7 +208,7 @@ const navigation = [
     title: "Guides",
     items: [
       {
-        title: "Internationalization (Custom)",
+        title: "Internationalization",
         href: "/docs/i18n",
         icon: Globe,
       },
