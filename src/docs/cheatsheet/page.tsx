@@ -43,6 +43,7 @@ const tocItems = [
   { id: "dynamic-ref", title: "dynamic()", level: 3 },
   { id: "validateparams-ref", title: "validateParams(params)", level: 3 },
   { id: "allowisg-ref", title: "allowISG()", level: 3 },
+  { id: "getcachetags-ref", title: "getCacheTags(params)", level: 3 },
 ];
 
 export default function Page() {
@@ -423,6 +424,28 @@ export default function Page() {
                   {`export function allowISG() {
   // Disable dynamic on-demand generation; serve getStaticPaths ONLY
   return false;
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="getcachetags-ref" className="mt-12 pt-8 border-t">
+                <h3 className="flex items-center gap-3">
+                  <code>getCacheTags(params)</code>
+                  <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
+                    v5.1.0+
+                  </span>
+                </h3>
+                <p>
+                  Defines the static cache tags for the generated page. Can be sync or async (supporting database or CMS queries), allowing on-demand invalidation via <code>revalidateTag</code>.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`export async function getCacheTags(params) {
+  // Can fetch data from a DB or CMS to determine tags
+  const product = await db.getProduct(params.id);
+  return ["products", product.category, \`product-\${params.id}\`];
 }`}
                 </CodeBlock>
               </section>

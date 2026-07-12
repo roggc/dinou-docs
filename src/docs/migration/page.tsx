@@ -22,6 +22,7 @@ const tocItems = [
   { id: "new-apis", title: "3. New page_functions APIs", level: 2 },
   { id: "anti-bot-shield", title: "4. Anti-Bot Shield Middleware", level: 2 },
   { id: "imports-adjustments", title: "5. Import Extension Fixes", level: 2 },
+  { id: "on-demand-revalidation", title: "6. On-Demand Revalidation", level: 2 },
 ];
 
 export default function Page() {
@@ -170,13 +171,11 @@ export default function Page() {
                   </CardContent>
                 </Card>
               </div>
-            </section>
-
-            {/* 3. New Control APIs */}
+            </section>            {/* 3. New APIs in page_functions */}
             <section id="new-apis" className="mt-12 pt-8 border-t">
-              <h2>3. New Control APIs in <code>page_functions</code></h2>
+              <h2>3. New APIs in <code>page_functions</code></h2>
               <p>
-                Dinou v5 introduces two new optional exports inside the <code>page_functions.ts</code> (or <code>.js</code>) files to give you finer control over dynamic routes before they enter the render cycle:
+                Dinou introduces new optional exports inside the <code>page_functions.ts</code> (or <code>.js</code>) files to give you finer control over dynamic routes, parameter validation, and cache tagging:
               </p>
 
               <div className="space-y-6 not-prose mt-6">
@@ -219,7 +218,6 @@ export function allowISG() {
                     </CodeBlock>
                   </CardContent>
                 </Card>
-
                 <div className="border rounded-lg p-4 bg-card not-prose">
                   <details className="group">
                     <summary className="cursor-pointer font-semibold text-xs text-slate-700 dark:text-slate-400 select-none hover:underline">
@@ -240,6 +238,31 @@ export function allowISG() {
                     </div>
                   </details>
                 </div>
+
+                <Card className="min-w-0 w-full">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 font-semibold text-slate-800 dark:text-slate-100">
+                        <Code2 className="h-5 w-5 text-purple-500" />
+                        <span>getCacheTags(params)</span>
+                      </div>
+                      <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
+                        v5.1.0+
+                      </span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Assigns custom static cache tags to the generated route page to enable granular cache purging and on-demand regeneration via <code>revalidateTag</code>.
+                    </p>
+                    <CodeBlock language="typescript" hideHeader>
+                      {`// Assign cache tags to the static page cache
+export async function getCacheTags(params) {
+  return ["products", \`product-\${params.id}\`];
+}`}
+                    </CodeBlock>
+                  </CardContent>
+                </Card>
               </div>
             </section>
 
@@ -305,6 +328,52 @@ export function allowISG() {
               <p className="mt-4">
                 This is only necessary for non-compliant third-party code and does not affect the standard source code of your application.
               </p>
+            </section>
+
+            {/* 6. On-Demand Revalidation */}
+            <section id="on-demand-revalidation" className="mt-12 pt-8 border-t">
+              <h2 className="flex items-center gap-3">
+                6. On-Demand Revalidation
+                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
+                  v5.1.0+
+                </span>
+              </h2>
+              <p>
+                Dinou v5.1.0 introduces native support for <strong>On-Demand Revalidation</strong>. This allows you to purge and regenerate the static page cache of individual pages on-demand without rebuilding the entire application.
+              </p>
+
+              <h3>1. Assign Cache Tags in page_functions</h3>
+              <p>
+                To tag static page cache files for granular invalidations, export a <code>getCacheTags</code> function (which can be sync or async) from your route's <code>page_functions.ts</code> file.
+              </p>
+              <CodeBlock language="typescript" containerClassName="w-full overflow-hidden rounded-lg">
+                {`// src/products/[id]/page_functions.ts
+export async function getCacheTags(params) {
+  // Can perform async checks (e.g., query database or CMS)
+  const product = await db.getProduct(params.id);
+  return ["products", product.category, \`product-\${params.id}\`];
+}`}
+              </CodeBlock>
+
+              <h3>2. Trigger Revalidation in Server Functions (Primary Use Case)</h3>
+              <p>
+                The primary and recommended way to trigger on-demand revalidation is inside <strong>Server Functions</strong> (Server Actions) immediately after performing database updates or data mutations. This ensures the static cache is instantly updated on the next request.
+              </p>
+              <CodeBlock language="javascript" containerClassName="w-full overflow-hidden rounded-lg">
+                {`// src/actions/update-product.js
+"use server";
+import { revalidateTag } from "dinou/server";
+import { db } from "@/db";
+
+export async function updateProduct(productId, data) {
+  // 1. Mutate the data in database
+  await db.updateProduct(productId, data);
+
+  // 2. Trigger on-demand revalidation on the server
+  // This will purge and rebuild all static pages tagged with this ID
+  await revalidateTag(\`product-\${productId}\`);
+}`}
+              </CodeBlock>
             </section>
           </div>
         </div>

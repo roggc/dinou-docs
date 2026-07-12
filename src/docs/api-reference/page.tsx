@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   FileText,
   Replace,
+  Zap,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -38,6 +39,13 @@ const tocItems = [
     level: 2,
   },
   { id: "getcontext", title: "getContext()", level: 3 },
+  {
+    id: "dinou-server",
+    title: "4. Revalidation (dinou/server)",
+    level: 2,
+  },
+  { id: "revalidatepath", title: "revalidatePath()", level: 3 },
+  { id: "revalidatetag", title: "revalidateTag()", level: 3 },
 ];
 
 export default function Page() {
@@ -641,6 +649,85 @@ export default function Page() {
   const safeUser = { name: ctx.req.cookies.username };
   return <ClientProfile user={safeUser} />;
 }`}
+              </CodeBlock>
+            </section>
+          </section>
+            
+          <section id="dinou-server" className="mt-12 pt-8 border-t">
+              <h2 className="flex items-center gap-3">
+                4. Revalidation (<code>dinou/server</code>)
+                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
+                  v5.1.0+
+                </span>
+              </h2>
+              <p>
+                Server-only APIs to purge and regenerate the static page cache of your application. These must be imported from the <code>"dinou/server"</code> entrypoint.
+              </p>
+
+              <section id="revalidatepath" className="mt-8">
+                <h3>
+                  <code>revalidatePath(path)</code>
+                </h3>
+                <p>
+                  Cleans the static cache files for a given route and triggers a background regeneration. Supports both absolute and relative paths.
+                </p>
+                <div className="border rounded-lg p-4 bg-card not-prose my-4">
+                  <div className="flex items-center gap-2 font-semibold mb-2">
+                    <Zap className="h-5 w-5 text-blue-500" />
+                    <span>Function Signature</span>
+                  </div>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                    <li>
+                      <strong>Arguments:</strong> <code>path</code> (string) - The absolute path (e.g. <code>"/blog"</code>) or relative path (e.g. <code>"./"</code>, <code>"../"</code>) to revalidate.
+                    </li>
+                    <li>
+                      <strong>Returns:</strong> <code>Promise&lt;void&gt;</code>
+                    </li>
+                  </ul>
+                </div>
+                <CodeBlock
+                  language="javascript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import { revalidatePath } from "dinou/server";
+
+// Revalidate absolute route path
+await revalidatePath("/products");
+
+// Revalidate relative route path
+await revalidatePath("./");`}
+                </CodeBlock>
+              </section>
+
+              <section id="revalidatetag" className="mt-12 pt-8 border-t">
+                <h3>
+                  <code>revalidateTag(tag)</code>
+                </h3>
+                <p>
+                  Revalidates all static pages associated with the specified cache tag.
+                </p>
+                <div className="border rounded-lg p-4 bg-card not-prose my-4">
+                  <div className="flex items-center gap-2 font-semibold mb-2">
+                    <Zap className="h-5 w-5 text-green-500" />
+                    <span>Function Signature</span>
+                  </div>
+                  <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                    <li>
+                      <strong>Arguments:</strong> <code>tag</code> (string) - The cache tag name to invalidate (e.g. <code>"products"</code>).
+                    </li>
+                    <li>
+                      <strong>Returns:</strong> <code>Promise&lt;void&gt;</code>
+                    </li>
+                  </ul>
+                </div>
+                <CodeBlock
+                  language="javascript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import { revalidateTag } from "dinou/server";
+
+// Purge and regenerate all pages tagged with "catalog"
+await revalidateTag("catalog");`}
                 </CodeBlock>
               </section>
             </section>
