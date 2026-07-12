@@ -212,6 +212,11 @@ const navigation = [
         href: "/docs/i18n",
         icon: Globe,
       },
+      {
+        title: "Clerk Authentication",
+        href: "/docs/clerk",
+        icon: Fingerprint,
+      },
     ],
   },
 ];
