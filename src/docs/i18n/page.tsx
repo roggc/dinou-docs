@@ -4,6 +4,11 @@ import { TableOfContents } from "@/docs/components/table-of-contents";
 import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
 import { CodeBlock } from "@/docs/components/code-block";
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/docs/components/ui/alert";
+import {
   Globe,
   Cpu,
   Boxes,
@@ -172,6 +177,15 @@ const contextForChild = {
               <p>
                 A zero-dependency server lookup system. Best when translations are only used to present static text content inside Server Components.
               </p>
+
+              <div className="not-prose my-4">
+                <Alert variant="warning">
+                  <AlertTitle>⚠️ Server-Only Constraint</AlertTitle>
+                  <AlertDescription className="text-xs text-muted-foreground mt-1">
+                    This custom approach does not establish context providers or client hooks (like <code>useTranslation()</code>). If a Client Component requires localized strings, they must be resolved on the server and explicitly passed down via props, which can lead to prop-drilling in larger component hierarchies.
+                  </AlertDescription>
+                </Alert>
+              </div>
 
               <h3>1. Defining page_functions.ts</h3>
               <div className="not-prose my-4">
