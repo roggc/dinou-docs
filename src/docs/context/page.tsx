@@ -227,6 +227,30 @@ export async function getProps() {
 }`}</CodeBlock>
               </div>
 
+              <h3>In React Server Components</h3>
+              <p>
+                Access the request context directly inside any React Server Component (such as headers, navigation bars, or layouts) to render personalized UI layouts:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="typescript">{`import { getContext } from "dinou";
+
+export default function WelcomeHeader() {
+  const context = getContext();
+  const userId = context?.req?.userId;
+
+  return (
+    <header className="flex justify-between items-center p-4 border-b">
+      <h1>My Application</h1>
+      {userId ? (
+        <span className="text-sm font-semibold">User: {userId}</span>
+      ) : (
+        <a href="/login" className="text-sm text-blue-600 underline">Sign In</a>
+      )}
+    </header>
+  );
+}`}</CodeBlock>
+              </div>
+
               <h3>In Server Functions (Actions)</h3>
               <p>
                 Verify identity and authorize mutations directly within actions:
