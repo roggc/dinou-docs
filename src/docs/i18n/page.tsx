@@ -419,6 +419,13 @@ app.use((req, res, next) => {
   next();
 });`}</CodeBlock>
               </div>
+
+              <Alert className="my-4">
+                <AlertTitle>💡 Context Propagation Best Practice</AlertTitle>
+                <AlertDescription className="text-xs text-muted-foreground mt-1">
+                  Although static SSG pages resolve their language at server startup using route parameters (<code>params.lang</code>), you should still propagate the <code>req.locale</code> property inside <code>server.js</code> (in <code>getContext</code>, <code>getContextForServerFunctionEndpoint</code>, and <code>contextForChild</code>) as explained in <a href="#dynamic-routing" className="underline font-semibold">Part 1: Common Server Configuration</a>. This is required for two reasons: (1) so that <strong>Server Functions (actions)</strong> triggered from these static pages can detect the user's active locale at request-time, and (2) to ensure consistent behavior in <strong>development mode</strong>, where all pages are rendered dynamically on the fly.
+                </AlertDescription>
+              </Alert>
             </section>
 
             {/* OPTION 2.A */}
@@ -427,6 +434,15 @@ app.use((req, res, next) => {
               <p>
                 Uses a custom translations dictionary within dynamic parameters. Fully compiled at build/startup time for maximum speed.
               </p>
+
+              <div className="not-prose my-4">
+                <Alert variant="warning">
+                  <AlertTitle>⚠️ Server-Only Constraint</AlertTitle>
+                  <AlertDescription className="text-xs text-muted-foreground mt-1">
+                    This custom approach does not establish context providers or client hooks (like <code>useTranslation()</code>). If a Client Component requires localized strings, they must be resolved on the server and explicitly passed down via props.
+                  </AlertDescription>
+                </Alert>
+              </div>
 
               <h4>1. Defining page_functions.ts</h4>
               <div className="not-prose my-4">
@@ -446,7 +462,7 @@ const translations = {
 };
 
 // 2. Read the lang parameter directly from the route parameters
-export async function getProps({ params }) {
+export async function getProps(params) {
   const lang = params.lang || "en";
   const t = translations[lang] || translations.en;
 
@@ -520,7 +536,7 @@ export async function getStaticPaths() {
   ];
 }
 
-export async function getProps({ params }) {
+export async function getProps(params) {
   const lang = params.lang || "en";
   const t = i18next.getFixedT(lang); // Get translation function fixed to route parameter lang
 
