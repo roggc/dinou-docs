@@ -217,6 +217,11 @@ const navigation = [
         href: "/docs/clerk",
         icon: Fingerprint,
       },
+      {
+        title: "Context Propagation",
+        href: "/docs/context",
+        icon: RefreshCw,
+      },
     ],
   },
 ];
