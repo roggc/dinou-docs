@@ -90,9 +90,58 @@ export default function Page() {
                 This approach intercepts incoming language routes (like <code>/es/about</code>), extracts the locale, rewrites the URL to standard paths (<code>/about</code>) internally, and resolves the active translation dynamically at request-time.
               </p>
 
-              <h3>Common Server Configuration</h3>
+              <h3>Server Configuration</h3>
               <p>
-                Eject the framework with <code>npm run eject</code>, then open <code className="text-amber-500">dinou/core/server.js</code>. Insert this prefix-aware middleware immediately after the cookie parser middleware:
+                You can configure the URL rewriter and context bindings either using the <strong>Plugin System</strong> (recommended, does not require ejecting) or manually (requires ejecting).
+              </p>
+
+              <h4>
+                🟢 Method A: Using the Plugin (Recommended - No Eject)
+                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20 ml-2 select-none">
+                  v5.2.0+
+                </span>
+              </h4>
+              <p>
+                Create a <code>dinou.config.js</code> file at your project root and add the Dynamic i18n Plugin. This handles the prefix check, cookie update, internal URL rewrite, and context propagation in one place:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`// dinou.config.js
+const i18nDynamicPlugin = {
+  name: "i18n-routing",
+  onServerInit(app) {
+    app.use((req, res, next) => {
+      const match = req.path.match(/^(\\/____rsc_payload(?:_old)?(?:_static)?____)?\\/(es|en)(\\/|$)/);
+      let locale = req.cookies?.locale || "en";
+
+      if (match) {
+        const prefix = match[1] || "";
+        locale = match[2];
+        if (req.cookies?.locale !== locale) {
+          res.cookie("locale", locale, { maxAge: 31536000000, httpOnly: true });
+        }
+        // Remove the language prefix internally to match standard routes
+        const remaining = req.url.substring(match[0].length - 1) || "/";
+        req.url = prefix + remaining;
+      }
+
+      req.locale = locale;
+      next();
+    });
+  },
+  onRequestContext(req, res, context) {
+    // Propagate active locale dynamically to RSC context
+    context.req.locale = req.locale;
+  }
+};
+
+module.exports = {
+  plugins: [i18nDynamicPlugin]
+};`}</CodeBlock>
+              </div>
+
+              <h4>🔵 Method B: Ejected Setup (Manual Integration)</h4>
+              <p>
+                If you have already ejected the framework, open <code className="text-amber-500">dinou/core/server.js</code>. Insert the prefix-aware middleware immediately after the cookie parser middleware:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`// dinou/core/server.js
@@ -120,54 +169,8 @@ app.use((req, res, next) => {
               </div>
 
               <p>
-                Expose the active <code>req.locale</code> inside the request context. In <code className="text-amber-500">server.js</code>, update <code>getContext</code> and <code>getContextForServerFunctionEndpoint</code>:
+                Once the middleware is registered, you must propagate the <code>req.locale</code> property down to your React application. Follow the step-by-step mapping instructions in the <a href="/docs/context#three-points" className="underline font-semibold">Context Propagation Guide</a> to register the variable inside the three crucial locations (<code>getContext</code>, <code>getContextForServerFunctionEndpoint</code>, and <code>contextForChild</code>).
               </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`function getContext(req, res) {
-  return {
-    req: {
-      cookies: { ...req.cookies },
-      headers: { ... },
-      query: { ...req.query },
-      path: req.path,
-      method: req.method,
-      locale: req.locale, // 👈 Expose locale to request context
-    },
-    res: { ... }
-  };
-}
-
-function getContextForServerFunctionEndpoint(req, res) {
-  return {
-    req: {
-      cookies: { ...req.cookies },
-      headers: { ... },
-      query: { ...req.query },
-      path: req.path,
-      method: req.method,
-      locale: req.locale, // 👈 Expose locale to request context
-    },
-    res: { ... }
-  };
-}`}</CodeBlock>
-              </div>
-
-              <p>
-                Also, pass the locale to the dynamic HTML compilation subprocess in the Express wildcard GET handler (<code>app.get(/^\/.*\/?$/)</code>) inside <code>contextForChild</code>:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`// In server.js wildcard route handler
-const contextForChild = {
-  req: {
-    query: { ...req.query },
-    cookies: { ...req.cookies },
-    headers: { ... },
-    path: req.path,
-    method: req.method,
-    locale: req.locale, // 👈 Propagate locale here
-  },
-};`}</CodeBlock>
-              </div>
             </section>
 
             {/* OPTION 1.A */}
@@ -397,9 +400,54 @@ export default function Page({ title, currentLocale }) {
                 Instead of rewriting URLs, pages are nested inside a dynamic folder structure (e.g. <code>src/[lang]/about/page.tsx</code>) and pre-compiled during server startup into static HTML files via <code>getStaticPaths()</code>.
               </p>
 
-              <h3>Simplified Server Middleware</h3>
+              <h3>Server Configuration</h3>
               <p>
-                Since the file-system router naturally matches the route prefix folder structure, we do <strong>not</strong> need to rewrite request paths. The middleware only updates cookies and sets <code>req.locale</code> for dynamic hooks:
+                Since the file-system router naturally matches the route prefix folder structure, we do <strong>not</strong> need to rewrite request paths. You can configure this middleware either using the <strong>Plugin System</strong> (recommended, does not require ejecting) or manually (requires ejecting).
+              </p>
+
+              <h4>
+                🟢 Method A: Using the Plugin (Recommended - No Eject)
+                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20 ml-2 select-none">
+                  v5.2.0+
+                </span>
+              </h4>
+              <p>
+                Create a <code>dinou.config.js</code> file in the root of your project and register the Static i18n Plugin:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`// dinou.config.js
+const i18nPlugin = {
+  name: "i18n-routing",
+  onServerInit(app) {
+    app.use((req, res, next) => {
+      const match = req.path.match(/^(\\/____rsc_payload(?:_old)?(?:_static)?____)?\\/(es|en)(\\/|$)/);
+      let locale = req.cookies?.locale || "en";
+
+      if (match) {
+        locale = match[2];
+        if (req.cookies?.locale !== locale) {
+          res.cookie("locale", locale, { maxAge: 31536000000, httpOnly: true });
+        }
+      }
+
+      req.locale = locale;
+      next();
+    });
+  },
+  onRequestContext(req, res, context) {
+    // Propagate active locale dynamically to RSC context
+    context.req.locale = req.locale;
+  }
+};
+
+module.exports = {
+  plugins: [i18nPlugin]
+};`}</CodeBlock>
+              </div>
+
+              <h4>🔵 Method B: Ejected Setup (Manual Integration)</h4>
+              <p>
+                If you have ejected the framework, open <code className="text-amber-500">dinou/core/server.js</code>. Register this simplified middleware (which does not rewrite paths):
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`// dinou/core/server.js
@@ -552,13 +600,13 @@ export async function getProps(params) {
 
               <h4>2. Rendering inside page.tsx</h4>
               <p>
-                In the page file, render the pre-translated props and wrap the tree in the client provider if client components also need translations:
+                In the page file, render the pre-translated props and wrap the tree in the client provider (the same <code>&lt;I18nProvider&gt;</code> defined in <a href="#dynamic-standard" className="underline font-semibold">Option 1.B</a> above) if client components also need translations:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="tsx">{`// src/[lang]/about/page.tsx
 import { Link } from "dinou";
-import { I18nProvider } from "../../i18n-real/I18nProvider"; // Import client provider
-import ClientComponent from "../../i18n-real/ClientComponent"; // Client component using hooks
+import { I18nProvider } from "@/components/I18nProvider"; // Import client provider
+import ClientComponent from "@/components/ClientComponent"; // Client component using hooks
 
 export default function Page({ title, welcome, currentLocale }) {
   return (

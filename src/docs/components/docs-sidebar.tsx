@@ -188,6 +188,11 @@ const navigation = [
         icon: AtSign,
       },
       {
+        title: "Plugins",
+        href: "/docs/plugins",
+        icon: Settings,
+      },
+      {
         title: "Eject",
         href: "/docs/eject",
         icon: Plug,
@@ -208,6 +213,11 @@ const navigation = [
     title: "Guides",
     items: [
       {
+        title: "Context Propagation",
+        href: "/docs/context",
+        icon: RefreshCw,
+      },
+      {
         title: "Internationalization",
         href: "/docs/i18n",
         icon: Globe,
@@ -216,11 +226,6 @@ const navigation = [
         title: "Clerk Authentication",
         href: "/docs/clerk",
         icon: Fingerprint,
-      },
-      {
-        title: "Context Propagation",
-        href: "/docs/context",
-        icon: RefreshCw,
       },
     ],
   },
