@@ -58,6 +58,11 @@ const navigation = [
         icon: Package,
       },
       {
+        title: "Why Dinou",
+        href: "/docs/why-dinou",
+        icon: Rocket,
+      },
+      {
         title: "About",
         href: "/docs/about",
         icon: Copyright,
@@ -196,6 +201,26 @@ const navigation = [
         title: "Deployment",
         href: "/docs/deployment",
         icon: Rocket,
+      },
+    ],
+  },
+  {
+    title: "Guides",
+    items: [
+      {
+        title: "Internationalization",
+        href: "/docs/i18n",
+        icon: Globe,
+      },
+      {
+        title: "Clerk Authentication",
+        href: "/docs/clerk",
+        icon: Fingerprint,
+      },
+      {
+        title: "Context Propagation",
+        href: "/docs/context",
+        icon: RefreshCw,
       },
     ],
   },
