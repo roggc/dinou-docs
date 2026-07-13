@@ -128,37 +128,27 @@ CLERK_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
                 <CodeBlock language="javascript">{`const { clerkMiddleware, getAuth } = require("@clerk/express");`}</CodeBlock>
               </div>
 
-              <h3>Adding JWT Fallback Decryption</h3>
+              <h3>Adding Verified User ID Helper</h3>
               <p>
-                In some requests (like compilation child processes or isolated data fetches), Clerk's official request binding might not be populated. We define a smart fallback helper to manually decrypt the <code>__session</code> JWT cookie:
+                To extract the authenticated user ID safely, we define a helper that retrieves the User ID exclusively from Clerk's cryptographically verified request objects.
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`app.use(clerkMiddleware());
 
-// 🛡️ Helper: Extracts userId by manually decrypting the __session cookie JWT
+// 🛡️ Helper: Extracts userId only if verified cryptographically by Clerk
 function getUserIdFallback(req) {
-  // 1. Try standard Clerk request binding
-  const officialId = req.auth?.userId || getAuth(req)?.userId;
-  if (officialId) return officialId;
-
-  // 2. Read the __session JWT cookie manually
-  try {
-    const token = req.cookies?.__session;
-    if (token) {
-      // Decode the middle payload block of the JWT
-      const payloadBase64 = token.split(".")[1];
-      if (payloadBase64) {
-        const decodedJson = Buffer.from(payloadBase64, "base64").toString("utf8");
-        const decoded = JSON.parse(decodedJson);
-        if (decoded.sub) return decoded.sub; // Clerk User ID is stored in 'sub'
-      }
-    }
-  } catch (err) {
-    // Fail silently if token is invalid or parsing fails
-  }
-
-  return null;
+  // Returns the ID verified by Clerk's middleware
+  return req.auth?.userId || getAuth(req)?.userId || null;
 }`}</CodeBlock>
+              </div>
+
+              <div className="my-4">
+                <Alert>
+                  <AlertTitle>🔒 Security Notice: Cryptographic Verification</AlertTitle>
+                  <AlertDescription className="text-xs text-muted-foreground mt-1">
+                    Never manually decode the <code>__session</code> cookie using raw Base64 decoders for authorization decisions. An attacker can easily forge a cookie with any User ID. Always rely on Clerk's official verified bindings (<code>req.auth</code> or <code>getAuth</code>), which cryptographically validate the token signature using your <code>CLERK_SECRET_KEY</code>.
+                  </AlertDescription>
+                </Alert>
               </div>
 
               <h3>Context Propagation</h3>
