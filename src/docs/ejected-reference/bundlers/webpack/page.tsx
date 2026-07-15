@@ -2,14 +2,13 @@
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { CodeBlock } from "@/docs/components/code-block";
-import { Boxes, FileCode, Cpu, Settings } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/docs/components/ui/alert";
+import { Settings, FileCode, Cpu, Shield, Zap } from "lucide-react";
 
 const tocItems = [
   { id: "overview", title: "💡 Overview", level: 2 },
-  { id: "config-setup", title: "⚙️ 1. webpack.config.js Orchestration", level: 2 },
-  { id: "helpers", title: "🛠️ 2. Helpers (helpers/)", level: 2 },
-  { id: "loaders", title: "🔌 3. Webpack Loaders (loaders/)", level: 2 },
-  { id: "plugins", title: "🔌 4. Custom Plugins (plugins/)", level: 2 },
+  { id: "webpack-config", title: "🛠️ 1. webpack.config.js Options", level: 2 },
+  { id: "postcss-config", title: "🎨 2. postcss.config.js Options", level: 2 },
 ];
 
 export default function Page() {
@@ -21,109 +20,102 @@ export default function Page() {
           <div className="mb-8 space-y-4">
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-cyan-600 dark:text-cyan-500">
-                Webpack Integration Guide
+                1. Webpack Overview & Config
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              An exhaustive file-by-file breakdown of the build configuration, custom loaders, and plugins inside the <code>dinou/webpack/</code> directory.
+              Examine the architecture of Webpack's compilation pipeline and the base config files used to resolve module entry points.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <blockquote>
-              <strong>Folder Path:</strong> <code>./dinou/webpack/</code> <br />
-              <strong>Role:</strong> Bundles client-side assets and resolves React Server Components graphs using React 19's official Webpack plugins.
+              <strong>Sub-Folder Location:</strong> <code>./dinou/webpack/</code> <br />
+              <strong>Focus Files:</strong> <code>webpack.config.js</code>, <code>postcss.config.js</code>
             </blockquote>
 
             {/* OVERVIEW */}
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                Webpack integrates natively with the React team's official Server Components compilation plugins (<code>react-server-dom-webpack</code>). When using the Webpack bundler setup, Dinou uses these plugins to map Server Components and Client boundaries during development and production builds.
+                Webpack provides the official loader and compiler implementation from the React team for React Server Components. Dinou configures Webpack to split files into lazy modules and generate manifest files.
               </p>
             </section>
 
             <hr className="my-8" />
 
-            {/* CONFIG SETUP */}
-            <section id="config-setup">
-              <h2>⚙️ 1. webpack.config.js Orchestration</h2>
+            {/* WEBPACK CONFIG */}
+            <section id="webpack-config">
+              <h2>🛠️ 1. <code>webpack.config.js</code> Options</h2>
               <p>
-                The <code>webpack.config.js</code> file defines Webpack's client-side and server-side configurations. It binds React's official plugins:
+                The <code>webpack.config.js</code> file configures loaders for JSX/TSX compilation and binds React's official plugins:
               </p>
+              
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`const ReactServerWebpackPlugin = require("react-server-dom-webpack/plugin");
+const ServerFunctionsPlugin = require("./plugins/server-functions-plugin.js");
+const ManifestGeneratorPlugin = require("./plugins/manifest-generator-plugin.js");
 
 module.exports = {
   entry: {
-    main: "dinou/core/client-webpack.jsx", // Webpack-specific client loader
+    main: "dinou/core/client-webpack.jsx", // Client entry point
+  },
+  output: {
+    path: path.resolve(__dirname, "../public"),
+    filename: "assets/[name].[contenthash:8].js",
+    chunkFilename: "assets/[name].[contenthash:8].chunk.js",
+  },
+  module: {
+    rules: [
+      {
+        test: /\\.[jt]sx?$/,
+        exclude: /node_modules/,
+        use: [
+          { loader: "babel-loader" },
+          { loader: path.resolve(__dirname, "./loaders/server-functions-loader.js") }
+        ]
+      },
+      {
+        test: /\\.css$/,
+        use: ["style-loader", "css-loader", "postcss-loader"]
+      }
+    ]
   },
   plugins: [
-    // Webpack plugin linking client-side bundles to server-side RSC elements
     new ReactServerWebpackPlugin({
       isServer: false,
       clientManifestPath: "public/react-client-manifest.json",
     }),
     new ServerFunctionsPlugin(),
-    new ManifestGeneratorPlugin(),
-  ],
+    new ManifestGeneratorPlugin()
+  ]
 };`}</CodeBlock>
               </div>
-            </section>
-
-            <hr className="my-8" />
-
-            {/* HELPERS */}
-            <section id="helpers">
-              <h2>🛠️ 2. Helpers (<code>helpers/</code>)</h2>
               <p>
-                Utility files to calculate compilation targets:
+                <strong>Key Details:</strong>
               </p>
               <ul>
-                <li>
-                  <strong><code>helpers/get-webpack-entries.js</code>:</strong> Scans the directory structure under <code>src/app/</code>, analyzes route paths, and dynamic segments, and returns a key-value mapping of entry points for Webpack's compiler.
-                </li>
+                <li><strong><code>ReactServerWebpackPlugin</code></strong>: Webpack plugin from the React team. It maps client-side chunks to server components, outputting reference hashes to <code>react-client-manifest.json</code>.</li>
+                <li><strong><code>server-functions-loader.js</code></strong>: Strips code bodies from server action files and generates client fetch proxies.</li>
+                <li><strong><code>chunkFilename: "assets/[name].[contenthash:8].chunk.js"</code></strong>: Generates hashed names for lazy components to enable browser caching.</li>
               </ul>
             </section>
 
             <hr className="my-8" />
 
-            {/* LOADERS */}
-            <section id="loaders">
-              <h2>🔌 3. Webpack Loaders (<code>loaders/</code>)</h2>
+            {/* POSTCSS CONFIG */}
+            <section id="postcss-config">
+              <h2>🎨 2. <code>postcss.config.js</code> Options</h2>
               <p>
-                Webpack uses loaders to transform source files. Dinou implements a specialized loader for Server Functions:
+                Configures the PostCSS rules used by <code>postcss-loader</code> to compile stylesheets:
               </p>
-              <ul>
-                <li>
-                  <strong><code>loaders/server-functions-loader.js</code>:</strong> Scans modules for the <code>"use server"</code> directive, parses the exported actions, and registers their signatures to allow clients to send action requests to the server.
-                </li>
-              </ul>
-            </section>
-
-            <hr className="my-8" />
-
-            {/* PLUGINS */}
-            <section id="plugins">
-              <h2>🔌 4. Custom Plugins (<code>plugins/</code>)</h2>
-              <p>
-                The custom Webpack plugins manage HMR state and RSC manifests:
-              </p>
-              
-              <div className="space-y-4 not-prose my-6 text-sm">
-                <div className="border p-4 rounded-lg bg-card">
-                  <strong className="text-cyan-600 dark:text-cyan-400">plugins/server-functions-plugin.js</strong>
-                  <p className="text-muted-foreground mt-1 text-xs">
-                    Aggregates action IDs resolved during compilation and outputs `server-functions-manifest.json`. This manifest acts as a whitelist on the production server to reject unauthorized or malformed action payloads.
-                  </p>
-                </div>
-
-                <div className="border p-4 rounded-lg bg-card">
-                  <strong className="text-cyan-600 dark:text-cyan-400">plugins/manifest-generator-plugin.js</strong>
-                  <p className="text-muted-foreground mt-1 text-xs">
-                    Combines Webpack's client bundle outputs and maps the module ids inside the hydration files: `react-client-manifest.json` and `react-ssr-manifest.json`.
-                  </p>
-                </div>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`module.exports = {
+  plugins: [
+    require("@tailwindcss/postcss"),
+    require("autoprefixer"),
+  ],
+};`}</CodeBlock>
               </div>
             </section>
           </div>

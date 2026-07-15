@@ -347,6 +347,24 @@ const navigation = [
         title: "Webpack Integration",
         href: "/docs/ejected-reference/bundlers/webpack",
         icon: Boxes,
+        subItems: [
+          {
+            title: "1. Overview & Config",
+            href: "/docs/ejected-reference/bundlers/webpack",
+          },
+          {
+            title: "2. Dynamic Entry Resolver",
+            href: "/docs/ejected-reference/bundlers/webpack/entry-resolver",
+          },
+          {
+            title: "3. Server Functions Loader",
+            href: "/docs/ejected-reference/bundlers/webpack/server-functions",
+          },
+          {
+            title: "4. Manifest Plugin",
+            href: "/docs/ejected-reference/bundlers/webpack/manifest-generator",
+          },
+        ],
       },
     ],
   },
