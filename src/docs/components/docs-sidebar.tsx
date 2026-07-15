@@ -41,6 +41,7 @@ import {
   Shredder,
   ClipboardList,
   RefreshCw,
+  Cpu,
 } from "lucide-react";
 
 const navigation = [
@@ -226,6 +227,11 @@ const navigation = [
         title: "Clerk Authentication",
         href: "/docs/clerk",
         icon: Fingerprint,
+      },
+      {
+        title: "Architecture & Internals",
+        href: "/docs/internals",
+        icon: Cpu,
       },
     ],
   },
