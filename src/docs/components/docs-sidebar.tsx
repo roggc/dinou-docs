@@ -264,6 +264,17 @@ const navigation = [
           },
         ],
       },
+      {
+        title: "Client & Routing",
+        href: "/docs/ejected-reference/client-runtime",
+        icon: Globe,
+        subItems: [
+          {
+            title: "SPA Hydration (client.jsx)",
+            href: "/docs/ejected-reference/client-runtime",
+          },
+        ],
+      },
     ],
   },
 ];
