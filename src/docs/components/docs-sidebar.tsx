@@ -280,6 +280,11 @@ const navigation = [
         href: "/docs/ejected-reference/assets-styling",
         icon: Settings,
       },
+      {
+        title: "Static & ISR Engines",
+        href: "/docs/ejected-reference/static-isr",
+        icon: RefreshCw,
+      },
     ],
   },
 ];

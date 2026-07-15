@@ -153,17 +153,17 @@ export default function Page() {
                   </Card>
                 </a>
 
-                <div className="opacity-75 cursor-not-allowed">
-                  <Card className="h-full border bg-muted/20">
+                <a href="/docs/ejected-reference/static-isr" className="group">
+                  <Card className="h-full border hover:border-orange-500/50 hover:bg-orange-50/5 dark:hover:bg-orange-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
-                      <RefreshCw className="h-5 w-5 text-orange-500" />
-                      <CardTitle className="text-base font-bold text-muted-foreground">Static & ISR Engines (Coming Soon)</CardTitle>
+                      <RefreshCw className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
+                      <CardTitle className="text-base font-bold">Static & ISR Engines</CardTitle>
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground">
-                      Pre-rendering SSG page crawlers and asynchronous incremental static cache revalidation logic.
+                      Pre-rendering SSG page crawlers, cache metadata manifests, and asynchronous background ISR/ISG revalidation locks.
                     </CardContent>
                   </Card>
-                </div>
+                </a>
               </div>
             </section>
           </div>
