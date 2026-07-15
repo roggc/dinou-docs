@@ -246,9 +246,23 @@ const navigation = [
         icon: BookOpen,
       },
       {
-        title: "Server Entry (server.js)",
+        title: "Server & RSC Core",
         href: "/docs/ejected-reference/server",
-        icon: Terminal,
+        icon: Cpu,
+        subItems: [
+          {
+            title: "Main Server (server.js)",
+            href: "/docs/ejected-reference/server",
+          },
+          {
+            title: "HTML Renderer (render-html.js)",
+            href: "/docs/ejected-reference/render-html",
+          },
+          {
+            title: "ESM Loader (babel-esm-loader.js)",
+            href: "/docs/ejected-reference/loader",
+          },
+        ],
       },
     ],
   },
@@ -280,19 +294,47 @@ export function DocsSidebar() {
             <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {section.items.map((item) => (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={mounted ? pathname === item.href : false}
-                    >
-                      <Link href={item.href}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {section.items.map((item) => {
+                  // Custom cast to handle typings dynamically or handle optional subItems
+                  const anyItem = item as any;
+                  const hasSubItems = anyItem.subItems && anyItem.subItems.length > 0;
+                  const isParentActive = mounted && (
+                    pathname === item.href || 
+                    (hasSubItems && anyItem.subItems.some((sub: any) => pathname === sub.href))
+                  );
+
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isParentActive && (!hasSubItems || pathname === item.href)}
+                      >
+                        <Link href={item.href}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+
+                      {hasSubItems && (
+                        <div className="pl-6 border-l border-slate-200 dark:border-slate-800 ml-4 my-1 space-y-1">
+                          {anyItem.subItems.map((sub: any) => (
+                            <Link
+                              key={sub.href}
+                              href={sub.href}
+                              className={`block text-xs py-1 px-2 rounded-md transition-colors ${
+                                mounted && pathname === sub.href
+                                  ? "bg-slate-100 dark:bg-slate-800 font-semibold text-foreground"
+                                  : "text-muted-foreground hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-900"
+                              }`}
+                            >
+                              {sub.title}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

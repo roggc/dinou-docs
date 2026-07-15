@@ -105,17 +105,29 @@ export default function Page() {
                   </Card>
                 </a>
 
-                <div className="opacity-75 cursor-not-allowed">
-                  <Card className="h-full border bg-muted/20">
+                <a href="/docs/ejected-reference/render-html" className="group">
+                  <Card className="h-full border hover:border-purple-500/50 hover:bg-purple-50/5 dark:hover:bg-purple-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
-                      <Cpu className="h-5 w-5 text-purple-500" />
-                      <CardTitle className="text-base font-bold text-muted-foreground">Core Engine & SSR (Coming Soon)</CardTitle>
+                      <Cpu className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform" />
+                      <CardTitle className="text-base font-bold">HTML Renderer Pipeline</CardTitle>
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground">
-                      How <code>render-html.js</code> and the RSC graph isolate environments using a two-process architecture.
+                      Analyze the isolated two-process architecture, JSX-to-client Flight Stream deserializer, and React 19 SSR stdout compilers.
                     </CardContent>
                   </Card>
-                </div>
+                </a>
+
+                <a href="/docs/ejected-reference/loader" className="group">
+                  <Card className="h-full border hover:border-amber-500/50 hover:bg-amber-50/5 dark:hover:bg-amber-950/5 transition-all">
+                    <CardHeader className="flex flex-row items-center gap-3 py-4">
+                      <Zap className="h-5 w-5 text-amber-500 group-hover:scale-110 transition-transform" />
+                      <CardTitle className="text-base font-bold">ESM Loader & Resolver</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground">
+                      Tweak dynamic JSX/TS transpilation worker threads, TSConfig path resolves, and custom "use client" / "use server" registers.
+                    </CardContent>
+                  </Card>
+                </a>
 
                 <div className="opacity-75 cursor-not-allowed">
                   <Card className="h-full border bg-muted/20">
@@ -132,11 +144,23 @@ export default function Page() {
                 <div className="opacity-75 cursor-not-allowed">
                   <Card className="h-full border bg-muted/20">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
-                      <Settings className="h-5 w-5 text-amber-500" />
+                      <Settings className="h-5 w-5 text-slate-500" />
                       <CardTitle className="text-base font-bold text-muted-foreground">Asset & Style Loading (Coming Soon)</CardTitle>
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground">
                       Custom CommonJS require hooks for CSS Modules with PostCSS and hashed static asset loaders.
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="opacity-75 cursor-not-allowed">
+                  <Card className="h-full border bg-muted/20">
+                    <CardHeader className="flex flex-row items-center gap-3 py-4">
+                      <RefreshCw className="h-5 w-5 text-orange-500" />
+                      <CardTitle className="text-base font-bold text-muted-foreground">Static & ISR Engines (Coming Soon)</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground">
+                      Pre-rendering SSG page crawlers and asynchronous incremental static cache revalidation logic.
                     </CardContent>
                   </Card>
                 </div>
