@@ -285,6 +285,25 @@ const navigation = [
         href: "/docs/ejected-reference/static-isr",
         icon: RefreshCw,
       },
+      {
+        title: "Bundlers Integration",
+        href: "/docs/ejected-reference/bundlers",
+        icon: Boxes,
+        subItems: [
+          {
+            title: "esbuild Configuration",
+            href: "/docs/ejected-reference/bundlers/esbuild",
+          },
+          {
+            title: "Rollup Configuration",
+            href: "/docs/ejected-reference/bundlers/rollup",
+          },
+          {
+            title: "Webpack Configuration",
+            href: "/docs/ejected-reference/bundlers/webpack",
+          },
+        ],
+      },
     ],
   },
 ];

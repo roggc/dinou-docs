@@ -164,6 +164,18 @@ export default function Page() {
                     </CardContent>
                   </Card>
                 </a>
+
+                <a href="/docs/ejected-reference/bundlers" className="group">
+                  <Card className="h-full border hover:border-cyan-500/50 hover:bg-cyan-50/5 dark:hover:bg-cyan-950/5 transition-all">
+                    <CardHeader className="flex flex-row items-center gap-3 py-4">
+                      <Boxes className="h-5 w-5 text-cyan-500 group-hover:scale-110 transition-transform" />
+                      <CardTitle className="text-base font-bold">Bundlers Integration</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground">
+                      Explore compilation settings and scripts for the Rollup tree-shaker, Webpack dynamic modules registry, and fast esbuild runners.
+                    </CardContent>
+                  </Card>
+                </a>
               </div>
             </section>
           </div>
