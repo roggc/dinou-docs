@@ -267,11 +267,29 @@ if (configFile) {
 
               <h3>D. The CommonJS-to-ESM Bridge (<code>import-module.js</code>)</h3>
               <p>
-                In a standard Node.js server, CommonJS modules cannot synchronously load ES Modules using <code>require()</code> (doing so throws a <code>ERR_REQUIRE_ESM</code> exception).
+                In a standard Node.js environment, CommonJS modules cannot synchronously load ES Modules using <code>require()</code> (doing so throws a <code>ERR_REQUIRE_ESM</code> exception).
               </p>
               <p>
-                Dinou bridges this execution boundary in <code>server.js</code> using the custom wrapper <code>import-module.js</code>, which executes a dynamic asynchronous import:
+                Initially, Dinou resolved this by attempting a <code>require()</code> first and falling back to a dynamic <code>await import()</code> if it failed. The current refactored version segregates this logic based on the active bundler (Webpack vs. Rollup / esbuild) for two critical reasons:
               </p>
+              
+              <ol className="list-decimal pl-6 space-y-3 text-sm text-muted-foreground my-4">
+                <li>
+                  <strong>Ensuring ESM Loader Interception (Rollup & esbuild)</strong>: 
+                  For Rollup and esbuild builds, Dinou utilizes a custom Node.js ESM loader (<code>babel-esm-loader.js</code>) to handle runtime TS/JSX transpilation and Server Component reference registration (via <code>registerServerReference</code>). Node.js only runs custom ESM loader hooks on modules fetched via <code>import</code> statements. If the engine attempted a <code>require()</code> first, it would either crash or bypass the loader entirely (using legacy CJS transpilation registers), breaking React Server Component hydration. Forcing <code>await import()</code> directly ensures the compilation pipeline is consistently intercepted.
+                </li>
+                <li>
+                  <strong>Webpack Cache Invalidation & Hybrid Module Loading</strong>: 
+                  Webpack produces a hybrid CommonJS/ESM module output. To allow Hot Module Replacement (HMR) in development, Dinou must invalidate the server modules from memory when they change.
+                  <br />
+                  <em>Bypassing vs. Clearing Cache</em>: In Node.js, V8's native ESM registry is immutable and does not provide an API to delete entries. While we can <strong>bypass</strong> this in Rollup/esbuild by appending a query timestamp (e.g. <code>?t=timestamp</code>), this forces V8 to instantiate a new module side-by-side in memory (a controlled development memory leak). In Webpack, however, this timestamp bypass breaks Webpack's internal dependency resolution and manifests. Webpack requires a <strong>physical cache clearance</strong> of Node's CommonJS module registry:
+                  <div className="not-prose my-2">
+                    <CodeBlock language="javascript">{`delete require.cache[require.resolve(absPath)];`}</CodeBlock>
+                  </div>
+                  Attempting <code>require()</code> first on Webpack configurations allows Dinou to purge the physical file cache cleanly in development. If the resource is a native ESM bundle, the caught exception safely redirects it to a dynamic <code>import()</code>.
+                </li>
+              </ol>
+
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`// dinou/core/import-module.js
 async function importModule(modulePath) {
@@ -280,26 +298,33 @@ async function importModule(modulePath) {
   if (!isWebpack) {
     let fileUrl = pathToFileURL(absPath).href;
     if (process.env['NODE_ENV'] !== "production") {
-      fileUrl += \`?t=\${Date.now()}\`; // Cache-busting query parameter
+      fileUrl += \`?t=\${Date.now()}\`; // Cache-busting for ESM modules
     }
-    const mod = await import(fileUrl); // Boundary jump from CJS to ESM
+    const mod = await import(fileUrl); // Direct ESM Loader entry
     return mod;
   }
 
-  // Webpack fallback
-  if (process.env['NODE_ENV'] !== "production") {
-    delete require.cache[require.resolve(absPath)];
+  try {
+    if (process.env['NODE_ENV'] !== "production") {
+      try {
+        const resolved = require.resolve(absPath);
+        delete require.cache[resolved]; // CJS Cache clearing
+      } catch (e) {}
+    }
+    return require(absPath);
+  } catch (err) {
+    if (err.code === "ERR_REQUIRE_ESM" || /require\\(\\) of ES Module/.test(err.message)) {
+      let fileUrl = pathToFileURL(absPath).href;
+      if (process.env['NODE_ENV'] !== "production") {
+        fileUrl += \`?t=\${Date.now()}\`;
+      }
+      const mod = await import(fileUrl); // Fallback for ES bundles
+      return mod;
+    }
+    throw err;
   }
-  return require(absPath);
 }`}</CodeBlock>
               </div>
-              <p>
-                <strong>Key features of this bridge:</strong>
-              </p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li><strong>Dynamic Import</strong>: The <code>await import()</code> expression is the exact point where V8 switches from the CommonJS execution loop to the asynchronous ESM graph, loading React Server Components dynamically.</li>
-                <li><strong>Cache Busting in Dev</strong>: V8 permanently caches ES Modules loaded via import statements. To prevent stale page views when a component is edited in development, the query parameter <code>?t=timestamp</code> forces V8 to treat the file as a new module and compile the fresh changes.</li>
-              </ul>
             </section>
 
             {/* 2. THE ESM LOADER */}
