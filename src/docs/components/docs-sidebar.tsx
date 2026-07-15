@@ -43,6 +43,7 @@ import {
   RefreshCw,
   Cpu,
   FolderTree,
+  Terminal,
 } from "lucide-react";
 
 const navigation = [
@@ -234,10 +235,20 @@ const navigation = [
         href: "/docs/internals",
         icon: Cpu,
       },
+    ],
+  },
+  {
+    title: "Ejected Reference",
+    items: [
       {
-        title: "Ejected Folder Reference",
+        title: "Overview",
         href: "/docs/ejected-reference",
-        icon: FolderTree,
+        icon: BookOpen,
+      },
+      {
+        title: "Server Entry (server.js)",
+        href: "/docs/ejected-reference/server",
+        icon: Terminal,
       },
     ],
   },
