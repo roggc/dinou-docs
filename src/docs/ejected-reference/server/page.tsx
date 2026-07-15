@@ -181,43 +181,453 @@ babelRegister({
             <section id="context-wrappers">
               <h2>🛡️ 5. Context State & Cookie Injection</h2>
               <p>
-                Dinou provides components and server actions with a request/response context using AsyncLocalStorage (in <code>request-context.js</code>). The context is built through two primary wrappers:
+                Dinou links Express request and response scopes to React Server Component trees using Node's <code>AsyncLocalStorage</code> (configured in <code>request-context.js</code>). 
+              </p>
+              
+              <h3>Why does Dinou use three distinct context wrappers?</h3>
+              <p>
+                A single unified context object cannot satisfy the conflicting networking, security, and process isolation constraints present during a request's lifecycle. Dinou splits request states into three environment-specific containers:
+              </p>
+
+              <div className="my-6 overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-900">
+                      <th className="px-4 py-2 font-bold text-left">Context Wrapper</th>
+                      <th className="px-4 py-2 font-bold text-left">Execution Thread</th>
+                      <th className="px-4 py-2 font-bold text-left">Request Phase</th>
+                      <th className="px-4 py-2 font-bold text-left">Redirection Method</th>
+                      <th className="px-4 py-2 font-bold text-left">Cookie Mutations</th>
+                      <th className="px-4 py-2 font-bold text-left">Design Constraint</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                    <tr>
+                      <td className="px-4 py-2 font-semibold"><code>getContext</code></td>
+                      <td className="px-4 py-2">Master Server (Express)</td>
+                      <td className="px-4 py-2">GET /____rsc_payload (Soft SPA navigation)</td>
+                      <td className="px-4 py-2">Intercepts redirect; writes custom <code>x-rsc-redirect</code> header.</td>
+                      <td className="px-4 py-2">Writes traditional <code>Set-Cookie</code> headers.</td>
+                      <td className="px-4 py-2">Prevents standard 302 redirects from breaking AJAX fetch routers.</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 font-semibold"><code>getContextForServerFunctionEndpoint</code></td>
+                      <td className="px-4 py-2">Master Server (Express)</td>
+                      <td className="px-4 py-2">POST /____server_function (Server Functions)</td>
+                      <td className="px-4 py-2">Throws <code>dinou-internal-redirect</code> to abort execution mid-stream.</td>
+                      <td className="px-4 py-2"><strong>Hybrid:</strong> Mid-stream cookie writes append command packets. Blocks <code>HttpOnly</code>.</td>
+                      <td className="px-4 py-2">Handles cookie updates and redirection signals inside active Flight stream channels.</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 font-semibold"><code>contextForChild</code></td>
+                      <td className="px-4 py-2">Child Render Process (Fork)</td>
+                      <td className="px-4 py-2">GET / (Initial load / Hard reload)</td>
+                      <td className="px-4 py-2">Blocked (No <code>res</code> object available).</td>
+                      <td className="px-4 py-2">Blocked (No <code>res</code> object available).</td>
+                      <td className="px-4 py-2">Serializes request headers across IPC. Enforces strict sandbox isolation.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="my-6">
+                <p className="text-sm font-semibold mb-2">Architectural Flow Mapping:</p>
+                <div className="not-prose">
+                  <CodeBlock language="text">{`                  ┌───────────────────────────┐
+                  │  Client Request Received  │
+                  └─────────────┬─────────────┘
+                                │
+                                ▼
+                        [ Request Type? ]
+                       /        │        \\
+                      /         │         \\
+       GET (Soft SPA Nav)       │          POST (Server Function)
+            ▼                   │                   ▼
+      getContext()              │   getContextForServerFunctionEndpoint()
+    (safeResCall Guard)         │                   │
+                                │                   ├─► cookie() -> Hybrid Setter
+                        GET (Hard Reload)           │   (headers Sent? D:cookie : res.cookie)
+                                │                   │
+                                ▼                   └─► redirect() -> throw error loop
+                         contextForChild
+                                │
+                                ▼
+                       renderAppToHtml()
+                     (Child Process Fork)`}</CodeBlock>
+                </div>
+              </div>
+
+              <p>
+                The server provisions request contexts through three distinct wrappers:
               </p>
 
               <h3>A. Standard Request Context (<code>getContext</code>)</h3>
               <p>
-                Constructs cookies, search params, and request headers. It features a safe redirect wrapper (<code>safeResCall</code>) that normalizes status codes and filters URLs to prevent open-redirect vulnerabilities.
+                Executed during standard page requests. This wrapper intercepts calls to Express's native response methods using a custom security guard helper, <code>safeResCall</code>:
               </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`const safeResCall = (methodName, ...args) => {
+  if (hasRedirected) return;
+  
+  // 1. Prevent ERR_HTTP_HEADERS_SENT Node.js server crashes
+  if (res.headersSent) {
+    if (methodName === "redirect" && req.path.includes("____rsc_payload")) return;
+    console.log(\`[Dinou] res.\${methodName} called but headers already sent. Ignoring.\`);
+    return; // Exit silently
+  }
+
+  if (methodName === "redirect") {
+    hasRedirected = true;
+    let url = args.length === 2 ? args[1] : args[0];
+    let status = args.length === 2 ? args[0] : 302;
+
+    // 2. Open-Redirect Vulnerability Filter
+    const resolvedUrl = resolveRelativeUrl(url, req.path);
+    let finalUrl = "/";
+    if (typeof resolvedUrl === "string" && resolvedUrl.startsWith("/") && !resolvedUrl.startsWith("//")) {
+      finalUrl = resolvedUrl;
+    } else {
+      console.warn(\`[Dinou Security] Blocked unsafe redirect to: \${url}\`);
+    }
+
+    // 3. RSC Router Redirect Handling
+    if (req.path.includes("____rsc_payload")) {
+      res.setHeader("x-rsc-redirect", finalUrl);
+      res.status(200).end();
+      return;
+    }
+
+    res.redirect.apply(res, [status, finalUrl]);
+    return;
+  }
+  return res[methodName].apply(res, args);
+};
+
+// 4. Return the consolidated mock request/response context
+const context = {
+  req: {
+    cookies: { ...req.cookies },
+    headers: {
+      "user-agent": req.headers["user-agent"],
+      cookie: req.headers["cookie"],
+      referer: req.headers["referer"],
+      host: req.headers["host"],
+      authorization: req.headers["authorization"],
+      "accept-language": req.headers["accept-language"],
+      "x-forwarded-for": req.headers["x-forwarded-for"],
+      forwarded: req.headers["forwarded"],
+      "content-type": req.headers["content-type"],
+      origin: req.headers["origin"],
+    },
+    query: { ...req.query },
+    path: req.path,
+    method: req.method,
+  },
+  res: {
+    status: (code) => safeResCall("status", code),
+    setHeader: (name, value) => safeResCall("setHeader", name, value),
+    clearCookie: (name, options) => safeResCall("clearCookie", name, options),
+    cookie: (name, value, options) => safeResCall("cookie", name, value, options),
+    redirect: (...args) => safeResCall("redirect", ...args),
+  },
+};
+
+return context;`}</CodeBlock>
+              </div>
+              <ul>
+                <li>
+                  <strong>Header Protection (Node Anti-Crash Guard):</strong> Writing headers after a response stream has started throws a fatal Node.js exception (<code>ERR_HTTP_HEADERS_SENT</code>) that can crash the server process. The <code>safeResCall</code> helper intercepts response mutations (like <code>cookie</code> or <code>status</code>) and exits silently if headers have already been sent.
+                </li>
+                <li>
+                  <strong>Open-Redirect Mitigation:</strong> Validates target URLs to ensure they are relative paths (starting with a single slash <code>/</code>) and do not contain protocol specifiers, preventing phishing redirects to external host domains.
+                </li>
+                <li>
+                  <strong>RSC Router Sync:</strong> If the client navigates via a soft routing SPA transition (requesting a <code>____rsc_payload</code> path) and a server component triggers a redirect, the server intercepts this redirect. Instead of sending a standard <code>302</code> status code (which the browser's <code>fetch</code> API would follow transparently without updating the client-side SPA route), the server sends the target URL in a custom <code>x-rsc-redirect</code> header and responds with a <code>200 OK</code>.
+                </li>
+              </ul>
+
+              <hr className="my-6" />
 
               <h3>B. Server Function Context (<code>getContextForServerFunctionEndpoint</code>)</h3>
               <p>
-                Server actions run during POST requests, which might already be streaming HTML when you try to write a cookie. To support setting cookies at any point in the lifecycle, Dinou implements a <strong>hybrid cookie manager</strong>:
+                Server Functions run inside <code>POST</code> request endpoints, where the server may already be streaming updates back to the browser. Under this setup, Dinou provisions context using a custom endpoint-specific wrapper:
               </p>
+              
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`function getContextForServerFunctionEndpoint(req, res) {
+  const context = {
+    req: {
+      cookies: { ...req.cookies },
+      headers: {
+        "user-agent": req.headers["user-agent"],
+        cookie: req.headers["cookie"],
+        referer: req.headers["referer"],
+        host: req.headers["host"],
+        authorization: req.headers["authorization"],
+        "accept-language": req.headers["accept-language"],
+        "x-forwarded-for": req.headers["x-forwarded-for"],
+        forwarded: req.headers["forwarded"],
+        "content-type": req.headers["content-type"],
+        origin: req.headers["origin"],
+      },
+      query: { ...req.query },
+      path: req.path,
+      method: req.method,
+    },
+    res: {
+      redirect: (urlOrStatus, url) => {
+        const rawUrl = url || urlOrStatus;
+        const referer = req.headers["referer"];
+        let refererPath = "/";
+        if (referer) {
+          try {
+            refererPath = new URL(referer).pathname;
+          } catch (e) {}
+        }
+        const resolvedUrl = resolveRelativeUrl(rawUrl, refererPath);
+        let finalUrl = "/";
+        if (typeof resolvedUrl === "string" && resolvedUrl.startsWith("/") && !resolvedUrl.startsWith("//")) {
+          finalUrl = resolvedUrl;
+        } else {
+          console.warn(\`[Dinou Security] Blocked unsafe server function redirect to: \${rawUrl}\`);
+        }
+        
+        // Throw an exception to halt normal execution and trigger the redirect loop
+        throw {
+          $$type: "dinou-internal-redirect",
+          url: finalUrl,
+        };
+      },
+      status: (code) => {
+        if (!res.headersSent) res.status(code);
+      },
+      setHeader: (n, v) => {
+        if (!res.headersSent) res.setHeader(n, v);
+      },
+      cookie: (name, value, options) => {
+        // Scenario A: Headers not sent yet. Use native Express cookie setter.
+        if (!res.headersSent) {
+          res.setHeader("Content-Type", "text/x-component");
+          res.cookie(name, value, options);
+          return;
+        }
 
+        // Scenario B: Streaming active (Headers already flushed).
+        // Block HttpOnly because client-side JavaScript cannot write HttpOnly cookies.
+        if (options && options.httpOnly) {
+          console.error(\`[Dinou Error] Cannot set HttpOnly cookie '\${name}'... streaming active.\`);
+          return;
+        }
+
+        // Inject cookie mutation command directly into the active flight stream
+        let cookieStr = \`\${name}=\${encodeURIComponent(value)}\`;
+        if (options) {
+          if (options.path) cookieStr += \`; path=\${options.path}\`;
+          if (options.domain) cookieStr += \`; domain=\${options.domain}\`;
+          if (options.maxAge) cookieStr += \`; max-age=\${options.maxAge}\`;
+          if (options.expires) cookieStr += \`; expires=\${new Date(options.expires).toUTCString()}\`;
+          if (options.secure) cookieStr += \`; secure\`;
+          if (options.sameSite) cookieStr += \`; samesite=\${options.sameSite}\`;
+        }
+        res.write(\`D:{"type":"cookie","cookie":\${JSON.stringify(cookieStr)}}\\n\`);
+      },
+      clearCookie: (name, options) => {
+        if (!res.headersSent) {
+          res.setHeader("Content-Type", "text/x-component");
+          res.clearCookie(name, options);
+          return;
+        }
+        let cookieStr = \`\${name}=; Max-Age=0\`;
+        const path = options?.path || "/";
+        cookieStr += \`; path=\${path}\`;
+        if (options) {
+          if (options.domain) cookieStr += \`; domain=\${options.domain}\`;
+          if (options.secure) cookieStr += \`; secure\`;
+          if (options.sameSite) cookieStr += \`; samesite=\${options.sameSite}\`;
+        }
+        cookieStr += ";";
+        res.write(\`D:{"type":"cookie","cookie":\${JSON.stringify(cookieStr)}}\\n\`);
+      }
+    }
+  };
+  return context;
+}`}</CodeBlock>
+              </div>
+
+              <h4>1. Controlled Redirection & Exception Handling Loop</h4>
+              <p>
+                Because Server Functions run during POST calls that return streams, a standard HTTP <code>302</code> status cannot be written mid-response. Instead, the <code>res.redirect</code> implementation aborts further execution by throwing a <code>dinou-internal-redirect</code> object:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`redirect: (urlOrStatus, url) => {
+  const rawUrl = url || urlOrStatus;
+  const resolvedUrl = resolveRelativeUrl(rawUrl, refererPath);
+  let finalUrl = resolvedUrl.startsWith("/") ? resolvedUrl : "/";
+
+  // Throw an exception to halt normal execution and trigger the redirect loop
+  throw {
+    $$type: "dinou-internal-redirect",
+    url: finalUrl,
+  };
+}`}</CodeBlock>
+              </div>
+              <p>
+                This exception is caught directly by the POST handler try-catch block inside <code>POST /____server_function____</code>:
+              </p>
+              
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`try {
+  result = await requestStorage.run(context, async () => await fn(...args));
+} catch (err) {
+  if (err && err.$$type === "dinou-internal-redirect") {
+    const safeUrl = JSON.stringify(err.url);
+
+    if (!res.headersSent) {
+      // Scenario A: Headers not sent yet. Return a direct JSON redirect payload.
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("X-Dinou-Redirect", err.url);
+      return res.status(200).json({ redirect: err.url });
+    } else {
+      // Scenario B: Headers already sent (active stream).
+      // Append a custom redirect instruction to the stream and close the connection.
+      res.write(\`D:{"type":"redirect","url":\${safeUrl}}\\n\`);
+      res.end();
+      return;
+    }
+  }
+  throw err; // bubble up normal exceptions
+}`}</CodeBlock>
+              </div>
+
+              <h4>2. Hybrid Cookie & Expiration Manager</h4>
+              <p>
+                The cookie setter implements a dual-mode behavior depending on the connection state:
+              </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`cookie: (name, value, options) => {
-  // Scenario A: Headers not sent yet. Write standard cookie header.
+  // Scenario A: Headers not sent yet. Use native Express cookie setter.
   if (!res.headersSent) {
     res.setHeader("Content-Type", "text/x-component");
     res.cookie(name, value, options);
     return;
   }
 
-  // Scenario B: Headers already sent (Streaming active).
-  // Block HttpOnly because JavaScript running in the browser cannot write HttpOnly cookies.
+  // Scenario B: Streaming active (Headers already flushed).
+  // Block HttpOnly because client-side JavaScript cannot write HttpOnly cookies.
   if (options && options.httpOnly) {
-    console.error(\`Cannot set HttpOnly cookie '\${name}'... streaming started.\`);
+    console.error(\`[Dinou Error] Cannot set HttpOnly cookie '\${name}'... streaming active.\`);
     return;
   }
 
-  // Inject a special command text block directly into the active flight stream
-  const cookieStr = constructCookieString(name, value, options);
+  // Inject cookie mutation command directly into the active flight stream
+  let cookieStr = \`\${name}=\${encodeURIComponent(value)}\`;
+  if (options) {
+    if (options.path) cookieStr += \`; path=\${options.path}\`;
+    if (options.domain) cookieStr += \`; domain=\${options.domain}\`;
+    if (options.maxAge) cookieStr += \`; max-age=\${options.maxAge}\`;
+    if (options.expires) cookieStr += \`; expires=\${new Date(options.expires).toUTCString()}\`;
+    if (options.secure) cookieStr += \`; secure\`;
+    if (options.sameSite) cookieStr += \`; samesite=\${options.sameSite}\`;
+  }
+  res.write(\`D:{"type":"cookie","cookie":\${JSON.stringify(cookieStr)}}\\n\`);
+}`}</CodeBlock>
+              </div>
+              
+              <p><strong>Cookie Creation Mechanics:</strong></p>
+              <ul>
+                <li>
+                  <strong>Scenario A (Headers not sent):</strong> Utilizes Express's native <code>res.cookie</code> method. It explicitly injects the <code>Content-Type: text/x-component</code> header (which represents React's RSC Flight stream contract) to initialize the network pipe before writing the cookie to the HTTP response header payload.
+                </li>
+                <li>
+                  <strong>Scenario B (Streaming active):</strong> When response headers have already been flushed to the browser, standard HTTP header injection is no longer possible. To bypass this, Dinou manually serializes cookie attributes (including <code>domain</code>, <code>path</code>, <code>secure</code>, and <code>sameSite</code>) into a standard formatted cookie string, wraps it inside a JSON structure, and streams it down the open HTTP channel using <code>res.write()</code>. The browser runtime intercepts this special text packet and writes the cookie programmatically.
+                </li>
+                <li>
+                  <strong>HttpOnly Isolation Security Guard:</strong> Browsers restrict access to <code>HttpOnly</code> cookies to prevent Cross-Site Scripting (XSS) document hijacking. Because Scenario B relies on browser-side JavaScript to parse the stream and write cookies to the document, setting <code>HttpOnly</code> cookies is blocked once streaming starts. Dinou logs a console error to warn developers if this occurs.
+                </li>
+              </ul>
+              
+              <p>
+                Similarly, clearing cookies dynamically mid-stream uses a custom script injection command with <code>Max-Age=0</code>:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`clearCookie: (name, options) => {
+  if (!res.headersSent) {
+    res.setHeader("Content-Type", "text/x-component");
+    res.clearCookie(name, options);
+    return;
+  }
+  let cookieStr = \`\${name}=; Max-Age=0\`;
+  const path = options?.path || "/";
+  cookieStr += \`; path=\${path}\`;
+  if (options) {
+    if (options.domain) cookieStr += \`; domain=\${options.domain}\`;
+    if (options.secure) cookieStr += \`; secure\`;
+    if (options.sameSite) cookieStr += \`; samesite=\${options.sameSite}\`;
+  }
+  cookieStr += ";";
   res.write(\`D:{"type":"cookie","cookie":\${JSON.stringify(cookieStr)}}\\n\`);
 }`}</CodeBlock>
               </div>
 
+              <p><strong>Cookie Deletion Mechanics:</strong></p>
+              <ul>
+                <li>
+                  <strong>Scenario A (Headers not sent):</strong> Calls Express's native <code>res.clearCookie</code> method, which appends a deletion header instructing the browser to discard the cookie.
+                </li>
+                <li>
+                  <strong>Scenario B (Streaming active):</strong> Because headers cannot be modified mid-stream, Dinou simulates cookie deletion by setting <code>Max-Age=0</code>. This formats a custom cookie command string that forces the cookie to expire immediately, instructing the browser to remove it.
+                </li>
+              </ul>
+
+              <hr className="my-6" />
+
+              <h3>C. Wildcard Child Context (<code>contextForChild</code>)</h3>
               <p>
-                If headers are already flushed, standard HTTP headers cannot be set. Dinou bypasses this by streaming a custom command packet (<code>{'D:{"type":"cookie",...}'}</code>) which the client-side runtime intercepts to write document cookies programmatically.
+                For initial loads or hard refreshes, rendering is delegated to a child thread. Because complex Node.js Express sockets cannot be sent directly over IPC (Inter-Process Communication), Dinou builds a serialized context:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`const contextForChild = {
+  req: {
+    query: { ...req.query },
+    cookies: { ...req.cookies },
+    headers: {
+      "user-agent": req.headers["user-agent"],
+      cookie: req.headers["cookie"],
+      referer: req.headers["referer"],
+      host: req.headers["host"],
+      authorization: req.headers["authorization"],
+      "accept-language": req.headers["accept-language"],
+      "x-forwarded-for": req.headers["x-forwarded-for"],
+      forwarded: req.headers["forwarded"],
+      "content-type": req.headers["content-type"],
+      origin: req.headers["origin"],
+    },
+    path: req.path,
+    method: req.method,
+  }
+};`}</CodeBlock>
+              </div>
+              <p>
+                This cloned metadata is sent to the child process (<code>render-html.js</code>) during compilation, allowing Server Components to access cookies, authorization headers, and browser user-agents during server rendering.
+              </p>
+              
+              <p>
+                This container is passed as an argument to the child process renderer function (<code>renderAppToHtml</code>) inside the wildcard router:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`const appHtmlStream = renderAppToHtml(
+  reqPath,
+  JSON.stringify({ ...req.query }),
+  contextForChild, // Cloned context injected here
+  res,
+  capturedStatus,
+  isDynamic,
+  isPathBlocked
+);`}</CodeBlock>
+              </div>
+              
+              <p>
+                <strong>Security Sandboxing & the omission of <code>res</code>:</strong> The response helper (<code>res</code>) is excluded from the child process context. This prevents the child rendering process from modifying cookies, headers, or redirects. All server state mutations are handled by the main server thread, keeping rendering logic decoupled from data mutation endpoints.
               </p>
             </section>
 
@@ -227,25 +637,261 @@ babelRegister({
             <section id="routing-endpoints">
               <h2>🚀 6. Routing & RSC Endpoints</h2>
               <p>
-                The Express application registers specific endpoints to orchestrate Server Actions and serve rendering streams:
+                Dinou's core server orchestrates two central endpoints inside <code>core/server.js</code> to handle user routing navigations and trigger Server Actions.
               </p>
 
               <h3>A. Serving RSC Payloads (<code>serveRSCPayload</code>)</h3>
               <p>
-                Triggered on navigation requests (e.g. <code>/____rsc_payload____</code>). It routes requests to the SSG build files (<code>rsc.rsc</code> or <code>rsc._old.rsc</code> in production) or resolves dynamic pages on-the-fly. If an ISR static build page has expired, it triggers background regeneration asynchronously.
+                Triggered on navigation queries (e.g. <code>/____rsc_payload____</code>). The engine resolves pages through three execution paths:
+              </p>
+              
+              <h4>1. Pre-compiled Static Cache (SSG / ISR)</h4>
+              <p>
+                If a route is static (or not flagged as dynamic), the server attempts to load cached files from the <code>dist2/</code> folder:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`const useOld =
+  isOld ||
+  regenerating.has(reqPath) ||
+  (req.query.buildId &&
+    currentGeneratedAt &&
+    req.query.buildId !== String(currentGeneratedAt));
+
+const payloadPath = path.resolve(
+  "dist2",
+  reqPath.replace(/^\//, ""),
+  useOld ? "rsc._old.rsc" : "rsc.rsc"
+);`}</CodeBlock>
+              </div>
+              <p>
+                <strong>Stale-While-Revalidate Fallback:</strong> If the requested build ID does not match the generated date, or if a background compilation task is already running (<code>regenerating.has(reqPath)</code>), the server automatically streams the backup file (<code>rsc._old.rsc</code>) to prevent blocking the client.
               </p>
 
-              <h3>B. Executing Actions (<code>POST /</code>)</h3>
+              <h4>2. Parameter & Route Validation</h4>
               <p>
-                Handles server functions triggered from the client. It:
+                For dynamic pages, the server imports the route configuration module (<code>page_functions</code>) to validate parameters before rendering:
               </p>
-              <ol>
-                <li>Reads the <code>x-rsc-action</code> header containing the unique action ID.</li>
-                <li>Validates the action ID against the <code>serverFunctionsManifest</code> in production.</li>
-                <li>Dynamically imports the target component/action module.</li>
-                <li>Invokes the function within the active <code>requestStorage</code> context, passing parsed form data or JSON parameters.</li>
-                <li>Streams the action return value and the updated React Server Component tree back to the client.</li>
-              </ol>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`if (validateParamsFn) {
+  const isValid = await validateParamsFn(dynamicParams);
+  if (!isValid) isPathBlocked = true; // Returns 404
+}
+
+if (!isPathBlocked && allowISGValue === false) {
+  // Check if current dynamic route exists inside getStaticPaths() whitelist
+  const isPathAllowed = staticPathsSet.has(serializedQuery);
+  if (!isPathAllowed) isPathBlocked = true;
+}`}</CodeBlock>
+              </div>
+
+              <h4>3. Dynamic RSC Serialization</h4>
+              <p>
+                If the route is valid, the server runs the request inside the async storage context and streams the RSC Flight payload using React's <code>renderToPipeableStream</code>:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`await requestStorage.run(context, async () => {
+  const jsx = await getJSX(reqPath, { ...req.query }, isNotFound, isDevelopment, isPathBlocked);
+  const manifest = isDevelopment ? loadManifestFromDisk() : cachedClientManifest;
+  const { pipe } = renderToPipeableStream(jsx, manifest);
+  pipe(res); // Stream Flight binary stream directly to client
+});`}</CodeBlock>
+              </div>
+
+              <hr className="my-6" />
+
+              <h3>B. Wildcard Initial Load Handler (<code>app.get(/^\/.*\/?$/)</code>)</h3>
+              <p>
+                This regex wildcard endpoint captures all standard browser GET requests (such as entering a URL directly or performing a hard refresh). Since these requests expect a fully rendered HTML page instead of an RSC Flight stream, the server handles them differently:
+              </p>
+
+              <h4>1. Pre-rendered HTML Cache / ISR Fallback</h4>
+              <p>
+                If not in development and the path matches a static page, the server streams the cached HTML page directly from the <code>dist2/</code> folder:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`const fileToRead = htmlPathOld || htmlPath;
+if (existsSync(fileToRead) && !dynamicState.value) {
+  res.setHeader("Content-Type", "text/html");
+  let htmlContent = readFileSync(fileToRead, "utf8");
+  
+  // Inject browser flags to direct SPA hydration
+  let scripts = \`<script>window.__DINOU_USE_STATIC__=true;</script>\`;
+  if (htmlPathOld) {
+    scripts += \`<script>window.__DINOU_USE_OLD_RSC__=true;</script>\`;
+  }
+  
+  htmlContent = htmlContent.replace("</head>", \`\${scripts}</head>\`);
+  return res.send(htmlContent);
+}`}</CodeBlock>
+              </div>
+              <p>
+                <strong>Hydration Script Injection:</strong> Before sending the cached HTML file, the server injects script tags into the <code>&lt;head&gt;</code> to configure hydration options:
+              </p>
+              <ul>
+                <li><code>window.__DINOU_USE_STATIC__ = true</code>: Instructs the client-side SPA router to retrieve its initial Flight payload from pre-built static files instead of initiating dynamic SSR requests.</li>
+                <li><code>window.__DINOU_USE_OLD_RSC__ = true</code>: During background ISR compilations, this directs the client to load the corresponding backup payload (<code>rsc._old.rsc</code>) to prevent cache mismatch errors.</li>
+              </ul>
+
+              <h4>2. Dynamic SSR Pipeline with Process Limiter</h4>
+              <p>
+                If the page is dynamic or not yet cached, the server performs Server-Side Rendering (SSR) by spawning a child rendering stream. To protect server resources, this execution is managed by a process limiter:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`processLimiter.run(async () => {
+  const appHtmlStream = renderAppToHtml(reqPath, JSON.stringify({ ...req.query }), contextForChild, res);
+  res.setHeader("Content-Type", "text/html");
+  appHtmlStream.pipe(res); // Stream HTML back to the browser
+
+  res.on("finish", () => {
+    if (!isDevelopment && res.statusCode === 200) {
+      generatingISG(reqPath, dynamicState); // Cache dynamic page in background
+    }
+  });
+
+  await new Promise((resolve) => {
+    appHtmlStream.on("end", resolve);
+    appHtmlStream.on("error", resolve);
+  });
+});`}</CodeBlock>
+              </div>
+              <p>
+                <strong>Background ISG Generation:</strong> When the response stream completes (<code>res.on("finish")</code>), the server starts a background compilation task (<code>generatingISG()</code>) to render and cache the page on disk for subsequent visits.
+              </p>
+
+              <hr className="my-6" />
+
+              <h3>C. Executing Server Functions (<code>POST /____server_function____</code>)</h3>
+              <p>
+                This endpoint processes client-side Server Functions. It includes built-in security features to protect server endpoints:
+              </p>
+
+              <h4>1. Origin & Anti-CSRF Verification</h4>
+              <p>
+                The server inspects header values to verify that request sources match host domains, and validates custom headers to prevent cross-site request forgery:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`if (!isDevelopment && origin && !origin.includes(host)) {
+  return res.status(403).json({ error: "Invalid Origin" });
+}
+if (req.headers["x-server-function-call"] !== "1") {
+  return res.status(403).json({ error: "Missing security header" });
+}`}</CodeBlock>
+              </div>
+
+              <h4>2. Path Resolution & Directory Guard Verification</h4>
+              <p>
+                To handle requests from multiple operating systems and protect the file system, Dinou executes a strict path normalization and sandbox resolution pipeline inside the POST route:
+              </p>
+              
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`let relativePath;
+
+// A. Check if the URL is a relative reference (e.g. file:///src/...)
+// If so, extract it directly without using fileURLToPath (which throws on Windows without a drive letter)
+const isRelativeSrc = fileUrl.startsWith("file:///src/") || fileUrl.startsWith("file:///src\\");
+
+if (isRelativeSrc) {
+  relativePath = fileUrl.replace(/^file:\/\/\/?/, "").trim();
+} else {
+  // B. Convert absolute file:// URIs to localized system path formats
+  const resolvedPath = fileURLToPath(fileUrl);
+  relativePath = resolvedPath;
+
+  const normalizedCwd = normalizePathCase(process.cwd());
+  const normalizedResolved = normalizePathCase(resolvedPath);
+
+  if (normalizedResolved.startsWith(normalizedCwd)) {
+    relativePath = path.relative(normalizedCwd, normalizedResolved);
+  } else {
+    relativePath = relativePath.replace(/^[\\/]+/, "");
+  }
+}
+
+// C. Anti-Directory-Traversal Guard Check
+const normalizedRelative = relativePath.replace(/\\/g, "/");
+if (
+  normalizedRelative.startsWith("/") ||
+  normalizedRelative.includes("..") ||
+  normalizedRelative.includes(":")
+) {
+  return res
+    .status(400)
+    .json({ error: "Invalid path: no absolute, traversal, or drive letter allowed" });
+}
+
+// D. Restrict to 'src/' folder: prepend 'src/' if missing, and resolve absolutePath
+if (!relativePath.startsWith("src/") && !relativePath.startsWith("src\\")) {
+  relativePath = path.join("src", relativePath);
+}
+const absolutePath = path.resolve(process.cwd(), relativePath);
+
+// E. Verify that absolutePath is strictly inside 'src/'
+const srcDir = path.resolve(process.cwd(), "src");
+if (!absolutePath.startsWith(srcDir + path.sep)) {
+  return res.status(403).json({ error: "Access denied: file outside src directory" });
+}`}</CodeBlock>
+              </div>
+
+              <p><strong>Mechanics & Rationale:</strong></p>
+              <ul>
+                <li>
+                  <strong>Windows <code>fileURLToPath</code> Bypass (A & B):</strong> Native Node.js <code>fileURLToPath</code> throws a fatal error on Windows (<code>TypeError: Unique drive letter expected</code>) when parsed with relative URIs like <code>file:///src/...</code>. Dinou bypasses this by matching <code>isRelativeSrc</code> and manually scraping the <code>file://</code> protocol prefix to yield a clean path.
+                </li>
+                <li>
+                  <strong>Path Case Normalization:</strong> Operating systems handle drive letters differently (e.g. <code>c:\</code> vs <code>C:\</code>). Dinou runs <code>normalizePathCase</code> over paths to prevent compilation mismatches in Windows.
+                </li>
+                <li>
+                  <strong>Anti-Directory-Traversal Guard (C):</strong> Verifies that the path does not start with root slashes, does not contain drive colons (<code>:</code>), and does not include dot-dot sequences (<code>..</code>) to block path traversal attempts.
+                </li>
+                <li>
+                  <strong>Sandbox Enforcement (D & E):</strong> Pre-pends the <code>src/</code> directory and verifies that the resolved path points strictly inside the project's source directory, returning <code>403 Forbidden</code> if it attempts to point to external folders.
+                </li>
+              </ul>
+
+              <p>
+                In production, the server validates the action ID against the whitelist manifest generated during the build step:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`allowedExports = serverFunctionsManifest[normalizedRelative.replace(/\\\\/g, "/")];
+if (!allowedExports || !allowedExports.includes(exportName)) {
+  return res.status(400).json({ error: "Invalid export name" });
+}`}</CodeBlock>
+              </div>
+
+              <h4>3. Dynamic Import & Execution Pipeline</h4>
+              <p>
+                If the server function is verified, the server dynamically imports the target code module and isolates the target function (either default or named export) before executing it:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`// Dynamically load target module
+const mod = await importModule(absolutePath);
+const fn = exportName === "default" ? mod.default : mod[exportName];
+
+if (typeof fn !== "function") {
+  return res.status(400).json({ error: "Export is not a function" });
+}
+
+// Execute function inside requestStorage context
+try {
+  result = await requestStorage.run(context, async () => await fn(...args));
+} catch (err) {
+  if (err && err.$$type === "dinou-internal-redirect") {
+    if (!res.headersSent) {
+      // Scenario A: Headers not sent yet. Return a direct JSON redirect payload.
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("X-Dinou-Redirect", err.url);
+      return res.json({ redirect: err.url });
+    } else {
+      // Scenario B: Headers already sent (active stream).
+      // Append a custom redirect instruction to the stream and close the connection.
+      res.write(\`D:{"type":"redirect","url":\${JSON.stringify(err.url)}}\\n\`);
+      res.end();
+      return;
+    }
+  }
+  throw err; // bubble up other exceptions
+}`}</CodeBlock>
+              </div>
             </section>
 
             <hr className="my-8" />
