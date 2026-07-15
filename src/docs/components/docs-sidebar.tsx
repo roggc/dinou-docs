@@ -324,6 +324,24 @@ const navigation = [
         title: "Rollup Integration",
         href: "/docs/ejected-reference/bundlers/rollup",
         icon: RefreshCw,
+        subItems: [
+          {
+            title: "1. Overview & Config",
+            href: "/docs/ejected-reference/bundlers/rollup",
+          },
+          {
+            title: "2. RSC Manifest Plugin",
+            href: "/docs/ejected-reference/bundlers/rollup/rsc-manifest",
+          },
+          {
+            title: "3. Server Functions Plugin",
+            href: "/docs/ejected-reference/bundlers/rollup/server-functions",
+          },
+          {
+            title: "4. Asset & Helpers Plugins",
+            href: "/docs/ejected-reference/bundlers/rollup/assets-helpers",
+          },
+        ],
       },
       {
         title: "Webpack Integration",
