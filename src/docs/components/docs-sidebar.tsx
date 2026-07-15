@@ -42,6 +42,7 @@ import {
   ClipboardList,
   RefreshCw,
   Cpu,
+  FolderTree,
 } from "lucide-react";
 
 const navigation = [
@@ -232,6 +233,11 @@ const navigation = [
         title: "Architecture & Internals",
         href: "/docs/internals",
         icon: Cpu,
+      },
+      {
+        title: "Ejected Folder Reference",
+        href: "/docs/ejected-reference",
+        icon: FolderTree,
       },
     ],
   },

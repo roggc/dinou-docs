@@ -72,7 +72,7 @@ export default function Page() {
                       The goal of this page is to bring the details of the ejected framework closer to the end developer to facilitate its understanding. However, given the high complexity of the internal engine, this analysis has been prepared with the assistance of an Artificial Intelligence (AI) agent and may contain inaccuracies or conceptual errors. <strong>The ultimate source of truth is always the actual code inside your ejected folder.</strong>
                     </p>
                     <p className="pt-1 border-t border-amber-500/20">
-                      💡 <strong>Tip:</strong> If you want to explore the ejected codebase yourself, we highly encourage feeding your local <code>./dinou/</code> folder to an AI coding assistant to ask questions, explain mechanisms, or implement custom tweaks. As detailed in <a href="/docs/why-dinou#why-ai" className="underline font-semibold hover:text-amber-900 dark:hover:text-amber-100">AI-Friendly Design</a>, Dinou is designed from the ground up to be lightweight and readable, making it the perfect match for AI pair programming.
+                      💡 <strong>Tip:</strong> If you want to explore the ejected codebase yourself, we highly encourage feeding your local <code>./dinou/</code> folder to an AI coding assistant. Refer to the <a href="/docs/ejected-reference" className="underline font-semibold hover:text-amber-900 dark:hover:text-amber-100">Ejected Folder Reference</a> for a comprehensive file-by-file breakdown, or read more in <a href="/docs/why-dinou#why-ai" className="underline font-semibold hover:text-amber-900 dark:hover:text-amber-100">AI-Friendly Design</a>.
                     </p>
                   </div>
                 </div>
@@ -85,7 +85,7 @@ export default function Page() {
             <section id="overview">
               <h2>💡 Overview & Architecture Blueprint</h2>
               <p>
-                Dinou is built on standard, vanilla Node.js primitives. There are no black boxes; when you run <code>npm run eject</code>, the entire framework code (found under the <code>./dinou/</code> directory, including the core engine under <code>./dinou/core/</code> and the bundler integrations under <code>./dinou/esbuild/</code>, <code>./dinou/rollup/</code>, and <code>./dinou/webpack/</code>) is copied into your repository, giving you complete freedom to inspect and modify it.
+                Dinou is built on standard, vanilla Node.js primitives. There are no black boxes; when you run <code>npm run eject</code>, the entire framework code (found under the <code>./dinou/</code> directory, including the core engine under <code>./dinou/core/</code> and the bundler integrations under <code>./dinou/esbuild/</code>, <code>./dinou/rollup/</code>, and <code>./dinou/webpack/</code>) is copied into your repository, giving you complete freedom to inspect and modify it. For a quick map of what each generated file does, see the <a href="/docs/ejected-reference" className="underline font-semibold">Ejected Folder Reference</a>.
               </p>
               <p>
                 Under the hood, Dinou coordinates a dual module system (CommonJS and ES Modules) and splits execution across two distinct Node.js processes to render pages. The blueprint below visualizes this request lifecycle:
