@@ -275,6 +275,11 @@ const navigation = [
           },
         ],
       },
+      {
+        title: "Styles & Assets Hooks",
+        href: "/docs/ejected-reference/assets-styling",
+        icon: Settings,
+      },
     ],
   },
 ];

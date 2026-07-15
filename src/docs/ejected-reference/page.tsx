@@ -141,17 +141,17 @@ export default function Page() {
                   </Card>
                 </a>
 
-                <div className="opacity-75 cursor-not-allowed">
-                  <Card className="h-full border bg-muted/20">
+                <a href="/docs/ejected-reference/assets-styling" className="group">
+                  <Card className="h-full border hover:border-slate-500/50 hover:bg-slate-50/5 dark:hover:bg-slate-900/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
-                      <Settings className="h-5 w-5 text-slate-500" />
-                      <CardTitle className="text-base font-bold text-muted-foreground">Asset & Style Loading (Coming Soon)</CardTitle>
+                      <Settings className="h-5 w-5 text-slate-500 group-hover:scale-110 transition-transform" />
+                      <CardTitle className="text-base font-bold">Asset & Style Loading</CardTitle>
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground">
                       Custom CommonJS require hooks for CSS Modules with PostCSS and hashed static asset loaders.
                     </CardContent>
                   </Card>
-                </div>
+                </a>
 
                 <div className="opacity-75 cursor-not-allowed">
                   <Card className="h-full border bg-muted/20">
