@@ -642,9 +642,154 @@ return context;`}</CodeBlock>
 
               <h3>A. Serving RSC Payloads (<code>serveRSCPayload</code>)</h3>
               <p>
-                Triggered on navigation queries (e.g. <code>/____rsc_payload____</code>). The engine resolves pages through three execution paths:
+                Triggered on page navigations. In Dinou, the client-side SPA router intercepts link clicks and fetches RSC Flight payloads (React element trees) instead of initiating full HTML page requests. To ensure cache consistency and support Stale-While-Revalidate (SWR) patterns, Dinou exposes five distinct RSC routing endpoints:
+              </p>
+
+              <div className="my-6 overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-900">
+                      <th className="px-4 py-2 font-bold text-left">Endpoint Route</th>
+                      <th className="px-4 py-2 font-bold text-left">serveRSCPayload Flags</th>
+                      <th className="px-4 py-2 font-bold text-left">Target Payload</th>
+                      <th className="px-4 py-2 font-bold text-left">Caller & Client Role</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                    <tr>
+                      <td className="px-4 py-2 font-semibold"><code>/____rsc_payload____/*</code></td>
+                      <td className="px-4 py-2"><code>isOld: false</code>, <code>isStatic: false</code></td>
+                      <td className="px-4 py-2">Latest cache file (<code>rsc.rsc</code>) or dynamic SSR on-the-fly.</td>
+                      <td className="px-4 py-2">Standard client-side SPA router. Resolves pages during routing transitions.</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 font-semibold"><code>/____rsc_payload_old____/*</code></td>
+                      <td className="px-4 py-2"><code>isOld: true</code>, <code>isStatic: false</code></td>
+                      <td className="px-4 py-2">Fallback cache file (<code>rsc._old.rsc</code>) or dynamic SSR.</td>
+                      <td className="px-4 py-2">Client hydration router. Triggered if a page is regenerating in background to match the old HTML.</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 font-semibold"><code>/____rsc_payload_static____/*</code></td>
+                      <td className="px-4 py-2"><code>isOld: false</code>, <code>isStatic: true</code></td>
+                      <td className="px-4 py-2">Only cached static assets (<code>rsc.rsc</code>). Dynamic rendering is blocked.</td>
+                      <td className="px-4 py-2">Client-side router. Fetches static files directly without triggering server-side compilers.</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 font-semibold"><code>/____rsc_payload_old_static____/*</code></td>
+                      <td className="px-4 py-2"><code>isOld: true</code>, <code>isStatic: true</code></td>
+                      <td className="px-4 py-2">Only cached backup assets (<code>rsc._old.rsc</code>). Dynamic rendering is blocked.</td>
+                      <td className="px-4 py-2">Client-side router. Fetches old static backup assets directly during active background builds.</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 font-semibold"><code>/____rsc_payload_error____/*</code> (POST)</td>
+                      <td className="px-4 py-2"><em>Not processed via serveRSCPayload</em></td>
+                      <td className="px-4 py-2">Error boundary view stream (<code>getErrorJSX</code>).</td>
+                      <td className="px-4 py-2">Client-side router. Invoked when client-side React rendering fails, returning an error UI stream.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="my-6">
+                <p className="text-sm font-semibold mb-2">RSC Payload Execution Mapping:</p>
+                <div className="not-prose">
+                  <CodeBlock language="text">{`           [ Client Router Request ]
+                       │
+                       ▼
+             [ Choose RSC Route? ]
+            /          │          \\
+           /           │           \\
+    /____rsc_payload____       /____rsc_payload_static____
+          │                         │
+          ▼                         ▼
+   isOld = false             isOld = false
+   isStatic = false          isStatic = true
+          │                         │
+          ▼                         ▼
+  serveRSCPayload(..., isOld, isStatic)
+          │
+          ├────────► [ isStatic == true? ]
+          │                  │
+          │                  ▼
+          │         [ Only read disk cache ]
+          │         ├─► useOld ? rsc._old.rsc
+          │         └─► else   ? rsc.rsc
+          │         (No file? 403 Forbidden/Block)
+          │
+          └────────► [ isStatic == false? ]
+                             │
+                             ▼
+                    [ SSG/ISR Cache exists? ]
+                     /                    \\
+                    /                      \\
+                  Yes                       No
+                  ▼                         ▼
+        [ check useOld logic ]        [ Dynamic SSR Pipeline ]
+        ├─► isOld == true?             ├─► validateParams()
+        ├─► regenerating?              ├─► getJSX()
+        ├─► buildId mismatch?          └─► renderToPipeableStream()
+        │     │
+        │     ├─► Yes: rsc._old.rsc
+        │     └─► No:  rsc.rsc
+        ▼
+   [ Stream: application/octet-stream ]`}</CodeBlock>
+                </div>
+              </div>
+
+              <h4>How <code>serveRSCPayload</code> executes parameters:</h4>
+              <p>
+                The <code>serveRSCPayload</code> function uses the <code>isOld</code> and <code>isStatic</code> flags to compute the target file path and restrict rendering paths:
               </p>
               
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`async function serveRSCPayload(req, res, isOld = false, isStatic = false) {
+  try {
+    // 1. Strip the matching routing prefix from req.path to resolve the raw route path
+    const reqPath = (
+      req.path.endsWith("/") ? req.path : req.path + "/"
+    ).replace(
+      isOld
+        ? isStatic
+          ? "/____rsc_payload_old_static____"
+          : "/____rsc_payload_old____"
+        : isStatic
+          ? "/____rsc_payload_static____"
+          : "/____rsc_payload____",
+      "",
+    );
+
+    // 2. Serve static cached file if path is not dynamic or if static only is requested
+    if ((!isDevelopment && !dynamicState.value) || isStatic) {
+      let currentGeneratedAt = null;
+      try {
+        const metadataPath = path.join("dist2", reqPath, "metadata.json");
+        if (existsSync(metadataPath)) {
+          const metaObj = JSON.parse(readFileSync(metadataPath, "utf8"));
+          currentGeneratedAt = metaObj.generatedAt || null;
+        }
+      } catch (e) {}
+
+      // Fallback triggers for Stale-While-Revalidate:
+      const useOld =
+        isOld ||
+        regenerating.has(reqPath) ||
+        (req.query.buildId &&
+          currentGeneratedAt &&
+          req.query.buildId !== String(currentGeneratedAt));
+
+      // Resolve the target payload file name
+      const payloadPath = path.resolve(
+        "dist2",
+        reqPath.replace(/^\//, ""),
+        useOld ? "rsc._old.rsc" : "rsc.rsc",
+      );
+      
+      // Serve file sychronously...
+    }
+  }
+}`}</CodeBlock>
+              </div>
+
               <h4>1. Pre-compiled Static Cache (SSG / ISR)</h4>
               <p>
                 If a route is static (or not flagged as dynamic), the server attempts to load cached files from the <code>dist2/</code> folder:
@@ -699,7 +844,98 @@ if (!isPathBlocked && allowISGValue === false) {
 
               <hr className="my-6" />
 
-              <h3>B. Wildcard Initial Load Handler (<code>app.get(/^\/.*\/?$/)</code>)</h3>
+              <h3>B. Executing Error Payloads (<code>POST /____rsc_payload_error____</code>)</h3>
+              <p>
+                Unlike standard rendering paths, the error endpoint is a <code>POST</code> route that does not invoke <code>serveRSCPayload</code>. Instead, it acts as an asynchronous Error Boundary renderer.
+              </p>
+              
+              <h4>1. Rationale & Client Calling Flow</h4>
+              <p>
+                When a runtime exception occurs in client-side React code during dynamic routing or hydration, the browser's SPA runtime catches the exception. To prevent a blank screen, it posts the serialized exception stack back to the server:
+              </p>
+              <ul>
+                <li><strong>Trigger:</strong> React Client Error Boundary catching a render crash.</li>
+                <li><strong>Destination:</strong> <code>POST /____rsc_payload_error____/[route]</code> with a body of <code>{'{ error: { message, stack, name } }'}</code>.</li>
+                <li><strong>Output:</strong> A binary Flight stream representing the error visual fallback tree (which renders local <code>error.tsx</code> templates if defined).</li>
+              </ul>
+
+              <div className="my-6">
+                <p className="text-sm font-semibold mb-2">Error Boundary Payload Mapping:</p>
+                <div className="not-prose">
+                  <CodeBlock language="text">{`           [ React Client-Side Component ]
+                         │
+                         ▼ (Render Exception Caught!)
+           [ Dinou Client Error Boundary ]
+                         │
+                         ▼ (Serialize error trace: stack, message)
+             POST /____rsc_payload_error____/[route]
+                         │
+                         ▼
+             [ Master Server Express POST ]
+                         │
+                         ▼
+                 getContext(req, res)
+                         │
+                         ▼
+              requestStorage.run(context)
+                         │
+                         ▼
+               [ getErrorJSX(reqPath) ]
+             Searches local directory tree
+             for the closest "error.tsx"
+                         │
+                         ▼
+           [ React 19 renderToPipeableStream ]
+             Serializes error JSX using the
+             client-side assets manifest
+                         │
+                         ▼
+           [ binary text/x-component stream ]
+                         │
+                         ▼
+            [ Hydrate Fallback UI in Browser ]`}</CodeBlock>
+                </div>
+              </div>
+
+              <h4>2. Server-Side Execution Handler</h4>
+              <p>
+                The server intercepts the error, runs it inside the AsyncLocalStorage request scope, and compiles the fallback layout using <code>getErrorJSX</code>:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`app.post(/^\/____rsc_payload_error____\/.*\/?$/, async (req, res) => {
+  try {
+    // 1. Strip routing prefix to isolate page path
+    const reqPath = (
+      req.path.endsWith("/") ? req.path : req.path + "/"
+    ).replace("/____rsc_payload_error____", "");
+
+    const context = getContext(req, res);
+    await requestStorage.run(context, async () => {
+      // 2. Resolve error JSX layout (searching for error.tsx templates)
+      const jsx = await getErrorJSX(
+        reqPath,
+        { ...req.query },
+        req.body.error,
+        isDevelopment,
+      );
+      
+      // 3. Serialize and stream error tree using React 19 pipeable streams
+      const manifest = isDevelopment ? loadManifestFromDisk() : cachedClientManifest;
+      const { pipe } = isWebpack
+        ? renderToPipeableStream(jsx, manifest)
+        : renderToPipeableStream(jsx, pathToFileURL(process.cwd()).href + "/");
+      pipe(res);
+    });
+  } catch (error) {
+    console.error("Error rendering RSC:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});`}</CodeBlock>
+              </div>
+
+              <hr className="my-6" />
+
+              <h3>C. Wildcard Initial Load Handler (<code>app.get(/^\/.*\/?$/)</code>)</h3>
               <p>
                 This regex wildcard endpoint captures all standard browser GET requests (such as entering a URL directly or performing a hard refresh). Since these requests expect a fully rendered HTML page instead of an RSC Flight stream, the server handles them differently:
               </p>
@@ -760,7 +996,7 @@ if (existsSync(fileToRead) && !dynamicState.value) {
 
               <hr className="my-6" />
 
-              <h3>C. Executing Server Functions (<code>POST /____server_function____</code>)</h3>
+              <h3>D. Executing Server Functions (<code>POST /____server_function____</code>)</h3>
               <p>
                 This endpoint processes client-side Server Functions. It includes built-in security features to protect server endpoints:
               </p>
