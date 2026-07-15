@@ -286,23 +286,49 @@ const navigation = [
         icon: RefreshCw,
       },
       {
-        title: "Bundlers Integration",
-        href: "/docs/ejected-reference/bundlers",
-        icon: Boxes,
+        title: "esbuild Integration",
+        href: "/docs/ejected-reference/bundlers/esbuild",
+        icon: Zap,
         subItems: [
           {
-            title: "esbuild Configuration",
+            title: "1. Overview & Configs",
             href: "/docs/ejected-reference/bundlers/esbuild",
           },
           {
-            title: "Rollup Configuration",
-            href: "/docs/ejected-reference/bundlers/rollup",
+            title: "2. Build & Dev Runners",
+            href: "/docs/ejected-reference/bundlers/esbuild/runners",
           },
           {
-            title: "Webpack Configuration",
-            href: "/docs/ejected-reference/bundlers/webpack",
+            title: "3. Core RSC Plugins",
+            href: "/docs/ejected-reference/bundlers/esbuild/rsc-plugins",
+          },
+          {
+            title: "4. Style & Asset Plugins",
+            href: "/docs/ejected-reference/bundlers/esbuild/asset-plugins",
+          },
+          {
+            title: "5. Optimization Plugins",
+            href: "/docs/ejected-reference/bundlers/esbuild/opt-plugins",
+          },
+          {
+            title: "6. ESM React Refresh",
+            href: "/docs/ejected-reference/bundlers/esbuild/react-refresh",
+          },
+          {
+            title: "7. Entry & File Helpers",
+            href: "/docs/ejected-reference/bundlers/esbuild/helpers",
           },
         ],
+      },
+      {
+        title: "Rollup Integration",
+        href: "/docs/ejected-reference/bundlers/rollup",
+        icon: RefreshCw,
+      },
+      {
+        title: "Webpack Integration",
+        href: "/docs/ejected-reference/bundlers/webpack",
+        icon: Boxes,
       },
     ],
   },
