@@ -36,7 +36,7 @@ export default function Page() {
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <blockquote>
               <strong>Key Files Involved:</strong> <br />
-              • Hydration entry: <code>./dinou/core/client.jsx</code> / <code>client-webpack.jsx</code> <br />
+              • Hydration entries: <code>./dinou/core/client.jsx</code> / <code>client-error.jsx</code> (and Webpack variants) <br />
               • Navigation Hooks: <code>./dinou/core/navigation.js</code> / <code>navigation-utils.js</code> <br />
               • Anchor elements: <code>./dinou/core/link.jsx</code> <br />
               • Call proxy: <code>./dinou/core/server-function-proxy.js</code>
@@ -46,7 +46,7 @@ export default function Page() {
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                Dinou provides a **Single Page Application (SPA)** user experience. On the initial request, the browser receives static, server-rendered HTML. Once loaded, standard JavaScript hydration bootstraps interactive React states, attaches global event listeners to hijack link clicks, and manages history states dynamically to stream incremental React Server Component (RSC) trees.
+                Dinou provides a <strong>Single Page Application (SPA)</strong> user experience. On the initial request, the browser receives static, server-rendered HTML. Once loaded, standard JavaScript hydration bootstraps interactive React states, attaches global event listeners to hijack link clicks, and manages history states dynamically to stream incremental React Server Component (RSC) trees.
               </p>
             </section>
 
@@ -54,18 +54,114 @@ export default function Page() {
 
             {/* HYDRATION ENTRY */}
             <section id="hydration-entry">
-              <h2>⚛️ 1. Hydration Entry (<code>client.jsx</code>)</h2>
+              <h2>⚛️ 1. Hydration Entry (<code>client.jsx</code> & <code>client-error.jsx</code>)</h2>
               <p>
-                The browser's entry bundling script (defined in <code>client.jsx</code>) mounts React onto the document:
+                Dinou hydrates the <strong>entire</strong> HTML document context (including <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, and <code>&lt;body&gt;</code> tags) compiled during SSR. To optimize client bundle sizes, Dinou isolates successful flows and error recovery flows into two separate entrypoint runtimes. 
+              </p>
+              <blockquote>
+                <strong>Source vs. Compiled Bundles:</strong><br />
+                • <code>client.jsx</code> is the source file compiled by the bundler (Rollup/Webpack) to generate the production-ready client bundle <code>main.js</code>.<br />
+                • <code>client-error.jsx</code> is the source file compiled by the bundler to generate the recovery client bundle <code>error.js</code>.
+              </blockquote>
+
+              <h3>A. Success Hydration Bundle (<code>client.jsx</code> / <code>main.js</code>)</h3>
+              <p>
+                For standard browser loads where components compile successfully on the server, Dinou injects the compiled <code>main.js</code> hydration script. This bootstrap file uses the standard GET route to retrieve initial RSC payloads:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`import { hydrateRoot } from "react-dom/client";
+                <CodeBlock language="javascript">{`// In client.jsx - standard RSC fetch
+const payloadUrl = "/____rsc_payload____" + url;
+const promise = createFromFetch(fetch(payloadUrl));`}</CodeBlock>
+              </div>
 
-hydrateRoot(document, <Router />);`}</CodeBlock>
+              <h3>B. Error Recovery Hydration Bundle (<code>client-error.jsx</code> / <code>error.js</code>)</h3>
+              <p>
+                If the server crashes or encounters rendering exceptions during SSR, it streams a fallback error wrapper layout to the browser and hooks the compiled <code>error.js</code> hydration bundle.
+              </p>
+              <p>
+                Because no valid RSC binary exists on disk for a crashed route, the error runtime cannot perform a standard GET request. Instead, it reads the error details injected by the server into global window objects and sends them back to the server using a <strong>POST request</strong> to compile the error component:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`// In client-error.jsx - error payload hydration
+let isInitialErrorLoad = true;
+
+const getRSCPayload = (rscKey) => {
+  const url = rscKey.split("::")[0];
+  if (cache.has(url)) return cache.get(url);
+
+  let promise;
+  if (isInitialErrorLoad && url === getCurrentRoute()) {
+    isInitialErrorLoad = false;
+    const payloadUrl = "/____rsc_payload_error____" + url;
+    
+    promise = createFromFetch(
+      fetch(payloadUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          error: {
+            message: window.__DINOU_ERROR_MESSAGE__ || "Unknown Error",
+            stack: window.__DINOU_ERROR_STACK__,
+            name: window.__DINOU_ERROR_NAME__,
+          },
+        }),
+      })
+    );
+  } else {
+    // Falls back to standard GET payloads if the user navigates away
+    promise = createFromFetch(fetch("/____rsc_payload____" + url));
+  }
+  
+  cache.set(url, promise);
+  return promise;
+};`}</CodeBlock>
               </div>
               <p>
-                Unlike standard client-only React mounts (which look for a single empty <code>&lt;div id="root"&gt;</code>), Dinou mounts and hydrates the **entire** HTML document context (including the <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, and <code>&lt;body&gt;</code> tags) compiled during SSR. This ensures metadata, style assets, and scripts stay synced seamlessly.
+                <strong>The <code>isInitialErrorLoad</code> Gate:</strong> This flag ensures the POST request is only triggered once to hydrate the initial crash view. If the user subsequently clicks a link to navigate away, the flag evaluates to <code>false</code>, causing the runtime to fall back to the standard GET behavior, restoring SPA transitions.
               </p>
+
+              <h3>C. Why Separate the Runtimes? (The Tradeoffs of a Single-File Approach)</h3>
+              <p>
+                Technically, Dinou could have combined both runtimes into a single <code>client.jsx</code> file using runtime conditionals (e.g., checking for the presence of <code>window.__DINOU_ERROR_MESSAGE__</code>). However, doing so introduces several significant drawbacks:
+              </p>
+              <ul>
+                <li>
+                  <strong>Production Bundle Bloat:</strong> If unified, every single successful visit would download, parse, and evaluate logic dedicated exclusively to server crash recovery (such as handling POST bodies for error streams and mapping stack traces). In modern web performance, keeping the primary bundle (<code>main.js</code>) free of dead code is critical.
+                </li>
+                <li>
+                  <strong>Separation of Concerns (SoC):</strong> The two files manage fundamentally different lifecycles. <code>client.jsx</code> handles dynamic cookies from Server Actions, smooth SPA page transitions, and ISR cache revalidations. Conversely, <code>client-error.jsx</code> is dedicated to reporting server exceptions, POSTing crash details to <code>/____rsc_payload_error____</code>, and mounting the visual error overlay.
+                </li>
+                <li>
+                  <strong>Hydration Mismatch Prevention:</strong> React 19 expects the server-rendered HTML nodes to match the client-side JSX structure exactly during hydration. Combining both runtimes would require complex synchronous checks before calling <code>hydrateRoot</code> to determine the active DOM layout. Any delay or failure in this check would trigger a React Hydration Mismatch, forcing the browser to discard the server HTML and repaint the UI from scratch.
+                </li>
+                <li>
+                  <strong>Security & Environment Boundaries:</strong> In production, detailed stack traces should be suppressed to prevent database or directory schema leaks. Separating the runtimes allows the framework to build a stripped-down, secure version of <code>error.js</code> for production environments while keeping <code>main.js</code> unaffected.
+                </li>
+              </ul>
+
+              <h3>D. Bundler Entrypoint Mapping</h3>
+              <p>
+                Both <code>main.js</code> and <code>error.js</code> files are generated directly by Dinou's build plugins. In <code>rollup.config.js</code> and <code>esbuild/build.mjs</code>, the framework defines separate input entrypoints:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`// rollup.config.js
+input: {
+  main: path.resolve(__dirname, "../core/client.jsx"),
+  error: path.resolve(__dirname, "../core/client-error.jsx"),
+},
+output: {
+  dir: outputDirectory, // e.g. dist3
+  format: "esm",
+  entryFileNames: isDevelopment ? "[name].js" : "[name]-[hash].js",
+}`}</CodeBlock>
+              </div>
+              <p>
+                <strong>Build Output Mapping:</strong>
+              </p>
+              <ul>
+                <li>The entry key <code>main</code> compiles <code>client.jsx</code> (standard app mounting) to <code>main.js</code> (or <code>main-[hash].js</code> in production).</li>
+                <li>The entry key <code>error</code> compiles <code>client-error.jsx</code> (error payload loader) to <code>error.js</code> (or <code>error-[hash].js</code> in production).</li>
+              </ul>
             </section>
 
             <hr className="my-8" />
@@ -79,7 +175,7 @@ hydrateRoot(document, <Router />);`}</CodeBlock>
 
               <h3>A. Fetching RSC Payload Streams</h3>
               <p>
-                When you navigate, the client router fetches the binary **RSC Flight Stream** rather than request a full HTML document reload:
+                When you navigate, the client router fetches the binary <strong>RSC Flight Stream</strong> rather than request a full HTML document reload:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`const getRSCPayload = (rscKey) => {
@@ -101,7 +197,7 @@ hydrateRoot(document, <Router />);`}</CodeBlock>
 
               <h3>B. Seamless Navigation Transitions</h3>
               <p>
-                To prevent rendering stutters or white screens, route changes are wrapped inside React 19's **Transitions**:
+                To prevent rendering stutters or white screens, route changes are wrapped inside React 19's <strong>Transitions</strong>:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`const [isPending, startTransition] = useTransition();
