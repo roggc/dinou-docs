@@ -940,9 +940,72 @@ if (!isPathBlocked && allowISGValue === false) {
                 This regex wildcard endpoint captures all standard browser GET requests (such as entering a URL directly or performing a hard refresh). Since these requests expect a fully rendered HTML page instead of an RSC Flight stream, the server handles them differently:
               </p>
 
-              <h4>1. Pre-rendered HTML Cache / ISR Fallback</h4>
+              <div className="my-6">
+                <p className="text-sm font-semibold mb-2">Wildcard Load Execution Mapping:</p>
+                <div className="not-prose">
+                  <CodeBlock language="text">{`           [ Browser GET /path ] (Initial Load / Refresh)
+                         │
+                         ▼
+           [ Match Wildcard app.get("*") ]
+                         │
+                         ▼
+            [ Route Parameter Validation ]
+            ├─► validateParams()
+            └─► allowISG check
+                         │
+                         ▼
+        [ Production, Static, Valid & HTML exists? ]
+           /                                   \\
+          /                                     \\
+        Yes                                      No
+        ▼                                        ▼
+ [ Serve HTML Cache ]                  [ Dynamic SSR Pipeline ]
+ ├─► Read index.html or                ├─► contextForChild
+ │   index._old.html                   ├─► processLimiter.run()
+ │                                     │   (Concurrency Guard)
+ ├─► Inject Header Scripts:            ▼
+ │   ├─► __DINOU_USE_STATIC__ = true   ├─► renderAppToHtml()
+ │   ├─► __DINOU_USE_OLD_RSC__ = true  │   (Fork Subprocess SSR)
+ │   └─► __DINOU_BUILD_ID__ = buildId  │
+ │                                     ├─► Stream HTML response
+ ├─► res.statusCode = status           │
+ └─► res.send(html)                    ▼
+                                       res.on("finish")
+                                       └─► generatingISG()
+                                           (Background Cache Build)`}</CodeBlock>
+                </div>
+              </div>
+
+              <h4>1. The Cache Gatekeeper Condition (All four flags required)</h4>
               <p>
-                If not in development and the path matches a static page, the server streams the cached HTML page directly from the <code>dist2/</code> folder:
+                Before checking for the physical file on disk, the server checks a composite logical gatekeeper:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`if (!isDevelopment && !dynamicState.value && pagePath && !isPathBlocked)`}</CodeBlock>
+              </div>
+              <p>
+                Each flag is necessary to ensure correct rendering behavior and prevent security or layout bugs:
+              </p>
+              <ul>
+                <li>
+                  <strong><code>!isDevelopment</code>:</strong> In local development, the user edits files in real-time. If the server served cached static HTML files, changes to React JSX wouldn't be reflected without rebuilds. Disabling caching in development ensures dynamic compilation is triggered on every reload.
+                </li>
+                <li>
+                  <strong><code>!dynamicState.value</code>:</strong> Differentiates static/ISR pages from dynamic routes. Dynamic routes require fresh headers, cookies, or search parameters and cannot be cached as static index.html pages. Serving a static file here would bypass dynamic session state logic.
+                </li>
+                <li>
+                  <strong><code>pagePath</code>:</strong> Confirms that the incoming request URL matches an actual React Server Component page file (e.g., <code>page.tsx</code>) in the <code>src/</code> directory. If missing (like for missing files or static routes without matching page files), caching is skipped to prevent serving index pages for 404 responses.
+                </li>
+                <li>
+                  <strong><code>!isPathBlocked</code>:</strong> Set by route-parameter validators (<code>validateParams</code>). If a user requests a page with invalid parameters and the validator blocks the route, bypassing this flag could serve static cached page structures to unauthorized users instead of returning a 404.
+                </li>
+              </ul>
+
+              <hr className="my-6" />
+
+              <h4>2. Pre-rendered HTML Cache & Hydration Hooks</h4>
+              <p>
+                If all four gatekeeper flags pass, the server reads the index page from the <code>dist2/</code> folder:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`const fileToRead = htmlPathOld || htmlPath;
@@ -955,6 +1018,9 @@ if (existsSync(fileToRead) && !dynamicState.value) {
   if (htmlPathOld) {
     scripts += \`<script>window.__DINOU_USE_OLD_RSC__=true;</script>\`;
   }
+  if (buildId) {
+    scripts += \`<script>window.__DINOU_BUILD_ID__="\${buildId}";</script>\`;
+  }
   
   htmlContent = htmlContent.replace("</head>", \`\${scripts}</head>\`);
   return res.send(htmlContent);
@@ -966,33 +1032,48 @@ if (existsSync(fileToRead) && !dynamicState.value) {
               <ul>
                 <li><code>window.__DINOU_USE_STATIC__ = true</code>: Instructs the client-side SPA router to retrieve its initial Flight payload from pre-built static files instead of initiating dynamic SSR requests.</li>
                 <li><code>window.__DINOU_USE_OLD_RSC__ = true</code>: During background ISR compilations, this directs the client to load the corresponding backup payload (<code>rsc._old.rsc</code>) to prevent cache mismatch errors.</li>
+                <li><code>window.__DINOU_BUILD_ID__ = buildId</code>: Syncs active build version timestamps to prevent runtime caching inconsistencies between the browser and server.</li>
               </ul>
 
-              <h4>2. Dynamic SSR Pipeline with Process Limiter</h4>
+              <hr className="my-6" />
+
+              <h4>3. Dynamic SSR Pipeline with Concurrency Limiter</h4>
               <p>
-                If the page is dynamic or not yet cached, the server performs Server-Side Rendering (SSR) by spawning a child rendering stream. To protect server resources, this execution is managed by a process limiter:
+                If the page is dynamic, not yet cached, or fails the gatekeeper checks, the server performs dynamic Server-Side Rendering (SSR). This rendering is managed by a process limiter:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`processLimiter.run(async () => {
   const appHtmlStream = renderAppToHtml(reqPath, JSON.stringify({ ...req.query }), contextForChild, res);
   res.setHeader("Content-Type", "text/html");
-  appHtmlStream.pipe(res); // Stream HTML back to the browser
+  appHtmlStream.pipe(res);
 
+  // Background Cache Build (Fire and Forget)
   res.on("finish", () => {
-    if (!isDevelopment && res.statusCode === 200) {
-      generatingISG(reqPath, dynamicState); // Cache dynamic page in background
+    if (!isDevelopment && res.statusCode === 200 && req.method === "GET" && isReady) {
+      generatingISG(reqPath, dynamicState); // Recompile page in background
     }
   });
 
+  // Concurrency Slot Release Hook
   await new Promise((resolve) => {
     appHtmlStream.on("end", resolve);
-    appHtmlStream.on("error", resolve);
+    appHtmlStream.on("error", (error) => {
+      console.error("Stream error:", error);
+      if (!res.headersSent) res.status(500).send("Internal Server Error");
+      resolve();
+    });
+    res.on("close", resolve); // Release slot if user cancels request or closes tab
   });
 });`}</CodeBlock>
               </div>
-              <p>
-                <strong>Background ISG Generation:</strong> When the response stream completes (<code>res.on("finish")</code>), the server starts a background compilation task (<code>generatingISG()</code>) to render and cache the page on disk for subsequent visits.
-              </p>
+              <ul>
+                <li>
+                  <strong>Process Limiter Slot Release Hook:</strong> The process limiter restricts concurrent page rendering requests to protect CPU resources. To prevent resource leaks, the wrapper holds the concurrency slot active using a Promise. It resolves and releases the slot only when the stream ends (<code>end</code>), encounters an error (<code>error</code>), or the client cancels the connection (<code>close</code>).
+                </li>
+                <li>
+                  <strong>Background ISG Generation:</strong> When the response stream completes (<code>res.on("finish")</code>), if the request was successful, the server starts a background compilation task (<code>generatingISG()</code>) to render and cache the page on disk for subsequent visits.
+                </li>
+              </ul>
 
               <hr className="my-6" />
 
