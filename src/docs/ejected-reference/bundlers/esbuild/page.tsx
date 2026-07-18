@@ -7,10 +7,171 @@ import { Settings, FileCode, Cpu, Shield, Zap } from "lucide-react";
 
 const tocItems = [
   { id: "overview", title: "💡 Overview", level: 2 },
-  { id: "config-dev", title: "🛠️ 1. get-config-esbuild.mjs", level: 2 },
-  { id: "config-prod", title: "🚀 2. get-config-esbuild-prod.mjs", level: 2 },
-  { id: "normalize-path", title: "📂 3. normalize-path.mjs", level: 2 },
+  { id: "config-comparison", title: "📊 Dev vs Prod Configuration", level: 2 },
+  { id: "config-dev", title: "🛠️ Dev Config (get-config-esbuild.mjs)", level: 2 },
+  { id: "config-prod", title: "🚀 Prod Config (get-config-esbuild-prod.mjs)", level: 2 },
+  { id: "normalize-path", title: "📂 Path Normalizer (normalize-path.mjs)", level: 2 },
 ];
+
+const CONFIGS_DIAGRAM = `                          [Select Build Environment]
+                                       │
+            ┌──────────────────────────┴──────────────────────────┐
+            ▼                                                     ▼
+     [Development Config]                                  [Production Config]
+   • getConfigEsbuild()                                  • getConfigEsbuildProd()
+   • outdir = "public"                                   • outdir = "dist3"
+   • sourcemap = true                                    • sourcemap = false (Minified)
+   • filenames: [name]                                   • filenames: [name]-[hash]
+   • plugins:                                            • plugins:
+      - TsconfigPathsPlugin                                 - babelReactCompilerPlugin
+      - cssProcessorPlugin                                  - cssProcessorPlugin
+      - reactClientManifestPlugin                           - reactClientManifestPlugin
+      - stableChunkNamesAndMapsPlugin                       - manifestGeneratorPlugin
+      - serverFunctionsPlugin                               - serverFunctionsPlugin
+      - esmHmrPlugin (HMR client)                           - writePlugin (Commit files)`;
+
+const DEV_CONFIG_CODE = `import { TsconfigPathsPlugin } from "@esbuild-plugins/tsconfig-paths";
+import reactClientManifestPlugin from "../plugins-esbuild/react-client-manifest-plugin.mjs";
+import serverFunctionsPlugin from "../plugins-esbuild/server-functions-plugin.mjs";
+import cssProcessorPlugin from "../plugins-esbuild/css-processor-plugin.mjs";
+import esmHmrPlugin from "../react-refresh/esm-hmr-plugin.mjs";
+import stableChunkNamesAndMapsPlugin from "../plugins-esbuild/stable-chunk-names-and-maps-plugin.mjs";
+import assetsPlugin from "../plugins-esbuild/assets-plugin.mjs";
+import skipMissingEntryPointsPlugin from "../plugins-esbuild/skip-missing-entry-points-plugin.mjs";
+import copyStaticFiles from "esbuild-copy-static-files";
+import { existsSync } from "node:fs";
+
+export default function getConfigEsbuild({
+  entryPoints,
+  outdir = "public",
+  manifest = {},
+  changedIds,
+  hmrEngine,
+}) {
+  let plugins = [
+    skipMissingEntryPointsPlugin(),
+    TsconfigPathsPlugin({}),
+    cssProcessorPlugin(),
+    reactClientManifestPlugin({ manifest }),
+    assetsPlugin(),
+    stableChunkNamesAndMapsPlugin(),
+    serverFunctionsPlugin(),
+    esmHmrPlugin({ entryNames: ["main", "error"], changedIds, hmrEngine }),
+  ];
+
+  if (existsSync("favicons")) {
+    plugins = [
+      copyStaticFiles({
+        src: "favicons",
+        dest: outdir,
+      }),
+      ...plugins,
+    ];
+  }
+
+  return {
+    entryPoints,
+    outdir,
+    format: "esm",
+    bundle: true,
+    splitting: true,
+    sourcemap: true,
+    jsx: "automatic",
+    target: "es2022",
+    write: false, // Write is handled in-memory for HMR performance
+    conditions: ["style"],
+    metafile: true,
+    logLevel: "warning",
+    define: {
+      "process.env.NODE_ENV": JSON.stringify("development"),
+    },
+    external: [
+      "/__SERVER_FUNCTION_PROXY__",
+      "/serverFunctionProxy.js",
+      "/__hmr_client__.js",
+      "/react-refresh-entry.js",
+    ],
+    plugins,
+  };
+}`;
+
+const PROD_CONFIG_CODE = `import { TsconfigPathsPlugin } from "@esbuild-plugins/tsconfig-paths";
+import reactClientManifestPlugin from "../plugins-esbuild/react-client-manifest-plugin.mjs";
+import serverFunctionsPlugin from "../plugins-esbuild/server-functions-plugin.mjs";
+import cssProcessorPlugin from "../plugins-esbuild/css-processor-plugin.mjs";
+import assetsPlugin from "../plugins-esbuild/assets-plugin.mjs";
+import copyStaticFiles from "esbuild-copy-static-files";
+import manifestGeneratorPlugin from "../plugins-esbuild/manifest-generator-plugin.mjs";
+import writePlugin from "../plugins-esbuild/write-plugin.mjs";
+import babelReactCompilerPlugin from "../plugins-esbuild/babel-react-compiler-plugin.mjs";
+import { existsSync } from "node:fs";
+
+const manifestData = {};
+
+export default function getConfigEsbuildProd({
+  entryPoints,
+  outdir = "dist3",
+  manifest = {},
+}) {
+  let plugins = [
+    babelReactCompilerPlugin(), // Injects Babel React 19 compiler optimizations
+    TsconfigPathsPlugin({}),
+    cssProcessorPlugin({ outdir }),
+    reactClientManifestPlugin({
+      manifest,
+      manifestPath: \`react_client_manifest/react-client-manifest.json\`,
+    }),
+    assetsPlugin(),
+    manifestGeneratorPlugin(manifestData),
+    serverFunctionsPlugin(manifestData),
+    writePlugin(), // Writes final files from memory buffers to disk
+  ];
+
+  if (existsSync("favicons")) {
+    plugins = [
+      copyStaticFiles({
+        src: "favicons",
+        dest: outdir,
+      }),
+      ...plugins,
+    ];
+  }
+
+  return {
+    entryPoints,
+    outdir,
+    format: "esm",
+    bundle: true,
+    splitting: true,
+    sourcemap: false,
+    chunkNames: "[name]-[hash]",
+    entryNames: "[name]-[hash]",
+    jsx: "automatic",
+    target: "es2022",
+    write: false,
+    conditions: ["style"],
+    metafile: true,
+    logLevel: "warning",
+    minify: true,
+    define: {
+      "process.env.NODE_ENV": JSON.stringify("production"),
+    },
+    external: [
+      "/__SERVER_FUNCTION_PROXY__",
+      "/serverFunctionProxy.js",
+      "/__hmr_client__.js",
+      "/react-refresh-entry.js",
+    ],
+    plugins,
+  };
+}`;
+
+const NORMALIZE_CODE = `export function normalizePath(filePath) {
+  if (typeof filePath !== "string") return filePath;
+  
+  // Replace Windows backslashes (\\) with standard POSIX forward slashes (/)
+  return filePath.replace(/\\\\/g, "/");
+}`;
 
 export default function Page() {
   return (
@@ -20,121 +181,87 @@ export default function Page() {
           {/* Header */}
           <div className="mb-8 space-y-4">
             <div className="flex items-center space-x-2">
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-yellow-600 dark:text-yellow-500">
-                1. esbuild Overview & Configs
+              <Zap className="h-6 w-6 text-primary text-yellow-500" />
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                esbuild Overview & Configs
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Examine the architecture of the esbuild compiler loop and the baseline configuration files that coordinate outputs.
+              Explore the base configs and normalization utilities that initialize and control esbuild for dev and production.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <blockquote>
-              <strong>Sub-Folder Location:</strong> <code>./dinou/esbuild/</code> <br />
-              <strong>Focus Files:</strong> <code>get-config-esbuild.mjs</code>, <code>get-config-esbuild-prod.mjs</code>, <code>normalize-path.mjs</code>
+              <strong>Key Files Mapped:</strong> <br />
+              • Dev Config: <code>./dinou/esbuild/helpers-esbuild/get-config-esbuild.mjs</code> <br />
+              • Prod Config: <code>./dinou/esbuild/helpers-esbuild/get-config-esbuild-prod.mjs</code> <br />
+              • Path Normalizer: <code>./dinou/esbuild/helpers-esbuild/normalize-path.mjs</code>
             </blockquote>
 
             {/* OVERVIEW */}
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                Dinou chooses esbuild as its primary build tool for local runs due to its speed. When compiled, esbuild uses Go binaries to build JSX, TypeScript, and standard JavaScript files.
+                Dinou chooses <strong>esbuild</strong> as its primary compilation engine during local development runs due to its speed. When compiling components, esbuild packages TSX, CSS, and asset files.
               </p>
               <p>
-                The base configs defined in <code>helpers-esbuild/</code> structure the compiler options, path definitions, output configurations, and loader bindings.
+                The configuration models are split into two baseline builders (Development and Production) located in <code>helpers-esbuild/</code>, mapping variables, optimization flags, and custom loader plugins.
               </p>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* CONFIG FLOW */}
+            <section id="config-comparison">
+              <h2>📊 Dev vs Prod Configuration</h2>
+              <p>
+                The chart below compares the two configurations:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="text">{CONFIGS_DIAGRAM}</CodeBlock>
+              </div>
             </section>
 
             <hr className="my-8" />
 
             {/* CONFIG DEV */}
             <section id="config-dev">
-              <h2>🛠️ 1. <code>get-config-esbuild.mjs</code></h2>
+              <h2>🛠️ Dev Config (get-config-esbuild.mjs)</h2>
               <p>
-                This helper yields the base settings for local development runs. It configures paths and enables source maps to facilitate debugging:
+                Yields compiler options optimal for local runs. Note that <code>write: false</code> is set to keep outputs in-memory for HMR server pushes, avoiding disk write overhead:
               </p>
-              
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`import path from "node:path";
-import assetsPlugin from "../plugins-esbuild/assets-plugin.mjs";
-import cssProcessorPlugin from "../plugins-esbuild/css-processor-plugin.mjs";
-
-export default function getConfigEsbuild(entryPoints, outdir) {
-  return {
-    entryPoints,
-    bundle: true,
-    outdir,
-    format: "esm",
-    platform: "browser",
-    target: ["es2020"],
-    sourcemap: true,
-    metafile: true,
-    minify: false,
-    splitting: true,
-    external: ["react", "react-dom", "@roggc/react-server-dom-esm"],
-    // ...
-  };
-}`}</CodeBlock>
+                <CodeBlock language="javascript">{DEV_CONFIG_CODE}</CodeBlock>
               </div>
-              <p>
-                <strong>Key Details:</strong>
-              </p>
-              <ul>
-                <li><strong><code>splitting: true</code></strong>: Enables code splitting. Crucial for React Server Components so that client components are extracted into separate files that browser runtimes can load asynchronously.</li>
-                <li><strong><code>format: "esm"</code></strong>: Generates ES Modules, which are required for standard module loading and dynamic imports.</li>
-                <li><strong><code>external</code></strong>: Excludes core React packages (<code>react</code>, <code>react-dom</code>) from client bundles. These modules are resolved by Dinou's browser resolver using import maps, reducing chunk weights.</li>
-              </ul>
             </section>
 
             <hr className="my-8" />
 
             {/* CONFIG PROD */}
             <section id="config-prod">
-              <h2>🚀 2. <code>get-config-esbuild-prod.mjs</code></h2>
+              <h2>🚀 Prod Config (get-config-esbuild-prod.mjs)</h2>
               <p>
-                Extends the development config to optimize builds for production releases (<code>npm run build</code>):
+                Extends the base setup for minified, optimized static builds. It enables hashes inside filenames, turns on minification, and attaches <code>writePlugin()</code> to commit memory buffers to files:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`import getConfigEsbuild from "./get-config-esbuild.mjs";
-
-export default function getConfigEsbuildProd(entryPoints, outdir) {
-  const baseConfig = getConfigEsbuild(entryPoints, outdir);
-  return {
-    ...baseConfig,
-    minify: true,
-    sourcemap: false,
-    drop: ["console", "debugger"],
-    treeShaking: true,
-  };
-}`}</CodeBlock>
+                <CodeBlock language="javascript">{PROD_CONFIG_CODE}</CodeBlock>
               </div>
-              <p>
-                <strong>Key Details:</strong>
-              </p>
-              <ul>
-                <li><strong><code>minify: true</code></strong>: Compresses compiled files and renames variables to minimize asset download times.</li>
-                <li><strong><code>sourcemap: false</code></strong>: Disables source maps in production to reduce build footprints and protect source code.</li>
-                <li><strong><code>drop: ["console", "debugger"]</code></strong>: Strips console statements and debugging triggers from production outputs.</li>
-              </ul>
             </section>
 
             <hr className="my-8" />
 
             {/* NORMALIZE PATH */}
             <section id="normalize-path">
-              <h2>📂 3. <code>normalize-path.mjs</code></h2>
+              <h2>📂 Path Normalizer (normalize-path.mjs)</h2>
               <p>
-                Coordinates cross-platform path matching. Windows uses backslashes (<code>\\</code>) to define paths, while macOS and Linux use forward slashes (<code>/</code>). 
+                On Windows drives, absolute paths resolve with backslashes (<code>\</code>). If written directly into JSON chunk manifests, this casing leads to serialization mismatches on browser hydration.
               </p>
               <p>
-                To prevent key mismatch bugs inside the hydration manifest JSON file, this helper normalizes all paths to the UNIX standard:
+                The <code>normalize-path.mjs</code> utility standardizes all filepaths to POSIX format before compiling them:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`export function normalizePath(filePath) {
-  if (typeof filePath !== "string") return filePath;
-  return filePath.replace(/\\\\/g, "/");
-}`}</CodeBlock>
+                <CodeBlock language="javascript">{NORMALIZE_CODE}</CodeBlock>
               </div>
             </section>
           </div>

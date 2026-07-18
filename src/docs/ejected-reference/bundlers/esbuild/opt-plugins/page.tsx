@@ -3,15 +3,220 @@
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { CodeBlock } from "@/docs/components/code-block";
 import { Alert, AlertDescription, AlertTitle } from "@/docs/components/ui/alert";
-import { Cpu, RefreshCw, Key, FileCode } from "lucide-react";
+import { Gauge, Settings, Cpu, HardDrive } from "lucide-react";
 
 const tocItems = [
   { id: "overview", title: "💡 Overview", level: 2 },
-  { id: "stable-chunks", title: "⚙️ 1. stable-chunk-names-and-maps-plugin.mjs", level: 2 },
-  { id: "babel-compiler", title: "⚛️ 2. babel-react-compiler-plugin.mjs", level: 2 },
-  { id: "skip-missing", title: "🛡️ 3. skip-missing-entry-points-plugin.mjs", level: 2 },
-  { id: "write-metafile", title: "📋 4. write-metafile-plugin.mjs", level: 2 },
+  { id: "stable-chunks-flow", title: "📊 Stable Chunks Plugin Flow", level: 2 },
+  { id: "skip-entries-flow", title: "📊 Skip Missing Entries Flow", level: 2 },
+  { id: "manifest-flow", title: "📊 Manifest Generator Flow", level: 2 },
+  { id: "code-stable", title: "⚙️ stable-chunk-names-and-maps-plugin.mjs", level: 2 },
+  { id: "code-skip", title: "⚙️ skip-missing-entry-points-plugin.mjs", level: 2 },
+  { id: "code-manifest", title: "⚙️ manifest-generator-plugin.mjs", level: 2 },
 ];
+
+const STABLE_CHUNKS_DIAGRAM = `                        metafile.outputs from esbuild
+                                      │
+                         [Loop through output chunks]
+                                      │
+                        Stable chunk name calculation
+                  src/components/Button.tsx -> chunk-components-Button.js
+                                      │
+             ┌────────────────────────┴────────────────────────┐
+             ▼                                                 ▼
+        [Rename Chunk]                                  [Rename Map]
+    Update key: chunk-stable.js                     Update sourceMappingURL references
+             │                                                 │
+             └────────────────────────┬────────────────────────┘
+                                      │
+                                      ▼
+                        Replace import specifiers
+                     inside compiled javascript chunks`;
+
+const SKIP_ENTRIES_DIAGRAM = `                             esbuild starts build
+                                      │
+                                      ▼
+                         [Check build.entryPoints]
+                                      │
+                        Are all files present on disk?
+                               ├── Yes ──► Continue compilation
+                               └── No  ──► Emit warning block
+                                           Halt/Abort build`;
+
+const MANIFEST_DIAGRAM = `                             esbuild finishes build
+                                      │
+                                      ▼
+                        Read metafile.outputs entrypoints
+                                      │
+                       Filter framework entries:
+                       "main", "error", "serverFunctionProxy"
+                                      │
+                                      ▼
+                       Extract hashed output filename
+                       e.g. main -> main-1a2b3c4d.js
+                                      │
+                                      ▼
+                        Write manifest.json metadata`;
+
+const STABLE_CHUNKS_CODE = `import path from "node:path";
+
+export default function stableChunkNamesAndMapsPlugin({ dev = true } = {}) {
+  return {
+    name: "stable-chunk-names",
+    setup(build) {
+      build.onEnd(async (result) => {
+        if (!result.metafile || !result.outputFiles?.length) return;
+        const outdir = build.initialOptions.outdir;
+        if (!outdir) return;
+
+        const renames = new Map();
+        const normalizeRel = (p) => p.replace(/\\\\/g, "/");
+
+        // 1. Calculate stable names for chunks based on their source input path
+        for (const [oldRelPath, info] of Object.entries(result.metafile.outputs)) {
+          if (info.entryPoint || !oldRelPath.endsWith(".js")) continue;
+          const inputs = Object.keys(info.inputs);
+          const sourceFile = inputs.find((f) => f.startsWith("src/") && /\\.(js|jsx|ts|tsx)$/.test(f));
+          if (!sourceFile) continue;
+
+          const rel = path.relative("src", sourceFile);
+          const normalizedRel = rel.replace(/\\\\/g, "/");
+          const dir = path.dirname(normalizedRel);
+          const base = path.basename(normalizedRel, path.extname(normalizedRel));
+          const stableName = dir === "." ? base : \`\${dir.replace(/\\//g, "-")}-\${base}\`;
+
+          let finalName = dev ? \`\${stableName}.js\` : \`\${stableName}-\${oldRelPath.match(/-([A-Z0-9]+)\\./)?.[1] || ""}.js\`;
+          renames.set(path.basename(oldRelPath), \`chunk-\${finalName}\`);
+        }
+
+        // 2. Rename associated sourcemaps
+        for (const [oldRelPath] of Object.entries(result.metafile.outputs)) {
+          if (!oldRelPath.endsWith(".js.map")) continue;
+          const jsLocal = path.basename(oldRelPath.replace(".map", ""));
+          if (renames.has(jsLocal)) {
+            renames.set(path.basename(oldRelPath), renames.get(jsLocal).replace(/\\.js$/, ".js.map"));
+          }
+        }
+
+        // 3. Rewrite import statements inside JS chunks to match the new stable filenames
+        const outputs = result.metafile.outputs;
+        const escapeRegExp = (string) => string.replace(/[.*+?^\${}()|[\\]\\\\]/g, "\\\\$&");
+
+        for (const relPath in outputs) {
+          const output = outputs[relPath];
+          if (!output.imports || !relPath.endsWith(".js")) continue;
+
+          const importerFile = result.outputFiles.find((f) => normalizeRel(path.relative(process.cwd(), f.path)) === relPath);
+          if (!importerFile) continue;
+
+          let content = new TextDecoder().decode(importerFile.contents);
+          for (const imp of output.imports) {
+            const oldImportedLocal = path.basename(imp.path);
+            const newImportedLocal = renames.get(oldImportedLocal);
+            if (!newImportedLocal) continue;
+
+            const pattern = new RegExp(\`"\?\\./\${escapeRegExp(oldImportedLocal)}"\?\`, "g");
+            content = content.replace(pattern, \`"./\${newImportedLocal}"\`);
+          }
+          importerFile.contents = new TextEncoder().encode(content);
+        }
+
+        // 4. Update sourceMappingURL annotations in JavaScript files
+        for (const file of result.outputFiles) {
+          if (!file.path.endsWith(".js")) continue;
+          const oldLocal = path.basename(normalizeRel(path.relative(process.cwd(), file.path)));
+          if (!renames.has(oldLocal)) continue;
+
+          const newLocal = renames.get(oldLocal);
+          const oldMapLocal = oldLocal.replace(/\\.js$/, ".js.map");
+          const newMapLocal = newLocal.replace(/\\.js$/, ".js.map");
+          let content = new TextDecoder().decode(file.contents);
+
+          content = content.replace(new RegExp(\`sourceMappingURL=\\./\${escapeRegExp(oldMapLocal)}\`, "g"), \`sourceMappingURL=./\${newMapLocal}\`);
+          file.contents = new TextEncoder().encode(content);
+        }
+
+        // Apply updated paths to the build output object
+        for (const file of result.outputFiles) {
+          const oldLocal = path.basename(normalizeRel(path.relative(process.cwd(), file.path)));
+          const newLocal = renames.get(oldLocal);
+          if (newLocal) {
+            file.path = path.join(path.dirname(file.path), newLocal);
+          }
+        }
+      });
+    },
+  };
+}`;
+
+const SKIP_ENTRIES_CODE = `import { existsSync } from "node:fs";
+
+export default function skipMissingEntryPointsPlugin() {
+  return {
+    name: "skip-missing-entry-points",
+    setup(build) {
+      // Intercept build initialization to perform files existence checks
+      build.onStart(async () => {
+        const entryPoints = build.initialOptions.entryPoints;
+        if (!entryPoints || typeof entryPoints === "string") return;
+
+        const missingEntries = [];
+        for (const [name, path] of Object.entries(entryPoints)) {
+          if (!existsSync(path)) {
+            missingEntries.push({ name, path });
+          }
+        }
+
+        // Halt compiler to avoid dumping fatal stack traces if a target component is missing
+        if (missingEntries.length > 0) {
+          return {
+            warnings: [{ text: "Missing entry points, skipping build. Neglect following error logs if any." }],
+          };
+        }
+      });
+    },
+  };
+}`;
+
+const MANIFEST_CODE = `import fs from "node:fs/promises";
+import path from "node:path";
+
+const frameworkEntryNames = ["main", "error", "serverFunctionProxy"];
+
+export default function manifestGeneratorPlugin(manifestData) {
+  return {
+    name: "manifest-generator",
+    setup(build) {
+      const outdir = build.initialOptions.outdir || ".";
+
+      build.onEnd(async (result) => {
+        const meta = result.metafile;
+        if (!meta) return;
+
+        // Loop through entrypoints to extract framework script filenames
+        for (const [outputFile, info] of Object.entries(meta.outputs)) {
+          const entryPoint = info.entryPoint;
+          if (entryPoint) {
+            if (!/\\.(js|jsx|ts|tsx|mjs)$/.test(entryPoint)) continue;
+
+            const entryName = outputFile.split("/").pop().split("-").shift();
+            if (!frameworkEntryNames.includes(entryName)) continue;
+
+            manifestData[entryName + ".js"] = outputFile.split("/").pop(); // Save filename mapping
+          }
+        }
+
+        try {
+          const outDir = path.resolve(process.cwd(), outdir);
+          await fs.mkdir(outDir, { recursive: true });
+          await fs.writeFile(path.join(outDir, "manifest.json"), JSON.stringify(manifestData, null, 2), "utf8");
+        } catch (e) {
+          console.error("Error writing manifest.json: ", e.message);
+        }
+      });
+    },
+  };
+}`;
 
 export default function Page() {
   return (
@@ -21,92 +226,108 @@ export default function Page() {
           {/* Header */}
           <div className="mb-8 space-y-4">
             <div className="flex items-center space-x-2">
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-yellow-600 dark:text-yellow-500">
-                5. Optimization Plugins
+              <Gauge className="h-6 w-6 text-primary text-yellow-500" />
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                Optimization Plugins
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Examine the compile optimization filters, chunk hash stabilizers, and error silencers inside the compiler setup.
+              Examine the optimization plugins that organize cache-stable chunk names, manage build skips, and generate manifest JSONs.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <blockquote>
-              <strong>Key Files Analyzed:</strong> <br />
-              • Hash stabilizer: <code>./dinou/esbuild/plugins-esbuild/stable-chunk-names-and-maps-plugin.mjs</code> <br />
-              • React compiler: <code>./dinou/esbuild/plugins-esbuild/babel-react-compiler-plugin.mjs</code> <br />
-              • Missing entries handler: <code>./dinou/esbuild/plugins-esbuild/skip-missing-entry-points-plugin.mjs</code> <br />
-              • Bundle auditor: <code>./dinou/esbuild/plugins-esbuild/write-metafile-plugin.mjs</code>
+              <strong>Key Files Location:</strong> <br />
+              • Chunks Stabilizer: <code>./dinou/esbuild/plugins-esbuild/stable-chunk-names-and-maps-plugin.mjs</code> <br />
+              • Skip Aborter: <code>./dinou/esbuild/plugins-esbuild/skip-missing-entry-points-plugin.mjs</code> <br />
+              • manifest.json Writer: <code>./dinou/esbuild/plugins-esbuild/manifest-generator-plugin.mjs</code>
             </blockquote>
 
             {/* OVERVIEW */}
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                Dinou registers multiple plugins during compile phases to handle chunk hash naming collisions, suppress transient errors during page modifications, and export bundle statistics.
+                In a dynamic React Server Component server, file names must remain stable across code edits during local runs to prevent browser cache invalidation and load failure crashes. Conversely, production releases require hashed manifests to prevent client-side CDN caching of outdated code.
               </p>
             </section>
 
             <hr className="my-8" />
 
-            {/* STABLE CHUNKS */}
-            <section id="stable-chunks">
-              <h2>⚙️ 1. <code>stable-chunk-names-and-maps-plugin.mjs</code></h2>
+            {/* STABLE FLOW */}
+            <section id="stable-chunks-flow">
+              <h2>📊 Stable Chunks Plugin Flow</h2>
               <p>
-                This plugin ensures chunk filenames stay deterministic. When esbuild bundles files with code splitting enabled, it generates shared chunks (such as <code>chunk-A1B2.js</code>). By default, these hashes can change between incremental rebuilds, leading to caching conflicts.
-              </p>
-              <p>
-                The plugin intercepts compile outputs (<code>build.onEnd</code>), reads chunk dependency structures, generates a deterministic signature based on module contents, and renames the files:
+                The flowchart below traces the hash stripping and reference renaming steps of the stable chunk names plugin:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`build.onEnd(async (result) => {
-  // 1. Traverse metafile outputs to trace chunk graphs
-  // 2. Generate a stable hash signature from content inputs
-  // 3. Rename chunk files on disk and update internal manifests
-});`}</CodeBlock>
+                <CodeBlock language="text">{STABLE_CHUNKS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
             <hr className="my-8" />
 
-            {/* BABEL COMPILER */}
-            <section id="babel-compiler">
-              <h2>⚛️ 2. <code>babel-react-compiler-plugin.mjs</code></h2>
+            {/* SKIP FLOW */}
+            <section id="skip-entries-flow">
+              <h2>📊 Skip Missing Entries Flow</h2>
               <p>
-                Integrates the React Compiler (React Forget) to compile components. It intercepts JSX/TSX loaders and applies Babel transformations to optimize hooks, insert memoization, and reduce component render weights automatically:
+                The flowchart below shows how compilation is aborted if a required entry file is missing:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`build.onLoad({ filter: /\\.[jt]sx?$/ }, async (args) => {
-  const source = await fs.readFile(args.path, "utf8");
-  const result = await babel.transformAsync(source, {
-    plugins: ["babel-plugin-react-compiler"]
-  });
-  return { contents: result.code, loader: "js" };
-});`}</CodeBlock>
+                <CodeBlock language="text">{SKIP_ENTRIES_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
             <hr className="my-8" />
 
-            {/* SKIP MISSING */}
-            <section id="skip-missing">
-              <h2>🛡️ 3. <code>skip-missing-entry-points-plugin.mjs</code></h2>
+            {/* MANIFEST FLOW */}
+            <section id="manifest-flow">
+              <h2>📊 Manifest Generator Flow</h2>
               <p>
-                In local development, if you rename or delete a routing directory (e.g. <code>src/app/about/page.tsx</code>), Chokidar detects the change and triggers a rebuild, but esbuild can throw an error because the target entry point no longer exists on disk.
+                The flowchart below shows how entrypoint names are mapped to final hashed filenames in the build manifest:
               </p>
-              <p>
-                This plugin intercepts esbuild resolution hooks, checks if the target file exists, and removes the entry point from the active compiler options if it is missing, preventing build failures.
-              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="text">{MANIFEST_DIAGRAM}</CodeBlock>
+              </div>
             </section>
 
             <hr className="my-8" />
 
-            {/* WRITE METAFILE */}
-            <section id="write-metafile">
-              <h2>📋 4. <code>write-metafile-plugin.mjs</code></h2>
+            {/* CODE STABLE */}
+            <section id="code-stable">
+              <h2>⚙️ stable-chunk-names-and-maps-plugin.mjs</h2>
               <p>
-                After compilation, this plugin writes a detailed JSON report (<code>metafile.json</code>) detailing input sizes, dependencies, and chunk relationships. This metadata is useful for bundle auditing and visualization tools.
+                Below is the full code of the stable chunk names resolver:
               </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{STABLE_CHUNKS_CODE}</CodeBlock>
+              </div>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* CODE SKIP */}
+            <section id="code-skip">
+              <h2>⚙️ skip-missing-entry-points-plugin.mjs</h2>
+              <p>
+                Below is the full code of the skip missing entrypoints checker:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{SKIP_ENTRIES_CODE}</CodeBlock>
+              </div>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* CODE MANIFEST */}
+            <section id="code-manifest">
+              <h2>⚙️ manifest-generator-plugin.mjs</h2>
+              <p>
+                Below is the full code of the output manifest generator:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{MANIFEST_CODE}</CodeBlock>
+              </div>
             </section>
           </div>
         </div>
