@@ -101,7 +101,7 @@ export default function Page() {
                 The flowchart below traces the path alias registration sequence during server initialization:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{REGISTER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="700px">{REGISTER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
