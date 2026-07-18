@@ -123,7 +123,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   /* Variables específicas de sidebar del segundo archivo */
-  --sidebar-width: 15rem;
+  --sidebar-width: 16rem;
   --sidebar-width-mobile: 18rem;
   --sidebar-width-icon: 3rem;
 }
