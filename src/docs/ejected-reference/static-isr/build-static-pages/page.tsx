@@ -237,7 +237,7 @@ export default function Page() {
                 The diagram below demonstrates how pages are crawled, evaluated against dynamic proxies, and compiled:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{STATIC_CRAWLER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{STATIC_CRAWLER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

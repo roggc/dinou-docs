@@ -107,7 +107,7 @@ export default function Page() {
                 The chart below traces the translation of compile-time side effects into executable inline scripts:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{METADATA_FLOW_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{METADATA_FLOW_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

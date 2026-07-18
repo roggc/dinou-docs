@@ -220,7 +220,7 @@ export default function Page() {
                 The diagram below illustrates how path-based updates differ from the recursive tag-based invalidation search:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{CACHE_REVALIDATE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="700px">{CACHE_REVALIDATE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

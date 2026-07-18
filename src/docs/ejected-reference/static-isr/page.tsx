@@ -15,6 +15,21 @@ const tocItems = [
   { id: "customizations", title: "🛠️ Common Tweak Recipes", level: 2 },
 ];
 
+const SWR_LIFECYCLE_DIAGRAM = `graph TD
+    Start[Browser Request: GET /route] --> CacheCheck{Exists in Cache?}
+    
+    CacheCheck -->|Yes| ServeCache[Serve index.html instantly]
+    ServeCache --> ExpCheck{Is Cache Expired?}
+    
+    ExpCheck -->|No| Done[Done]
+    ExpCheck -->|Yes| Reval[revalidating]
+    
+    Reval --> LockCheck{Already Compile-Locked?}
+    LockCheck -->|Yes| Skip[Skip / Wait]
+    LockCheck -->|No| BuildBackground[1. Set Lock<br/>2. Run background fork<br/>3. Commit page<br/>4. Release Lock]
+    
+    CacheCheck -->|No| ISG[ISG Engine: Generate, Cache, and Serve]`;
+
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
@@ -176,23 +191,8 @@ function revalidating(reqPath, isDynamicFromServer) {
                 The diagram below outlines the cache check and background regeneration flow:
               </p>
 
-              <div className="not-prose my-6 border rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 overflow-x-auto">
-                <pre className="font-mono text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre">{`    🌐 Browser Request (GET /route)
-               │
-               ▼
-      [Exists in Cache?]
-        ├── Yes ──► serve index.html (instantly) ──► [Is Cache Expired?]
-        │                                                ├── No  ──► Done
-        │                                                └── Yes ──► revalidating()
-        │                                                                │
-        │                                                [Already Compile-Locked?]
-        │                                                    ├── Yes ──► Skip (Wait)
-        │                                                    └── No  ──► 1. Set Lock
-        │                                                                2. Run background fork
-        │                                                                3. Commit page
-        │                                                                4. Release Lock
-        ▼
-    [ISG Engine] ──► Generate, Cache, and Serve`}</pre>
+              <div className="not-prose my-6">
+                <CodeBlock language="mermaid" minWidth="600px">{SWR_LIFECYCLE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

@@ -81,7 +81,7 @@ export default function Page() {
                 The chart below traces the simple, high-performance key-value operations exposed by the manifest:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{MANIFEST_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{MANIFEST_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

@@ -95,7 +95,7 @@ export default function Page() {
                 The chart below traces the progressive retry loop triggered when file operations encounter active locks:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{RENAME_FLOW_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{RENAME_FLOW_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

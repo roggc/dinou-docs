@@ -164,7 +164,7 @@ export default function Page() {
                 The flowchart below shows how checks are run in parallel to the user response loop to trigger background builds:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{ISR_LIFECYCLE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="700px">{ISR_LIFECYCLE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

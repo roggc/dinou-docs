@@ -152,7 +152,7 @@ export default function Page() {
                 Below is the lifecycle of an incoming request on a non-compiled path:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{ISG_COMPILATION_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="700px">{ISG_COMPILATION_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
