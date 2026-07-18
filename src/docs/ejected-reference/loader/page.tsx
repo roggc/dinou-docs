@@ -10,7 +10,7 @@ const tocItems = [
   { id: "resolve-hook", title: "⚙️ 1. Resolve Hook & TSConfig Paths", level: 2 },
   { id: "asset-stubs", title: "🎨 2. Asset & CSS ESM Interception", level: 2 },
   { id: "use-client-refs", title: "⚛️ 3. Client References ('use client')", level: 2 },
-  { id: "use-server-actions", title: "🚀 4. Server Actions ('use server')", level: 2 },
+  { id: "use-server-functions", title: "🚀 4. Server Functions ('use server')", level: 2 },
   { id: "babel-compilation", title: "⚡ 5. JSX & TypeScript Transpilation", level: 2 },
   { id: "customizations", title: "🛠️ Common Tweak Recipes", level: 2 },
 ];
@@ -73,7 +73,24 @@ export default function Page() {
 };`}</CodeBlock>
               </div>
               <p>
-                By using <code>getAbsPathWithExt()</code>, Dinou checks <code>tsconfig.json</code> and maps specifiers like <code>@/components/Header</code> directly to their absolute local file paths before Node can reject the query.
+                <strong>Under the Hood: <code>getAbsPathWithExt()</code> and Path Normalization</strong>
+              </p>
+              <p>
+                In the ES Modules specification, Node.js natively requires explicit relative paths with complete file extensions (e.g., <code>import Header from "./Header.tsx"</code> instead of <code>"./Header"</code>). To restore standard frontend importing syntax, <code>getAbsPathWithExt()</code> executes three operations:
+              </p>
+              <ul>
+                <li>
+                  <strong>Alias Resolution (tsconfig.json):</strong> It reads the project's <code>tsconfig.json</code> (or <code>jsconfig.json</code>) síncronamente at startup. It maps the <code>compilerOptions.paths</code> keys (e.g., <code>"@/*"</code>) to their absolute target base directories on disk.
+                </li>
+                <li>
+                  <strong>Relative Path Resolution:</strong> If the specifier is relative (starts with <code>./</code> or <code>../</code>), it converts the path to an absolute location relative to the parent file's folder (<code>context.parentURL</code>).
+                </li>
+                <li>
+                  <strong>Implicit Extension & Index Scans (<code>tryExtensions</code>):</strong> Once an absolute path is resolved, if it does not point directly to an active file, it scans sequentially for valid file suffixes: <code>.js</code>, <code>.ts</code>, <code>.jsx</code>, and <code>.tsx</code>. If the path points to a directory (e.g., <code>components/Header/</code>), it sweeps for index entryfiles: <code>index.js</code>, <code>index.ts</code>, <code>index.jsx</code>, or <code>index.tsx</code>.
+                </li>
+              </ul>
+              <p>
+                If a file matches, the resolver returns the absolute file system path, allowing the loader to bypass Node's strict ESM format requirements cleanly.
               </p>
             </section>
 
@@ -119,11 +136,25 @@ return { format: "module", source, shortCircuit: true };`}</CodeBlock>
             <section id="use-client-refs">
               <h2>⚛️ 3. Client References (<code>"use client"</code>)</h2>
               <p>
-                When a Server Component renders, it builds a metadata description (RSC JSON) detailing where Client Components are nested. The server should never compile or evaluate the actual JS body of a Client Component.
+                When a Server Component renders, it builds a metadata description (RSC JSON/Flight Stream) detailing where Client Components are nested. The server should never compile or evaluate the actual JS body of a Client Component, as browser-only globals (like <code>window</code> or <code>document</code>) or React hooks (like <code>useEffect</code> or <code>useState</code>) would crash the Node.js server.
               </p>
               <p>
-                If a loaded file contains the <code>"use client"</code> directive, the ESM loader intercepts the code and discards the file body completely. It parses the module exports and registers them as **Client References**:
+                <strong>The <code>isReactServer && hasUseClient</code> Conditional Guard:</strong>
               </p>
+              <p>
+                If the loader is running within the React Server Components rendering graph (identified by checking if <code>process.execArgv</code> contains the <code>react-server</code> flag) and detects the <code>"use client"</code> directive in a file:
+              </p>
+              <ol>
+                <li>
+                  <strong>Discarding the Source Code:</strong> The loader completely discards the original source file body.
+                </li>
+                <li>
+                  <strong>Parsing Exports:</strong> It parses the file's exports síncronamente using the helper <code>parseExports(source)</code>.
+                </li>
+                <li>
+                  <strong>Registering Proxies:</strong> It replaces the exports with a call to <code>registerClientReference()</code> from React's server-dom packages (as shown below). This registers a metadata hook pointing to the local file URL and export key.
+                </li>
+              </ol>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`// If file contains 'use client' and we are running inside the react-server graph:
 const exports = parseExports(source);
@@ -148,27 +179,41 @@ for (const name of exports) {
 return { format: "module", source: newSrc, shortCircuit: true };`}</CodeBlock>
               </div>
               <p>
-                This ensures that the server process only outputs the metadata link (reference location) instead of running client-only React hooks like <code>useEffect</code> or <code>useState</code>, which would crash the node process.
+                This ensures that the server process only outputs the metadata link (reference location) instead of running client-only code. If the server tries to invoke a client component directly, the proxy function throws a descriptive runtime exception.
               </p>
             </section>
 
             <hr className="my-8" />
 
-            {/* SERVER ACTIONS */}
-            <section id="use-server-actions">
-              <h2>🚀 4. Server Actions (<code>"use server"</code>)</h2>
+            {/* SERVER FUNCTIONS */}
+            <section id="use-server-functions">
+              <h2>🚀 4. Server Functions (<code>"use server"</code>)</h2>
               <p>
-                If a file contains <code>"use server"</code>, the functions inside represent asynchronous server actions that the browser client can call remotely.
+                If a file contains the <code>"use server"</code> directive, the functions exported from this module represent Server Functions (Server Actions) that the client browser can trigger remotely via POST request callbacks.
               </p>
               <p>
-                The loader processes the module exports, builds the ESM JavaScript structure, and binds them to the server registry:
+                <strong>The <code>isReactServer && hasUseServer</code> Conditional Guard:</strong>
               </p>
+              <p>
+                When executing Server Components, if the loader catches a <code>"use server"</code> module:
+              </p>
+              <ol>
+                <li>
+                  <strong>Transpile code:</strong> Unlike client components, it does not discard the function bodies. It passes the code through Babel to generate pure JavaScript compatible with the execution environment.
+                </li>
+                <li>
+                  <strong>Map IDs:</strong> It maps every exported function key to an absolute reference using its relative file system URL and the export symbol name.
+                </li>
+                <li>
+                  <strong>Server Registry Binding:</strong> It appends calls to <code>registerServerReference()</code> mapping the function pointer to its unique remote address (as shown below).
+                </li>
+              </ol>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`const { code } = await transformAsync(source, { ...BabelConfig });
 let newSrc = code + "\\n\\n";
 
 newSrc += 'import pkgServer from "@roggc/react-server-dom-esm/server.node.js";\\n';
-newSrc += 'const {registerServerReference} = pkgServer;\\n';
+const {registerServerReference} = pkgServer;
 
 const relativeFileUrl = "file:///" + rel.replace(/\\\\/g, "/");
 for (const name of exports) {
@@ -179,7 +224,7 @@ for (const name of exports) {
 return { format: "module", source: newSrc, shortCircuit: true };`}</CodeBlock>
               </div>
               <p>
-                This links each function to a unique identifier so the router can locate and run the exact action when receiving postbacks.
+                This links each function to a unique identifier. When the client invokes a Server Function, the browser transmits a POST request containing these target parameters. The Dinou router reads the request, maps it to the registered function, executes it in the Node environment, and streams the React response back to the client.
               </p>
             </section>
 
