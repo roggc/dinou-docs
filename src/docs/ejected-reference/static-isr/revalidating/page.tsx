@@ -13,31 +13,18 @@ const tocItems = [
   { id: "stale-backup", title: "💾 Backup & Double-buffer Commit", level: 2 },
 ];
 
-const ISR_LIFECYCLE_DIAGRAM = `            🌐 Browser GET Request
-                       │
-                       ▼
-             [Exists in Cache?]
-               ├── No  ──► Render dynamically from Server
-               │
-               └── Yes ──► serve index.html (Instant Load)
-                               │
-                               ▼
-                     [Verify Expiration]
-              (Date.now() > generatedAt + revalidate)
-                               │
-               ┌───────────────┴───────────────┐
-               ▼                               ▼
-         [Not Expired]                     [Expired]
-               │                               │
-             (Done)                            ▼
-                                      [Mutex Lock Active?]
-                                               ├── Yes ──► Skip (Wait)
-                                               │
-                                               └── No  ──► 1. Set Lock
-                                                           2. Back up Stale Files
-                                                           3. Compile new payloads
-                                                           4. Commit via safeRename()
-                                                           5. Release Lock`;
+const ISR_LIFECYCLE_DIAGRAM = `graph TD
+    Start[🌐 Browser GET Request] --> CacheCheck{Exists in Cache?}
+    
+    CacheCheck -->|No| RenderDynamic[Render dynamically from Server]
+    CacheCheck -->|Yes| ServeHTML[Serve index.html Instant Load]
+    
+    ServeHTML --> ExpiryCheck{Verify Expiration:<br/>Date.now > generatedAt + revalidate?}
+    ExpiryCheck -->|No| Done[Done / Stop]
+    ExpiryCheck -->|Yes| LockCheck{Mutex Lock Active?}
+    
+    LockCheck -->|Yes| Skip[Skip / Wait]
+    LockCheck -->|No| RunReval[1. Set Lock<br/>2. Back up Stale Files<br/>3. Compile new payloads<br/>4. Commit via safeRename<br/>5. Release Lock]`;
 
 const REVALIDATING_CODE = `const path = require("path");
 const fs = require("fs").promises;
@@ -177,7 +164,7 @@ export default function Page() {
                 The flowchart below shows how checks are run in parallel to the user response loop to trigger background builds:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{ISR_LIFECYCLE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{ISR_LIFECYCLE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

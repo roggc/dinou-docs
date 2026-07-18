@@ -12,29 +12,14 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const HTML_BUILDER_DIAGRAM = `                  generateStaticPage(reqPath)
-                             │
-                             ▼
-                [Create Temp File Path] ──► index.html.[timestamp].tmp
-                             │
-                             ▼
-                [Inject Mock Context] ──► Mock req/res context
-                             │
-                             ▼
-             [1. renderAppToHtml(mockRes)] ──► Renders page component stream
-                             │
-                             ▼
-            [2. processMetadata(effects)] ──► Resolves side-effect cookies/redirects
-                             │
-                             ▼
-                [Pipe HTML to Temp File] ──► Writes to disk cache
-                             │
-                             ▼
-                [3. Write metadata.json] ──► Stores generatedAt, tags, revalidate
-                             │
-                             ▼
-                [Return verification object]
-                { success, tempPath, finalPath, status }`;
+const HTML_BUILDER_DIAGRAM = `graph TD
+    Start[generateStaticPage reqPath] --> TempPath[Create Temp File Path: index.html.timestamp.tmp]
+    TempPath --> MockCtx[Inject Mock req/res context]
+    MockCtx --> RenderApp[1. renderAppToHtml mockRes Renders page component stream]
+    RenderApp --> ProcessMeta[2. processMetadata effects Resolves side-effect cookies/redirects]
+    ProcessMeta --> PipeTemp[Pipe HTML to Temp File Writes to disk cache]
+    PipeTemp --> WriteMeta[3. Write metadata.json generatedAt, tags, revalidate]
+    WriteMeta --> ReturnObj[Return verification object:<br/>success, tempPath, finalPath, status]`;
 
 const HTML_BUILDER_CODE = `const path = require("path");
 const { mkdirSync, createWriteStream, existsSync } = require("fs");
@@ -202,7 +187,7 @@ export default function Page() {
                 The flowchart below shows how routes are compiled to HTML in the single-page builder:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{HTML_BUILDER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{HTML_BUILDER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

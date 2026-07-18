@@ -14,53 +14,19 @@ const tocItems = [
   { id: "webpack-variant", title: "📦 Webpack Variant (client-webpack.jsx)", level: 2 },
 ];
 
-const CLIENT_STRUCTURE_DIAGRAM = `========================================================================================================
-                                PHYSICAL FILE CODE STRUCTURE: CLIENT.JSX
-========================================================================================================
-
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  1. Imports & Core Modules                                                                       │
-  │     • React hooks, hydrateRoot, RouterContext, resolveUrl/isExternalUrl, serverActionProxy       │
-  │     • ESM vs Webpack client libraries.                                                           │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  2. Global Module State & Variables                                                              │
-  │     • cache: Cache map for RSC payload promises (prevents React fetch rendering loops).           │
-  │     • scrollCache: Map storing vertical scroll position coordinates per route.                   │
-  │     • getCurrentRoute(): Helper returning the relative path and search query of the URL.        │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  3. Pure Helper Functions                                                                        │
-  │     ├── isHashChangeOnly(finalPath) ──> Detects if the target navigation only updates the hash   │
-  │     ├── getRSCPayload(rscKey, isPrefetch) ──> Fetches RSC stream via GET, caches promise,        │
-  │     │                                         intercepts x-rsc-redirect redirect headers.        │
-  │     └── getErrorRSCPayload(route, error) ──> Performs POST fetch to /____rsc_payload_error____   │
-  │                                              to request error layout JSX flight stream.          │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  4. ErrorBoundary Component                                                                      │
-  │     • Catches client-side rendering exceptions.                                                   │
-  │     • Renders styled traceback overlay in development, or simple message in production.          │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  5. Router Component & Hydration Entry                                                           │
-  │     • useState trackers: route, isPopState, version, navError.                                   │
-  │     • navigate(href, options): SPA transition enforcer (uses startTransition).                   │
-  │     • useEffect bindings:                                                                        │
-  │         1. Exposes global hooks (window.__DINOU_ROUTER_NAVIGATE__, window.__DINOU_PREFETCH__).   │
-  │         2. Registers click/popstate listeners (scroll manual, click hijack, history pop).        │
-  │         3. useLayoutEffect: Manages scroll position resets vs popstate restoration.              │
-  │         4. Hash Scroll: Scrolls element into view if window.location.hash is present.            │
-  │     • hydrateRoot(document, <Router />): Bootstraps the app in the browser DOM.                  │
-  └─────────────────────────────────┘`;
+const CLIENT_STRUCTURE_DIAGRAM = `graph TD
+    subgraph Client.jsx Code Structure
+        Imports[1. Imports & Core Modules<br/>React hooks, hydrateRoot, RouterContext, resolveUrl/isExternalUrl, serverActionProxy<br/>ESM vs Webpack client libraries]
+        GlobalState[2. Global Module State & Variables<br/>cache: Cache map for RSC payload promises<br/>scrollCache: Map storing vertical scroll position coordinates<br/>getCurrentRoute: Helper returning path & query]
+        Helpers[3. Pure Helper Functions<br/>isHashChangeOnly: Detects hash navigation<br/>getRSCPayload: Fetches RSC stream, handles redirects<br/>getErrorRSCPayload: POST to fetch error layout flight stream]
+        ErrorBound[4. ErrorBoundary Component<br/>Catches client-side rendering exceptions<br/>Renders styled traceback overlay or message]
+        RouterComp[5. Router Component & Hydration Entry<br/>useState trackers: route, isPopState, version, navError<br/>navigate: startTransition SPA transition enforcer<br/>popstate / click listeners, scroll restoration<br/>hydrateRoot entry point]
+    end
+    
+    Imports --> GlobalState
+    GlobalState --> Helpers
+    Helpers --> ErrorBound
+    ErrorBound --> RouterComp`;
 
 const CLIENT_IMPORTS_CODE = `import {
   use,
@@ -235,7 +201,7 @@ export default function Page() {
                 The file defines helper cache stores, RSC fetch wrappers, and the hydration entry:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{CLIENT_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{CLIENT_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

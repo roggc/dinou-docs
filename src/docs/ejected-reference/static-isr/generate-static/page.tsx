@@ -12,22 +12,12 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const ORCHESTRATOR_DIAGRAM = `                     generateStatic()
-                            │
-                            ▼
-              [Clean Output Folder] ──► Removes dist2/ directory
-                            │
-                            ▼
-             [1. buildStaticPages()] ──► Filesystem crawler scans src/
-                            │
-                            ▼
-              [2. getStaticPaths()] ──► Retrieves all crawled routes
-                            │
-                            ▼
-            [3. generateStaticRSCs()] ──► Serializes Flight payloads
-                            │
-                            ▼
-           [4. generateStaticPages()] ──► Compiles HTML documents`;
+const ORCHESTRATOR_DIAGRAM = `graph TD
+    Start[generateStatic] --> Clean[Clean Output Folder Removes dist2]
+    Clean --> BuildStatic[1. buildStaticPages Filesystem crawler scans src]
+    BuildStatic --> GetPaths[2. getStaticPaths Retrieves all crawled routes]
+    GetPaths --> GenRSCs[3. generateStaticRSCs Serializes Flight payloads]
+    GenRSCs --> GenPages[4. generateStaticPages Compiles HTML documents]`;
 
 const ORCHESTRATOR_CODE = `const path = require("path");
 const { existsSync, rmSync } = require("fs");
@@ -98,7 +88,7 @@ export default function Page() {
                 The flowchart below traces the steps executed when running the compiler:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{ORCHESTRATOR_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{ORCHESTRATOR_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

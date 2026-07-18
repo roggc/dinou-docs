@@ -16,29 +16,17 @@ const tocItems = [
   { id: "code-babel-config", title: "⚙️ babel-config.js", level: 2 },
 ];
 
-const HMR_DIAGRAM = `                   [Browser Client]                    [Server Compiler (WS)]
-                          │                                      │
-                          ├─── Connects to port 3001 WebSocket ──►
-                          │                                      │
-                   Edit Component                                │
-                          │                                      │
-                          │                               Recompile modified
-                          │                               component with SWC
-                          │                               react: {refresh: true}
-                          │                                      │
-                          ◄─────── Sends "update" event ─────────┤
-                          │       (with module URL path)         │
-                          │                                      │
-                    applyUpdate()                                │
-                          │                                      │
-             Prune old module bindings                           │
-            (Runs .disposeCallbacks())                           │
-                          │                                      │
-             Bust browser module cache                           │
-          import(url + "?mtime=timestamp")                       │
-                          │                                      │
-             Rerender React Component                            │
-          (performReactRefresh() debounced)                      │`;
+const HMR_DIAGRAM = `sequenceDiagram
+    participant Client as Browser Client
+    participant Server as Server Compiler (WS)
+    
+    Client->>Server: Connects to port 3001 WebSocket
+    Note over Client: Edit Component
+    Note over Server: Recompile modified component<br/>with SWC react: {refresh: true}
+    Server->>Client: Sends "update" event (with module URL path)
+    Note over Client: applyUpdate()<br/>Prune old module bindings (disposeCallbacks)
+    Note over Client: Bust browser module cache<br/>import(url + "?mtime=timestamp")
+    Note over Client: Rerender React Component<br/>(performReactRefresh() debounced)`;
 
 const PLUGIN_CODE = `import fs from "node:fs/promises";
 import path from "node:path";
@@ -430,7 +418,7 @@ export default function Page() {
                 The sequence below shows how compilation events flow over WebSocket channels to trigger browser updates:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{HMR_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{HMR_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

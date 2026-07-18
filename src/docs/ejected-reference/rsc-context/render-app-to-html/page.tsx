@@ -12,35 +12,18 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const RENDER_APP_DIAGRAM = `                           renderAppToHtml(reqPath, res)
-                                         │
-                                         ▼
-                     [Verify if static RSC exists in dist2/]
-                                         │
-                ┌────────────────────────┴────────────────────────┐
-                ▼                                                 ▼
-        [Static RSC exists]                             [Dynamic SSR Render]
-                │                                                 │
-      Read rsc.rsc from disk                              getJSX() in parent
-      Pipe payload to child stdin                         Pipe RSC to child stdin
-                │                                                 │
-                └────────────────────────┬────────────────────────┘
-                                         │
-                                         ▼
-                               [fork(renderHtmlPath)]
-                             (Spawns child worker process)
-                                         │
-                                         ▼
-                             [Listen to child IPC events]
-                                         │
-                     ├── Message "DINOU_CONTEXT_COMMAND"
-                     │    ├── Headers NOT sent ──► Apply to res (Express API)
-                     │    └── Headers SENT     ──► Inject inline script blocks
-                     │                             e.g. <script>document.cookie=...</script>
-                     │
-                     ▼
-                            [child.stdout stream]
-                      (Piped directly to Client Browser)`;
+const RENDER_APP_DIAGRAM = `graph TD
+    Start[renderAppToHtml reqPath, res] --> CacheCheck{Verify if static RSC exists in dist2/}
+    CacheCheck -->|Exists| ReadStatic[Read rsc.rsc from disk]
+    CacheCheck -->|No| DynamicRender[Run getJSX in parent process]
+    ReadStatic --> PipeChild[Pipe RSC payload to child stdin]
+    DynamicRender --> PipeChild
+    PipeChild --> ForkChild[fork render-html.js child worker]
+    ForkChild --> IPC[Listen to child IPC events]
+    IPC -->|DINOU_CONTEXT_COMMAND| HeadersCheck{Headers already sent?}
+    HeadersCheck -->|No| ExpressAPI[Apply to res: cookie, status, setHeader]
+    HeadersCheck -->|Yes| JSInject[Inject inline script tags in output HTML stream]
+    ForkChild --> Output[Pipe child.stdout directly to Browser client]`;
 
 const RENDER_APP_CODE = `const path = require("path");
 const { fork } = require("child_process");
@@ -246,7 +229,7 @@ export default function Page() {
                 The flowchart below traces parent-to-child data streams and Express process events:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{RENDER_APP_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{RENDER_APP_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

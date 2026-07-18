@@ -14,40 +14,17 @@ const tocItems = [
   { id: "webpack-variant", title: "📦 Webpack Variant (client-error-webpack.jsx)", level: 2 },
 ];
 
-const CLIENT_STRUCTURE_DIAGRAM = `========================================================================================================
-                             PHYSICAL FILE CODE STRUCTURE: CLIENT-ERROR.JSX
-========================================================================================================
-
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  1. Imports & Core Modules                                                                       │
-  │     • Identical to client.jsx (React, hydrateRoot, RouterContext, server-function-proxy).         │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  2. Global Module State & Variables                                                              │
-  │     • cache, scrollCache, getCurrentRoute().                                                     │
-  │     • isInitialErrorLoad = true: Flag to identify first load after server rendering crash.       │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  3. Pure Helper Functions & Error-Hydration Fetching                                             │
-  │     ├── isHashChangeOnly(finalPath)                                                              │
-  │     ├── getRSCPayload(rscKey, isPrefetch) ──> Intercepts initial load:                           │
-  │     │   • IF (isInitialErrorLoad && path == current): POSTs crash details                        │
-  │     │     (window.__DINOU_ERROR_MESSAGE__/STACK) to /____rsc_payload_error____ to request        │
-  │     │     the server-rendered React error UI layout stream. Sets isInitialErrorLoad = false.     │
-  │     │   • ELSE (user navigated away): Falls back to normal RSC GET payload retrieval.            │
-  │     └── getErrorRSCPayload(route, error) ──> Handles subsequent navigations errors rendering.    │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  4. ErrorBoundary & Router Layout Components                                                     │
-  │     • ErrorBoundary, Router component mount, transition hooks, popstate history observers,       │
-  │       scroll restore, and hydrateRoot() bootstrapping.                                           │
-  └─────────────────────────────────┘`;
+const CLIENT_STRUCTURE_DIAGRAM = `graph TD
+    subgraph Client-Error.jsx Code Structure
+        Imports[1. Imports & Core Modules<br/>Identical to client.jsx React, hydrateRoot, RouterContext, server-function-proxy]
+        GlobalState[2. Global Module State & Variables<br/>cache, scrollCache, getCurrentRoute<br/>isInitialErrorLoad = true: Flag to identify first load after crash]
+        Helpers[3. Pure Helper Functions & Error-Hydration Fetching<br/>isHashChangeOnly: Detects hash navigation<br/>getRSCPayload: Intercepts initial load. If crash, POSTs crash details to /____rsc_payload_error____. Else normal GET<br/>getErrorRSCPayload: Handles subsequent navigations error rendering]
+        RouterComp[4. ErrorBoundary & Router Layout Components<br/>ErrorBoundary, Router component mount, transitions, popstate observers, scroll restore, and hydrateRoot bootstrapping]
+    end
+    
+    Imports --> GlobalState
+    GlobalState --> Helpers
+    Helpers --> RouterComp`;
 
 const CLIENT_ERROR_IMPORTS_CODE = `import {
   use,
@@ -223,7 +200,7 @@ export default function Page() {
                 The module layout structures error-initialization flags and intercept routines:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{CLIENT_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{CLIENT_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

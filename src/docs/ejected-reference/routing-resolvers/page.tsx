@@ -11,26 +11,15 @@ const tocItems = [
   { id: "files", title: "📂 Module Directory", level: 2 },
 ];
 
-const ROUTING_RESOLVERS_OVERVIEW = `                 🌐 Inbound Request URL: /posts/42/details
-                                  │
-                                  ▼
-           ┌──────────────────────────────────────────────┐
-           │     get-file-path-and-dynamic-params.js      │
-           ├──────────────────────────────────────────────┤
-           │  • Parses segments: ["posts", "42", "details"]│
-           │  • Matches dynamic folders: [id] -> id: 42   │
-           │  • Crawls layout.tsx & @slots recursively    │
-           └──────────────────────┬───────────────────────┘
-                                  │
-                  ┌───────────────┼───────────────┐
-                  ▼                               ▼
-      ┌───────────────────────┐       ┌───────────────────────┐
-      │   url-resolver.js     │       │get-asset-from-manifest│
-      ├───────────────────────┤       ├───────────────────────┤
-      │ • Normalizes relative │       │ • Maps bundle imports │
-      │   URIs from context.  │       │   to output hashes    │
-      │ • standard URL resolve│       │   using manifest.json │
-      └───────────────────────┘       └───────────────────────┘`;
+const ROUTING_RESOLVERS_OVERVIEW = `graph TD
+    Start[Inbound Request URL: /posts/42/details] --> Parse[get-file-path-and-dynamic-params.js]
+    Parse --> ParseAction[Parses segments: posts, 42, details <br/> Matches dynamic folders: id -> id: 42 <br/> Crawls layout.tsx & parallel slots recursively]
+    
+    ParseAction --> URL[url-resolver.js]
+    ParseAction --> Asset[get-asset-from-manifest.js]
+    
+    URL --> URLAction[Normalizes relative URIs from context <br/> Standard path URL resolution]
+    Asset --> AssetAction[Maps bundle imports to output hashes <br/> using manifest.json]`;
 
 export default function Page() {
   return (
@@ -78,7 +67,7 @@ export default function Page() {
                 The following diagram outlines the routing lifecycle:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{ROUTING_RESOLVERS_OVERVIEW}</CodeBlock>
+                <CodeBlock language="mermaid">{ROUTING_RESOLVERS_OVERVIEW}</CodeBlock>
               </div>
             </section>
 

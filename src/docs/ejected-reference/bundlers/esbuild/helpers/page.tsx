@@ -16,54 +16,31 @@ const tocItems = [
   { id: "code-write-plugin", title: "⚙️ write-plugin.mjs & write-metafile-plugin.mjs", level: 2 },
 ];
 
-const ENTRIES_DIAGRAM = `                             Crawl src/ folder
-                                     │
-                        Files found: loop recursively
-                                     │
-             ┌───────────────────────┴───────────────────────┐
-             ▼                                               ▼
-       [Client Component]                             [Page / Layout / CSS]
-       • parse exports via Babel AST                  • Parse recursively to
-       • update manifest.json                         • gather CSS stylesheets
-       • extract imports recursively                  • gather static assets
-             │                                               │
-             └───────────────────────┬───────────────────────┘
-                                     │
-                                     ▼
-                            Compute SHA-1 hash
-                         of all files absolute path
-                                     │
-                                     ▼
-                        Map unique chunk output names
-                        e.g. client-f273b18d.js`;
+const ENTRIES_DIAGRAM = `graph TD
+    Start[Crawl src/ folder] --> Loop[Files found: loop recursively]
+    
+    Loop --> TypeCheck{Component Type?}
+    TypeCheck -->|Client Component| Client[parse exports via Babel AST & update manifest.json & extract imports recursively]
+    TypeCheck -->|Page / Layout / CSS| Structure[Parse recursively to gather CSS stylesheets & gather static assets]
+    
+    Client --> ComputeHash[Compute SHA-1 hash of all files absolute path]
+    Structure --> ComputeHash
+    
+    ComputeHash --> MapName[Map unique chunk output names e.g. client-f273b18d.js]`;
 
-const MANIFEST_UPDATE_DIAGRAM = `                        updateManifestForModule(path)
-                                     │
-                                     ▼
-                        Strips previous stale mappings
-                                     │
-                                     ▼
-                       parseExports(clientModuleCode)
-                                     │
-                                     ▼
-                            [Loop exports list]
-                                     │
-                                     ▼
-                        Update manifest object records
-                      file:///...#exp -> relative file path`;
+const MANIFEST_UPDATE_DIAGRAM = `graph TD
+    Start[updateManifestForModule path] --> StripStale[Strips previous stale mappings]
+    StripStale --> Parse[parseExports clientModuleCode]
+    Parse --> LoopExports[Loop exports list]
+    LoopExports --> UpdateRecords[Update manifest object records:<br/>file:///...#exp -> relative file path]`;
 
-const WRITER_DIAGRAM = `                           esbuild finishes build
-                                     │
-                                     ▼
-                      Extract result.metafile.outputs
-                                     │
-                         [Identify output formats]
-                                     │
-             ┌───────────────────────┴───────────────────────┐
-             ▼                                               ▼
-     [CSS / Asset stubs]                             [Client/Server JS]
-     Add file.js and file.map                        Write output contents
-     to skipSet list                                 to disk via fs.writeFile`;
+const WRITER_DIAGRAM = `graph TD
+    Start[esbuild finishes build] --> Extract[Extract result.metafile.outputs]
+    Extract --> Identify[Identify output formats]
+    
+    Identify --> FormatCheck{Format type?}
+    FormatCheck -->|CSS / Asset stubs| Stubs[Add file.js and file.map to skipSet list]
+    FormatCheck -->|Client/Server JS| JS[Write output contents to disk via fs.writeFile]`;
 
 const ENTRIES_CODE = `import { readFileSync } from "fs";
 import path from "node:path";
@@ -346,7 +323,7 @@ export default function Page() {
                 The flowchart below shows how directories are scanned and input entrypoints are cataloged:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{ENTRIES_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{ENTRIES_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -359,7 +336,7 @@ export default function Page() {
                 The flowchart below shows how modules are mapped inside the client hydration manifest:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{MANIFEST_UPDATE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{MANIFEST_UPDATE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -372,7 +349,7 @@ export default function Page() {
                 The flowchart below shows how compiler-generated JS stubs for assets and styles are filtered out:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{WRITER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{WRITER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

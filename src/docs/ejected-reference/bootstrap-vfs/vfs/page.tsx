@@ -12,22 +12,15 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const VFS_DIAGRAM = `                                [Is Production?]
-                                       │
-            ┌──────────────────────────┴──────────────────────────┐
-            ▼                                                     ▼
-      [Production (warmup)]                                 [Development]
-            │                                                     │
-     buildVfs(srcDir)                                             │
-            │                                                     │
-     Recursively crawl folders                                    │
-     Cache file & directory metadata                              │
-     in 'vfs' memory object.                                      │
-            │                                                     │
-            ▼                                                     ▼
-    [existsSync / readdirSync]                            [existsSync / readdirSync]
-    Query vfs memory object.                              Query raw OS filesystem.
-    (Prevents OS Disk I/O bounds)                         (Supports hot file edits)`;
+const VFS_DIAGRAM = `graph TD
+    Start[existsSync / readdirSync query] --> EnvCheck{Is Production?}
+    
+    EnvCheck -->|Yes| Prod[Production Mode]
+    Prod --> BuildVfs[buildVfs warmup Crawl folders recursively & Cache metadata in vfs memory object]
+    BuildVfs --> QueryMemory[Query vfs memory object Prevents OS Disk I/O bounds]
+    
+    EnvCheck -->|No| Dev[Development Mode]
+    Dev --> QueryDisk[Query raw OS filesystem Supports hot file edits]`;
 
 const VFS_CODE = `const fs = require("fs");
 const path = require("path");
@@ -145,7 +138,7 @@ export default function Page() {
                 The flowchart below shows how the virtual filesystem changes behavior based on the environment:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{VFS_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{VFS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

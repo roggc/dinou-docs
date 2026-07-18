@@ -12,39 +12,18 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Code Implementation Details", level: 2 },
 ];
 
-const ERROR_DIAGRAM = `                           getErrorJSX(reqPath, error)
-                                       │
-                                       ▼
-                       [Look for error.tsx on path]
-                                       │
-                ┌──────────────────────┴──────────────────────┐
-                ▼                                             ▼
-          [Found pagePath]                             [Not Found]
-                │                                             │
-                │                                   getFilePathAndDynamicParams()
-                │                                   to locate parent error page
-                │                                             │
-                └──────────────────────┬──────────────────────┘
-                                       │
-                                       ▼
-                            [Import pageModule]
-                             Create React Element
-                                       │
-                                       ▼
-                          [Check layouts propagation]
-                         (Check layouts recursively)
-                                       │
-                                       ▼
-                          [Check parallel slots]
-                         Loop through layout slots
-                                       │
-                      ├── Slot resolves OK ──► Proceed
-                      └── Slot rendering fails
-                               │
-                               ▼
-                    Retrieve slot __modulePath
-                    Locate error.tsx inside slot folder
-                    Mount SlotError fallback element`;
+const ERROR_DIAGRAM = `graph TD
+    Start[getErrorJSX reqPath, error] --> FindError{Look for error.tsx on path?}
+    
+    FindError -->|Found pagePath| ImportPage[Import pageModule & Create React Element]
+    FindError -->|Not Found| LocateParent[getFilePathAndDynamicParams to locate parent error page]
+    LocateParent --> ImportPage
+    
+    ImportPage --> CheckLayouts[Check layouts recursively]
+    CheckLayouts --> CheckSlots[Check parallel layout slots]
+    
+    CheckSlots -->|Slot resolves OK| Proceed[Proceed with render]
+    CheckSlots -->|Slot rendering fails| SlotError[Retrieve slot __modulePath & Locate error.tsx in slot folder & Mount SlotError fallback element]`;
 
 const ERROR_CODE = `const path = require("path");
 const { existsSync } = require("./vfs");
@@ -192,7 +171,7 @@ export default function Page() {
                 The flowchart below traces layout wrapping and slot-level exception handling:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{ERROR_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{ERROR_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

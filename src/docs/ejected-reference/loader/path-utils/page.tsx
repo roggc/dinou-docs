@@ -12,25 +12,16 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const UTILS_DIAGRAM = `                             normalizePathCase(path)
-                                       │
-                                       ▼
-                            [Are we on Windows OS?]
-                                       │
-                ┌──────────────────────┴──────────────────────┐
-                ▼                                             ▼
-             [win32]                                      [POSIX OS]
-                │                                             │
-      Starts with drive letter?                               │
-      e.g., "C:\\Users\\..."                                    │
-     ├── Yes ──► Convert letter to lowercase                  │
-     │            "c:\\Users\\..."                              │
-     └── No  ──► Return path as-is                            │
-                │                                             │
-                └──────────────────────┬──────────────────────┘
-                                       │
-                                       ▼
-                              Return normalized path`;
+const UTILS_DIAGRAM = `graph TD
+    Start[normalizePathCase path] --> WinCheck{Are we on Windows OS?}
+    WinCheck -->|Yes| LetterCheck{Starts with drive letter? e.g. C:}
+    WinCheck -->|No| ReturnAsIs[Return path as-is]
+    
+    LetterCheck -->|Yes| Lowercase[Convert letter to lowercase e.g. c:]
+    LetterCheck -->|No| ReturnAsIs
+    
+    Lowercase --> ReturnPath[Return normalized path]
+    ReturnAsIs --> ReturnPath`;
 
 const UTILS_CODE = `function normalizePathCase(p) {
   // 1. Check if running on Windows (win32) and starts with a drive letter (e.g. C:)
@@ -90,7 +81,7 @@ export default function Page() {
                 The flowchart below shows how path drive letters are evaluated and normalized:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{UTILS_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{UTILS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

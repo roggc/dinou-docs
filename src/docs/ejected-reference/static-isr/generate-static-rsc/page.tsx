@@ -12,27 +12,16 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const RSC_BUILDER_DIAGRAM = `                  generateStaticRSC(reqPath)
-                             │
-                             ▼
-                [Create Temp File Path] ──► rsc.rsc.[timestamp].tmp
-                             │
-                             ▼
-                [Inject Mock Context] ──► Mock req/res context
-                             │
-                             ▼
-             [requestStorage.run(mockContext)]
-                             │
-                             ├─► getJSX(finalReqPath) ──► Loads Server Component React Tree
-                             │
-                             ├─► renderToPipeableStream(jsx, manifest) ──► Serializes elements
-                             │
-                             ▼
-                [Pipe stream to Temp File] ──► Writes to disk cache
-                             │
-                             ▼
-                [Return verification object]
-                { success, tempPath, finalPath, status }`;
+const RSC_BUILDER_DIAGRAM = `graph TD
+    Start[generateStaticRSC reqPath] --> TempPath[Create Temp File Path: rsc.rsc.timestamp.tmp]
+    TempPath --> MockCtx[Inject Mock req/res context]
+    MockCtx --> RunALS[requestStorage.run mockContext]
+    
+    RunALS --> LoadJSX[getJSX finalReqPath Loads Server Component React Tree]
+    LoadJSX --> Stream[renderToPipeableStream Serializes elements]
+    Stream --> PipeTemp[Pipe stream to Temp File Writes to disk cache]
+    
+    PipeTemp --> ReturnObj[Return verification object:<br/>success, tempPath, finalPath, status]`;
 
 const RSC_BUILDER_CODE = `const fs = require("fs");
 const path = require("path");
@@ -196,7 +185,7 @@ export default function Page() {
                 The flowchart below traces the steps executed during single-route RSC serialization:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{RSC_BUILDER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{RSC_BUILDER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

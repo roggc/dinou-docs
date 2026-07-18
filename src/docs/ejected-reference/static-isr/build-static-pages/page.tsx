@@ -14,35 +14,23 @@ const tocItems = [
   { id: "page-builder", title: "🏗️ 4. Static Page Compiler", level: 2 },
 ];
 
-const STATIC_CRAWLER_DIAGRAM = `               [npm run build] ──► Triggers buildStaticPages()
-                                         │
-                                         ▼
-                     ┌──────────────────────────────────────┐
-                     │            collectPages()            │
-                     │  (Recursively crawls src/ routes)    │
-                     └──────────────────┬───────────────────┘
-                                        │
-                                        ├─► Normal routes: e.g. /docs
-                                        └─► Dynamic routes: calls getStaticPaths()
-                                                │
-                                                ▼
-                     ┌──────────────────────────────────────┐
-                     │          buildStaticPage()           │
-                     │  (Mock-renders each path segment)    │
-                     └──────────────────┬───────────────────┘
-                                        │
-             ┌──────────────────────────┴──────────────────────────┐
-             ▼                                                     ▼
-┌─────────────────────────┐                            ┌─────────────────────────┐
-│  createBailoutProxy()   │                            │   AsyncLocalStorage     │
-│ (Wraps headers/cookies) │                            │  (Injects mock Req/Res) │
-└────────────┬────────────┘                            └────────────┬────────────┘
-             │                                                      │
-             ▼                                                      ▼
-    [Access detected?]                                   [Evaluates Page Components]
-             │                                                      │
-             ├─► Yes ──► Bailout (Mark isStatic = false)            │
-             └─► No  ──► Commit: rsc.rsc & index.html ◄─────────────┘`;
+const STATIC_CRAWLER_DIAGRAM = `graph TD
+    Start[npm run build] --> BuildStatic[Triggers buildStaticPages]
+    BuildStatic --> Collect[collectPages Recursively crawls src/ routes]
+    
+    Collect --> Normal[Normal routes e.g. /docs]
+    Collect --> Dynamic[Dynamic routes: calls getStaticPaths]
+    
+    Normal --> BuildPage[buildStaticPage Mock-renders each path segment]
+    Dynamic --> BuildPage
+    
+    BuildPage --> Bailout[createBailoutProxy Wraps headers/cookies]
+    BuildPage --> MockALS[AsyncLocalStorage Injects mock Req/Res]
+    
+    Bailout --> AccessCheck{Access detected?}
+    AccessCheck -->|Yes| BailoutSSR[Bailout: Mark isStatic = false]
+    AccessCheck -->|No| Commit[Commit: rsc.rsc & index.html]
+    MockALS --> Commit`;
 
 const BAILOUT_PROXY_CODE = `function createBailoutProxy(target, label, onBailout) {
   const safeTarget = target || {};
@@ -249,7 +237,7 @@ export default function Page() {
                 The diagram below demonstrates how pages are crawled, evaluated against dynamic proxies, and compiled:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{STATIC_CRAWLER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{STATIC_CRAWLER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

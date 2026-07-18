@@ -12,26 +12,19 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const NAVIGATION_DIAGRAM = `                             resolveUrl(href, current)
-                                        │
-                                        ▼
-                             [Is it an external URL?]
-                               ├── Yes ──► Return href unmodified
-                               └── No  ──► Normalize target paths
-                                               │
-                                               ▼
-                                      [Relative pathing?]
-                                      e.g., "details" -> Append current base "/"
-                                               │
-                                               ▼
-                                   [new URL(href, origin)]
-                                               │
-                                               ▼
-                                        normalize(path)
-                                     (Strips trailing slash)
-                                               │
-                                               ▼
-                                     Return normalized URL`;
+const NAVIGATION_DIAGRAM = `graph TD
+    Start[resolveUrl href, current] --> ExtCheck{Is it an external URL?}
+    
+    ExtCheck -->|Yes| ReturnHref[Return href unmodified]
+    ExtCheck -->|No| NormalizeTarget[Normalize target paths]
+    
+    NormalizeTarget --> RelCheck{Is path relative?}
+    RelCheck -->|Yes| AppendBase[Append current base path /]
+    RelCheck -->|No| ParseURL[Parse new URL href, origin]
+    AppendBase --> ParseURL
+    
+    ParseURL --> StripSlash[normalize: Strips trailing slash]
+    StripSlash --> ReturnPath[Return normalized URL string]`;
 
 const NAVIGATION_CODE = `export function isExternalUrl(href) {
   if (!href) return false;
@@ -140,7 +133,7 @@ export default function Page() {
                 The flowchart below shows how routes are resolved and normalized for client-side navigation:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{NAVIGATION_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{NAVIGATION_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

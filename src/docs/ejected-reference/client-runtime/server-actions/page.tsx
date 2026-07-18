@@ -13,42 +13,17 @@ const tocItems = [
   { id: "webpack-variant", title: "📦 Webpack Variant (server-function-proxy-webpack.js)", level: 2 },
 ];
 
-const PROXY_STRUCTURE_DIAGRAM = `========================================================================================================
-                     PHYSICAL FILE CODE STRUCTURE: SERVER-FUNCTION-PROXY.JS
-========================================================================================================
-
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  1. Safe URL Redirect Handlers                                                                   │
-  │     • isSafeRedirect(url): Blocks protocol-relative redirections preventing open redirects.      │
-  │     • executeRedirect(url): Navigates via SPA Router or falls back to window.location.href.      │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  2. createServerFunctionProxy(id)                                                                │
-  │     • Wraps calls to functions with the 'use server' directive in a Javascript Proxy object.     │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  3. Request Formatter (apply hook)                                                               │
-  │     • Checks argument lists:                                                                     │
-  │       • IF FormData: Appends __dinou_func_id and serializes extra arguments to __dinou_args.     │
-  │       • ELSE: Serializes JSON payload with { id, args } variables.                               │
-  │     • Launches POST request to /____server_function____ endpoint.                                │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  4. Response Stream Processor                                                                    │
-  │     ├── Redirect Headers check: Intercepts X-Dinou-Redirect header and triggers action.           │
-  │     ├── Unexpected HTML guard: Rejects text/html content-type immediately.                       │
-  │     ├── JSON responses check: Resolves payload and triggers inline redirects.                    │
-  │     └── RSC Hybrid stream parser (text/x-component): Reads binary fetch reader chunks:           │
-  │         • Accumulates data and processes text chunks line-by-line.                               │
-  │         • If line starts with "D:": Decodes JSON command (type redirects or cookie writes).      │
-  │         • Else: Passes clean Flight stream down to createFromFetch() for React component updates.│
-  └─────────────────────────────────┘`;
+const PROXY_STRUCTURE_DIAGRAM = `graph TD
+    subgraph server-function-proxy.js Code Structure
+        Redirects[1. Safe URL Redirect Handlers<br/>isSafeRedirect: Blocks open redirects<br/>executeRedirect: SPA Router or window.location]
+        ProxyFactory[2. createServerFunctionProxy<br/>Wraps 'use server' calls in JavaScript Proxy]
+        Formatter[3. Request Formatter<br/>FormData: Appends func_id, serializes args<br/>JSON: Serializes JSON payload. POSTs to server]
+        Processor[4. Response Stream Processor<br/>Intercepts redirects & cookie updates. Passes component stream chunks to React createFromFetch]
+    end
+    
+    Redirects --> ProxyFactory
+    ProxyFactory --> Formatter
+    Formatter --> Processor`;
 
 const PROXY_FACTORY_CODE = `export function createServerFunctionProxy(id) {
   return new Proxy(() => {}, {
@@ -190,7 +165,7 @@ export default function Page() {
                 The file layout splits request serialization, redirect filtering, and stream line parsers:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{PROXY_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{PROXY_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

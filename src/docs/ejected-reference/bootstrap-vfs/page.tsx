@@ -11,25 +11,10 @@ const tocItems = [
   { id: "files", title: "📂 Module Directory", level: 2 },
 ];
 
-const BOOTSTRAP_VFS_DIAGRAM = `                              🚀 Server Startup (node core)
-                                        │
-                                        ▼
-                           ┌─────────────────────────┐
-                           │    register-paths.js    │
-                           │  (Load tsconfig paths   │
-                           │   aliases in Node.js)   │
-                           └────────────┬────────────┘
-                                        │
-                                        ▼
-                           ┌─────────────────────────┐
-                           │         vfs.js          │
-                           │  (Warmup src/ directory │
-                           │   cache for production) │
-                           └────────────┬────────────┘
-                                        │
-                                        ▼
-                              🌐 Routing Middleware
-                       (Bypasses OS file I/O lookups)`;
+const BOOTSTRAP_VFS_DIAGRAM = `graph TD
+    Start[🚀 Server Startup node core] --> RegisterPaths[register-paths.js Load tsconfig paths aliases]
+    RegisterPaths --> WarmupVFS[vfs.js Warmup src/ directory cache for production]
+    WarmupVFS --> Middleware[🌐 Routing Middleware Bypasses OS file I/O lookups]`;
 
 export default function Page() {
   return (
@@ -80,7 +65,7 @@ export default function Page() {
                 The diagram below traces the bootstrapping sequence executed when the server process starts:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{BOOTSTRAP_VFS_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{BOOTSTRAP_VFS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

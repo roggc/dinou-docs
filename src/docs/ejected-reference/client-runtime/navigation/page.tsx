@@ -13,33 +13,15 @@ const tocItems = [
   { id: "navigation-utils", title: "🛠️ 4. Navigation Utilities", level: 2 },
 ];
 
-const NAVIGATION_STRUCTURE_DIAGRAM = `========================================================================================================
-                           PHYSICAL FILE CODE STRUCTURE: NAVIGATION.JS
-========================================================================================================
-
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  1. RouterContext Initialization & Default Mock                                                  │
-  │     • Creates RouterContext via React.createContext(). Default mocks warning on server calls.   │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  2. Custom Client Hooks                                                                          │
-  │     ├── useRouter() ──> Returns push/replace/back/forward/refresh delegates.                    │
-  │     ├── usePathname() ──> Resolves active pathname. On server (SSR) reads from AsyncLocalStorage │
-  │     │                     request context req.path. On client, reads from RouterContext.url.     │
-  │     ├── useSearchParams() ──> Resolves active search query parameters URLSearchParams.            │
-  │     └── useNavigationLoading() ──> Returns active transition pending state (isPending).          │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  3. Navigation Utilities (navigation-utils.js)                                                   │
-  │     ├── isExternalUrl(href) ──> Detects protocol-relative, absolute external, or special protocol │
-  │     │                           URLs (mailto:, tel:, javascript:).                               │
-  │     └── resolveUrl(href, currentPathname) ──> Normalizes relative paths to fully qualified,     │
-  │                                               trailing-slash-normalized route path strings.     │
-  └─────────────────────────────────┘`;
+const NAVIGATION_STRUCTURE_DIAGRAM = `graph TD
+    subgraph Navigation.js Code Structure
+        DefaultMock[1. RouterContext & Default Mock<br/>Creates RouterContext via createContext<br/>Default mock handles warnings on raw server calls]
+        ClientHooks[2. Custom Client Hooks<br/>useRouter: push/replace/back/forward/refresh delegates<br/>usePathname: Reads from ALS on server, RouterContext on client<br/>useSearchParams: URLSearchParams tracker<br/>useNavigationLoading: active transition pending status]
+        NavUtils[3. Navigation Utilities<br/>isExternalUrl: Detects external/special protocol URLs<br/>resolveUrl: Normalizes relative paths to standardized URL path strings]
+    end
+    
+    DefaultMock --> ClientHooks
+    ClientHooks --> NavUtils`;
 
 const NAVIGATION_CONTEXT_CODE = `export const RouterContext = createContext({
   url: "",
@@ -183,7 +165,7 @@ export default function Page() {
                 The directory separates context bindings from path checkers:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{NAVIGATION_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{NAVIGATION_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

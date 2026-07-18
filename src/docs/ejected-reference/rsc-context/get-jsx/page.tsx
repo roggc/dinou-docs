@@ -12,36 +12,17 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const GET_JSX_DIAGRAM = `                              getJSX(reqPath, query)
-                                        │
-                                        ▼
-                           [Look for page.* in path]
-                                        │
-                ┌──────────────────────┴──────────────────────┐
-                ▼                                             ▼
-          [Found pagePath]                             [Not Found]
-                │                                             │
-                │                                   getFilePathAndDynamicParams()
-                │                                   to locate nearest page
-                │                                             │
-                └──────────────────────┬──────────────────────┘
-                                       │
-                                       ▼
-                            [Import pageModule]
-                                       │
-                            [Check page_functions]
-                     (Executes getProps() server helper)
-                                       │
-                                       ▼
-                       Create React Page Element with props
-                                       │
-                                       ▼
-                        [Wrap with parent layouts]
-                         (Check layouts recursively)
-                                       │
-                                       ▼
-                          [Check parallel slots]
-                  (Isolates errors in nested layouts slots)`;
+const GET_JSX_DIAGRAM = `graph TD
+    Start[getJSX reqPath, query] --> PathCheck{Look for page.* in path}
+    PathCheck -->|Found| Found[Import pageModule]
+    PathCheck -->|Not Found| Resolve[getFilePathAndDynamicParams to locate nearest page]
+    Resolve --> Found
+    Found --> CheckFuncs{Check page_functions}
+    CheckFuncs -->|Exists| RunProps[Executes getProps server helper]
+    CheckFuncs -->|None| CreatePage[Create React Page Element with props]
+    RunProps --> CreatePage
+    CreatePage --> WrapLayouts[Wrap with parent layouts recursively]
+    WrapLayouts --> CheckSlots[Check parallel slots and isolate errors]`;
 
 const GET_JSX_CODE = `const path = require("path");
 const { existsSync } = require("./vfs");
@@ -279,7 +260,7 @@ export default function Page() {
                 The flowchart below shows how routes are compiled to Server elements:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{GET_JSX_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{GET_JSX_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

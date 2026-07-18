@@ -12,29 +12,24 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const PARSER_DIAGRAM = `                             parseExports(code)
-                                      │
-                                      ▼
-                        [Parse AST via Babel Parser]
-                                      │
-                                      ▼
-                        [Traverse AST Syntax Tree]
-                                      │
-             ┌────────────────────────┴────────────────────────┐
-             ▼                                                 ▼
-   [ExportDefaultDeclaration]                       [ExportNamedDeclaration]
-             │                                                 │
-      Add "default" to Set                              Check declaration type
-                                                               │
-                       ┌───────────────────────────────────────┼───────────────────────────────────────┐
-                       ▼                                       ▼                                       ▼
-             [Function/ClassDecl]                       [VariableDecl]                         [ExportSpecifiers]
-                       │                                       │                                       │
-                Add identifier name                      Loop declarations                       Loop specifiers
-                                                         Add variable names                      Add exported names
-                                                               │                                       │
-                                                               ▼
-                                                    [Return unique array]`;
+const PARSER_DIAGRAM = `graph TD
+    Start[parseExports code] --> Babel[Babel Parser parse AST]
+    Babel --> Traverse[Traverse AST Nodes]
+    
+    Traverse --> DefaultCheck{ExportDefaultDeclaration?}
+    DefaultCheck -->|Yes| DefaultAdd[Add 'default' to exports list]
+    
+    Traverse --> NamedCheck{ExportNamedDeclaration?}
+    NamedCheck -->|Yes| TypeCheck{Declaration Type}
+    
+    TypeCheck -->|Function/Class| FnClass[Add identifier name]
+    TypeCheck -->|Variable| Var[Loop variable identifiers]
+    TypeCheck -->|Specifiers| Spec[Loop export specifiers]
+    
+    DefaultAdd --> ReturnArray[Return unique exports array]
+    FnClass --> ReturnArray
+    Var --> ReturnArray
+    Spec --> ReturnArray`;
 
 const PARSER_CODE = `const parser = require("@babel/parser");
 const traverse = require("@babel/traverse");
@@ -129,7 +124,7 @@ export default function Page() {
                 The flowchart below shows how different export structures are traversed and collected:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{PARSER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{PARSER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

@@ -12,27 +12,21 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const METADATA_FLOW_DIAGRAM = `                     processMetadata(effects)
-                                │
-                                ▼
-                       [Are effects present?]
-                                │
-            ┌───────────────────┴───────────────────┐
-            ▼                                       ▼
-         [None]                              [Effects Present]
-            │                                       │
-       Return ""                                    ▼
-                                          [Check effects.cookies]
-                                          Loop and write document.cookie lines
-                                          (Detect ck.isClear -> Max-Age=0)
-                                                    │
-                                                    ▼
-                                          [Check effects.redirect]
-                                          Append window.location.href string
-                                                    │
-                                                    ▼
-                                      Wrap in <script>(function(){})
-                                      Return compiled inline script block`;
+const METADATA_FLOW_DIAGRAM = `graph TD
+    Start[processMetadata effects] --> EffectCheck{Are effects present?}
+    
+    EffectCheck -->|No| ReturnEmpty[Return empty string]
+    EffectCheck -->|Yes| CookiesCheck{Does effects.cookies exist?}
+    
+    CookiesCheck -->|Yes| LoopCookies[Loop cookies & generate document.cookie scripts]
+    CookiesCheck -->|No| RedirectCheck{Does effects.redirect exist?}
+    LoopCookies --> RedirectCheck
+    
+    RedirectCheck -->|Yes| AddRedirect[Append window.location.href script]
+    RedirectCheck -->|No| WrapScript[Wrap code inside self-invoking function script block]
+    AddRedirect --> WrapScript
+    
+    WrapScript --> ReturnScript[Return compiled inline script block]`;
 
 const METADATA_CODE = `function processMetadata(effects) {
   if (!effects) return "";
@@ -113,7 +107,7 @@ export default function Page() {
                 The chart below traces the translation of compile-time side effects into executable inline scripts:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{METADATA_FLOW_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{METADATA_FLOW_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

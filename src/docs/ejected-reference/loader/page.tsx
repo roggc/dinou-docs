@@ -19,56 +19,33 @@ const tocItems = [
   { id: "customizations", title: "🛠️ Common Tweak Recipes", level: 2 },
 ];
 
-const LOADER_STRUCTURE_DIAGRAM = `========================================================================================================
-                          PHYSICAL FILE CODE STRUCTURE: BABEL-ESM-LOADER.JS
-========================================================================================================
+const LOADER_STRUCTURE_DIAGRAM = `graph TD
+    classDef depClass fill:#334155,stroke:#475569,stroke-width:1px,color:#fff;
+    classDef hookClass fill:#1e293b,stroke:#334155,stroke-width:1px,color:#fff;
 
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  1. Dependencies & Module Resolution Mocking                                                     │
-  │     • fs, path, url, babel/core, asset-extensions, get-abs-path-with-ext, path-utils             │
-  │     • Overrides Module._resolveFilename: Redirects 'react', 'react-dom' imports to their         │
-  │       corresponding .react-server bundles in ESM mode (non-webpack).                            │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  2. Exports.resolve(specifier, context, defaultResolve)                                          │
-  │     • Intercepts module import specifiers at lookup stage.                                       │
-  │     • Delegates to getAbsPathWithExt() to resolve path aliases (@/*) and implicit extensions.    │
-  │     • If resolved: returns absolute file:// URL and short-circuits Node's default resolver.       │
-  │     • Else: falls back to defaultResolve().                                                      │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  3. Exports.load(url, context, defaultLoad)                                                      │
-  │     • Intercepts the content reading and loading phase for resolved file URLs.                  │
-  │     │                                                                                            │
-  │     ├── A. Non-JS Static Assets (e.g. .png, .jpg, .svg)                                          │
-  │     │   • Generates mock ES module exporting public hashed asset path string.                    │
-  │     │                                                                                            │
-  │     ├── B. Stylesheets (.css)                                                                    │
-  │     │   • Requires path (triggers css-require-hook JIT) and exports JSON class mappings object.  │
-  │     │                                                                                            │
-  │     └── C. Source Code Files (.js, .jsx, .ts, .tsx)                                              │
-  │         ├── Reads file content synchronously & checks for directive comments.                    │
-  │         │                                                                                        │
-  │         ├── IF (isReactServer && hasUseClient): Client reference stubbing                        │
-  │         │   • Discards original file body code to protect server environment.                    │
-  │         │   • Parses module exports via parseExports() helper.                                   │
-  │         │   • Generates stub calls to registerClientReference() throwing runtime errors if called.│
-  │         │                                                                                        │
-  │         ├── IF (isReactServer && hasUseServer): Server actions registration                       │
-  │         │   • Compiles function bodies via Babel transpiler.                                     │
-  │         │   • Parses module exports and maps functions to unique Action IDs.                     │
-  │         │   • Calls registerServerReference() to bind function pointers to remote URLs.          │
-  │         │                                                                                        │
-  │         ├── IF (Standard JS File): Returns source file code directly.                            │
-  │         │                                                                                        │
-  │         └── ELSE (TSX, TS, JSX): Babel compilation                                               │
-  │             • Transpiles JSX tags and TypeScript types to raw Javascript via Babel.              │
-  │             • Injects inline source maps and returns standard Javascript module.                 │
-  └──────────────────────────────────────────────────────────────────────────────────────────────────┘`;
+    subgraph LoaderSystem [babel-esm-loader.js Pipeline]
+        Deps[1. Dependencies & Resolution Mocking<br/>• fs, path, url, babel/core<br/>• Overrides Module._resolveFilename for React server bundles]:::depClass
+        
+        Deps --> Resolve[2. resolve Hook<br/>• Intercepts imports at lookup stage<br/>• Delegates to getAbsPathWithExt for aliases/extensions<br/>• Returns absolute file:// URL]:::hookClass
+        
+        Resolve --> Load[3. load Hook<br/>• Intercepts source loading stage]:::hookClass
+    end
+
+    subgraph LoadStages [load Hook Branches]
+        Load --> Asset[A. Static Assets .png/.jpg/.svg<br/>• Generates mock ES module exporting asset path]
+        Load --> CSS[B. Stylesheets .css<br/>• Requires path to run PostCSS JIT<br/>• Exports JSON class mappings]
+        Load --> Src[C. Source Files .js/.jsx/.ts/.tsx<br/>• Analyzes directives]
+    end
+
+    subgraph SourceParsing [Source Code Directives]
+        Src --> ClientCheck{isReactServer & hasUseClient?}
+        ClientCheck -->|Yes| ClientStub[Client Reference Stubbing<br/>• Discards original server-side code<br/>• Generates registerClientReference stub proxies]
+        
+        Src --> ServerCheck{isReactServer & hasUseServer?}
+        ServerCheck -->|Yes| ServerRegister[Server Actions Registration<br/>• Compiles functions with Babel<br/>• Maps function exports to Action IDs<br/>• Binds via registerServerReference]
+
+        Src --> DefaultJS[Standard JS / TSX<br/>• Transpiles JSX & types to JS via Babel<br/>• Injects inline source maps]
+    end`;
 
 const LOADER_DEPS_MOCKING_CODE = `const fs = require("fs");
 const path = require("path");
@@ -316,7 +293,7 @@ export default function Page() {
                 The <code>babel-esm-loader.js</code> file follows this logical pipeline structure during module resolution and compilation:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{LOADER_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{LOADER_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

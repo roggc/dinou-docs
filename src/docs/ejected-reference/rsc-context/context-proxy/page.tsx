@@ -12,23 +12,17 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const PROXY_DIAGRAM = `                  React Server Component (Child Process)
-                            │
-              (Sets cookie or redirect prop)
-                            │
-                            ▼
-           ┌────────────────────────────────────────┐
-           │            createResponseProxy()       │
-           ├────────────────────────────────────────┤
-           │ Intercepts: cookie(), redirect(), etc. │
-           └───────────────────┬────────────────────┘
-                               │
-                       sendCommand(cmd, args)
-                               │
-                               ▼
-                    [process.send() (IPC)]
-                               │
-      👤 Parent Process (Express Main Thread) ──► Apply changes to real res headers`;
+const PROXY_DIAGRAM = `graph TD
+    subgraph Child Process
+        RSC[React Server Component Sets cookie or redirect prop] --> Proxy[createResponseProxy Intercepts response methods]
+        Proxy --> SendCmd[sendCommand cmd, args]
+    end
+    
+    SendCmd -->|process.send IPC| IPC[process.send IPC Channel]
+    
+    subgraph Parent Process
+        IPC --> Parent[Express Main Thread Apply changes to real res headers]
+    end`;
 
 const PROXY_CODE = `// core/context-proxy.js
 
@@ -132,7 +126,7 @@ export default function Page() {
                 The diagram below traces the communication path between worker threads and the main server:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{PROXY_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{PROXY_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

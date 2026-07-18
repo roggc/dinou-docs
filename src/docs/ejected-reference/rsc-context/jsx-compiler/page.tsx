@@ -12,24 +12,19 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const COMPILER_DIAGRAM = `                   asyncRenderJSXToClientJSX(jsx, key)
-                                   │
-                                   ▼
-                       [Evaluate type of node]
-                                   │
-         ┌─────────────────────────┼─────────────────────────┐
-         ▼                         ▼                         ▼
-   [Primitive/Value]       [Array / Children]      [Transitional Element]
-         │                         │                         │
-     Return as-is            Promise.all()             Check jsx.type
-                             recursive call                  │
-                                                             ▼
-                                                [Is function / component?]
-                                                 ├── Yes ──► [Is client ref?]
-                                                 │            ├── Yes ──► Return element descriptor
-                                                 │            └── No  ──► Execute Component(props),
-                                                 │                        recursive compile returned JSX
-                                                 └── No  ──► Recursive compile props`;
+const COMPILER_DIAGRAM = `graph TD
+    Start[asyncRenderJSXToClientJSX jsx, key] --> NodeType{Evaluate type of node}
+    
+    NodeType -->|Primitive/Value| ReturnAsIs[Return as-is]
+    NodeType -->|Array / Children| RecursiveArray[Promise.all recursive call]
+    NodeType -->|Transitional Element| TypeCheck[Check jsx.type]
+    
+    TypeCheck --> ComponentCheck{Is function / component?}
+    ComponentCheck -->|Yes| ClientCheck{Is client ref?}
+    ClientCheck -->|Yes| ClientRef[Return element descriptor]
+    ClientCheck -->|No| ExecComp[Execute Component props & recursively compile returned JSX]
+    
+    ComponentCheck -->|No| RecProps[Recursive compile props]`;
 
 const COMPILER_CODE = `// Function to check if a component is a client component ('use client')
 function isClientComponent(type) {
@@ -246,7 +241,7 @@ export default function Page() {
                 The flowchart below traces how React nodes are recursively evaluated:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{COMPILER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{COMPILER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

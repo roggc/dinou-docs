@@ -13,37 +13,17 @@ const tocItems = [
   { id: "seo-crawler", title: "📄 4. SEO & Crawler Compatibility", level: 2 },
 ];
 
-const LINK_STRUCTURE_DIAGRAM = `========================================================================================================
-                             PHYSICAL FILE CODE STRUCTURE: LINK.JSX
-========================================================================================================
-
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  1. Link Component Export                                                                        │
-  │     • Props: href, children, prefetch (default: true), fresh (default: false), ...props          │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  2. Hover Prefetch Capture                                                                       │
-  │     • onMouseEnter event handler:                                                                │
-  │       • Checks prefetch eligibility: rejects empty/external links or fresh flags.              │
-  │       • Calls window.__DINOU_PREFETCH__(resolvedHref) to pre-load target RSC payload in cache.   │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  3. Click Hijack Handler                                                                         │
-  │     • onClick event handler:                                                                     │
-  │       • Ignores compound clicks (Cmd/Ctrl, Shift, Alt click) to preserve native browser actions.  │
-  │       • Blocks standard navigation with e.preventDefault().                                      │
-  │       • Invokes push(href, { fresh }) via useRouter() to transition SPA states.                  │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  4. Native Anchor Render                                                                         │
-  │     • Renders standard <a> element preserving SEO crawlers indexing pathways.                    │
-  └──────────────────────────────────────────────────────────────────────────────────────────────────┘`;
+const LINK_STRUCTURE_DIAGRAM = `graph TD
+    subgraph Link.jsx Code Structure
+        Props[1. Link Component Export<br/>Props: href, children, prefetch=true, fresh=false, ...props]
+        Prefetch[2. Hover Prefetch Capture<br/>onMouseEnter event handler:<br/>Checks prefetch eligibility. Calls window.__DINOU_PREFETCH__ to pre-load target RSC payload in cache]
+        Hijack[3. Click Hijack Handler<br/>onClick event handler:<br/>Ignores compound clicks. Blocks standard navigation. Invokes push href via useRouter]
+        Render[4. Native Anchor Render<br/>Renders standard a element preserving SEO crawlers indexing pathways]
+    end
+    
+    Props --> Prefetch
+    Prefetch --> Hijack
+    Hijack --> Render`;
 
 const LINK_COMPONENT_CODE = `"use client";
 
@@ -126,7 +106,7 @@ export default function Page() {
                 The component encapsulates path resolution, click hijacking, and hover prefetching:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{LINK_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{LINK_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

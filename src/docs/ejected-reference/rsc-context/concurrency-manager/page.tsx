@@ -12,27 +12,20 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const LIMITER_DIAGRAM = `                           async run(task)
-                                  │
-                                  ▼
-                     [Is activeCount >= limit?]
-                                  ├── Yes ──► Push resolve callback to queue
-                                  │            Wait for promise resolve signal
-                                  └── No  ──► Proceed immediately
-                                               │
-                                               ▼
-                                      Increment activeCount
-                                               │
-                                               ▼
-                                        [Execute Task]
-                                               │
-                                               ▼
-                                      Decrement activeCount
-                                               │
-                                               ▼
-                                     [Is queue populated?]
-                                          ├── Yes ──► Shift next resolve() signal
-                                          └── No  ──► Exit run block (No-op)`;
+const LIMITER_DIAGRAM = `graph TD
+    Start[async run task] --> LimitCheck{Is activeCount >= limit?}
+    
+    LimitCheck -->|Yes| QueueTask[Push resolve callback to queue & Wait for promise resolve signal]
+    LimitCheck -->|No| Proceed[Proceed immediately]
+    
+    QueueTask --> Proceed
+    Proceed --> Inc[Increment activeCount]
+    Inc --> ExecTask[Execute Task]
+    ExecTask --> Dec[Decrement activeCount]
+    
+    Dec --> QueueCheck{Is queue populated?}
+    QueueCheck -->|Yes| ShiftQueue[Shift next resolve signal from queue]
+    QueueCheck -->|No| Exit[Exit run block / No-op]`;
 
 const LIMITER_CODE = `class ConcurrencyManager {
   constructor(maxConcurrent) {
@@ -125,7 +118,7 @@ export default function Page() {
                 The flowchart below traces the task scheduling lifecycle of the concurrency queue:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{LIMITER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{LIMITER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

@@ -11,28 +11,11 @@ const tocItems = [
   { id: "files", title: "📂 Module Directory", level: 2 },
 ];
 
-const RSC_CONTEXT_DIAGRAM = `                                🌐 Client Request
-                                        │
-                                        ▼
-                           ┌─────────────────────────┐
-                           │   concurrency-manager   │
-                           │   (Limit active renders)│
-                           └────────────┬────────────┘
-                                        │
-                                        ▼
-                           ┌─────────────────────────┐
-                           │    context-proxy.js     │
-                           │  (IPC cookie/redirect)  │
-                           └────────────┬────────────┘
-                                        │
-                                        ▼
-             ┌──────────────────────────┴──────────────────────────┐
-             ▼                                                     ▼
-   ┌───────────────────┐                                 ┌───────────────────┐
-   │  render-jsx-to... │                                 │  get-error-jsx.js │
-   │ (Compiles React   │ ───────[Caught render crash]───►│ (Crawls error.tsx │
-   │ Server Components)│                                 │ and nested slots) │
-   └───────────────────┘                                 └───────────────────┘`;
+const RSC_CONTEXT_DIAGRAM = `graph TD
+    Start[🌐 Client Request] --> Concurrency[concurrency-manager Limit active renders]
+    Concurrency --> Proxy[context-proxy.js IPC cookie/redirect]
+    Proxy --> RenderJSX[render-jsx-to-json.js Compiles React Server Components]
+    RenderJSX -->|Caught render crash| ErrorJSX[get-error-jsx.js Crawls error.tsx and nested slots]`;
 
 export default function Page() {
   return (
@@ -87,7 +70,7 @@ export default function Page() {
                 The diagram below shows the processing lifecycle of client requests as they pass through concurrency checks, context proxies, compile streams, and error boundaries:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{RSC_CONTEXT_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{RSC_CONTEXT_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

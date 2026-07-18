@@ -12,28 +12,14 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const PAGES_PIPELINE_DIAGRAM = `                  generateStaticPages(routes)
-                             │
-                             ▼
-                    [For each route...]
-                             │
-                             ▼
-             [Inject Mock Request & Response]
-                             │
-                             ▼
-             [1. renderAppToHtml(mockRes)] ──► Renders page component stream
-                             │
-                             ▼
-            [2. processMetadata(effects)] ──► Resolves side-effect cookies/redirects
-                             │
-                             ▼
-                [Pipe HTML to dist2/index.html]
-                             │
-                             ▼
-                [3. Write dist2/metadata.json] ──► Stores generatedAt, tags, revalidate
-                             │
-                             ▼
-                    [Update status-manifest]`;
+const PAGES_PIPELINE_DIAGRAM = `graph TD
+    Start[generateStaticPages routes] --> LoopRoutes[For each route...]
+    LoopRoutes --> MockCtx[Inject Mock Request & Response]
+    MockCtx --> RenderApp[1. renderAppToHtml mockRes Renders page component stream]
+    RenderApp --> ProcessMeta[2. processMetadata effects Resolves side-effect cookies/redirects]
+    ProcessMeta --> WriteHTML[Pipe HTML to dist2/index.html]
+    WriteHTML --> WriteMeta[3. Write dist2/metadata.json generatedAt, tags, revalidate]
+    WriteMeta --> UpdateStatus[Update status-manifest]`;
 
 const PAGES_PIPELINE_CODE = `// generate-static-pages.js
 const path = require("path");
@@ -203,7 +189,7 @@ export default function Page() {
                 The flowchart below shows how routes are processed through the bulk HTML generation pipeline:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{PAGES_PIPELINE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{PAGES_PIPELINE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

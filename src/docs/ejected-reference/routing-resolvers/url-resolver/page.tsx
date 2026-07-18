@@ -12,24 +12,16 @@ const tocItems = [
   { id: "preservation", title: "⏱️ Preserving State Parameters", level: 2 },
 ];
 
-const RESOLVER_DIAGRAM = `                  resolveRelativeUrl(href, currentPathname)
-                                        │
-                                        ▼
-                            [Is href absolute / URL?]
-                               ├── Yes ──► Return href directly
-                               └── No  ──► Normalize base path
-                                               │
-                                               ▼
-                                      [Append trailing slash]
-                                      e.g. "/docs" ──► "/docs/"
-                                               │
-                                               ▼
-                                   [new URL(href, base)]
-                                   base = "http://localhost" + base
-                                               │
-                                               ▼
-                                     [Re-assemble path]
-                                     Return pathname + search + hash`;
+const RESOLVER_DIAGRAM = `graph TD
+    Start[resolveRelativeUrl href, currentPathname] --> AbsCheck{Is href absolute or external?}
+    
+    AbsCheck -->|Yes| ReturnHref[Return href directly]
+    AbsCheck -->|No| NormalizeBase[Normalize base path]
+    
+    NormalizeBase --> Slash[Append trailing slash e.g. /docs to /docs/]
+    Slash --> NewURL[Resolve via new URL href, base]
+    NewURL --> Assemble[Re-assemble path: pathname + search + hash]
+    Assemble --> ReturnPath[Return resolved URL path]`;
 
 const RESOLVER_CODE = `function resolveRelativeUrl(href, currentPathname) {
   if (!href || typeof href !== "string") {
@@ -101,7 +93,7 @@ export default function Page() {
                 The flowchart below shows how incoming paths are categorized and parsed:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{RESOLVER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{RESOLVER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

@@ -12,25 +12,13 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const CONTEXT_DIAGRAM = `                             Incoming HTTP Request
-                                       │
-                                       ▼
-                       ┌───────────────────────────────┐
-                       │     requestStorage (ALSC)     │
-                       ├───────────────────────────────┤
-                       │  • Run callback in storage    │
-                       │  • Store context: {req, res}  │
-                       └───────────────┬───────────────┘
-                                       │
-                                       ▼
-                              [Server Components]
-                       (Execute nested child functions)
-                                       │
-                                       ▼
-                                 getContext()
-                                       │
-                                       ▼
-                            [Return {req, res} Map]`;
+const CONTEXT_DIAGRAM = `graph TD
+    Request[Incoming HTTP Request] --> ALS{requestStorage AsyncLocalStorage}
+    ALS -->|Server context| RunStore[Run callback inside storage]
+    RunStore --> SaveContext[Store context: req, res]
+    SaveContext --> Comp[Server Components execute]
+    Comp --> GetCtx[getContext]
+    GetCtx --> ReturnCtx[Return req, res Context Map]`;
 
 const CONTEXT_CODE = `// dinou/core/request-context.js
 
@@ -125,7 +113,7 @@ export default function Page() {
                 The flowchart below shows how request contexts are isolated and retrieved:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{CONTEXT_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{CONTEXT_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

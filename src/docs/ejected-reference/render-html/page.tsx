@@ -13,71 +13,32 @@ const tocItems = [
   { id: "customizations", title: "🛠️ Common Tweak Recipes", level: 2 },
 ];
 
-const PIPELINE_DIAGRAM = ` [Express Server.js] ───────────────► Calling renderAppToHtml()
-        │                                     │
-        │                                     ▼ [Forking Child Process]
-        │                            [render-app-to-html.js] (Parent Environment)
-        │                                     │
-        │                                     ├─► 1. Evaluates React Server graph
-        │                                     ├─► 2. Generates RSC Flight JSON binary
-        │                                     │
-        ▼ [Piping RSC Flight Stream via fd:4] │
-  ┌───────────────────────────────────────────┼───────────────────────────┐
-  │ [render-html.js] (Child Process Environment - Standard Client React)   │
-  │                                           │                           │
-  │   a. Reads flight stream from fd:4 ◄──────┘                           │
-  │   b. Reconstructs client-safe JSX via createFromNodeStream()          │
-  │   c. Performs React 19 SSR via renderToPipeableStream()               │
-  │   d. Writes final HTML chunks to stdout                               │
-  └───────────────────┬───────────────────────────────────────────────────┘
-                      │
-                      ▼ [Piped stdout chunks]
-                [Express res] ────────► Browser (HTML Response)`;
+const PIPELINE_DIAGRAM = `graph TD
+    Start[Express Server.js Calling renderAppToHtml] --> Fork[Forking Child Process: render-app-to-html.js Parent]
+    Fork --> ParentActions[1. Evaluates React Server graph <br/> 2. Generates RSC Flight JSON binary]
+    
+    ParentActions -->|Piping RSC Flight Stream via fd 4| Child[render-html.js Child Process Environment]
+    
+    subgraph Child Process Environment
+        Child --> ReadFlight[a. Reads flight stream from fd:4]
+        ReadFlight --> Reconstruct[b. Reconstructs client-safe JSX via createFromNodeStream]
+        Reconstruct --> SSR[c. Performs React 19 SSR via renderToPipeableStream]
+        SSR --> WriteHTML[d. Writes final HTML chunks to stdout]
+    end
+    
+    WriteHTML -->|Piped stdout chunks| ExpressRes[Express res Response to Browser]`;
 
-const PARENT_STRUCTURE_DIAGRAM = `========================================================================================================
-                          PHYSICAL FILE CODE STRUCTURE: RENDER-APP-TO-HTML.JS
-========================================================================================================
-
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  1. Dependencies & Module Imports                                                                │
-  │     • child_process (fork), fs, path, url, status-manifest, concurrency-manager (processLimiter) │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  2. Global Helper Functions                                                                      │
-  │                                                                                                  │
-  │     ├── getManifest()                                                                            │
-  │     │   • síncronamente reads & parses client manifest files for module IDs resolution            │
-  │     │                                                                                            │
-  │     └── toFileUrl(p)                                                                             │
-  │         • Converts local absolute system paths to absolute 'file://' format strings              │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  3. createParentResponseWrapper(reqPath, res, child)                                             │
-  │     • Constructs the IPC command listener wrapper                                                │
-  │     • Listens to "message" commands from the child renderer (e.g. cookies or redirects)           │
-  │     • If headersSent: writes direct inline <script> modifications into the output stream chunk   │
-  │     • If headersClean: triggers native Express methods (res.cookie / res.redirect)               │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  4. Main Export: renderAppToHtml(reqPath, reqQuery, context, isReady, res, options)              │
-  │     • Resolves render-html.js filepath & checks output cache (dist2/rsc.rsc)                     │
-  │     • Sets up temporary file descriptor fd 4                                                     │
-  │     • IF CACHED:                                                                                 │
-  │         • Pipes compiled static dist2/rsc.rsc directly into fd 4                                 │
-  │     • IF DYNAMIC:                                                                                │
-  │         • Renders Server Components (RSC) to binary Flight payload stream                       │
-  │         • Writes stream concurrently into fd 4                                                   │
-  │     • Spawns the child process renderer: fork(renderHtmlPath, [args], { stdio: [..., fd:4] })    │
-  │     • Sets up IPC message listener: child.on("message", createParentResponseWrapper)             │
-  │     • Limits concurrent renders: processLimiter.acquire()                                        │
-  │     • Streams output: child.stdout.pipe(res)                                                     │
-  └──────────────────────────────────────────────────────────────────────────────────────────────────┘`;
+const PARENT_STRUCTURE_DIAGRAM = `graph TD
+    subgraph render-app-to-html.js Code Structure
+        Deps[1. Dependencies & Module Imports<br/>child_process fork, fs, path, url, status-manifest, concurrency-manager]
+        Helpers[2. Global Helper Functions<br/>getManifest: Reads & parses client manifest for module IDs<br/>toFileUrl: Converts absolute path to file:// format]
+        ResponseWrapper[3. createParentResponseWrapper<br/>IPC command listener cookie/redirect<br/>Headers sent? JavaScript script inject : Express res methods]
+        Export[4. Main Export: renderAppToHtml<br/>Checks cache dist2/rsc.rsc<br/>Cached? Pipes buffer directly to child fd 4<br/>Dynamic? Renders RSC to binary Flight payload & writes to fd 4<br/>Spawns child fork stdio fd:4, IPC listener, child.stdout.pipe res]
+    end
+    
+    Deps --> Helpers
+    Helpers --> ResponseWrapper
+    ResponseWrapper --> Export`;
 
 const PARENT_IMPORTS_CODE = `const path = require("path");
 const { fork } = require("child_process");
@@ -371,73 +332,32 @@ const PARENT_IPC_MESSAGE_CODE = `child.on("message", (message) => {
   }
 });`;
 
-const IPC_FLOW_DIAGRAM = `         [ Master Express Server ]                   [ Child Process (render-html) ]
-                     │                                              │
-                     ├────────► Fork child process ────────────────►│
-                     │                                              │
-       Check Cache   ├─► (Exists) -> Read dist2/rsc.rsc             │
-                     │   (Missing)-> compile JSX to Flight          │
-                     │                                              │
-                     ├────────► Pipe Flight data (fd 4) ───────────►│ (createFromNodeStream)
-                     │                                              │
-                     │◄──────── stream HTML chunks (stdout) ────────┤ (renderToPipeableStream)
-                     │                                              │
-      Child calls    │                                              │
-    res.cookie/redir │◄──────── IPC command message ────────────────┤ (send message)
-                     │                                              │
-                     ├─► (Headers Sent?)                            │
-                     │   ├─► Yes: write <script> cookie/redirect    │
-                     │   └─► No : call native Express headers       │`;
+const IPC_FLOW_DIAGRAM = `sequenceDiagram
+    participant Parent as Master Express Server
+    participant Child as Child Process (render-html)
+    
+    Parent->>Child: Fork child process
+    Note over Parent: Check Cache:<br/>Exists? Read dist2/rsc.rsc<br/>Missing? Compile JSX to Flight
+    Parent->>Child: Pipe Flight data (fd 4) (createFromNodeStream)
+    Child->>Parent: Stream HTML chunks (stdout) (renderToPipeableStream)
+    Child->>Parent: IPC command message (res.cookie / redirect)
+    Note over Parent: Headers Sent?<br/>Yes: write script cookie/redirect<br/>No: call native Express headers`;
 
-const CHILD_STRUCTURE_DIAGRAM = `========================================================================================================
-                             PHYSICAL FILE CODE STRUCTURE: RENDER-HTML.JS
-========================================================================================================
-
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  1. Webpack Runtime Global Mocks                                                                 │
-  │     • global.__webpack_require__(id): Resolves mapped Client Component IDs using require()       │
-  │     • global.__webpack_chunk_load__(chunkId): Instantly resolves static chunk loading promises   │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  2. Core Environment Setup & Require Hooks                                                       │
-  │     • @babel/register, css-require-hook, asset-require-hook, Module._resolveFilename overrides   │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  3. Error Rendering Functions                                                                    │
-  │                                                                                                  │
-  │     ├── formatErrorHtml(error)           ──> HTML crash templates (development stack overlays)   │
-  │     ├── formatErrorHtmlProduction(error) ──> Sanitized HTML crash templates (production logs)    │
-  │     └── writeErrorOutput(error, isProd)  ──> Writes error HTML to stdout and exits process with 1│
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  4. Manifest & Import Map Utilities                                                              │
-  │                                                                                                  │
-  │     ├── getImportMapHtml() ──> Returns HTML tag injecting ESM import maps                        │
-  │     └── getSsrManifest()   ──> Reads & caches client and SSR module dependency mappings          │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  5. Main Render Implementation: renderToStream(reqPath, paramsString, contextJson, isDynamic)    │
-  │     • Reads inherited fd 4 stream to parse RSC Flight payload binary                             │
-  │     • Reconstructs the JSX tree asynchronously (createFromNodeStream)                            │
-  │     • Calls renderToPipeableStream() to write HTML chunks to process.stdout                      │
-  │     • Handles ShellReady event to write ESM import maps                                          │
-  │     • onError callback: Catches SSR crashes and triggers fallback render (getErrorJSX)           │
-  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │  6. Self-Executing Startup Hook (CLI Execution)                                                  │
-  │     • Reads CLI arguments: [_, _, reqPath, paramsString, contextJson, isDynamic]                 │
-  │     • Invokes renderToStream() immediately upon child process spawning                           │
-  └──────────────────────────────────────────────────────────────────────────────────────────────────┘`;
+const CHILD_STRUCTURE_DIAGRAM = `graph TD
+    subgraph render-html.js Code Structure
+        Mocks[1. Webpack Runtime Global Mocks<br/>global.__webpack_require__: Resolves mapped Client Component IDs using require<br/>global.__webpack_chunk_load__: Instantly resolves chunk load promises]
+        Setup[2. Core Environment Setup & Require Hooks<br/>@babel/register, css-require-hook, asset-require-hook, Module._resolveFilename]
+        Errors[3. Error Rendering Functions<br/>formatErrorHtml: Development stack overlays<br/>formatErrorHtmlProduction: Sanitized logs<br/>writeErrorOutput: Writes error HTML to stdout & exits]
+        ImportMaps[4. Manifest & Import Map Utilities<br/>getImportMapHtml: Returns ESM import map script tag<br/>getSsrManifest: Reads & caches client / SSR dependency mappings]
+        Render[5. Main Render Implementation: renderToStream<br/>Reads fd 4 Flight payload & reconstructs JSX tree<br/>renderToPipeableStream to process.stdout<br/>ESM import maps, HMR WebSockets, onError recovery]
+        Startup[6. Self-Executing Startup Hook<br/>Reads CLI arguments & invokes renderToStream]
+    end
+    
+    Mocks --> Setup
+    Setup --> Errors
+    Errors --> ImportMaps
+    ImportMaps --> Render
+    Render --> Startup`;
 
 const WEBPACK_MOCKS_CODE = `global.__webpack_require__ = function (id) {
   if (global.__webpack_require_map__ && global.__webpack_require_map__[id]) {
@@ -660,8 +580,8 @@ export default function Page() {
                 The lifecycle of an HTML request follows this decoupled execution graph:
               </p>
               
-              <div className="not-prose my-6 border rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 overflow-x-auto">
-                <pre className="font-mono text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre">{PIPELINE_DIAGRAM}</pre>
+              <div className="not-prose my-4">
+                <CodeBlock language="mermaid" minWidth="800px">{PIPELINE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -679,7 +599,7 @@ export default function Page() {
                 The file defines the following helper variables, utilities, and main export:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{PARENT_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{PARENT_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
 
               <h3>1. Dependencies & Module Imports</h3>
@@ -770,7 +690,7 @@ export default function Page() {
               <div className="my-6">
                 <p className="text-sm font-semibold mb-2">IPC & Process Pipeline Flow Diagram:</p>
                 <div className="not-prose">
-                  <CodeBlock language="text">{IPC_FLOW_DIAGRAM}</CodeBlock>
+                  <CodeBlock language="mermaid" minWidth="800px">{IPC_FLOW_DIAGRAM}</CodeBlock>
                 </div>
               </div>
             </section>
@@ -789,7 +709,7 @@ export default function Page() {
                 The file defines the following global structures, internal utilities, and self-execution hook:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{CHILD_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{CHILD_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
 
               <h3>1. Webpack Runtime Global Mocks</h3>

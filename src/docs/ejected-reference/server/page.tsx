@@ -52,55 +52,19 @@ export default function Page() {
                 Below is a visual map outlining the lifecycle phases and core duties of the ejected <code>server.js</code> file:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{`========================================================================================================
-                                      SERVER.JS ARCHITECTURE & LIFECYCLE
-========================================================================================================
+                <CodeBlock language="mermaid" minWidth="800px">{`graph TD
+    subgraph server.js Architecture & Lifecycle
+        Init[1. INITIALIZATION & TRANSPILATION<br/>Load Core Dependencies Express, Chokidar, React Server DOM, etc<br/>@babel/register Hook JIT transpile JSX/TypeScript imports in CommonJS<br/>asset-require-hook & css-require-hook Mock static imports in Node.js]
+        HMR[2. HOT MODULE REPLACEMENT ENGINE Development Only<br/>Chokidar Watcher Monitors react_client_manifest/ for updates<br/>loadManifestWithRetry & readJSONWithRetry Prevent concurrent I/O race conditions<br/>clearRequireCache & getParents Evict modified modules & propagate HMR recursively]
+        Express[3. EXPRESS APP & ENVIRONMENT MIDDLEWARES<br/>Static Asset Handlers Serve files from dist3 client builds & src<br/>AsyncLocalStorage Request Context Bind HTTP request/response to React thread]
+        Endpoints[4. ROUTING & RSC ENDPOINTS<br/>GET /____rsc_payload____/* returns standard RSC Flight binary payload stream<br/>POST /____rsc_payload_error____/* Handles crashes, returns React error layout<br/>GET Wildcard Route /* Compiles parameters, checks blocklists, routes requests<br/>POST /____server_function____ Invokes actions mapped by registerServerReference]
+        Launch[5. LAUNCH<br/>Listen port 3000 Ready to handle request streams]
+    end
 
- ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
- │  1. INITIALIZATION & TRANSPILATION                                                                 │
- │                                                                                                    │
- │  • Load Core Dependencies (Express, Chokidar, React Server DOM, etc.)                              │
- │  • @babel/register Hook ──> JIT transpile JSX/TypeScript imports in CommonJS (server & child)       │
- │  • asset-require-hook & css-require-hook ──> Mock static imports (png, css) in Node.js             │
- └───────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                     │
-                                     ▼
- ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
- │  2. HOT MODULE REPLACEMENT ENGINE (Development Only)                                               │
- │                                                                                                    │
- │  • Chokidar Watcher ──> Monitors react_client_manifest/ for updates                                │
- │  • loadManifestWithRetry & readJSONWithRetry ──> Prevent concurrent I/O race conditions            │
- │  • clearRequireCache & getParents ──> Evict modified modules & propagate HMR recursively           │
- └───────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                     │
-                                     ▼
- ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
- │  3. EXPRESS APP & ENVIRONMENT MIDDLEWARES                                                          │
- │                                                                                                    │
- │  • Static Asset Handlers ──> Serve files from dist3/ (client builds) & src/                        │
- │  • AsyncLocalStorage Request Context ──> Bind HTTP request/response to React rendering thread      │
- └───────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                     │
-                                     ▼
- ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
- │  4. ROUTING & RSC ENDPOINTS                                                                        │
- │                                                                                                    │
- │  ├── GET  /____rsc_payload____/*        ──> Returns the standard RSC Flight binary payload stream │
- │  │                                                                                                 │
- │  ├── POST /____rsc_payload_error____/*  ──> Handles server crashes, returns React error layout    │
- │  │                                                                                                 │
- │  ├── GET  Wildcard Route (/*)           ──> Compiles parameters, checks blocklists, routes requests │
- │  │                                           to page_functions, and pipes output to children        │
- │  │                                                                                                 │
- │  └── POST /____server_function____       ──> Invokes actions mapped by registerServerReference     │
- └───────────────────────────────────┬────────────────────────────────────────────────────────────────┘
-                                     │
-                                     ▼
- ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
- │  5. LAUNCH                                                                                         │
- │                                                                                                    │
- │  • Listen (port 3000) ──> Ready to handle request streams                                          │
- └────────────────────────────────────────────────────────────────────────────────────────────────────┘`}</CodeBlock>
+    Init --> HMR
+    HMR --> Express
+    Express --> Endpoints
+    Endpoints --> Launch`}</CodeBlock>
               </div>
             </section>
 
@@ -387,27 +351,17 @@ babelRegister({
               <div className="my-6">
                 <p className="text-sm font-semibold mb-2">Architectural Flow Mapping:</p>
                 <div className="not-prose">
-                  <CodeBlock language="text">{`                  ┌───────────────────────────┐
-                  │  Client Request Received  │
-                  └─────────────┬─────────────┘
-                                │
-                                ▼
-                        [ Request Type? ]
-                       /        │        \\
-                      /         │         \\
-       GET (Soft SPA Nav)       │          POST (Server Function)
-            ▼                   │                   ▼
-      getContext()              │   getContextForServerFunctionEndpoint()
-    (safeResCall Guard)         │                   │
-                                │                   ├─► cookie() -> Hybrid Setter
-                        GET (Hard Reload)           │   (headers Sent? D:cookie : res.cookie)
-                                │                   │
-                                ▼                   └─► redirect() -> throw error loop
-                         contextForChild
-                                │
-                                ▼
-                       renderAppToHtml()
-                     (Child Process Fork)`}</CodeBlock>
+                  <CodeBlock language="mermaid">{`graph TD
+    Start[Client Request Received] --> ReqType{Request Type?}
+    
+    ReqType -->|GET Soft SPA Nav| SoftNav[getContext safeResCall Guard]
+    
+    ReqType -->|GET Hard Reload| HardNav[contextForChild]
+    HardNav --> ChildFork[renderAppToHtml Child Process Fork]
+    
+    ReqType -->|POST Server Function| ServerFunc[getContextForServerFunctionEndpoint]
+    ServerFunc --> CookieSet[cookie -> Hybrid Setter:<br/>headers Sent? D:cookie : res.cookie]
+    ServerFunc --> RedirectSet[redirect -> throw error loop]`}</CodeBlock>
                 </div>
               </div>
 
@@ -847,46 +801,34 @@ return context;`}</CodeBlock>
               <div className="my-6">
                 <p className="text-sm font-semibold mb-2">RSC Payload Execution Mapping:</p>
                 <div className="not-prose">
-                  <CodeBlock language="text">{`           [ Client Router Request ]
-                       │
-                       ▼
-             [ Choose RSC Route? ]
-            /          │          \\
-           /           │           \\
-    /____rsc_payload____       /____rsc_payload_static____
-          │                         │
-          ▼                         ▼
-   isOld = false             isOld = false
-   isStatic = false          isStatic = true
-          │                         │
-          ▼                         ▼
-  serveRSCPayload(..., isOld, isStatic)
-          │
-          ├────────► [ isStatic == true? ]
-          │                  │
-          │                  ▼
-          │         [ Only read disk cache ]
-          │         ├─► useOld ? rsc._old.rsc
-          │         └─► else   ? rsc.rsc
-          │         (No file? 403 Forbidden/Block)
-          │
-          └────────► [ isStatic == false? ]
-                             │
-                             ▼
-                    [ SSG/ISR Cache exists? ]
-                     /                    \\
-                    /                      \\
-                  Yes                       No
-                  ▼                         ▼
-        [ check useOld logic ]        [ Dynamic SSR Pipeline ]
-        ├─► isOld == true?             ├─► validateParams()
-        ├─► regenerating?              ├─► getJSX()
-        ├─► buildId mismatch?          └─► renderToPipeableStream()
-        │     │
-        │     ├─► Yes: rsc._old.rsc
-        │     └─► No:  rsc.rsc
-        ▼
-   [ Stream: application/octet-stream ]`}</CodeBlock>
+                  <CodeBlock language="mermaid" minWidth="800px">{`graph TD
+    Start[Client Router Request] --> RouteType{Choose RSC Route?}
+    
+    RouteType -->|/____rsc_payload____| PayloadRoute[serveRSCPayload: isOld=false, isStatic=false]
+    RouteType -->|/____rsc_payload_static____| StaticRoute[serveRSCPayload: isOld=false, isStatic=true]
+    
+    PayloadRoute --> CheckStatic
+    StaticRoute --> CheckStatic
+    
+    CheckStatic{isStatic == true?}
+    CheckStatic -->|Yes| ReadDiskCache[Only read disk cache]
+    ReadDiskCache --> ReadDiskCacheChoice{useOld?}
+    ReadDiskCacheChoice -->|Yes| OldRscFile[Serve rsc._old.rsc]
+    ReadDiskCacheChoice -->|No| RscFile[Serve rsc.rsc]
+    
+    CheckStatic -->|No| CacheCheck{SSG/ISR Cache exists?}
+    CacheCheck -->|Yes| OldCheck[Check useOld logic:<br/>isOld == true?<br/>regenerating?<br/>buildId mismatch?]
+    OldCheck --> OldCheckChoice{Any true?}
+    OldCheckChoice -->|Yes| ServeOld[Serve rsc._old.rsc]
+    OldCheckChoice -->|No| ServeCurrent[Serve rsc.rsc]
+    
+    CacheCheck -->|No| DynamicSSR[Dynamic SSR Pipeline:<br/>validateParams<br/>getJSX<br/>renderToPipeableStream]
+    
+    OldRscFile --> StreamOctet[Stream: application/octet-stream]
+    RscFile --> StreamOctet
+    ServeOld --> StreamOctet
+    ServeCurrent --> StreamOctet
+    DynamicSSR --> StreamOctet`}</CodeBlock>
                 </div>
               </div>
 
@@ -1016,38 +958,16 @@ if (!isPathBlocked && allowISGValue === false) {
               <div className="my-6">
                 <p className="text-sm font-semibold mb-2">Error Boundary Payload Mapping:</p>
                 <div className="not-prose">
-                  <CodeBlock language="text">{`           [ React Client-Side Component ]
-                         │
-                         ▼ (Render Exception Caught!)
-           [ Dinou Client Error Boundary ]
-                         │
-                         ▼ (Serialize error trace: stack, message)
-             POST /____rsc_payload_error____/[route]
-                         │
-                         ▼
-             [ Master Server Express POST ]
-                         │
-                         ▼
-                 getContext(req, res)
-                         │
-                         ▼
-              requestStorage.run(context)
-                         │
-                         ▼
-               [ getErrorJSX(reqPath) ]
-             Searches local directory tree
-             for the closest "error.tsx"
-                         │
-                         ▼
-           [ React 19 renderToPipeableStream ]
-             Serializes error JSX using the
-             client-side assets manifest
-                         │
-                         ▼
-           [ binary text/x-component stream ]
-                         │
-                         ▼
-            [ Hydrate Fallback UI in Browser ]`}</CodeBlock>
+                  <CodeBlock language="mermaid">{`graph TD
+    Start[React Client-Side Component] -->|Render Exception Caught| ClientEB[Dinou Client Error Boundary]
+    ClientEB -->|Serialize error trace: stack, message| POSTError[POST /____rsc_payload_error____/route]
+    POSTError --> ExpressPOST[Master Server Express POST]
+    ExpressPOST --> GetCtx[getContext req, res]
+    GetCtx --> RunALS[requestStorage.run context]
+    RunALS --> GetErrorJSX[getErrorJSX reqPath: Searches directory tree for closest error.tsx]
+    GetErrorJSX --> StreamReact[React 19 renderToPipeableStream: Serializes error JSX using client-side assets manifest]
+    StreamReact --> StreamBinary[Stream binary text/x-component]
+    StreamBinary --> HydrateFallback[Hydrate Fallback UI in Browser]`}</CodeBlock>
                 </div>
               </div>
 
@@ -1097,36 +1017,22 @@ if (!isPathBlocked && allowISGValue === false) {
               <div className="my-6">
                 <p className="text-sm font-semibold mb-2">Wildcard Load Execution Mapping:</p>
                 <div className="not-prose">
-                  <CodeBlock language="text">{`           [ Browser GET /path ] (Initial Load / Refresh)
-                         │
-                         ▼
-           [ Match Wildcard app.get("*") ]
-                         │
-                         ▼
-            [ Route Parameter Validation ]
-            ├─► validateParams()
-            └─► allowISG check
-                         │
-                         ▼
-        [ Production, Static, Valid & HTML exists? ]
-           /                                   \\
-          /                                     \\
-        Yes                                      No
-        ▼                                        ▼
- [ Serve HTML Cache ]                  [ Dynamic SSR Pipeline ]
- ├─► Read index.html or                ├─► contextForChild
- │   index._old.html                   ├─► processLimiter.run()
- │                                     │   (Concurrency Guard)
- ├─► Inject Header Scripts:            ▼
- │   ├─► __DINOU_USE_STATIC__ = true   ├─► renderAppToHtml()
- │   ├─► __DINOU_USE_OLD_RSC__ = true  │   (Fork Subprocess SSR)
- │   └─► __DINOU_BUILD_ID__ = buildId  │
- │                                     ├─► Stream HTML response
- ├─► res.statusCode = status           │
- └─► res.send(html)                    ▼
-                                       res.on("finish")
-                                       └─► generatingISG()
-                                           (Background Cache Build)`}</CodeBlock>
+                  <CodeBlock language="mermaid" minWidth="800px">{`graph TD
+    Start[Browser GET /path Initial Load / Refresh] --> MatchWildcard[Match Wildcard app.get wildcard]
+    MatchWildcard --> Validate[Route Parameter Validation:<br/>validateParams & allowISG check]
+    Validate --> RouteCheck{Production & Static & Valid & HTML exists?}
+    
+    RouteCheck -->|Yes| ServeHTML[Serve HTML Cache]
+    ServeHTML --> ReadFiles[Read index.html or index._old.html]
+    ReadFiles --> InjectScripts[Inject Header Scripts:<br/>__DINOU_USE_STATIC__ = true<br/>__DINOU_USE_OLD_RSC__ = true<br/>__DINOU_BUILD_ID__ = buildId]
+    InjectScripts --> SetStatus[res.statusCode = status & res.send html]
+    
+    RouteCheck -->|No| DynamicSSR[Dynamic SSR Pipeline]
+    DynamicSSR --> SetupCtx[contextForChild & processLimiter.run Concurrency Guard]
+    SetupCtx --> RenderHTML[renderAppToHtml Fork Subprocess SSR]
+    RenderHTML --> StreamHTML[Stream HTML response]
+    StreamHTML --> Finish[res.on finish]
+    Finish --> GenISG[generatingISG Background Cache Build]`}</CodeBlock>
                 </div>
               </div>
 

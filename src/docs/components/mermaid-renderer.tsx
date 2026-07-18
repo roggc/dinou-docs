@@ -18,9 +18,10 @@ mermaid.initialize({
 
 interface MermaidProps {
   chart: string;
+  minWidth?: string;
 }
 
-export function Mermaid({ chart }: MermaidProps) {
+export function Mermaid({ chart, minWidth }: MermaidProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,7 +37,11 @@ export function Mermaid({ chart }: MermaidProps) {
 
   return (
     <div className="my-6 p-4 rounded-xl bg-slate-900/40 border border-slate-800/80 shadow-inner overflow-x-auto max-w-full">
-      <div className="mermaid min-w-[800px] w-full text-center" ref={ref}>
+      <div 
+        className="mermaid w-full text-center" 
+        style={minWidth ? { minWidth } : undefined}
+        ref={ref}
+      >
         {chart}
       </div>
     </div>

@@ -13,25 +13,22 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const CACHE_REVALIDATE_DIAGRAM = `            [On-Demand Revalidation Trigger]
-                           │
-             ┌─────────────┴─────────────┐
-             ▼                           ▼
-    revalidatePath("/path")      revalidateTag("cms-tag")
-             │                           │
-    (Normalize path URI)                 │
-             │                           │
-    (Backup stale files)                 ▼
-             │                  [Walk dist2/ folders]
-             ▼               (Collect all metadata.json)
-    [buildStaticPage]                    │
-    [generateStaticRSC]                  ▼
-    [generateStaticPage]        [Does tags array match?]
-             │                     ├── Yes ──► Call revalidatePath()
-             ▼                     └── No  ──► Skip
-     (safeRename commit)                 │
-             │                           ▼
-          (Done)                [Promise.all() Execution]`;
+const CACHE_REVALIDATE_DIAGRAM = `graph TD
+    Start[On-Demand Revalidation Trigger] --> PathTrigger[revalidatePath /path]
+    Start --> TagTrigger[revalidateTag cms-tag]
+    
+    PathTrigger --> NormalizePath[Normalize path URI]
+    NormalizePath --> Backup[Backup stale files]
+    Backup --> BuildStatic[buildStaticPage & generateStaticRSC & generateStaticPage]
+    BuildStatic --> Commit[safeRename commit]
+    Commit --> Done[Done / Stop]
+    
+    TagTrigger --> WalkDirs[Walk dist2/ folders & read metadata.json]
+    WalkDirs --> MatchCheck{Does tags array match?}
+    MatchCheck -->|Yes| CallPath[Call revalidatePath matchedPath]
+    MatchCheck -->|No| Skip[Skip]
+    CallPath --> PromiseAll[Promise.all Execution / Await all revalidations]
+    PromiseAll --> Done`;
 
 const CACHE_REVALIDATE_CODE = `const path = require("path");
 const fs = require("fs").promises;
@@ -223,7 +220,7 @@ export default function Page() {
                 The diagram below illustrates how path-based updates differ from the recursive tag-based invalidation search:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{CACHE_REVALIDATE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{CACHE_REVALIDATE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

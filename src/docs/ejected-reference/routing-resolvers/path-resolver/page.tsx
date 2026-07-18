@@ -12,35 +12,19 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Code Implementation Details", level: 2 },
 ];
 
-const RESOLVER_DIAGRAM = `                  getFilePathAndDynamicParams(segments, fileName)
-                                        │
-                                        ▼
-                           ┌─────────────────────────┐
-                           │      Iterate Path       │
-                           │   (Crawl folderPath)    │
-                           └────────────┬────────────┘
-                                        │
-             ┌──────────────────────────┼──────────────────────────┐
-             ▼                          ▼                          ▼
-   ┌──────────────────┐       ┌──────────────────┐       ┌──────────────────┐
-   │  Static Match    │       │  Dynamic Match   │       │  Catch-all Match │
-   │  (Folder exists) │       │  ([paramName])   │       │  ([[...slug]])   │
-   └─────────┬────────┘       └─────────┬────────┘       └─────────┬────────┘
-             │                          │                          │
-             ▼                          ▼                          ▼
-       Descend into              Add key:value              Extract remaining
-       folder segment             to dParams                 array to dParams
-             │                          │                          │
-             └──────────────────────────┼──────────────────────────┘
-                                        │
-                                        ▼
-                           ┌─────────────────────────┐
-                           │       getSlots()        │
-                           │   (Crawl folder for @)  │
-                           └────────────┬────────────┘
-                                        │
-                                        ▼
-                          [Return [file, dParams, slots]]`;
+const RESOLVER_DIAGRAM = `graph TD
+    Start[getFilePathAndDynamicParams segments, fileName] --> Loop[Iterate Path: Crawl folderPath]
+    
+    Loop --> MatchType{Match Segment Type}
+    MatchType -->|Static Match| Static[Descend into folder segment]
+    MatchType -->|Dynamic Match: param| Dynamic[Add parameter key:value to dynamic params]
+    MatchType -->|Catch-all Match: slug| CatchAll[Extract remaining segment array to dynamic params]
+    
+    Static --> Slots[getSlots: Crawl folder for @ slots]
+    Dynamic --> Slots
+    CatchAll --> Slots
+    
+    Slots --> Return[Return pageFilePath, dynamicParams, slotsMap]`;
 
 const RESOLVER_CODE = `const path = require("path");
 const { existsSync, readdirSync } = require("./vfs");
@@ -184,7 +168,7 @@ export default function Page() {
                 The flowchart below traces how incoming path segments are evaluated to locate files and extract request props:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{RESOLVER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{RESOLVER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

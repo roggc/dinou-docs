@@ -11,6 +11,7 @@ interface CodeBlockProps {
   language?: string;
   className?: string;
   containerClassName?: string;
+  minWidth?: string;
 }
 
 export function CodeBlock({
@@ -18,6 +19,7 @@ export function CodeBlock({
   language = "typescript",
   className,
   containerClassName,
+  minWidth,
 }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
@@ -28,7 +30,7 @@ export function CodeBlock({
   };
 
   if (language === "mermaid") {
-    return <Mermaid chart={children} />;
+    return <Mermaid chart={children} minWidth={minWidth} />;
   }
 
   return (

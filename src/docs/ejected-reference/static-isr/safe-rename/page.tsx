@@ -12,28 +12,15 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const RENAME_FLOW_DIAGRAM = `                  safeRename(oldPath, newPath)
-                               │
-                               ▼
-                        [Iterate Loop]
-                      (Up to 5 attempts)
-                               │
-                               ▼
-                       [fs.rename(src, dest)]
-                               │
-             ┌─────────────────┴─────────────────┐
-             ▼                                   ▼
-        [Success]                            [Exception]
-             │                                   │
-          Return!                     [Is error EPERM or EBUSY?]
-                                           ├── No  ──► Re-throw error (Abort)
-                                           └── Yes ──► Calculate Backoff Delay
-                                                           │
-                                                           ▼
-                                                       [Wait Delay]
-                                                           │
-                                                           ▼
-                                                     Retry Loop pass`;
+const RENAME_FLOW_DIAGRAM = `graph TD
+    Start[safeRename oldPath, newPath] --> Loop[Iterate loop: 5 attempts]
+    Loop --> TryRename[fs.rename src, dest]
+    TryRename -->|Success| Return[Return success]
+    TryRename -->|Exception| ErrorCheck{Is error EPERM or EBUSY?}
+    ErrorCheck -->|No| Abort[Re-throw error / Abort]
+    ErrorCheck -->|Yes| CalcDelay[Calculate Backoff Delay]
+    CalcDelay --> Wait[Wait for delay ms]
+    Wait --> Loop`;
 
 const RENAME_CODE = `const fs = require("fs").promises;
 
@@ -108,7 +95,7 @@ export default function Page() {
                 The chart below traces the progressive retry loop triggered when file operations encounter active locks:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{RENAME_FLOW_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{RENAME_FLOW_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

@@ -12,26 +12,20 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Code Walkthrough", level: 2 },
 ];
 
-const MANIFEST_FLOW_DIAGRAM = `                     getAssetFromManifest(name)
-                                 │
-                                 ▼
-                     [Verify Environment state]
-                                 │
-         ┌───────────────────────┴───────────────────────┐
-         ▼                                               ▼
-   [Production]                                    [Development]
-         │                                               │
-   Read dist3/manifest.json                        Check process.env.DINOU_BUILD_TOOL
-   (Save in 'manifest' cache)                            ├── webpack ──► Read public/manifest.json
-         │                                               └── other   ──► Bypass (Use name as-is)
-         └───────────────────────┬───────────────────────┘
-                                 │
-                                 ▼
-                    [Extract asset mapped path]
-                    e.g. "main.js" ──► "main-1a2b3c4d.js"
-                                 │
-                                 ▼
-                    Return "/" + hashed_filename`;
+const MANIFEST_FLOW_DIAGRAM = `graph TD
+    Start[getAssetFromManifest name] --> EnvCheck{Verify Environment state}
+    
+    EnvCheck -->|Production| Prod[Read dist3/manifest.json & save in manifest cache]
+    EnvCheck -->|Development| DevCheck{Check process.env.DINOU_BUILD_TOOL}
+    
+    DevCheck -->|webpack| ReadWeb[Read public/manifest.json]
+    DevCheck -->|other| Bypass[Bypass / Use name as-is]
+    
+    Prod --> MapAsset[Extract asset mapped path e.g. main.js to main-1a2b3c4d.js]
+    ReadWeb --> MapAsset
+    Bypass --> MapAsset
+    
+    MapAsset --> Return[Return / + hashed_filename]`;
 
 const ASSET_RESOLVER_CODE = `const fs = require("fs");
 const path = require("path");
@@ -106,7 +100,7 @@ export default function Page() {
                 The chart below traces how assets are resolved based on the environment:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{MANIFEST_FLOW_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{MANIFEST_FLOW_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

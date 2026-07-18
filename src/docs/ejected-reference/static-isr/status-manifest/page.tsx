@@ -12,20 +12,16 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const MANIFEST_DIAGRAM = `                    status-manifest.js
-                             │
-                             ▼
-                      [statusMap (Map)]
-                             │
-            ┌────────────────┴────────────────┐
-            ▼                                 ▼
-       getStatus(path)                updateStatus(path, status)
-            │                                 │
-     Retrieves status                         │
-     from map key                             ▼
-                                  Check if status has changed
-                                       ├── Yes ──► Set new key { status }
-                                       └── No  ──► return (No-op)`;
+const MANIFEST_DIAGRAM = `graph TD
+    Start[status-manifest.js] --> MapInit[statusMap Map Registry]
+    
+    MapInit --> GetStatus[getStatus path]
+    GetStatus --> ReturnStatus[Retrieve key status from Map]
+
+    MapInit --> UpdateStatus[updateStatus path, status]
+    UpdateStatus --> CheckChange{Has status changed?}
+    CheckChange -->|Yes| SetMap[Set Map key to new status]
+    CheckChange -->|No| NoOp[No-op / Return]`;
 
 const MANIFEST_CODE = `const statusMap = new Map(); // In-memory compilation status registry
 
@@ -85,7 +81,7 @@ export default function Page() {
                 The chart below traces the simple, high-performance key-value operations exposed by the manifest:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{MANIFEST_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{MANIFEST_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

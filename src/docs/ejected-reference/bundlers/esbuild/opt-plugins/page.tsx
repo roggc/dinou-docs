@@ -15,48 +15,27 @@ const tocItems = [
   { id: "code-manifest", title: "⚙️ manifest-generator-plugin.mjs", level: 2 },
 ];
 
-const STABLE_CHUNKS_DIAGRAM = `                        metafile.outputs from esbuild
-                                      │
-                         [Loop through output chunks]
-                                      │
-                        Stable chunk name calculation
-                  src/components/Button.tsx -> chunk-components-Button.js
-                                      │
-             ┌────────────────────────┴────────────────────────┐
-             ▼                                                 ▼
-        [Rename Chunk]                                  [Rename Map]
-    Update key: chunk-stable.js                     Update sourceMappingURL references
-             │                                                 │
-             └────────────────────────┬────────────────────────┘
-                                      │
-                                      ▼
-                        Replace import specifiers
-                     inside compiled javascript chunks`;
+const STABLE_CHUNKS_DIAGRAM = `graph TD
+    Start[metafile.outputs from esbuild] --> Loop[Loop through output chunks]
+    Loop --> Calc[Stable chunk name calculation<br/>src/components/Button.tsx -> chunk-components-Button.js]
+    
+    Calc --> Rename[Rename Chunk: Update key to chunk-stable.js]
+    Calc --> RenameMap[Rename Map: Update sourceMappingURL references]
+    
+    Rename --> Replace[Replace import specifiers inside compiled javascript chunks]
+    RenameMap --> Replace`;
 
-const SKIP_ENTRIES_DIAGRAM = `                             esbuild starts build
-                                      │
-                                      ▼
-                         [Check build.entryPoints]
-                                      │
-                        Are all files present on disk?
-                               ├── Yes ──► Continue compilation
-                               └── No  ──► Emit warning block
-                                           Halt/Abort build`;
+const SKIP_ENTRIES_DIAGRAM = `graph TD
+    Start[esbuild starts build] --> EntryCheck[Check build.entryPoints]
+    EntryCheck --> DiskCheck{Are all files present on disk?}
+    DiskCheck -->|Yes| Continue[Continue compilation]
+    DiskCheck -->|No| Warn[Emit warning block & Halt/Abort build]`;
 
-const MANIFEST_DIAGRAM = `                             esbuild finishes build
-                                      │
-                                      ▼
-                        Read metafile.outputs entrypoints
-                                      │
-                       Filter framework entries:
-                       "main", "error", "serverFunctionProxy"
-                                      │
-                                      ▼
-                       Extract hashed output filename
-                       e.g. main -> main-1a2b3c4d.js
-                                      │
-                                      ▼
-                        Write manifest.json metadata`;
+const MANIFEST_DIAGRAM = `graph TD
+    Start[esbuild finishes build] --> ReadEntries[Read metafile.outputs entrypoints]
+    ReadEntries --> Filter[Filter framework entries:<br/>main, error, serverFunctionProxy]
+    Filter --> Extract[Extract hashed output filename<br/>e.g. main -> main-1a2b3c4d.js]
+    Extract --> Write[Write manifest.json metadata]`;
 
 const STABLE_CHUNKS_CODE = `import path from "node:path";
 
@@ -261,7 +240,7 @@ export default function Page() {
                 The flowchart below traces the hash stripping and reference renaming steps of the stable chunk names plugin:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{STABLE_CHUNKS_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{STABLE_CHUNKS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -274,7 +253,7 @@ export default function Page() {
                 The flowchart below shows how compilation is aborted if a required entry file is missing:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{SKIP_ENTRIES_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{SKIP_ENTRIES_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -287,7 +266,7 @@ export default function Page() {
                 The flowchart below shows how entrypoint names are mapped to final hashed filenames in the build manifest:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{MANIFEST_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{MANIFEST_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

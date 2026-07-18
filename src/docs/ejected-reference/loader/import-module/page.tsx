@@ -12,29 +12,22 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const IMPORT_DIAGRAM = `                              importModule(modulePath)
-                                         │
-                                         ▼
-                             [Resolve absolute path]
-                                         │
-                        ┌────────────────┴────────────────┐
-                        ▼                                 ▼
-                  [isWebpack = true]             [isWebpack = false]
-                        │                                 │
-                   [Production]                           │
-            require(absPath) (Cached)                     │
-                        │                                 │
-                   [Development]                          │
-            Delete require.cache[path]                    │
-            require(absPath) (Live reload)                │
-                        │                                 │
-          Fallback to dynamic ESM import                  ▼
-                        │                            [Production]
-                        │                       import(fileUrl) (Cached)
-                        │                                 │
-                        │                            [Development]
-                        ▼                       Append \`?t=[timestamp]\`
-             Dynamic import(fileUrl) ────────►  import(fileUrl) (Live reload)`;
+const IMPORT_DIAGRAM = `graph TD
+    Start[importModule modulePath] --> Resolve[Resolve absolute path]
+    Resolve --> WebpackCheck{isWebpack?}
+    
+    WebpackCheck -->|Yes| CJS[CJS Context]
+    CJS --> EnvCheck{Environment?}
+    EnvCheck -->|Production| RequireProd[require absPath Cached]
+    EnvCheck -->|Development| RequireDev[Delete require.cache path & require absPath Live reload]
+    RequireProd --> FallbackESM[Fallback to dynamic ESM import]
+    RequireDev --> FallbackESM
+
+    WebpackCheck -->|No| ESM[ESM Context]
+    FallbackESM --> ESM
+    ESM --> EnvCheck2{Environment?}
+    EnvCheck2 -->|Production| ImportProd[import fileUrl Cached]
+    EnvCheck2 -->|Development| ImportDev[Append ?t=timestamp & import fileUrl Live reload]`;
 
 const IMPORT_CODE = `const { pathToFileURL } = require("url");
 const path = require("path");
@@ -127,7 +120,7 @@ export default function Page() {
                 The flowchart below shows how modules are imported based on the bundler type and environment state:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{IMPORT_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{IMPORT_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

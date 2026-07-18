@@ -12,24 +12,22 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const REGISTER_DIAGRAM = `                           getConfigFileIfExists()
-                                      │
-                                      ▼
-                        [Verify tsconfig.json exists]
-                                ├── Yes ──► Return tsconfig.json path
-                                └── No  ──► [Verify jsconfig.json exists]
-                                                ├── Yes ──► Return jsconfig.json path
-                                                └── No  ──► Return null
-                                                                │
-                                                                ▼
-                                                       [ConfigFile Found?]
-                                                                ├── No  ──► Skip (No-op)
-                                                                └── Yes ──► Require config
-                                                                            Read compilerOptions
-                                                                                │
-                                                                                ▼
-                                                                     tsconfigPaths.register()
-                                                                     Injects alias registry`;
+const REGISTER_DIAGRAM = `graph TD
+    Start[getConfigFileIfExists] --> TSConfigCheck{Verify tsconfig.json exists?}
+    
+    TSConfigCheck -->|Yes| ReturnTS[Return tsconfig.json path]
+    TSConfigCheck -->|No| JSConfigCheck{Verify jsconfig.json exists?}
+    
+    JSConfigCheck -->|Yes| ReturnJS[Return jsconfig.json path]
+    JSConfigCheck -->|No| ReturnNull[Return null]
+    
+    ReturnTS --> ConfigCheck{ConfigFile Found?}
+    ReturnJS --> ConfigCheck
+    ReturnNull --> ConfigCheck
+    
+    ConfigCheck -->|No| NoOp[Skip / No-op]
+    ConfigCheck -->|Yes| LoadConfig[Require config & Read compilerOptions]
+    LoadConfig --> RegisterPaths[tsconfigPaths.register Injects alias registry]`;
 
 const REGISTER_CODE = `const tsconfigPaths = require("tsconfig-paths");
 const path = require("path");
@@ -103,7 +101,7 @@ export default function Page() {
                 The flowchart below traces the path alias registration sequence during server initialization:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{REGISTER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{REGISTER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

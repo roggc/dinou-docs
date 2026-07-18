@@ -13,33 +13,19 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const ISG_COMPILATION_DIAGRAM = `       🌐 User GET /posts/42 (Not Compiled at Build Time)
-                      │
-                      ▼
-         [Does file exist on disk?]
-           ├── Yes ──► Serve Static index.html (Skip)
-           │
-           └── No  ──► Call generatingISG()
-                           │
-                           ▼
-                  [Mutex Lock Pool]
-             (Check regenerating.has(path))
-                           │
-           ┌───────────────┴───────────────┐
-           ▼                               ▼
-       [Locked]                         [Free]
-           │                               │
-      (Exit/Skip)                          ▼
-                                   1. Set Mutex Lock
-                                   2. Run buildStaticPage()
-                                           │
-                                           ▼
-                                   [Is dynamic bailout?]
-                                    ├── Yes ──► Switch Server-Side Render (isDynamic=true)
-                                    └── No  ──► 1. Compile RSC & safeRename()
-                                                2. Compile HTML & safeRename()
-                                                3. updateStatus() to cached
-                                                4. Release Mutex Lock`;
+const ISG_COMPILATION_DIAGRAM = `graph TD
+    Start[🌐 User GET /posts/42 Not Cached] --> DiskCheck{Does file exist on disk?}
+    
+    DiskCheck -->|Yes| ServeStatic[Serve Static index.html / Skip]
+    DiskCheck -->|No| CallISG[Call generatingISG path]
+    
+    CallISG --> MutexCheck{Mutex Lock Pool Active?}
+    MutexCheck -->|Yes| Exit[Exit / Skip]
+    MutexCheck -->|No| RunISG[1. Set Mutex Lock<br/>2. Run buildStaticPage]
+    
+    RunISG --> BailCheck{Is dynamic bailout?}
+    BailCheck -->|Yes| SSR[Switch to dynamic Server-Side Render isDynamic=true]
+    BailCheck -->|No| SaveCache[1. Compile RSC & safeRename<br/>2. Compile HTML & safeRename<br/>3. updateStatus to cached<br/>4. Release Mutex Lock]`;
 
 const GENERATING_ISG_CODE = `const fs = require("fs").promises;
 const path = require("path");
@@ -166,7 +152,7 @@ export default function Page() {
                 Below is the lifecycle of an incoming request on a non-compiled path:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{ISG_COMPILATION_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{ISG_COMPILATION_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

@@ -12,25 +12,14 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const RSCS_PIPELINE_DIAGRAM = `                  generateStaticRSCs(routes)
-                             │
-                             ▼
-              [Read React Client Manifest]
-                             │
-                             ▼
-                    [For each route...]
-                             │
-                             ▼
-             [Inject Mock Request & Response]
-                             │
-                             ▼
-             [requestStorage.run(mockContext)]
-                             │
-                    getJSX(reqPath) ──► Loads React Tree
-                    renderToPipeableStream() ──► Serializes stream
-                             │
-                             ▼
-               [Write directly to dist2/rsc.rsc]`;
+const RSCS_PIPELINE_DIAGRAM = `graph TD
+    Start[generateStaticRSCs routes] --> ReadManifest[Read React Client Manifest]
+    ReadManifest --> LoopRoutes[For each route...]
+    LoopRoutes --> MockContext[Inject Mock Request & Response Context]
+    MockContext --> RunALS[requestStorage.run mockContext]
+    RunALS --> LoadJSX[getJSX reqPath Loads React Tree]
+    LoadJSX --> Stream[renderToPipeableStream Serializes stream]
+    Stream --> WriteRSC[Write directly to dist2/rsc.rsc]`;
 
 const RSCS_PIPELINE_CODE = `const fs = require("fs");
 const path = require("path");
@@ -180,7 +169,7 @@ export default function Page() {
                 The flowchart below shows how routes are processed through the bulk serialization pipeline:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{RSCS_PIPELINE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{RSCS_PIPELINE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

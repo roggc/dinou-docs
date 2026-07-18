@@ -14,47 +14,34 @@ const tocItems = [
   { id: "code-extractor", title: "⚙️ postcss-extract-plugin.js", level: 2 },
 ];
 
-const ASSETS_DIAGRAM = `                             esbuild Compiles assets
-                                       │
-                      onResolve: Intercept asset formats
-                                       │
-             ┌─────────────────────────┴─────────────────────────┐
-             ▼                                                   ▼
-       [kind = entry-point]                                [Import/Require]
-     Namespace: "dinou-asset-entry"                       Namespace: "dinou-asset"
-             │                                                   │
-             └─────────────────────────┬─────────────────────────┘
-                                       │
-                                       ▼
-                             onEnd: Collect outputs
-                                       │
-             ┌─────────────────────────┴─────────────────────────┐
-             ▼                                                   ▼
-     [Normal Asset Chunks]                               [Inlined JS Chunks]
-     Rename to scoped paths                              Locate "// dinou-asset:..." comment
-     e.g., assets/scoped-hash.png                        Extract asset binary contents
-                                                         Write asset to assets/scoped-hash.png
-                                                         Replace chunk var to point to asset`;
+const ASSETS_DIAGRAM = `graph TD
+    Start[esbuild Compiles assets] --> Resolve[onResolve: Intercept asset formats]
+    
+    Resolve --> KindCheck{Kind of load?}
+    KindCheck -->|kind = entry-point| Entry[Namespace: dinou-asset-entry]
+    KindCheck -->|Import/Require| Import[Namespace: dinou-asset]
+    
+    Entry --> End[onEnd: Collect outputs]
+    Import --> End
+    
+    End --> OutputType{Output Type?}
+    OutputType -->|Normal Asset Chunks| Normal[Rename to scoped paths<br/>e.g., assets/scoped-hash.png]
+    OutputType -->|Inlined JS Chunks| Inlined[Locate // dinou-asset:... comment & Extract asset binary contents & Write asset & Replace chunk var to point to asset]`;
 
-const CSS_DIAGRAM = `                           esbuild imports .css file
-                                       │
-                                       ▼
-                       postcss([ ...plugins, extractor ])
-                                       │
-            ┌──────────────────────────┼──────────────────────────┐
-            ▼                          ▼                          ▼
-     [postcssImport]           [postCssModules]             [extractor]
-     Resolve alias using       Scoped module names        OnceExit: append rules,
-     getAbsPathWithExt()       e.g. .button-scoped        root.removeAll()
-            │                          │                          │
-            └──────────────────────────┼──────────────────────────┘
-                                       ▼
-                             [File Type Evaluation]
-                                       │
-                ┌──────────────────────┴──────────────────────┐
-                ▼                                             ▼
-          [module.css]                                   [global.css]
-     export default { button: ... }                  /* global: styles */`;
+const CSS_DIAGRAM = `graph TD
+    Start[esbuild imports .css file] --> RunPostCSS[postcss plugins & extractor]
+    
+    RunPostCSS --> postcssImport[postcssImport: Resolve alias using getAbsPathWithExt]
+    RunPostCSS --> postCssModules[postCssModules: Scoped module names e.g. .button-scoped]
+    RunPostCSS --> extractor[extractor: OnceExit append rules & root.removeAll]
+    
+    postcssImport --> Eval[File Type Evaluation]
+    postCssModules --> Eval
+    extractor --> Eval
+    
+    Eval --> FileType{CSS File Type?}
+    FileType -->|module.css| Module[export default classnames map]
+    FileType -->|global.css| Global[Global styles rule injection]`;
 
 const ASSETS_CODE = `import fs from "node:fs/promises";
 import path from "node:path";
@@ -376,7 +363,7 @@ export default function Page() {
                 The flowchart below shows how static files are intercepted, scoped, and resolved from JavaScript chunks:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{ASSETS_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{ASSETS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -389,7 +376,7 @@ export default function Page() {
                 The flowchart below shows how CSS Modules and tailwind styles are parsed and compiled into `styles.css`:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{CSS_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{CSS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

@@ -15,46 +15,26 @@ const tocItems = [
   { id: "code-babel", title: "⚙️ babel-react-compiler-plugin.mjs", level: 2 },
 ];
 
-const MANIFEST_DIAGRAM = `                        metafile.outputs from esbuild
-                                      │
-                         [Loop through output chunks]
-                                      │
-                        Contains "use client" directive?
-                               ├── No  ──► Skip module
-                               └── Yes ──► parseExports(code)
-                                                │
-                                                ▼
-                                    [Update manifest map]
-                                 manifestKey -> Hashed chunk path
-                                                │
-                                                ▼
-                             Write react-client-manifest.json`;
+const MANIFEST_DIAGRAM = `graph TD
+    Start[metafile.outputs from esbuild] --> Loop[Loop through output chunks]
+    Loop --> DirectiveCheck{Contains 'use client' directive?}
+    DirectiveCheck -->|No| Skip[Skip module]
+    DirectiveCheck -->|Yes| Parse[parseExports code]
+    Parse --> UpdateMap[Update manifest map:<br/>manifestKey -> Hashed chunk path]
+    UpdateMap --> WriteManifest[Write react-client-manifest.json]`;
 
-const SERVER_DIAGRAM = `                             File loaded by esbuild
-                                      │
-                         Contains "use server" directive?
-                               ├── No  ──► Proceed (Null)
-                               └── Yes ──► parseExports(code)
-                                                │
-                                                ▼
-                                    [Generate Proxy Code]
-                                import createServerFunctionProxy
-                                export proxies of all exports
-                                                │
-                                                ▼
-                                Return replacement contents`;
+const SERVER_DIAGRAM = `graph TD
+    Start[File loaded by esbuild] --> DirectiveCheck{Contains 'use server' directive?}
+    DirectiveCheck -->|No| Proceed[Proceed Null]
+    DirectiveCheck -->|Yes| Parse[parseExports code]
+    Parse --> GenProxy[Generate Proxy Code:<br/>import createServerFunctionProxy<br/>export proxies of all exports]
+    GenProxy --> Return[Return replacement contents]`;
 
-const COMPILER_DIAGRAM = `                             File loaded by esbuild
-                                      │
-                              Is an entrypoint?
-                               ├── No  ──► Proceed (Null)
-                               └── Yes ──► babel.transformAsync()
-                                            presets: @babel/preset-react,
-                                                     @babel/preset-typescript
-                                            plugins: babel-plugin-react-compiler
-                                                │
-                                                ▼
-                                   Return compiled JS code`;
+const COMPILER_DIAGRAM = `graph TD
+    Start[File loaded by esbuild] --> EntryCheck{Is an entrypoint?}
+    EntryCheck -->|No| Proceed[Proceed Null]
+    EntryCheck -->|Yes| Transpile[babel.transformAsync:<br/>presets: @babel/preset-react, @babel/preset-typescript<br/>plugins: babel-plugin-react-compiler]
+    Transpile --> Return[Return compiled JS code]`;
 
 const MANIFEST_CODE = `import fs from "node:fs/promises";
 import path from "node:path";
@@ -267,7 +247,7 @@ export default function Page() {
                 The flowchart below traces the client component export parsing and manifest indexing process:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{MANIFEST_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{MANIFEST_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -280,7 +260,7 @@ export default function Page() {
                 The flowchart below shows how Server Actions are transformed into client-side fetch proxy calls:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{SERVER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{SERVER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -293,7 +273,7 @@ export default function Page() {
                 The flowchart below shows the Babel bridge that compiles React 19 auto-memoized trees:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{COMPILER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{COMPILER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

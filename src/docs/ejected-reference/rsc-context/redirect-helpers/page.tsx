@@ -13,36 +13,17 @@ const tocItems = [
   { id: "code-walkthrough-client", title: "⚙️ Client Code (client-redirect.jsx)", level: 2 },
 ];
 
-const REDIRECT_DIAGRAM = `                               redirect(destination)
-                                         │
-                                         ▼
-                             [Are we on the Server?]
-                                         │
-                ┌────────────────────────┴────────────────────────┐
-                ▼                                                 ▼
-            [Server]                                           [Client]
-                │                                                 │
-        [Get requestContext]                                      │
-                │                                                 │
-        Headers NOT sent?                                         │
-     ├── Yes ──► res.redirect() (Express 307)                     │
-     └── No  ──► Fallback to component                            │
-                │                                                 │
-                └────────────────────────┬────────────────────────┘
-                                         │
-                                         ▼
-                            <ClientRedirect to={dest} />
-                                         │
-                                         ▼
-                            [Are we in the Browser?]
-                                         │
-                                         ▼
-                         window.__DINOU_ROUTER_NAVIGATE__()
-                                         │
-                                         ▼
-                           [React Suspense Intercept]
-                            throw new Promise(() => {})
-                           (Suspends intermediate render)`;
+const REDIRECT_DIAGRAM = `graph TD
+    Start[redirect destination] --> ServerCheck{Are we on the Server?}
+    ServerCheck -->|Yes| ContextCheck[Get requestContext]
+    ContextCheck --> HeadersCheck{Headers already sent?}
+    HeadersCheck -->|No| RedirectExpress[res.redirect Express 307]
+    HeadersCheck -->|Yes| FallbackClient[Return ClientRedirect component]
+    ServerCheck -->|No| FallbackClient
+    RedirectExpress --> FallbackClient
+    FallbackClient --> BrowserCheck{Are we in the Browser?}
+    BrowserCheck -->|Yes| Navigate[window.__DINOU_ROUTER_NAVIGATE__]
+    Navigate --> Suspense[React Suspense Intercept: throw pending Promise]`;
 
 const REDIRECT_SERVER_CODE = `import { ClientRedirect } from "./client-redirect.jsx";
 
@@ -149,7 +130,7 @@ export default function Page() {
                 The flowchart below traces the redirect resolution checks from server context detection to client suspense interception:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{REDIRECT_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{REDIRECT_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
