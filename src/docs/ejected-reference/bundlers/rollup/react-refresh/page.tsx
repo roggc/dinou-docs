@@ -10,6 +10,9 @@ const tocItems = [
   { id: "refresh-flow", title: "📊 React Refresh Wrap Flow", level: 2 },
   { id: "code-hmr-plugin", title: "⚙️ rollup-plugin-esm-hmr.js", level: 2 },
   { id: "code-wrap", title: "⚙️ react-refresh-wrap-modules.js", level: 2 },
+  { id: "code-boundary", title: "⚙️ is-react-refresh-boundary.js", level: 2 },
+  { id: "code-runtime", title: "⚙️ react-refresh-runtime.js", level: 2 },
+  { id: "code-entry", title: "⚙️ react-refresh-entry.js", level: 2 },
   { id: "code-server", title: "⚙️ esm-hmr/server.js", level: 2 },
   { id: "code-client", title: "⚙️ esm-hmr/client.js", level: 2 },
 ];
@@ -195,6 +198,65 @@ if (import.meta.hot) {
 }
 
 module.exports = reactRefreshWrapModules;`;
+
+const BOUNDARY_CODE = `export function isReactRefreshBoundary(RefreshRuntime, moduleExports) {
+  if (RefreshRuntime.isLikelyComponentType(moduleExports)) {
+    return true;
+  }
+  if (moduleExports == null || typeof moduleExports !== "object") {
+    return false;
+  }
+
+  let hasExports = false;
+  let areAllExportsComponents = true;
+  for (const key in moduleExports) {
+    if (key === "__esModule") continue;
+
+    hasExports = true;
+    const desc = Object.getOwnPropertyDescriptor(moduleExports, key);
+    if (desc && desc.get) return false;
+
+    const exportValue = moduleExports[key];
+    if (!RefreshRuntime.isLikelyComponentType(exportValue)) {
+      areAllExportsComponents = false;
+    }
+  }
+
+  return hasExports && areAllExportsComponents;
+}`;
+
+const RUNTIME_CODE = `import RefreshRuntime from "/refresh.js";
+import { isReactRefreshBoundary } from "./is-react-refresh-boundary";
+
+if (
+  typeof window !== "undefined" &&
+  !window.__REACT_REFRESH_RUNTIME_INSTALLED__
+) {
+  RefreshRuntime.injectIntoGlobalHook(window);
+  window.$RefreshReg$ = () => {};
+  window.$RefreshSig$ = () => (type) => type;
+  window.__REACT_REFRESH_RUNTIME_INSTALLED__ = true;
+
+  let refreshTimeout;
+  window.performReactRefresh = RefreshRuntime.performReactRefresh;
+  window.__debouncePerformReactRefresh = () => {
+    clearTimeout(refreshTimeout);
+    refreshTimeout = setTimeout(() => {
+      try {
+        RefreshRuntime.performReactRefresh();
+      } catch (err) {
+        console.warn("React Refresh failed:", err);
+      }
+    }, 30); // 30ms debounce
+  };
+
+  window.__isReactRefreshBoundary = (moduleExports) =>
+    isReactRefreshBoundary(RefreshRuntime, moduleExports);
+}`;
+
+const ENTRY_CODE = `import * as RefreshRuntime from "react-refresh/runtime";
+
+export { RefreshRuntime as default };`;
 
 const SERVER_CODE = `const WebSocket = require("ws");
 
@@ -500,6 +562,9 @@ export default function Page() {
               <strong>Key Files Location:</strong> <br />
               • HMR Compiler: <code>./dinou/rollup/react-refresh/rollup-plugin-esm-hmr.js</code> <br />
               • Module Wrapper: <code>./dinou/rollup/react-refresh/react-refresh-wrap-modules.js</code> <br />
+              • Boundary Check: <code>./dinou/rollup/react-refresh/is-react-refresh-boundary.js</code> <br />
+              • Global Injector: <code>./dinou/rollup/react-refresh/react-refresh-runtime.js</code> <br />
+              • Library Wrapper: <code>./dinou/rollup/react-refresh/react-refresh-entry.js</code> <br />
               • HMR WS Server: <code>./dinou/rollup/react-refresh/esm-hmr/server.js</code> <br />
               • HMR WS Client: <code>./dinou/rollup/react-refresh/esm-hmr/client.js</code>
             </blockquote>
@@ -564,6 +629,45 @@ export default function Page() {
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{WRAP_CODE}</CodeBlock>
+              </div>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* CODE BOUNDARY */}
+            <section id="code-boundary">
+              <h2>⚙️ is-react-refresh-boundary.js</h2>
+              <p>
+                Below is the code helper used at runtime to determine if a compiled module exports components that qualify for a hot swap boundary:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{BOUNDARY_CODE}</CodeBlock>
+              </div>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* CODE RUNTIME */}
+            <section id="code-runtime">
+              <h2>⚙️ react-refresh-runtime.js</h2>
+              <p>
+                Below is the runtime injector code that loads React Fast Refresh hooks on window and sets up debounce refresh:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{RUNTIME_CODE}</CodeBlock>
+              </div>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* CODE ENTRY */}
+            <section id="code-entry">
+              <h2>⚙️ react-refresh-entry.js</h2>
+              <p>
+                Below is the library wrapper module that exports react-refresh's core runtime logic:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{ENTRY_CODE}</CodeBlock>
               </div>
             </section>
 
