@@ -1,0 +1,162 @@
+"use client";
+
+import { TableOfContents } from "@/docs/components/table-of-contents";
+import { CodeBlock } from "@/docs/components/code-block";
+import { Alert, AlertDescription, AlertTitle } from "@/docs/components/ui/alert";
+import { Lock, HardDrive, ShieldAlert, Cpu } from "lucide-react";
+
+const tocItems = [
+  { id: "overview", title: "💡 Overview", level: 2 },
+  { id: "rename-flow", title: "📊 Retry Backoff Flow", level: 2 },
+  { id: "file-locking", title: "🔒 The File Locking Problem", level: 2 },
+  { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
+];
+
+const RENAME_FLOW_DIAGRAM = `                  safeRename(oldPath, newPath)
+                               │
+                               ▼
+                        [Iterate Loop]
+                      (Up to 5 attempts)
+                               │
+                               ▼
+                       [fs.rename(src, dest)]
+                               │
+             ┌─────────────────┴─────────────────┐
+             ▼                                   ▼
+        [Success]                            [Exception]
+             │                                   │
+          Return!                     [Is error EPERM or EBUSY?]
+                                           ├── No  ──► Re-throw error (Abort)
+                                           └── Yes ──► Calculate Backoff Delay
+                                                           │
+                                                           ▼
+                                                       [Wait Delay]
+                                                           │
+                                                           ▼
+                                                     Retry Loop pass`;
+
+const RENAME_CODE = `const fs = require("fs").promises;
+
+async function safeRename(oldPath, newPath, retries = 5, delay = 100) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      // 1. Trigger native filesystem rename operation (Atomic)
+      await fs.rename(oldPath, newPath);
+      return;
+    } catch (err) {
+      // 2. If the error is not EPERM (Lock) or EBUSY (Busy), throw it immediately
+      if (err.code !== "EPERM" && err.code !== "EBUSY") {
+        throw err;
+      }
+
+      // 3. If we run out of retries, log error and throw
+      if (i === retries - 1) {
+        console.error(
+          \`[ISR] Failed to rename locked file after \${retries} attempts: \${newPath}\`
+        );
+        throw err;
+      }
+
+      // 4. Calculate delay with progressive linear scale: 100ms, 200ms, 300ms, etc.
+      await new Promise((resolve) => setTimeout(resolve, delay * (i + 1)));
+    }
+  }
+}
+
+module.exports = { safeRename };`;
+
+export default function Page() {
+  return (
+    <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
+      <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
+        <div className="container max-w-4xl px-4 md:px-6 mx-auto">
+          {/* Header */}
+          <div className="mb-8 space-y-4">
+            <div className="flex items-center space-x-2">
+              <Lock className="h-6 w-6 text-primary" />
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                Atomic Committer (safe-rename.js)
+              </h1>
+            </div>
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              Understand atomic file system operations, dynamic read/write file lock overrides, and progressive linear backoff retry loops.
+            </p>
+          </div>
+
+          <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
+            <blockquote>
+              <strong>Key File Location:</strong> <code>./dinou/core/safe-rename.js</code>
+            </blockquote>
+
+            {/* OVERVIEW */}
+            <section id="overview">
+              <h2>💡 Overview</h2>
+              <p>
+                In production servers, updating files on disk can lead to dynamic page crashes. If a background thread overwrites a page's <code>index.html</code> while a user is loading that exact file, the browser may receive a partially written, corrupt document.
+              </p>
+              <p>
+                Dinou solves this using <strong>atomic commits</strong>. The compiler writes assets to temporary files first. Once compilation succeeds, it runs <code>safeRename()</code> to replace the old file instantly at the operating system level, ensuring zero downtime.
+              </p>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* RETRY FLOW */}
+            <section id="rename-flow">
+              <h2>📊 Retry Backoff Flow</h2>
+              <p>
+                The chart below traces the progressive retry loop triggered when file operations encounter active locks:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="text">{RENAME_FLOW_DIAGRAM}</CodeBlock>
+              </div>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* THE FILE LOCKING PROBLEM */}
+            <section id="file-locking">
+              <h2>🔒 The File Locking Problem</h2>
+              <p>
+                In Windows environments (and some Linux filesystems), when a file is open in a read stream, the OS places a lock on its sector. Trying to rename or delete the file throws <code>EPERM</code> (Operation not permitted) or <code>EBUSY</code> (Resource busy).
+              </p>
+              <p>
+                The <code>safeRename()</code> utility mitigates this by:
+              </p>
+              <ul>
+                <li>
+                  <strong>Targeted Filtering:</strong> If the error is a normal filesystem error (e.g. <code>ENOENT</code> - File not found), it stops and throws immediately.
+                </li>
+                <li>
+                  <strong>Progressive Backoff:</strong> If the file is locked, it sleeps for a progressive linear duration (<code>100ms * loop_iteration</code>) to allow active read streams to close before retrying.
+                </li>
+                <li>
+                  <strong>Failure Threshold:</strong> Aborts and throws after 5 failed retries to prevent infinite execution hangs.
+                </li>
+              </ul>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* CODE WALKTHROUGH */}
+            <section id="code-walkthrough">
+              <h2>⚙️ Complete Code Walkthrough</h2>
+              <p>
+                Below is the full, complete code of <code>safe-rename.js</code>:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{RENAME_CODE}</CodeBlock>
+              </div>
+            </section>
+          </div>
+        </div>
+      </main>
+
+      <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">
+        <div className="sticky top-20">
+          <TableOfContents items={tocItems} />
+        </div>
+      </aside>
+    </div>
+  );
+}

@@ -44,6 +44,7 @@ import {
   Cpu,
   FolderTree,
   Terminal,
+  Compass,
 } from "lucide-react";
 
 const navigation = [
@@ -301,6 +302,75 @@ const navigation = [
         icon: Settings,
       },
       {
+        title: "Routing & Path Resolvers",
+        href: "/docs/ejected-reference/routing-resolvers",
+        icon: Compass,
+        subItems: [
+          {
+            title: "Overview",
+            href: "/docs/ejected-reference/routing-resolvers",
+          },
+          {
+            title: "Route Mapper (get-file-path-and-dynamic-params.js)",
+            href: "/docs/ejected-reference/routing-resolvers/path-resolver",
+          },
+          {
+            title: "Relative URL Resolver (url-resolver.js)",
+            href: "/docs/ejected-reference/routing-resolvers/url-resolver",
+          },
+          {
+            title: "Asset Manifest Loader (get-asset-from-manifest.js)",
+            href: "/docs/ejected-reference/routing-resolvers/asset-resolver",
+          },
+        ],
+      },
+      {
+        title: "RSC Render & Context Utilities",
+        href: "/docs/ejected-reference/rsc-context",
+        icon: Atom,
+        subItems: [
+          {
+            title: "Overview",
+            href: "/docs/ejected-reference/rsc-context",
+          },
+          {
+            title: "JSX Compiler (render-jsx-to-client-jsx.js)",
+            href: "/docs/ejected-reference/rsc-context/jsx-compiler",
+          },
+          {
+            title: "Context Proxy (context-proxy.js)",
+            href: "/docs/ejected-reference/rsc-context/context-proxy",
+          },
+          {
+            title: "Concurrency Manager (concurrency-manager.js)",
+            href: "/docs/ejected-reference/rsc-context/concurrency-manager",
+          },
+          {
+            title: "Error Boundaries Handler (get-error-jsx.js)",
+            href: "/docs/ejected-reference/rsc-context/error-handler",
+          },
+        ],
+      },
+      {
+        title: "Bootstrapping & VFS Utils",
+        href: "/docs/ejected-reference/bootstrap-vfs",
+        icon: Terminal,
+        subItems: [
+          {
+            title: "Overview",
+            href: "/docs/ejected-reference/bootstrap-vfs",
+          },
+          {
+            title: "Path Aliases (register-paths.js)",
+            href: "/docs/ejected-reference/bootstrap-vfs/path-register",
+          },
+          {
+            title: "Virtual File System (vfs.js)",
+            href: "/docs/ejected-reference/bootstrap-vfs/vfs",
+          },
+        ],
+      },
+      {
         title: "Static & ISR Engines",
         href: "/docs/ejected-reference/static-isr",
         icon: RefreshCw,
@@ -324,6 +394,38 @@ const navigation = [
           {
             title: "ISG Engine (generating-isg.js)",
             href: "/docs/ejected-reference/static-isr/generating-isg",
+          },
+          {
+            title: "Orchestrator Entry (generate-static.js)",
+            href: "/docs/ejected-reference/static-isr/generate-static",
+          },
+          {
+            title: "RSC Builder (generate-static-rsc.js)",
+            href: "/docs/ejected-reference/static-isr/generate-static-rsc",
+          },
+          {
+            title: "RSCs Pipeline (generate-static-rscs.js)",
+            href: "/docs/ejected-reference/static-isr/generate-static-rscs",
+          },
+          {
+            title: "HTML Builder (generate-static-page.js)",
+            href: "/docs/ejected-reference/static-isr/generate-static-page",
+          },
+          {
+            title: "HTML Pipeline (generate-static-pages.js)",
+            href: "/docs/ejected-reference/static-isr/generate-static-pages",
+          },
+          {
+            title: "Atomic Committer (safe-rename.js)",
+            href: "/docs/ejected-reference/static-isr/safe-rename",
+          },
+          {
+            title: "Cache Side-Effects (get-ssg-metadata.js)",
+            href: "/docs/ejected-reference/static-isr/get-ssg-metadata",
+          },
+          {
+            title: "Status Manifest (status-manifest.js)",
+            href: "/docs/ejected-reference/static-isr/status-manifest",
           },
         ],
       },
