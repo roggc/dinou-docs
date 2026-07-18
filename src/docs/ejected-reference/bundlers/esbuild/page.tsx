@@ -13,22 +13,15 @@ const tocItems = [
   { id: "normalize-path", title: "📂 Path Normalizer (normalize-path.mjs)", level: 2 },
 ];
 
-const CONFIGS_DIAGRAM = `                          [Select Build Environment]
-                                       │
-            ┌──────────────────────────┴──────────────────────────┐
-            ▼                                                     ▼
-     [Development Config]                                  [Production Config]
-   • getConfigEsbuild()                                  • getConfigEsbuildProd()
-   • outdir = "public"                                   • outdir = "dist3"
-   • sourcemap = true                                    • sourcemap = false (Minified)
-   • filenames: [name]                                   • filenames: [name]-[hash]
-   • plugins:                                            • plugins:
-      - TsconfigPathsPlugin                                 - babelReactCompilerPlugin
-      - cssProcessorPlugin                                  - cssProcessorPlugin
-      - reactClientManifestPlugin                           - reactClientManifestPlugin
-      - stableChunkNamesAndMapsPlugin                       - manifestGeneratorPlugin
-      - serverFunctionsPlugin                               - serverFunctionsPlugin
-      - esmHmrPlugin (HMR client)                           - writePlugin (Commit files)`;
+const CONFIGS_DIAGRAM = `graph TD
+    Start[Select Build Environment] --> Dev[Development Config<br/>get-config-esbuild.mjs]
+    Start --> Prod[Production Config<br/>get-config-esbuild-prod.mjs]
+
+    Dev --> DevProps[outdir: public<br/>sourcemap: true<br/>write: false]
+    Prod --> ProdProps[outdir: dist3<br/>sourcemap: false<br/>minify: true]
+
+    DevProps --> DevPlugins[Plugins:<br/>- TsconfigPathsPlugin<br/>- cssProcessorPlugin<br/>- reactClientManifestPlugin<br/>- stableChunkNamesAndMapsPlugin<br/>- serverFunctionsPlugin<br/>- esmHmrPlugin]
+    ProdProps --> ProdPlugins[Plugins:<br/>- babelReactCompilerPlugin<br/>- TsconfigPathsPlugin<br/>- cssProcessorPlugin<br/>- reactClientManifestPlugin<br/>- manifestGeneratorPlugin<br/>- serverFunctionsPlugin<br/>- writePlugin]`;
 
 const DEV_CONFIG_CODE = `import { TsconfigPathsPlugin } from "@esbuild-plugins/tsconfig-paths";
 import reactClientManifestPlugin from "../plugins-esbuild/react-client-manifest-plugin.mjs";
@@ -219,7 +212,7 @@ export default function Page() {
                 The chart below compares the two configurations:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="text">{CONFIGS_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{CONFIGS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

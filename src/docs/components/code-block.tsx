@@ -4,6 +4,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism/index.js";
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
+import { Mermaid } from "./mermaid-renderer";
 
 interface CodeBlockProps {
   children: string;
@@ -25,6 +26,10 @@ export function CodeBlock({
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  if (language === "mermaid") {
+    return <Mermaid chart={children} />;
+  }
 
   return (
     <div

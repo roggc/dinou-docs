@@ -91,56 +91,32 @@ export default function Page() {
                 Under the hood, Dinou coordinates a dual module system (CommonJS and ES Modules) and splits execution across two distinct Node.js processes to render pages. The blueprint below visualizes this request lifecycle:
               </p>
 
-              <div className="not-prose my-6 border rounded-xl p-6 bg-slate-50 dark:bg-slate-900/50 overflow-x-auto">
-                <pre className="font-mono text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre">{` 🌐 Browser Request
-         │
-         │ 1. GET /route
-         ▼
-┌────────────────────────────────────────────────────────┐
-│  Parent Process: server.js                             │
-│  (CommonJS Environment, --conditions=react-server)     │
-│                                                        │
-│  ┌───────────────────────┐                             │
-│  │ Express Route Handler │                             │
-│  └──────────┬────────────┘                             │
-│             │ 2. Resolve target path                   │
-│             ▼                                          │
-│  ┌───────────────────────┐                             │
-│  │ import-module.js      ├──────┐                      │
-│  └───────────────────────┘      │ 3. await import()    │
-│                                 ▼                      │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │ ESM Custom Loader Thread (babel-esm-loader.js)   │  │
-│  │                                                  │  │
-│  │  a. resolve() hook: maps TSConfig path aliases   │  │
-│  │  b. load() hook: transpiles JSX & TS via Babel   │  │
-│  └──────────────────────┬───────────────────────────┘  │
-│                         │ 4. Executable JS returned    │
-│                         ▼                              │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │ V8 Engine RSC Graph (Executes Server Components) │  │
-│  └──────────────────────┬───────────────────────────┘  │
-│                         │ 5. RSC Flight Stream JSON    │
-│                         ▼                              │
-└─────────────────────────┼──────────────────────────────┘
-                          │
-                          │ 6. Send Flight payload via Pipe (fd:4)
-                          ▼
-┌────────────────────────────────────────────────────────┐
-│  Child Process: render-html.js                         │
-│  (Standard SSR Environment, Client React)              │
-│                                                        │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │ Deserializer & SSR HTML compiler                 │  │
-│  │ (react-dom/server -> renderToPipeableStream)     │  │
-│  └──────────────────────┬───────────────────────────┘  │
-│                         │ 7. HTML stdout stream        │
-│                         ▼                              │
-└─────────────────────────┼──────────────────────────────┘
-                          │
-                          │ 8. Express pipes stdout directly
-                          ▼
-                 🌐 Browser (HTML Response)`}</pre>
+              <div className="not-prose my-6">
+                <CodeBlock language="mermaid">{`sequenceDiagram
+    autonumber
+    actor Browser as 🌐 Browser
+    box #0f172a Parent Process: server.js (CJS condition=react-server)
+        participant Express as Express Route Handler
+        participant ImportModule as import-module.js
+        participant Loader as ESM Loader<br/>(babel-esm-loader.js)
+        participant RSC as V8 Engine RSC Graph<br/>(Server Components)
+    end
+    box #1e293b Child Process: render-html.js (Client React)
+        participant Child as Deserializer & SSR<br/>(react-dom/server)
+    end
+
+    Browser->>Express: 1. GET /route
+    Express->>ImportModule: 2. Resolve target path
+    ImportModule->>Loader: 3. await import()
+    Note over Loader: a. resolve() maps TSConfig aliases<br/>b. load() transpiles JSX/TS via Babel
+    Loader->>ImportModule: 4. Executable JS returned
+    ImportModule->>RSC: 5. Execute Server Component graph
+    RSC->>Express: 6. RSC Flight Stream JSON
+    Express->>Child: 7. Send Flight payload via Pipe (fd:4)
+    Note over Child: Deserializes RSC & compiles HTML<br/>(renderToPipeableStream)
+    Child->>Express: 8. HTML stdout stream
+    Express->>Browser: 9. Express pipes stdout directly (HTML Response)
+`}</CodeBlock>
               </div>
 
               <h3>1. The CJS-to-ESM Bridge (The Code Jump)</h3>
