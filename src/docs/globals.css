@@ -123,7 +123,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   /* Variables específicas de sidebar del segundo archivo */
-  --sidebar-width: 11rem;
+  --sidebar-width: 15rem;
   --sidebar-width-mobile: 18rem;
   --sidebar-width-icon: 3rem;
 }
@@ -213,16 +213,9 @@
 
 /* Desktop sidebar spacing */
 @media (min-width: 768px) {
-  .sidebar-content {
-    margin-left: var(--sidebar-width);
-    /* Calculamos el ancho exacto para evitar desbordamientos o huecos */
-    width: calc(100vw - var(--sidebar-width));
-    max-width: calc(100vw - var(--sidebar-width));
-  }
-
-  .group[data-state="collapsed"] .sidebar-content {
-    margin-left: var(--sidebar-width-icon);
-    width: calc(100% - var(--sidebar-width-icon));
+  .sidebar-content .container {
+    margin-left: 1rem !important;
+    max-width: 1000px !important;
   }
 }
 
