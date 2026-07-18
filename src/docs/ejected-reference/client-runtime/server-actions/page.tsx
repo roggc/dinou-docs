@@ -165,7 +165,7 @@ export default function Page() {
                 The file layout splits request serialization, redirect filtering, and stream line parsers:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{PROXY_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1200px">{PROXY_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

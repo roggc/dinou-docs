@@ -260,7 +260,7 @@ export default function Page() {
                 The flowchart below shows how routes are compiled to Server elements:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{GET_JSX_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{GET_JSX_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

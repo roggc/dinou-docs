@@ -168,7 +168,7 @@ export default function Page() {
                 The flowchart below traces how incoming path segments are evaluated to locate files and extract request props:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{RESOLVER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{RESOLVER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

@@ -7,6 +7,7 @@ import { Terminal, Cpu, RefreshCw, Layers, ShieldCheck, Zap } from "lucide-react
 
 const tocItems = [
   { id: "overview", title: "💡 Overview", level: 2 },
+  { id: "loader-registration", title: "⚙️ Loader Registration (register-loader.mjs)", level: 2 },
   { id: "loader-structure", title: "📊 Physical File Structure", level: 2 },
   { id: "deps-mocking", title: "🔗 1. Dependencies & Resolution Mocking", level: 2 },
   { id: "resolve-hook", title: "⚙️ 2. The Resolve Hook", level: 2 },
@@ -18,6 +19,17 @@ const tocItems = [
   { id: "jsx-ts-compilation", title: "⚡ C.4. JSX & TypeScript Transpilation", level: 3 },
   { id: "customizations", title: "🛠️ Common Tweak Recipes", level: 2 },
 ];
+
+const LOADER_REGISTRATION_CODE = `import { register } from "node:module";
+import { pathToFileURL } from "node:url";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
+globalThis.__dinou_require__ = require;
+
+const loaderPath = require.resolve("./babel-esm-loader.js");
+
+register(pathToFileURL(loaderPath).href, pathToFileURL("./"));`;
 
 const LOADER_STRUCTURE_DIAGRAM = `graph TD
     classDef depClass fill:#334155,stroke:#475569,stroke-width:1px,color:#fff;
@@ -282,6 +294,33 @@ export default function Page() {
               <p>
                 Dinou bridges this execution gap by starting the server with a custom Node.js ESM Loader (via the <code>--import</code> flag in <code>register-loader.mjs</code>). The loader runs in a dedicated worker thread, intercepting every ES Modules dynamic <code>import()</code> and static <code>import</code> chain to resolve, stub, and transpile code on the fly.
               </p>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* LOADER REGISTRATION */}
+            <section id="loader-registration">
+              <h2>⚙️ Loader Registration (<code>register-loader.mjs</code>)</h2>
+              <p>
+                The entry point of the loader thread is <code>register-loader.mjs</code>. When the Master Express Server starts up, Node.js is executed with the command line option <code>--import=./dinou/core/register-loader.mjs</code>. This registers our custom ESM hooks globally in the V8 VM instance.
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{LOADER_REGISTRATION_CODE}</CodeBlock>
+              </div>
+              <p>
+                This script performs three actions:
+              </p>
+              <ul>
+                <li>
+                  <strong>Dynamic Registration:</strong> It uses Node's native <code>module.register</code> API to register <code>babel-esm-loader.js</code> as the active loader.
+                </li>
+                <li>
+                  <strong>CommonJS Bridge creation:</strong> Node's ESM loader runs in a separate thread where native CommonJS <code>require</code> is unavailable. It instantiates a standard require resolver using <code>createRequire</code> and binds it to <code>globalThis.__dinou_require__</code> so that the loader can synchronously resolve CommonJS files.
+                </li>
+                <li>
+                  <strong>Bootstrapping hooks:</strong> Once registered, all subsequent dynamic module imports will flow through our JIT compiler hooks.
+                </li>
+              </ul>
             </section>
 
             <hr className="my-8" />

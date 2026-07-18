@@ -286,10 +286,6 @@ const navigation = [
             title: "HTML Renderer (render-html.js)",
             href: "/docs/ejected-reference/render-html",
           },
-          {
-            title: "ESM Loader (babel-esm-loader.js)",
-            href: "/docs/ejected-reference/loader",
-          },
         ],
       },
       {

@@ -13,17 +13,17 @@ const tocItems = [
 ];
 
 const RENDER_APP_DIAGRAM = `graph TD
-    Start[renderAppToHtml reqPath, res] --> CacheCheck{Verify if static RSC exists in dist2/}
-    CacheCheck -->|Exists| ReadStatic[Read rsc.rsc from disk]
-    CacheCheck -->|No| DynamicRender[Run getJSX in parent process]
-    ReadStatic --> PipeChild[Pipe RSC payload to child stdin]
+    Start[renderAppToHtml reqPath, res] --> CacheCheck{Verify if static<br/>RSC exists in dist2/}
+    CacheCheck -->|Exists| ReadStatic[Read rsc.rsc<br/>from disk]
+    CacheCheck -->|No| DynamicRender[Run getJSX in<br/>parent process]
+    ReadStatic --> PipeChild[Pipe RSC payload<br/>to child stdin]
     DynamicRender --> PipeChild
-    PipeChild --> ForkChild[fork render-html.js child worker]
-    ForkChild --> IPC[Listen to child IPC events]
-    IPC -->|DINOU_CONTEXT_COMMAND| HeadersCheck{Headers already sent?}
-    HeadersCheck -->|No| ExpressAPI[Apply to res: cookie, status, setHeader]
-    HeadersCheck -->|Yes| JSInject[Inject inline script tags in output HTML stream]
-    ForkChild --> Output[Pipe child.stdout directly to Browser client]`;
+    PipeChild --> ForkChild[fork render-html.js<br/>child worker]
+    ForkChild --> IPC[Listen to child<br/>IPC events]
+    IPC -->|DINOU_CONTEXT_COMMAND| HeadersCheck{Headers<br/>already sent?}
+    HeadersCheck -->|No| ExpressAPI[Apply to res:<br/>cookie, status, setHeader]
+    HeadersCheck -->|Yes| JSInject[Inject inline script<br/>tags in HTML stream]
+    ForkChild --> Output[Pipe child.stdout<br/>directly to Browser]`;
 
 const RENDER_APP_CODE = `const path = require("path");
 const { fork } = require("child_process");
@@ -229,7 +229,7 @@ export default function Page() {
                 The flowchart below traces parent-to-child data streams and Express process events:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{RENDER_APP_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="650px">{RENDER_APP_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

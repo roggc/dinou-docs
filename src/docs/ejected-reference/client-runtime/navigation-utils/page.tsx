@@ -133,7 +133,7 @@ export default function Page() {
                 The flowchart below shows how routes are resolved and normalized for client-side navigation:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{NAVIGATION_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{NAVIGATION_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

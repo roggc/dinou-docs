@@ -52,7 +52,7 @@ export default function Page() {
                 Below is a visual map outlining the lifecycle phases and core duties of the ejected <code>server.js</code> file:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="800px">{`graph TD
+                <CodeBlock language="mermaid" minWidth="1000px">{`graph TD
     subgraph server.js Architecture & Lifecycle
         Init[1. INITIALIZATION & TRANSPILATION<br/>Load Core Dependencies Express, Chokidar, React Server DOM, etc<br/>@babel/register Hook JIT transpile JSX/TypeScript imports in CommonJS<br/>asset-require-hook & css-require-hook Mock static imports in Node.js]
         HMR[2. HOT MODULE REPLACEMENT ENGINE Development Only<br/>Chokidar Watcher Monitors react_client_manifest/ for updates<br/>loadManifestWithRetry & readJSONWithRetry Prevent concurrent I/O race conditions<br/>clearRequireCache & getParents Evict modified modules & propagate HMR recursively]
@@ -351,7 +351,7 @@ babelRegister({
               <div className="my-6">
                 <p className="text-sm font-semibold mb-2">Architectural Flow Mapping:</p>
                 <div className="not-prose">
-                  <CodeBlock language="mermaid">{`graph TD
+                  <CodeBlock language="mermaid" minWidth="800px">{`graph TD
     Start[Client Request Received] --> ReqType{Request Type?}
     
     ReqType -->|GET Soft SPA Nav| SoftNav[getContext safeResCall Guard]

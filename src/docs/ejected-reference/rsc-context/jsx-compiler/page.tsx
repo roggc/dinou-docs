@@ -241,7 +241,7 @@ export default function Page() {
                 The flowchart below traces how React nodes are recursively evaluated:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{COMPILER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{COMPILER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

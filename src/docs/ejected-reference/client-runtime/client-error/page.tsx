@@ -200,7 +200,7 @@ export default function Page() {
                 The module layout structures error-initialization flags and intercept routines:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{CLIENT_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1200px">{CLIENT_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

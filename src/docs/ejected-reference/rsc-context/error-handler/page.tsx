@@ -23,7 +23,7 @@ const ERROR_DIAGRAM = `graph TD
     CheckLayouts --> CheckSlots[Check parallel layout slots]
     
     CheckSlots -->|Slot resolves OK| Proceed[Proceed with render]
-    CheckSlots -->|Slot rendering fails| SlotError[Retrieve slot __modulePath & Locate error.tsx in slot folder & Mount SlotError fallback element]`;
+    CheckSlots -->|Slot rendering fails| SlotError[Retrieve slot __modulePath<br/>& Locate error.tsx in slot folder<br/>& Mount fallback element]`;
 
 const ERROR_CODE = `const path = require("path");
 const { existsSync } = require("./vfs");
@@ -171,7 +171,7 @@ export default function Page() {
                 The flowchart below traces layout wrapping and slot-level exception handling:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{ERROR_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{ERROR_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

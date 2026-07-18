@@ -130,7 +130,7 @@ export default function Page() {
                 The flowchart below traces the redirect resolution checks from server context detection to client suspense interception:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{REDIRECT_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{REDIRECT_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

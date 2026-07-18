@@ -581,7 +581,7 @@ export default function Page() {
               </p>
               
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="800px">{PIPELINE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid">{PIPELINE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -599,7 +599,7 @@ export default function Page() {
                 The file defines the following helper variables, utilities, and main export:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="800px">{PARENT_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="900px">{PARENT_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
 
               <h3>1. Dependencies & Module Imports</h3>
@@ -709,7 +709,7 @@ export default function Page() {
                 The file defines the following global structures, internal utilities, and self-execution hook:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="800px">{CHILD_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1400px">{CHILD_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
 
               <h3>1. Webpack Runtime Global Mocks</h3>

@@ -100,7 +100,7 @@ export default function Page() {
                 The chart below traces how assets are resolved based on the environment:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{MANIFEST_FLOW_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="700px">{MANIFEST_FLOW_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

@@ -93,7 +93,7 @@ export default function Page() {
                 The flowchart below shows how incoming paths are categorized and parsed:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{RESOLVER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{RESOLVER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

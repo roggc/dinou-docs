@@ -118,7 +118,7 @@ export default function Page() {
                 The flowchart below traces the task scheduling lifecycle of the concurrency queue:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{LIMITER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="650px">{LIMITER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

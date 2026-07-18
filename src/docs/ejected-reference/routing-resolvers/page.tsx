@@ -67,7 +67,7 @@ export default function Page() {
                 The following diagram outlines the routing lifecycle:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{ROUTING_RESOLVERS_OVERVIEW}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{ROUTING_RESOLVERS_OVERVIEW}</CodeBlock>
               </div>
             </section>
 

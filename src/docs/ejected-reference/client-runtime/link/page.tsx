@@ -106,7 +106,7 @@ export default function Page() {
                 The component encapsulates path resolution, click hijacking, and hover prefetching:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{LINK_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1200px">{LINK_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

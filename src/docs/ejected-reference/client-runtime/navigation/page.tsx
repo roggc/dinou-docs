@@ -165,7 +165,7 @@ export default function Page() {
                 The directory separates context bindings from path checkers:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{NAVIGATION_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1000px">{NAVIGATION_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
