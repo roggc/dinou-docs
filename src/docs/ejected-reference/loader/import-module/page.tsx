@@ -120,7 +120,7 @@ export default function Page() {
                 The flowchart below shows how modules are imported based on the bundler type and environment state:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="800px">{IMPORT_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{IMPORT_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
