@@ -1402,7 +1402,7 @@ app.use((req, res, next) => {
             <section id="startup-sequence">
               <h2>🏁 8. Server Startup Sequence</h2>
               <p>
-                At the very end of <code>server.js</code>, an asynchronous self-executing function <code>(async () => &#123; ... &#125;)()</code> coordinates the HTTP socket bindings and background static compilations:
+                At the very end of <code>server.js</code>, an asynchronous self-executing function <code>(async () =&gt; &#123; ... &#125;)()</code> coordinates the HTTP socket bindings and background static compilations:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`const http = require("http");

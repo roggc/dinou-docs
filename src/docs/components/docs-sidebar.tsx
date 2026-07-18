@@ -270,8 +270,28 @@ const navigation = [
         icon: Globe,
         subItems: [
           {
-            title: "SPA Hydration (client.jsx)",
+            title: "Overview",
             href: "/docs/ejected-reference/client-runtime",
+          },
+          {
+            title: "SPA Hydration (client.jsx)",
+            href: "/docs/ejected-reference/client-runtime/client",
+          },
+          {
+            title: "Recovery Hydration (client-error.jsx)",
+            href: "/docs/ejected-reference/client-runtime/client-error",
+          },
+          {
+            title: "Router Hooks & Context (navigation.js)",
+            href: "/docs/ejected-reference/client-runtime/navigation",
+          },
+          {
+            title: "Link Click Hijacking (link.jsx)",
+            href: "/docs/ejected-reference/client-runtime/link",
+          },
+          {
+            title: "Actions Connection (server-function-proxy.js)",
+            href: "/docs/ejected-reference/client-runtime/server-actions",
           },
         ],
       },

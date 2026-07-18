@@ -983,7 +983,7 @@ function processMetadata(effects) {
                 </li>
                 <li>
                   <strong><code>revalidating.js</code> (Stale-While-Revalidate Engine)</strong>: 
-                  Handles background revalidation. It reads the page's <code>metadata.json</code>, evaluates whether the revalidation time has expired (<code>Date.now() > generatedAt + revalidate</code>), sets compile locks, and executes re-compilation.
+                  Handles background revalidation. It reads the page's <code>metadata.json</code>, evaluates whether the revalidation time has expired (<code>Date.now() &gt; generatedAt + revalidate</code>), sets compile locks, and executes re-compilation.
                 </li>
                 <li>
                   <strong><code>cache-revalidate.js</code> (On-Demand Trigger)</strong>: 
@@ -1732,7 +1732,7 @@ module.exports = function (source) {
                 </li>
                 <li>
                   <strong><code>manifest-generator-plugin.js</code> (Asset Map)</strong>: 
-                  Hooks into the asset processing phase in production to compile a flat JSON lookup map linking original source filenames to their final hashed output files (e.g. <code>main.js -> main-a7b89.js</code>).
+                  Hooks into the asset processing phase in production to compile a flat JSON lookup map linking original source filenames to their final hashed output files (e.g. <code>main.js -&gt; main-a7b89.js</code>).
                 </li>
               </ul>
             </section>

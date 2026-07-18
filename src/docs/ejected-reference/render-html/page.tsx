@@ -79,88 +79,294 @@ const PARENT_STRUCTURE_DIAGRAM = `==============================================
   │     • Streams output: child.stdout.pipe(res)                                                     │
   └──────────────────────────────────────────────────────────────────────────────────────────────────┘`;
 
-const CHILD_SPAWNING_CODE = `const child = fork(
-  renderHtmlPath,
-  [
-    reqPath,
-    paramsString,
-    contextForChild ? JSON.stringify(contextForChild) : JSON.stringify({}),
-    isDynamic ? "true" : "false",
-  ],
-  {
-    execArgv: cleanExecArgv,
-    stdio: ["inherit", "pipe", "inherit", "ipc", rscReadFd],
+const PARENT_IMPORTS_CODE = `const path = require("path");
+const { fork } = require("child_process");
+const url = require("url");
+const fs = require("fs");
+const getJSX = require("./get-jsx.js");
+const { requestStorage } = require("./request-context.js");
+
+const isDevelopment = process.env.NODE_ENV !== "production";
+const isWebpack = process.env.DINOU_BUILD_TOOL === "webpack";
+
+const { renderToPipeableStream } = isWebpack
+  ? require("react-server-dom-webpack/server")
+  : require("@roggc/react-server-dom-esm/server");`;
+
+const PARENT_GLOBAL_HELPERS_CODE = `const manifestPath = path.resolve(
+  process.cwd(),
+  isWebpack
+    ? (isDevelopment ? "public/react-client-manifest.json" : "dist3/react-client-manifest.json")
+    : "react_client_manifest/react-client-manifest.json"
+);
+
+let cachedManifest = null;
+function getManifest() {
+  if (!isDevelopment && cachedManifest) return cachedManifest;
+  try {
+    const content = fs.readFileSync(manifestPath, "utf8");
+    const parsed = JSON.parse(content);
+    if (parsed && Object.keys(parsed).length > 0) {
+      cachedManifest = parsed;
+    }
+    return cachedManifest || parsed;
+  } catch (e) {
+    if (cachedManifest) {
+      console.warn("Using cached client manifest due to read error:", e.message);
+      return cachedManifest;
+    }
+    console.error("Error reading client manifest:", e);
+    return {};
   }
-);`;
+}
 
-const RSC_CACHE_BYPASS_CODE = `const rscPath = path.resolve(process.cwd(), "dist2", reqPath.replace(/^\\//, ""), "rsc.rsc");
-const hasStaticRsc = !isDynamic && fs.existsSync(rscPath);
+function toFileUrl(p) {
+  return url.pathToFileURL(p).href;
+}
 
-if (hasStaticRsc) {
-  const rscBuffer = fs.readFileSync(rscPath);
-  child.stdio[4].write(rscBuffer); // Inject cached RSC payload directly
-  child.stdio[4].end();
-} else {
-  // Fallback to dynamic SSR compilation using getJSX and React 19 server package
-  requestStorage.run(context, () => {
-    getJSX(reqPath, query, isNotFound, isDevelopment, forceNotFound)
-      .then((jsx) => {
-        const manifest = getManifest();
-        const { pipe } = renderToPipeableStream(jsx, manifest);
-        pipe(child.stdio[4]); // Pipe generated Flight stream to child
-      });
-  });
-}`;
+const registerLoaderPath = toFileUrl(
+  path.join(__dirname, "register-loader.mjs"),
+);
+const renderHtmlPath = path.resolve(__dirname, "render-html.js");
+
+const ESSENTIAL_NODE_ARGS = [];
+const loaderArg = \`--import=\${registerLoaderPath}\`;
+const childExecArgv = ESSENTIAL_NODE_ARGS.concat(loaderArg);
+
+const { resolveRelativeUrl } = require("./url-resolver");`;
 
 const PARENT_RESPONSE_WRAPPER_CODE = `function createParentResponseWrapper(reqPath, res, child) {
+  let hasRedirected = false;
+
+  const safeRedirect = (targetUrl) => {
+    if (hasRedirected) return;
+    hasRedirected = true;
+
+    const resolvedUrl = resolveRelativeUrl(targetUrl, reqPath);
+    let finalUrl = "/";
+    if (
+      typeof resolvedUrl === "string" &&
+      resolvedUrl.startsWith("/") &&
+      !resolvedUrl.startsWith("//")
+    ) {
+      finalUrl = resolvedUrl;
+    } else {
+      console.warn(
+        \`[Dinou Security] Blocked unsafe redirect to: \${targetUrl}\`,
+      );
+    }
+
+    if (res.headersSent) {
+      console.log(
+        \`[Dinou] Streaming active. Redirecting via JavaScript to: \${finalUrl}\`,
+      );
+      const safeUrl = JSON.stringify(finalUrl);
+      res.write(\`<script>window.location.href = \${safeUrl};</script>\`);
+      res.end();
+      child.stdout.unpipe(res);
+      child.kill();
+    } else {
+      res.redirect(302, finalUrl);
+      child.stdout.unpipe(res);
+      child.kill();
+    }
+  };
+
   return {
     setHeader: (name, value) => {
-      if (!res.headersSent) res.setHeader(name, value);
+      if (res.headersSent) {
+        console.warn(
+          \`[Dinou Warning] Cannot set header '\${name}' because streaming started.\`,
+        );
+      } else {
+        res.setHeader(name, value);
+      }
     },
     cookie: (name, value, options) => {
       if (res.headersSent) {
-        // Fallback to streaming inline JS mutations if headers are flushed
-        if (options && options.httpOnly) return;
-        const cookieStr = constructCookieString(name, value, options);
-        res.write(\`<script>document.cookie = \${JSON.stringify(cookieStr)};</script>\`);
+        if (options && options.httpOnly) {
+          console.error(
+            \`[Dinou Error] Cannot set HttpOnly cookie '\${name}' because streaming has already started.\`,
+          );
+          return;
+        }
+        console.log(
+          \`[Dinou] Streaming active. Setting cookie '\${name}' via JS.\`,
+        );
+        let cookieStr = \`\${name}=\${encodeURIComponent(value)}\`;
+        if (options) {
+          if (options.path) cookieStr += \`; path=\${options.path}\`;
+          if (options.domain) cookieStr += \`; domain=\${options.domain}\`;
+          if (options.maxAge) cookieStr += \` max-age=\${options.maxAge}\`;
+          if (options.expires)
+            cookieStr += \`; expires=\${new Date(options.expires).toUTCString()}\`;
+          if (options.secure) cookieStr += \`; secure\`;
+          if (options.sameSite)
+            cookieStr += \`; samesite=\${options.sameSite}\`;
+        }
+        const safeCookieStr = JSON.stringify(cookieStr);
+        res.write(\`<script>document.cookie = \${safeCookieStr};</script>\`);
       } else {
         res.cookie(name, value, options);
       }
     },
+    clearCookie: (name, options) => {
+      if (res.headersSent) {
+        console.log(
+          \`[Dinou] Streaming active. Clearing cookie '\${name}' via JS.\`,
+        );
+        let cookieStr = \`\${name}=; Max-Age=0\`;
+        const path = options?.path || "/";
+        cookieStr += \`; path=\${path}\`;
+        if (options) {
+          if (options.domain) cookieStr += \`; domain=\${options.domain}\`;
+          if (options.secure) cookieStr += \`; secure\`;
+          if (options.sameSite) cookieStr += \`; samesite=\${options.sameSite}\`;
+        }
+        cookieStr += ";";
+        const safeCookieStr = JSON.stringify(cookieStr);
+        res.write(\`<script>document.cookie = \${safeCookieStr};</script>\`);
+      } else {
+        res.clearCookie(name, options);
+      }
+    },
     redirect: (arg1, arg2) => {
       const url = arg2 || arg1;
-      safeRedirect(url); // Triggers standard 302 or inlines window.location.href script
-    }
+      safeRedirect(url);
+    },
+    status: (code) => {
+      if (res.headersSent) {
+        console.warn(
+          \`[Dinou Warning] HTTP status '\${code}' ignored because streaming started.\`,
+        );
+      } else {
+        res.status(code);
+      }
+    },
   };
 }`;
 
-const RESPONSE_PROXY_CODE = `const responseProxy = createResponseProxy(reqPath, res, child);
-child.on("message", (message) => {
-  if (message && typeof message === "object" && message.type === "res_call") {
-    const { command, args } = message;
-    
-    // Scenario 1: Headers already sent
-    if (res.headersSent) {
-      if (command === "redirect") {
-        const target = args.length === 1 ? args[0] : args[1];
-        const resolved = resolveRelativeUrl(target, reqPath);
-        res.write(\`<script>window.location.href = \${JSON.stringify(resolved)};</script>\`);
-        res.end();
-        child.kill(); // Terminate renderer immediately
-        return;
-      }
-      if (command === "cookie") {
-        const [name, value, options] = args;
-        if (options?.httpOnly) return; // Blocked: JS cannot write HttpOnly
-        const cookieStr = constructCookieString(name, value, options);
-        res.write(\`<script>document.cookie = \${JSON.stringify(cookieStr)};</script>\`);
-        return;
-      }
+const PARENT_MAIN_EXPORT_CODE = `function renderAppToHtml(
+  reqPath,
+  paramsString,
+  contextForChild,
+  res,
+  capturedStatus = null,
+  isDynamic = false,
+  forceNotFound = false,
+) {
+  // Spawns the child process renderer: fork(renderHtmlPath, [args], { stdio: [..., fd:4] })
+  const child = fork(
+    renderHtmlPath,
+    [
+      reqPath,
+      paramsString,
+      contextForChild ? JSON.stringify(contextForChild) : JSON.stringify({}),
+      isDynamic ? "true" : "false",
+    ],
+    {
+      execArgv: childExecArgv,
+      stdio: ["ignore", "pipe", "pipe", "ipc", "pipe"], // fd 4 is the RSC stream pipe
+    },
+  );
+
+  const query = JSON.parse(paramsString || "{}");
+  const rscPath = path.resolve(process.cwd(), "dist2", reqPath.replace(/^\\//, ""), "rsc.rsc");
+  const hasStaticRsc = !isDynamic && fs.existsSync(rscPath);
+
+  if (hasStaticRsc) {
+    // IF CACHED: pipes compiled static dist2/rsc.rsc directly into fd 4
+    try {
+      const rscBuffer = fs.readFileSync(rscPath);
+      child.stdio[4].write(rscBuffer);
+      child.stdio[4].end();
+    } catch (err) {
+      console.error(\`[Dinou] Failed to read static RSC from \${rscPath}:\`, err.message);
+      if (child.stdio[4]) child.stdio[4].destroy();
     }
-    
-    // Scenario 2: Headers not yet sent
-    if (typeof res[command] === "function") {
-      res[command].apply(res, args); // Execute native Express response methods
+  } else {
+    // IF DYNAMIC: renders Server Components (RSC) to binary Flight payload stream
+    const isNotFound = {};
+    const parentRes = createParentResponseWrapper(reqPath, res, child);
+    const context = {
+      req: contextForChild ? contextForChild.req : {},
+      res: parentRes,
+    };
+    requestStorage.run(context, () => {
+      getJSX(reqPath, query, isNotFound, isDevelopment, forceNotFound)
+        .then((jsx) => {
+          if (isNotFound.value) {
+            parentRes.status(404);
+          }
+          const manifest = getManifest();
+          const { pipe } = isWebpack
+            ? renderToPipeableStream(jsx, manifest)
+            : renderToPipeableStream(jsx, url.pathToFileURL(process.cwd()).href + "/");
+          pipe(child.stdio[4]);
+        })
+        .catch((err) => {
+          console.error("Error rendering JSX in parent renderAppToHtml:", err);
+          if (child.stdio[4]) child.stdio[4].destroy();
+        });
+    });
+  }
+
+  // Sets up IPC message listener: child.on("message", createParentResponseWrapper proxy)
+  child.on("message", (message) => {
+    // ... handles message commands
+  });
+
+  // Streams output: child.stdout.pipe(res)
+  return child.stdout;
+}`;
+
+const PARENT_IPC_MESSAGE_CODE = `child.on("message", (message) => {
+  if (message && message.type === "DINOU_CONTEXT_COMMAND") {
+    const { command, args } = message;
+    if (
+      command === "setHeader" ||
+      command === "clearCookie" ||
+      command === "cookie" ||
+      command === "status" ||
+      command === "redirect"
+    ) {
+      // SCENARIO 1: STREAMING ALREADY STARTED (Headers sent)
+      if (res.headersSent) {
+        if (command === "redirect") {
+          const rawUrl = args.length === 1 ? args[0] : args[1];
+          const resolvedUrl = resolveRelativeUrl(rawUrl, reqPath);
+          let finalUrl = resolvedUrl.startsWith("/") && !resolvedUrl.startsWith("//") ? resolvedUrl : "/";
+          res.write(\`<script>window.location.href = \${JSON.stringify(finalUrl)};</script>\`);
+          res.end();
+          child.stdout.unpipe(res);
+          child.kill();
+          return;
+        }
+        if (command === "cookie") {
+          const [name, value, options] = args;
+          if (options && options.httpOnly) return;
+          let cookieStr = \`\${name}=\${encodeURIComponent(value)}\`;
+          // ... constructs options ...
+          res.write(\`<script>document.cookie = \${JSON.stringify(cookieStr)};</script>\`);
+          return;
+        }
+        // ...
+      }
+
+      // SCENARIO 2: HEADERS NOT YET SENT (Normal Express usage)
+      if (typeof res[command] === "function") {
+        if (command === "redirect") {
+          let status = args.length === 2 ? args[0] : 302;
+          let rawUrl = args.length === 2 ? args[1] : args[0];
+          const resolvedUrl = resolveRelativeUrl(rawUrl, reqPath);
+          let finalUrl = resolvedUrl.startsWith("/") && !resolvedUrl.startsWith("//") ? resolvedUrl : "/";
+          res.redirect(status, finalUrl);
+          child.stdout.unpipe(res);
+          child.kill();
+          return;
+        }
+        res[command].apply(res, args);
+      }
     }
   }
 });`;
@@ -476,54 +682,93 @@ export default function Page() {
                 <CodeBlock language="text">{PARENT_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
 
-              <h3>1. Spawning the Child Process</h3>
+              <h3>1. Dependencies & Module Imports</h3>
               <p>
-                When a user requests a page, the parent spins up a clean, isolated child process using Node's <code>fork()</code> to run the standard React renderer (<code>render-html.js</code>):
+                The orchestrator imports core Node.js modules like <code>child_process</code> (specifically <code>fork</code>), <code>fs</code>, <code>path</code>, and <code>url</code>. In addition, it imports project utilities such as <code>getJSX</code> and <code>requestStorage</code> (for <code>AsyncLocalStorage</code> request context tracking).
               </p>
-              <div className="not-prose my-2">
-                <CodeBlock language="javascript">{CHILD_SPAWNING_CODE}</CodeBlock>
-              </div>
               <p>
-                <strong>File Descriptor Mapping:</strong> The <code>stdio</code> array maps file descriptors:
-              </p>
-              <ul>
-                <li><code>stdio[1] (stdout)</code>: Dedicated to receiving compiled HTML chunks back from the child, piped directly to Express's <code>res</code> object.</li>
-                <li><code>stdio[3] (ipc)</code>: Bidirectional message channel for context updates.</li>
-                <li><code>stdio[4] (pipe)</code>: Custom data descriptor dedicated to streaming the React Server Components (RSC) Flight payload down to the child process.</li>
-              </ul>
-
-              <hr className="my-6" />
-
-              <h3>2. Static Cache Optimization (RSC Cache Bypass)</h3>
-              <p>
-                To avoid redundant rendering overhead, the parent checks if a static RSC binary (<code>rsc.rsc</code>) exists in the <code>dist2/</code> cache. If found, it bypasses the Server Component compilation pipeline and writes the file contents directly to the child's RSC stream:
+                Depending on the build tool configuration (Webpack vs. ESM), the parent dynamically imports the corresponding React server rendering engine:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{RSC_CACHE_BYPASS_CODE}</CodeBlock>
+                <CodeBlock language="javascript">{PARENT_IMPORTS_CODE}</CodeBlock>
               </div>
 
               <hr className="my-6" />
 
-              <h3>3. Parent Response Mocking (<code>createParentResponseWrapper</code>)</h3>
+              <h3>2. Global Helper Functions</h3>
               <p>
-                During dynamic SSR, the parent runs Server Components inside the <code>requestStorage</code> context using a mocked Express response wrapper. This maps response calls to the child process IPC channel:
+                Two key helpers are defined at the module scope to load manifests and format URLs:
               </p>
+              <ul>
+                <li>
+                  <strong><code>getManifest()</code>:</strong> Synchronously reads the client build manifest (<code>react-client-manifest.json</code>) from the current distribution directory. In production builds, this manifest is cached in memory (<code>cachedManifest</code>) to minimize filesystem overhead.
+                </li>
+                <li>
+                  <strong><code>toFileUrl(p)</code>:</strong> Converts absolute physical files paths to absolute <code>file://</code> URLs required by dynamic ESM loaders.
+                </li>
+              </ul>
+              <p>
+                Additionally, the script resolves paths for loader hooks and standard render modules, and imports URL resolver helpers:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{PARENT_GLOBAL_HELPERS_CODE}</CodeBlock>
+              </div>
+
+              <hr className="my-6" />
+
+              <h3>3. <code>createParentResponseWrapper(reqPath, res, child)</code></h3>
+              <p>
+                This function returns a mocked response helper object. When Server Components execute in the parent process under an <code>AsyncLocalStorage</code> execution context (<code>requestStorage.run</code>), any mutations on headers, cookies, redirects, or HTTP status codes are intercepted by this wrapper:
+              </p>
+              <ul>
+                <li>
+                  <strong>Headers Clean (Headers not sent yet):</strong> Calls are forwarded directly to Express's native response methods (e.g. <code>res.cookie</code> or <code>res.setHeader</code>).
+                </li>
+                <li>
+                  <strong>Headers Sent (Streaming started):</strong> Since HTTP headers cannot be altered once streaming to the client has begun, the wrapper falls back to injecting inline JavaScript <code>&lt;script&gt;</code> blocks directly into the HTML response stream to apply changes client-side (such as updating <code>document.cookie</code> or changing <code>window.location.href</code>).
+                </li>
+              </ul>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{PARENT_RESPONSE_WRAPPER_CODE}</CodeBlock>
               </div>
 
               <hr className="my-6" />
 
-              <h3>4. Bidirectional IPC Context Synchronization</h3>
+              <h3>4. Main Export: <code>renderAppToHtml(...)</code></h3>
               <p>
-                Since Server Components execute in a separate process from the HTML renderer, mutations (such as <code>res.cookie</code> or <code>res.redirect</code>) triggered inside the child process are sent back to the parent as IPC message payloads:
+                This is the entry point invoked by the Express server. It handles cache optimization, process spawning, IPC communication setup, and output streaming:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{RESPONSE_PROXY_CODE}</CodeBlock>
+                <CodeBlock language="javascript">{PARENT_MAIN_EXPORT_CODE}</CodeBlock>
               </div>
 
+              <h4>Detailed Steps of the Render Lifecycle</h4>
+              <ul>
+                <li>
+                  <strong>Child Process Spawning:</strong> The parent forks <code>render-html.js</code> to run standard React SSR in a clean sandbox. The <code>stdio</code> array is mapped with a custom file descriptor:
+                  <ul className="pl-4 mt-1 space-y-1 list-disc">
+                    <li><code>stdio[1] (stdout)</code>: Set to <code>"pipe"</code> to read the compiled HTML chunks back from the child.</li>
+                    <li><code>stdio[3] (ipc)</code>: Set to <code>"ipc"</code> to establish the bidirectional command channel.</li>
+                    <li><code>stdio[4] (pipe)</code>: Mapped to a custom write stream (<code>child.stdio[4]</code>) dedicated to piping the RSC flight binary data.</li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>Cache Resolution (RSC Cache Bypass):</strong>
+                  <ul className="pl-4 mt-1 space-y-1 list-disc">
+                    <li><strong>If Static RSC is cached:</strong> Reads the pre-built <code>dist2/../rsc.rsc</code> buffer and writes it directly to the child's RSC file descriptor <code>stdio[4]</code>, completely bypassing dynamic rendering.</li>
+                    <li><strong>If Dynamic RSC is requested:</strong> Invokes <code>getJSX()</code> within the request context to render Server Components, compiling them into a pipeable Flight stream which is written to <code>stdio[4]</code>.</li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>IPC Command Listener:</strong> It registers a listener on the <code>"message"</code> event from the child. When the child performs actions that change response metadata, they are processed through the IPC channel:
+                  <div className="not-prose my-4">
+                    <CodeBlock language="javascript">{PARENT_IPC_MESSAGE_CODE}</CodeBlock>
+                  </div>
+                </li>
+              </ul>
+
               <div className="my-6">
-                <p className="text-sm font-semibold mb-2">IPC & Process Pipeline Flow:</p>
+                <p className="text-sm font-semibold mb-2">IPC & Process Pipeline Flow Diagram:</p>
                 <div className="not-prose">
                   <CodeBlock language="text">{IPC_FLOW_DIAGRAM}</CodeBlock>
                 </div>
