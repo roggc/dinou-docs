@@ -38,8 +38,11 @@ export function Mermaid({ chart, minWidth }: MermaidProps) {
   return (
     <div className="my-6 p-4 rounded-xl bg-slate-900/40 border border-slate-800/80 shadow-inner overflow-x-auto max-w-full">
       <div 
-        className="mermaid w-full text-center" 
-        style={minWidth ? { minWidth } : undefined}
+        className="mermaid mx-auto text-center" 
+        style={{
+          width: "max-content",
+          minWidth: minWidth || undefined,
+        }}
         ref={ref}
       >
         {chart}
