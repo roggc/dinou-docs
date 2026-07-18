@@ -13,6 +13,7 @@ const tocItems = [
   { id: "code-runtime", title: "⚙️ react-refresh-runtime.mjs", level: 2 },
   { id: "code-boundary", title: "⚙️ is-react-refresh-boundary.mjs", level: 2 },
   { id: "code-client", title: "⚙️ esm-hmr/client.mjs", level: 2 },
+  { id: "code-babel-config", title: "⚙️ babel-config.js", level: 2 },
 ];
 
 const HMR_DIAGRAM = `                   [Browser Client]                    [Server Compiler (WS)]
@@ -370,6 +371,20 @@ socket.addEventListener("message", ({ data }) => {
   }
 });`;
 
+const BABEL_CONFIG_CODE = `const babelConfig = {
+  presets: [
+    ["@babel/preset-react", { runtime: "automatic" }],
+    "@babel/preset-typescript",
+  ],
+  plugins: [
+    require.resolve("react-refresh/babel"),
+    "@babel/plugin-syntax-import-meta",
+  ],
+  exclude: /node_modules[\\\\/](?!dinou|react-refresh)/,
+};
+
+module.exports.babelConfig = babelConfig;`;
+
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
@@ -394,7 +409,8 @@ export default function Page() {
               • esbuild HMR Plugin: <code>./dinou/esbuild/react-refresh/esm-hmr-plugin.mjs</code> <br />
               • Refresh Runtime: <code>./dinou/esbuild/react-refresh/react-refresh-runtime.mjs</code> <br />
               • Boundary Checker: <code>./dinou/esbuild/react-refresh/is-react-refresh-boundary.mjs</code> <br />
-              • Client WebSocket: <code>./dinou/esbuild/react-refresh/esm-hmr/client.mjs</code>
+              • Client WebSocket: <code>./dinou/esbuild/react-refresh/esm-hmr/client.mjs</code> <br />
+              • Babel Config: <code>./dinou/esbuild/react-refresh/babel-config.js</code>
             </blockquote>
 
             {/* OVERVIEW */}
@@ -488,6 +504,19 @@ export default function Page() {
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{CLIENT_CODE}</CodeBlock>
+              </div>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* CODE BABEL CONFIG */}
+            <section id="code-babel-config">
+              <h2>⚙️ babel-config.js</h2>
+              <p>
+                Below is the full, complete code of the Babel configuration used to instrument React Fast Refresh modules:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{BABEL_CONFIG_CODE}</CodeBlock>
               </div>
             </section>
           </div>
