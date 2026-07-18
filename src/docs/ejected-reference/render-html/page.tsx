@@ -13,6 +13,403 @@ const tocItems = [
   { id: "customizations", title: "🛠️ Common Tweak Recipes", level: 2 },
 ];
 
+const PIPELINE_DIAGRAM = ` [Express Server.js] ───────────────► Calling renderAppToHtml()
+        │                                     │
+        │                                     ▼ [Forking Child Process]
+        │                            [render-app-to-html.js] (Parent Environment)
+        │                                     │
+        │                                     ├─► 1. Evaluates React Server graph
+        │                                     ├─► 2. Generates RSC Flight JSON binary
+        │                                     │
+        ▼ [Piping RSC Flight Stream via fd:4] │
+  ┌───────────────────────────────────────────┼───────────────────────────┐
+  │ [render-html.js] (Child Process Environment - Standard Client React)   │
+  │                                           │                           │
+  │   a. Reads flight stream from fd:4 ◄──────┘                           │
+  │   b. Reconstructs client-safe JSX via createFromNodeStream()          │
+  │   c. Performs React 19 SSR via renderToPipeableStream()               │
+  │   d. Writes final HTML chunks to stdout                               │
+  └───────────────────┬───────────────────────────────────────────────────┘
+                      │
+                      ▼ [Piped stdout chunks]
+                [Express res] ────────► Browser (HTML Response)`;
+
+const PARENT_STRUCTURE_DIAGRAM = `========================================================================================================
+                          PHYSICAL FILE CODE STRUCTURE: RENDER-APP-TO-HTML.JS
+========================================================================================================
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  1. Dependencies & Module Imports                                                                │
+  │     • child_process (fork), fs, path, url, status-manifest, concurrency-manager (processLimiter) │
+  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  2. Global Helper Functions                                                                      │
+  │                                                                                                  │
+  │     ├── getManifest()                                                                            │
+  │     │   • síncronamente reads & parses client manifest files for module IDs resolution            │
+  │     │                                                                                            │
+  │     └── toFileUrl(p)                                                                             │
+  │         • Converts local absolute system paths to absolute 'file://' format strings              │
+  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  3. createParentResponseWrapper(reqPath, res, child)                                             │
+  │     • Constructs the IPC command listener wrapper                                                │
+  │     • Listens to "message" commands from the child renderer (e.g. cookies or redirects)           │
+  │     • If headersSent: writes direct inline <script> modifications into the output stream chunk   │
+  │     • If headersClean: triggers native Express methods (res.cookie / res.redirect)               │
+  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  4. Main Export: renderAppToHtml(reqPath, reqQuery, context, isReady, res, options)              │
+  │     • Resolves render-html.js filepath & checks output cache (dist2/rsc.rsc)                     │
+  │     • Sets up temporary file descriptor fd 4                                                     │
+  │     • IF CACHED:                                                                                 │
+  │         • Pipes compiled static dist2/rsc.rsc directly into fd 4                                 │
+  │     • IF DYNAMIC:                                                                                │
+  │         • Renders Server Components (RSC) to binary Flight payload stream                       │
+  │         • Writes stream concurrently into fd 4                                                   │
+  │     • Spawns the child process renderer: fork(renderHtmlPath, [args], { stdio: [..., fd:4] })    │
+  │     • Sets up IPC message listener: child.on("message", createParentResponseWrapper)             │
+  │     • Limits concurrent renders: processLimiter.acquire()                                        │
+  │     • Streams output: child.stdout.pipe(res)                                                     │
+  └──────────────────────────────────────────────────────────────────────────────────────────────────┘`;
+
+const CHILD_SPAWNING_CODE = `const child = fork(
+  renderHtmlPath,
+  [
+    reqPath,
+    paramsString,
+    contextForChild ? JSON.stringify(contextForChild) : JSON.stringify({}),
+    isDynamic ? "true" : "false",
+  ],
+  {
+    execArgv: cleanExecArgv,
+    stdio: ["inherit", "pipe", "inherit", "ipc", rscReadFd],
+  }
+);`;
+
+const RSC_CACHE_BYPASS_CODE = `const rscPath = path.resolve(process.cwd(), "dist2", reqPath.replace(/^\\//, ""), "rsc.rsc");
+const hasStaticRsc = !isDynamic && fs.existsSync(rscPath);
+
+if (hasStaticRsc) {
+  const rscBuffer = fs.readFileSync(rscPath);
+  child.stdio[4].write(rscBuffer); // Inject cached RSC payload directly
+  child.stdio[4].end();
+} else {
+  // Fallback to dynamic SSR compilation using getJSX and React 19 server package
+  requestStorage.run(context, () => {
+    getJSX(reqPath, query, isNotFound, isDevelopment, forceNotFound)
+      .then((jsx) => {
+        const manifest = getManifest();
+        const { pipe } = renderToPipeableStream(jsx, manifest);
+        pipe(child.stdio[4]); // Pipe generated Flight stream to child
+      });
+  });
+}`;
+
+const PARENT_RESPONSE_WRAPPER_CODE = `function createParentResponseWrapper(reqPath, res, child) {
+  return {
+    setHeader: (name, value) => {
+      if (!res.headersSent) res.setHeader(name, value);
+    },
+    cookie: (name, value, options) => {
+      if (res.headersSent) {
+        // Fallback to streaming inline JS mutations if headers are flushed
+        if (options && options.httpOnly) return;
+        const cookieStr = constructCookieString(name, value, options);
+        res.write(\`<script>document.cookie = \${JSON.stringify(cookieStr)};</script>\`);
+      } else {
+        res.cookie(name, value, options);
+      }
+    },
+    redirect: (arg1, arg2) => {
+      const url = arg2 || arg1;
+      safeRedirect(url); // Triggers standard 302 or inlines window.location.href script
+    }
+  };
+}`;
+
+const RESPONSE_PROXY_CODE = `const responseProxy = createResponseProxy(reqPath, res, child);
+child.on("message", (message) => {
+  if (message && typeof message === "object" && message.type === "res_call") {
+    const { command, args } = message;
+    
+    // Scenario 1: Headers already sent
+    if (res.headersSent) {
+      if (command === "redirect") {
+        const target = args.length === 1 ? args[0] : args[1];
+        const resolved = resolveRelativeUrl(target, reqPath);
+        res.write(\`<script>window.location.href = \${JSON.stringify(resolved)};</script>\`);
+        res.end();
+        child.kill(); // Terminate renderer immediately
+        return;
+      }
+      if (command === "cookie") {
+        const [name, value, options] = args;
+        if (options?.httpOnly) return; // Blocked: JS cannot write HttpOnly
+        const cookieStr = constructCookieString(name, value, options);
+        res.write(\`<script>document.cookie = \${JSON.stringify(cookieStr)};</script>\`);
+        return;
+      }
+    }
+    
+    // Scenario 2: Headers not yet sent
+    if (typeof res[command] === "function") {
+      res[command].apply(res, args); // Execute native Express response methods
+    }
+  }
+});`;
+
+const IPC_FLOW_DIAGRAM = `         [ Master Express Server ]                   [ Child Process (render-html) ]
+                     │                                              │
+                     ├────────► Fork child process ────────────────►│
+                     │                                              │
+       Check Cache   ├─► (Exists) -> Read dist2/rsc.rsc             │
+                     │   (Missing)-> compile JSX to Flight          │
+                     │                                              │
+                     ├────────► Pipe Flight data (fd 4) ───────────►│ (createFromNodeStream)
+                     │                                              │
+                     │◄──────── stream HTML chunks (stdout) ────────┤ (renderToPipeableStream)
+                     │                                              │
+      Child calls    │                                              │
+    res.cookie/redir │◄──────── IPC command message ────────────────┤ (send message)
+                     │                                              │
+                     ├─► (Headers Sent?)                            │
+                     │   ├─► Yes: write <script> cookie/redirect    │
+                     │   └─► No : call native Express headers       │`;
+
+const CHILD_STRUCTURE_DIAGRAM = `========================================================================================================
+                             PHYSICAL FILE CODE STRUCTURE: RENDER-HTML.JS
+========================================================================================================
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  1. Webpack Runtime Global Mocks                                                                 │
+  │     • global.__webpack_require__(id): Resolves mapped Client Component IDs using require()       │
+  │     • global.__webpack_chunk_load__(chunkId): Instantly resolves static chunk loading promises   │
+  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  2. Core Environment Setup & Require Hooks                                                       │
+  │     • @babel/register, css-require-hook, asset-require-hook, Module._resolveFilename overrides   │
+  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  3. Error Rendering Functions                                                                    │
+  │                                                                                                  │
+  │     ├── formatErrorHtml(error)           ──> HTML crash templates (development stack overlays)   │
+  │     ├── formatErrorHtmlProduction(error) ──> Sanitized HTML crash templates (production logs)    │
+  │     └── writeErrorOutput(error, isProd)  ──> Writes error HTML to stdout and exits process with 1│
+  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  4. Manifest & Import Map Utilities                                                              │
+  │                                                                                                  │
+  │     ├── getImportMapHtml() ──> Returns HTML tag injecting ESM import maps                        │
+  │     └── getSsrManifest()   ──> Reads & caches client and SSR module dependency mappings          │
+  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  5. Main Render Implementation: renderToStream(reqPath, paramsString, contextJson, isDynamic)    │
+  │     • Reads inherited fd 4 stream to parse RSC Flight payload binary                             │
+  │     • Reconstructs the JSX tree asynchronously (createFromNodeStream)                            │
+  │     • Calls renderToPipeableStream() to write HTML chunks to process.stdout                      │
+  │     • Handles ShellReady event to write ESM import maps                                          │
+  │     • onError callback: Catches SSR crashes and triggers fallback render (getErrorJSX)           │
+  └─────────────────────────────────┬────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │  6. Self-Executing Startup Hook (CLI Execution)                                                  │
+  │     • Reads CLI arguments: [_, _, reqPath, paramsString, contextJson, isDynamic]                 │
+  │     • Invokes renderToStream() immediately upon child process spawning                           │
+  └──────────────────────────────────────────────────────────────────────────────────────────────────┘`;
+
+const WEBPACK_MOCKS_CODE = `global.__webpack_require__ = function (id) {
+  if (global.__webpack_require_map__ && global.__webpack_require_map__[id]) {
+    return require(global.__webpack_require_map__[id]); // Redirects to local system file path
+  }
+  if (typeof id === "string" && id.startsWith("./")) {
+    id = path.resolve(process.cwd(), id);
+  }
+  return require(id);
+};
+global.__webpack_chunk_load__ = () => Promise.resolve(); // Chunks are already on disk`;
+
+const REQUIRE_HOOKS_CODE = `const babelRegister = require("@babel/register");
+babelRegister({
+  ignore: [/node_modules[\\\\/](?!dinou)/], // Compile app and framework core files
+  presets: [
+    ["@babel/preset-react", { runtime: "automatic" }],
+    "@babel/preset-typescript",
+  ],
+  plugins: ["@babel/transform-modules-commonjs"],
+  extensions: [".js", ".jsx", ".ts", ".tsx"],
+});
+
+require("./css-require-hook.js")(); // Parse CSS Modules to class maps
+addHook({
+  extensions,
+  name: (localName, filepath) => createScopedName(localName, filepath) + ".[ext]",
+  publicPath: "/assets/",
+}); // Parse image/svg imports to static public URL strings`;
+
+const ERROR_RENDERING_CODE = `function formatErrorHtml(error) {
+  const message = error.message || "Unknown error";
+  const stack = error.stack ? error.stack.replace(/\\n/g, "<br>").replace(/\\s/g, "&nbsp;") : "No stack trace available";
+  return \`<!DOCTYPE html><html>...<body><h1 class="error-title">An Error Occurred</h1><p class="error-message">\${message}</p><div class="error-stack">\${stack}</div></body></html>\`;
+}
+
+function writeErrorOutput(error, isProd) {
+  process.stdout.write(
+    isProd ? formatErrorHtmlProduction(error) : formatErrorHtml(error)
+  );
+  process.stderr.write(
+    JSON.stringify({ error: error.message, stack: error.stack })
+  );
+}`;
+
+const MANIFEST_UTILITIES_CODE = `function getSsrManifest() {
+  const ssrManifest = JSON.parse(fs.readFileSync(ssrManifestPath, "utf8"));
+  const clientManifest = JSON.parse(fs.readFileSync(clientManifestPath, "utf8"));
+
+  const requireMap = {};
+  for (const [fileUrl, entry] of Object.entries(clientManifest)) {
+    if (entry && entry.id !== undefined) {
+      requireMap[entry.id] = fileURLToPath(fileUrl); // Mappings table
+    }
+  }
+  global.__webpack_require_map__ = requireMap; // Populate require() polyfill
+  return ssrManifest;
+}`;
+
+const RENDER_TO_STREAM_CODE = `async function renderToStream(
+  reqPath,
+  query,
+  serializedBox,
+  isDynamic,
+) {
+  const context = {
+    req: serializedBox.req,
+    res: createResponseProxy(),
+  };
+
+  // 1. Run inside the asynchronous execution context
+  await requestStorage.run(context, async () => {
+    try {
+      const { createReadStream } = require("fs");
+      const rscStream = createReadStream(null, { fd: 4 });
+      const { pathToFileURL } = require("url");
+      const baseUrl = pathToFileURL(process.cwd()).href + "/";
+
+      // 2. Reconstruct Client-Safe JSX Components Graph
+      const jsx = isWebpack
+        ? await createFromNodeStream(rscStream, getSsrManifest())
+        : await createFromNodeStream(rscStream, baseUrl, baseUrl);
+
+      // 3. Compile JSX to HTML chunks streamed to stdout
+      const stream = renderToPipeableStream(jsx, {
+        onShellReady() {
+          if (!isWebpack) {
+            const importMapHtml = getImportMapHtml(); // Inject importmaps in ESM
+            process.stdout.write(importMapHtml);
+          }
+          stream.pipe(process.stdout);
+        },
+        onError(error) {
+          // 4. Advanced Error Recovery Boundary
+          process.nextTick(async () => {
+            if (stream && !stream.destroyed) {
+              try {
+                stream.unpipe(process.stdout);
+                stream.destroy();
+              } catch { }
+            }
+            const isProd = process.env.NODE_ENV === "production";
+
+            try {
+              const errorJSX = await getErrorJSX(reqPath, query, error, isDevelopment);
+              if (!context.res.headersSent) context.res.status(500);
+
+              if (errorJSX === undefined) {
+                writeErrorOutput(error, isProd);
+                process.exit(1); // Hard Fallback
+              }
+
+              // Render custom boundary (error.tsx)
+              const errorStream = renderToPipeableStream(errorJSX, {
+                onShellReady() {
+                  if (!isWebpack) {
+                    const importMapHtml = getImportMapHtml();
+                    process.stdout.write(importMapHtml);
+                  }
+                  errorStream.pipe(process.stdout);
+                },
+                onError(err) {
+                  console.error("Error rendering error JSX:", err);
+                  writeErrorOutput(error, isProd);
+                  process.exit(1);
+                },
+                bootstrapModules: isDevelopment
+                  ? [
+                    getAssetFromManifest("error.js"),
+                    isWebpack ? undefined : getAssetFromManifest("runtime.js"),
+                  ].filter(Boolean)
+                  : [getAssetFromManifest("error.js")],
+                bootstrapScriptContent: \`window.__DINOU_ERROR_MESSAGE__=\${JSON.stringify(
+                  error.message || "Unknown error",
+                )};window.__DINOU_ERROR_NAME__=\${JSON.stringify(error.name)};\${isDevelopment
+                  ? \`window.__DINOU_ERROR_STACK__=\${JSON.stringify(error.stack || "")};\`
+                  : ""
+                }\${isDevelopment ? \`window.HMR_WEBSOCKET_URL="ws://localhost:3001";\` : ""}\`,
+              });
+            } catch (err) {
+              console.error("Render error (no error.tsx?):", err);
+              writeErrorOutput(error, isProd);
+              process.exit(1);
+            }
+          });
+        },
+        bootstrapModules: isDevelopment
+          ? [
+            getAssetFromManifest("main.js"),
+            isWebpack ? undefined : getAssetFromManifest("runtime.js"),
+          ].filter(Boolean)
+          : [getAssetFromManifest("main.js")],
+        ...(isDevelopment
+          ? {
+            bootstrapScriptContent: \`window.HMR_WEBSOCKET_URL="ws://localhost:3001";\`,
+          }
+          : {}),
+      });
+    } catch (error) {
+      if (context && context.res && typeof context.res.status === "function") {
+        if (!context.res.headersSent) context.res.status(500);
+      }
+      process.stdout.write(formatErrorHtml(error));
+      process.stderr.write(
+        JSON.stringify({ error: error.message, stack: error.stack }),
+      );
+      process.exit(1);
+    }
+  });
+}`;
+
+const STARTUP_HOOK_CODE = `const reqPath = process.argv[2] || "/";
+const paramsString = process.argv[3] || "{}";
+const contextJson = process.argv[4] || "{}";
+const isDynamic = process.argv[5] === "true";
+
+renderToStream(reqPath, paramsString, contextJson, isDynamic);`;
+
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
@@ -58,26 +455,7 @@ export default function Page() {
               </p>
               
               <div className="not-prose my-6 border rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50 overflow-x-auto">
-                <pre className="font-mono text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre">{` [Express Server.js] ───────────────► Calling renderAppToHtml()
-       │                                     │
-       │                                     ▼ [Forking Child Process]
-       │                            [render-app-to-html.js] (Parent Environment)
-       │                                     │
-       │                                     ├─► 1. Evaluates React Server graph
-       │                                     ├─► 2. Generates RSC Flight JSON binary
-       │                                     │
-       ▼ [Piping RSC Flight Stream via fd:4] │
- ┌───────────────────────────────────────────┼───────────────────────────┐
- │ [render-html.js] (Child Process Environment - Standard Client React)   │
- │                                           │                           │
- │   a. Reads flight stream from fd:4 ◄──────┘                           │
- │   b. Reconstructs client-safe JSX via createFromNodeStream()          │
- │   c. Performs React 19 SSR via renderToPipeableStream()               │
- │   d. Writes final HTML chunks to stdout                               │
- └───────────────────┬───────────────────────────────────────────────────┘
-                     │
-                     ▼ [Piped stdout chunks]
-               [Express res] ────────► Browser (HTML Response)`}</pre>
+                <pre className="font-mono text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre">{PIPELINE_DIAGRAM}</pre>
               </div>
             </section>
 
@@ -90,24 +468,20 @@ export default function Page() {
                 This module acts as the orchestrator running inside the master Express server process. It handles child process lifecycle management, serializes requests across the IPC channel, and manages response streaming.
               </p>
 
+              <h3>render-app-to-html.js Code Structure & Functions</h3>
+              <p>
+                The file defines the following helper variables, utilities, and main export:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="text">{PARENT_STRUCTURE_DIAGRAM}</CodeBlock>
+              </div>
+
               <h3>1. Spawning the Child Process</h3>
               <p>
                 When a user requests a page, the parent spins up a clean, isolated child process using Node's <code>fork()</code> to run the standard React renderer (<code>render-html.js</code>):
               </p>
               <div className="not-prose my-2">
-                <CodeBlock language="javascript">{`const child = fork(
-  renderHtmlPath,
-  [
-    reqPath,
-    paramsString,
-    contextForChild ? JSON.stringify(contextForChild) : JSON.stringify({}),
-    isDynamic ? "true" : "false",
-  ],
-  {
-    execArgv: childExecArgv, // Imports register-loader.mjs resolver
-    stdio: ["ignore", "pipe", "pipe", "ipc", "pipe"], // fd 4 is the custom RSC stream pipe
-  }
-);`}</CodeBlock>
+                <CodeBlock language="javascript">{CHILD_SPAWNING_CODE}</CodeBlock>
               </div>
               <p>
                 <strong>File Descriptor Mapping:</strong> The <code>stdio</code> array maps file descriptors:
@@ -125,24 +499,7 @@ export default function Page() {
                 To avoid redundant rendering overhead, the parent checks if a static RSC binary (<code>rsc.rsc</code>) exists in the <code>dist2/</code> cache. If found, it bypasses the Server Component compilation pipeline and writes the file contents directly to the child's RSC stream:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`const rscPath = path.resolve(process.cwd(), "dist2", reqPath.replace(/^\//, ""), "rsc.rsc");
-const hasStaticRsc = !isDynamic && fs.existsSync(rscPath);
-
-if (hasStaticRsc) {
-  const rscBuffer = fs.readFileSync(rscPath);
-  child.stdio[4].write(rscBuffer); // Inject cached RSC payload directly
-  child.stdio[4].end();
-} else {
-  // Fallback to dynamic SSR compilation using getJSX and React 19 server package
-  requestStorage.run(context, () => {
-    getJSX(reqPath, query, isNotFound, isDevelopment, forceNotFound)
-      .then((jsx) => {
-        const manifest = getManifest();
-        const { pipe } = renderToPipeableStream(jsx, manifest);
-        pipe(child.stdio[4]); // Pipe generated Flight stream to child
-      });
-  });
-}`}</CodeBlock>
+                <CodeBlock language="javascript">{RSC_CACHE_BYPASS_CODE}</CodeBlock>
               </div>
 
               <hr className="my-6" />
@@ -152,27 +509,7 @@ if (hasStaticRsc) {
                 During dynamic SSR, the parent runs Server Components inside the <code>requestStorage</code> context using a mocked Express response wrapper. This maps response calls to the child process IPC channel:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`function createParentResponseWrapper(reqPath, res, child) {
-  return {
-    setHeader: (name, value) => {
-      if (!res.headersSent) res.setHeader(name, value);
-    },
-    cookie: (name, value, options) => {
-      if (res.headersSent) {
-        // Fallback to streaming inline JS mutations if headers are flushed
-        if (options && options.httpOnly) return;
-        const cookieStr = constructCookieString(name, value, options);
-        res.write(\`<script>document.cookie = \${JSON.stringify(cookieStr)};</script>\`);
-      } else {
-        res.cookie(name, value, options);
-      }
-    },
-    redirect: (arg1, arg2) => {
-      const url = arg2 || arg1;
-      safeRedirect(url); // Triggers standard 302 or inlines window.location.href script
-    }
-  };
-}`}</CodeBlock>
+                <CodeBlock language="javascript">{PARENT_RESPONSE_WRAPPER_CODE}</CodeBlock>
               </div>
 
               <hr className="my-6" />
@@ -182,57 +519,13 @@ if (hasStaticRsc) {
                 Since Server Components execute in a separate process from the HTML renderer, mutations (such as <code>res.cookie</code> or <code>res.redirect</code>) triggered inside the child process are sent back to the parent as IPC message payloads:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`child.on("message", (message) => {
-  if (message && message.type === "DINOU_CONTEXT_COMMAND") {
-    const { command, args } = message;
-    
-    // Scenario 1: Headers already sent (Streaming active)
-    if (res.headersSent) {
-      if (command === "redirect") {
-        const target = args.length === 1 ? args[0] : args[1];
-        const resolved = resolveRelativeUrl(target, reqPath);
-        res.write(\`<script>window.location.href = \${JSON.stringify(resolved)};</script>\`);
-        res.end();
-        child.kill(); // Terminate renderer immediately
-        return;
-      }
-      if (command === "cookie") {
-        const [name, value, options] = args;
-        if (options?.httpOnly) return; // Blocked: JS cannot write HttpOnly
-        const cookieStr = constructCookieString(name, value, options);
-        res.write(\`<script>document.cookie = \${JSON.stringify(cookieStr)};</script>\`);
-        return;
-      }
-    }
-    
-    // Scenario 2: Headers not yet sent
-    if (typeof res[command] === "function") {
-      res[command].apply(res, args); // Execute native Express response methods
-    }
-  }
-});`}</CodeBlock>
+                <CodeBlock language="javascript">{RESPONSE_PROXY_CODE}</CodeBlock>
               </div>
 
               <div className="my-6">
                 <p className="text-sm font-semibold mb-2">IPC & Process Pipeline Flow:</p>
                 <div className="not-prose">
-                  <CodeBlock language="text">{`         [ Master Express Server ]                   [ Child Process (render-html) ]
-                     │                                              │
-                     ├────────► Fork child process ────────────────►│
-                     │                                              │
-       Check Cache   ├─► (Exists) -> Read dist2/rsc.rsc             │
-                     │   (Missing)-> compile JSX to Flight          │
-                     │                                              │
-                     ├────────► Pipe Flight data (fd 4) ───────────►│ (createFromNodeStream)
-                     │                                              │
-                     │◄──────── stream HTML chunks (stdout) ────────┤ (renderToPipeableStream)
-                     │                                              │
-      Child calls    │                                              │
-    res.cookie/redir │◄──────── IPC command message ────────────────┤ (send message)
-                     │                                              │
-                     ├─► (Headers Sent?)                            │
-                     │   ├─► Yes: write <script> cookie/redirect    │
-                     │   └─► No : call native Express headers       │`}</CodeBlock>
+                  <CodeBlock language="text">{IPC_FLOW_DIAGRAM}</CodeBlock>
                 </div>
               </div>
             </section>
@@ -246,191 +539,155 @@ if (hasStaticRsc) {
                 The child process runs in a clean standard React rendering thread (free from the <code>react-server</code> environment condition). Below is the complete step-by-step breakdown of its internal execution pipeline:
               </p>
 
-              <h3>1. Global Webpack Polyfills & Mocks</h3>
+              <h3>render-html.js Code Structure & Functions</h3>
               <p>
-                React Client Components rely on bundler-specific globals to load modules and chunks. Since the child runs in Node.js, it injects these global mocks at startup:
+                The file defines the following global structures, internal utilities, and self-execution hook:
               </p>
-              <ul>
-                <li>
-                  <strong><code>global.__webpack_require__</code>:</strong> Resolves dependencies dynamically. If the module ID is mapped in the active manifest (<code>global.__webpack_require_map__</code>), it delegates the resolution to Node's native <code>require()</code>. If it starts with <code>./</code>, it resolves the path relative to <code>process.cwd()</code>.
-                </li>
-                <li>
-                  <strong><code>global.__webpack_chunk_load__</code>:</strong> Simulates dynamic chunk loading. Since all server-side assets are already resident on disk, this immediately returns a resolved promise (<code>Promise.resolve()</code>).
-                </li>
-              </ul>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`global.__webpack_require__ = function (id) {
-  if (global.__webpack_require_map__ && global.__webpack_require_map__[id]) {
-    return require(global.__webpack_require_map__[id]);
-  }
-  if (typeof id === "string" && id.startsWith("./")) {
-    id = path.resolve(process.cwd(), id);
-  }
-  return require(id);
-};
-global.__webpack_chunk_load__ = () => Promise.resolve();`}</CodeBlock>
+                <CodeBlock language="text">{CHILD_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
 
-              <hr className="my-6" />
-
-              <h3>2. Transpilation & CSS/Asset Require Hooks</h3>
+              <h3>1. Webpack Runtime Global Mocks</h3>
               <p>
-                To handle modern frontend syntaxes, the child sets up compile-on-the-fly hooks before importing user files:
-              </p>
-              <ul>
-                <li>
-                  <strong>Babel Register:</strong> Configures <code>@babel/register</code> to transpile JSX, TypeScript (<code>.ts/.tsx</code>), and ES modules into Node-compatible CommonJS. It ignores <code>node_modules</code> unless the package is part of the <code>dinou</code> framework core.
-                </li>
-                <li>
-                  <strong>Asset Require Hook:</strong> Intercepts static assets (like <code>.png</code> or <code>.svg</code>). Instead of throwing runtime evaluation errors, it returns the public URL path mapped in the build output (e.g., <code>/assets/image.[hash].png</code>).
-                </li>
-                <li>
-                  <strong>CSS Require Hook:</strong> Parses stylesheets and CSS Modules, hashing localized class names (e.g. mapping <code>.title</code> to <code>.title__x3f9</code>) so they align with build outputs.
-                </li>
-              </ul>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`const babelRegister = require("@babel/register");
-babelRegister({
-  ignore: [/node_modules[\\/](?!dinou)/],
-  presets: [
-    ["@babel/preset-react", { runtime: "automatic" }],
-    "@babel/preset-typescript",
-  ],
-  plugins: ["@babel/transform-modules-commonjs"],
-  extensions: [".js", ".jsx", ".ts", ".tsx"],
-});
-
-require("./css-require-hook.js")();
-addHook({
-  extensions,
-  name: (localName, filepath) => createScopedName(localName, filepath) + ".[ext]",
-  publicPath: "/assets/",
-});`}</CodeBlock>
-              </div>
-
-              <hr className="my-6" />
-
-              <h3>3. CLI Arguments Parsing</h3>
-              <p>
-                Deserializes variables passed down from the parent process CLI fork call:
+                React Client Components compiled by bundlers rely on specific globals like <code>__webpack_require__</code> and <code>__webpack_chunk_load__</code> to resolve chunks in the browser. Since the isolated child process runs inside a native Node.js V8 context, it overrides these globals at startup to redirect module resolution:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`const reqPath = process.argv[2] || "/";
-const query = JSON.parse(process.argv[3] || "{}");
-const serializedBox = JSON.parse(process.argv[4] || "{}");
-const isDynamic = process.argv[5] === "true";`}</CodeBlock>
-              </div>
-
-              <hr className="my-6" />
-
-              <h3>4. SSR Manifest & Require Mapping</h3>
-              <p>
-                To map Flight serialized hashes back to local JS modules, the helper reads and unifies build manifests:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`function getSsrManifest() {
-  const ssrManifest = JSON.parse(fs.readFileSync(ssrManifestPath, "utf8"));
-  const clientManifest = JSON.parse(fs.readFileSync(clientManifestPath, "utf8"));
-
-  const requireMap = {};
-  for (const [fileUrl, entry] of Object.entries(clientManifest)) {
-    if (entry && entry.id !== undefined) {
-      requireMap[entry.id] = fileURLToPath(fileUrl); // Convert file:// URL to system path
-    }
-  }
-  global.__webpack_require_map__ = requireMap; // Feed the global Webpack polyfill
-  return ssrManifest;
-}`}</CodeBlock>
-              </div>
-
-              <hr className="my-6" />
-
-              <h3>5. IPC and Pipe Deserialization</h3>
-              <p>
-                The child opens a read-stream pointing directly to descriptor channel <code>fd:4</code>. It reads the incoming binary RSC Flight payload and passes it to the client reconstructor:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`const rscStream = createReadStream(null, { fd: 4 });
-const { createFromNodeStream } = isWebpack
-  ? require("react-server-dom-webpack/client")
-  : require("@roggc/react-server-dom-esm/client");
-
-const jsx = isWebpack
-  ? await createFromNodeStream(rscStream, getSsrManifest())
-  : await createFromNodeStream(rscStream, baseUrl, baseUrl);`}</CodeBlock>
-              </div>
-
-              <hr className="my-6" />
-
-              <h3>6. React 19 HTML Compilation</h3>
-              <p>
-                The deserialized client JSX tree is compiled into HTML using React 19's server compiler:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`const stream = renderToPipeableStream(jsx, {
-  onShellReady() {
-    // Write importmap dynamically for ESM resolution (ESBuild/Rollup only)
-    if (!isWebpack) {
-      process.stdout.write(getImportMapHtml());
-    }
-    stream.pipe(process.stdout); // Write raw HTML chunks to stdout
-  },
-  bootstrapModules: ["/main.js", "/runtime.js"], // Hydration scripts
-  bootstrapScriptContent: isDevelopment ? 'window.HMR_WEBSOCKET_URL="ws://localhost:3001";' : ''
-});`}</CodeBlock>
-              </div>
-              <p>
-                The <code>stdout</code> of the process is hooked directly to the master Express response, which streams the HTML back to the browser.
-              </p>
-
-              <hr className="my-6" />
-
-              <h3>7. Error Isolation & Recovery</h3>
-              <p>
-                If a component throws an error during the SSR compilation, the child process implements a robust recovery handler:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`onError(error) {
-  process.nextTick(async () => {
-    if (stream && !stream.destroyed) {
-      stream.unpipe(process.stdout); // Detach stdout immediately to avoid layout corruption
-      stream.destroy();
-    }
-    try {
-      const errorJSX = await getErrorJSX(reqPath, query, error, isDevelopment);
-      if (!context.res.headersSent) context.res.status(500);
-
-      if (errorJSX === undefined) {
-        writeErrorOutput(error, isProd); // Fallback to raw HTML
-        process.exit(1);
-      }
-
-      // Render custom error.tsx with bootstrap scripts
-      const errorStream = renderToPipeableStream(errorJSX, {
-        onShellReady() {
-          errorStream.pipe(process.stdout);
-        },
-        bootstrapModules: [getAssetFromManifest("error.js")],
-        bootstrapScriptContent: \`window.__DINOU_ERROR_MESSAGE__=\${JSON.stringify(error.message)};\`
-      });
-    } catch {
-      writeErrorOutput(error, isProd);
-      process.exit(1);
-    }
-  });
-}`}</CodeBlock>
+                <CodeBlock language="javascript">{WEBPACK_MOCKS_CODE}</CodeBlock>
               </div>
               <ul>
                 <li>
-                  <strong>Stdout Detaching:</strong> The moment an error is caught in <code>onError</code>, the child detaches the stream from <code>process.stdout</code> and destroys it, preventing broken layout code from reaching the client.
+                  <strong><code>global.__webpack_require__</code>:</strong> Intercepts imports. If a component request matches a key in <code>global.__webpack_require_map__</code>, it maps the identifier to the absolute physical file on disk (calculated from the Client Manifest) and calls Node's native <code>require()</code>.
                 </li>
                 <li>
-                  <strong>Custom Error Boundary SSR:</strong> It resolves the user's custom <code>error.tsx</code> component (using <code>getErrorJSX()</code>). If found, it renders it with code 500 and injects error details (message, stack, and HMR socket url) as global variables so the client-side hydration compiles a visual error boundary.
-                </li>
-                <li>
-                  <strong>Hard Fallback Exit:</strong> If no custom component is found or it throws during compile, the script writes a static crash template (<code>formatErrorHtml</code>) and exits with <code>process.exit(1)</code>.
+                  <strong><code>global.__webpack_chunk_load__</code>:</strong> Mocks dynamic loading. Because all bundle assets already reside locally on the disk, dynamic loading is a no-op that resolves immediately.
                 </li>
               </ul>
+
+              <hr className="my-6" />
+
+              <h3>2. Core Environment Setup & Require Hooks</h3>
+              <p>
+                Before executing JSX or user styles, the child process establishes its JIT compiler hooks to prevent syntax or resolution errors:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{REQUIRE_HOOKS_CODE}</CodeBlock>
+              </div>
+              <ul>
+                <li>
+                  <strong>Babel Register:</strong> Compiles React 19 JSX brackets and TypeScript constructs into raw CommonJS.
+                </li>
+                <li>
+                  <strong>CSS Require Hook:</strong> Compiles PostCSS classes into JSON keymaps, outputting scoped class names (e.g., mapping <code>.container</code> to <code>.container__x3a2</code>) matching the client stylesheet builds.
+                </li>
+                <li>
+                  <strong>Asset Require Hook (<code>addHook</code>):</strong> Intercepts file extensions for static assets (like <code>.png</code> or <code>.svg</code>) to prevent evaluation errors, returning a static URL string (e.g., <code>/assets/logo.a1b2c3.png</code>).
+                </li>
+              </ul>
+
+              <hr className="my-6" />
+
+              <h3>3. Error Rendering Functions</h3>
+              <p>
+                In the event of a compiler or React rendering crash, <code>render-html.js</code> uses dedicated templates to output a complete, standalone error HTML payload:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{ERROR_RENDERING_CODE}</CodeBlock>
+              </div>
+              <ul>
+                <li>
+                  <strong><code>formatErrorHtml</code>:</strong> Produces a stylized HTML overlay displaying the error stack trace, tailored for local debugging.
+                </li>
+                <li>
+                  <strong><code>formatErrorHtmlProduction</code>:</strong> Outputs a minimal HTML template containing a script that logs the error context to the client browser's console, hiding implementation details from the user.
+                </li>
+                <li>
+                  <strong><code>writeErrorOutput</code>:</strong> Directs the formatted HTML directly to <code>process.stdout</code> and writes the raw JSON traceback metadata block to <code>process.stderr</code> before exiting the process.
+                </li>
+              </ul>
+
+              <hr className="my-6" />
+
+              <h3>4. Manifest & Import Map Utilities</h3>
+              <p>
+                Before starting the React stream, the child reads the compilation manifests to populate Webpack and ESM resolvers:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{MANIFEST_UTILITIES_CODE}</CodeBlock>
+              </div>
+              <ul>
+                <li>
+                  <strong><code>getSsrManifest()</code>:</strong> Populates the global <code>__webpack_require_map__</code> by converting all client manifest <code>file://</code> URLs to absolute paths, ensuring runtime require lookups succeed.
+                </li>
+                <li>
+                  <strong><code>getImportMapHtml()</code>:</strong> Builds a <code>&lt;script type="importmap"&gt;</code> element dynamically to resolve ES module specifiers in non-webpack environments.
+                </li>
+              </ul>
+
+              <div className="my-4 border rounded-xl p-4 bg-slate-50 dark:bg-slate-900/40 not-prose space-y-3">
+                <h4 className="text-sm font-semibold flex items-center gap-2 text-foreground">
+                  <Cpu className="h-4 w-4 text-blue-500" />
+                  How Module Resolution Differs: Webpack vs. ESM (esbuild/Rollup)
+                </h4>
+                <div className="text-xs text-muted-foreground leading-relaxed space-y-2">
+                  <div>
+                    <strong>📦 Webpack (Server-side mapping):</strong>
+                    <p className="mt-1">
+                      Webpack relies on <strong>abstract module IDs</strong> (e.g., numeric IDs like <code>102</code>) instead of actual file paths. During Server-Side Rendering (SSR), React needs <code>getSsrManifest()</code> to build <code>__webpack_require_map__</code>, mapping those abstract IDs back to physical file paths on disk for Node's <code>require()</code>. Under Webpack, <code>getImportMapHtml()</code> is a no-op that returns an empty string, since the Webpack runtime handles module loading in the browser.
+                    </p>
+                  </div>
+                  <div>
+                    <strong>🌐 ESM (Client-side mapping):</strong>
+                    <p className="mt-1">
+                      ESM-based runtimes (using <strong>esbuild</strong> and <strong>Rollup</strong>) write native relative ES module paths directly into the Flight stream. The child process resolves these paths natively via standard dynamic <code>import()</code> statements, rendering <code>getSsrManifest()</code> unnecessary. However, the client browser needs to resolve module specifiers (bare imports like <code>import React from 'react'</code>) to physical URLs. This is solved by <code>getImportMapHtml()</code>, which reads <code>react-client-manifest.json</code> to inject a <code>&lt;script type="importmap"&gt;</code> element dynamically in non-webpack environments.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <hr className="my-6" />
+
+              <h3>5. Main Render Implementation: <code>renderToStream</code></h3>
+              <p>
+                This asynchronous function orchestrates the reading, reconstruction, and rendering of the React tree:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{RENDER_TO_STREAM_CODE}</CodeBlock>
+              </div>
+              <p>
+                During execution, <code>renderToStream</code> opens a stream on file descriptor <code>fd:4</code> to read the binary Flight stream, parsing it with React's <code>createFromNodeStream()</code> within the isolated <code>requestStorage.run</code> context.
+              </p>
+              <p>
+                The rebuilt component graph is then compiled to HTML chunks via React's <code>renderToPipeableStream()</code>. The orchestration executes through the following structural blocks:
+              </p>
+              <ul>
+                <li>
+                  <strong>Context Isolation (<code>requestStorage.run</code>):</strong> Wraps the rendering thread inside a thread-safe AsyncLocalStorage container. This ensures sub-components can access request headers, query parameters, and cookie contexts without cross-talk.
+                </li>
+                <li>
+                  <strong>Client Asset Resolution (<code>bootstrapModules</code>):</strong> Maps client hydration bundles using <code>getAssetFromManifest()</code>. This dynamic lookup maps the static identifiers (like <code>main.js</code> and <code>runtime.js</code>) to the physical hash-appended build assets inside the client manifest.
+                </li>
+                <li>
+                  <strong>HMR WebSocket Injection (<code>bootstrapScriptContent</code>):</strong> In development mode, it registers the global <code>window.HMR_WEBSOCKET_URL</code> string, allowing the client-side browser to open hot reloading pipes.
+                </li>
+                <li>
+                  <strong>Advanced Error Recovery Hook (<code>onError</code>):</strong> If an SSR compiler or runtime crash is intercepted:
+                  <ul className="pl-4 mt-1 space-y-1 list-disc">
+                    <li><strong>Stdout Detaching:</strong> The child immediately detaches the active stream from <code>process.stdout</code> and destroys it to prevent corrupted layouts from reaching the browser.</li>
+                    <li><strong>Custom Error Boundary:</strong> It resolves the project's custom <code>error.tsx</code> component via <code>getErrorJSX()</code>. If found, it status-codes the request to 500 and renders the boundary, injecting metadata logs (<code>__DINOU_ERROR_MESSAGE__</code>, <code>__DINOU_ERROR_STACK__</code>) to the browser window.</li>
+                    <li><strong>Hard Fallback Exit:</strong> If no custom template exists or rendering the error component fails, it writes the raw stack trace template (<code>formatErrorHtml</code>) and exits the process via <code>process.exit(1)</code>.</li>
+                  </ul>
+                </li>
+              </ul>
+
+              <hr className="my-6" />
+
+              <h3>6. Self-Executing Startup Hook</h3>
+              <p>
+                At the very end of <code>render-html.js</code>, the script parses the command line arguments passed by the parent fork call and executes <code>renderToStream()</code> immediately:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{STARTUP_HOOK_CODE}</CodeBlock>
+              </div>
             </section>
 
             <hr className="my-8" />

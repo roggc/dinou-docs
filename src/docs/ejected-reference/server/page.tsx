@@ -14,6 +14,7 @@ const tocItems = [
   { id: "context-wrappers", title: "🛡️ 5. Context State & Cookie Injection", level: 2 },
   { id: "routing-endpoints", title: "🚀 6. Routing & RSC Endpoints", level: 2 },
   { id: "security-features", title: "🛡️ 7. Bot Mitigation Shield", level: 2 },
+  { id: "startup-sequence", title: "🏁 8. Server Startup Sequence", level: 2 },
 ];
 
 export default function Page() {
@@ -45,6 +46,62 @@ export default function Page() {
               <p>
                 The <code>server.js</code> file is the root server entry point. It is loaded as a <strong>CommonJS (CJS)</strong> script in Node.js, and is executed with the <code>--conditions=react-server</code> flag. It bootstraps the environment, overrides Node's module resolution, transpiles incoming ES modules, watches filesystem changes for HMR cache eviction, and starts the Express application.
               </p>
+
+              <h3>server.js File Structure & Lifecycle</h3>
+              <p>
+                Below is a visual map outlining the lifecycle phases and core duties of the ejected <code>server.js</code> file:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="text">{`========================================================================================================
+                                      SERVER.JS ARCHITECTURE & LIFECYCLE
+========================================================================================================
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │  1. INITIALIZATION & TRANSPILATION                                                                 │
+ │                                                                                                    │
+ │  • Load Core Dependencies (Express, Chokidar, React Server DOM, etc.)                              │
+ │  • @babel/register Hook ──> JIT transpile JSX/TypeScript imports in CommonJS (server & child)       │
+ │  • asset-require-hook & css-require-hook ──> Mock static imports (png, css) in Node.js             │
+ └───────────────────────────────────┬────────────────────────────────────────────────────────────────┘
+                                     │
+                                     ▼
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │  2. HOT MODULE REPLACEMENT ENGINE (Development Only)                                               │
+ │                                                                                                    │
+ │  • Chokidar Watcher ──> Monitors react_client_manifest/ for updates                                │
+ │  • loadManifestWithRetry & readJSONWithRetry ──> Prevent concurrent I/O race conditions            │
+ │  • clearRequireCache & getParents ──> Evict modified modules & propagate HMR recursively           │
+ └───────────────────────────────────┬────────────────────────────────────────────────────────────────┘
+                                     │
+                                     ▼
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │  3. EXPRESS APP & ENVIRONMENT MIDDLEWARES                                                          │
+ │                                                                                                    │
+ │  • Static Asset Handlers ──> Serve files from dist3/ (client builds) & src/                        │
+ │  • AsyncLocalStorage Request Context ──> Bind HTTP request/response to React rendering thread      │
+ └───────────────────────────────────┬────────────────────────────────────────────────────────────────┘
+                                     │
+                                     ▼
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │  4. ROUTING & RSC ENDPOINTS                                                                        │
+ │                                                                                                    │
+ │  ├── GET  /____rsc_payload____/*        ──> Returns the standard RSC Flight binary payload stream │
+ │  │                                                                                                 │
+ │  ├── POST /____rsc_payload_error____/*  ──> Handles server crashes, returns React error layout    │
+ │  │                                                                                                 │
+ │  ├── GET  Wildcard Route (/*)           ──> Compiles parameters, checks blocklists, routes requests │
+ │  │                                           to page_functions, and pipes output to children        │
+ │  │                                                                                                 │
+ │  └── POST /____server_function____       ──> Invokes actions mapped by registerServerReference     │
+ └───────────────────────────────────┬────────────────────────────────────────────────────────────────┘
+                                     │
+                                     ▼
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │  5. LAUNCH                                                                                         │
+ │                                                                                                    │
+ │  • Listen (port 3000) ──> Ready to handle request streams                                          │
+ └────────────────────────────────────────────────────────────────────────────────────────────────────┘`}</CodeBlock>
+              </div>
             </section>
 
             <hr className="my-8" />
@@ -189,8 +246,36 @@ babelRegister({
             <section id="hmr-engine">
               <h2>🔄 4. Dev HMR & Cache Eviction</h2>
               <p>
-                In development, when you edit a React Component, the bundler updates the client build and outputs a new <code>react-client-manifest.json</code>.
+                In development, when you edit a React Component, the bundler (Rollup/Esbuild or Webpack) updates the client build and outputs a metadata mapping file called <code>react-client-manifest.json</code>.
               </p>
+
+              <h3>What is the Client Manifest?</h3>
+              <p>
+                The client manifest is a JSON map generated by the bundler that links absolute source file locations to the compiled public asset assets served to the browser:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="json">{`{
+  "file:///C:/Users/.../src/components/Counter.tsx": {
+    "id": "/assets/Counter.js",
+    "chunks": ["/assets/Counter.js"],
+    "name": "Counter"
+  }
+}`}</CodeBlock>
+              </div>
+
+              <h3>Why does the Server Watch the Manifest?</h3>
+              <p>
+                The server monitors the manifest file for two critical reasons:
+              </p>
+              <ul>
+                <li>
+                  <strong>RSC Boundary Detection:</strong> When rendering React Server Components on the server, React Server DOM consults this manifest. If an imported component path exists in the JSON, React knows it is a Client Component (marked with <code>"use client"</code>). React skips executing its JS body in Node.js (preventing crashes from window/state references) and writes a client reference link to the Flight stream.
+                </li>
+                <li>
+                  <strong>HMR Compilation Signalling:</strong> Instead of watching thousands of <code>.tsx</code> files, the server watches the manifest folder. When <code>react-client-manifest.json</code> updates, it serves as a "build complete" signal. The server immediately wakes up to evict outdated modules from Node's cache.
+                </li>
+              </ul>
+
               <p>
                 However, Node.js permanently caches modules loaded via <code>require()</code>. To ensure the parent server picks up your changes instantly without a process restart, <code>server.js</code> sets up a file watcher using <code>chokidar</code>:
               </p>
@@ -220,10 +305,14 @@ babelRegister({
               <h3>HMR Mechanics & Chokidar's Role:</h3>
               <ol>
                 <li>
-                  <strong>High-Performance File Watching:</strong> <code>chokidar.watch()</code> is configured to monitor <code>react_client_manifest/</code> (or Webpack's output folder). It triggers the <code>onManifestChange()</code> callback immediately when the bundler (Rollup/Esbuild) finishes compiling changes and writes a updated manifest file to disk.
+                  <strong>High-Performance File Watching:</strong> <code>chokidar.watch()</code> is configured to monitor <code>react_client_manifest/</code> (or Webpack's output folder). It triggers the <code>onManifestChange()</code> callback immediately when the bundler finishes compiling changes and writes the updated manifest file to disk.
                 </li>
                 <li>
-                  <strong>Write-Concurrency Guard (Read Retries):</strong> Because Chokidar events can fire while the bundler is still writing bytes to disk (which would result in an empty JSON read error), the server wraps manifest reading inside <code>loadManifestWithRetry()</code> and <code>readJSONWithRetry()</code>. This performs up to 10 sequential attempts with atomic delays until a valid JSON structure is parsed.
+                  <strong>Write-Concurrency Guard (Read Retries):</strong> Because Chokidar events can fire while the bundler is still writing bytes to disk (which would result in an empty JSON read error), the server wraps manifest reading inside <code>loadManifestWithRetry()</code> and <code>readJSONWithRetry()</code>. 
+                  <ul>
+                    <li><code>loadManifestWithRetry()</code>: Bounded to startup, attempting up to 10 reads with 100ms async delays.</li>
+                    <li><code>readJSONWithRetry()</code>: Runs during active requests, executing up to 4 fast attempts using <strong><code>Atomics.wait</code></strong> over a SharedArrayBuffer to perform microsecond-level síncrona pauses without clogging the event loop.</li>
+                  </ul>
                 </li>
                 <li>
                   <strong>Dependency Diffing:</strong> When a valid new manifest is loaded, Dinou compares its module keys with the cached <code>currentManifest</code> version. Any added or removed module keys represent boundaries that have shifted from server rendering to client hydration.
@@ -1305,6 +1394,75 @@ app.use((req, res, next) => {
   next();
 });`}</CodeBlock>
               </div>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* 8. SERVER STARTUP SEQUENCE */}
+            <section id="startup-sequence">
+              <h2>🏁 8. Server Startup Sequence</h2>
+              <p>
+                At the very end of <code>server.js</code>, an asynchronous self-executing function <code>(async () => &#123; ... &#125;)()</code> coordinates the HTTP socket bindings and background static compilations:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`const http = require("http");
+
+(async () => {
+  try {
+    const server = http.createServer(app);
+
+    // 1. Anti-Zombie Port Safety Check
+    server.on("error", (error) => {
+      if (error.code === "EADDRINUSE") {
+        console.error(\`\\n❌ FATAL ERROR: Port \${port} is already in use!\`);
+      } else {
+        console.error("❌ [Server Error]:", error);
+      }
+      process.exit(1);
+    });
+
+    // 2. Open HTTP Listener Sockets
+    await new Promise((resolve) => {
+      server.listen(port, () => {
+        console.log(\`\\n🚀 Dinou Server is ready on http://localhost:\${port}\`);
+        resolve();
+      });
+    });
+
+    // 3. Environment Specific Tasks
+    if (!isDevelopment) {
+      generateStatic()
+        .then(() => {
+          isReady = true; // Mark as ready after SSG compilation succeeds
+        })
+        .catch((err) => {
+          isReady = true; // Fallback to dynamic execution
+        });
+    }
+  } catch (error) {
+    process.exit(1);
+  }
+})();`}</CodeBlock>
+              </div>
+
+              <h3>The Architectural Role of the <code>isReady</code> State</h3>
+              <p>
+                Dinou declares a global lifecycle boolean <code>let isReady = isDevelopment;</code>. Although it might seem unused at first glance, it serves two critical purposes:
+              </p>
+              <ul>
+                <li>
+                  <strong>Preventing Disk File System Contention (ISG vs SSG):</strong> In production (<code>!isDevelopment</code>), the server fires <code>generateStatic()</code> at startup to pre-build all static pages to disk. If an incoming client requests a dynamic route that triggers Incremental Static Generation (ISG/ISR) at the same time, Node.js would attempt to write, rename, and rewrite those same static files in parallel. 
+                  <br />
+                  To prevent EBUSY/EPERM file locking conflicts on disk, <code>isReady</code> acts as a gatekeeper. By remaining <code>false</code> during the initial build, Dinou disables background revalidations (ISG) on matching wildcard GET routes until the initial compilation completes.
+                </li>
+                <li>
+                  <strong>Testing Integration & Ready Signaling:</strong> Dinou exposes a diagnostic endpoint: <code>/__DINOU_STATUS_PLAYWRIGHT__</code>. Automated testing runners (such as Playwright) need a reliable signal to know when the server has finished its initial compilation before launching E2E UI tests. The endpoint queries:
+                  <br />
+                  <code>isReady: isDevelopment ? isManifestReady() : isReady</code>
+                  <br />
+                  It returns a status response containing <code>isReady: true</code> only when all static components and client manifests have been written successfully.
+                </li>
+              </ul>
             </section>
 
             <hr className="my-8" />
