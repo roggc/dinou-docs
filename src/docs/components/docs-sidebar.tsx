@@ -528,6 +528,10 @@ const navigation = [
             title: "4. Asset & Helpers Plugins",
             href: "/docs/ejected-reference/bundlers/rollup/assets-helpers",
           },
+          {
+            title: "5. ESM React Refresh",
+            href: "/docs/ejected-reference/bundlers/rollup/react-refresh",
+          },
         ],
       },
       {
