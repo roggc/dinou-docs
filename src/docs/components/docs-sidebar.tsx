@@ -304,6 +304,28 @@ const navigation = [
         title: "Static & ISR Engines",
         href: "/docs/ejected-reference/static-isr",
         icon: RefreshCw,
+        subItems: [
+          {
+            title: "Overview",
+            href: "/docs/ejected-reference/static-isr",
+          },
+          {
+            title: "Static Crawler (build-static-pages.js)",
+            href: "/docs/ejected-reference/static-isr/build-static-pages",
+          },
+          {
+            title: "Background ISR (revalidating.js)",
+            href: "/docs/ejected-reference/static-isr/revalidating",
+          },
+          {
+            title: "On-Demand Purge (cache-revalidate.js)",
+            href: "/docs/ejected-reference/static-isr/cache-revalidate",
+          },
+          {
+            title: "ISG Engine (generating-isg.js)",
+            href: "/docs/ejected-reference/static-isr/generating-isg",
+          },
+        ],
       },
       {
         title: "esbuild Integration",

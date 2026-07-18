@@ -35,10 +35,10 @@ export default function Page() {
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <blockquote>
               <strong>Key Files Involved:</strong> <br />
-              • Production compiler: <code>./dinou/core/build-static-pages.js</code> <br />
-              • Background engine: <code>./dinou/core/revalidating.js</code> <br />
-              • On-demand revalidator: <code>./dinou/core/cache-revalidate.js</code> <br />
-              • Dynamic ISG builder: <code>./dinou/core/generating-isg.js</code>
+              • Production compiler: <a href="/docs/ejected-reference/static-isr/build-static-pages"><code>./dinou/core/build-static-pages.js</code></a> <br />
+              • Background engine: <a href="/docs/ejected-reference/static-isr/revalidating"><code>./dinou/core/revalidating.js</code></a> <br />
+              • On-demand revalidator: <a href="/docs/ejected-reference/static-isr/cache-revalidate"><code>./dinou/core/cache-revalidate.js</code></a> <br />
+              • Dynamic ISG builder: <a href="/docs/ejected-reference/static-isr/generating-isg"><code>./dinou/core/generating-isg.js</code></a>
             </blockquote>
 
             {/* OVERVIEW */}
