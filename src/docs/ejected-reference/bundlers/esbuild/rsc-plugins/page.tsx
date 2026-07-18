@@ -247,7 +247,7 @@ export default function Page() {
                 The flowchart below traces the client component export parsing and manifest indexing process:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{MANIFEST_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{MANIFEST_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -260,7 +260,7 @@ export default function Page() {
                 The flowchart below shows how Server Actions are transformed into client-side fetch proxy calls:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{SERVER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{SERVER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -273,7 +273,7 @@ export default function Page() {
                 The flowchart below shows the Babel bridge that compiles React 19 auto-memoized trees:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{COMPILER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{COMPILER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

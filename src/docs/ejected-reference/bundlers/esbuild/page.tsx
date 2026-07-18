@@ -212,7 +212,7 @@ export default function Page() {
                 The chart below compares the two configurations:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{CONFIGS_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="700px">{CONFIGS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

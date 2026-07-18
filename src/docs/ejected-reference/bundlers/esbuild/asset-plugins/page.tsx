@@ -26,7 +26,7 @@ const ASSETS_DIAGRAM = `graph TD
     
     End --> OutputType{Output Type?}
     OutputType -->|Normal Asset Chunks| Normal[Rename to scoped paths<br/>e.g., assets/scoped-hash.png]
-    OutputType -->|Inlined JS Chunks| Inlined[Locate // dinou-asset:... comment & Extract asset binary contents & Write asset & Replace chunk var to point to asset]`;
+    OutputType -->|Inlined JS Chunks| Inlined[Locate // dinou-asset:... comment<br/>& Extract asset binary contents<br/>& Write asset & Replace chunk var]`;
 
 const CSS_DIAGRAM = `graph TD
     Start[esbuild imports .css file] --> RunPostCSS[postcss plugins & extractor]
@@ -363,7 +363,7 @@ export default function Page() {
                 The flowchart below shows how static files are intercepted, scoped, and resolved from JavaScript chunks:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="800px">{ASSETS_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="650px">{ASSETS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -376,7 +376,7 @@ export default function Page() {
                 The flowchart below shows how CSS Modules and tailwind styles are parsed and compiled into `styles.css`:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="800px">{CSS_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="750px">{CSS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
