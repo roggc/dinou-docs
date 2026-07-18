@@ -20,8 +20,8 @@ const ENTRIES_DIAGRAM = `graph TD
     Start[Crawl src/ folder] --> Loop[Files found: loop recursively]
     
     Loop --> TypeCheck{Component Type?}
-    TypeCheck -->|Client Component| Client[parse exports via Babel AST & update manifest.json & extract imports recursively]
-    TypeCheck -->|Page / Layout / CSS| Structure[Parse recursively to gather CSS stylesheets & gather static assets]
+    TypeCheck -->|Client Component| Client[parse exports via Babel AST<br/>& update manifest.json<br/>& extract imports recursively]
+    TypeCheck -->|Page / Layout / CSS| Structure[Parse recursively to gather<br/>CSS stylesheets<br/>& gather static assets]
     
     Client --> ComputeHash[Compute SHA-1 hash of all files absolute path]
     Structure --> ComputeHash
@@ -323,7 +323,7 @@ export default function Page() {
                 The flowchart below shows how directories are scanned and input entrypoints are cataloged:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="800px">{ENTRIES_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="650px">{ENTRIES_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -336,7 +336,7 @@ export default function Page() {
                 The flowchart below shows how modules are mapped inside the client hydration manifest:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{MANIFEST_UPDATE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{MANIFEST_UPDATE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -349,7 +349,7 @@ export default function Page() {
                 The flowchart below shows how compiler-generated JS stubs for assets and styles are filtered out:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="800px">{WRITER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="650px">{WRITER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

@@ -240,7 +240,7 @@ export default function Page() {
                 The flowchart below traces the hash stripping and reference renaming steps of the stable chunk names plugin:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="800px">{STABLE_CHUNKS_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="650px">{STABLE_CHUNKS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -253,7 +253,7 @@ export default function Page() {
                 The flowchart below shows how compilation is aborted if a required entry file is missing:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{SKIP_ENTRIES_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{SKIP_ENTRIES_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -266,7 +266,7 @@ export default function Page() {
                 The flowchart below shows how entrypoint names are mapped to final hashed filenames in the build manifest:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{MANIFEST_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{MANIFEST_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
