@@ -247,6 +247,33 @@ const navigation = [
         icon: BookOpen,
       },
       {
+        title: "ESM Loader Integration",
+        href: "/docs/ejected-reference/loader",
+        icon: Cpu,
+        subItems: [
+          {
+            title: "Overview",
+            href: "/docs/ejected-reference/loader",
+          },
+          {
+            title: "Module Importer (import-module.js)",
+            href: "/docs/ejected-reference/loader/import-module",
+          },
+          {
+            title: "Path Resolver (get-abs-path-with-ext.js)",
+            href: "/docs/ejected-reference/loader/get-abs-path-with-ext",
+          },
+          {
+            title: "Exports Parser (parse-exports.js)",
+            href: "/docs/ejected-reference/loader/parse-exports",
+          },
+          {
+            title: "Path Normalizer (path-utils.js)",
+            href: "/docs/ejected-reference/loader/path-utils",
+          },
+        ],
+      },
+      {
         title: "Server & RSC Core",
         href: "/docs/ejected-reference/server",
         icon: Cpu,
@@ -293,6 +320,10 @@ const navigation = [
           {
             title: "Actions Connection (server-function-proxy.js)",
             href: "/docs/ejected-reference/client-runtime/server-actions",
+          },
+          {
+            title: "Navigation Utilities (navigation-utils.js)",
+            href: "/docs/ejected-reference/client-runtime/navigation-utils",
           },
         ],
       },
@@ -348,6 +379,22 @@ const navigation = [
           {
             title: "Error Boundaries Handler (get-error-jsx.js)",
             href: "/docs/ejected-reference/rsc-context/error-handler",
+          },
+          {
+            title: "RSC Tree Builder (get-jsx.js)",
+            href: "/docs/ejected-reference/rsc-context/get-jsx",
+          },
+          {
+            title: "HTML App Renderer (render-app-to-html.js)",
+            href: "/docs/ejected-reference/rsc-context/render-app-to-html",
+          },
+          {
+            title: "Request Context Store (request-context.js)",
+            href: "/docs/ejected-reference/rsc-context/request-context",
+          },
+          {
+            title: "Redirect Engine (redirect.jsx)",
+            href: "/docs/ejected-reference/rsc-context/redirect-helpers",
           },
         ],
       },
