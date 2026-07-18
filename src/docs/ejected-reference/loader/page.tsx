@@ -293,7 +293,7 @@ export default function Page() {
                 The <code>babel-esm-loader.js</code> file follows this logical pipeline structure during module resolution and compilation:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{LOADER_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{LOADER_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

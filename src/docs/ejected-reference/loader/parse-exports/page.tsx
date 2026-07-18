@@ -124,7 +124,7 @@ export default function Page() {
                 The flowchart below shows how different export structures are traversed and collected:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{PARSER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{PARSER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

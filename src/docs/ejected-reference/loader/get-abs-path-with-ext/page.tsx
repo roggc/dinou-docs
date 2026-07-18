@@ -165,7 +165,7 @@ export default function Page() {
                 The flowchart below traces the path resolution cascade for imports:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{RESOLVER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{RESOLVER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
