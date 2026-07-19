@@ -209,11 +209,35 @@ export default function Page() {
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                Server Functions represent endpoints executing database queries or handling credentials. Webpack compiles client bundles, meaning server components code must be stripped and replaced with client-side fetch proxies.
+                Server Functions represent sensitive backend endpoints executing database queries or handling credentials. Webpack compiles client bundles, meaning server components code must be stripped and replaced with client-side fetch proxies.
               </p>
               <p>
                 Dinou achieves this using a custom Webpack loader to replace modules containing <code>"use server"</code> with fetch skeletons, and a custom compilation plugin to aggregate the exported functions into <code>server-functions-manifest.json</code>.
               </p>
+
+              <h3>🤝 The Teamwork Lifecycle (Step-by-Step)</h3>
+              <p>
+                The loader and the plugin coordinate in a two-stage relay race to compile Server Functions safely:
+              </p>
+              <ol className="list-decimal pl-6 space-y-2">
+                <li>
+                  <strong>Loader (Stage 1 - File-by-File)</strong>:
+                  <ul className="list-disc pl-5 mt-1 space-y-1">
+                    <li>Intercepts individual module source files containing the <code>"use server"</code> directive.</li>
+                    <li>Discards all server-side implementation logic (preventing leakage into client bundles).</li>
+                    <li>Replaces exports with dynamic fetch proxy stubs that point to a temporary <code>"__SERVER_FUNCTION_PROXY__"</code> token.</li>
+                    <li>Calls Webpack's <code>this.emitFile</code> to output a temporary file under <code>server-functions/[path].json</code> containing the function whitelists.</li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>Plugin (Stage 2 - Compilation Wrap)</strong>:
+                  <ul className="list-disc pl-5 mt-1 space-y-1">
+                    <li>Hooks into Webpack's <code>PROCESS_ASSETS_STAGE_REPORT</code> phase after all bundles are grouped.</li>
+                    <li>Scans JavaScript chunks and replaces the temporary <code>"__SERVER_FUNCTION_PROXY__"</code> string with the actual hashed proxy script URL.</li>
+                    <li>Crawls the emitted <code>server-functions/*.json</code> files, aggregates the whitelisted exports into a single <code>server-functions-manifest.json</code> on disk, and deletes the temporary JSON files so they are not written to production outputs.</li>
+                  </ul>
+                </li>
+              </ol>
             </section>
 
             <hr className="my-8" />

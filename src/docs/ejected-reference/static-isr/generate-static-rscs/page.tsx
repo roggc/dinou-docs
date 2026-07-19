@@ -13,13 +13,13 @@ const tocItems = [
 ];
 
 const RSCS_PIPELINE_DIAGRAM = `graph TD
-    Start[generateStaticRSCs routes] --> ReadManifest[Read React Client Manifest]
-    ReadManifest --> LoopRoutes[For each route...]
-    LoopRoutes --> MockContext[Inject Mock Request & Response Context]
-    MockContext --> RunALS[requestStorage.run mockContext]
-    RunALS --> LoadJSX[getJSX reqPath Loads React Tree]
-    LoadJSX --> Stream[renderToPipeableStream Serializes stream]
-    Stream --> WriteRSC[Write directly to dist2/rsc.rsc]`;
+    Start["generateStaticRSCs(routes)"] --> ReadManifest["Read React Client Manifest:<br/>react-client-manifest.json"]
+    ReadManifest --> LoopRoutes["Loop: For each route of routes"]
+    LoopRoutes --> MockContext["Inject mock Express req/res context"]
+    MockContext --> RunALS["requestStorage.run(mockContext, ...)"]
+    RunALS --> LoadJSX["getJSX(finalReqPath):<br/>Loads React Server Component tree"]
+    LoadJSX --> Stream["renderToPipeableStream:<br/>Serializes component tree"]
+    Stream --> WriteRSC["Write directly to target:<br/>dist2/[route]/rsc.rsc"]`;
 
 const RSCS_PIPELINE_CODE = `const fs = require("fs");
 const path = require("path");
@@ -143,7 +143,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Understand build-time react serialization for multiple routes, client bundle mappings, and bulk stream piping.
+              Examine how Dinou serializes all application routes into React Server Component payloads in bulk during the production build.
             </p>
           </div>
 
@@ -156,7 +156,7 @@ export default function Page() {
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                During the static compilation phase (<code>npm run build</code>), we need to serialize the Server Components element trees of all crawled routes. The <code>generate-static-rscs.js</code> module manages this batch process, rendering routes to <code>rsc.rsc</code> payloads inside <code>dist2/</code>.
+                During the production server startup phase, we need to serialize the Server Components element trees of all crawled routes. The <code>generate-static-rscs.js</code> module manages this batch process, rendering routes to <code>rsc.rsc</code> payloads inside <code>dist2/</code>.
               </p>
             </section>
 
@@ -177,18 +177,46 @@ export default function Page() {
 
             {/* BULK VS SINGLE */}
             <section id="bulk-vs-single">
-              <h2>🔄 Bulk Pipeline vs Single Route Compiler</h2>
+              <h2>🔄 Differences: Bulk vs. Single Route Compilation</h2>
               <p>
-                Unlike the single-route builder <code>generate-static-rsc.js</code> (which handles runtime ISR/ISG cache refreshes):
+                Dinou has two modules for generating RSC payloads: <code>generate-static-rscs.js</code> (for batch generation at startup) and <code>generate-static-rsc.js</code> (for single routes during active traffic). They operate differently to optimize speed and prevent downtime:
               </p>
-              <ul>
-                <li>
-                  <strong>Direct Writes:</strong> Write directly to final files on disk instead of writing to <code>.tmp</code> files first, since no user traffic hits the server during the build phase.
-                </li>
-                <li>
-                  <strong>Cached Manifest Lookup:</strong> Reads the client component mappings manifest once at the start of execution, bypassing read overhead across files.
-                </li>
-              </ul>
+              <div className="my-6 overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-900">
+                      <th className="px-4 py-2 font-bold text-left">Feature</th>
+                      <th className="px-4 py-2 font-bold text-left">Bulk Pipeline (generate-static-rscs.js)</th>
+                      <th className="px-4 py-2 font-bold text-left">Single Route Compiler (generate-static-rsc.js)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                    <tr>
+                      <td className="px-4 py-2 font-semibold">When does it run?</td>
+                      <td className="px-4 py-2">Runs once in the background when the production server starts up.</td>
+                      <td className="px-4 py-2">Runs on-demand when a user visits a page (ISR / ISG).</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 font-semibold">How does it write files?</td>
+                      <td className="px-4 py-2">
+                        <strong>Direct Writes:</strong> Writes directly to the final <code>rsc.rsc</code> file path. Safe because no public traffic is hitting the server yet during startup.
+                      </td>
+                      <td className="px-4 py-2">
+                        <strong>Double-Buffered:</strong> Writes to a temporary <code>.tmp</code> file first, then renames it atomically to prevent serving a half-written file to an active user.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 font-semibold">Manifest File Reads</td>
+                      <td className="px-4 py-2">
+                        Reads the <code>react-client-manifest.json</code> <strong>once</strong> at the start and reuses it for all routes. Highly efficient for batching.
+                      </td>
+                      <td className="px-4 py-2">
+                        Reads the manifest from disk on every single execution to get the latest client component mappings.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </section>
 
             <hr className="my-8" />

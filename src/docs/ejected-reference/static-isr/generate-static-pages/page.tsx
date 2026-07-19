@@ -163,7 +163,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Understand build-time static HTML page generation for multiple routes, stream piping, and metadata serialization.
+              Understand static HTML page generation at server startup for multiple routes, stream piping, and metadata serialization.
             </p>
           </div>
 
@@ -176,7 +176,7 @@ export default function Page() {
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                During the static compilation build phase (<code>npm run build</code>), we need to output complete physical HTML pages for all crawled static directories. The <code>generate-static-pages.js</code> module manages this batch execution, piping rendering components to <code>index.html</code> inside <code>dist2/</code>.
+                During the production server startup phase, we need to output complete physical HTML pages for all crawled static directories. The <code>generate-static-pages.js</code> module manages this batch execution, piping rendering components to <code>index.html</code> inside <code>dist2/</code>.
               </p>
             </section>
 
@@ -203,7 +203,7 @@ export default function Page() {
               </p>
               <ul>
                 <li>
-                  <strong>Direct Writes:</strong> Writes directly to final files on disk instead of writing to <code>.tmp</code> files first, since no user traffic hits the server during the build phase.
+                  <strong>Direct Writes:</strong> Writes directly to final files on disk instead of writing to <code>.tmp</code> files first, since no user traffic hits the server during the server startup phase.
                 </li>
                 <li>
                   <strong>Status Manifest Invalidation:</strong> Updates the in-memory <code>status-manifest.js</code> map at compile-time to synchronise routing states for immediate post-build execution.

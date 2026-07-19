@@ -63,7 +63,7 @@ export default function Page() {
                 Dinou provides three types of rendering outputs for pages:
               </p>
               <ul>
-                <li><strong>Static Site Generation (SSG):</strong> Pages compile at build time and serve instantly from the disk.</li>
+                <li><strong>Static Site Generation (SSG):</strong> Pages compile during production server startup and serve instantly from the disk.</li>
                 <li><strong>Incremental Static Regeneration (ISR):</strong> Expired pages re-generate asynchronously in the background.</li>
                 <li><strong>Incremental Static Generation (ISG):</strong> Dynamic routes render on the first browser query and cache immediately.</li>
               </ul>
@@ -75,7 +75,7 @@ export default function Page() {
             <section id="ssg-build">
               <h2>💾 1. SSG Static Builder (<code>build-static-pages.js</code>)</h2>
               <p>
-                When you execute <code>npm run build</code>, the compiler runs the static page crawler script:
+                When the production server starts up, it runs the static page crawler script:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`async function buildStaticPages() {

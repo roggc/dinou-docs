@@ -13,15 +13,15 @@ const tocItems = [
 ];
 
 const RSC_BUILDER_DIAGRAM = `graph TD
-    Start[generateStaticRSC reqPath] --> TempPath[Create Temp File Path: rsc.rsc.timestamp.tmp]
-    TempPath --> MockCtx[Inject Mock req/res context]
-    MockCtx --> RunALS[requestStorage.run mockContext]
+    Start["generateStaticRSC(reqPath)"] --> TempPath["Create temporary file path:<br/>rsc.rsc.timestamp.tmp"]
+    TempPath --> MockCtx["Inject mock Express req/res context"]
+    MockCtx --> RunALS["requestStorage.run(mockContext, ...)"]
     
-    RunALS --> LoadJSX[getJSX finalReqPath Loads Server Component React Tree]
-    LoadJSX --> Stream[renderToPipeableStream Serializes elements]
-    Stream --> PipeTemp[Pipe stream to Temp File Writes to disk cache]
+    RunALS --> LoadJSX["getJSX(finalReqPath):<br/>Loads React Server Component tree"]
+    LoadJSX --> Stream["renderToPipeableStream:<br/>Serializes component tree"]
+    Stream --> PipeTemp["Pipe stream to temp file<br/>on disk"]
     
-    PipeTemp --> ReturnObj[Return verification object:<br/>success, tempPath, finalPath, status]`;
+    PipeTemp --> ReturnObj["Return validation object:<br/>{ success, tempPath, finalPath, status }"]`;
 
 const RSC_BUILDER_CODE = `const fs = require("fs");
 const path = require("path");
@@ -205,7 +205,7 @@ export default function Page() {
                   <strong>Safe Verification:</strong> Validates the response status code. If compilation fails (e.g. status <code>500</code>), it deletes the temp file and exits without committing.
                 </li>
                 <li>
-                  <strong>Decoupled Renames:</strong> The final rename commit is left to the calling engines (like `revalidating` or `generatingISG`), which use atomic OS rename calls to overwrite the active cache with zero downtime.
+                  <strong>Decoupled Renames:</strong> The final rename commit is left to the calling engines (like <code>revalidating</code> or <code>generating-isg</code>), which use atomic OS rename calls to overwrite the active cache with zero downtime.
                 </li>
               </ol>
             </section>
