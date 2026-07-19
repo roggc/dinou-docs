@@ -107,7 +107,7 @@ export default function Page() {
             <section id="manifest-flow">
               <h2>📊 Manifest Generator Flow</h2>
               <p>
-                The flowchart below shows how compilation chunks are crawled and output mapped to `manifest.json`:
+                The flowchart below shows how compilation chunks are crawled and output mapped to <code>manifest.json</code>:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="mermaid" minWidth="600px">{MANIFEST_GENERATOR_DIAGRAM}</CodeBlock>
