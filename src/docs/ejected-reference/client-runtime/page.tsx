@@ -36,7 +36,7 @@ export default function Page() {
               • Recovery Hydration Entry: <code>./dinou/core/client-error.jsx</code> / <code>client-error-webpack.jsx</code> <br />
               • Router Context & Hooks: <code>./dinou/core/navigation.js</code> / <code>navigation-utils.js</code> <br />
               • Link Click Hijacking: <code>./dinou/core/link.jsx</code> <br />
-              • Actions Connection: <code>./dinou/core/server-function-proxy.js</code>
+              • Server Functions Connection: <code>./dinou/core/server-function-proxy.js</code>
             </blockquote>
 
             {/* OVERVIEW */}
@@ -50,7 +50,7 @@ export default function Page() {
               </p>
               <ul>
                 <li>
-                  <strong>SPA Hydration (<code>client.jsx</code>)</strong>: Bootstrapped on successful page loads. It handles normal navigation transitions, scroll restoration, history state tracking, and Server Actions proxies.
+                  <strong>SPA Hydration (<code>client.jsx</code>)</strong>: Bootstrapped on successful page loads. It handles normal navigation transitions, scroll restoration, history state tracking, and Server Functions proxies.
                 </li>
                 <li>
                   <strong>Recovery Hydration (<code>client-error.jsx</code>)</strong>: Bootstrapped only when the server encounters a crash or compilation error during SSR. It displays the crash stack overlay, posts trace details back to the compiler, and provides mechanisms to safely navigate back to working states.
@@ -101,10 +101,10 @@ export default function Page() {
                 <div className="border rounded-xl p-4 bg-slate-50 dark:bg-slate-900/40">
                   <h4 className="text-sm font-semibold flex items-center gap-2 text-foreground">
                     <Cpu className="h-4 w-4 text-purple-500" />
-                    4. Actions Connection (<code>server-function-proxy.js</code>)
+                    4. Server Functions Connection (<code>server-function-proxy.js</code>)
                   </h4>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Intercepts invocations to functions containing the <code>"use server"</code> directive, serializing argument arrays or form data into HTTP POST requests sent to the server Action endpoint (<code>/____server_function____</code>).
+                    Intercepts invocations to functions containing the <code>"use server"</code> directive, serializing argument arrays or form data into HTTP POST requests sent to the server Function endpoint (<code>/____server_function____</code>).
                   </p>
                 </div>
               </div>

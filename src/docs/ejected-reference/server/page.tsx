@@ -37,7 +37,7 @@ export default function Page() {
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <blockquote>
               <strong>Path:</strong> <code>./dinou/core/server.js</code> <br />
-              <strong>Role:</strong> Parent Node.js process. Responsible for starting the web server, resolving route structures, hosting Server Actions, managing Node's runtime module cache, and piping flight payloads to the SSR sub-process.
+              <strong>Role:</strong> Parent Node.js process. Responsible for starting the web server, resolving route structures, hosting Server Functions, managing Node's runtime module cache, and piping flight payloads to the SSR sub-process.
             </blockquote>
 
             {/* OVERVIEW */}
@@ -57,7 +57,7 @@ export default function Page() {
         Init[1. INITIALIZATION & TRANSPILATION<br/>Load Core Dependencies Express, Chokidar, React Server DOM, etc<br/>@babel/register Hook JIT transpile JSX/TypeScript imports in CommonJS<br/>asset-require-hook & css-require-hook Mock static imports in Node.js]
         HMR[2. HOT MODULE REPLACEMENT ENGINE Development Only<br/>Chokidar Watcher Monitors react_client_manifest/ for updates<br/>loadManifestWithRetry & readJSONWithRetry Prevent concurrent I/O race conditions<br/>clearRequireCache & getParents Evict modified modules & propagate HMR recursively]
         Express[3. EXPRESS APP & ENVIRONMENT MIDDLEWARES<br/>Static Asset Handlers Serve files from dist3 client builds & src<br/>AsyncLocalStorage Request Context Bind HTTP request/response to React thread]
-        Endpoints[4. ROUTING & RSC ENDPOINTS<br/>GET /____rsc_payload____/* returns standard RSC Flight binary payload stream<br/>POST /____rsc_payload_error____/* Handles crashes, returns React error layout<br/>GET Wildcard Route /* Compiles parameters, checks blocklists, routes requests<br/>POST /____server_function____ Invokes actions mapped by registerServerReference]
+        Endpoints[4. ROUTING & RSC ENDPOINTS<br/>GET /____rsc_payload____/* returns standard RSC Flight binary payload stream<br/>POST /____rsc_payload_error____/* Handles crashes, returns React error layout<br/>GET Wildcard Route /* Compiles parameters, checks blocklists, routes requests<br/>POST /____server_function____ Invokes functions mapped by registerServerReference]
         Launch[5. LAUNCH<br/>Listen port 3000 Ready to handle request streams]
     end
 
@@ -745,7 +745,7 @@ return context;`}</CodeBlock>
             <section id="routing-endpoints">
               <h2>🚀 6. Routing & RSC Endpoints</h2>
               <p>
-                Dinou's core server orchestrates two central endpoints inside <code>core/server.js</code> to handle user routing navigations and trigger Server Actions.
+                Dinou's core server orchestrates two central endpoints inside <code>core/server.js</code> to handle user routing navigations and trigger Server Functions.
               </p>
 
               <h3>A. Serving RSC Payloads (<code>serveRSCPayload</code>)</h3>
@@ -1226,7 +1226,7 @@ if (!absolutePath.startsWith(srcDir + path.sep)) {
               </ul>
 
               <p>
-                In production, the server validates the action ID against the whitelist manifest generated during the build step:
+                In production, the server validates the function ID against the whitelist manifest generated during the build step:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`allowedExports = serverFunctionsManifest[normalizedRelative.replace(/\\\\/g, "/")];

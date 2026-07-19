@@ -135,11 +135,11 @@ export default function Page() {
           <div className="mb-8 space-y-4">
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Actions Connection (server-function-proxy.js)
+                Server Functions Connection (server-function-proxy.js)
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Explore how Dinou handles client-side Server Action invocations, request serialization, safe redirection execution, and live streaming command parsing.
+              Explore how Dinou handles client-side Server Function invocations, request serialization, safe redirection execution, and live streaming command parsing.
             </p>
           </div>
 
@@ -152,7 +152,7 @@ export default function Page() {
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                Server Actions (functions tagged with the <code>"use server"</code> directive) reside on the backend. When client components invoke these functions, they need a proxy layer to translate parameters into HTTP network calls and parse incoming streaming responses. The <code>server-function-proxy.js</code> module manages this bridge.
+                Server Functions (functions tagged with the <code>"use server"</code> directive) reside on the backend. When client components invoke these functions, they need a proxy layer to translate parameters into HTTP network calls and parse incoming streaming responses. The <code>server-function-proxy.js</code> module manages this bridge.
               </p>
             </section>
 
@@ -179,7 +179,7 @@ export default function Page() {
               </p>
               <ul>
                 <li>
-                  <strong>Form Data check:</strong> If the first argument is a <code>FormData</code> instance (from a native form submit), the proxy appends <code>__dinou_func_id</code> (the Action ID) and serializes extra args into <code>__dinou_args</code>, submitting it as a multipart request body.
+                  <strong>Form Data check:</strong> If the first argument is a <code>FormData</code> instance (from a native form submit), the proxy appends <code>__dinou_func_id</code> (the Function ID) and serializes extra args into <code>__dinou_args</code>, submitting it as a multipart request body.
                 </li>
                 <li>
                   <strong>JSON check:</strong> For direct JS calls, it sets headers to <code>application/json</code> and POSTs serialized &#123; id, args &#125;.
@@ -196,7 +196,7 @@ export default function Page() {
             <section id="redirect-security">
               <h2>🛡️ 2. Redirections & Security Checks</h2>
               <p>
-                Actions might trigger redirect operations on completion. The proxy handles redirections securely:
+                Server Functions might trigger redirect operations on completion. The proxy handles redirections securely:
               </p>
               <ul>
                 <li>
@@ -217,7 +217,7 @@ export default function Page() {
             <section id="stream-processing">
               <h2>⚙️ 3. RSC & Hybrid Stream Processing</h2>
               <p>
-                If the server Action returns React node updates, the response carries a <code>text/x-component</code> header representing the RSC Flight stream. The proxy reads this incrementally:
+                If the server Function returns React node updates, the response carries a <code>text/x-component</code> header representing the RSC Flight stream. The proxy reads this incrementally:
               </p>
               <ul>
                 <li>

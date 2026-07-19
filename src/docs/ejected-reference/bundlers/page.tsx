@@ -90,7 +90,7 @@ export default function Page() {
                       <CardTitle className="text-base font-bold">Webpack Setup</CardTitle>
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground">
-                      React 19's official React Server Components plugins binding, dynamic chunk split maps, and loaders for Server Actions.
+                      React 19's official React Server Components plugins binding, dynamic chunk split maps, and loaders for Server Functions.
                     </CardContent>
                   </Card>
                 </a>

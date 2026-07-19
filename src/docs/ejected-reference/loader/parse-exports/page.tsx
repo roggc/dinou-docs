@@ -108,7 +108,7 @@ export default function Page() {
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                In React Server Components (RSC), the loader must determine which functions are exported by Client Components (files starting with <code>"use client"</code>) and Server Actions (files starting with <code>"use server"</code>). This allows the compiler to generate proxy wrappers that bridge process and network boundaries.
+                In React Server Components (RSC), the loader must determine which functions are exported by Client Components (files starting with <code>"use client"</code>) and Server Functions (files starting with <code>"use server"</code>). This allows the compiler to generate proxy wrappers that bridge process and network boundaries.
               </p>
               <p>
                 The <code>parse-exports.js</code> utility handles this by parsing the file into an Abstract Syntax Tree (AST) and extracting all exported identifiers.

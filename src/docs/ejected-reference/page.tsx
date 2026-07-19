@@ -136,7 +136,7 @@ export default function Page() {
                       <CardTitle className="text-base font-bold">Client SPA & Routing</CardTitle>
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground">
-                      Examine client-side hydration, dynamic SPA transitions, history routers, scroll preservation, and Server Action fetch channels.
+                      Examine client-side hydration, dynamic SPA transitions, history routers, scroll preservation, and Server Function fetch channels.
                     </CardContent>
                   </Card>
                 </a>

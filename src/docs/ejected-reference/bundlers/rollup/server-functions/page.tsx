@@ -121,7 +121,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Examine the Rollup compiler hooks used to secure database calls and serialize Server Actions during production bundling.
+              Examine the Rollup compiler hooks used to secure database calls and serialize Server Functions during production bundling.
             </p>
           </div>
 
@@ -134,10 +134,10 @@ export default function Page() {
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                Server Actions contain sensitive database hooks and APIs that must never leak into client-side JS bundles.
+                Server Functions contain sensitive database hooks and APIs that must never leak into client-side JS bundles.
               </p>
               <p>
-                The <code>rollup-plugin-server-functions.js</code> plugin intercepts modules containing the <code>"use server"</code> directive during the <code>transform</code> stage. It strips out all server-side logic and replaces it with dynamic fetch proxy stubs. When the bundle is created, it writes the Server Action whitelist index: <code>server-functions-manifest.json</code>.
+                The <code>rollup-plugin-server-functions.js</code> plugin intercepts modules containing the <code>"use server"</code> directive during the <code>transform</code> stage. It strips out all server-side logic and replaces it with dynamic fetch proxy stubs. When the bundle is created, it writes the Server Function whitelist index: <code>server-functions-manifest.json</code>.
               </p>
             </section>
 
@@ -147,7 +147,7 @@ export default function Page() {
             <section id="server-functions-flow">
               <h2>📊 Server Functions Flow</h2>
               <p>
-                The flowchart below shows how Server Actions are extracted and transformed into client-side proxy skeletons:
+                The flowchart below shows how Server Functions are extracted and transformed into client-side proxy skeletons:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="mermaid" minWidth="650px">{SERVER_FUNCTIONS_DIAGRAM}</CodeBlock>

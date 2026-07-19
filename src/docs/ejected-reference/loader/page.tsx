@@ -54,8 +54,8 @@ const LOADER_STRUCTURE_DIAGRAM = `graph TD
         ClientCheck -->|Yes| ClientStub[Client Reference Stubbing<br/>• Discards original server-side code<br/>• Generates registerClientReference stub proxies]
         
         Src --> ServerCheck{isReactServer & hasUseServer?}
-        ServerCheck -->|Yes| ServerRegister[Server Actions Registration<br/>• Compiles functions with Babel<br/>• Maps function exports to Action IDs<br/>• Binds via registerServerReference]
-
+        ServerCheck -->|Yes| ServerRegister[Server Functions Registration<br/>• Compiles functions with Babel<br/>• Maps function exports to Function IDs<br/>• Binds via registerServerReference]
+        
         Src --> DefaultJS[Standard JS / TSX<br/>• Transpiles JSX & types to JS via Babel<br/>• Injects inline source maps]
     end`;
 
@@ -440,7 +440,7 @@ export default function Page() {
               {/* SERVER FUNCTIONS */}
               <h3 id="server-functions">🚀 C.2. Server Functions (<code>"use server"</code>)</h3>
               <p>
-                If a file contains the <code>"use server"</code> directive, the functions exported from this module represent Server Functions (Server Actions) that the client browser can trigger remotely via POST request callbacks.
+                If a file contains the <code>"use server"</code> directive, the functions exported from this module represent Server Functions that the client browser can trigger remotely via POST request callbacks.
               </p>
               <p>
                 <strong>The <code>isReactServer && hasUseServer</code> Conditional Guard:</strong>

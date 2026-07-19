@@ -95,7 +95,7 @@ export default function Page() {
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                To resolve hashed javascript paths (e.g. <code>main.a1b2c3d4.js</code>) during page rendering and action postbacks, the loader needs to keep compile mappings in sync. This plugin crawls Webpack compilation outputs to build a chunk dependency index.
+                To resolve hashed javascript paths (e.g. <code>main.a1b2c3d4.js</code>) during page rendering and server function postbacks, the loader needs to keep compile mappings in sync. This plugin crawls Webpack compilation outputs to build a chunk dependency index.
               </p>
               <p>
                 The plugin hooks into Webpack's asset analysis step (<code>PROCESS_ASSETS_STAGE_ANALYSE</code>). It traverses all output chunks, resolves their names, matches them to output filenames on disk, and writes them to the manifest data:

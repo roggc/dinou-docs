@@ -16,7 +16,7 @@ const tocItems = [
 
 const CLIENT_STRUCTURE_DIAGRAM = `graph TD
     subgraph Client.jsx Code Structure
-        Imports[1. Imports & Core Modules<br/>React hooks, hydrateRoot, RouterContext, resolveUrl/isExternalUrl, serverActionProxy<br/>ESM vs Webpack client libraries]
+        Imports[1. Imports & Core Modules<br/>React hooks, hydrateRoot, RouterContext, resolveUrl/isExternalUrl, serverFunctionProxy<br/>ESM vs Webpack client libraries]
         GlobalState[2. Global Module State & Variables<br/>cache: Cache map for RSC payload promises<br/>scrollCache: Map storing vertical scroll position coordinates<br/>getCurrentRoute: Helper returning path & query]
         Helpers[3. Pure Helper Functions<br/>isHashChangeOnly: Detects hash navigation<br/>getRSCPayload: Fetches RSC stream, handles redirects<br/>getErrorRSCPayload: POST to fetch error layout flight stream]
         ErrorBound[4. ErrorBoundary Component<br/>Catches client-side rendering exceptions<br/>Renders styled traceback overlay or message]
@@ -188,7 +188,7 @@ export default function Page() {
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                The <code>client.jsx</code> module is the browser-side application loader. It hydrates the React component tree over the pre-rendered HTML document, initializes the dynamic client router context, listens for browser navigation events, and coordinates Server Actions executions.
+                The <code>client.jsx</code> module is the browser-side application loader. It hydrates the React component tree over the pre-rendered HTML document, initializes the dynamic client router context, listens for browser navigation events, and coordinates Server Functions executions.
               </p>
             </section>
 
@@ -211,7 +211,7 @@ export default function Page() {
             <section id="imports-core">
               <h2>🔗 1. Imports & Core Modules</h2>
               <p>
-                The script pulls in core React hydration hooks, the RSC stream deserializer <code>createFromFetch</code>, the global <code>RouterContext</code> context, path utility helper functions, and the remote Action proxy binder:
+                The script pulls in core React hydration hooks, the RSC stream deserializer <code>createFromFetch</code>, the global <code>RouterContext</code> context, path utility helper functions, and the remote Function proxy binder:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{CLIENT_IMPORTS_CODE}</CodeBlock>

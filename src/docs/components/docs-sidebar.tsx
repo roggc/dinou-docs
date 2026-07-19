@@ -314,7 +314,7 @@ const navigation = [
             href: "/docs/ejected-reference/client-runtime/link",
           },
           {
-            title: "Actions Connection (server-function-proxy.js)",
+            title: "Server Functions Connection (server-function-proxy.js)",
             href: "/docs/ejected-reference/client-runtime/server-actions",
           },
           {

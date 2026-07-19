@@ -357,7 +357,7 @@ export default function Page() {
                 Dinou provides <strong>Webpack</strong> as an alternative compilation system, integrating the official loader and compiler implementation from the React team for React Server Components.
               </p>
               <p>
-                In ejected applications, Webpack coordinates custom loaders (for stripping Server Actions), splits vendors chunks to optimize cache hits, extracts CSS modules with content-hashed names, and outputs client-hydration manifests.
+                In ejected applications, Webpack coordinates custom loaders (for stripping Server Functions), splits vendors chunks to optimize cache hits, extracts CSS modules with content-hashed names, and outputs client-hydration manifests.
               </p>
             </section>
 

@@ -194,7 +194,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Analyze the inner workings of Webpack's module transforms for parsing Server Actions and compiling secure whitelist manifests.
+              Analyze the inner workings of Webpack's module transforms for parsing Server Functions and compiling secure whitelist manifests.
             </p>
           </div>
 
@@ -209,7 +209,7 @@ export default function Page() {
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                Server Actions represent endpoints executing database queries or handling credentials. Webpack compiles client bundles, meaning server components code must be stripped and replaced with client-side fetch proxies.
+                Server Functions represent endpoints executing database queries or handling credentials. Webpack compiles client bundles, meaning server components code must be stripped and replaced with client-side fetch proxies.
               </p>
               <p>
                 Dinou achieves this using a custom Webpack loader to replace modules containing <code>"use server"</code> with fetch skeletons, and a custom compilation plugin to aggregate the exported functions into <code>server-functions-manifest.json</code>.
@@ -222,7 +222,7 @@ export default function Page() {
             <section id="server-functions-flow">
               <h2>📊 Server Functions Flow</h2>
               <p>
-                The flowchart below shows how Server Actions are stripped, proxied, and whitelisted during Webpack compiles:
+                The flowchart below shows how Server Functions are stripped, proxied, and whitelisted during Webpack compiles:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="mermaid" minWidth="650px">{SERVER_FUNCTIONS_WEBPACK_DIAGRAM}</CodeBlock>
