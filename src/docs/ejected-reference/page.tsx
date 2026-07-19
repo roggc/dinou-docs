@@ -51,7 +51,7 @@ export default function Page() {
             <section id="overview">
               <h2>📂 Overview & Tree Structure</h2>
               <p>
-                Ejecting copies all internal configurations, CLI commands, and rendering systems directly into your root <code>./dinou/</code> folder. The directory is structured as follows:
+                Running the eject command copies the entire framework source code—including the web server, bundler scripts, client runtime, and core React Server Components engine—directly into the <code>./dinou/</code> folder at your project root. This grants you total ownership and control over how your pages are built, rendered, and served.
               </p>
               <div className="not-prose my-6 border rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50">
                 <pre className="font-mono text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre">{`dinou/
@@ -93,6 +93,7 @@ export default function Page() {
               </p>
 
               <div className="grid gap-4 sm:grid-cols-2 not-prose mt-6">
+                {/* 1. SERVER ENTRY */}
                 <a href="/docs/ejected-reference/server" className="group">
                   <Card className="h-full border hover:border-blue-500/50 hover:bg-blue-50/5 dark:hover:bg-blue-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
@@ -105,6 +106,7 @@ export default function Page() {
                   </Card>
                 </a>
 
+                {/* 2. HTML RENDERER PIPELINE */}
                 <a href="/docs/ejected-reference/render-html" className="group">
                   <Card className="h-full border hover:border-purple-500/50 hover:bg-purple-50/5 dark:hover:bg-purple-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
@@ -117,6 +119,46 @@ export default function Page() {
                   </Card>
                 </a>
 
+                {/* 3. VFS & BOOTSTRAP */}
+                <a href="/docs/ejected-reference/bootstrap-vfs" className="group">
+                  <Card className="h-full border hover:border-teal-500/50 hover:bg-teal-50/5 dark:hover:bg-teal-950/5 transition-all">
+                    <CardHeader className="flex flex-row items-center gap-3 py-4">
+                      <FolderTree className="h-5 w-5 text-teal-500 group-hover:scale-110 transition-transform" />
+                      <CardTitle className="text-base font-bold">Virtual Filesystem & Bootstrap</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground">
+                      Analyze the bootstrapping pipeline, virtual file mapping engines, and runtime path registration utilities.
+                    </CardContent>
+                  </Card>
+                </a>
+
+                {/* 4. ROUTING RESOLVERS */}
+                <a href="/docs/ejected-reference/routing-resolvers" className="group">
+                  <Card className="h-full border hover:border-sky-500/50 hover:bg-sky-50/5 dark:hover:bg-sky-950/5 transition-all">
+                    <CardHeader className="flex flex-row items-center gap-3 py-4">
+                      <Globe className="h-5 w-5 text-sky-500 group-hover:scale-110 transition-transform" />
+                      <CardTitle className="text-base font-bold">Routing Resolvers</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground">
+                      Inspect route parameter matching engines, URL path normalization helpers, and static asset resolution logic.
+                    </CardContent>
+                  </Card>
+                </a>
+
+                {/* 5. RSC CONTEXT & CONCURRENCY */}
+                <a href="/docs/ejected-reference/rsc-context" className="group">
+                  <Card className="h-full border hover:border-indigo-500/50 hover:bg-indigo-50/5 dark:hover:bg-indigo-950/5 transition-all">
+                    <CardHeader className="flex flex-row items-center gap-3 py-4">
+                      <Boxes className="h-5 w-5 text-indigo-500 group-hover:scale-110 transition-transform" />
+                      <CardTitle className="text-base font-bold">RSC Context & Concurrency</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground">
+                      Explore Server-side AsyncLocalStorage request store contexts, layout component composition trees, and RSC concurrent error isolation boundaries.
+                    </CardContent>
+                  </Card>
+                </a>
+
+                {/* 6. ESM LOADER & RESOLVER */}
                 <a href="/docs/ejected-reference/loader" className="group">
                   <Card className="h-full border hover:border-amber-500/50 hover:bg-amber-50/5 dark:hover:bg-amber-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
@@ -129,6 +171,7 @@ export default function Page() {
                   </Card>
                 </a>
 
+                {/* 7. CLIENT SPA & ROUTING */}
                 <a href="/docs/ejected-reference/client-runtime" className="group">
                   <Card className="h-full border hover:border-emerald-500/50 hover:bg-emerald-50/5 dark:hover:bg-emerald-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
@@ -141,6 +184,7 @@ export default function Page() {
                   </Card>
                 </a>
 
+                {/* 8. ASSET & STYLE LOADING */}
                 <a href="/docs/ejected-reference/assets-styling" className="group">
                   <Card className="h-full border hover:border-slate-500/50 hover:bg-slate-50/5 dark:hover:bg-slate-900/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
@@ -153,6 +197,7 @@ export default function Page() {
                   </Card>
                 </a>
 
+                {/* 9. STATIC & ISR ENGINES */}
                 <a href="/docs/ejected-reference/static-isr" className="group">
                   <Card className="h-full border hover:border-orange-500/50 hover:bg-orange-50/5 dark:hover:bg-orange-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
@@ -165,6 +210,7 @@ export default function Page() {
                   </Card>
                 </a>
 
+                {/* 10. ESBUILD INTEGRATION */}
                 <a href="/docs/ejected-reference/bundlers/esbuild" className="group">
                   <Card className="h-full border hover:border-yellow-500/50 hover:bg-yellow-50/5 dark:hover:bg-yellow-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
@@ -177,6 +223,7 @@ export default function Page() {
                   </Card>
                 </a>
 
+                {/* 11. ROLLUP INTEGRATION */}
                 <a href="/docs/ejected-reference/bundlers/rollup" className="group">
                   <Card className="h-full border hover:border-orange-500/50 hover:bg-orange-50/5 dark:hover:bg-orange-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
@@ -189,6 +236,7 @@ export default function Page() {
                   </Card>
                 </a>
 
+                {/* 12. WEBPACK INTEGRATION */}
                 <a href="/docs/ejected-reference/bundlers/webpack" className="group">
                   <Card className="h-full border hover:border-cyan-500/50 hover:bg-cyan-50/5 dark:hover:bg-cyan-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
