@@ -7,6 +7,7 @@ import { Cpu } from "lucide-react";
 const tocItems = [
   { id: "overview", title: "💡 Overview", level: 2 },
   { id: "manifest-flow", title: "📊 Manifest Generator Flow", level: 2 },
+  { id: "consumers", title: "🎯 Manifest Consumers", level: 2 },
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
@@ -112,6 +113,24 @@ export default function Page() {
               <div className="not-prose my-4">
                 <CodeBlock language="mermaid" minWidth="600px">{MANIFEST_GENERATOR_DIAGRAM}</CodeBlock>
               </div>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* CONSUMERS */}
+            <section id="consumers">
+              <h2>🎯 Manifest Consumers</h2>
+              <p>
+                The emitted <code>manifest.json</code> file is consumed by core subsystems to resolve cache-busted filenames:
+              </p>
+              <ul>
+                <li>
+                  <strong>HTML SSR Renderer (<code>render-html.js</code>)</strong>: When compiling the initial HTML response, the server imports the <code>getAssetFromManifest</code> helper to map logical assets (like <code>main.js</code> and <code>error.js</code>) to the compiled, hashed file names on disk.
+                </li>
+                <li>
+                  <strong>Webpack Plugins (<code>ServerFunctionsPlugin</code>)</strong>: During building, plugins read the in-memory object <code>manifestGeneratorPlugin.manifestData</code> to replace temporary placeholders (like <code>__SERVER_FUNCTION_PROXY__</code>) with their finalized production hashes.
+                </li>
+              </ul>
             </section>
 
             <hr className="my-8" />
