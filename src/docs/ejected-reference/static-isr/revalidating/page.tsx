@@ -9,22 +9,23 @@ const tocItems = [
   { id: "overview", title: "💡 Overview", level: 2 },
   { id: "lifecycle-diagram", title: "📊 Revalidation Lifecycle", level: 2 },
   { id: "lock-mechanism", title: "🔒 Mutex Lock & Concurrency Control", level: 2 },
+  { id: "invocation", title: "🎯 Invocation & SWR Serving", level: 2 },
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
   { id: "stale-backup", title: "💾 Backup & Double-buffer Commit", level: 2 },
 ];
 
 const ISR_LIFECYCLE_DIAGRAM = `graph TD
-    Start[🌐 Browser GET Request] --> CacheCheck{Exists in Cache?}
+    Start["🌐 Browser GET Request"] --> CacheCheck{"Exists in Cache?"}
     
-    CacheCheck -->|No| RenderDynamic[Render dynamically from Server]
-    CacheCheck -->|Yes| ServeHTML[Serve index.html Instant Load]
+    CacheCheck -->|"No"| RenderDynamic["Render dynamically from Server"]
+    CacheCheck -->|"Yes"| ServeHTML["Serve index.html (Instant Load)"]
     
-    ServeHTML --> ExpiryCheck{Verify Expiration:<br/>Date.now > generatedAt + revalidate?}
-    ExpiryCheck -->|No| Done[Done / Stop]
-    ExpiryCheck -->|Yes| LockCheck{Mutex Lock Active?}
+    ServeHTML --> ExpiryCheck{"Verify Expiration:<br/>Date.now() > generatedAt + revalidate?"}
+    ExpiryCheck -->|"No"| Done["Done / Stop"]
+    ExpiryCheck -->|"Yes"| LockCheck{"Mutex Lock Active?"}
     
-    LockCheck -->|Yes| Skip[Skip / Wait]
-    LockCheck -->|No| RunReval[1. Set Lock<br/>2. Back up Stale Files<br/>3. Compile new payloads<br/>4. Commit via safeRename<br/>5. Release Lock]`;
+    LockCheck -->|"Yes"| Skip["Skip / Wait"]
+    LockCheck -->|"No"| RunReval["1. Set Lock<br/>2. Back up Stale Files<br/>3. Compile new payloads<br/>4. Commit via safeRename<br/>5. Release Lock"]`;
 
 const REVALIDATING_CODE = `const path = require("path");
 const fs = require("fs").promises;
@@ -138,7 +139,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Examine the background compilation engine, stale-while-revalidate caches, and mutual exclusion build locks.
+              Explore how Dinou handles background cache updates (ISR) when pages expire, using locks to prevent duplicate rendering tasks.
             </p>
           </div>
 
@@ -190,6 +191,40 @@ export default function Page() {
                   <strong>Cleanup:</strong> Inside a <code>finally</code> block, the lock is released using <code>regenerating.delete(reqPath)</code>, enabling the next cache pass when expiration occurs.
                 </li>
               </ul>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* INVOCATION & SWR SERVING */}
+            <section id="invocation">
+              <h2>🎯 Invocation & SWR Serving (Where is it called?)</h2>
+              <p>
+                The <code>revalidating</code> function is imported and called by the main web server (<a href="/docs/ejected-reference/server"><code>core/server.js</code></a>) inside the request routing middleware when intercepting GET requests.
+              </p>
+              <p>
+                To implement the <strong>Stale-While-Revalidate (SWR)</strong> pattern, the server checks the route conditions, triggers the background compilation, and immediately serves the cached file (meaning the client doesn't wait for compilation):
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`// Inside core/server.js:
+if (!isDevelopment && !dynamicState.value && pagePath && !isPathBlocked) {
+  revalidating(reqPath, dynamicState); // Calls the background SWR engine
+
+  let htmlPathOld;
+  if (regenerating.has(reqPath)) {
+    // If compilation is currently active, fall back to the backup stale file
+    htmlPathOld = path.join("dist2", reqPath, "index._old.html");
+  }
+  const htmlPath = path.join("dist2", reqPath, "index.html");
+  const fileToRead = htmlPathOld || htmlPath;
+
+  // Instantly serve the cached file to the user
+  if (existsSync(fileToRead) && !dynamicState.value) {
+    res.setHeader("Content-Type", "text/html");
+    res.statusCode = getStatus(reqPath) || 200;
+    return fs.createReadStream(fileToRead).pipe(res);
+  }
+}`}</CodeBlock>
+              </div>
             </section>
 
             <hr className="my-8" />

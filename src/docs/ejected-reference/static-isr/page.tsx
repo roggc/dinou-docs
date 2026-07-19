@@ -16,19 +16,19 @@ const tocItems = [
 ];
 
 const SWR_LIFECYCLE_DIAGRAM = `graph TD
-    Start[Browser Request: GET /route] --> CacheCheck{Exists in Cache?}
+    Start["Browser Request: GET /route"] --> CacheCheck{"Exists in Cache?"}
     
-    CacheCheck -->|Yes| ServeCache[Serve index.html instantly]
-    ServeCache --> ExpCheck{Is Cache Expired?}
+    CacheCheck -->|"Yes"| ServeCache["Serve index.html instantly"]
+    ServeCache --> ExpCheck{"Is Cache Expired?"}
     
-    ExpCheck -->|No| Done[Done]
-    ExpCheck -->|Yes| Reval[revalidating]
+    ExpCheck -->|"No"| Done["Done"]
+    ExpCheck -->|"Yes"| Reval["revalidating(reqPath)"]
     
-    Reval --> LockCheck{Already Compile-Locked?}
-    LockCheck -->|Yes| Skip[Skip / Wait]
-    LockCheck -->|No| BuildBackground[1. Set Lock<br/>2. Run background fork<br/>3. Commit page<br/>4. Release Lock]
+    Reval --> LockCheck{"Already Build-Locked?"}
+    LockCheck -->|"Yes"| Skip["Skip / Wait"]
+    LockCheck -->|"No"| BuildBackground["1. Set Lock<br/>2. Run background build<br/>3. Commit pages via safeRename<br/>4. Release Lock"]
     
-    CacheCheck -->|No| ISG[ISG Engine: Generate, Cache, and Serve]`;
+    CacheCheck -->|"No"| ISG["ISG Engine: Generate, Cache, and Serve"]`;
 
 export default function Page() {
   return (
@@ -43,29 +43,60 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Understand the pre-rendering builders, background revalidation pools, and on-demand cache purging controllers that run inside the ejected framework core.
+              Understand the static route crawlers, background SWR revalidation engines, and programmatic cache invalidation APIs that run inside the framework core.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <blockquote>
               <strong>Key Files Involved:</strong> <br />
-              • Production compiler: <a href="/docs/ejected-reference/static-isr/build-static-pages"><code>./dinou/core/build-static-pages.js</code></a> <br />
-              • Background engine: <a href="/docs/ejected-reference/static-isr/revalidating"><code>./dinou/core/revalidating.js</code></a> <br />
-              • On-demand revalidator: <a href="/docs/ejected-reference/static-isr/cache-revalidate"><code>./dinou/core/cache-revalidate.js</code></a> <br />
-              • Dynamic ISG builder: <a href="/docs/ejected-reference/static-isr/generating-isg"><code>./dinou/core/generating-isg.js</code></a>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 text-sm not-prose">
+                <div className="space-y-1">
+                  <span className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">1. Crawling & Evaluation</span>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li><a href="/docs/ejected-reference/static-isr/build-static-pages" className="text-primary hover:underline"><code>build-static-pages.js</code></a>: Crawls routes and evaluates static/dynamic status.</li>
+                    <li><a href="/docs/ejected-reference/static-isr/get-ssg-metadata" className="text-primary hover:underline"><code>get-ssg-metadata.js</code></a>: Resolves side-effect cookies/redirects.</li>
+                  </ul>
+                </div>
+                <div className="space-y-1">
+                  <span className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">2. Orchestrators & Triggers</span>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li><a href="/docs/ejected-reference/static-isr/generate-static" className="text-primary hover:underline"><code>generate-static.js</code></a>: Bulk startup pre-generation entry point.</li>
+                    <li><a href="/docs/ejected-reference/static-isr/revalidating" className="text-primary hover:underline"><code>revalidating.js</code></a>: Background ISR expiration revalidator.</li>
+                    <li><a href="/docs/ejected-reference/static-isr/generating-isg" className="text-primary hover:underline"><code>generating-isg.js</code></a>: On-demand dynamic route ISG compiler.</li>
+                    <li><a href="/docs/ejected-reference/static-isr/cache-revalidate" className="text-primary hover:underline"><code>cache-revalidate.js</code></a>: Programmatic path & tag revalidation API.</li>
+                  </ul>
+                </div>
+                <div className="space-y-1">
+                  <span className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">3. RSC & HTML Generators</span>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li><a href="/docs/ejected-reference/static-isr/generate-static-rsc" className="text-primary hover:underline"><code>generate-static-rsc.js</code></a>: Generates single-route RSC payload.</li>
+                    <li><a href="/docs/ejected-reference/static-isr/generate-static-rscs" className="text-primary hover:underline"><code>generate-static-rscs.js</code></a>: Generates bulk-route RSC payloads.</li>
+                    <li><a href="/docs/ejected-reference/static-isr/generate-static-page" className="text-primary hover:underline"><code>generate-static-page.js</code></a>: Renders single-route HTML files.</li>
+                    <li><a href="/docs/ejected-reference/static-isr/generate-static-pages" className="text-primary hover:underline"><code>generate-static-pages.js</code></a>: Renders bulk-route HTML files.</li>
+                  </ul>
+                </div>
+                <div className="space-y-1">
+                  <span className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">4. Utilities & State</span>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li><a href="/docs/ejected-reference/static-isr/safe-rename" className="text-primary hover:underline"><code>safe-rename.js</code></a>: Atomic retry committer for safe disk writes.</li>
+                    <li><a href="/docs/ejected-reference/static-isr/status-manifest" className="text-primary hover:underline"><code>status-manifest.js</code></a>: Tracks and synchronizes routing state.</li>
+                  </ul>
+                </div>
+              </div>
             </blockquote>
 
             {/* OVERVIEW */}
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                Dinou provides three types of rendering outputs for pages:
+                Dinou provides four rendering and caching patterns for pages:
               </p>
               <ul>
-                <li><strong>Static Site Generation (SSG):</strong> Pages compile during production server startup and serve instantly from the disk.</li>
-                <li><strong>Incremental Static Regeneration (ISR):</strong> Expired pages re-generate asynchronously in the background.</li>
-                <li><strong>Incremental Static Generation (ISG):</strong> Dynamic routes render on the first browser query and cache immediately.</li>
+                <li><strong>Static Site Generation (SSG):</strong> Pages are pre-rendered during production server startup and served instantly from disk.</li>
+                <li><strong>Incremental Static Regeneration (ISR):</strong> Expired pages are re-generated asynchronously in the background upon client requests.</li>
+                <li><strong>Incremental Static Generation (ISG):</strong> Dynamic parameter routes not resolved at startup are rendered on their first request and cached immediately.</li>
+                <li><strong>On-Demand Revalidation:</strong> Specific routes or tag-matched sets are purged and rebuilt immediately using programmatic API calls (such as inside Server Functions or Express endpoints).</li>
               </ul>
             </section>
 
@@ -78,18 +109,17 @@ export default function Page() {
                 When the production server starts up, it runs the static page crawler script:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`async function buildStaticPages() {
-  const routes = await crawlStaticRoutes(); // Crawls project routes index
+                <CodeBlock language="javascript">{`// Bulk startup orchestration flow inside generate-static.js
+async function generateStatic() {
+  // 1. Crawl filesystem and resolve static/dynamic configurations
+  await buildStaticPages();
+  const routes = getStaticPaths();
 
-  for (const route of routes) {
-    const isDynamic = {};
-    await buildStaticPage(route, isDynamic); // Renders the RSC Flight output
-    
-    if (!isDynamic.value) {
-      await generateStaticRSC(route);  // Saves rsc.rsc output
-      await generateStaticPage(route); // Saves index.html output
-    }
-  }
+  // 2. Generate and write all RSC flight payload files (.rsc) in parallel
+  await generateStaticRSCs(routes);
+
+  // 3. Render and write all static HTML files (index.html) in bulk
+  await generateStaticPages(routes);
 }`}</CodeBlock>
               </div>
               <p>
@@ -111,7 +141,6 @@ export default function Page() {
 function revalidating(reqPath, isDynamicFromServer) {
   if (regenerating.has(reqPath)) return; // Avoid concurrent compile conflicts
 
-  // Read metadata.json to verify expiration states
   fs.readFile(metadataPath, "utf8").then((content) => {
     const { revalidate, generatedAt } = JSON.parse(content);
     const isExpired = Date.now() > generatedAt + revalidate;
@@ -124,9 +153,19 @@ function revalidating(reqPath, isDynamicFromServer) {
       regenerating.add(reqPath); // Acquire compile lock
       (async () => {
         try {
-          await buildStaticPage(reqPath);
-          await generateStaticRSC(reqPath);
-          await generateStaticPage(reqPath);
+          const isDynamic = {};
+          await buildStaticPage(reqPath, isDynamic);
+          if (isDynamic.value) {
+            isDynamicFromServer.value = true;
+            return;
+          }
+
+          const rscResult = await generateStaticRSC(reqPath);
+          await safeRename(rscResult.tempPath, rscResult.finalPath);
+
+          const pageResult = await generateStaticPage(reqPath);
+          await safeRename(pageResult.tempPath, pageResult.finalPath);
+          updateStatus(reqPath, pageResult.status);
         } finally {
           regenerating.delete(reqPath); // Release lock
         }
@@ -153,12 +192,19 @@ function revalidating(reqPath, isDynamicFromServer) {
   const cleanPath = normalizeRoutePath(reqPath);
   
   // 1. Back up current pages to old
-  copyCurrentToOld(cleanPath);
+  backupStaleFiles(cleanPath);
 
-  // 2. Re-compile immediately
-  await buildStaticPage(cleanPath);
-  await generateStaticRSC(cleanPath);
-  await generateStaticPage(cleanPath);
+  // 2. Re-render and write updated files
+  const isDynamic = {};
+  await buildStaticPage(cleanPath, isDynamic);
+  if (isDynamic.value) return;
+
+  const rscResult = await generateStaticRSC(cleanPath);
+  await safeRename(rscResult.tempPath, rscResult.finalPath);
+
+  const pageResult = await generateStaticPage(cleanPath);
+  await safeRename(pageResult.tempPath, pageResult.finalPath);
+  updateStatus(cleanPath, pageResult.status);
 }`}</CodeBlock>
               </div>
               <p>

@@ -11,26 +11,26 @@ const tocItems = [
   { id: "bailout-proxy", title: "🛡️ 1. Dynamic Bailout Proxy", level: 2 },
   { id: "crawler-engine", title: "🔍 2. Directory Crawler & Route Collector", level: 2 },
   { id: "mock-context", title: "🎭 3. Mock Request & Response Context", level: 2 },
-  { id: "page-builder", title: "🏗️ 4. Static Page Compiler", level: 2 },
+  { id: "page-builder", title: "🏗️ 4. Static Route Resolver", level: 2 },
+  { id: "calling-modules", title: "🎯 Integration & Calling Modules", level: 2 },
 ];
 
-const STATIC_CRAWLER_DIAGRAM = `graph TD
-    Start[npm run build] --> BuildStatic[Triggers buildStaticPages]
-    BuildStatic --> Collect[collectPages Recursively crawls src/ routes]
-    
-    Collect --> Normal[Normal routes e.g. /docs]
-    Collect --> Dynamic[Dynamic routes: calls getStaticPaths]
-    
-    Normal --> BuildPage[buildStaticPage Mock-renders each path segment]
-    Dynamic --> BuildPage
-    
-    BuildPage --> Bailout[createBailoutProxy Wraps headers/cookies]
-    BuildPage --> MockALS[AsyncLocalStorage Injects mock Req/Res]
-    
-    Bailout --> AccessCheck{Access detected?}
-    AccessCheck -->|Yes| BailoutSSR[Bailout: Mark isStatic = false]
-    AccessCheck -->|No| Commit[Commit: rsc.rsc & index.html]
-    MockALS --> Commit`;
+const BULK_DIAGRAM = `graph TD
+    Start["production startup / buildStaticPages()"] --> Collect["collectPages():<br/>Recursively crawls src/ routes"]
+    Collect --> Normal["Normal routes"]
+    Collect --> Dynamic["Dynamic parameter routes:<br/>getStaticPaths()"]
+    Normal & Dynamic --> RenderBulk["Mock-renders page segments"]
+    RenderBulk --> ProxyCheck["createBailoutProxy():<br/>Checks for headers, cookies, query access"]
+    ProxyCheck --> AccessCheck{"Dynamic access detected?"}
+    AccessCheck -->|"Yes"| SSR["Bailout:<br/>Skip file generation (Runtime SSR)"]
+    AccessCheck -->|"No"| RegisterBulk["Success:<br/>Register staticRoutes & staticMetadata"]`;
+
+const RUNTIME_DIAGRAM = `graph TD
+    StartSingle["Runtime Request / buildStaticPage(reqPath)"] --> RenderSingle["Mock-renders page segment"]
+    RenderSingle --> ProxyCheckSingle["createBailoutProxy():<br/>Checks for headers, cookies, query access"]
+    ProxyCheckSingle --> AccessCheckSingle{"Dynamic access detected?"}
+    AccessCheckSingle -->|"Yes"| SSRSingle["Bailout:<br/>Mark route as dynamic"]
+    AccessCheckSingle -->|"No"| RegisterSingle["Success:<br/>Update staticMetadata for route"]`;
 
 const BAILOUT_PROXY_CODE = `function createBailoutProxy(target, label, onBailout) {
   const safeTarget = target || {};
@@ -186,14 +186,20 @@ const PAGE_BUILDER_CODE = `async function buildStaticPage(reqPath, isDynamic = n
       // Render React Server Component (RSC) element tree
       const jsx = React.createElement(Page, props);
       
-      // If no dynamic proxies were triggered, write the files!
-      if (isStatic) {
-        await generateStaticRSC(reqPath, jsx);
-        await generateStaticPage(reqPath);
+      if (!isStatic) {
+        if (isDynamic) isDynamic.value = true;
+        return;
       }
+
+      staticRoutes.add(reqPath);
+      staticMetadata.set(reqPath, {
+        revalidate: revalidate?.(),
+        effects: { redirect: mockRes._redirectUrl, cookies: mockRes._cookies },
+        tags: cacheTags,
+      });
     });
   } catch (err) {
-    console.error(\`[SSG] Error compiling \${reqPath}:\`, err);
+    console.error(\`[SSG] Error evaluating \${reqPath}:\`, err);
   }
 }`;
 
@@ -207,11 +213,11 @@ export default function Page() {
             <div className="flex items-center space-x-2">
               <Hammer className="h-6 w-6 text-primary" />
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Static Crawler & Compiler (build-static-pages.js)
+                Static Crawler & Resolver (build-static-pages.js)
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Crawl your codebase routes, inspect layout structures, mock client requests, and pre-compile static React Server Components.
+              Crawl your codebase routes, inspect layout structures, mock client requests, and resolve static route configurations.
             </p>
           </div>
 
@@ -224,7 +230,7 @@ export default function Page() {
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                In a standard React Server Components architecture, static pages are compiled at build time to provide near-instant loading speeds. The <code>build-static-pages.js</code> script is Dinou's main compiler. It crawls the filesystem for page entry points, runs a mock render pass inside a simulated request context, and writes the output files (<code>index.html</code> and <code>rsc.rsc</code>) directly to the cache folder (<code>dist2/</code>).
+                In Dinou's architecture, static pages are evaluated and pre-rendered at server startup to provide near-instant loading speeds. The <code>build-static-pages.js</code> script acts as the central router crawler and static route evaluator. It traverses the filesystem to find page entry points, runs a mock render pass inside a simulated request context to detect if the page performs dynamic checks (which would cause a bailout), and registers the route and its metadata in-memory if no bailout occurs. This allows the caller orchestrator to trigger the actual RSC and HTML page compilation.
               </p>
             </section>
 
@@ -234,10 +240,15 @@ export default function Page() {
             <section id="structure-diagram">
               <h2>📊 Architecture Flow</h2>
               <p>
-                The diagram below demonstrates how pages are crawled, evaluated against dynamic proxies, and compiled:
+                The diagrams below demonstrate how routes are crawled and registered in bulk at server startup, versus how single paths are resolved at runtime:
               </p>
+              <h3 className="text-sm font-semibold mt-4 mb-2">1. Bulk Startup Pass (buildStaticPages)</h3>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="600px">{STATIC_CRAWLER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{BULK_DIAGRAM}</CodeBlock>
+              </div>
+              <h3 className="text-sm font-semibold mt-6 mb-2">2. Runtime Single-Route Pass (buildStaticPage)</h3>
+              <div className="not-prose my-4">
+                <CodeBlock language="mermaid" minWidth="800px">{RUNTIME_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -250,7 +261,7 @@ export default function Page() {
                 A page is considered <strong>static</strong> only if its output is identical for all users. If a component reads request-specific parameters (such as browser cookies or custom HTTP headers), the page must run dynamically on every request.
               </p>
               <p>
-                Dinou accomplishes this using Javascript <code>Proxy</code> wrapper spies. When mock-rendering a page, the compiler injects proxies in place of <code>cookies()</code> and <code>headers()</code>. If any property is accessed during the render cycle, a bailout callback runs and marks the page compile state as dynamic:
+                Dinou accomplishes this using Javascript <code>Proxy</code> wrapper spies. When mock-rendering a page, the evaluator injects proxies in place of <code>cookies()</code> and <code>headers()</code>. If any property is accessed during the render cycle, a bailout callback runs and marks the route as dynamic:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{BAILOUT_PROXY_CODE}</CodeBlock>
@@ -263,7 +274,7 @@ export default function Page() {
             <section id="crawler-engine">
               <h2>🔍 2. Directory Crawler & Route Collector</h2>
               <p>
-                When you compile the application, the <code>collectPages()</code> recursive method traverses your <code>src/</code> directory:
+                During production server startup, the <code>collectPages()</code> recursive method traverses your <code>src/</code> directory:
               </p>
               <ul>
                 <li>
@@ -298,13 +309,44 @@ export default function Page() {
 
             {/* PAGE BUILDER */}
             <section id="page-builder">
-              <h2>🏗️ 4. Static Page Compiler</h2>
+              <h2>🏗️ 4. Static Route Resolver</h2>
               <p>
-                The compilation of each individual route is encapsulated in <code>buildStaticPage()</code>. It resolves layout hierarchies, feeds props derived from <code>getProps()</code>, renders the component tree, and records the output if no bailout occurred:
+                The evaluation of each individual route is encapsulated in <code>buildStaticPage()</code>. It resolves layout hierarchies, feeds props derived from <code>getProps()</code>, renders the component tree, and records the output if no bailout occurred:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{PAGE_BUILDER_CODE}</CodeBlock>
               </div>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* CALLING MODULES */}
+            <section id="calling-modules">
+              <h2>🎯 Integration & Calling Modules</h2>
+              <p>
+                Dinou isolates route evaluation from file generation. The modules in <code>build-static-pages.js</code> are imported and invoked by different orchestration engines depending on the lifecycle phase:
+              </p>
+
+              <h3 className="text-sm font-semibold mt-4 mb-2">1. buildStaticPages() — Bulk Startup Pass</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Called once by the main static builder entry point (<a href="/docs/ejected-reference/static-isr/generate-static"><code>generate-static.js</code></a>) during production server startup. It performs the initial directory crawl to discover all static routes (including parameters fetched from <code>getStaticPaths()</code>) and populates the in-memory route registry.
+              </p>
+
+              <h3 className="text-sm font-semibold mt-6 mb-2">2. buildStaticPage() — Runtime Single-Route Pass</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Invoked dynamically to evaluate a single route and check for dynamic proxy bailouts. It is called by three runtime engines:
+              </p>
+              <ul className="text-sm text-muted-foreground mt-2 list-disc pl-6 space-y-1">
+                <li>
+                  <a href="/docs/ejected-reference/static-isr/revalidating"><strong><code>revalidating.js</code> (Background ISR):</strong></a> Checks if a stale cache page has become dynamic before writing its background revalidation.
+                </li>
+                <li>
+                  <a href="/docs/ejected-reference/static-isr/generating-isg"><strong><code>generating-isg.js</code> (On-Demand ISG):</strong></a> Mock-renders dynamic parameter routes on their first request to verify if they can be cached statically.
+                </li>
+                <li>
+                  <a href="/docs/ejected-reference/static-isr/cache-revalidate"><strong><code>cache-revalidate.js</code> (On-Demand Revalidation API):</strong></a> Evaluates the target path when forced to purge cache by a manual revalidation request.
+                </li>
+              </ul>
             </section>
           </div>
         </div>

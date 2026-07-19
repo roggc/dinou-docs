@@ -10,6 +10,7 @@ const tocItems = [
   { id: "engine-flow", title: "📊 Revalidation Flow", level: 2 },
   { id: "path-revalidation", title: "⚡ Path Invalidation (revalidatePath)", level: 2 },
   { id: "tag-revalidation", title: "🏷️ Tag Invalidation (revalidateTag)", level: 2 },
+  { id: "public-api", title: "🎯 Public API Entry Points", level: 2 },
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
@@ -180,6 +181,18 @@ module.exports = {
   revalidateTag,
 };`;
 
+const PUBLIC_API_CJS_CODE = `// Inside dinou/server.js (Public CJS Entry Point)
+module.exports = {
+  revalidatePath: async function (path) {
+    const { revalidatePath: fn } = require("./core/cache-revalidate.js");
+    return fn(path);
+  },
+  revalidateTag: async function (tag) {
+    const { revalidateTag: fn } = require("./core/cache-revalidate.js");
+    return fn(tag);
+  },
+};`;
+
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
@@ -194,7 +207,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Understand the immediate, webhook-driven cache invalidation API for paths and custom database tags.
+              Understand the programmatic cache invalidation API for purging and rebuilding paths and custom cache tags on-demand.
             </p>
           </div>
 
@@ -264,6 +277,29 @@ export default function Page() {
                   <strong>Concurred Awaiting:</strong> Promisifies all rebuild tasks and resolves them in parallel using <code>Promise.all()</code>.
                 </li>
               </ol>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* PUBLIC API */}
+            <section id="public-api">
+              <h2>🎯 Public API Entry Points (Where is it called?)</h2>
+              <p>
+                Developers do not invoke <code>core/cache-revalidate.js</code> directly. Instead, Dinou exposes these functions as part of its public API through the main package imports (CommonJS and ES Modules):
+              </p>
+              <ul>
+                <li><strong>CommonJS:</strong> <code>require("dinou/server")</code></li>
+                <li><strong>ES Modules:</strong> <code>{'import { revalidatePath, revalidateTag } from "dinou/server"'}</code></li>
+              </ul>
+              <p>
+                When imported, the entry points dynamically load <code>cache-revalidate.js</code> and proxy the arguments to the internal handlers:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{PUBLIC_API_CJS_CODE}</CodeBlock>
+              </div>
+              <p>
+                Revalidation APIs are mutative actions and should only be invoked inside <strong>Server Functions</strong>, custom Express route handlers (such as webhook listeners), or standalone Node.js cron and synchronization scripts.
+              </p>
             </section>
 
             <hr className="my-8" />

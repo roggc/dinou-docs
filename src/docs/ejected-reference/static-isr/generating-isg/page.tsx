@@ -10,6 +10,7 @@ const tocItems = [
   { id: "engine-flow", title: "📊 Compilation Lifecycle", level: 2 },
   { id: "lazy-promotion", title: "🚀 Lazy Static Promotion", level: 2 },
   { id: "mutex-sharing", title: "🔒 Mutex Sharing & Lock Pools", level: 2 },
+  { id: "invocation", title: "🎯 Invocation & Conditionals", level: 2 },
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
@@ -123,7 +124,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Explore dynamic incremental static generation, lazy pre-rendering, and runtime cache promotion.
+              Explore how Dinou dynamically generates and caches dynamic routes on their first request at runtime.
             </p>
           </div>
 
@@ -136,10 +137,10 @@ export default function Page() {
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                Incremental Static Generation (ISG) resolves a classic build scaling dilemma: if your application contains millions of dynamic pages (e.g. e-commerce products), rendering them all at build time would lead to hours of build latency.
+                Incremental Static Generation (ISG) resolves a classic scaling dilemma: if your application contains thousands or millions of dynamic paths (such as product detail pages), rendering all of them upfront would lead to significant delay and resource consumption.
               </p>
               <p>
-                Instead, Dinou compiles only the most popular pages at build time. For all remaining routes (e.g., <code>/posts/[id]</code> paths that weren't crawled initially), the server runs <code>generating-isg.js</code> on their first request. It lazy-promotes the page into a static file, ensuring subsequent loads skip compilation entirely.
+                To optimize this, during production server startup, Dinou evaluates which routes should be static. For routes with dynamic segments (e.g., <code>/posts/[id]</code>), it pre-compiles only the paths explicitly returned by the route's <code>getStaticPaths()</code> function. For all other un-precompiled paths, the server executes <code>generating-isg.js</code> on their first request. This dynamic compiler evaluates the route, creates the static cache files (both RSC and HTML) on disk, and promotes the route to static so that subsequent visits bypass rendering entirely.
               </p>
             </section>
 
@@ -191,6 +192,38 @@ export default function Page() {
               <p>
                 This ensures that if a background ISR task is already updating a page, the ISG thread cannot attempt to create a parallel compilation task for the same path, and vice versa.
               </p>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* INVOCATION & CONDITIONALS */}
+            <section id="invocation">
+              <h2>🎯 Invocation & Conditionals (Where is it called?)</h2>
+              <p>
+                The <code>generatingISG</code> function is imported and called by the main web server (<a href="/docs/ejected-reference/server"><code>core/server.js</code></a>) during the handling of wildcard page requests (<code>/*</code>).
+              </p>
+              <p>
+                To avoid slowing down the active user's request, the server executes the compilation as a <strong>"fire-and-forget" background task</strong>. It waits until the response has successfully finished streaming to the client (listening to Express's <code>res.on("finish")</code>) and then checks these conditions:
+              </p>
+              <ul>
+                <li><strong>Production Only (<code>!isDevelopment</code>):</strong> ISG cache files are only compiled and served in production mode.</li>
+                <li><strong>Success Status (<code>res.statusCode === 200</code>):</strong> Only promotes the page if it rendered successfully without crashes.</li>
+                <li><strong>HTTP GET Method (<code>req.method === "GET"</code>):</strong> Only triggers compilation on standard GET navigations.</li>
+                <li><strong>Server Ready (<code>isReady</code>):</strong> Verifies that the initial startup SSG generation of crawled routes has completed.</li>
+              </ul>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`// Inside core/server.js wildcard route handler:
+res.on("finish", () => {
+  if (
+    !isDevelopment &&
+    res.statusCode === 200 &&
+    req.method === "GET" &&
+    isReady
+  ) {
+    generatingISG(reqPath, dynamicState); // Triggers background compile
+  }
+});`}</CodeBlock>
+              </div>
             </section>
 
             <hr className="my-8" />
