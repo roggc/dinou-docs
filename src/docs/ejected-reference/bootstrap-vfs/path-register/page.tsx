@@ -155,10 +155,10 @@ export default function Page() {
               </p>
               <ul className="list-disc pl-6 mt-4 space-y-3">
                 <li>
-                  <a href="/docs/ejected-reference/server"><strong><code>server.js</code> (Parent Web Server):</strong></a> Loads <code>register-paths.js</code> at startup to allow parsing aliases inside middleware, route handlers, and configuration modules run directly on the main thread.
+                  <a href="/docs/ejected-reference/server/main-server"><strong><code>server.js</code> (Parent Web Server):</strong></a> Loads <code>register-paths.js</code> at startup to allow parsing aliases inside middleware, route handlers, and configuration modules run directly on the main thread.
                 </li>
                 <li>
-                  <a href="/docs/ejected-reference/render-html"><strong><code>render-html.js</code> (Child HTML Renderer):</strong></a> Runs in an isolated sub-process spawned to pre-render the pages. It imports <code>register-paths.js</code> to resolve absolute paths when constructing layout modules and page trees.
+                  <a href="/docs/ejected-reference/server/render-html"><strong><code>render-html.js</code> (Child HTML Renderer):</strong></a> Runs in an isolated sub-process spawned to pre-render the pages. It imports <code>register-paths.js</code> to resolve absolute paths when constructing layout modules and page trees.
                 </li>
               </ul>
             </section>

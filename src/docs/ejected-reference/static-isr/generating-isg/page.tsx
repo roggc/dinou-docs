@@ -200,7 +200,7 @@ export default function Page() {
             <section id="invocation">
               <h2>🎯 Invocation & Conditionals (Where is it called?)</h2>
               <p>
-                The <code>generatingISG</code> function is imported and called by the main web server (<a href="/docs/ejected-reference/server"><code>core/server.js</code></a>) during the handling of wildcard page requests (<code>/*</code>).
+                The <code>generatingISG</code> function is imported and called by the main web server (<a href="/docs/ejected-reference/server/main-server"><code>core/server.js</code></a>) during the handling of wildcard page requests (<code>/*</code>).
               </p>
               <p>
                 To avoid slowing down the active user's request, the server executes the compilation as a <strong>"fire-and-forget" background task</strong>. It waits until the response has successfully finished streaming to the client (listening to Express's <code>res.on("finish")</code>) and then checks these conditions:

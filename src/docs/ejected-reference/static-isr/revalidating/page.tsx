@@ -199,7 +199,7 @@ export default function Page() {
             <section id="invocation">
               <h2>🎯 Invocation & SWR Serving (Where is it called?)</h2>
               <p>
-                The <code>revalidating</code> function is imported and called by the main web server (<a href="/docs/ejected-reference/server"><code>core/server.js</code></a>) inside the request routing middleware when intercepting GET requests.
+                The <code>revalidating</code> function is imported and called by the main web server (<a href="/docs/ejected-reference/server/main-server"><code>core/server.js</code></a>) inside the request routing middleware when intercepting GET requests.
               </p>
               <p>
                 To implement the <strong>Stale-While-Revalidate (SWR)</strong> pattern, the server checks the route conditions, triggers the background compilation, and immediately serves the cached file (meaning the client doesn't wait for compilation):

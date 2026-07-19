@@ -62,7 +62,7 @@ export default function Page() {
 ├── server.js               # Entry point for the parent Node.js server
 ├── core/                   # ⚙️ Core RSC engine, router, and renderers (47 files)
 │   ├── babel-esm-loader.js # Custom ESM loader thread for Babel compilation
-│   ├── render-html.js      # Child process HTML compiler (Standard Client SSR)
+│   ├── render-html.js      # Child process HTML renderer (Standard Client SSR)
 │   ├── css-require-hook.js # PostCSS CSS Modules require loader
 │   ├── client.jsx          # Client hydration entry point (Rollup/esbuild)
 │   ├── client-webpack.jsx  # Client hydration entry point (Webpack config)
@@ -107,7 +107,7 @@ export default function Page() {
                 </a>
 
                 {/* 2. SERVER ENTRY */}
-                <a href="/docs/ejected-reference/server" className="group">
+                <a href="/docs/ejected-reference/server/main-server" className="group">
                   <Card className="h-full border hover:border-blue-500/50 hover:bg-blue-50/5 dark:hover:bg-blue-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
                       <Terminal className="h-5 w-5 text-blue-500 group-hover:scale-110 transition-transform" />
@@ -120,7 +120,7 @@ export default function Page() {
                 </a>
 
                 {/* 3. HTML RENDERER PIPELINE */}
-                <a href="/docs/ejected-reference/render-html" className="group">
+                <a href="/docs/ejected-reference/server/render-html" className="group">
                   <Card className="h-full border hover:border-purple-500/50 hover:bg-purple-50/5 dark:hover:bg-purple-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
                       <Cpu className="h-5 w-5 text-purple-500 group-hover:scale-110 transition-transform" />

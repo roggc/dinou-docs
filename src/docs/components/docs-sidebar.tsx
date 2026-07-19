@@ -266,17 +266,21 @@ const navigation = [
         ],
       },
       {
-        title: "Server & RSC Core",
+        title: "Server & SSR Architecture",
         href: "/docs/ejected-reference/server",
         icon: Server,
         subItems: [
           {
-            title: "Main Server (server.js)",
+            title: "Overview",
             href: "/docs/ejected-reference/server",
           },
           {
+            title: "Main Server (server.js)",
+            href: "/docs/ejected-reference/server/main-server",
+          },
+          {
             title: "HTML Renderer (render-html.js)",
-            href: "/docs/ejected-reference/render-html",
+            href: "/docs/ejected-reference/server/render-html",
           },
         ],
       },
