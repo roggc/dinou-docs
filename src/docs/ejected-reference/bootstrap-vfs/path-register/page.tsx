@@ -9,6 +9,7 @@ const tocItems = [
   { id: "overview", title: "💡 Overview", level: 2 },
   { id: "register-flow", title: "📊 Bootstrapping Flow", level: 2 },
   { id: "why-register", title: "⚡ Module Resolution Mapping", level: 2 },
+  { id: "calling-contexts", title: "🎯 Integration & Calling Processes", level: 2 },
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
@@ -72,7 +73,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Examine the tsconfig paths resolver, runtime import hook registry, and development configuration detectors.
+              Understand how Dinou reads tsconfig.json or jsconfig.json to register custom path aliases, allowing the server to resolve absolute imports like @/components.
             </p>
           </div>
 
@@ -122,6 +123,42 @@ export default function Page() {
                 </li>
                 <li>
                   <strong>Module Interception:</strong> Registers resolution handlers with the <code>tsconfig-paths</code> library, intercepting standard <code>require()</code> calls and mapping alias paths to their physical disk locations.
+                </li>
+              </ul>
+
+              <div className="my-6 border border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/10 rounded-lg p-4 not-prose space-y-2 text-sm text-muted-foreground">
+                <h4 className="font-semibold text-foreground">💡 Node.js Resolution: Why both register-paths.js and babel-esm-loader.js?</h4>
+                <p>
+                  Dinou runs as a hybrid server environment supporting both legacy CommonJS (using <code>require()</code>) and modern native ESM (using <code>import</code>):
+                </p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>
+                    <strong>tsconfig-paths (register-paths.js):</strong> Hooks into Node's CommonJS module system (<code>Module._resolveFilename</code>). It allows the parent Express web server and other ejected scripts utilizing <code>require()</code> to load alias-mapped files.
+                  </li>
+                  <li>
+                    <strong>babel-esm-loader.js:</strong> Hooks into Node's native ESM loader pipeline. It intercepts native <code>import</code> or dynamic <code>import()</code> statements when transpiling React Server Components (RSC) on-the-fly.
+                  </li>
+                </ul>
+                <p>
+                  Having only one loader would result in resolution crashes: <code>tsconfig-paths</code> cannot intercept ESM <code>import</code> calls, and <code>babel-esm-loader</code> cannot intercept CommonJS <code>require()</code> calls.
+                </p>
+              </div>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* CALLING CONTEXTS */}
+            <section id="calling-contexts">
+              <h2>🎯 Integration & Calling Processes</h2>
+              <p>
+                In Dinou's dual-process architecture, Node.js runs two isolated processes. Since both require access to typescript path aliases (like <code>@/</code>) inside their CommonJS execution threads, <code>register-paths.js</code> is required by both entry files:
+              </p>
+              <ul className="list-disc pl-6 mt-4 space-y-3">
+                <li>
+                  <a href="/docs/ejected-reference/server"><strong><code>server.js</code> (Parent Web Server):</strong></a> Loads <code>register-paths.js</code> at startup to allow parsing aliases inside middleware, route handlers, and configuration modules run directly on the main thread.
+                </li>
+                <li>
+                  <a href="/docs/ejected-reference/render-html"><strong><code>render-html.js</code> (Child HTML Renderer):</strong></a> Runs in an isolated sub-process spawned to pre-render the pages. It imports <code>register-paths.js</code> to resolve absolute paths when constructing layout modules and page trees.
                 </li>
               </ul>
             </section>

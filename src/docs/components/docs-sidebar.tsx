@@ -247,7 +247,7 @@ const navigation = [
         icon: BookOpen,
       },
       {
-        title: "Bootstrapping & VFS Utils",
+        title: "Virtual Filesystem & Bootstrap",
         href: "/docs/ejected-reference/bootstrap-vfs",
         icon: Terminal,
         subItems: [

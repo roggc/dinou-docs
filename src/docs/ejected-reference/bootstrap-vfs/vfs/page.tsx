@@ -9,6 +9,7 @@ const tocItems = [
   { id: "overview", title: "💡 Overview", level: 2 },
   { id: "vfs-flow", title: "📊 VFS Operational Flow", level: 2 },
   { id: "optimizations", title: "⚡ Filesystem Optimizations", level: 2 },
+  { id: "calling-contexts", title: "🎯 Calling Modules & Contexts", level: 2 },
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
@@ -109,7 +110,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Examine the virtual file system wrapper, in-memory directories indexes, and production path query resolvers.
+              Understand how Dinou maps the physical src/ directory tree into an in-memory cache at startup to eliminate disk read latency during route resolution.
             </p>
           </div>
 
@@ -156,6 +157,27 @@ export default function Page() {
                 </li>
                 <li>
                   <strong>Development Live Queries:</strong> In development, caching files in memory would prevent hot-reloading from detecting new page files immediately. To resolve this, the wrapper bypasses the cache in development, querying the physical disk in real-time.
+                </li>
+              </ul>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* CALLING CONTEXTS */}
+            <section id="calling-contexts">
+              <h2>🎯 Calling Modules & Contexts</h2>
+              <p>
+                To maintain high throughput and prevent disk seek latencies, other framework core modules query the in-memory virtual filesystem instead of Node's native <code>fs</code> module:
+              </p>
+              <ul className="list-disc pl-6 mt-4 space-y-3">
+                <li>
+                  <a href="/docs/ejected-reference/routing-resolvers/path-resolver"><strong><code>get-file-path-and-dynamic-params.js</code> (Path Resolver):</strong></a> The main router engine maps request URLs to physical file structures. It imports <code>vfs.js</code>'s cached <code>existsSync</code> and <code>readdirSync</code> helpers to locate catch-all parameters and route groups instantly.
+                </li>
+                <li>
+                  <a href="/docs/ejected-reference/rsc-context/get-jsx"><strong><code>get-jsx.js</code> (RSC Tree Builder):</strong></a> When resolving components to construct React Server Component JSX trees, it queries <code>vfs.js</code> to verify component file paths (such as dynamic layouts or pages) before importing them.
+                </li>
+                <li>
+                  <a href="/docs/ejected-reference/rsc-context/error-handler"><strong><code>get-error-jsx.js</code> (Error Boundary Handler):</strong></a> Crawls up folders to check for boundary files (like <code>error.tsx</code> or <code>not-found.tsx</code>) using <code>vfs.js</code>'s cache, serving custom layout errors cleanly.
                 </li>
               </ul>
             </section>

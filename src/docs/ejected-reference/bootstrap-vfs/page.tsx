@@ -26,11 +26,11 @@ export default function Page() {
             <div className="flex items-center space-x-2">
               <Terminal className="h-6 w-6 text-primary" />
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Bootstrapping & VFS Utils
+                Virtual Filesystem & Bootstrap
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Discover runtime path alias registers, virtual memory file indexes, and production route optimizations.
+              Understand how Dinou maps custom path aliases and caches the project directory tree in-memory to eliminate disk read latency.
             </p>
           </div>
 
@@ -45,14 +45,14 @@ export default function Page() {
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                Before Node.js begins compiling components or routing incoming traffic, it must bootstrap the runtime environment:
+                Before the server starts loading components or routing incoming requests, it must bootstrap the runtime environment:
               </p>
               <ul>
                 <li><strong>Alias Mapping:</strong> Imports inside files that use custom path configurations (e.g. <code>import Component from "@/components/Component"</code>) will fail unless Node is taught how to parse these alias patterns.</li>
                 <li><strong>Filesystem Optimization:</strong> Constantly performing disk operations (like <code>fs.existsSync</code>) for routing lookups degrades server throughput. The framework must implement memory-level caches to avoid disk latency in production.</li>
               </ul>
               <p>
-                The **Bootstrapping & VFS Utils** group contains the core configuration files responsible for these startup tasks.
+                The <strong>Virtual Filesystem & Bootstrap</strong> group contains the core configuration files responsible for these startup tasks.
               </p>
             </section>
 
