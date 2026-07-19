@@ -11,13 +11,25 @@ const tocItems = [
 ];
 
 const PROCESS_FLOW_DIAGRAM = `graph TD
-    Parent["Parent Web Server (server.js)"] -->|Spawns via fork| Child["Child HTML Renderer (render-html.js)"]
-    Parent -->|Routes HTTP GET requests| RouteCheck{"Check static metadata"}
-    RouteCheck -->|Static/ISR hit| ServeCache["Serve index.html directly (no runtime cost)"]
-    RouteCheck -->|Bailout / Dynamic route| RunSSR["Execute dynamic request handler"]
-    RunSSR -->|Requests Flight serialization| Child
-    Child -->|Generates HTML & RSC payload| Parent
-    Parent -->|Streams response| Client["Browser Client SPA"]`;
+    subgraph Parent["Parent Process (server.js) with react-server conditions"]
+        HTTPReq["HTTP GET Request"] --> RouteCheck{"Is Route Cached?"}
+        RouteCheck -->|Yes| ServeStatic["Serve index.html directly"]
+        RouteCheck -->|No| GetJSX["Run getJSX() & resolve RSC tree"]
+        GetJSX --> SerializeRSC["renderToPipeableStream() from ESM Server"]
+        IPCListener["IPC listener: child.on message"] --> SetHeaders["Apply Headers, Cookies, Status, or Redirects"]
+    end
+
+    subgraph Child["Child Process (render-html.js) Standard Environment"]
+        ReadRSC["Read RSC Flight Stream from fd 4"] --> SSRRender["Reconstruct JSX & render to HTML via react-dom/server"]
+        SSRRender --> SendIPC["process.send context actions"]
+    end
+
+    %% Process Connections
+    SerializeRSC -->|Pipes binary RSC stream to stdin fd 4| ReadRSC
+    SendIPC -->|Sends IPC messages| IPCListener
+    SSRRender -->|Pipes HTML string stdout| ServeHTML["Send HTTP Response Stream"]
+    ServeStatic --> ServeHTML
+    ServeHTML --> Browser["Client Browser SPA"]`;
 
 export default function Page() {
   return (
@@ -84,7 +96,7 @@ export default function Page() {
                 The flowchart below demonstrates how the parent web server communicates with the child HTML renderer to compile and stream page responses:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="600px">{PROCESS_FLOW_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="900px">{PROCESS_FLOW_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
