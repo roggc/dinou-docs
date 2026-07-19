@@ -247,36 +247,28 @@ const navigation = [
         icon: BookOpen,
       },
       {
-        title: "ESM Loader Integration",
-        href: "/docs/ejected-reference/loader",
-        icon: Cpu,
+        title: "Bootstrapping & VFS Utils",
+        href: "/docs/ejected-reference/bootstrap-vfs",
+        icon: Terminal,
         subItems: [
           {
             title: "Overview",
-            href: "/docs/ejected-reference/loader",
+            href: "/docs/ejected-reference/bootstrap-vfs",
           },
           {
-            title: "Module Importer (import-module.js)",
-            href: "/docs/ejected-reference/loader/import-module",
+            title: "Path Aliases (register-paths.js)",
+            href: "/docs/ejected-reference/bootstrap-vfs/path-register",
           },
           {
-            title: "Path Resolver (get-abs-path-with-ext.js)",
-            href: "/docs/ejected-reference/loader/get-abs-path-with-ext",
-          },
-          {
-            title: "Exports Parser (parse-exports.js)",
-            href: "/docs/ejected-reference/loader/parse-exports",
-          },
-          {
-            title: "Path Normalizer (path-utils.js)",
-            href: "/docs/ejected-reference/loader/path-utils",
+            title: "Virtual File System (vfs.js)",
+            href: "/docs/ejected-reference/bootstrap-vfs/vfs",
           },
         ],
       },
       {
         title: "Server & RSC Core",
         href: "/docs/ejected-reference/server",
-        icon: Cpu,
+        icon: Server,
         subItems: [
           {
             title: "Main Server (server.js)",
@@ -287,46 +279,6 @@ const navigation = [
             href: "/docs/ejected-reference/render-html",
           },
         ],
-      },
-      {
-        title: "Client & Routing",
-        href: "/docs/ejected-reference/client-runtime",
-        icon: Globe,
-        subItems: [
-          {
-            title: "Overview",
-            href: "/docs/ejected-reference/client-runtime",
-          },
-          {
-            title: "SPA Hydration (client.jsx)",
-            href: "/docs/ejected-reference/client-runtime/client",
-          },
-          {
-            title: "Recovery Hydration (client-error.jsx)",
-            href: "/docs/ejected-reference/client-runtime/client-error",
-          },
-          {
-            title: "Router Hooks & Context (navigation.js)",
-            href: "/docs/ejected-reference/client-runtime/navigation",
-          },
-          {
-            title: "Link Click Hijacking (link.jsx)",
-            href: "/docs/ejected-reference/client-runtime/link",
-          },
-          {
-            title: "Server Functions Connection (server-function-proxy.js)",
-            href: "/docs/ejected-reference/client-runtime/server-actions",
-          },
-          {
-            title: "Navigation Utilities (navigation-utils.js)",
-            href: "/docs/ejected-reference/client-runtime/navigation-utils",
-          },
-        ],
-      },
-      {
-        title: "Styles & Assets Hooks",
-        href: "/docs/ejected-reference/assets-styling",
-        icon: Settings,
       },
       {
         title: "Routing & Path Resolvers",
@@ -395,21 +347,29 @@ const navigation = [
         ],
       },
       {
-        title: "Bootstrapping & VFS Utils",
-        href: "/docs/ejected-reference/bootstrap-vfs",
-        icon: Terminal,
+        title: "ESM Loader Integration",
+        href: "/docs/ejected-reference/loader",
+        icon: Cpu,
         subItems: [
           {
             title: "Overview",
-            href: "/docs/ejected-reference/bootstrap-vfs",
+            href: "/docs/ejected-reference/loader",
           },
           {
-            title: "Path Aliases (register-paths.js)",
-            href: "/docs/ejected-reference/bootstrap-vfs/path-register",
+            title: "Module Importer (import-module.js)",
+            href: "/docs/ejected-reference/loader/import-module",
           },
           {
-            title: "Virtual File System (vfs.js)",
-            href: "/docs/ejected-reference/bootstrap-vfs/vfs",
+            title: "Path Resolver (get-abs-path-with-ext.js)",
+            href: "/docs/ejected-reference/loader/get-abs-path-with-ext",
+          },
+          {
+            title: "Exports Parser (parse-exports.js)",
+            href: "/docs/ejected-reference/loader/parse-exports",
+          },
+          {
+            title: "Path Normalizer (path-utils.js)",
+            href: "/docs/ejected-reference/loader/path-utils",
           },
         ],
       },
@@ -471,6 +431,46 @@ const navigation = [
             href: "/docs/ejected-reference/static-isr/status-manifest",
           },
         ],
+      },
+      {
+        title: "Client & Routing",
+        href: "/docs/ejected-reference/client-runtime",
+        icon: Globe,
+        subItems: [
+          {
+            title: "Overview",
+            href: "/docs/ejected-reference/client-runtime",
+          },
+          {
+            title: "SPA Hydration (client.jsx)",
+            href: "/docs/ejected-reference/client-runtime/client",
+          },
+          {
+            title: "Recovery Hydration (client-error.jsx)",
+            href: "/docs/ejected-reference/client-runtime/client-error",
+          },
+          {
+            title: "Router Hooks & Context (navigation.js)",
+            href: "/docs/ejected-reference/client-runtime/navigation",
+          },
+          {
+            title: "Link Click Hijacking (link.jsx)",
+            href: "/docs/ejected-reference/client-runtime/link",
+          },
+          {
+            title: "Server Functions Connection (server-function-proxy.js)",
+            href: "/docs/ejected-reference/client-runtime/server-actions",
+          },
+          {
+            title: "Navigation Utilities (navigation-utils.js)",
+            href: "/docs/ejected-reference/client-runtime/navigation-utils",
+          },
+        ],
+      },
+      {
+        title: "Styles & Assets Hooks",
+        href: "/docs/ejected-reference/assets-styling",
+        icon: Settings,
       },
       {
         title: "esbuild Integration",

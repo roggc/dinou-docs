@@ -93,7 +93,20 @@ export default function Page() {
               </p>
 
               <div className="grid gap-4 sm:grid-cols-2 not-prose mt-6">
-                {/* 1. SERVER ENTRY */}
+                {/* 1. VFS & BOOTSTRAP */}
+                <a href="/docs/ejected-reference/bootstrap-vfs" className="group">
+                  <Card className="h-full border hover:border-teal-500/50 hover:bg-teal-50/5 dark:hover:bg-teal-950/5 transition-all">
+                    <CardHeader className="flex flex-row items-center gap-3 py-4">
+                      <FolderTree className="h-5 w-5 text-teal-500 group-hover:scale-110 transition-transform" />
+                      <CardTitle className="text-base font-bold">Virtual Filesystem & Bootstrap</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground">
+                      Analyze the bootstrapping pipeline, virtual file mapping engines, and runtime path registration utilities.
+                    </CardContent>
+                  </Card>
+                </a>
+
+                {/* 2. SERVER ENTRY */}
                 <a href="/docs/ejected-reference/server" className="group">
                   <Card className="h-full border hover:border-blue-500/50 hover:bg-blue-50/5 dark:hover:bg-blue-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
@@ -106,7 +119,7 @@ export default function Page() {
                   </Card>
                 </a>
 
-                {/* 2. HTML RENDERER PIPELINE */}
+                {/* 3. HTML RENDERER PIPELINE */}
                 <a href="/docs/ejected-reference/render-html" className="group">
                   <Card className="h-full border hover:border-purple-500/50 hover:bg-purple-50/5 dark:hover:bg-purple-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
@@ -115,19 +128,6 @@ export default function Page() {
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground">
                       Analyze the isolated two-process architecture, JSX-to-client Flight Stream deserializer, and React 19 SSR stdout compilers.
-                    </CardContent>
-                  </Card>
-                </a>
-
-                {/* 3. VFS & BOOTSTRAP */}
-                <a href="/docs/ejected-reference/bootstrap-vfs" className="group">
-                  <Card className="h-full border hover:border-teal-500/50 hover:bg-teal-50/5 dark:hover:bg-teal-950/5 transition-all">
-                    <CardHeader className="flex flex-row items-center gap-3 py-4">
-                      <FolderTree className="h-5 w-5 text-teal-500 group-hover:scale-110 transition-transform" />
-                      <CardTitle className="text-base font-bold">Virtual Filesystem & Bootstrap</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-xs text-muted-foreground">
-                      Analyze the bootstrapping pipeline, virtual file mapping engines, and runtime path registration utilities.
                     </CardContent>
                   </Card>
                 </a>
@@ -171,7 +171,20 @@ export default function Page() {
                   </Card>
                 </a>
 
-                {/* 7. CLIENT SPA & ROUTING */}
+                {/* 7. STATIC & ISR ENGINES */}
+                <a href="/docs/ejected-reference/static-isr" className="group">
+                  <Card className="h-full border hover:border-orange-500/50 hover:bg-orange-50/5 dark:hover:bg-orange-950/5 transition-all">
+                    <CardHeader className="flex flex-row items-center gap-3 py-4">
+                      <RefreshCw className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
+                      <CardTitle className="text-base font-bold">Static & ISR Engines</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground">
+                      Pre-rendering SSG page crawlers, cache metadata manifests, and asynchronous background ISR/ISG revalidation locks.
+                    </CardContent>
+                  </Card>
+                </a>
+
+                {/* 8. CLIENT SPA & ROUTING */}
                 <a href="/docs/ejected-reference/client-runtime" className="group">
                   <Card className="h-full border hover:border-emerald-500/50 hover:bg-emerald-50/5 dark:hover:bg-emerald-950/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
@@ -184,7 +197,7 @@ export default function Page() {
                   </Card>
                 </a>
 
-                {/* 8. ASSET & STYLE LOADING */}
+                {/* 9. ASSET & STYLE LOADING */}
                 <a href="/docs/ejected-reference/assets-styling" className="group">
                   <Card className="h-full border hover:border-slate-500/50 hover:bg-slate-50/5 dark:hover:bg-slate-900/5 transition-all">
                     <CardHeader className="flex flex-row items-center gap-3 py-4">
@@ -193,19 +206,6 @@ export default function Page() {
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground">
                       Custom CommonJS require hooks for CSS Modules with PostCSS and hashed static asset loaders.
-                    </CardContent>
-                  </Card>
-                </a>
-
-                {/* 9. STATIC & ISR ENGINES */}
-                <a href="/docs/ejected-reference/static-isr" className="group">
-                  <Card className="h-full border hover:border-orange-500/50 hover:bg-orange-50/5 dark:hover:bg-orange-950/5 transition-all">
-                    <CardHeader className="flex flex-row items-center gap-3 py-4">
-                      <RefreshCw className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
-                      <CardTitle className="text-base font-bold">Static & ISR Engines</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-xs text-muted-foreground">
-                      Pre-rendering SSG page crawlers, cache metadata manifests, and asynchronous background ISR/ISG revalidation locks.
                     </CardContent>
                   </Card>
                 </a>
