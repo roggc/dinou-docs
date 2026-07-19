@@ -9,6 +9,7 @@ const tocItems = [
   { id: "overview", title: "💡 Overview", level: 2 },
   { id: "rename-flow", title: "📊 Retry Backoff Flow", level: 2 },
   { id: "file-locking", title: "🔒 The File Locking Problem", level: 2 },
+  { id: "integration-usage", title: "🎯 Integration & Usage", level: 2 },
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
@@ -119,6 +120,36 @@ export default function Page() {
                 </li>
                 <li>
                   <strong>Failure Threshold:</strong> Aborts and throws after 5 failed retries to prevent infinite execution hangs.
+                </li>
+              </ul>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* INTEGRATION & USAGE */}
+            <section id="integration-usage">
+              <h2>🎯 Integration & Usage (Where is it Used?)</h2>
+              <p>
+                Because <code>safeRename()</code> is the core mechanism that prevents serving partially-written files to active users, it is imported and executed by the three runtime engines in Dinou that perform "in-flight" page updates:
+              </p>
+              <ul>
+                <li className="space-y-1">
+                  <a href="/docs/ejected-reference/static-isr/revalidating"><strong><code>revalidating.js</code> (Background ISR):</strong></a>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    When a stale page (past its <code>revalidate</code> timestamp) is requested, a background task generates new HTML and RSC payloads into <code>.tmp</code> files. Once finished, it invokes <code>safeRename()</code> to swap them into the production directory.
+                  </p>
+                </li>
+                <li className="space-y-1">
+                  <a href="/docs/ejected-reference/static-isr/generating-isg"><strong><code>generating-isg.js</code> (On-Demand ISG):</strong></a>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    When a user requests a path that was not generated at startup, the server dynamically renders the RSC and HTML files into temp files first, then uses <code>safeRename()</code> to promote them to static cache files.
+                  </p>
+                </li>
+                <li className="space-y-1">
+                  <a href="/docs/ejected-reference/static-isr/cache-revalidate"><strong><code>cache-revalidate.js</code> (On-Demand Revalidation API):</strong></a>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    When a CMS webhook calls <code>revalidatePath()</code>, the server forces an immediate compile of the target page into a temporary file and commits it to disk using <code>safeRename()</code>.
+                  </p>
                 </li>
               </ul>
             </section>

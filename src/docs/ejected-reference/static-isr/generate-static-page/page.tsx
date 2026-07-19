@@ -13,13 +13,13 @@ const tocItems = [
 ];
 
 const HTML_BUILDER_DIAGRAM = `graph TD
-    Start[generateStaticPage reqPath] --> TempPath[Create Temp File Path: index.html.timestamp.tmp]
-    TempPath --> MockCtx[Inject Mock req/res context]
-    MockCtx --> RenderApp[1. renderAppToHtml mockRes Renders page component stream]
-    RenderApp --> ProcessMeta[2. processMetadata effects Resolves side-effect cookies/redirects]
-    ProcessMeta --> PipeTemp[Pipe HTML to Temp File Writes to disk cache]
-    PipeTemp --> WriteMeta[3. Write metadata.json generatedAt, tags, revalidate]
-    WriteMeta --> ReturnObj[Return verification object:<br/>success, tempPath, finalPath, status]`;
+    Start["generateStaticPage(reqPath)"] --> TempPath["Create temporary file path:<br/>index.html.timestamp.tmp"]
+    TempPath --> MockCtx["Inject mock Express req/res context"]
+    MockCtx --> RenderApp["renderAppToHtml(context, mockRes):<br/>Renders page component stream"]
+    RenderApp --> ProcessMeta["processMetadata(capturedStatus, headers):<br/>Resolves side-effect cookies/redirects"]
+    ProcessMeta --> PipeTemp["Pipe HTML stream to temp file<br/>on disk"]
+    PipeTemp --> WriteMeta["Write metadata.json:<br/>{ generatedAt, tags, revalidate }"]
+    WriteMeta --> ReturnObj["Return validation object:<br/>{ success, tempPath, finalPath, status }"]`;
 
 const HTML_BUILDER_CODE = `const path = require("path");
 const { mkdirSync, createWriteStream, existsSync } = require("fs");
@@ -161,7 +161,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Examine single-route HTML generation, side-effect script injection, and metadata cache parameters.
+              Examine how Dinou renders individual routes to static HTML files and generates metadata JSON files to control cache revalidation.
             </p>
           </div>
 

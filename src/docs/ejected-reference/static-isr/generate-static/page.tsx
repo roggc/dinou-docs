@@ -13,11 +13,11 @@ const tocItems = [
 ];
 
 const ORCHESTRATOR_DIAGRAM = `graph TD
-    Start[generateStatic] --> Clean[Clean Output Folder Removes dist2]
-    Clean --> BuildStatic[1. buildStaticPages Filesystem crawler scans src]
-    BuildStatic --> GetPaths[2. getStaticPaths Retrieves all crawled routes]
-    GetPaths --> GenRSCs[3. generateStaticRSCs Serializes Flight payloads]
-    GenRSCs --> GenPages[4. generateStaticPages Compiles HTML documents]`;
+    Start["generateStatic()"] --> Clean["Clean output folder:<br/>Deletes dist2/ directory"]
+    Clean --> BuildStatic["buildStaticPages():<br/>Scans src/ for static route files"]
+    BuildStatic --> GetPaths["getStaticPaths():<br/>Retrieves list of crawled paths"]
+    GetPaths --> GenRSCs["generateStaticRSCs(routes):<br/>Generates rsc.rsc payloads"]
+    GenRSCs --> GenPages["generateStaticPages(routes):<br/>Renders static index.html pages"]`;
 
 const ORCHESTRATOR_CODE = `const path = require("path");
 const { existsSync, rmSync } = require("fs");
@@ -62,7 +62,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Examine the main compilation orchestrator, route clean-up hooks, and page rendering pipeline sequences.
+              Examine the main orchestrator script that cleans the build cache, crawls static paths, and triggers the RSC and HTML rendering pipelines.
             </p>
           </div>
 

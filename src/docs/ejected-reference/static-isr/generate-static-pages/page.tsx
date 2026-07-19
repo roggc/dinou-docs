@@ -13,13 +13,13 @@ const tocItems = [
 ];
 
 const PAGES_PIPELINE_DIAGRAM = `graph TD
-    Start[generateStaticPages routes] --> LoopRoutes[For each route...]
-    LoopRoutes --> MockCtx[Inject Mock Request & Response]
-    MockCtx --> RenderApp[1. renderAppToHtml mockRes Renders page component stream]
-    RenderApp --> ProcessMeta[2. processMetadata effects Resolves side-effect cookies/redirects]
-    ProcessMeta --> WriteHTML[Pipe HTML to dist2/index.html]
-    WriteHTML --> WriteMeta[3. Write dist2/metadata.json generatedAt, tags, revalidate]
-    WriteMeta --> UpdateStatus[Update status-manifest]`;
+    Start["generateStaticPages(routes)"] --> LoopRoutes["Loop: For each route of routes"]
+    LoopRoutes --> MockCtx["Inject mock Express req/res context"]
+    MockCtx --> RenderApp["renderAppToHtml(context, mockRes):<br/>Renders page component stream"]
+    RenderApp --> ProcessMeta["processMetadata(capturedStatus, headers):<br/>Resolves side-effect cookies/redirects"]
+    ProcessMeta --> WriteHTML["Write HTML directly to disk:<br/>dist2/[route]/index.html"]
+    WriteHTML --> WriteMeta["Write metadata.json:<br/>{ generatedAt, tags, revalidate }"]
+    WriteMeta --> UpdateStatus["updateStatus(route, status):<br/>Synchronizes in-memory status manifest"]`;
 
 const PAGES_PIPELINE_CODE = `// generate-static-pages.js
 const path = require("path");
@@ -197,18 +197,46 @@ export default function Page() {
 
             {/* BULK VS SINGLE */}
             <section id="bulk-vs-single">
-              <h2>🔄 Bulk Pipeline vs Single Page Compiler</h2>
+              <h2>🔄 Differences: Bulk vs. Single Page Compilation</h2>
               <p>
-                Unlike the single-page builder <code>generate-static-page.js</code> (which handles runtime ISR/ISG cache updates):
+                Dinou has two modules for rendering HTML: <code>generate-static-pages.js</code> (for batch rendering at startup) and <code>generate-static-page.js</code> (for single pages during active traffic). They operate differently to optimize speed and prevent downtime:
               </p>
-              <ul>
-                <li>
-                  <strong>Direct Writes:</strong> Writes directly to final files on disk instead of writing to <code>.tmp</code> files first, since no user traffic hits the server during the server startup phase.
-                </li>
-                <li>
-                  <strong>Status Manifest Invalidation:</strong> Updates the in-memory <code>status-manifest.js</code> map at compile-time to synchronise routing states for immediate post-build execution.
-                </li>
-              </ul>
+              <div className="my-6 overflow-x-auto">
+                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-900">
+                      <th className="px-4 py-2 font-bold text-left">Feature</th>
+                      <th className="px-4 py-2 font-bold text-left">Bulk Pipeline (generate-static-pages.js)</th>
+                      <th className="px-4 py-2 font-bold text-left">Single Page Compiler (generate-static-page.js)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                    <tr>
+                      <td className="px-4 py-2 font-semibold">When does it run?</td>
+                      <td className="px-4 py-2">Runs once in the background when the production server starts up.</td>
+                      <td className="px-4 py-2">Runs on-demand when a user visits a page (ISR / ISG).</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 font-semibold">How does it write files?</td>
+                      <td className="px-4 py-2">
+                        <strong>Direct Writes:</strong> Writes directly to the final <code>index.html</code> file path. Safe because no public traffic is hitting the server yet during startup.
+                      </td>
+                      <td className="px-4 py-2">
+                        <strong>Double-Buffered:</strong> Writes to a temporary <code>.tmp</code> file first, then renames it atomically to prevent serving a half-written file to an active user.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-2 font-semibold">Status Manifest updates</td>
+                      <td className="px-4 py-2">
+                        Updates the in-memory <code>status-manifest.js</code> map at the end of the batch run to synchronize routing states for all compiled paths at once.
+                      </td>
+                      <td className="px-4 py-2">
+                        Updates only the status map metadata key for the specific path that was revalidated.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </section>
 
             <hr className="my-8" />
