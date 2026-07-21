@@ -37,14 +37,14 @@ export default function Page() {
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <blockquote>
               <strong>Path:</strong> <code>./dinou/core/server.js</code> <br />
-              <strong>Role:</strong> Parent Node.js process. Responsible for starting the web server, resolving route structures, hosting Server Functions, managing Node's runtime module cache, and piping flight payloads to the SSR sub-process.
+              <strong>Role:</strong> Parent Node.js process. Responsible for starting the Express server, handling wildcard page routing and static asset delivery, executing Server Components to generate the RSC Flight payload, piping the Flight stream to the SSR subprocess, exposing endpoints to execute client-invoked Server Functions (Server Actions), and managing the dynamic transpilation hooks (Babel register, CSS modules require, and Dev HMR cache evictions).
             </blockquote>
 
             {/* OVERVIEW */}
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                The <code>server.js</code> file is the root server entry point. It is loaded as a <strong>CommonJS (CJS)</strong> script in Node.js, and is executed with the <code>--conditions=react-server</code> flag. It bootstraps the environment, overrides Node's module resolution, transpiles incoming ES modules, watches filesystem changes for HMR cache eviction, and starts the Express application.
+                The <code>server.js</code> file is the root entry point of the ejected web server. It runs as a <strong>CommonJS (CJS)</strong> process in Node.js executed with the <code>--conditions=react-server</code> flag. During startup, it bootstraps the runtime environment by overriding Node's module resolution for React, registering custom path aliases, establishing compilation hooks for JSX/TSX, CSS Modules, and static assets, and setting up file watchers for Hot Module Replacement (HMR). During runtime, it serves static assets, reads and writes cookies and headers, executes the page components to generate the binary RSC payload, and pipes this payload to the HTML SSR subprocess.
               </p>
 
               <h3>server.js File Structure & Lifecycle</h3>
@@ -52,19 +52,37 @@ export default function Page() {
                 Below is a visual map outlining the lifecycle phases and core duties of the ejected <code>server.js</code> file:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="1000px">{`graph TD
-    subgraph server.js Architecture & Lifecycle
-        Init[1. INITIALIZATION & TRANSPILATION<br/>Load Core Dependencies Express, Chokidar, React Server DOM, etc<br/>@babel/register Hook JIT transpile JSX/TypeScript imports in CommonJS<br/>asset-require-hook & css-require-hook Mock static imports in Node.js]
-        HMR[2. HOT MODULE REPLACEMENT ENGINE Development Only<br/>Chokidar Watcher Monitors react_client_manifest/ for updates<br/>loadManifestWithRetry & readJSONWithRetry Prevent concurrent I/O race conditions<br/>clearRequireCache & getParents Evict modified modules & propagate HMR recursively]
-        Express[3. EXPRESS APP & ENVIRONMENT MIDDLEWARES<br/>Static Asset Handlers Serve files from dist3 client builds & src<br/>AsyncLocalStorage Request Context Bind HTTP request/response to React thread]
-        Endpoints[4. ROUTING & RSC ENDPOINTS<br/>GET /____rsc_payload____/* returns standard RSC Flight binary payload stream<br/>POST /____rsc_payload_error____/* Handles crashes, returns React error layout<br/>GET Wildcard Route /* Compiles parameters, checks blocklists, routes requests<br/>POST /____server_function____ Invokes functions mapped by registerServerReference]
-        Launch[5. LAUNCH<br/>Listen port 3000 Ready to handle request streams]
+                <CodeBlock language="mermaid" minWidth="950px">{`graph TD
+    subgraph Phase1["1. Initialization & Compilation Hooks"]
+        Start[🚀 Start server.js] --> LoadDeps["1.1 Load dependencies<br/>(Express, Chokidar, React Server DOM, etc.)"]
+        LoadDeps --> OverrideResolve["1.2 Override Module._resolveFilename<br/>(Forces Node to resolve React Server builds)"]
+        OverrideResolve --> PathAlias["1.3 Register path aliases<br/>(tsconfig-paths register)"]
+        PathAlias --> BabelHook["1.4 @babel/register hook<br/>(JIT transpile TSX/TS during require)"]
+        BabelHook --> ReqHooks["1.5 CSS & Asset require hooks<br/>(Mock styling & static assets in Node)"]
     end
 
-    Init --> HMR
-    HMR --> Express
-    Express --> Endpoints
-    Endpoints --> Launch`}</CodeBlock>
+    subgraph Phase2["2. Dev HMR Engine (Development Only)"]
+        ReqHooks --> ChokidarWatch["2.1 Chokidar file watcher<br/>(Monitors manifest updates)"]
+        ChokidarWatch --> EvictCache["2.2 HMR cache eviction<br/>(Clears modified modules from require.cache)"]
+    end
+
+    subgraph Phase3["3. HTTP Server & Middleware"]
+        EvictCache --> ExpressInit["3.1 Initialize Express application"]
+        ExpressInit --> StaticAssets["3.2 Serve static assets<br/>(Serves client-side bundles & public files)"]
+        StaticAssets --> ContextWrap["3.3 Bind AsyncLocalStorage context<br/>(Exposes req/res to Server Components)"]
+    end
+
+    subgraph Phase4["4. Routing Endpoints"]
+        ContextWrap --> RouteWild["4.1 Wildcard page route: GET /*<br/>(Executes RSC & pipes stream to render-html subprocess)"]
+        ContextWrap --> RouteRSC["4.2 RSC payload: GET /____rsc_payload____/*<br/>(Serves raw RSC Flight binary stream directly)"]
+        ContextWrap --> RouteActions["4.3 Server Actions: POST /____server_function____<br/>(Invokes and runs server-side functions)"]
+    end
+
+    subgraph Phase5["5. Port Listener"]
+        RouteWild --> Listen["5.1 Start Express listener on port 3000"]
+        RouteRSC --> Listen
+        RouteActions --> Listen
+    end`}</CodeBlock>
               </div>
             </section>
 
@@ -74,10 +92,10 @@ export default function Page() {
             <section id="module-hack">
               <h2>📦 1. Module Resolution Hack</h2>
               <p>
-                React Server Components (RSC) require a specialized build of React (<code>react.react-server.js</code>) that includes server-exclusive APIs like <code>renderToPipeableStream</code> and prevents the import of client-only hooks like <code>useState</code>.
+                React Server Components (RSC) require a specialized build of React (<code>react.react-server.js</code>) that excludes client-only hooks like <code>useState</code> and <code>useEffect</code> to ensure pure server-side execution.
               </p>
               <p>
-                Because standard CommonJS <code>require("react")</code> calls ignore Node's <code>--conditions</code> flags (which only affect ES Modules imports), Dinou intercepts Node's module loader by overriding <code>Module._resolveFilename</code>:
+                Because standard CommonJS <code>require("react")</code> calls default to loading React's client-side build in Node.js, Dinou intercepts the module resolver by overriding <code>Module._resolveFilename</code> to force the loading of server-specific files (like <code>react.react-server.js</code> and <code>react-dom.react-server.js</code>) when files are loaded via <code>require()</code>:
               </p>
 
               <div className="not-prose my-4">
