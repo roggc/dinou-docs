@@ -765,27 +765,21 @@ return context;`}</CodeBlock>
                 <p className="text-sm font-semibold mb-2">RSC Payload Execution Mapping:</p>
                 <div className="not-prose">
                   <CodeBlock language="mermaid" minWidth="800px">{`graph TD
-    Start[Client Router Request] --> RouteType{Choose RSC Route?}
+    Start[Client Router Request] --> RouteType{Choose RSC Endpoint Route}
     
-    RouteType -->|/____rsc_payload____| PayloadRoute[serveRSCPayload: isOld=false, isStatic=false]
-    RouteType -->|/____rsc_payload_static____| StaticRoute[serveRSCPayload: isOld=false, isStatic=true]
+    RouteType -->|/____rsc_payload_static____ or _old_static| StaticRoute[Static Endpoint: isStatic = true]
+    RouteType -->|/____rsc_payload____ or _old| StandardRoute[Standard Endpoint: isStatic = false]
     
-    PayloadRoute --> CheckStatic
-    StaticRoute --> CheckStatic
-    
-    CheckStatic{isStatic == true?}
-    CheckStatic -->|Yes| ReadDiskCache[Only read disk cache]
-    ReadDiskCache --> ReadDiskCacheChoice{useOld?}
+    StaticRoute --> ReadDiskCacheChoice{useOld?}
     ReadDiskCacheChoice -->|Yes| OldRscFile[Serve rsc._old.rsc]
     ReadDiskCacheChoice -->|No| RscFile[Serve rsc.rsc]
     
-    CheckStatic -->|No| CacheCheck{SSG/ISR Cache exists?}
-    CacheCheck -->|Yes| OldCheck[Check useOld logic:<br/>isOld == true?<br/>regenerating?<br/>buildId mismatch?]
-    OldCheck --> OldCheckChoice{Any true?}
+    StandardRoute --> CacheCheck{Prod SSG/ISR page & .rsc file exists?}
+    CacheCheck -->|Yes| OldCheckChoice{useOld?}
     OldCheckChoice -->|Yes| ServeOld[Serve rsc._old.rsc]
     OldCheckChoice -->|No| ServeCurrent[Serve rsc.rsc]
     
-    CacheCheck -->|No| DynamicSSR[Dynamic SSR Pipeline:<br/>validateParams<br/>getJSX<br/>renderToPipeableStream]
+    CacheCheck -->|No / Dynamic Page| DynamicSSR[Dynamic SSR Pipeline:<br/>validateParams → getJSX → renderToPipeableStream]
     
     OldRscFile --> StreamOctet[Stream: application/octet-stream]
     RscFile --> StreamOctet
@@ -849,10 +843,50 @@ return context;`}</CodeBlock>
 }`}</CodeBlock>
               </div>
 
-              <h4>1. Pre-compiled Static Cache (SSG / ISR)</h4>
+              <h4>1. Pre-compiled Static Cache (SSG / ISR) & Hydration Signals</h4>
               <p>
-                If a route is static (or not flagged as dynamic), the server attempts to load cached files from the <code>dist2/</code> folder:
+                To determine whether a request can be served directly from disk or requires dynamic server execution, <code>serveRSCPayload</code> evaluates the following condition:
               </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`if ((!isDevelopment && !dynamicState.value) || isStatic) { ... }`}</CodeBlock>
+              </div>
+
+              <h5>The Role of <code>isStatic</code> & The One-Time Hydration Signal</h5>
+              <p>
+                When a user performs a full page load (Document Request) for a static SSG or ISR page, <code>server.js</code> serves the pre-rendered <code>index.html</code> file from disk and injects a one-time hydration script into the <code>&lt;head&gt;</code>:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="html">{`<script>window.__DINOU_USE_STATIC__=true;</script>`}</CodeBlock>
+              </div>
+              <ul>
+                <li>
+                  <strong>First Hydration Fetch:</strong> During initial React client hydration, the router in <code>client.jsx</code> detects <code>window.__DINOU_USE_STATIC__ === true</code> and issues a request to <code>/____rsc_payload_static____/</code> (which sets <code>isStatic = true</code> in Express).
+                </li>
+                <li>
+                  <strong>Guaranteed Hydration Matching:</strong> Setting <code>isStatic = true</code> forces <code>serveRSCPayload</code> to bypass dynamic rendering checks and serve the exact pre-compiled <code>rsc.rsc</code> payload from disk, guaranteeing 100% hydration alignment with the served HTML.
+                </li>
+                <li>
+                  <strong>Immediate Signal Reset:</strong> Immediately after initiating the fetch, <code>client.jsx</code> resets <code>window.__DINOU_USE_STATIC__ = false</code>. This ensures that subsequent client-side SPA navigations (via <code>&lt;Link&gt;</code>) hit the standard <code>/____rsc_payload____</code> endpoint (<code>isStatic = false</code>), allowing the server to dynamically evaluate each new route.
+                </li>
+              </ul>
+
+              <h5>The <code>isDynamic</code> Map & Dynamic Bailouts</h5>
+              <p>
+                The server maintains a global Map <code>const isDynamic = new Map()</code> to track route execution modes:
+              </p>
+              <ul>
+                <li>
+                  <strong>Bailout Tracking:</strong> During build-time pre-rendering or ISR revalidation (via <code>buildStaticPages</code>, <code>generatingISG</code>, or <code>revalidating</code>), if a page invokes dynamic APIs (like <code>cookies()</code>, <code>headers()</code>, or declares <code>export const dynamic = "force-dynamic"</code>), Dinou sets <code>dynamicState.value = true</code>.
+                </li>
+                <li>
+                  <strong>Standard Endpoint Evaluation (<code>isStatic = false</code>):</strong> On SPA navigations to <code>/____rsc_payload____</code>, the server checks <code>!dynamicState.value</code>:
+                  <ul>
+                    <li>If <code>false</code> (SSG/ISR route): The server reads the cached <code>rsc.rsc</code> file directly from disk.</li>
+                    <li>If <code>true</code> (Dynamic route): The server bypasses disk cache and executes the dynamic SSR pipeline in real time.</li>
+                  </ul>
+                </li>
+              </ul>
+
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`const useOld =
   isOld ||

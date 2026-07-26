@@ -92,7 +92,7 @@ export default function Page() {
               </p>
 
               <div className="not-prose my-6">
-                <CodeBlock language="mermaid" minWidth="800px">{`sequenceDiagram
+                <CodeBlock language="mermaid" minWidth="1200px">{`sequenceDiagram
     autonumber
     actor Browser as 🌐 Browser
     box #0f172a Parent Process: server.js (CJS condition=react-server)
