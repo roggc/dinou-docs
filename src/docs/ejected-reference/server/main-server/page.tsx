@@ -115,8 +115,12 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 
               <h3>Why this is critical:</h3>
               <ul>
-                <li><strong>Prevents Memory Collisions:</strong> If standard React and React Server run in the same process, the V8 engine instantiates both simultaneously, leading to crashes during serialization.</li>
-                <li><strong>Webpack Bypassing:</strong> If you bundle using Webpack, this hook is bypassed (<code>isWebpack = true</code>) because Webpack handles compilation pathways internally and registers its own resolver registers via <code>react-server-dom-webpack/node-register</code>.</li>
+                <li>
+                  <strong>Prevents Duplicate React Builds:</strong> Ensures Node.js doesn't load both the client and server builds of React at the same time, which would corrupt React's internal state and cause crashes during rendering.
+                </li>
+                <li>
+                  <strong>Delegation in Webpack Mode:</strong> When bundling with Webpack (<code>isWebpack = true</code>), Dinou skips this manual override because it calls <code>webpackRegister()</code> (from <code>react-server-dom-webpack/node-register</code>). This official React helper automatically configures Node.js to resolve the <code>react-server</code> builds and map Client Components using Webpack's manifest.
+                </li>
               </ul>
             </section>
 
@@ -126,7 +130,10 @@ Module._resolveFilename = function (request, parent, isMain, options) {
             <section id="babel-register">
               <h2>⚙️ 2. On-the-fly Transpilation</h2>
               <p>
-                Dinou projects are authored in modern ES Modules (ESM) with TSX, JSX, and TypeScript. To run these seamlessly in Node's parent CommonJS process without an upfront compile step in development, the server registers <code>@babel/register</code>:
+                Node.js cannot natively parse TypeScript (<code>.ts</code>/<code>.tsx</code>) or JSX syntax. Instead of requiring you to pre-compile your server code into a build directory before starting Node, Dinou registers <code>@babel/register</code> at process startup.
+              </p>
+              <p>
+                This hook intercepts synchronous CommonJS <code>require()</code> calls, transpiling TypeScript, JSX brackets, and ES Modules (<code>import/export</code>) in memory on-the-fly whenever a file is loaded:
               </p>
 
               <div className="not-prose my-4">
@@ -142,64 +149,23 @@ babelRegister({
 });`}</CodeBlock>
               </div>
 
-              <h3>Why is this strictly necessary?</h3>
-              <p>
-                Without this registration block, the master server process would crash instantly. Node.js has no native capabilities to parse or execute frontend-centric configurations:
-              </p>
-              <ul>
-                <li>
-                  <strong>Sintax JSX/TSX:</strong> Node's V8 engine throws a <code>SyntaxError: Unexpected token '&lt;'</code> the moment it encounters a JSX bracket (e.g., <code>&lt;Page /&gt;</code>). Babel compiles JSX into standard, executable <code>React.createElement</code> or <code>_jsx</code> function calls.
-                </li>
-                <li>
-                  <strong>TypeScript Types:</strong> TypeScript types, interfaces, and decorators are not native to JavaScript. `@babel/register` strips TypeScript syntax in memory so the output matches pure ECMAScript.
-                </li>
-                <li>
-                  <strong>ESM-to-CommonJS Conversion:</strong> The ejected server and rendering pipeline are built on CommonJS (<code>require()</code>), whereas client component folders utilize ES Modules (<code>import/export</code>). The <code>@babel/transform-modules-commonjs</code> plugin translates ESM imports into synchronous CommonJS structures in real-time, preventing <code>Cannot use import statement outside a module</code> crashes.
-                </li>
-                <li>
-                  <strong>Zero-Build Developer Experience (JIT Compiler):</strong> By using on-the-fly require hooks instead of compiling the entire backend to a temporary folder, Dinou evaluates updated files immediately. The JIT (Just-In-Time) compilation enables instant page updates on refresh and fuels the Hot Module Replacement (HMR) process.
-                </li>
-              </ul>
 
               <h3>Babel Register vs. ESM Loader (Why both exist)</h3>
               <p>
-                Dinou employs two distinct JIT compilers to transpile JSX/TypeScript code depending on the execution thread:
+                Dinou employs two complementary JIT transpilation mechanisms because Node.js separates CommonJS loading (<code>require()</code>) from ES Module loading (<code>import()</code>):
               </p>
               <ul>
                 <li>
-                  <strong><code>@babel/register</code> (CommonJS Scope):</strong> Intercepts imports loaded synchronously via Node's native <code>require()</code>. It compiles the master Express server (<code>server.js</code>) and the child HTML compiler (<code>render-html.js</code>).
+                  <strong><code>@babel/register</code> (CommonJS Scope):</strong> Hooks into Node's synchronous <code>require()</code> pipeline. It is initialized at the top of both Node processes (<code>server.js</code> and <code>render-html.js</code>) to handle CommonJS <code>require()</code> calls for TypeScript/JSX files, CSS modules, and asset hooks.
                 </li>
                 <li>
-                  <strong><code>babel-esm-loader.js</code> (ESM Scope):</strong> Intercepts dynamic <code>import()</code> calls loaded asynchronously inside Node's native ES Module pipeline. It compiles the React Server Components (RSC) rendering graph. 
+                  <strong><code>babel-esm-loader.js</code> (ESM Scope):</strong> Loaded via Node's <code>--import ./dinou/core/register-loader.mjs</code> startup flag in both processes. It intercepts dynamic <code>import()</code> calls loaded asynchronously inside Node's native ES Module pipeline, powering React Server Components (RSC) and mapping Client Component references onto the Flight stream.
                 </li>
               </ul>
               <p>
-                <strong>The Critical Role of the ESM Loader in RSC:</strong> When executing Server Components, Node loads files natively as ES Modules. If it imports a component marked with <code>"use client"</code>, the ESM Loader intercepts the request, discards the client-only JS body, and registers a client reference stub (via <code>registerClientReference</code>) to map the component onto the Flight stream. This prevents Node from executing browser-specific codes (like <code>useState</code>) that would crash the server.
+                <strong>The Critical Role of the ESM Loader in RSC:</strong> When executing Server Components, Node loads files natively as ES Modules. If it imports a component marked with <code>"use client"</code>, the ESM Loader intercepts the request, discards the client-only JS body, and registers a client reference stub (via <code>registerClientReference</code>) to map the component onto the Flight stream. This prevents Node from executing browser-specific code (like <code>useState</code>) that would crash the server.
               </p>
 
-              <h4>What happens if we remove <code>@babel/register</code>?</h4>
-              <p>
-                Even though Dinou has the <code>babel-esm-loader.js</code> active, removing the <code>@babel/register</code> block would cause the master server process to crash instantly. This is because Node's ESM Loader operates in a separate thread and <strong>has no control over the CommonJS <code>require()</code> pipeline</strong>:
-              </p>
-              <ul>
-                <li>
-                  <strong>Extension Resolution Failure:</strong> When <code>server.js</code> attempts to load user page files or parameter validators (such as <code>page_functions.ts</code>), Node's native CommonJS loader will fail to resolve the path because it does not recognize <code>.ts</code>, <code>.tsx</code>, or <code>.jsx</code> extension layouts by default.
-                </li>
-                <li>
-                  <strong>Syntax Crash:</strong> Even if path resolution succeeded, Node's V8 compiler would parse the TSX bracket layouts or TypeScript types as raw JavaScript. This throws immediate syntax errors like <code>SyntaxError: Unexpected token '&lt;'</code> or <code>SyntaxError: Unexpected token ':'</code> and halts the server.
-                </li>
-                <li>
-                  <strong>Child Process Isolation Crash:</strong> The child HTML compiler (<code>render-html.js</code>) is spawned as a CommonJS script. Without <code>@babel/register</code> initialized at startup, it cannot import any of the user's React 19 layout or page components to stream the initial HTML.
-                </li>
-              </ul>
-
-              <Alert className="my-4 not-prose">
-                <Zap className="h-4 w-4 text-amber-500" />
-                <AlertTitle>Babel Configuration Tuning</AlertTitle>
-                <AlertDescription>
-                  If you want to add custom Babel plugins (such as decorators or experimental syntax support), you can append them to this <code>babelRegister</code> object in your ejected server file.
-                </AlertDescription>
-              </Alert>
             </section>
 
             <hr className="my-8" />
@@ -226,14 +192,14 @@ babelRegister({
 
             {/* 4. DEV HMR & CACHE EVICTION */}
             <section id="hmr-engine">
-              <h2>🔄 4. Dev HMR & Cache Eviction</h2>
+              <h2>🔄 4. Dev HMR Engine & Manifest-Driven Cache Eviction</h2>
               <p>
-                In development, when you edit a React Component, the bundler (Rollup/Esbuild or Webpack) updates the client build and outputs a metadata mapping file called <code>react-client-manifest.json</code>.
+                During development, when you edit components or toggle the <code>"use client"</code> directive, Dinou automatically updates Node.js's in-memory cache without needing a server restart.
               </p>
 
               <h3>What is the Client Manifest?</h3>
               <p>
-                The client manifest is a JSON map generated by the bundler that links absolute source file locations to the compiled public asset assets served to the browser:
+                The client manifest is a JSON metadata map (<code>react-client-manifest.json</code>) generated by the bundler (esbuild, Rollup, or Webpack) that lists all components marked with <code>"use client"</code>:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="json">{`{
@@ -245,21 +211,17 @@ babelRegister({
 }`}</CodeBlock>
               </div>
 
-              <h3>Why does the Server Watch the Manifest?</h3>
+              <h3>1. Manifest Watching & Boundary Transitions</h3>
               <p>
-                The server monitors the manifest file for two critical reasons:
+                The server uses <code>chokidar</code> to watch the manifest file. When you add or remove <code>"use client"</code> in a file, the component transitions between a <strong>Server Component</strong> and a <strong>Client Component</strong>, causing the bundler to update the manifest.
               </p>
-              <ul>
-                <li>
-                  <strong>RSC Boundary Detection:</strong> When rendering React Server Components on the server, React Server DOM consults this manifest. If an imported component path exists in the JSON, React knows it is a Client Component (marked with <code>"use client"</code>). React skips executing its JS body in Node.js (preventing crashes from window/state references) and writes a client reference link to the Flight stream.
-                </li>
-                <li>
-                  <strong>HMR Compilation Signalling:</strong> Instead of watching thousands of <code>.tsx</code> files, the server watches the manifest folder. When <code>react-client-manifest.json</code> updates, it serves as a "build complete" signal. The server immediately wakes up to evict outdated modules from Node's cache.
-                </li>
-              </ul>
-
               <p>
-                However, Node.js permanently caches modules loaded via <code>require()</code>. To ensure the parent server picks up your changes instantly without a process restart, <code>server.js</code> sets up a file watcher using <code>chokidar</code>:
+                When Chokidar detects a manifest change, <code>server.js</code> diffs the new manifest keys against the previous ones to identify which files changed boundaries and immediately invalidates their cache.
+              </p>
+
+              <h3>2. Recursive Cache Eviction (<code>clearRequireCache</code>)</h3>
+              <p>
+                Node.js permanently caches modules loaded via <code>require()</code> in <code>require.cache</code>. Deleting only the modified child file from <code>require.cache</code> is not enough because parent layouts and pages in <code>src/</code> still retain references to the old module in memory.
               </p>
 
               <div className="not-prose my-4">
@@ -272,7 +234,7 @@ babelRegister({
     if (require.cache[resolved]) {
       delete require.cache[resolved]; // Remove from Node's cache
 
-      // Recursively evict parents in src/ to ensure updates cascade upwards
+      // Recursively evict parents in src/ so updates propagate upwards
       const parents = getParents(resolved);
       for (const parent of parents) {
         if (parent.startsWith(path.resolve(process.cwd(), "src"))) {
@@ -284,31 +246,14 @@ babelRegister({
 }`}</CodeBlock>
               </div>
 
-              <h3>HMR Mechanics & Chokidar's Role:</h3>
-              <ol>
-                <li>
-                  <strong>High-Performance File Watching:</strong> <code>chokidar.watch()</code> is configured to monitor <code>react_client_manifest/</code> (or Webpack's output folder). It triggers the <code>onManifestChange()</code> callback immediately when the bundler finishes compiling changes and writes the updated manifest file to disk.
-                </li>
-                <li>
-                  <strong>Write-Concurrency Guard (Read Retries):</strong> Because Chokidar events can fire while the bundler is still writing bytes to disk (which would result in an empty JSON read error), the server wraps manifest reading inside <code>loadManifestWithRetry()</code> and <code>readJSONWithRetry()</code>. 
-                  <ul>
-                    <li><code>loadManifestWithRetry()</code>: Bounded to startup, attempting up to 10 reads with 100ms async delays.</li>
-                    <li><code>readJSONWithRetry()</code>: Runs during active requests, executing up to 4 fast attempts using <strong><code>Atomics.wait</code></strong> over a SharedArrayBuffer to perform microsecond-level síncrona pauses without clogging the event loop.</li>
-                  </ul>
-                </li>
-                <li>
-                  <strong>Dependency Diffing:</strong> When a valid new manifest is loaded, Dinou compares its module keys with the cached <code>currentManifest</code> version. Any added or removed module keys represent boundaries that have shifted from server rendering to client hydration.
-                </li>
-                <li>
-                  <strong>Recursive Node Cache Eviction (<code>clearRequireCache</code>):</strong> Since Node's native module loader permanently caches evaluated JavaScript files in <code>require.cache</code>, subsequent browser requests would read the stale cached values. Dinou solves this by:
-                  <ul>
-                    <li>Evicting the target file path via <code>delete require.cache[resolvedPath]</code>.</li>
-                    <li>
-                      <strong>Parent Propagation (HMR Bubbling):</strong> Using a custom helper (<code>getParents()</code>), it scans <code>require.cache</code> to identify all parent modules importing the modified code and sweeps them recursively. The sweep is bounded strictly to modules residing in the project's <code>src/</code> directory for system safety.
-                    </li>
-                  </ul>
-                </li>
-              </ol>
+              <p>
+                <code>clearRequireCache</code> removes the modified file from Node's cache and uses <code>getParents()</code> to recursively evict all parent modules inside <code>src/</code>. On the next HTTP request, Node re-evaluates the entire component hierarchy with fresh code.
+              </p>
+
+              <h3>3. I/O Race Condition Prevention</h3>
+              <p>
+                Because file system change events can trigger while the bundler is still writing to disk, <code>server.js</code> wraps manifest reads in retry mechanisms (<code>loadManifestWithRetry</code> and <code>readJSONWithRetry</code> using <code>Atomics.wait</code>). This prevents <code>JSON.parse</code> crashes caused by reading empty or incomplete files.
+              </p>
             </section>
 
             <hr className="my-8" />
