@@ -25,28 +25,38 @@ export function Mermaid({ chart, minWidth }: MermaidProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    const id = `mermaid-id-${Math.random().toString(36).substring(2, 9)}`;
+
     if (ref.current) {
-      ref.current.removeAttribute("data-processed");
-      try {
-        mermaid.contentLoaded();
-      } catch (err) {
-        console.error("[Mermaid Render Error]:", err);
-      }
+      ref.current.innerHTML = "";
+      mermaid
+        .render(id, chart)
+        .then(({ svg }) => {
+          if (isMounted && ref.current) {
+            ref.current.innerHTML = svg;
+          }
+        })
+        .catch((err) => {
+          console.error("[Mermaid Render Error]:", err);
+        });
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [chart]);
 
   return (
     <div className="my-6 p-4 rounded-xl bg-slate-900/40 border border-slate-800/80 shadow-inner overflow-x-auto max-w-full">
       <div 
-        className="mermaid mx-auto text-center" 
+        className="mx-auto text-center" 
         style={{
           width: "max-content",
           minWidth: minWidth || undefined,
         }}
         ref={ref}
-      >
-        {chart}
-      </div>
+      />
     </div>
   );
 }
