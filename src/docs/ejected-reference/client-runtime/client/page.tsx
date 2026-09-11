@@ -14,14 +14,13 @@ const tocItems = [
   { id: "webpack-variant", title: "📦 Webpack Variant (client-webpack.jsx)", level: 2 },
 ];
 
-const CLIENT_STRUCTURE_DIAGRAM = `graph TD
-    subgraph Client.jsx Code Structure
-        Imports[1. Imports & Core Modules<br/>React hooks, hydrateRoot, RouterContext, resolveUrl/isExternalUrl, serverFunctionProxy<br/>ESM vs Webpack client libraries]
-        GlobalState[2. Global Module State & Variables<br/>cache: Cache map for RSC payload promises<br/>scrollCache: Map storing vertical scroll position coordinates<br/>getCurrentRoute: Helper returning path & query]
-        Helpers[3. Pure Helper Functions<br/>isHashChangeOnly: Detects hash navigation<br/>getRSCPayload: Fetches RSC stream, handles redirects<br/>getErrorRSCPayload: POST to fetch error layout flight stream]
-        ErrorBound[4. ErrorBoundary Component<br/>Catches client-side rendering exceptions<br/>Renders styled traceback overlay or message]
-        RouterComp[5. Router Component & Hydration Entry<br/>useState trackers: route, isPopState, version, navError<br/>navigate: startTransition SPA transition enforcer<br/>popstate / click listeners, scroll restoration<br/>hydrateRoot entry point]
-    end
+const CLIENT_STRUCTURE_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Imports["1. Imports & Core Modules<br/>(React hooks, hydrateRoot, RouterContext & serverFunctionProxy)"]
+    GlobalState["2. Global Module State & Cache<br/>(RSC payload cache map & scroll coordinate history)"]
+    Helpers["3. Pure Helper Functions<br/>(isHashChangeOnly, getRSCPayload & getErrorRSCPayload)"]
+    ErrorBound["4. ErrorBoundary Component<br/>(Catches client-side exceptions & renders error overlay)"]
+    RouterComp["5. Router Component & Hydration Entry<br/>(SPA navigation, popstate listener & hydrateRoot mount)"]
     
     Imports --> GlobalState
     GlobalState --> Helpers
@@ -201,7 +200,7 @@ export default function Page() {
                 The file defines helper cache stores, RSC fetch wrappers, and the hydration entry:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="1200px">{CLIENT_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="550px">{CLIENT_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
