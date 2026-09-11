@@ -12,15 +12,17 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const UTILS_DIAGRAM = `graph TD
-    Start[normalizePathCase path] --> WinCheck{Are we on Windows OS?}
-    WinCheck -->|Yes| LetterCheck{Starts with drive letter? e.g. C:}
-    WinCheck -->|No| ReturnAsIs[Return path as-is]
+const UTILS_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["normalizePathCase(path)<br/>(Entry function call)"] --> WinCheck{"Platform is Windows?<br/>(process.platform === 'win32')"}
     
-    LetterCheck -->|Yes| Lowercase[Convert letter to lowercase e.g. c:]
-    LetterCheck -->|No| ReturnAsIs
+    WinCheck -->|"Yes"| LetterCheck{"Has Drive Letter?<br/>(e.g. C: or D:)"}
+    WinCheck -->|"No"| ReturnAsIs["Return Path As-Is<br/>(POSIX / Linux path unmodified)"]
     
-    Lowercase --> ReturnPath[Return normalized path]
+    LetterCheck -->|"Yes"| Lowercase["Normalize Drive Letter<br/>(Convert letter to lowercase e.g. c:)"]
+    LetterCheck -->|"No"| ReturnAsIs
+    
+    Lowercase --> ReturnPath["Return Normalized Path<br/>(Consistent casing for VFS & cache)"]
     ReturnAsIs --> ReturnPath`;
 
 const UTILS_CODE = `function normalizePathCase(p) {
@@ -81,7 +83,7 @@ export default function Page() {
                 The flowchart below shows how path drive letters are evaluated and normalized:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{UTILS_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="650px">{UTILS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
