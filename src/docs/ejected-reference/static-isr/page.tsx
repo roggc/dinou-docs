@@ -15,20 +15,21 @@ const tocItems = [
   { id: "customizations", title: "🛠️ Common Tweak Recipes", level: 2 },
 ];
 
-const SWR_LIFECYCLE_DIAGRAM = `graph TD
-    Start["Browser Request: GET /route"] --> CacheCheck{"Exists in Cache?"}
+const SWR_LIFECYCLE_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["Browser Request: GET /route<br/>(Incoming HTTP request)"] --> CacheCheck{"Exists in Cache?<br/>(Check disk static files)"}
     
-    CacheCheck -->|"Yes"| ServeCache["Serve index.html instantly"]
-    ServeCache --> ExpCheck{"Is Cache Expired?"}
+    CacheCheck -->|"Yes"| ServeCache["Serve Cached Static HTML<br/>(Immediate response to client)"]
+    ServeCache --> ExpCheck{"Is Cache Expired?<br/>(Check revalidate timestamp)"}
     
-    ExpCheck -->|"No"| Done["Done"]
-    ExpCheck -->|"Yes"| Reval["revalidating(reqPath)"]
+    ExpCheck -->|"No"| Done["Cache is Fresh<br/>(No background regeneration needed)"]
+    ExpCheck -->|"Yes"| Reval["revalidating(reqPath)<br/>(Trigger background worker)"]
     
-    Reval --> LockCheck{"Already Build-Locked?"}
-    LockCheck -->|"Yes"| Skip["Skip / Wait"]
-    LockCheck -->|"No"| BuildBackground["1. Set Lock<br/>2. Run background build<br/>3. Commit pages via safeRename<br/>4. Release Lock"]
+    Reval --> LockCheck{"Already Build-Locked?<br/>(Prevent concurrent rebuilds)"}
+    LockCheck -->|"Yes"| Skip["Skip Regeneration<br/>(Rebuild already in progress)"]
+    LockCheck -->|"No"| BuildBackground["Background Build Pipeline<br/>(Compile RSC, HTML & safeRename)"]
     
-    CacheCheck -->|"No"| ISG["ISG Engine: Generate, Cache, and Serve"]`;
+    CacheCheck -->|"No"| ISG["ISG On-Demand Engine<br/>(Compile, cache, and serve dynamic route)"]`;
 
 export default function Page() {
   return (
@@ -238,7 +239,7 @@ function revalidating(reqPath, isDynamicFromServer) {
               </p>
 
               <div className="not-prose my-6">
-                <CodeBlock language="mermaid" minWidth="600px">{SWR_LIFECYCLE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="850px">{SWR_LIFECYCLE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
