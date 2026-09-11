@@ -18,6 +18,7 @@ import {
   RefreshCw,
   Sparkles,
   BookOpen,
+  Info,
 } from "lucide-react";
 
 const tocItems = [
@@ -40,6 +41,18 @@ export default function Page() {
             <p className="text-xl text-muted-foreground leading-relaxed">
               Explore the comprehensive, file-by-file documentation of the ejected Dinou framework. Modify and extend everything from the server pipeline to bundler settings.
             </p>
+          </div>
+
+          <div className="border border-blue-500/20 bg-blue-50/40 dark:bg-blue-950/10 rounded-xl p-4 mb-6 not-prose flex items-start gap-3">
+            <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+            <div className="text-sm space-y-1">
+              <p className="font-semibold text-blue-900 dark:text-blue-300">
+                Internal Architecture & Ejected Reference
+              </p>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                This section is designed to explain the code generated after running <code>npm run eject</code> and explore what happens under the hood. <strong>Standard Dinou applications work out of the box in production without needing to configure or understand these internal files.</strong>
+              </p>
+            </div>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">

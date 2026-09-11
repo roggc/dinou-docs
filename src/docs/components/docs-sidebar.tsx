@@ -45,9 +45,11 @@ import {
   FolderTree,
   Terminal,
   Compass,
+  ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
 
-const navigation = [
+const docsNavigation = [
   {
     title: "Getting Started",
     items: [
@@ -238,6 +240,9 @@ const navigation = [
       },
     ],
   },
+];
+
+const ejectedNavigation = [
   {
     title: "Ejected Reference",
     items: [
@@ -571,6 +576,9 @@ export function DocsSidebar() {
   const { setOpenMobile } = useSidebar();
   const prevPathname = useRef(pathname);
 
+  const isEjected = pathname.startsWith("/docs/ejected-reference");
+  const activeNavigation = isEjected ? ejectedNavigation : docsNavigation;
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -586,7 +594,46 @@ export function DocsSidebar() {
   return (
     <Sidebar className="border-r fixed left-0 top-0 h-full z-30">
       <SidebarContent className="scrollbar-thin md:pt-14">
-        {navigation.map((section) => (
+        {/* Mobile segmented switcher */}
+        <div className="px-3 pt-3 pb-1 sm:hidden">
+          <div className="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+            <Link
+              href="/docs"
+              className={`flex-1 text-center py-1.5 text-xs font-medium rounded-md transition-colors ${
+                !isEjected
+                  ? "bg-white dark:bg-slate-800 text-foreground font-semibold shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Docs
+            </Link>
+            <Link
+              href="/docs/ejected-reference"
+              className={`flex-1 text-center py-1.5 text-xs font-medium rounded-md transition-colors ${
+                isEjected
+                  ? "bg-white dark:bg-slate-800 text-foreground font-semibold shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Ejected Ref
+            </Link>
+          </div>
+        </div>
+
+        {/* Ejected mode back button */}
+        {isEjected && (
+          <div className="px-3 pt-3 pb-1">
+            <Link
+              href="/docs"
+              className="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg text-slate-600 dark:text-slate-400 hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200/80 dark:border-slate-800"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span>Back to Documentation</span>
+            </Link>
+          </div>
+        )}
+
+        {activeNavigation.map((section) => (
           <SidebarGroup key={section.title}>
             <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -636,6 +683,28 @@ export function DocsSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+
+        {/* In Docs mode: Card inviting to Ejected Reference */}
+        {!isEjected && (
+          <div className="p-3 mt-4 mb-2">
+            <div className="rounded-xl border border-amber-500/20 bg-amber-50/40 dark:bg-amber-950/10 p-3 space-y-2">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                <Plug className="h-3.5 w-3.5" />
+                <span>Ejected Code?</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Explore the complete reference of architecture and plugins generated after running <code>npm run eject</code>.
+              </p>
+              <Link
+                href="/docs/ejected-reference"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline pt-1"
+              >
+                <span>Ejected Reference</span>
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+          </div>
+        )}
       </SidebarContent>
     </Sidebar>
   );
