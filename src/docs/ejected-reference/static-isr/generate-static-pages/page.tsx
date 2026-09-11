@@ -12,14 +12,15 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const PAGES_PIPELINE_DIAGRAM = `graph TD
-    Start["generateStaticPages(routes)"] --> LoopRoutes["Loop: For each route of routes"]
-    LoopRoutes --> MockCtx["Inject mock Express req/res context"]
-    MockCtx --> RenderApp["renderAppToHtml(context, mockRes):<br/>Renders page component stream"]
-    RenderApp --> ProcessMeta["processMetadata(capturedStatus, headers):<br/>Resolves side-effect cookies/redirects"]
-    ProcessMeta --> WriteHTML["Write HTML directly to disk:<br/>dist2/[route]/index.html"]
-    WriteHTML --> WriteMeta["Write metadata.json:<br/>{ generatedAt, tags, revalidate }"]
-    WriteMeta --> UpdateStatus["updateStatus(route, status):<br/>Synchronizes in-memory status manifest"]`;
+const PAGES_PIPELINE_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["generateStaticPages(routes)<br/>(Entry function call for batch routes)"] --> LoopRoutes["Sequential Route Loop<br/>(Processes each route path iteratively)"]
+    LoopRoutes --> MockCtx["Inject Mock Express Context<br/>(Simulates req/res headers and cookies)"]
+    MockCtx --> RenderApp["Execute renderAppToHtml()<br/>(Renders page component HTML stream)"]
+    RenderApp --> ProcessMeta["Resolve Side-Effects: processMetadata()<br/>(Extracts cookies, redirects and headers)"]
+    ProcessMeta --> WriteHTML["Write HTML Directly to Disk<br/>(Pipes output to dist2/route/index.html)"]
+    WriteHTML --> WriteMeta["Generate metadata.json<br/>(Saves generatedAt, tags, revalidate)"]
+    WriteMeta --> UpdateStatus["Synchronize Status Manifest<br/>(Calls updateStatus to track in-memory state)"]`;
 
 const PAGES_PIPELINE_CODE = `// generate-static-pages.js
 const path = require("path");
@@ -189,7 +190,7 @@ export default function Page() {
                 The flowchart below shows how routes are processed through the bulk HTML generation pipeline:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{PAGES_PIPELINE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="450px">{PAGES_PIPELINE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
