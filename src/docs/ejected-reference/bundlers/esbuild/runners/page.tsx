@@ -13,24 +13,26 @@ const tocItems = [
   { id: "code-dev", title: "⚙️ dev.mjs Code Walkthrough", level: 2 },
 ];
 
-const BUILD_DIAGRAM = `graph TD
-    Start[build.mjs Production] --> Clear[Clear Output Dirs dist3, manifests folders]
-    Clear --> Crawl[getEsbuildEntries Crawl client & CSS pages]
-    Crawl --> MapEntries[Orchestrate Entrypoints Map]
-    MapEntries --> RunBuild[esbuild.build Configs from prod helper]`;
+const BUILD_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["build.mjs Production"] --> Clear["Clear Output Dirs dist3, manifests folders"]
+    Clear --> Crawl["getEsbuildEntries Crawl client & CSS pages"]
+    Crawl --> MapEntries["Orchestrate Entrypoints Map"]
+    MapEntries --> RunBuild["esbuild.build Configs from prod helper"]`;
 
-const DEV_DIAGRAM = `graph TD
-    Start[dev.mjs Development Run] --> Clear[Clear Output Dirs public folder]
-    Clear --> Watcher[chokidar.watch src Ready]
-    Watcher --> Ctx[createEsbuildContext esbuild.context + ctx.watch]
-    Ctx --> Monitor[Monitor file changes]
+const DEV_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["dev.mjs Development Run"] --> Clear["Clear Output Dirs public folder"]
+    Clear --> Watcher["chokidar.watch src Ready"]
+    Watcher --> Ctx["createEsbuildContext esbuild.context + ctx.watch"]
+    Ctx --> Monitor["Monitor file changes"]
     
-    Monitor --> Changes{Type of Change?}
-    Changes -->|File Add/Delete| AddDelete[getEsbuildEntries & recreate context & broadcast reload]
-    Changes -->|Client Component Edit| ClientEdit[Add to changedIds & HMR push update]
-    Changes -->|Server Action Edit| ServerEdit[Ignore refresh]
+    Monitor --> Changes{"Type of Change?"}
+    Changes -->|File Add/Delete| AddDelete["getEsbuildEntries & recreate context & broadcast reload"]
+    Changes -->|Client Component Edit| ClientEdit["Add to changedIds & HMR push update"]
+    Changes -->|Server Action Edit| ServerEdit["Ignore refresh"]
     
-    AddDelete --> LiveUpdate[Live Update Browser]
+    AddDelete --> LiveUpdate["Live Update Browser"]
     ClientEdit --> LiveUpdate
     ServerEdit --> LiveUpdate`;
 
@@ -321,7 +323,7 @@ export default function Page() {
                 The flowchart below traces the production build pipeline:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{BUILD_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="600px">{BUILD_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -334,7 +336,7 @@ export default function Page() {
                 The flowchart below shows how development changes trigger recompilation or HMR updates:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="800px">{DEV_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1100px">{DEV_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
