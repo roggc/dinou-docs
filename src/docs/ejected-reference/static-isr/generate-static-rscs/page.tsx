@@ -12,14 +12,15 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const RSCS_PIPELINE_DIAGRAM = `graph TD
-    Start["generateStaticRSCs(routes)"] --> ReadManifest["Read React Client Manifest:<br/>react-client-manifest.json"]
-    ReadManifest --> LoopRoutes["Loop: For each route of routes"]
-    LoopRoutes --> MockContext["Inject mock Express req/res context"]
-    MockContext --> RunALS["requestStorage.run(mockContext, ...)"]
-    RunALS --> LoadJSX["getJSX(finalReqPath):<br/>Loads React Server Component tree"]
-    LoadJSX --> Stream["renderToPipeableStream:<br/>Serializes component tree"]
-    Stream --> WriteRSC["Write directly to target:<br/>dist2/[route]/rsc.rsc"]`;
+const RSCS_PIPELINE_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["generateStaticRSCs(routes)<br/>(Entry function call for bulk routes)"] --> ReadManifest["Load React Client Manifest<br/>(Reads react-client-manifest.json)"]
+    ReadManifest --> LoopRoutes["Iterate Crawled Routes<br/>(Sequential loop over static routes array)"]
+    LoopRoutes --> MockContext["Inject Mock Express Context<br/>(Simulate req/res, cookies and headers)"]
+    MockContext --> RunALS["Bind AsyncLocalStorage Context<br/>(requestStorage.run wraps execution)"]
+    RunALS --> LoadJSX["Load Component Tree: getJSX()<br/>(Evaluates layout & page server components)"]
+    LoadJSX --> Stream["Serialize Via renderToPipeableStream<br/>(React Server DOM Flight binary stream)"]
+    Stream --> WriteRSC["Write Payload Directly to Target<br/>(Saves stream to dist2/route/rsc.rsc)"]`;
 
 const RSCS_PIPELINE_CODE = `const fs = require("fs");
 const path = require("path");
@@ -169,7 +170,7 @@ export default function Page() {
                 The flowchart below shows how routes are processed through the bulk serialization pipeline:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{RSCS_PIPELINE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="450px">{RSCS_PIPELINE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
