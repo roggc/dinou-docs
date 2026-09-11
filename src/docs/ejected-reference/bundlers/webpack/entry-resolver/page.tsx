@@ -10,20 +10,21 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const ENTRY_RESOLVER_DIAGRAM = `graph TD
-    Start[getCSSEntries] --> Scan[Crawl src/ for JS/TS/CSS components]
-    Scan --> LoopFiles[Loop project files]
-    LoopFiles --> CheckClient{Is Client Component?}
+const ENTRY_RESOLVER_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '18px' }}}%%
+graph TD
+    Start["getCSSEntries"] --> Scan["Crawl src/ for JS/TS/CSS components"]
+    Scan --> LoopFiles["Loop project files"]
+    LoopFiles --> CheckClient{"Is Client Component?"}
     
-    CheckClient -->|Yes| RegisterClient[Add to detectedClientEntries & extract imports recursively]
-    CheckClient -->|No| CheckPage{Is Page or Layout?}
+    CheckClient -->|Yes| RegisterClient["Add to detectedClientEntries & extract imports recursively"]
+    CheckClient -->|No| CheckPage{"Is Page or Layout?"}
     
-    CheckPage -->|Yes| RecurseCSS[Extract imports recursively to gather CSS stylesheets]
-    CheckPage -->|No| Skip[Skip file]
+    CheckPage -->|Yes| RecurseCSS["Extract imports recursively to gather CSS stylesheets"]
+    CheckPage -->|No| Skip["Skip file"]
     
-    RegisterClient --> ComputeHash[Hash absolute paths for output stability]
+    RegisterClient --> ComputeHash["Hash absolute paths for output stability"]
     RecurseCSS --> ComputeHash
-    ComputeHash --> Return[Return detectedCSSEntries & detectedClientEntries]`;
+    ComputeHash --> Return["Return detectedCSSEntries & detectedClientEntries"]`;
 
 const RESOLVER_CODE = `const { readFileSync } = require("fs");
 const path = require("node:path");
@@ -272,7 +273,7 @@ export default function Page() {
                 The flowchart below shows how directories are scanned and input components are mapped recursively:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="650px">{ENTRY_RESOLVER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1200px">{ENTRY_RESOLVER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
