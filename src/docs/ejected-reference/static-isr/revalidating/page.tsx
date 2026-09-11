@@ -14,18 +14,19 @@ const tocItems = [
   { id: "stale-backup", title: "💾 Backup & Double-buffer Commit", level: 2 },
 ];
 
-const ISR_LIFECYCLE_DIAGRAM = `graph TD
-    Start["🌐 Browser GET Request"] --> CacheCheck{"Exists in Cache?"}
+const ISR_LIFECYCLE_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["Browser Request: GET /route<br/>(Incoming client request)"] --> CacheCheck{"Exists in Cache?<br/>(Check dist2 static files)"}
     
-    CacheCheck -->|"No"| RenderDynamic["Render dynamically from Server"]
-    CacheCheck -->|"Yes"| ServeHTML["Serve index.html (Instant Load)"]
+    CacheCheck -->|"No"| RenderDynamic["Render Dynamically<br/>(Standard SSR on server)"]
+    CacheCheck -->|"Yes"| ServeHTML["Serve index.html<br/>(Instant static response)"]
     
-    ServeHTML --> ExpiryCheck{"Verify Expiration:<br/>Date.now() > generatedAt + revalidate?"}
-    ExpiryCheck -->|"No"| Done["Done / Stop"]
-    ExpiryCheck -->|"Yes"| LockCheck{"Mutex Lock Active?"}
+    ServeHTML --> ExpiryCheck{"Verify Expiration?<br/>(Date.now() > generatedAt + revalidate)"}
+    ExpiryCheck -->|"No"| Done["Done / Stop<br/>(Cache still fresh)"]
+    ExpiryCheck -->|"Yes"| LockCheck{"Mutex Lock Active?<br/>(Check regenerating Set pool)"}
     
-    LockCheck -->|"Yes"| Skip["Skip / Wait"]
-    LockCheck -->|"No"| RunReval["1. Set Lock<br/>2. Back up Stale Files<br/>3. Compile new payloads<br/>4. Commit via safeRename<br/>5. Release Lock"]`;
+    LockCheck -->|"Yes"| Skip["Skip / Wait<br/>(Another worker is compiling)"]
+    LockCheck -->|"No"| RunReval["Background Revalidation Pipeline<br/>(Lock, backup stale, compile RSC/HTML & safeRename)"]`;
 
 const REVALIDATING_CODE = `const path = require("path");
 const fs = require("fs").promises;
@@ -165,7 +166,7 @@ export default function Page() {
                 The flowchart below shows how checks are run in parallel to the user response loop to trigger background builds:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="700px">{ISR_LIFECYCLE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="950px">{ISR_LIFECYCLE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
