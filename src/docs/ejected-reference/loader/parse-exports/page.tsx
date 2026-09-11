@@ -12,21 +12,22 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const PARSER_DIAGRAM = `graph TD
-    Start[parseExports code] --> Babel[Babel Parser parse AST]
-    Babel --> Traverse[Traverse AST Nodes]
+const PARSER_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '18px' }}}%%
+graph TD
+    Start["parseExports(code)<br/>(Entry function call)"] --> Babel["Babel Parser<br/>(Parses code to AST with TS & JSX plugins)"]
+    Babel --> Traverse["Traverse AST Nodes<br/>(Walks AST via @babel/traverse)"]
     
-    Traverse --> DefaultCheck{ExportDefaultDeclaration?}
-    DefaultCheck -->|Yes| DefaultAdd[Add 'default' to exports list]
+    Traverse --> DefaultCheck{"ExportDefaultDeclaration?<br/>(Check for default exports)"}
+    DefaultCheck -->|"Yes"| DefaultAdd["Add 'default' Identifier<br/>(exports.add('default'))"]
     
-    Traverse --> NamedCheck{ExportNamedDeclaration?}
-    NamedCheck -->|Yes| TypeCheck{Declaration Type}
+    Traverse --> NamedCheck{"ExportNamedDeclaration?<br/>(Check for named exports)"}
+    NamedCheck -->|"Yes"| TypeCheck{"Inspect Declaration Type<br/>(declaration or specifiers)"}
     
-    TypeCheck -->|Function/Class| FnClass[Add identifier name]
-    TypeCheck -->|Variable| Var[Loop variable identifiers]
-    TypeCheck -->|Specifiers| Spec[Loop export specifiers]
+    TypeCheck -->|"Function/Class"| FnClass["Function or Class<br/>(exports.add(node.id.name))"]
+    TypeCheck -->|"Variable"| Var["Variable Declaration<br/>(Iterate declarations & add names)"]
+    TypeCheck -->|"Specifiers"| Spec["Export Specifiers<br/>(Iterate specifiers & add exported names)"]
     
-    DefaultAdd --> ReturnArray[Return unique exports array]
+    DefaultAdd --> ReturnArray["Return Array<br/>(Array.from(exports))"]
     FnClass --> ReturnArray
     Var --> ReturnArray
     Spec --> ReturnArray`;
@@ -124,7 +125,7 @@ export default function Page() {
                 The flowchart below shows how different export structures are traversed and collected:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="800px">{PARSER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1300px">{PARSER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

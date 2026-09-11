@@ -12,27 +12,28 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const RESOLVER_DIAGRAM = `graph TD
-    Start[getAbsPathWithExt specifier] --> AliasCheck{Does it match tsconfig alias?}
-    AliasCheck -->|Yes| ResolveAlias[Map alias path to absolute directory]
-    AliasCheck -->|No| RelCheck{Is relative path?}
+const RESOLVER_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["getAbsPathWithExt(specifier)<br/>(Entry function call)"] --> AliasCheck{"Does it match tsconfig alias?<br/>(Check paths mapping)"}
+    AliasCheck -->|"Yes"| ResolveAlias["Resolve Tsconfig Alias<br/>(Map alias path to absolute directory)"]
+    AliasCheck -->|"No"| RelCheck{"Is relative path?<br/>(Starts with ./ or ../)"}
     
-    RelCheck -->|Yes| ResolveRel[Resolve relative to parentURL directory]
-    RelCheck -->|No| ReturnEmpty[Return specifier as-is]
+    RelCheck -->|"Yes"| ResolveRel["Resolve Relative Path<br/>(Relative to parentURL directory)"]
+    RelCheck -->|"No"| ReturnEmpty["Return specifier as-is<br/>(External package / Bare import)"]
 
-    ResolveAlias --> ExistCheck{Does exact file exist?}
+    ResolveAlias --> ExistCheck{"Does exact file exist?<br/>(fs.existsSync check)"}
     ResolveRel --> ExistCheck
 
-    ExistCheck -->|Yes| ReturnPath[Return absolute path]
-    ExistCheck -->|No| LoopExt[Try extensions: .js, .ts, .jsx, .tsx]
-    LoopExt --> ExtExistCheck{Found matched file?}
+    ExistCheck -->|"Yes"| ReturnPath["Return Absolute Path<br/>(Exact file found directly)"]
+    ExistCheck -->|"No"| LoopExt["Probe File Extensions<br/>(Try: .js, .ts, .jsx, .tsx)"]
+    LoopExt --> ExtExistCheck{"Found matched file?<br/>(Extension candidate exists)"}
     
-    ExtExistCheck -->|Yes| ReturnPathWithExt[Return absolute path with extension]
-    ExtExistCheck -->|No| TryIndex[Try appending index files: /index.js, /index.tsx, etc.]
-    TryIndex --> IndexExistCheck{Found index file?}
+    ExtExistCheck -->|"Yes"| ReturnPathWithExt["Return Path With Extension<br/>(Resolved candidate path)"]
+    ExtExistCheck -->|"No"| TryIndex["Probe Directory Indexes<br/>(Try: /index.js, /index.tsx, etc.)"]
+    TryIndex --> IndexExistCheck{"Found index file?<br/>(Index candidate exists)"}
     
-    IndexExistCheck -->|Yes| ReturnIndexPath[Return absolute index path]
-    IndexExistCheck -->|No| ReturnNull[Return null / Let default loader crash]`;
+    IndexExistCheck -->|"Yes"| ReturnIndexPath["Return Index File Path<br/>(Resolved folder index)"]
+    IndexExistCheck -->|"No"| ReturnNull["Return null<br/>(Let default loader handle/crash)"]`;
 
 const RESOLVER_CODE = `const fs = require("fs");
 const path = require("path");
@@ -165,7 +166,7 @@ export default function Page() {
                 The flowchart below traces the path resolution cascade for imports:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="800px">{RESOLVER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1050px">{RESOLVER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
