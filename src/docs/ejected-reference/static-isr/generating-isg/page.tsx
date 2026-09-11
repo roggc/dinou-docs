@@ -14,19 +14,20 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const ISG_COMPILATION_DIAGRAM = `graph TD
-    Start[🌐 User GET /posts/42 Not Cached] --> DiskCheck{Does file exist on disk?}
+const ISG_COMPILATION_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["User GET Request: /posts/42<br/>(Dynamic un-cached route request)"] --> DiskCheck{"Does file exist on disk?<br/>(Check dist2 static cache)"}
     
-    DiskCheck -->|Yes| ServeStatic[Serve Static index.html / Skip]
-    DiskCheck -->|No| CallISG[Call generatingISG path]
+    DiskCheck -->|"Yes"| ServeStatic["Serve Static index.html<br/>(Instant cache hit / Bypass rendering)"]
+    DiskCheck -->|"No"| CallISG["Call generatingISG(path)<br/>(Trigger on-demand pre-render)"]
     
-    CallISG --> MutexCheck{Mutex Lock Pool Active?}
-    MutexCheck -->|Yes| Exit[Exit / Skip]
-    MutexCheck -->|No| RunISG[1. Set Mutex Lock<br/>2. Run buildStaticPage]
+    CallISG --> MutexCheck{"Mutex Lock Pool Active?<br/>(Check regenerating Set pool)"}
+    MutexCheck -->|"Yes"| Exit["Skip Compilation<br/>(Another worker is generating)"]
+    MutexCheck -->|"No"| RunISG["Run buildStaticPage<br/>(Acquire mutex lock & evaluate route)"]
     
-    RunISG --> BailCheck{Is dynamic bailout?}
-    BailCheck -->|Yes| SSR[Switch to dynamic Server-Side Render isDynamic=true]
-    BailCheck -->|No| SaveCache[1. Compile RSC & safeRename<br/>2. Compile HTML & safeRename<br/>3. updateStatus to cached<br/>4. Release Mutex Lock]`;
+    RunISG --> BailCheck{"Dynamic Bailout Detected?<br/>(e.g., cookies() or headers() access)"}
+    BailCheck -->|"Yes"| SSR["Switch to Runtime SSR<br/>(Serve dynamic render / Mark isDynamic)"]
+    BailCheck -->|"No"| SaveCache["Commit Static Artifacts<br/>(Compile RSC & HTML, safeRename & release lock)"]`;
 
 const GENERATING_ISG_CODE = `const fs = require("fs").promises;
 const path = require("path");
@@ -153,7 +154,7 @@ export default function Page() {
                 Below is the lifecycle of an incoming request on a non-compiled path:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="700px">{ISG_COMPILATION_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="950px">{ISG_COMPILATION_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
