@@ -12,16 +12,17 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const RSC_BUILDER_DIAGRAM = `graph TD
-    Start["generateStaticRSC(reqPath)"] --> TempPath["Create temporary file path:<br/>rsc.rsc.timestamp.tmp"]
-    TempPath --> MockCtx["Inject mock Express req/res context"]
-    MockCtx --> RunALS["requestStorage.run(mockContext, ...)"]
+const RSC_BUILDER_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["generateStaticRSC(reqPath)<br/>(Entry function call for single route)"] --> TempPath["Generate Temporary File Path<br/>(rsc.rsc.timestamp.tmp double-buffer)"]
+    TempPath --> MockCtx["Inject Mock Express Context<br/>(Simulate req/res, cookies and headers)"]
+    MockCtx --> RunALS["Bind AsyncLocalStorage Context<br/>(requestStorage.run wraps execution)"]
     
-    RunALS --> LoadJSX["getJSX(finalReqPath):<br/>Loads React Server Component tree"]
-    LoadJSX --> Stream["renderToPipeableStream:<br/>Serializes component tree"]
-    Stream --> PipeTemp["Pipe stream to temp file<br/>on disk"]
+    RunALS --> LoadJSX["Load Component Tree: getJSX()<br/>(Evaluates layout & page server components)"]
+    LoadJSX --> Stream["Serialize Via renderToPipeableStream<br/>(React Server DOM Flight stream)"]
+    Stream --> PipeTemp["Pipe Stream to Disk<br/>(Writes payload into temporary file)"]
     
-    PipeTemp --> ReturnObj["Return validation object:<br/>{ success, tempPath, finalPath, status }"]`;
+    PipeTemp --> ReturnObj["Return Validation Metadata<br/>(success, tempPath, finalPath, status)"]`;
 
 const RSC_BUILDER_CODE = `const fs = require("fs");
 const path = require("path");
@@ -185,7 +186,7 @@ export default function Page() {
                 The flowchart below traces the steps executed during single-route RSC serialization:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{RSC_BUILDER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="450px">{RSC_BUILDER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
