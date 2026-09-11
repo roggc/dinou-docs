@@ -13,12 +13,13 @@ const tocItems = [
   { id: "seo-crawler", title: "📄 4. SEO & Crawler Compatibility", level: 2 },
 ];
 
-const LINK_STRUCTURE_DIAGRAM = `graph TD
+const LINK_STRUCTURE_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '28px' }}}%%
+graph TD
     subgraph Link.jsx Code Structure
-        Props[1. Link Component Export<br/>Props: href, children, prefetch=true, fresh=false, ...props]
-        Prefetch[2. Hover Prefetch Capture<br/>onMouseEnter event handler:<br/>Checks prefetch eligibility. Calls window.__DINOU_PREFETCH__ to pre-load target RSC payload in cache]
-        Hijack[3. Click Hijack Handler<br/>onClick event handler:<br/>Ignores compound clicks. Blocks standard navigation. Invokes push href via useRouter]
-        Render[4. Native Anchor Render<br/>Renders standard a element preserving SEO crawlers indexing pathways]
+        Props["1. Link Component Export<br/>Props: href, children, prefetch=true, fresh=false, ...props"]
+        Prefetch["2. Hover Prefetch Capture<br/>onMouseEnter event handler:<br/>Checks prefetch eligibility. Calls window.__DINOU_PREFETCH__ to pre-load target RSC payload in cache"]
+        Hijack["3. Click Hijack Handler<br/>onClick event handler:<br/>Ignores compound clicks. Blocks standard navigation. Invokes push href via useRouter"]
+        Render["4. Native Anchor Render<br/>Renders standard a element preserving SEO crawlers indexing pathways"]
     end
     
     Props --> Prefetch
@@ -106,7 +107,7 @@ export default function Page() {
                 The component encapsulates path resolution, click hijacking, and hover prefetching:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="1200px">{LINK_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1650px">{LINK_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
