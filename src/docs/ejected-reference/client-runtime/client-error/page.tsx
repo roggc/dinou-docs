@@ -14,13 +14,12 @@ const tocItems = [
   { id: "webpack-variant", title: "📦 Webpack Variant (client-error-webpack.jsx)", level: 2 },
 ];
 
-const CLIENT_STRUCTURE_DIAGRAM = `graph TD
-    subgraph Client-Error.jsx Code Structure
-        Imports[1. Imports & Core Modules<br/>Identical to client.jsx React, hydrateRoot, RouterContext, server-function-proxy]
-        GlobalState[2. Global Module State & Variables<br/>cache, scrollCache, getCurrentRoute<br/>isInitialErrorLoad = true: Flag to identify first load after crash]
-        Helpers[3. Pure Helper Functions & Error-Hydration Fetching<br/>isHashChangeOnly: Detects hash navigation<br/>getRSCPayload: Intercepts initial load. If crash, POSTs crash details to /____rsc_payload_error____. Else normal GET<br/>getErrorRSCPayload: Handles subsequent navigations error rendering]
-        RouterComp[4. ErrorBoundary & Router Layout Components<br/>ErrorBoundary, Router component mount, transitions, popstate observers, scroll restore, and hydrateRoot bootstrapping]
-    end
+const CLIENT_STRUCTURE_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Imports["1. Imports & Core Modules<br/>(React hooks, hydrateRoot, RouterContext & serverFunctionProxy)"]
+    GlobalState["2. Global Module State & Flags<br/>(Cache maps & isInitialErrorLoad crash tracker)"]
+    Helpers["3. Pure Helpers & Error Payload Fetch<br/>(isHashChangeOnly & POST crash payload interceptor)"]
+    RouterComp["4. ErrorBoundary & Router Mounting<br/>(SPA error navigation, scroll restore & hydrateRoot)"]
     
     Imports --> GlobalState
     GlobalState --> Helpers
@@ -200,7 +199,7 @@ export default function Page() {
                 The module layout structures error-initialization flags and intercept routines:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="1200px">{CLIENT_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="550px">{CLIENT_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
