@@ -155,8 +155,18 @@
   overflow: visible !important;
 }
 
+/* Ensure text and paragraphs inside Mermaid foreignObject never inherit prose margins or line heights */
+.mermaid svg foreignObject p,
+.prose .mermaid p {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.5 !important;
+  color: inherit !important;
+}
+
+.mermaid svg foreignObject,
 .mermaid svg .node .label {
-  line-height: 1.4 !important;
+  line-height: 1.5 !important;
 }
 
 /* Edge labels styling: prevent clipping, add padding, border, and clean background */

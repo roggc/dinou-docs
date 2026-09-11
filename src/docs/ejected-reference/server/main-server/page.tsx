@@ -52,7 +52,7 @@ export default function Page() {
                 Below is a visual map outlining the lifecycle phases and core duties of the ejected <code>server.js</code> file:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="950px">{`graph TD
+                <CodeBlock language="mermaid" minWidth="1350px">{`graph TD
     subgraph Phase1["1. Initialization & Compilation Hooks"]
         Start[🚀 Start server.js] --> LoadDeps["1.1 Load dependencies<br/>(Express, Chokidar, React Server DOM, etc.)"]
         LoadDeps --> OverrideResolve["1.2 Override Module._resolveFilename<br/>(Forces Node to resolve React Server builds)"]

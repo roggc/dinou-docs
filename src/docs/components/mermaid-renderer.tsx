@@ -21,6 +21,7 @@ mermaid.initialize({
   flowchart: {
     htmlLabels: true,
     padding: 18,
+    wrappingWidth: 600,
   },
 });
 
