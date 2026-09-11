@@ -13,15 +13,20 @@ const tocItems = [
   { id: "navigation-utils", title: "🛠️ 4. Navigation Utilities", level: 2 },
 ];
 
-const NAVIGATION_STRUCTURE_DIAGRAM = `graph TD
-    subgraph Navigation.js Code Structure
-        DefaultMock[1. RouterContext & Default Mock<br/>Creates RouterContext via createContext<br/>Default mock handles warnings on raw server calls]
-        ClientHooks[2. Custom Client Hooks<br/>useRouter: push/replace/back/forward/refresh delegates<br/>usePathname: Reads from ALS on server, RouterContext on client<br/>useSearchParams: URLSearchParams tracker<br/>useNavigationLoading: active transition pending status]
-        NavUtils[3. Navigation Utilities<br/>isExternalUrl: Detects external/special protocol URLs<br/>resolveUrl: Normalizes relative paths to standardized URL path strings]
-    end
+const NAVIGATION_STRUCTURE_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    DefaultMock["1. RouterContext & Default Mock<br/>(Creates RouterContext & handles warnings on raw server calls)"]
+    UseRouter["2a. useRouter() Delegate<br/>(push, replace, back, forward, refresh delegates)"]
+    UsePathname["2b. usePathname() Route Resolver<br/>(Reads from ALS on server, RouterContext on client)"]
+    UseSearch["2c. useSearchParams() Tracker<br/>(Tracks query parameters via URLSearchParams)"]
+    UseNavLoading["2d. useNavigationLoading() Hook<br/>(Tracks active Flight payload transition pending status)"]
+    NavUtils["3. Navigation Utilities<br/>(isExternalUrl protocol detector & resolveUrl path normalizer)"]
     
-    DefaultMock --> ClientHooks
-    ClientHooks --> NavUtils`;
+    DefaultMock --> UseRouter
+    UseRouter --> UsePathname
+    UsePathname --> UseSearch
+    UseSearch --> UseNavLoading
+    UseNavLoading --> NavUtils`;
 
 const NAVIGATION_CONTEXT_CODE = `export const RouterContext = createContext({
   url: "",
@@ -165,7 +170,7 @@ export default function Page() {
                 The directory separates context bindings from path checkers:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="1000px">{NAVIGATION_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="550px">{NAVIGATION_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
