@@ -28,20 +28,21 @@ const ASSETS_DIAGRAM = `graph TD
     OutputType -->|Normal Asset Chunks| Normal[Rename to scoped paths<br/>e.g., assets/scoped-hash.png]
     OutputType -->|Inlined JS Chunks| Inlined[Locate // dinou-asset:... comment<br/>& Extract asset binary contents<br/>& Write asset & Replace chunk var]`;
 
-const CSS_DIAGRAM = `graph TD
-    Start[esbuild imports .css file] --> RunPostCSS[postcss plugins & extractor]
+const CSS_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["esbuild imports .css file"] --> RunPostCSS["postcss plugins & extractor"]
     
-    RunPostCSS --> postcssImport[postcssImport: Resolve alias using getAbsPathWithExt]
-    RunPostCSS --> postCssModules[postCssModules: Scoped module names e.g. .button-scoped]
-    RunPostCSS --> extractor[extractor: OnceExit append rules & root.removeAll]
+    RunPostCSS --> postcssImport["postcssImport: Resolve alias using getAbsPathWithExt"]
+    RunPostCSS --> postCssModules["postCssModules: Scoped module names e.g. .button-scoped"]
+    RunPostCSS --> extractor["extractor: OnceExit append rules & root.removeAll"]
     
-    postcssImport --> Eval[File Type Evaluation]
+    postcssImport --> Eval["File Type Evaluation"]
     postCssModules --> Eval
     extractor --> Eval
     
-    Eval --> FileType{CSS File Type?}
-    FileType -->|module.css| Module[export default classnames map]
-    FileType -->|global.css| Global[Global styles rule injection]`;
+    Eval --> FileType{"CSS File Type?"}
+    FileType -->|module.css| Module["export default classnames map"]
+    FileType -->|global.css| Global["Global styles rule injection"]`;
 
 const ASSETS_CODE = `import fs from "node:fs/promises";
 import path from "node:path";
@@ -376,7 +377,7 @@ export default function Page() {
                 The flowchart below shows how CSS Modules and tailwind styles are parsed and compiled into `styles.css`:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="750px">{CSS_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1300px">{CSS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
