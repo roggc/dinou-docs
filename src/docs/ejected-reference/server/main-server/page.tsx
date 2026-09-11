@@ -955,16 +955,17 @@ if (!isPathBlocked && allowISGValue === false) {
               <div className="my-6">
                 <p className="text-sm font-semibold mb-2">Error Boundary Payload Mapping:</p>
                 <div className="not-prose">
-                  <CodeBlock language="mermaid">{`graph TD
-    Start[React Client-Side Component] -->|Render Exception Caught| ClientEB[Dinou Client Error Boundary]
-    ClientEB -->|Serialize error trace: stack, message| POSTError[POST /____rsc_payload_error____/route]
-    POSTError --> ExpressPOST[Master Server Express POST]
-    ExpressPOST --> GetCtx[getContext req, res]
-    GetCtx --> RunALS[requestStorage.run context]
-    RunALS --> GetErrorJSX[getErrorJSX reqPath: Searches directory tree for closest error.tsx]
-    GetErrorJSX --> StreamReact[React 19 renderToPipeableStream: Serializes error JSX using client-side assets manifest]
-    StreamReact --> StreamBinary[Stream binary text/x-component]
-    StreamBinary --> HydrateFallback[Hydrate Fallback UI in Browser]`}</CodeBlock>
+                  <CodeBlock language="mermaid" minWidth="850px">{`%%{init: {'themeVariables': { 'fontSize': '16px' }}}%%
+graph TD
+    Start["⚛️ React Client-Side Component<br/>(Render Exception Caught)"] -->|"Exception thrown"| ClientEB["Dinou Client Error Boundary<br/>(Extracts message & stack trace)"]
+    ClientEB -->|"HTTP POST error payload"| POSTError["POST /____rsc_payload_error____/:route<br/>(Transmits serialized error)"]
+    POSTError --> ExpressPOST["Master Server (Express POST)<br/>(Intercepts error route)"]
+    ExpressPOST --> GetCtx["getContext(req, res)<br/>(Extracts cookies & headers)"]
+    GetCtx --> RunALS["requestStorage.run()<br/>(Binds AsyncLocalStorage context)"]
+    RunALS --> GetErrorJSX["getErrorJSX(reqPath)<br/>(Locates closest error.tsx layout)"]
+    GetErrorJSX --> StreamReact["React 19 renderToPipeableStream()<br/>(Serializes fallback tree with client manifest)"]
+    StreamReact -->|"Binary Flight stream"| StreamBinary["Stream binary response<br/>(Content-Type: text/x-component)"]
+    StreamBinary -->|"Pipe to client"| HydrateFallback["Hydrate Fallback UI in Browser<br/>(Renders error template)"]`}</CodeBlock>
                 </div>
               </div>
 

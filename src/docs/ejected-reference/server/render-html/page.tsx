@@ -13,32 +13,35 @@ const tocItems = [
   { id: "customizations", title: "🛠️ Common Tweak Recipes", level: 2 },
 ];
 
-const PIPELINE_DIAGRAM = `graph TD
-    Start[Express Server.js Calling renderAppToHtml] --> Fork[Forking Child Process: render-app-to-html.js Parent]
-    Fork --> ParentActions[1. Evaluates React Server graph <br/> 2. Generates RSC Flight JSON binary]
+const PIPELINE_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '16px' }}}%%
+graph TD
+    Start["🚀 Express server.js<br/>(Initiates request handling via renderAppToHtml)"] --> Fork["Parent Process Handler: render-app-to-html.js<br/>(Spawns & orchestrates child worker process)"]
+    Fork --> ParentActions["RSC Pipeline Execution (Parent)<br/>1. Evaluates React Server Component tree<br/>2. Serializes binary RSC Flight payload"]
     
-    ParentActions -->|Piping RSC Flight Stream via fd 4| Child[render-html.js Child Process Environment]
+    ParentActions -->|"Pipes RSC Flight stream via fd 4"| Child["render-html.js Child Process<br/>(Isolated Client SSR execution environment)"]
     
-    subgraph Child Process Environment
-        Child --> ReadFlight[a. Reads flight stream from fd:4]
-        ReadFlight --> Reconstruct[b. Reconstructs client-safe JSX via createFromNodeStream]
-        Reconstruct --> SSR[c. Performs React 19 SSR via renderToPipeableStream]
-        SSR --> WriteHTML[d. Writes final HTML chunks to stdout]
+    subgraph ChildEnv["⚙️ Child Process SSR Environment"]
+        Child --> ReadFlight["a. Read Flight Stream<br/>(Consumes binary RSC stream from fd 4)"]
+        ReadFlight --> Reconstruct["b. Reconstruct JSX Tree<br/>(createFromNodeStream with SSR manifest)"]
+        Reconstruct --> SSR["c. React 19 SSR Engine<br/>(renderToPipeableStream compiles JSX to HTML)"]
+        SSR --> WriteHTML["d. Stream HTML Output<br/>(Pipes final HTML chunks to stdout)"]
     end
     
-    WriteHTML -->|Piped stdout chunks| ExpressRes[Express res Response to Browser]`;
+    WriteHTML -->|"Pipes stdout HTML stream"| ExpressRes["🌐 Express HTTP Response<br/>(Streams HTML chunks to client browser)"]`;
 
-const PARENT_STRUCTURE_DIAGRAM = `graph TD
-    subgraph render-app-to-html.js Code Structure
-        Deps[1. Dependencies & Module Imports<br/>child_process fork, fs, path, url, status-manifest, concurrency-manager]
-        Helpers[2. Global Helper Functions<br/>getManifest: Reads & parses client manifest for module IDs<br/>toFileUrl: Converts absolute path to file:// format]
-        ResponseWrapper[3. createParentResponseWrapper<br/>IPC command listener cookie/redirect<br/>Headers sent? JavaScript script inject : Express res methods]
-        Export[4. Main Export: renderAppToHtml<br/>Checks cache dist2/rsc.rsc<br/>Cached? Pipes buffer directly to child fd 4<br/>Dynamic? Renders RSC to binary Flight payload & writes to fd 4<br/>Spawns child fork stdio fd:4, IPC listener, child.stdout.pipe res]
-    end
-    
-    Deps --> Helpers
-    Helpers --> ResponseWrapper
-    ResponseWrapper --> Export`;
+const PARENT_STRUCTURE_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '16px' }}}%%
+graph TD
+    subgraph Structure["📦 render-app-to-html.js Code Structure & Sequence"]
+        direction TB
+        Deps["1. Dependencies & Module Imports<br/>(child_process fork, fs, path, url, getJSX, requestStorage)"]
+        Helpers["2. Global Helper Functions<br/>(getManifest: parses client manifest & toFileUrl: path resolver)"]
+        ResponseWrapper["3. createParentResponseWrapper<br/>(IPC command listener for cookies, redirects & status codes)"]
+        Export["4. Main Export: renderAppToHtml<br/>(Flight cache check, child process stdio/fd:4 orchestration & stdout piping)"]
+
+        Deps --> Helpers
+        Helpers --> ResponseWrapper
+        ResponseWrapper --> Export
+    end`;
 
 const PARENT_IMPORTS_CODE = `const path = require("path");
 const { fork } = require("child_process");
@@ -581,7 +584,7 @@ export default function Page() {
               </p>
               
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{PIPELINE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{PIPELINE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
@@ -599,7 +602,7 @@ export default function Page() {
                 The file defines the following helper variables, utilities, and main export:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="900px">{PARENT_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{PARENT_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
 
               <h3>1. Dependencies & Module Imports</h3>
