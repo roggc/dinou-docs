@@ -12,16 +12,19 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const PROXY_DIAGRAM = `graph TD
-    subgraph Child Process
-        RSC[React Server Component Sets cookie or redirect prop] --> Proxy[createResponseProxy Intercepts response methods]
-        Proxy --> SendCmd[sendCommand cmd, args]
+const PROXY_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '16px' }}}%%
+graph TD
+    subgraph Child["⚙️ Child Process (Node.js Worker)"]
+        direction TB
+        RSC["React Server Component<br/>(Calls cookies().set(), redirect(), etc.)"] --> Proxy["createResponseProxy()<br/>(Intercepts response method calls)"]
+        Proxy --> SendCmd["sendCommand(command, args)<br/>(Serializes arguments into IPC payload)"]
     end
     
-    SendCmd -->|process.send IPC| IPC[process.send IPC Channel]
+    SendCmd -->|"process.send(DINOU_CONTEXT_COMMAND)"| IPC["📡 Node.js IPC Channel<br/>(Inter-process message bridge)"]
     
-    subgraph Parent Process
-        IPC --> Parent[Express Main Thread Apply changes to real res headers]
+    subgraph Parent["🚀 Parent Process (Express Main Server)"]
+        direction TB
+        IPC --> ParentHandler["Express Main Thread Listener<br/>(child.on('message') applies changes to real res)"]
     end`;
 
 const PROXY_CODE = `// core/context-proxy.js
@@ -126,7 +129,7 @@ export default function Page() {
                 The diagram below traces the communication path between worker threads and the main server:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{PROXY_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{PROXY_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

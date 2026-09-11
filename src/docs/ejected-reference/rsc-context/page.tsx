@@ -11,11 +11,12 @@ const tocItems = [
   { id: "files", title: "📂 Module Directory", level: 2 },
 ];
 
-const RSC_CONTEXT_DIAGRAM = `graph TD
-    Start[🌐 Client Request] --> Concurrency[concurrency-manager Limit active renders]
-    Concurrency --> Proxy[context-proxy.js IPC cookie/redirect]
-    Proxy --> RenderJSX[render-jsx-to-json.js Compiles React Server Components]
-    RenderJSX -->|Caught render crash| ErrorJSX[get-error-jsx.js Crawls error.tsx and nested slots]`;
+const RSC_CONTEXT_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '16px' }}}%%
+graph TD
+    Start["🌐 Client Request<br/>(Incoming HTTP navigation / RSC payload request)"] --> Concurrency["concurrency-manager.js<br/>(Throttles & queues active parallel renders)"]
+    Concurrency --> Proxy["context-proxy.js<br/>(Proxies cookies & redirects across IPC boundary)"]
+    Proxy --> RenderJSX["render-jsx-to-client-jsx.js<br/>(Executes Server Components & serializes Flight stream)"]
+    RenderJSX -->|"Caught render crash"| ErrorJSX["get-error-jsx.js<br/>(Crawls error.tsx templates for slot-level fallback)"]`;
 
 export default function Page() {
   return (
@@ -70,7 +71,7 @@ export default function Page() {
                 The diagram below shows the processing lifecycle of client requests as they pass through concurrency checks, context proxies, compile streams, and error boundaries:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{RSC_CONTEXT_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="800px">{RSC_CONTEXT_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

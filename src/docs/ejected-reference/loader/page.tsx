@@ -31,32 +31,34 @@ const loaderPath = require.resolve("./babel-esm-loader.js");
 
 register(pathToFileURL(loaderPath).href, pathToFileURL("./"));`;
 
-const LOADER_STRUCTURE_DIAGRAM = `graph TD
+const LOADER_STRUCTURE_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '18px' }}}%%
+graph TD
     classDef depClass fill:#334155,stroke:#475569,stroke-width:1px,color:#fff;
     classDef hookClass fill:#1e293b,stroke:#334155,stroke-width:1px,color:#fff;
 
-    subgraph LoaderSystem [babel-esm-loader.js Pipeline]
-        Deps[1. Dependencies & Resolution Mocking<br/>• fs, path, url, babel/core<br/>• Overrides Module._resolveFilename for React server bundles]:::depClass
-        
-        Deps --> Resolve[2. resolve Hook<br/>• Intercepts imports at lookup stage<br/>• Delegates to getAbsPathWithExt for aliases/extensions<br/>• Returns absolute file:// URL]:::hookClass
-        
-        Resolve --> Load[3. load Hook<br/>• Intercepts source loading stage]:::hookClass
+    subgraph LoaderSystem ["1. babel-esm-loader.js Core Pipeline"]
+        direction TB
+        Deps["1. Dependencies & Resolution Mocking<br/>(Overrides Module._resolveFilename for React server builds)"]:::depClass
+        Deps --> Resolve["2. resolve Hook<br/>(Resolves path aliases, extensions & returns file:// URL)"]:::hookClass
+        Resolve --> Load["3. load Hook<br/>(Intercepts module source loading stage)"]:::hookClass
     end
 
-    subgraph LoadStages [load Hook Branches]
-        Load --> Asset[A. Static Assets .png/.jpg/.svg<br/>• Generates mock ES module exporting asset path]
-        Load --> CSS[B. Stylesheets .css<br/>• Requires path to run PostCSS JIT<br/>• Exports JSON class mappings]
-        Load --> Src[C. Source Files .js/.jsx/.ts/.tsx<br/>• Analyzes directives]
+    subgraph LoadStages ["2. load Hook Branches"]
+        direction TB
+        Load --> Asset["A. Static Assets (.png/.jpg/.svg)<br/>(Generates mock ES module exporting asset path)"]
+        Load --> CSS["B. Stylesheets (.css)<br/>(Runs PostCSS JIT & exports JSON class mappings)"]
+        Load --> Src["C. Source Code (.js/.jsx/.ts/.tsx)<br/>(Analyzes directives & JIT transpiles source)"]
     end
 
-    subgraph SourceParsing [Source Code Directives]
-        Src --> ClientCheck{isReactServer & hasUseClient?}
-        ClientCheck -->|Yes| ClientStub[Client Reference Stubbing<br/>• Discards original server-side code<br/>• Generates registerClientReference stub proxies]
+    subgraph SourceParsing ["3. Source Code Directive Branches"]
+        direction TB
+        Src --> ClientCheck{"isReactServer & 'use client'?"}
+        ClientCheck -->|"Yes"| ClientStub["Client Reference Stubbing<br/>(Generates registerClientReference stub proxies)"]
         
-        Src --> ServerCheck{isReactServer & hasUseServer?}
-        ServerCheck -->|Yes| ServerRegister[Server Functions Registration<br/>• Compiles functions with Babel<br/>• Maps function exports to Function IDs<br/>• Binds via registerServerReference]
+        Src --> ServerCheck{"isReactServer & 'use server'?"}
+        ServerCheck -->|"Yes"| ServerRegister["Server Functions Registration<br/>(Compiles & binds via registerServerReference)"]
         
-        Src --> DefaultJS[Standard JS / TSX<br/>• Transpiles JSX & types to JS via Babel<br/>• Injects inline source maps]
+        Src --> DefaultJS["Standard JS / TSX<br/>(Transpiles JSX & types via Babel with inline sourcemaps)"]
     end`;
 
 const LOADER_DEPS_MOCKING_CODE = `const fs = require("fs");
@@ -332,7 +334,7 @@ export default function Page() {
                 The <code>babel-esm-loader.js</code> file follows this logical pipeline structure during module resolution and compilation:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="800px">{LOADER_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1500px">{LOADER_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 

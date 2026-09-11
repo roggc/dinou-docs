@@ -12,22 +12,23 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const IMPORT_DIAGRAM = `graph TD
-    Start[importModule modulePath] --> Resolve[Resolve absolute path]
-    Resolve --> WebpackCheck{isWebpack?}
+const IMPORT_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '16px' }}}%%
+graph TD
+    Start["importModule(modulePath)<br/>(Entry function call)"] --> Resolve["Resolve Absolute Path<br/>(path.isAbsolute ? path : path.resolve)"]
+    Resolve --> WebpackCheck{"isWebpack?<br/>(Check build tool)"}
     
-    WebpackCheck -->|Yes| CJS[CJS Context]
-    CJS --> EnvCheck{Environment?}
-    EnvCheck -->|Production| RequireProd[require absPath Cached]
-    EnvCheck -->|Development| RequireDev[Delete require.cache path & require absPath Live reload]
-    RequireProd --> FallbackESM[Fallback to dynamic ESM import]
+    WebpackCheck -->|"Yes"| CJS["CommonJS Context<br/>(Webpack bundles)"]
+    CJS --> EnvCheck{"Check NODE_ENV"}
+    EnvCheck -->|"production"| RequireProd["require(absPath)<br/>(Uses cached CJS module)"]
+    EnvCheck -->|"development"| RequireDev["Delete require.cache[path]<br/>(Busts cache & requires fresh module)"]
+    RequireProd --> FallbackESM["Error Fallback (ERR_REQUIRE_ESM)<br/>(Falls back to dynamic import)"]
     RequireDev --> FallbackESM
 
-    WebpackCheck -->|No| ESM[ESM Context]
+    WebpackCheck -->|"No"| ESM["ESM Context<br/>(Node.js native loader)"]
     FallbackESM --> ESM
-    ESM --> EnvCheck2{Environment?}
-    EnvCheck2 -->|Production| ImportProd[import fileUrl Cached]
-    EnvCheck2 -->|Development| ImportDev[Append ?t=timestamp & import fileUrl Live reload]`;
+    ESM --> EnvCheck2{"Check NODE_ENV"}
+    EnvCheck2 -->|"production"| ImportProd["import(fileUrl)<br/>(Uses Node's native module cache)"]
+    EnvCheck2 -->|"development"| ImportDev["import(fileUrl + '?t=timestamp')<br/>(Dynamic timestamp query busts ESM cache)"]`;
 
 const IMPORT_CODE = `const { pathToFileURL } = require("url");
 const path = require("path");
@@ -120,7 +121,7 @@ export default function Page() {
                 The flowchart below shows how modules are imported based on the bundler type and environment state:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="600px">{IMPORT_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="950px">{IMPORT_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
