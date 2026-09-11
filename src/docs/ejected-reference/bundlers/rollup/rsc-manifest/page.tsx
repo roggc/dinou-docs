@@ -10,22 +10,23 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const RSC_MANIFEST_DIAGRAM = `graph TD
-    Start[buildStart: scan all files] --> LoopFiles[Loop project files]
-    LoopFiles --> CheckClient{Contains 'use client'?}
+const RSC_MANIFEST_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '18px' }}}%%
+graph TD
+    Start["buildStart: scan all files"] --> LoopFiles["Loop project files"]
+    LoopFiles --> CheckClient{"Contains 'use client'?"}
     
-    CheckClient -->|Yes| EmitChunk[this.emitFile as chunk & updateManifestForModule]
-    CheckClient -->|No| CheckPage{Is Page or Layout?}
+    CheckClient -->|Yes| EmitChunk["this.emitFile as chunk & updateManifestForModule"]
+    CheckClient -->|No| CheckPage{"Is Page or Layout?"}
     
-    CheckPage -->|Yes| Watch[Add to watchFiles]
-    CheckPage -->|No| Skip[Skip file]
+    CheckPage -->|Yes| Watch["Add to watchFiles"]
+    CheckPage -->|No| Skip["Skip file"]
     
-    Watch --> DependencyCheck[getImportsAndAssetsAndCsss recursively]
-    DependencyCheck --> EmitCSS[Emit css imports as chunks]
-    DependencyCheck --> EmitAssets[Emit assets and add watchFiles]
+    Watch --> DependencyCheck["getImportsAndAssetsAndCsss recursively"]
+    DependencyCheck --> EmitCSS["Emit css imports as chunks"]
+    DependencyCheck --> EmitAssets["Emit assets and add watchFiles"]
     
-    EmitChunk --> GenerateBundle[generateBundle: Map modules in output chunks to final names]
-    GenerateBundle --> Write[Write react-client-manifest.json]`;
+    EmitChunk --> GenerateBundle["generateBundle: Map modules in output chunks to final names"]
+    GenerateBundle --> Write["Write react-client-manifest.json"]`;
 
 const MANIFEST_CODE = `const { readFileSync, writeFileSync, mkdirSync, existsSync } = require("fs");
 const path = require("path");
@@ -428,7 +429,7 @@ export default function Page() {
                 The flowchart below shows how the plugin coordinates file crawling, dependency checks, and manifest generation:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="750px">{RSC_MANIFEST_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1200px">{RSC_MANIFEST_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
