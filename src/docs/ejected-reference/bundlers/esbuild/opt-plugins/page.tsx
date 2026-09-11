@@ -15,14 +15,15 @@ const tocItems = [
   { id: "code-manifest", title: "⚙️ manifest-generator-plugin.mjs", level: 2 },
 ];
 
-const STABLE_CHUNKS_DIAGRAM = `graph TD
-    Start[metafile.outputs from esbuild] --> Loop[Loop through output chunks]
-    Loop --> Calc[Stable chunk name calculation<br/>src/components/Button.tsx -> chunk-components-Button.js]
+const STABLE_CHUNKS_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["metafile.outputs from esbuild"] --> Loop["Loop through output chunks"]
+    Loop --> Calc["Stable chunk name calculation<br/>src/components/Button.tsx -> chunk-components-Button.js"]
     
-    Calc --> Rename[Rename Chunk: Update key to chunk-stable.js]
-    Calc --> RenameMap[Rename Map: Update sourceMappingURL references]
+    Calc --> Rename["Rename Chunk: Update key to chunk-stable.js"]
+    Calc --> RenameMap["Rename Map: Update sourceMappingURL references"]
     
-    Rename --> Replace[Replace import specifiers inside compiled javascript chunks]
+    Rename --> Replace["Replace import specifiers inside compiled javascript chunks"]
     RenameMap --> Replace`;
 
 const SKIP_ENTRIES_DIAGRAM = `graph TD
@@ -240,7 +241,7 @@ export default function Page() {
                 The flowchart below traces the hash stripping and reference renaming steps of the stable chunk names plugin:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="650px">{STABLE_CHUNKS_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1000px">{STABLE_CHUNKS_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
