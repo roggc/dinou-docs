@@ -12,14 +12,15 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const HTML_BUILDER_DIAGRAM = `graph TD
-    Start["generateStaticPage(reqPath)"] --> TempPath["Create temporary file path:<br/>index.html.timestamp.tmp"]
-    TempPath --> MockCtx["Inject mock Express req/res context"]
-    MockCtx --> RenderApp["renderAppToHtml(context, mockRes):<br/>Renders page component stream"]
-    RenderApp --> ProcessMeta["processMetadata(capturedStatus, headers):<br/>Resolves side-effect cookies/redirects"]
-    ProcessMeta --> PipeTemp["Pipe HTML stream to temp file<br/>on disk"]
-    PipeTemp --> WriteMeta["Write metadata.json:<br/>{ generatedAt, tags, revalidate }"]
-    WriteMeta --> ReturnObj["Return validation object:<br/>{ success, tempPath, finalPath, status }"]`;
+const HTML_BUILDER_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["generateStaticPage(reqPath)<br/>(Entry function call for single HTML page)"] --> TempPath["Generate Temporary File Path<br/>(index.html.timestamp.tmp double-buffer)"]
+    TempPath --> MockCtx["Inject Mock Express Context<br/>(Simulate req/res, cookies and headers)"]
+    MockCtx --> RenderApp["Execute renderAppToHtml()<br/>(Renders page component HTML stream)"]
+    RenderApp --> ProcessMeta["Resolve Side-Effects: processMetadata()<br/>(Extracts cookies, redirects and headers)"]
+    ProcessMeta --> PipeTemp["Pipe Stream to Disk<br/>(Writes HTML into temporary file)"]
+    PipeTemp --> WriteMeta["Generate metadata.json<br/>(Saves generatedAt, tags, revalidate)"]
+    WriteMeta --> ReturnObj["Return Validation Metadata<br/>(success, tempPath, finalPath, status)"]`;
 
 const HTML_BUILDER_CODE = `const path = require("path");
 const { mkdirSync, createWriteStream, existsSync } = require("fs");
@@ -187,7 +188,7 @@ export default function Page() {
                 The flowchart below shows how routes are compiled to HTML in the single-page builder:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid">{HTML_BUILDER_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="450px">{HTML_BUILDER_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
