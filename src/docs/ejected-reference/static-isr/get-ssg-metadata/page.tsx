@@ -12,21 +12,22 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const METADATA_FLOW_DIAGRAM = `graph TD
-    Start[processMetadata effects] --> EffectCheck{Are effects present?}
+const METADATA_FLOW_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["processMetadata(effects)<br/>(Entry function with captured side-effects)"] --> EffectCheck{"Check Effects<br/>(Are effects present?)"}
     
-    EffectCheck -->|No| ReturnEmpty[Return empty string]
-    EffectCheck -->|Yes| CookiesCheck{Does effects.cookies exist?}
+    EffectCheck -->|No| ReturnEmpty["Return Empty String<br/>(No side-effects to inject)"]
+    EffectCheck -->|Yes| CookiesCheck{"Check Cookies<br/>(Does effects.cookies exist?)"}
     
-    CookiesCheck -->|Yes| LoopCookies[Loop cookies & generate document.cookie scripts]
-    CookiesCheck -->|No| RedirectCheck{Does effects.redirect exist?}
+    CookiesCheck -->|Yes| LoopCookies["Process Cookies Array<br/>(Loop cookies & set document.cookie)"]
+    CookiesCheck -->|No| RedirectCheck{"Check Redirect<br/>(Does effects.redirect exist?)"}
     LoopCookies --> RedirectCheck
     
-    RedirectCheck -->|Yes| AddRedirect[Append window.location.href script]
-    RedirectCheck -->|No| WrapScript[Wrap code inside self-invoking function script block]
+    RedirectCheck -->|Yes| AddRedirect["Append Redirect Script<br/>(Set window.location.href)"]
+    RedirectCheck -->|No| WrapScript["Encapsulate in IIFE<br/>(Wrap script in self-invoking block)"]
     AddRedirect --> WrapScript
     
-    WrapScript --> ReturnScript[Return compiled inline script block]`;
+    WrapScript --> ReturnScript["Return HTML Script Tag<br/>(Inject into static HTML page)"]`;
 
 const METADATA_CODE = `function processMetadata(effects) {
   if (!effects) return "";
@@ -107,7 +108,7 @@ export default function Page() {
                 The chart below traces the translation of compile-time side effects into executable inline scripts:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="600px">{METADATA_FLOW_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="650px">{METADATA_FLOW_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
