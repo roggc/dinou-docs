@@ -13,12 +13,13 @@ const tocItems = [
   { id: "webpack-variant", title: "📦 Webpack Variant (server-function-proxy-webpack.js)", level: 2 },
 ];
 
-const PROXY_STRUCTURE_DIAGRAM = `graph TD
+const PROXY_STRUCTURE_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '28px' }}}%%
+graph TD
     subgraph server-function-proxy.js Code Structure
-        Redirects[1. Safe URL Redirect Handlers<br/>isSafeRedirect: Blocks open redirects<br/>executeRedirect: SPA Router or window.location]
-        ProxyFactory[2. createServerFunctionProxy<br/>Wraps 'use server' calls in JavaScript Proxy]
-        Formatter[3. Request Formatter<br/>FormData: Appends func_id, serializes args<br/>JSON: Serializes JSON payload. POSTs to server]
-        Processor[4. Response Stream Processor<br/>Intercepts redirects & cookie updates. Passes component stream chunks to React createFromFetch]
+        Redirects["1. Safe URL Redirect Handlers<br/>isSafeRedirect: Blocks open redirects<br/>executeRedirect: SPA Router or window.location"]
+        ProxyFactory["2. createServerFunctionProxy<br/>Wraps 'use server' calls in JavaScript Proxy"]
+        Formatter["3. Request Formatter<br/>FormData: Appends func_id, serializes args<br/>JSON: Serializes JSON payload. POSTs to server"]
+        Processor["4. Response Stream Processor<br/>Intercepts redirects & cookie updates. Passes component stream chunks to React createFromFetch"]
     end
     
     Redirects --> ProxyFactory
@@ -165,7 +166,7 @@ export default function Page() {
                 The file layout splits request serialization, redirect filtering, and stream line parsers:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="1200px">{PROXY_STRUCTURE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="1600px">{PROXY_STRUCTURE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
