@@ -14,21 +14,22 @@ const tocItems = [
   { id: "code-walkthrough", title: "⚙️ Complete Code Walkthrough", level: 2 },
 ];
 
-const CACHE_REVALIDATE_DIAGRAM = `graph TD
-    Start[On-Demand Revalidation Trigger] --> PathTrigger[revalidatePath /path]
-    Start --> TagTrigger[revalidateTag cms-tag]
+const CACHE_REVALIDATE_DIAGRAM = `%%{init: {'themeVariables': { 'fontSize': '20px' }}}%%
+graph TD
+    Start["On-Demand Revalidation Trigger<br/>(Programmatic API Call)"] --> PathTrigger["revalidatePath(path)<br/>(Direct Route Invalidation)"]
+    Start --> TagTrigger["revalidateTag(tag)<br/>(Batch Tag Invalidation)"]
     
-    PathTrigger --> NormalizePath[Normalize path URI]
-    NormalizePath --> Backup[Backup stale files]
-    Backup --> BuildStatic[buildStaticPage & generateStaticRSC & generateStaticPage]
-    BuildStatic --> Commit[safeRename commit]
-    Commit --> Done[Done / Stop]
+    PathTrigger --> NormalizePath["Normalize Path URI<br/>(Resolve relative paths via referer)"]
+    NormalizePath --> Backup["Backup Stale Files<br/>(Copy current html/rsc to backup)"]
+    Backup --> BuildStatic["Execute Static Build Pipeline<br/>(buildStaticPage & generateStaticRSC)"]
+    BuildStatic --> Commit["Commit Via safeRename<br/>(Atomic file replacement & status update)"]
+    Commit --> Done["Done / Cache Updated<br/>(Visitors now see fresh page)"]
     
-    TagTrigger --> WalkDirs[Walk dist2/ folders & read metadata.json]
-    WalkDirs --> MatchCheck{Does tags array match?}
-    MatchCheck -->|Yes| CallPath[Call revalidatePath matchedPath]
-    MatchCheck -->|No| Skip[Skip]
-    CallPath --> PromiseAll[Promise.all Execution / Await all revalidations]
+    TagTrigger --> WalkDirs["Scan Disk Metadata<br/>(Recursively inspect dist2 metadata.json)"]
+    WalkDirs --> MatchCheck{"Tag Matches?<br/>(metadata.tags includes tag)"}
+    MatchCheck -->|"Yes"| CallPath["Trigger Path Revalidation<br/>(Call revalidatePath for matched route)"]
+    MatchCheck -->|"No"| Skip["Skip Route<br/>(No tag match)"]
+    CallPath --> PromiseAll["Promise.all Execution<br/>(Await all route rebuilds concurrently)"]
     PromiseAll --> Done`;
 
 const CACHE_REVALIDATE_CODE = `const path = require("path");
@@ -233,7 +234,7 @@ export default function Page() {
                 The diagram below illustrates how path-based updates differ from the recursive tag-based invalidation search:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="mermaid" minWidth="700px">{CACHE_REVALIDATE_DIAGRAM}</CodeBlock>
+                <CodeBlock language="mermaid" minWidth="950px">{CACHE_REVALIDATE_DIAGRAM}</CodeBlock>
               </div>
             </section>
 
