@@ -144,8 +144,44 @@
   }
 }
 
-/* Center Mermaid SVG diagrams within their container */
+/* Center Mermaid SVG diagrams within their container and prevent text clipping */
 .mermaid svg {
   margin: 0 auto !important;
   display: block !important;
+}
+
+/* Ensure ALL foreignObject elements (nodes, edge labels, clusters) never clip text */
+.mermaid svg foreignObject {
+  overflow: visible !important;
+}
+
+.mermaid svg .node .label {
+  line-height: 1.4 !important;
+}
+
+/* Edge labels styling: prevent clipping, add padding, border, and clean background */
+.mermaid svg .edgeLabel {
+  background-color: #0f172a !important;
+}
+
+.mermaid svg .edgeLabel foreignObject {
+  overflow: visible !important;
+}
+
+.mermaid svg .edgeLabel foreignObject > div {
+  width: max-content !important;
+  overflow: visible !important;
+  text-align: center !important;
+}
+
+.mermaid svg .edgeLabel span,
+.mermaid svg span.edgeLabel {
+  background-color: #0f172a !important;
+  border: 1px solid #334155 !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  display: inline-block !important;
+  line-height: 1.3 !important;
+  white-space: nowrap !important;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3) !important;
 }

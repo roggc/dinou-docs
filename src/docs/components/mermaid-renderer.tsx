@@ -5,14 +5,22 @@ import mermaid from "mermaid";
 
 // Initialize mermaid configurations globally
 mermaid.initialize({
-  startOnLoad: true,
+  startOnLoad: false,
   theme: "dark",
   securityLevel: "loose",
+  fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   themeVariables: {
     background: "#0f172a", // Slate-900 matching Tailwind dark theme
     primaryColor: "#3b82f6", // Blue-500
     primaryTextColor: "#f8fafc", // Slate-50
     lineColor: "#64748b", // Slate-500
+    edgeLabelBackground: "#0f172a",
+    fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+    fontSize: "14px",
+  },
+  flowchart: {
+    htmlLabels: true,
+    padding: 18,
   },
 });
 
@@ -50,7 +58,7 @@ export function Mermaid({ chart, minWidth }: MermaidProps) {
   return (
     <div className="my-6 p-4 rounded-xl bg-slate-900/40 border border-slate-800/80 shadow-inner overflow-x-auto max-w-full">
       <div 
-        className="mx-auto text-center" 
+        className="mermaid mx-auto text-center" 
         style={{
           width: "max-content",
           minWidth: minWidth || undefined,

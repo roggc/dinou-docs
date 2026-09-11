@@ -13,8 +13,8 @@ const tocItems = [
 const PROCESS_FLOW_DIAGRAM = `graph TD
     subgraph Parent["Parent Process (server.js) with react-server conditions"]
         HTTPReq["HTTP GET Request"] --> RouteCheck{"Is Route Cached?"}
-        RouteCheck -->|Yes| ServeStatic["Serve index.html directly"]
-        RouteCheck -->|No| GetJSX["Run getJSX() & resolve RSC tree"]
+        RouteCheck -->|"Yes"| ServeStatic["Serve index.html directly"]
+        RouteCheck -->|"No"| GetJSX["Run getJSX() & resolve RSC tree"]
         GetJSX --> SerializeRSC["renderToPipeableStream() from ESM Server"]
         IPCListener["IPC listener: child.on message"] --> SetHeaders["Apply Headers, Cookies, Status, or Redirects"]
     end
@@ -25,9 +25,9 @@ const PROCESS_FLOW_DIAGRAM = `graph TD
     end
 
     %% Process Connections
-    SerializeRSC -->|Pipes binary RSC stream to stdin fd 4| ReadRSC
-    SendIPC -->|Sends IPC messages| IPCListener
-    SSRRender -->|Pipes HTML string stdout| ServeHTML["Send HTTP Response Stream"]
+    SerializeRSC -->|"Pipes binary RSC stream to stdin fd 4"| ReadRSC
+    SendIPC -->|"Sends IPC messages"| IPCListener
+    SSRRender -->|"Pipes HTML string stdout"| ServeHTML["Send HTTP Response Stream"]
     ServeStatic --> ServeHTML
     ServeHTML --> Browser["Client Browser SPA"]`;
 
