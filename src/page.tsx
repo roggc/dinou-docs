@@ -44,7 +44,7 @@ export default function Page() {
                 >
                   <Sparkles className="mr-2 h-3.5 w-3.5 text-blue-500" />
                   <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-semibold">
-                    Dinou v5
+                    Dinou v6
                   </span>
                 </Badge>
               </div>
