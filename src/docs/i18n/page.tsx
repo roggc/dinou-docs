@@ -10,19 +10,22 @@ import {
 } from "@/docs/components/ui/alert";
 import {
   Globe,
-  Cpu,
-  Boxes,
+  Languages,
   Zap,
+  CheckCircle2,
+  ArrowRight,
+  Layers,
+  Sparkles,
 } from "lucide-react";
 
 const tocItems = [
   { id: "overview", title: "💡 Overview", level: 2 },
-  { id: "dynamic-routing", title: "⚡ Part 1: Dynamic Localized Routing", level: 2 },
-  { id: "dynamic-custom", title: "🟢 Option 1.A: Custom Server Lookup", level: 3 },
-  { id: "dynamic-standard", title: "🔵 Option 1.B: i18next & Client Hooks", level: 3 },
-  { id: "static-routing", title: "🌐 Part 2: Static Localized Routing (SSG)", level: 2 },
-  { id: "static-custom", title: "🟢 Option 2.A: Custom Dictionary SSG", level: 3 },
-  { id: "static-standard", title: "🔵 Option 2.B: i18next SSG Resolution", level: 3 },
+  { id: "choosing-strategy", title: "⚖️ Choosing Your Strategy", level: 2 },
+  { id: "root-redirect", title: "🔀 Root URL Redirection", level: 2 },
+  { id: "custom-dictionary", title: "🟢 Option A: Custom Dictionary", level: 2 },
+  { id: "i18next-standard", title: "🔵 Option B: Standard i18next", level: 2 },
+  { id: "server-functions", title: "⚡ Server Functions (Actions)", level: 2 },
+  { id: "language-switcher", title: "🌐 Language Switcher Component", level: 2 },
 ];
 
 export default function Page() {
@@ -33,355 +36,525 @@ export default function Page() {
           {/* Header */}
           <div className="mb-8 space-y-4">
             <div className="flex items-center space-x-2">
+              <Globe className="h-6 w-6 text-primary text-blue-600 dark:text-blue-400" />
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Internationalization (i18n)
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Explore the architectural patterns for building prefix-based, search-engine-friendly localized routing in Dinou.
+              Build search-engine-friendly, localized applications using native dynamic folder route parameters (<code>src/[lang]/...</code>).
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <blockquote>
-              <strong>In Dinou, internationalization is built on standard web primitives. You have the choice between Dynamic request-time routing or Static pre-compiled routing, using custom dictionaries or standard packages.</strong>
+              <strong>In Dinou, internationalization follows modern web standards: localized pages are structured using folder-based dynamic route parameters (<code>src/[lang]/...</code>). This guarantees explicit, canonical URLs for search engines, eliminates complex server URL rewrites, and natively supports both Static (Pre-rendered) and Dynamic (On-Demand) rendering.</strong>
             </blockquote>
 
             {/* OVERVIEW */}
             <section id="overview">
               <h2>💡 Overview</h2>
               <p>
-                Dinou provides complete flexibility for internationalization. Depending on whether you prefer dynamic request-time translations or pre-compiled static HTML pages, the configuration is structured into two main pathways:
+                Organizing routes under dynamic language folders (such as <code>src/[lang]/about/page.tsx</code>) provides a clean, predictable mental model for both developers and search engine crawlers.
+              </p>
+
+              <div className="grid gap-6 md:grid-cols-3 not-prose my-6">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm">
+                      <Layers className="h-4 w-4" />
+                      <span>Native File Routing</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
+                    Dinou's file-system router extracts the locale automatically into <code>params.lang</code>. No custom route-mapping configurations or Express URL rewriting middlewares needed.
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold text-sm">
+                      <Zap className="h-4 w-4" />
+                      <span>Static (Pre-rendered) & Dynamic (On-Demand)</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
+                    Pre-compile static HTML files for each language with <code>getStaticPaths()</code>, or render on-demand at request-time with <code>export function dynamic() {"{ return true; }"}</code>.
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold text-sm">
+                      <Globe className="h-4 w-4" />
+                      <span>SEO First-Class</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
+                    Every language has its own distinct, crawlable URL (e.g. <code>/en/about</code> and <code>/es/about</code>), perfectly suited for standard <code>hreflang</code> meta tags and sitemaps.
+                  </CardContent>
+                </Card>
+              </div>
+
+              <h3>How it Works</h3>
+              <p>
+                When a request arrives for <code>/es/about</code>, Dinou matches the dynamic route <code>src/[lang]/about</code> and invokes <code>getProps(params)</code> inside <code>page_functions.ts</code>, passing <code>{"{ lang: 'es' }"}</code> directly in the parameters object. The active language is passed straight into the page component via standard React props.
+              </p>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* CHOOSING YOUR STRATEGY */}
+            <section id="choosing-strategy">
+              <h2>⚖️ Choosing Your Strategy: Option A vs. Option B</h2>
+              <p>
+                Dinou provides complete architectural flexibility for internationalization. Depending on your component tree depth, dependency constraints, and localization complexity, choose between a lightweight custom dictionary or the standard <code>i18next</code> ecosystem:
               </p>
 
               <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold">
-                      <Zap className="h-5 w-5" />
-                      <span>Part 1: Dynamic Routing (URL Rewrites)</span>
+                <Card className="border-l-4 border-l-emerald-500 bg-card">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-base">
+                      <span className="text-xl">🟢</span>
+                      <span>Option A: Custom Dictionary</span>
                     </div>
                   </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    Evaluate language at request-time. Keeps your directory structure clean (e.g. <code>src/about/page.tsx</code>). Uses Express middleware to intercept prefixes and rewrite URLs internally.
+                  <CardContent className="text-xs space-y-3 text-muted-foreground leading-relaxed">
+                    <p>
+                      <strong>How it works:</strong> Translations are defined as plain JavaScript/TypeScript dictionaries and passed via <strong>standard React props</strong> from <code>getProps()</code> directly into your page component.
+                    </p>
+                    <p>
+                      <strong>Server & Client Components:</strong> Because plain dictionary objects (<code>{"{ [key]: string }"}</code>) are 100% serializable, you can pass translated strings down to <strong>both Server Components and interactive Client Components</strong> without issues.
+                    </p>
+                    <div className="pt-2 border-t space-y-1.5">
+                      <div className="text-emerald-700 dark:text-emerald-300 font-medium">✓ Zero bundle overhead (0 KB client runtime)</div>
+                      <div className="text-emerald-700 dark:text-emerald-300 font-medium">✓ Zero external dependencies</div>
+                      <div className="text-emerald-700 dark:text-emerald-300 font-medium">✓ Works seamlessly across Server & Client boundaries</div>
+                      <div className="text-amber-700 dark:text-amber-400">⚠ Requires prop passing for deep client trees (prop drilling)</div>
+                    </div>
                   </CardContent>
                 </Card>
 
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 font-semibold">
-                      <Globe className="h-5 w-5" />
-                      <span>Part 2: Static Routing (SSG Prefixes)</span>
+                <Card className="border-l-4 border-l-blue-500 bg-card">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-base">
+                      <span className="text-xl">🔵</span>
+                      <span>Option B: Standard i18next</span>
                     </div>
                   </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    Pre-compile independent language files at build/startup time for maximum performance. Uses folders (e.g. <code>src/[lang]/about/page.tsx</code>) matched natively by the file-system router.
+                  <CardContent className="text-xs space-y-3 text-muted-foreground leading-relaxed">
+                    <p>
+                      <strong>How it works:</strong> Localized strings are loaded into an <code>I18nextProvider</code> context and consumed in client components using the <strong><code>useTranslation()</code> hook</strong>.
+                    </p>
+                    <p>
+                      <strong>Eliminates Prop Drilling:</strong> Any deeply nested Client Component (modals, drawers, nested form inputs, toasts) can consume translated strings anywhere without having to thread props down multiple levels.
+                    </p>
+                    <div className="pt-2 border-t space-y-1.5">
+                      <div className="text-blue-700 dark:text-blue-300 font-medium">✓ Convenient <code>useTranslation()</code> hook anywhere</div>
+                      <div className="text-blue-700 dark:text-blue-300 font-medium">✓ Built-in pluralization, interpolation & formatting</div>
+                      <div className="text-blue-700 dark:text-blue-300 font-medium">✓ Standard ecosystem (widely used in enterprise)</div>
+                      <div className="text-amber-700 dark:text-amber-400">⚠ Includes client runtime bundle (~15-20 KB)</div>
+                    </div>
                   </CardContent>
                 </Card>
+              </div>
+
+              <div className="overflow-x-auto not-prose my-6 border rounded-lg bg-card">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-muted/50 border-b font-semibold">
+                    <tr>
+                      <th className="p-3">Feature</th>
+                      <th className="p-3">Option A: Custom Dictionary</th>
+                      <th className="p-3">Option B: Standard i18next</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y text-muted-foreground">
+                    <tr>
+                      <td className="p-3 font-medium text-foreground">Delivery Method</td>
+                      <td className="p-3">Standard React Props (<code>props.t</code>)</td>
+                      <td className="p-3">React Context Hook (<code>useTranslation()</code>)</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-medium text-foreground">Component Support</td>
+                      <td className="p-3">Server Components & Client Components (via props)</td>
+                      <td className="p-3">Client Components (via hook) + Server helper</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-medium text-foreground">Bundle Overhead</td>
+                      <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">0 KB (Zero dependencies)</td>
+                      <td className="p-3">~15-20 KB (i18next runtime)</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-medium text-foreground">Deep Client Nesting</td>
+                      <td className="p-3">Requires prop drilling or composition</td>
+                      <td className="p-3 text-blue-600 dark:text-blue-400 font-semibold">Effortless (Hook anywhere)</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-medium text-foreground">Pluralization & Formatting</td>
+                      <td className="p-3">Manual helper functions</td>
+                      <td className="p-3 text-blue-600 dark:text-blue-400 font-semibold">Built-in (Plurals, dates, numbers)</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </section>
 
             <hr className="my-8" />
 
-            {/* PART 1: DYNAMIC ROUTING */}
-            <section id="dynamic-routing">
-              <h2>⚡ Part 1: Dynamic Localized Routing</h2>
+            {/* ROOT REDIRECT */}
+            <section id="root-redirect">
+              <h2>🔀 Root URL Redirection (<code>/</code> ➔ <code>/[lang]</code>)</h2>
               <p>
-                This approach intercepts incoming language routes (like <code>/es/about</code>), extracts the locale, rewrites the URL to standard paths (<code>/about</code>) internally, and resolves the active translation dynamically at request-time.
+                When all localized routes live under <code>src/[lang]/...</code>, a visitor navigating to the bare root URL (<code>https://example.com/</code>) should be redirected automatically to their preferred language.
               </p>
 
-              <h3>Common Server Configuration</h3>
               <p>
-                Eject the framework with <code>npm run eject</code>, then open <code className="text-amber-500">dinou/core/server.js</code>. Insert this prefix-aware middleware immediately after the cookie parser middleware:
+                The standard industry approach follows this evaluation order:
               </p>
+              <ol className="list-decimal pl-6 space-y-1 text-sm text-muted-foreground">
+                <li><strong>Saved Cookie:</strong> Check <code>req.cookies.locale</code> if the user previously selected a language.</li>
+                <li><strong>Browser Header:</strong> Check <code>req.headers["accept-language"]</code> for the user's browser language preference.</li>
+                <li><strong>Default Fallback:</strong> Default to your primary language (e.g. <code>"en"</code> or <code>"es"</code>).</li>
+                <li><strong>Temporary Redirect:</strong> Respond with an HTTP <code>307</code> (Temporary Redirect) to <code>/{"${targetLocale}"}</code>.</li>
+              </ol>
+
+              <h3>Configuring the Root Redirect Plugin</h3>
+              <p>
+                You can register this redirection logic cleanly without ejecting using a lightweight plugin in <code>dinou.config.js</code>:
+              </p>
+
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`// dinou/core/server.js
-app.use(appUseCookieParser);
+                <CodeBlock language="javascript">{`// dinou.config.js
+module.exports = {
+  plugins: [
+    {
+      name: "i18n-root-redirect",
+      onServerInit(app) {
+        // Intercept requests to the bare root "/"
+        app.get("/", (req, res) => {
+          const supportedLocales = ["en", "es"];
+          const defaultLocale = "en";
 
-// 🌐 PREFIX-AWARE i18n ROUTING MIDDLEWARE
-app.use((req, res, next) => {
-  const match = req.path.match(/^(\/____rsc_payload(?:_old)?(?:_static)?____)?\/(es|en)(\/|$)/);
-  let locale = req.cookies?.locale || "en";
+          // 1. Check saved user cookie
+          const cookieLocale = req.cookies?.locale;
+          if (cookieLocale && supportedLocales.includes(cookieLocale)) {
+            return res.redirect(307, \`/\${cookieLocale}\`);
+          }
 
-  if (match) {
-    const prefix = match[1] || "";
-    locale = match[2];
-    if (req.cookies?.locale !== locale) {
-      res.cookie("locale", locale, { maxAge: 31536000000, httpOnly: true });
-    }
-    // Remove the language prefix internally to match standard routes
-    const remaining = req.url.substring(match[0].length - 1) || "/";
-    req.url = prefix + remaining;
-  }
+          // 2. Check browser Accept-Language header
+          const acceptLang = req.headers["accept-language"] || "";
+          const browserLocale = supportedLocales.find((lang) =>
+            acceptLang.toLowerCase().includes(lang)
+          );
 
-  req.locale = locale;
-  next();
-});`}</CodeBlock>
-              </div>
-
-              <p>
-                Expose the active <code>req.locale</code> inside the request context. In <code className="text-amber-500">server.js</code>, update <code>getContext</code> and <code>getContextForServerFunctionEndpoint</code>:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`function getContext(req, res) {
-  return {
-    req: {
-      cookies: { ...req.cookies },
-      headers: { ... },
-      query: { ...req.query },
-      path: req.path,
-      method: req.method,
-      locale: req.locale, // 👈 Expose locale to request context
+          // 3. Fallback to default
+          const targetLocale = browserLocale || defaultLocale;
+          return res.redirect(307, \`/\${targetLocale}\`);
+        });
+      },
     },
-    res: { ... }
-  };
-}
-
-function getContextForServerFunctionEndpoint(req, res) {
-  return {
-    req: {
-      cookies: { ...req.cookies },
-      headers: { ... },
-      query: { ...req.query },
-      path: req.path,
-      method: req.method,
-      locale: req.locale, // 👈 Expose locale to request context
-    },
-    res: { ... }
-  };
-}`}</CodeBlock>
-              </div>
-
-              <p>
-                Also, pass the locale to the dynamic HTML compilation subprocess in the Express wildcard GET handler (<code>app.get(/^\/.*\/?$/)</code>) inside <code>contextForChild</code>:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`// In server.js wildcard route handler
-const contextForChild = {
-  req: {
-    query: { ...req.query },
-    cookies: { ...req.cookies },
-    headers: { ... },
-    path: req.path,
-    method: req.method,
-    locale: req.locale, // 👈 Propagate locale here
-  },
+  ],
 };`}</CodeBlock>
+              </div>
+
+              <div className="not-prose my-4">
+                <Alert>
+                  <Sparkles className="h-4 w-4" />
+                  <AlertTitle>Why HTTP 307?</AlertTitle>
+                  <AlertDescription className="text-xs text-muted-foreground mt-1">
+                    An HTTP 307 (Temporary Redirect) ensures that search engine crawlers and browser caches do not permanently store the redirect, allowing visitors to switch languages later without getting locked into their initial choice.
+                  </AlertDescription>
+                </Alert>
               </div>
             </section>
 
-            {/* OPTION 1.A */}
-            <section id="dynamic-custom">
-              <h3>🟢 Option 1.A: Custom Lightweight Server Lookup</h3>
+            <hr className="my-8" />
+
+            {/* OPTION A: CUSTOM DICTIONARY */}
+            <section id="custom-dictionary">
+              <h2>🟢 Option A: Lightweight Custom Dictionary</h2>
               <p>
-                A simple server-side lookup system. Best when translations are only used to present static text content inside Server Components with zero package dependencies.
+                This zero-dependency pattern passes translated strings via <strong>standard React props</strong> from <code>getProps()</code> directly into your components. Because plain dictionary objects are completely serializable across the Server-to-Client boundary, this works seamlessly for <strong>both Server Components and interactive Client Components</strong> with zero client runtime overhead.
               </p>
 
               <div className="not-prose my-4">
-                <Alert variant="warning">
-                  <AlertTitle>⚠️ Server-Only Constraint</AlertTitle>
+                <Alert>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <AlertTitle>Full Support for Server & Client Components via Props</AlertTitle>
                   <AlertDescription className="text-xs text-muted-foreground mt-1">
-                    This custom approach does not establish context providers or client hooks (like <code>useTranslation()</code>). If a Client Component requires localized strings, they must be resolved on the server and explicitly passed down via props.
+                    Plain dictionary objects (<code>{"{ [key]: string }"}</code>) are 100% serializable. You can render translations directly in Server Components or pass them as props down into interactive Client Components (marked with <code>"use client"</code>) without any third-party dependencies or client context providers.
                   </AlertDescription>
                 </Alert>
               </div>
 
-              <h4>1. Defining page_functions.ts</h4>
-              <div className="not-prose my-4">
-                <CodeBlock language="typescript">{`// src/about/page_functions.ts
-import { getContext } from "dinou";
+              <h3>1. Directory Structure</h3>
+              <div className="not-prose my-4 border rounded-xl p-4 bg-slate-50 dark:bg-slate-900/50">
+                <pre className="font-mono text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre">{`src/
+└── [lang]/
+    └── about/
+        ├── page_functions.ts   # Route parameters & dictionary lookup
+        └── page.tsx            # Server or Client Component receiving translated props`}</pre>
+              </div>
 
-export function dynamic() {
-  return true; // Evaluate route dynamically at request-time (to access request cookies/locale)
+              <h3>2. Route Logic (<code>page_functions.ts</code>)</h3>
+              <p>
+                In <code>page_functions.ts</code>, define <code>getStaticPaths()</code> to declare which languages to pre-compile at build/startup time, and read <code>params.lang</code> inside <code>getProps(params)</code>:
+              </p>
+
+              <div className="not-prose my-4">
+                <CodeBlock language="typescript">{`// src/[lang]/about/page_functions.ts
+
+// 1. Declare the language variants to pre-compile as static HTML
+export async function getStaticPaths() {
+  return [
+    { lang: "en" },
+    { lang: "es" },
+  ];
 }
 
+// 2. Define your dictionary strings
 const translations = {
-  en: { title: "Custom i18n", welcome: "Welcome!" },
-  es: { title: "i18n Personalizado", welcome: "¡Bienvenido!" },
+  en: {
+    title: "About Dinou",
+    description: "Dinou is an ejectable, full-stack React 19 framework.",
+    backToHome: "Back to Home",
+  },
+  es: {
+    title: "Acerca de Dinou",
+    description: "Dinou es un framework full-stack eyectable de React 19.",
+    backToHome: "Volver al Inicio",
+  },
 };
 
-export async function getProps() {
-  const ctx = getContext();
-  const locale = ctx?.req?.locale || "en";
-  const t = translations[locale] || translations.en;
+// 3. Resolve the translation directly from route params
+export async function getProps(params: { lang?: string }) {
+  const lang = (params.lang === "es" ? "es" : "en") as "en" | "es";
+  const t = translations[lang];
 
   return {
     page: {
       t,
-      currentLocale: locale,
+      currentLocale: lang,
     },
   };
 }`}</CodeBlock>
               </div>
 
-              <h4>2. Rendering inside page.tsx</h4>
+              <h3>3. Page View (<code>page.tsx</code>)</h3>
+              <p>
+                The page component receives <code>t</code> and <code>currentLocale</code> via standard React props:
+              </p>
+
               <div className="not-prose my-4">
-                <CodeBlock language="tsx">{`// src/about/page.tsx
+                <CodeBlock language="tsx">{`// src/[lang]/about/page.tsx
 import { Link } from "dinou";
 
-export default function Page({ t, currentLocale }) {
+export default function AboutPage({
+  t,
+  currentLocale,
+}: {
+  t: { title: string; description: string; backToHome: string };
+  currentLocale: string;
+}) {
   return (
-    <div>
-      <h1>{t.title}</h1>
-      <p>{t.welcome}</p>
-      
-      <div className="flex gap-4">
-        <Link href="/en/about">English</Link>
-        <Link href="/es/about">Español</Link>
+    <main className="max-w-2xl mx-auto py-12 px-4 space-y-6">
+      <h1 className="text-3xl font-bold">{t.title}</h1>
+      <p className="text-muted-foreground">{t.description}</p>
+
+      {/* Language Switcher */}
+      <div className="flex gap-4 pt-4 border-t text-sm">
+        <Link
+          href="/en/about"
+          className={currentLocale === "en" ? "font-bold underline" : "text-muted-foreground"}
+        >
+          English
+        </Link>
+        <Link
+          href="/es/about"
+          className={currentLocale === "es" ? "font-bold underline" : "text-muted-foreground"}
+        >
+          Español
+        </Link>
       </div>
-    </div>
+    </main>
   );
 }`}</CodeBlock>
               </div>
             </section>
 
-            {/* OPTION 1.B */}
-            <section id="dynamic-standard">
-              <h3>🔵 Option 1.B: Standard i18next & Client Hooks</h3>
+            <hr className="my-8" />
+
+            {/* OPTION B: STANDARD I18NEXT */}
+            <section id="i18next-standard">
+              <h2>🔵 Option B: Standard i18next & Client Hooks</h2>
               <p>
-                Integrates the official <code>i18next</code> engine. Exposes translation hooks to Client Components so they can dynamically translate strings after hydration.
+                When interactive Client Components are deeply nested across multiple layers, passing props down through each level (prop drilling) can become tedious. By integrating <code>i18next</code> and <code>react-i18next</code>, any Client Component can consume localized strings anywhere using the <strong><code>useTranslation()</code> hook</strong>, while also providing built-in pluralization, interpolation, and nested namespaces.
               </p>
 
-              <h4>1. Installation</h4>
+              <h3>1. Installation</h3>
               <div className="not-prose my-4">
                 <CodeBlock language="bash">{`npm install i18next react-i18next`}</CodeBlock>
               </div>
 
-              <h4>2. Server Configuration (i18n.ts)</h4>
+              <h3>2. Shared i18next Configuration (<code>src/lib/i18n.ts</code>)</h3>
+              <p>
+                Create a shared configuration file with your translation resources:
+              </p>
+
               <div className="not-prose my-4">
-                <CodeBlock language="typescript">{`// src/i18n-real/i18n.ts
+                <CodeBlock language="typescript">{`// src/lib/i18n.ts
 import i18next from "i18next";
-import { getContext } from "dinou";
+
+export const resources = {
+  en: {
+    translation: {
+      title: "Interactive i18n Demo",
+      clientMessage: "This text is translated inside a Client Component using useTranslation()!",
+      save: "Save Changes",
+    },
+  },
+  es: {
+    translation: {
+      title: "Demostración Interactiva de i18n",
+      clientMessage: "¡Este texto se traduce dentro de un Client Component usando useTranslation()!",
+      save: "Guardar Cambios",
+    },
+  },
+} as const;
 
 if (!i18next.isInitialized) {
   i18next.init({
-    resources: {
-      en: {
-        translation: {
-          title: "Standard i18n Demo",
-          clientText: "This text is translated inside a CLIENT component using useTranslation!",
-        },
-      },
-      es: {
-        translation: {
-          title: "Demostración de i18n Estándar",
-          clientText: "¡Este texto se traduce dentro de un componente de CLIENTE usando useTranslation!",
-        },
-      },
-    },
+    resources,
     fallbackLng: "en",
     interpolation: { escapeValue: false },
   });
 }
 
-export function getT() {
-  const ctx = getContext();
-  const locale = ctx?.req?.locale || "en";
-  return i18next.getFixedT(locale); // Safe for concurrent requests
+// Helper for server-side fixed translations matching route parameters
+export function getFixedT(lang: string) {
+  return i18next.getFixedT(lang);
 }`}</CodeBlock>
               </div>
 
-              <h4>3. Page Functions (page_functions.ts)</h4>
-              <div className="not-prose my-4">
-                <CodeBlock language="typescript">{`// src/i18n-real/page_functions.ts
-import { getContext } from "dinou";
-import { getT } from "./i18n";
+              <h3>3. Route Logic (<code>page_functions.ts</code>)</h3>
+              <p>
+                Use <code>getFixedT(params.lang)</code> in <code>getProps</code> to pre-translate server strings:
+              </p>
 
-export function dynamic() {
-  return true; // Evaluate route dynamically at request-time (to access request cookies/locale)
+              <div className="not-prose my-4">
+                <CodeBlock language="typescript">{`// src/[lang]/interactive/page_functions.ts
+import { getFixedT } from "@/lib/i18n";
+
+export async function getStaticPaths() {
+  return [
+    { lang: "en" },
+    { lang: "es" },
+  ];
 }
 
-export async function getProps() {
-  const ctx = getContext();
-  const locale = ctx?.req?.locale || "en";
-  const t = getT();
+export async function getProps(params: { lang?: string }) {
+  const lang = params.lang || "en";
+  const t = getFixedT(lang);
 
   return {
     page: {
       title: t("title"),
-      currentLocale: locale,
+      currentLocale: lang,
     },
   };
 }`}</CodeBlock>
               </div>
 
-              <h4>4. Client Context Provider (I18nProvider.tsx)</h4>
+              <h3>4. Client Provider (<code>src/components/i18n-provider.tsx</code>)</h3>
+              <p>
+                Wrap the Client tree in an <code>I18nextProvider</code> that synchronizes its active language whenever <code>currentLocale</code> changes:
+              </p>
+
               <div className="not-prose my-4">
-                <CodeBlock language="tsx">{`// src/i18n-real/I18nProvider.tsx
+                <CodeBlock language="tsx">{`// src/components/i18n-provider.tsx
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import i18next from "i18next";
 import { I18nextProvider } from "react-i18next";
+import { resources } from "@/lib/i18n";
 
-const clientResources = {
-  en: {
-    translation: {
-      title: "Standard i18n Demo",
-      clientText: "This text is translated inside a CLIENT component using useTranslation!",
-    },
-  },
-  es: {
-    translation: {
-      title: "Demostración de i18n Estándar",
-      clientText: "¡Este texto se traduce dentro de un componente de CLIENTE usando useTranslation!",
-    },
-  },
-};
-
-const i18nInstance = i18next.createInstance();
-
-export function I18nProvider({ locale, children }: { locale: string; children: ReactNode }) {
-  if (!i18nInstance.isInitialized) {
-    i18nInstance.init({
-      resources: clientResources,
+export function I18nProvider({
+  locale,
+  children,
+}: {
+  locale: string;
+  children: ReactNode;
+}) {
+  const i18nInstance = useMemo(() => {
+    const instance = i18next.createInstance();
+    instance.init({
+      resources,
       lng: locale,
       fallbackLng: "en",
       interpolation: { escapeValue: false },
     });
-  }
+    return instance;
+  }, [locale]);
 
   useEffect(() => {
     if (i18nInstance.language !== locale) {
       i18nInstance.changeLanguage(locale);
     }
-  }, [locale]);
+  }, [locale, i18nInstance]);
 
   return <I18nextProvider i18n={i18nInstance}>{children}</I18nextProvider>;
 }`}</CodeBlock>
               </div>
 
-              <h4>5. Consuming in Client Components (ClientComponent.tsx)</h4>
+              <h3>5. Client Component & Page Integration</h3>
+              <p>
+                Client Components can now call the <code>useTranslation()</code> hook safely:
+              </p>
+
               <div className="not-prose my-4">
-                <CodeBlock language="tsx">{`// src/i18n-real/ClientComponent.tsx
+                <CodeBlock language="tsx">{`// src/components/feedback-box.tsx
 "use client";
 
 import { useTranslation } from "react-i18next";
 
-export default function ClientComponent() {
+export function FeedbackBox() {
   const { t } = useTranslation();
-  return <div>{t("clientText")}</div>;
+  return (
+    <div className="p-4 rounded-lg bg-muted border text-sm">
+      <p>{t("clientMessage")}</p>
+      <button className="mt-3 px-3 py-1.5 bg-primary text-primary-foreground rounded text-xs font-semibold">
+        {t("save")}
+      </button>
+    </div>
+  );
 }`}</CodeBlock>
               </div>
 
-              <h4>6. Page Integration (page.tsx)</h4>
               <div className="not-prose my-4">
-                <CodeBlock language="tsx">{`// src/i18n-real/page.tsx
+                <CodeBlock language="tsx">{`// src/[lang]/interactive/page.tsx
+import { I18nProvider } from "@/components/i18n-provider";
+import { FeedbackBox } from "@/components/feedback-box";
 import { Link } from "dinou";
-import { I18nProvider } from "./I18nProvider";
-import ClientComponent from "./ClientComponent";
 
-export default function Page({ title, currentLocale }) {
+export default function InteractivePage({
+  title,
+  currentLocale,
+}: {
+  title: string;
+  currentLocale: string;
+}) {
   return (
     <I18nProvider locale={currentLocale}>
-      <div>
-        <h1>{title}</h1>
-        <ClientComponent />
-        <div className="flex gap-4">
-          <Link href="/en/i18n-real">English</Link>
-          <Link href="/es/i18n-real">Español</Link>
+      <main className="max-w-2xl mx-auto py-12 px-4 space-y-6">
+        <h1 className="text-3xl font-bold">{title}</h1>
+        <FeedbackBox />
+
+        <div className="flex gap-4 pt-4 border-t text-sm">
+          <Link href="/en/interactive">English</Link>
+          <Link href="/es/interactive">Español</Link>
         </div>
-      </div>
+      </main>
     </I18nProvider>
   );
 }`}</CodeBlock>
@@ -390,192 +563,243 @@ export default function Page({ title, currentLocale }) {
 
             <hr className="my-8" />
 
-            {/* PART 2: STATIC ROUTING */}
-            <section id="static-routing">
-              <h2>🌐 Part 2: Static Localized Routing (SSG)</h2>
+            {/* SERVER FUNCTIONS */}
+            <section id="server-functions">
+              <h2>⚡ Server Functions (Server Actions) with i18n</h2>
               <p>
-                Instead of rewriting URLs, pages are nested inside a dynamic folder structure (e.g. <code>src/[lang]/about/page.tsx</code>) and pre-compiled during server startup into static HTML files via <code>getStaticPaths()</code>.
+                When a component triggers a Server Function (Server Action) from a localized page, pass the active language explicitly as an argument or form field. This maintains pure, testable functions without relying on hidden global server state.
               </p>
 
-              <h3>Simplified Server Middleware</h3>
+              <h3>Pattern 1: Direct Function Call (Client Component)</h3>
               <p>
-                Since the file-system router naturally matches the route prefix folder structure, we do <strong>not</strong> need to rewrite request paths. The middleware only updates cookies and sets <code>req.locale</code> for dynamic hooks:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`// dinou/core/server.js
-app.use((req, res, next) => {
-  const match = req.path.match(/^(\/____rsc_payload(?:_old)?(?:_static)?____)?\/(es|en)(\/|$)/);
-  let locale = req.cookies?.locale || "en";
-
-  if (match) {
-    locale = match[2];
-    if (req.cookies?.locale !== locale) {
-      res.cookie("locale", locale, { maxAge: 31536000000, httpOnly: true });
-    }
-    // 🚨 NOTE: No URL rewriting is needed here!
-  }
-
-  req.locale = locale;
-  next();
-});`}</CodeBlock>
-              </div>
-
-              <Alert className="my-4">
-                <AlertTitle>💡 Context Propagation Best Practice</AlertTitle>
-                <AlertDescription className="text-xs text-muted-foreground mt-1">
-                  Although static SSG pages resolve their language at server startup using route parameters (<code>params.lang</code>), you should still propagate the <code>req.locale</code> property inside <code>server.js</code> (in <code>getContext</code>, <code>getContextForServerFunctionEndpoint</code>, and <code>contextForChild</code>) as explained in <a href="#dynamic-routing" className="underline font-semibold">Part 1: Common Server Configuration</a>. This is required for two reasons: (1) so that <strong>Server Functions (actions)</strong> triggered from these static pages can detect the user's active locale at request-time, and (2) to ensure consistent behavior in <strong>development mode</strong>, where all pages are rendered dynamically on the fly.
-                </AlertDescription>
-              </Alert>
-            </section>
-
-            {/* OPTION 2.A */}
-            <section id="static-custom">
-              <h3>🟢 Option 2.A: Custom Dictionary SSG Lookup</h3>
-              <p>
-                Uses a custom translations dictionary within dynamic parameters. Fully compiled at build/startup time for maximum speed.
+                Pass <code>lang</code> directly when calling the server action from an event handler or <code>useTransition</code>. How you obtain the active language depends on your chosen strategy:
               </p>
 
               <div className="not-prose my-4">
-                <Alert variant="warning">
-                  <AlertTitle>⚠️ Server-Only Constraint</AlertTitle>
-                  <AlertDescription className="text-xs text-muted-foreground mt-1">
-                    This custom approach does not establish context providers or client hooks (like <code>useTranslation()</code>). If a Client Component requires localized strings, they must be resolved on the server and explicitly passed down via props.
-                  </AlertDescription>
-                </Alert>
-              </div>
+                <CodeBlock language="typescript">{`// src/actions/newsletter.ts
+"use server";
 
-              <h4>1. Defining page_functions.ts</h4>
-              <div className="not-prose my-4">
-                <CodeBlock language="typescript">{`// src/[lang]/about/page_functions.ts
-
-// 1. Tell Dinou which language paths to pre-compile as static HTML files at startup
-export async function getStaticPaths() {
-  return [
-    { lang: "en" },
-    { lang: "es" },
-  ];
-}
-
-const translations = {
-  en: { title: "Static i18n Page", welcome: "Statically compiled!" },
-  es: { title: "Página de i18n Estática", welcome: "¡Compilado estáticamente!" },
-};
-
-// 2. Read the lang parameter directly from the route parameters
-export async function getProps(params) {
-  const lang = params.lang || "en";
-  const t = translations[lang] || translations.en;
-
-  return {
-    page: {
-      t,
-      currentLocale: lang,
-    },
-  };
+export async function subscribeNewsletter(lang: string, email: string) {
+  // Use the active locale to send a localized confirmation email
+  console.log(\`Sending \${lang} welcome email to \${email}\`);
+  return { success: true };
 }`}</CodeBlock>
               </div>
 
-              <h4>2. Rendering inside page.tsx</h4>
-              <div className="not-prose my-4">
-                <CodeBlock language="tsx">{`// src/[lang]/about/page.tsx
-import { Link } from "dinou";
+              <h4>Option A: Receiving <code>currentLocale</code> via Props</h4>
+              <p>
+                In zero-dependency setups, pass <code>currentLocale</code> as a regular prop into the Client Component:
+              </p>
 
-export default function Page({ t, currentLocale }) {
+              <div className="not-prose my-4">
+                <CodeBlock language="tsx">{`// src/components/newsletter-form.tsx (Option A: via Props)
+"use client";
+
+import { useState, useTransition } from "react";
+import { subscribeNewsletter } from "@/actions/newsletter";
+
+export function NewsletterForm({ currentLocale }: { currentLocale: string }) {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    startTransition(async () => {
+      // Pass currentLocale received from props
+      const res = await subscribeNewsletter(currentLocale, email);
+      if (res.success) setStatus("Subscribed successfully!");
+    });
+  };
+
   return (
-    <div>
-      <h1>{t.title}</h1>
-      <p>{t.welcome}</p>
-      <div className="flex gap-4">
-        <Link href="/en/about">English</Link>
-        <Link href="/es/about">Español</Link>
-      </div>
-    </div>
+    <form onSubmit={handleSubmit} className="flex gap-2">
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="you@example.com"
+        required
+        className="px-3 py-2 rounded border text-sm"
+      />
+      <button
+        type="submit"
+        disabled={isPending}
+        className="px-4 py-2 rounded bg-primary text-primary-foreground text-sm font-semibold"
+      >
+        {isPending ? "Subscribing..." : "Subscribe"}
+      </button>
+      {status && <p className="text-xs text-green-600 mt-1">{status}</p>}
+    </form>
   );
 }`}</CodeBlock>
               </div>
-            </section>
 
-            {/* OPTION 2.B */}
-            <section id="static-standard">
-              <h3>🔵 Option 2.B: Standard i18next SSG Resolution</h3>
+              <h4>Option B: Accessing Locale via <code>useTranslation()</code></h4>
               <p>
-                Utilizes the <code>i18next</code> package inside a static pre-compiled context by leveraging <code>i18next.getFixedT(lang)</code>.
+                If your project uses <code>react-i18next</code>, the active locale is already available in context via <code>i18n.language</code>, eliminating the need to pass any locale props:
               </p>
 
-              <h4>1. Defining page_functions.ts</h4>
               <div className="not-prose my-4">
-                <CodeBlock language="typescript">{`// src/[lang]/about/page_functions.ts
-import i18next from "i18next";
+                <CodeBlock language="tsx">{`// src/components/newsletter-form-i18n.tsx (Option B: via Hook)
+"use client";
 
-// Ensure i18next is initialized for the static compilation run
-if (!i18next.isInitialized) {
-  i18next.init({
-    resources: {
-      en: {
-        translation: {
-          title: "Static Page (i18next)",
-          welcome: "This HTML page was pre-compiled statically via i18next!",
-        },
-      },
-      es: {
-        translation: {
-          title: "Página Estática (i18next)",
-          welcome: "¡Esta página se pre-compiló estáticamente con i18next!",
-        },
-      },
-    },
-    fallbackLng: "en",
-    interpolation: { escapeValue: false },
-  });
-}
+import { useState, useTransition } from "react";
+import { useTranslation } from "react-i18next";
+import { subscribeNewsletter } from "@/actions/newsletter";
 
-export async function getStaticPaths() {
-  return [
-    { lang: "en" },
-    { lang: "es" },
-  ];
-}
+export function NewsletterForm() {
+  const { i18n } = useTranslation(); // No props needed!
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-export async function getProps(params) {
-  const lang = params.lang || "en";
-  const t = i18next.getFixedT(lang); // Get translation function fixed to route parameter lang
-
-  return {
-    page: {
-      title: t("title"),
-      welcome: t("welcome"),
-      currentLocale: lang,
-    },
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    startTransition(async () => {
+      // Read current language directly from the hook
+      const res = await subscribeNewsletter(i18n.language, email);
+      if (res.success) setStatus("Subscribed successfully!");
+    });
   };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex gap-2">
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="you@example.com"
+        required
+        className="px-3 py-2 rounded border text-sm"
+      />
+      <button
+        type="submit"
+        disabled={isPending}
+        className="px-4 py-2 rounded bg-primary text-primary-foreground text-sm font-semibold"
+      >
+        {isPending ? "Subscribing..." : "Subscribe"}
+      </button>
+      {status && <p className="text-xs text-green-600 mt-1">{status}</p>}
+    </form>
+  );
 }`}</CodeBlock>
               </div>
 
-              <h4>2. Rendering inside page.tsx</h4>
+              <h3>Pattern 2: Form Actions with <code>.bind()</code></h3>
               <p>
-                In the page file, render the pre-translated props and wrap the tree in the client provider if client components also need translations:
+                In React 19, use the standard <code>.bind()</code> pattern to pre-attach route parameters to native form actions:
               </p>
+
               <div className="not-prose my-4">
-                <CodeBlock language="tsx">{`// src/[lang]/about/page.tsx
-import { Link } from "dinou";
-import { I18nProvider } from "../../i18n-real/I18nProvider"; // Import client provider
-import ClientComponent from "../../i18n-real/ClientComponent"; // Client component using hooks
+                <CodeBlock language="typescript">{`// src/actions/contact.ts
+"use server";
 
-export default function Page({ title, welcome, currentLocale }) {
+export async function submitContactForm(lang: string, formData: FormData) {
+  const email = formData.get("email") as string;
+  const message = formData.get("message") as string;
+  console.log(\`Received \${lang} contact request from \${email}\`);
+  return { success: true };
+}`}</CodeBlock>
+              </div>
+
+              <div className="not-prose my-4">
+                <CodeBlock language="tsx">{`// src/[lang]/contact/page.tsx
+import { submitContactForm } from "@/actions/contact";
+
+export default function ContactPage({ currentLocale }: { currentLocale: string }) {
+  // Pre-bind currentLocale as the first argument
+  const submitWithLocale = submitContactForm.bind(null, currentLocale);
+
   return (
-    <I18nProvider locale={currentLocale}>
-      <div>
-        <h1>{title}</h1>
-        <p>{welcome}</p>
-        
-        {/* Translates correctly on the client side using useTranslation hooks */}
-        <ClientComponent />
+    <form action={submitWithLocale} className="space-y-4">
+      <input name="email" type="email" required placeholder="name@example.com" />
+      <textarea name="message" required placeholder="Your message..." />
+      <button type="submit">Submit</button>
+    </form>
+  );
+}`}</CodeBlock>
+              </div>
 
-        <div className="flex gap-4">
-          <Link href="/en/about">English</Link>
-          <Link href="/es/about">Español</Link>
-        </div>
-      </div>
-    </I18nProvider>
+              <h3>Pattern 3: Hidden Form Input</h3>
+              <p>
+                Alternatively, include the locale as a standard hidden input in your form. The Server Action reads it directly via <code>formData.get("lang")</code>:
+              </p>
+
+              <div className="not-prose my-4">
+                <CodeBlock language="tsx">{`<form action={submitContactForm}>
+  {/* Read in the server action with: const lang = formData.get("lang") */}
+  <input type="hidden" name="lang" value={currentLocale} />
+  {/* other form fields */}
+  <button type="submit">Submit</button>
+</form>`}</CodeBlock>
+              </div>
+
+              <div className="not-prose my-4">
+                <Alert>
+                  <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <AlertTitle>Advantages of Passing Locale by Parameter</AlertTitle>
+                  <AlertDescription className="text-xs text-muted-foreground mt-1 space-y-1">
+                    <p>• <strong>Strict Type Safety:</strong> TypeScript validates that the action receives a valid locale string.</p>
+                    <p>• <strong>Testability:</strong> Unit test your Server Actions directly without having to mock Express request contexts.</p>
+                    <p>• <strong>Zero Global Coupling:</strong> Functions remain pure and decoupled from server middleware lifecycles.</p>
+                  </AlertDescription>
+                </Alert>
+              </div>
+            </section>
+
+            <hr className="my-8" />
+
+            {/* LANGUAGE SWITCHER */}
+            <section id="language-switcher">
+              <h2>🌐 Language Switcher Component</h2>
+              <p>
+                Below is a reusable language switcher component. It uses Dinou's <code>usePathname()</code> to swap the active language prefix while keeping the user on the exact same sub-path:
+              </p>
+
+              <div className="not-prose my-4">
+                <CodeBlock language="tsx">{`// src/components/language-switcher.tsx
+"use client";
+
+import { usePathname, Link } from "dinou";
+
+const LOCALES = [
+  { code: "en", label: "English" },
+  { code: "es", label: "Español" },
+];
+
+export function LanguageSwitcher() {
+  const pathname = usePathname();
+
+  // Helper to replace the leading language prefix (e.g. /en/about -> /es/about)
+  const getLocalizedPath = (targetLocale: string) => {
+    const segments = pathname.split("/").filter(Boolean);
+    if (segments.length > 0 && LOCALES.some((l) => l.code === segments[0])) {
+      segments[0] = targetLocale;
+    } else {
+      segments.unshift(targetLocale);
+    }
+    return "/" + segments.join("/");
+  };
+
+  const currentLocale = pathname.split("/").filter(Boolean)[0] || "en";
+
+  return (
+    <div className="inline-flex items-center gap-2 p-1 rounded-lg border bg-card text-xs">
+      {LOCALES.map(({ code, label }) => (
+        <Link
+          key={code}
+          href={getLocalizedPath(code)}
+          className={\`px-2.5 py-1 rounded-md transition-colors \${
+            currentLocale === code
+              ? "bg-primary text-primary-foreground font-semibold shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }\`}
+        >
+          {label}
+        </Link>
+      ))}
+    </div>
   );
 }`}</CodeBlock>
               </div>
@@ -584,7 +808,7 @@ export default function Page({ title, welcome, currentLocale }) {
         </div>
       </main>
 
-      {/* Sidebar TOC - Hidden on Mobile */}
+      {/* Sidebar TOC */}
       <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">
         <div className="sticky top-20">
           <TableOfContents items={tocItems} />

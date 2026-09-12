@@ -23,6 +23,7 @@ const tocItems = [
   { id: "anti-bot-shield", title: "4. Anti-Bot Shield Middleware", level: 2 },
   { id: "imports-adjustments", title: "5. Import Extension Fixes", level: 2 },
   { id: "on-demand-revalidation", title: "6. On-Demand Revalidation", level: 2 },
+  { id: "plugin-system", title: "7. Plugin System & dinou.config.js", level: 2 },
 ];
 
 export default function Page() {
@@ -369,11 +370,46 @@ export async function updateProduct(productId, data) {
   // 1. Mutate the data in database
   await db.updateProduct(productId, data);
 
-  // 2. Trigger on-demand revalidation on the server
+  // 2. Trigger revalidation on the server
   // This will purge and rebuild all static pages tagged with this ID
   await revalidateTag(\`product-\${productId}\`);
 }`}
               </CodeBlock>
+            </section>
+
+            {/* 7. Plugin System & dinou.config.js */}
+            <section id="plugin-system" className="mt-12 pt-8 border-t">
+              <h2 className="flex items-center gap-3">
+                7. Plugin System & dinou.config.js
+                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
+                  v5.2.0+
+                </span>
+              </h2>
+              <p>
+                Dinou v5.2.0 introduces a lightweight, native <strong>Plugin System</strong>. Developers can now extend the framework, register custom Express middlewares or webhook routes, and inject custom request variables into React Server Components (RSC) context without needing to run <code>npm run eject</code>.
+              </p>
+              <p>
+                To utilize the plugin system, simply create a <code>dinou.config.js</code> file in the root of your project using CommonJS syntax:
+              </p>
+              <CodeBlock language="javascript" containerClassName="w-full overflow-hidden rounded-lg">
+                {`// dinou.config.js
+module.exports = {
+  plugins: [
+    {
+      name: "custom-plugin",
+      onServerInit(app) {
+        // Register Express middlewares or endpoints
+      },
+      onRequestContext(req, res, context) {
+        // Expose custom variables to RSC context
+      }
+    }
+  ]
+};`}
+              </CodeBlock>
+              <p className="mt-4">
+                For detailed configuration and hooks, check out the new <a href="/docs/plugins" className="underline font-semibold text-blue-600 dark:text-blue-400">Plugin System Guide</a>.
+              </p>
             </section>
           </div>
         </div>

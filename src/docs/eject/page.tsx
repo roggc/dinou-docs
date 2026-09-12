@@ -76,6 +76,9 @@ npx dinou eject`}
                       Gives you complete freedom to customize the framework
                     </li>
                   </ul>
+                  <div className="mt-3 pt-2 border-t text-xs text-muted-foreground">
+                    👉 Check out the <a href="/docs/ejected-reference" className="underline font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300">Ejected Folder Reference</a> for a full breakdown of the generated files.
+                  </div>
                 </div>
               </section>
               <section id="when-to-eject">
@@ -118,6 +121,9 @@ npx dinou eject`}
                       <li><strong>Seamless Modifications:</strong> Your AI assistant can directly implement custom middleware, extend asset compilation, or modify parallel route slots resolution directly within the framework's files.</li>
                       <li><strong>Zero Constraints:</strong> The boundary between "application code" and "framework code" is eliminated, enabling fluid and efficient full-stack vibe-coding.</li>
                     </ul>
+                    <p className="mt-3 pt-2 border-t border-purple-500/10 text-xs">
+                      💡 <strong>Tip:</strong> Need to know what each ejected file does? See our comprehensive <a href="/docs/ejected-reference" className="underline text-purple-600 dark:text-purple-400 font-semibold hover:text-purple-800 dark:hover:text-purple-300">Ejected Folder Reference</a>.
+                    </p>
                   </div>
                 </div>
               </section>

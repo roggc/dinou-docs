@@ -4,12 +4,14 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism/index.js";
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
+import { Mermaid } from "./mermaid-renderer";
 
 interface CodeBlockProps {
   children: string;
   language?: string;
   className?: string;
   containerClassName?: string;
+  minWidth?: string;
 }
 
 export function CodeBlock({
@@ -17,6 +19,7 @@ export function CodeBlock({
   language = "typescript",
   className,
   containerClassName,
+  minWidth,
 }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
@@ -25,6 +28,10 @@ export function CodeBlock({
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  if (language === "mermaid") {
+    return <Mermaid chart={children} minWidth={minWidth} />;
+  }
 
   return (
     <div

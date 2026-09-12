@@ -117,27 +117,61 @@ CLERK_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
             <section id="server-setup">
               <h2>🌐 2. Express Server Setup</h2>
               <p>
-                Once ejected, open your local <code className="text-amber-500">dinou/core/server.js</code> file.
+                You can integrate Clerk's authentication hooks and middleware either via the <strong>Plugin System</strong> (recommended, does not require ejecting) or manually (requires ejecting the server).
               </p>
 
-              <h3>Importing and Initializing Clerk</h3>
+              <h3>
+                🟢 Option 2.A: Using the Plugin (Recommended - No Eject)
+                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20 ml-2 select-none">
+                  v5.2.0+
+                </span>
+              </h3>
               <p>
-                Import the Clerk middleware and initializers using CommonJS at the top of the server file:
+                Create a <code>dinou.config.js</code> file in the root of your project and register the Clerk Authentication plugin. This registers the middleware and handles context propagation automatically across layouts, pages, and server actions:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`// dinou.config.js
+const { clerkMiddleware, getAuth } = require("@clerk/express");
+
+const clerkPlugin = {
+  name: "clerk-auth",
+  onServerInit(app) {
+    // Register middleware globally on Express
+    app.use(clerkMiddleware());
+  },
+  onRequestContext(req, res, context) {
+    // Propagate the cryptographically verified userId to RSC context
+    context.req.userId = req.auth?.userId || getAuth(req)?.userId || null;
+  }
+};
+
+module.exports = {
+  plugins: [clerkPlugin]
+};`}</CodeBlock>
+              </div>
+
+              <h3>🔵 Option 2.B: Manual Integration (Ejected Setup)</h3>
+              <p>
+                If you have ejected the framework using <code>npm run eject</code> and want full control of the Express middleware pipeline, open <code className="text-amber-500">dinou/core/server.js</code> and configure Clerk manually:
+              </p>
+
+              <h4>1. Import Clerk</h4>
+              <p>
+                Import the SDK packages using CommonJS at the top of the file:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`const { clerkMiddleware, getAuth } = require("@clerk/express");`}</CodeBlock>
               </div>
 
-              <h3>Adding Verified User ID Helper</h3>
+              <h4>2. Add the User ID Helper and Middleware</h4>
               <p>
-                To extract the authenticated user ID safely, we define a helper that retrieves the User ID exclusively from Clerk's cryptographically verified request objects.
+                Add the verified user ID extraction helper and register the middleware:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`app.use(clerkMiddleware());
 
 // 🛡️ Helper: Extracts userId only if verified cryptographically by Clerk
 function getUserIdFallback(req) {
-  // Returns the ID verified by Clerk's middleware
   return req.auth?.userId || getAuth(req)?.userId || null;
 }`}</CodeBlock>
               </div>
@@ -151,7 +185,7 @@ function getUserIdFallback(req) {
                 </Alert>
               </div>
 
-              <h3>Context Propagation</h3>
+              <h4>3. Context Propagation</h4>
               <p>
                 Expose the active <code>userId</code> inside the request context. In <code className="text-amber-500">server.js</code>, update <code>getContext</code> and <code>getContextForServerFunctionEndpoint</code>:
               </p>
@@ -186,7 +220,7 @@ function getContextForServerFunctionEndpoint(req, res) {
               </div>
 
               <p>
-                Also, propagate this ID in the Express wildcard GET handler (<code>app.get(/^\/.*\/?$/)</code>) inside <code>contextForChild</code> for Server Component rendering:
+                Finally, propagate this ID in the Express wildcard GET handler (<code>app.get(/^\/.*\/?$/)</code>) inside <code>contextForChild</code> for Server Component rendering:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="javascript">{`const contextForChild = {
@@ -247,7 +281,7 @@ export async function createPost(title: string, content: string) {
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="typescript">{`// src/dashboard/page_functions.ts
-import { getContext } from "dinou";
+import { getContext, redirect } from "dinou";
 
 export function dynamic() {
   return true; // Force SSR at request-time to load dynamic session
@@ -258,11 +292,7 @@ export async function getProps() {
   const userId = context?.req?.userId;
 
   if (!userId) {
-    return {
-      redirect: {
-        destination: "/login",
-      }
-    };
+    return redirect("/login");
   }
 
   const posts = await prisma.post.findMany({
@@ -389,79 +419,102 @@ export default function Layout({ children }) {
             <section id="webhooks">
               <h2>🔄 5. Handling Clerk Webhooks</h2>
               <p>
-                To synchronize Clerk users with your local database (e.g. Prisma), create a POST webhook endpoint in <code className="text-amber-500">dinou/core/server.js</code>. Use the <code>svix</code> SDK to verify the authenticity of Clerk's payload signature:
+                To synchronize Clerk user profiles with your local database (e.g. Prisma), you can declare a POST webhook endpoint either within the <strong>Plugin System</strong> (recommended) or manually inside `server.js` (ejected).
+              </p>
+
+              <h3>
+                🟢 Option 5.A: Using the Plugin (Recommended - No Eject)
+                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20 ml-2 select-none">
+                  v5.2.0+
+                </span>
+              </h3>
+              <p>
+                Register the raw webhook POST endpoint directly inside your plugin's <code>onServerInit(app)</code> hook. This keeps your Clerk integration fully contained in a single file:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`import { Webhook } from "svix";
+                <CodeBlock language="javascript">{`// dinou.config.js
+const { clerkMiddleware, getAuth } = require("@clerk/express");
+const express = require("express");
+const { Webhook } = require("svix");
 
-// Endpoint to receive webhook events from Clerk (e.g. user.created)
-app.post("/api/webhooks/clerk", express.raw({ type: "application/json" }), async (req, res) => {
-  const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+const clerkPlugin = {
+  name: "clerk-auth",
+  onServerInit(app) {
+    app.use(clerkMiddleware());
 
-  if (!WEBHOOK_SECRET) {
-    console.error("Missing CLERK_WEBHOOK_SECRET in .env");
-    return res.status(500).send("Server Error");
+    // Register Clerk webhook endpoint directly from the plugin
+    app.post(
+      "/api/webhooks/clerk",
+      express.raw({ type: "application/json" }), // Parse body as raw buffer for signature check
+      async (req, res) => {
+        const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+        const svix_id = req.headers["svix-id"];
+        const svix_timestamp = req.headers["svix-timestamp"];
+        const svix_signature = req.headers["svix-signature"];
+
+        if (!WEBHOOK_SECRET || !svix_id || !svix_timestamp || !svix_signature) {
+          return res.status(400).send("Missing credentials or signatures");
+        }
+
+        const payloadString = req.body.toString("utf8");
+        const wh = new Webhook(WEBHOOK_SECRET);
+        let evt;
+
+        try {
+          evt = wh.verify(payloadString, {
+            "svix-id": svix_id,
+            "svix-timestamp": svix_timestamp,
+            "svix-signature": svix_signature,
+          });
+        } catch (err) {
+          return res.status(400).json({ error: "Invalid signature" });
+        }
+
+        const { id } = evt.data;
+        const eventType = evt.type;
+
+        if (eventType === "user.created") {
+          const email = evt.data.email_addresses[0]?.email_address || \`\${id}@no-email.com\`;
+          await prisma.user.upsert({
+            where: { clerkId: id },
+            update: { email },
+            create: { clerkId: id, email },
+          });
+        }
+
+        if (eventType === "user.deleted") {
+          await prisma.user.delete({ where: { clerkId: id } }).catch(() => {});
+        }
+
+        res.status(200).json({ received: true });
+      }
+    );
+  },
+  onRequestContext(req, res, context) {
+    context.req.userId = req.auth?.userId || getAuth(req)?.userId || null;
   }
+};`}</CodeBlock>
+              </div>
 
-  const svix_id = req.headers["svix-id"];
-  const svix_timestamp = req.headers["svix-timestamp"];
-  const svix_signature = req.headers["svix-signature"];
+              <h3>🔵 Option 5.B: Manual Integration (Ejected Setup)</h3>
+              <p>
+                If you have ejected the framework, you can register the POST webhook endpoint in <code className="text-amber-500">dinou/core/server.js</code>. Use the <code>svix</code> SDK to verify the authenticity of Clerk's payload signature:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`// dinou/core/server.js
+const { Webhook } = require("svix");
+const express = require("express");
 
-  if (!svix_id || !svix_timestamp || !svix_signature) {
-    return res.status(400).send("Missing Svix headers");
+// Endpoint to receive webhook events from Clerk
+app.post(
+  "/api/webhooks/clerk",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    // ... Verify signatures using Svix and synchronize database ...
+    // ... (The verification and DB sync logic is identical to Option 5.A) ...
+    res.status(200).json({ received: true });
   }
-
-  // Clerk webhook verification expects raw string payload
-  const payloadString = req.body.toString("utf8");
-  const wh = new Webhook(WEBHOOK_SECRET);
-  let evt;
-
-  try {
-    evt = wh.verify(payloadString, {
-      "svix-id": svix_id,
-      "svix-timestamp": svix_timestamp,
-      "svix-signature": svix_signature,
-    });
-  } catch (err) {
-    console.error("Clerk Webhook verification failed:", err.message);
-    return res.status(400).json({ error: "Invalid signature" });
-  }
-
-  const { id } = evt.data;
-  const eventType = evt.type;
-
-  if (eventType === "user.created") {
-    const email = evt.data.email_addresses[0]?.email_address || \`\${id}@no-email.com\`;
-
-    try {
-      // Sync user to local Prisma database
-      await prisma.user.upsert({
-        where: { clerkId: id },
-        update: { email },
-        create: {
-          clerkId: id,
-          email,
-        },
-      });
-    } catch (dbErr) {
-      console.error("Database user sync failed:", dbErr.message);
-      return res.status(500).send("Database Error");
-    }
-  }
-
-  if (eventType === "user.deleted") {
-    try {
-      // Remove user from local database
-      await prisma.user.delete({
-        where: { clerkId: id },
-      });
-    } catch (dbErr) {
-      // Ignore error if user does not exist
-    }
-  }
-
-  res.status(200).json({ received: true });
-});`}</CodeBlock>
+);`}</CodeBlock>
               </div>
               <Alert className="my-4">
                 <AlertTitle>⚠️ Raw Request Body Notice</AlertTitle>

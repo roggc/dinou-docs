@@ -12,13 +12,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/docs/components/ui/tooltip";
-import { Link } from "dinou";
+import { Link, usePathname } from "dinou";
 
 export function DocsHeader() {
+  const pathname = usePathname();
+  const isEjected = pathname.startsWith("/docs/ejected-reference");
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* CAMBIA EL CONTENEDOR PRINCIPAL - QUITA px-4 Y USA UN CONTENEDOR FLEX MÁS AMPLIO */}
-      <div className="flex h-14 items-center w-full">
+      <div className="flex h-14 items-center justify-between w-full">
         <div className="flex items-center gap-2 pl-4 md:pl-6">
           <SidebarTrigger className="md:hidden" />
           <div className="flex items-center space-x-2">
@@ -32,6 +35,33 @@ export function DocsHeader() {
               </Badge>
             </Link>
           </div>
+
+          {/* Top navigation tabs */}
+          <nav className="hidden sm:flex items-center space-x-1 ml-3 md:ml-6 pl-3 md:pl-6 border-l border-slate-200 dark:border-slate-800">
+            <Link
+              href="/docs"
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                !isEjected
+                  ? "bg-slate-100 dark:bg-slate-800 text-foreground font-semibold"
+                  : "text-muted-foreground hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-900"
+              }`}
+            >
+              Docs
+            </Link>
+            <Link
+              href="/docs/ejected-reference"
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                isEjected
+                  ? "bg-slate-100 dark:bg-slate-800 text-foreground font-semibold"
+                  : "text-muted-foreground hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-900"
+              }`}
+            >
+              <span>Ejected Reference</span>
+              <span className="text-[10px] font-semibold tracking-wide uppercase px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                Internals
+              </span>
+            </Link>
+          </nav>
         </div>
 
         <div className="flex flex-1 items-center justify-end pr-4 md:pr-6">

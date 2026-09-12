@@ -54,7 +54,7 @@ export default function Layout({
               <DocsHeader />
               <div className="sidebar-layout w-full">
                 <DocsSidebar />
-                <div className="sidebar-content w-full ml-0">
+                <div className="sidebar-content">
                   <main className="flex-1 w-full">{children}</main>
                 </div>
               </div>

@@ -39,10 +39,10 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --sidebar-accent: oklch(
-    0.95 0 0 / 0.5
-  ); /* Sutil gris claro semi-transparente para active/hover */
-  --sidebar-accent-foreground: oklch(0.145 0 0); /* Mantén el foreground */
+  --sidebar-accent: oklch(0.95 0 0 / 0.5);
+  /* Sutil gris claro semi-transparente para active/hover */
+  --sidebar-accent-foreground: oklch(0.145 0 0);
+  /* Mantén el foreground */
 }
 
 .dark {
@@ -79,9 +79,8 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
-  --sidebar-accent: oklch(
-    0.3 0 0 / 0.5
-  ); /* Sutil gris oscuro semi-transparente para dark mode */
+  --sidebar-accent: oklch(0.3 0 0 / 0.5);
+  /* Sutil gris oscuro semi-transparente para dark mode */
   --sidebar-accent-foreground: oklch(0.985 0 0);
 }
 
@@ -133,6 +132,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -167,31 +167,33 @@
 /* SOBRESCRIBIR EL SIDEBAR DE SHADCN/UI */
 [role="complementary"],
 [data-sidebar="sidebar"],
-.sidebar-layout > :first-child,
-.sidebar-layout > .border-r {
-  background: linear-gradient(
-    135deg,
-    rgb(248 250 252) 0%,
-    /* from-slate-50 */ rgb(255 255 255) 100% /* to-white */
-  ) !important;
+.sidebar-layout> :first-child,
+.sidebar-layout>.border-r {
+  background: linear-gradient(135deg,
+      rgb(248 250 252) 0%,
+      /* from-slate-50 */
+      rgb(255 255 255) 100%
+      /* to-white */
+    ) !important;
   border-color: hsl(var(--border)) !important;
 }
 
 .dark [role="complementary"],
 .dark [data-sidebar="sidebar"],
-.dark .sidebar-layout > :first-child,
-.dark .sidebar-layout > .border-r {
-  background: linear-gradient(
-    135deg,
-    rgb(2 6 23) 0%,
-    /* dark:from-slate-950 */ rgb(15 23 42) 100% /* dark:to-slate-900 */
-  ) !important;
+.dark .sidebar-layout> :first-child,
+.dark .sidebar-layout>.border-r {
+  background: linear-gradient(135deg,
+      rgb(2 6 23) 0%,
+      /* dark:from-slate-950 */
+      rgb(15 23 42) 100%
+      /* dark:to-slate-900 */
+    ) !important;
   border-color: hsl(var(--border)) !important;
 }
 
 /* Sobrescribir también el contenido interno del sidebar */
-[data-sidebar="sidebar"] > div,
-.sidebar-layout > :first-child > div {
+[data-sidebar="sidebar"]>div,
+.sidebar-layout> :first-child>div {
   background: transparent !important;
 }
 
@@ -204,22 +206,16 @@
 
 .sidebar-content {
   flex: 1;
-  min-width: 0; /* Prevents flex item from overflowing */
+  min-width: 0;
+  /* Prevents flex item from overflowing */
   margin-left: 0;
 }
 
 /* Desktop sidebar spacing */
 @media (min-width: 768px) {
-  .sidebar-content {
-    margin-left: var(--sidebar-width);
-    /* Calculamos el ancho exacto para evitar desbordamientos o huecos */
-    width: calc(100vw - var(--sidebar-width));
-    max-width: calc(100vw - var(--sidebar-width));
-  }
-
-  .group[data-state="collapsed"] .sidebar-content {
-    margin-left: var(--sidebar-width-icon);
-    width: calc(100% - var(--sidebar-width-icon));
+  .sidebar-content .container {
+    margin-left: 1rem !important;
+    max-width: 1000px !important;
   }
 }
 
@@ -310,6 +306,13 @@
   color: var(--muted-foreground);
   line-height: 1.75rem;
   margin-bottom: 1rem;
+}
+
+.prose .mermaid p,
+.prose .mermaid svg foreignObject p {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.5 !important;
 }
 
 .prose ul {

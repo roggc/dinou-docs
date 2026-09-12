@@ -12,7 +12,8 @@ import {
 
 const tocItems = [
   { id: "philosophy", title: "💡 Philosophy", level: 2 },
-  { id: "three-points", title: "🎯 The Three Crucial Points", level: 2 },
+  { id: "three-points", title: "🎯 The Three Crucial Points (Ejected)", level: 2 },
+  { id: "plugin-alternative", title: "🔌 Non-Ejected Plugin Alternative", level: 2 },
   { id: "consumption", title: "⚡ Consuming Context in React", level: 2 },
 ];
 
@@ -81,9 +82,9 @@ export default function Page() {
 
             {/* THREE POINTS */}
             <section id="three-points">
-              <h2>🎯 The Three Crucial Points</h2>
+              <h2>🎯 The Three Crucial Points (Ejected Framework)</h2>
               <p>
-                To propagate any request variable (such as <code>req.locale</code> for internationalization or <code>req.userId</code> for Clerk Authentication) from Express to React, you must map it in <strong>exactly three specific locations</strong> inside your ejected <code className="text-amber-500">dinou/core/server.js</code> file:
+                If you have already run <code>npm run eject</code> and are maintaining your own Express server, you must map any request variables (such as <code>req.locale</code> for internationalization or <code>req.userId</code> for Clerk Authentication) from Express to React in <strong>exactly three specific locations</strong> inside your ejected <code className="text-amber-500">dinou/core/server.js</code> file:
               </p>
 
               <h3>1. Standard Page Context: getContext()</h3>
@@ -159,6 +160,37 @@ const contextForChild = {
               </div>
             </section>
 
+            {/* PLUGIN ALTERNATIVE */}
+            <section id="plugin-alternative">
+              <h2>
+                🔌 Non-Ejected Alternative: Plugin System
+                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20 ml-2 select-none">
+                  v5.2.0+
+                </span>
+              </h2>
+              <p>
+                If you prefer <strong>not to eject</strong> and want to keep updating the framework engine, you can bypass the manual mapping entirely.
+              </p>
+              <p>
+                By creating a <code>dinou.config.js</code> file and using the <code>onRequestContext(req, res, context)</code> plugin hook, Dinou will run your logic and automatically bind the values across all three execution environments (dynamic requests, server functions, and SSR child processes) behind the scenes:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="javascript">{`// dinou.config.js
+const customContextPlugin = {
+  name: "context-injector",
+  onRequestContext(req, res, context) {
+    // Expose properties to React Server Components context automatically
+    context.req.locale = req.locale;
+    context.req.userId = req.userId;
+  }
+};
+
+module.exports = {
+  plugins: [customContextPlugin]
+};`}</CodeBlock>
+              </div>
+            </section>
+
             <hr className="my-8" />
 
             {/* CONSUMPTION */}
@@ -192,6 +224,30 @@ export async function getProps() {
       userId
     }
   };
+}`}</CodeBlock>
+              </div>
+
+              <h3>In React Server Components</h3>
+              <p>
+                Access the request context directly inside any React Server Component (such as headers, navigation bars, or layouts) to render personalized UI layouts:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="typescript">{`import { getContext } from "dinou";
+
+export default function WelcomeHeader() {
+  const context = getContext();
+  const userId = context?.req?.userId;
+
+  return (
+    <header className="flex justify-between items-center p-4 border-b">
+      <h1>My Application</h1>
+      {userId ? (
+        <span className="text-sm font-semibold">User: {userId}</span>
+      ) : (
+        <a href="/login" className="text-sm text-blue-600 underline">Sign In</a>
+      )}
+    </header>
+  );
 }`}</CodeBlock>
               </div>
 
