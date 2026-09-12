@@ -79,8 +79,18 @@ const docsNavigation = [
     title: "Upgrade Guides",
     items: [
       {
-        title: "Migration from v4",
+        title: "Overview",
         href: "/docs/migration",
+        icon: Compass,
+      },
+      {
+        title: "Migration from v5 to v6",
+        href: "/docs/migration/v5-to-v6",
+        icon: RefreshCw,
+      },
+      {
+        title: "Migration from v4 to v5",
+        href: "/docs/migration/v4-to-v5",
         icon: RefreshCw,
       },
     ],

@@ -224,21 +224,18 @@ npx dinou dev:webpack`}
                 <div>
                   <h4>5. Configure .gitignore (Recommended)</h4>
                   <p>
-                    Dinou generates temporary cache manifests, build outputs, and development directories that should not be committed to version control. Add the following folders to your <code>.gitignore</code> file:
+                    Dinou generates temporary cache manifests, build outputs, and development bundles inside an internal <code>.dinou</code> directory. Create a <code>.gitignore</code> file at the root of your project with only the following entries:
                   </p>
                   <CodeBlock
                     language="text"
                     containerClassName="w-full overflow-hidden rounded-lg"
                   >
-                    {`# Dinou build & cache directories
-dist2/
-dist3/
-public/
-react_client_manifest/
-server_functions_manifest/`}
+                    {`node_modules
+.dinou
+.env`}
                   </CodeBlock>
                   <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-                    These folders contain compilation outputs (such as development files in <code>public/</code> and production builds in <code>dist3/</code>) or client/server manifests mapped dynamically during server execution.
+                    All build artifacts (such as development bundles in <code>.dinou/public/</code> and production builds in <code>.dinou/dist3/</code>), static pre-rendered pages (<code>.dinou/dist2/</code>), and client/server manifests are automatically contained inside <code>.dinou/</code>, keeping your project root clean.
                   </p>
                 </div>
               </div>

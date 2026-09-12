@@ -31,7 +31,7 @@ export function DocsHeader() {
             <span className="font-bold">Dinou</span>
             <Link href="/docs">
               <Badge variant="secondary" className="text-xs">
-                docs v5
+                docs v6
               </Badge>
             </Link>
           </div>
