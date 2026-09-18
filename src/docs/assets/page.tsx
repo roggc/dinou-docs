@@ -150,12 +150,54 @@ export default function Hero() {
               <section id="typescript-support">
                 <h3>TypeScript Support</h3>
                 <p>
-                  To avoid TypeScript errors when importing assets, create
-                  declaration files for each format you use.
+                  Starting with <strong>Dinou v6.1.0</strong>, you no longer need to manually create a <code>src/assets.d.ts</code> file. Dinou includes built-in ambient type declarations for all 21 supported image, video, and audio extensions directly via <code>dinou/env</code>.
+                </p>
+                <p>
+                  Simply create <code>dinou-env.d.ts</code> at the root of your project:
                 </p>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`/// <reference types="dinou/env" />`}
+                </CodeBlock>
+                <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
+                  And ensure your <code>tsconfig.json</code> includes it alongside <code>&quot;moduleResolution&quot;: &quot;bundler&quot;</code>:
+                </p>
+                <CodeBlock
+                  language="json"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+    "allowJs": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler"
+  },
+  "include": [
+    "src",
+    "dinou-env.d.ts"
+  ]
+}`}
+                </CodeBlock>
+
+                <div className="mt-4 text-xs text-muted-foreground">
+                  <p>
+                    <strong>Legacy Projects (v6.0.1 or earlier):</strong> If you are using an older version of Dinou, you can manually declare assets by creating a <code>src/assets.d.ts</code> file with the following declarations:
+                  </p>
+                </div>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg mt-2"
                 >
                   {`// src/assets.d.ts (or similar declaration file)
 declare module "*.png" {
@@ -195,18 +237,8 @@ declare module "*.mp3" {
 
 // Add declarations for other formats as needed...`}
                 </CodeBlock>
-                <div className="border rounded-lg p-4 bg-card not-prose mt-4">
-                  <div className="flex items-center gap-2 font-semibold mb-2">
-                    <FileType className="h-5 w-5 text-blue-500" />
-                    <span>Declaration Placement</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Place these declarations in a <code>.d.ts</code> file inside
-                    your <code>src</code> directory. Make sure the file is
-                    included in your <code>tsconfig.json</code>.
-                  </p>
-                </div>
               </section>
+
             </section>
           </div>
         </div>

@@ -125,7 +125,10 @@ cd my-dinou-app
 npm init -y
 
 # Install core dependencies
-npm install react react-dom dinou`}
+npm install react react-dom dinou
+
+# Optional: if using TypeScript
+npm install -D typescript @types/react @types/react-dom`}
                   </CodeBlock>
                 </div>
 
@@ -138,7 +141,7 @@ npm install react react-dom dinou`}
                     language="javascript"
                     containerClassName="w-full overflow-hidden rounded-lg"
                   >
-                    {`// src/page.jsx
+                    {`// src/page.jsx (or src/page.tsx)
 export default function Page() {
   return <h1>Hello, Dinou!</h1>;
 }`}
@@ -153,7 +156,9 @@ export default function Page() {
                       {`my-dinou-app/
 ├── node_modules/
 ├── src/
-│   └── page.jsx
+│   └── page.tsx (or page.jsx)
+├── dinou-env.d.ts       # If using TypeScript
+├── tsconfig.json        # If using TypeScript
 ├── package.json
 └── package-lock.json`}
                     </pre>
@@ -161,7 +166,57 @@ export default function Page() {
                 </div>
 
                 <div>
-                  <h4>3. Configure package.json (Optional)</h4>
+                  <h4>3. Configure TypeScript (Optional)</h4>
+                  <p>
+                    If you are using TypeScript, create <code>tsconfig.json</code> and <code>dinou-env.d.ts</code> at the root of your project:
+                  </p>
+
+                  <p className="text-sm font-semibold mt-3 mb-1">
+                    a) <code>tsconfig.json</code>
+                  </p>
+                  <CodeBlock
+                    language="json"
+                    containerClassName="w-full overflow-hidden rounded-lg"
+                  >
+                    {`{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "allowJs": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler"
+  },
+  "include": [
+    "src",
+    "dinou-env.d.ts"
+  ]
+}`}
+                  </CodeBlock>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                    Setting <code>&quot;moduleResolution&quot;: &quot;bundler&quot;</code> and <code>&quot;module&quot;: &quot;ESNext&quot;</code> ensures TypeScript resolves Dinou subpath exports (like <code>dinou/env</code> and <code>dinou/server</code>) correctly.
+                  </p>
+
+                  <p className="text-sm font-semibold mt-4 mb-1">
+                    b) <code>dinou-env.d.ts</code>
+                  </p>
+                  <CodeBlock
+                    language="typescript"
+                    containerClassName="w-full overflow-hidden rounded-lg"
+                  >
+                    {`/// <reference types="dinou/env" />`}
+                  </CodeBlock>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                    This single ambient type reference provides built-in typing for static media assets (images, SVGs, audio, video) and CSS modules (<code>*.module.css</code>), keeping your <code>src/</code> directory clean without needing manual declaration files.
+                  </p>
+                </div>
+
+                <div>
+                  <h4>4. Configure package.json (Optional)</h4>
                   <p>
                     Add the necessary scripts to your <code>package.json</code>:
                   </p>
@@ -190,7 +245,7 @@ export default function Page() {
                 </div>
 
                 <div>
-                  <h4>4. Run the Development Server</h4>
+                  <h4>5. Run the Development Server</h4>
                   <p>
                     Start the development server using the configured scripts:
                   </p>
@@ -222,7 +277,7 @@ npx dinou dev:webpack`}
                 </div>
 
                 <div>
-                  <h4>5. Configure .gitignore (Recommended)</h4>
+                  <h4>6. Configure .gitignore (Recommended)</h4>
                   <p>
                     Dinou generates temporary cache manifests, build outputs, and development bundles inside an internal <code>.dinou</code> directory. Create a <code>.gitignore</code> file at the root of your project with only the following entries:
                   </p>

@@ -156,7 +156,7 @@ export default function Page() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Includes native support for React 19 Server Functions (<code>'use server'</code>) to invoke server-side logic directly from the client. Combined with <code>react-enhanced-suspense</code> and <code>jotai-wrapper</code> for clean state synchronization and mutations.
+                      Includes native support for React 19 Server Functions (<code>&apos;use server&apos;</code>) to invoke server-side logic directly from the client. Stream updates and synchronize state with zero external dependencies using native React 19 primitives (<code>&lt;Suspense&gt;</code> and <code>use()</code>), with full flexibility to integrate external global state libraries if desired.
                     </p>
                   </CardContent>
                 </Card>

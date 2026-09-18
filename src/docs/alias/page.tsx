@@ -28,7 +28,7 @@ export default function Page() {
           {/* Header */}
           <div className="mb-8 space-y-4">
             <div className="flex items-center space-x-2">
-              <h1 className="text-3sl sm:text-4xl font-extrabold tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Import Aliases
               </h1>
             </div>
@@ -53,19 +53,25 @@ export default function Page() {
                   language="json"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-                  {`// tsconfig.json
-{
+                  {`{
   "compilerOptions": {
-    "baseUrl": ".", // Important: root of your project
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"], // Maps @/ to src/
+      "@/*": [
+        "src/*"
+      ]
     },
     "allowJs": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "strict": true
+    "strict": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler"
   },
-  "include": ["src", "src/assets.d.ts"] // Include your declaration files
+  "include": [
+    "src",
+    "dinou-env.d.ts"
+  ]
 }`}
                 </CodeBlock>
               </section>

@@ -104,14 +104,14 @@ export async function getPost(postId) {
             </section>
             {/* SECTION: SUSPENSE INTEGRATION */}
             <section id="suspense-integration" className="mt-12 pt-8 border-t">
-              <h2>Suspense Integration</h2>
+              <h2>Suspense Integration (React 19 Pure Primitives)</h2>
               <p>
-                Dinou provides built-in integration with <code>react-enhanced-suspense</code> to handle loading fallbacks and data-fetching states smoothly when calling Server Functions.
+                Dinou seamlessly integrates with pure <strong>React 19 primitives</strong> (<code>&lt;Suspense&gt;</code> and <code>use()</code>) to handle loading fallbacks and streaming data states when calling Server Functions &mdash; with zero external dependencies.
               </p>
 
-              <h3>1. In Server Components (Direct Promise)</h3>
+              <h3>1. In Server Components (Async Components &amp; Native Suspense)</h3>
               <p>
-                Inside Server Components, you can call the Server Function directly and pass the returned promise as the child of the <code>Suspense</code> component. Since <code>react-enhanced-suspense</code> behaves identically to React's native <code>Suspense</code> when it is used exactly like it—meaning, without any props besides <code>children</code> and <code>fallback</code>, and without <code>children</code> being a function—it will suspend and render the component once the promise resolves.
+                Inside Server Components, you can directly <code>await</code> Server Functions inside an async component, or pass promises to components wrapped in React&apos;s native <code>&lt;Suspense&gt;</code>. React streams the component progressively as the promise resolves.
               </p>
               <CodeBlock
                 language="jsx"
@@ -119,26 +119,31 @@ export async function getPost(postId) {
               >
                 {`// src/post-section/page.jsx
 // Server Component
-import Suspense from "react-enhanced-suspense";
+import { Suspense } from "react";
 import { getPost } from "@/server-functions/get-post";
+
+async function Post({ id }) {
+  // getPost returns a rendered Component directly from the server
+  return await getPost(id);
+}
 
 export default function Page() {
   return (
     <section>
       <h1>Latest Post</h1>
       
-      {/* Pass the promise directly as a child */}
+      {/* Native React 19 Suspense */}
       <Suspense fallback={<p>Loading post on the server...</p>}>
-        {getPost("post-1")}
+        <Post id="post-1" />
       </Suspense>
     </section>
   );
 }`}
               </CodeBlock>
 
-              <h3>2. In Client Components (with <code>resourceId</code>)</h3>
+              <h3>2. In Client Components (with Native <code>use()</code>)</h3>
               <p>
-                Inside Client Components, to prevent component re-execution loops and allow interactive state updates or refreshes, you must provide a unique <code>resourceId</code> prop to <code>Suspense</code> and pass the function call wrapped inside a callback function as its child.
+                Inside Client Components, Server Functions return promises over Flight RPC. In React 19, read the returned promise directly using the native <code>use()</code> hook inside a <code>&lt;Suspense&gt;</code> boundary. Updating the promise or key re-evaluates the stream cleanly without full-page reloads.
               </p>
               <CodeBlock
                 language="jsx"
@@ -146,23 +151,34 @@ export default function Page() {
               >
                 {`// src/post-viewer/page.jsx
 "use client";
-import { useState } from "react";
-import Suspense from "react-enhanced-suspense";
+import { useState, use, Suspense } from "react";
 import { getPost } from "@/server-functions/get-post";
+
+function PostStream({ promise }) {
+  // Pure React 19 native 'use' hook unrolls the promise within Suspense
+  const content = use(promise);
+  return <>{content}</>;
+}
 
 export default function Page() {
   const [postId, setPostId] = useState("post-1");
+  const [postPromise, setPostPromise] = useState(() => getPost("post-1"));
+
+  const loadNextPost = () => {
+    setPostId("post-2");
+    setPostPromise(getPost("post-2"));
+  };
 
   return (
     <div>
-      <button onClick={() => setPostId("post-2")}>Load Next Post</button>
+      <button onClick={loadNextPost}>Load Next Post</button>
 
-      {/* Wrap function call in a callback and specify resourceId */}
+      {/* Pure React 19 Suspense with key-based invalidation */}
       <Suspense
+        key={postId}
         fallback={<p>Loading post on the client...</p>}
-        resourceId={\`post-viewer-\${postId}\`}
       >
-        {() => getPost(postId)}
+        <PostStream promise={postPromise} />
       </Suspense>
     </div>
   );
