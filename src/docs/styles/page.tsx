@@ -163,12 +163,56 @@ export default function Page() {
                 </CodeBlock>
 
                 <h4>
-                  TypeScript Declarations (<code>src/css.d.ts</code>)
+                  TypeScript Declarations (<code>dinou-env.d.ts</code>)
                 </h4>
-                <p>For TypeScript support with CSS Modules:</p>
+                <p>
+                  Starting with <strong>Dinou v6.1.0</strong>, you no longer need to manually create a <code>src/css.d.ts</code> file. Built-in ambient type declarations for CSS Modules (and static media assets) are provided directly via <code>dinou/env</code>.
+                </p>
+                <p>
+                  Simply create <code>dinou-env.d.ts</code> at the root of your project:
+                </p>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`/// <reference types="dinou/env" />`}
+                </CodeBlock>
+                <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
+                  And ensure your <code>tsconfig.json</code> includes it alongside <code>&quot;moduleResolution&quot;: &quot;bundler&quot;</code>:
+                </p>
+                <CodeBlock
+                  language="json"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+    "allowJs": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler"
+  },
+  "include": [
+    "src",
+    "dinou-env.d.ts"
+  ]
+}`}
+                </CodeBlock>
+                <div className="mt-4 text-xs text-muted-foreground">
+                  <p>
+                    <strong>Legacy Projects (v6.0.1 or earlier):</strong> If you are using an older version of Dinou, you can manually declare CSS modules by creating a <code>src/css.d.ts</code> file with the following declaration:
+                  </p>
+                </div>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg mt-2"
                 >
                   {`declare module "*.module.css" {
   const classes: { [key: string]: string };

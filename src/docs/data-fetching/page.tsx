@@ -185,13 +185,12 @@ export async function getProps(params) {
             {/* Section 2: With Suspense */}
             <section id="with-suspense" className="mt-12">
               <h2>
-                With Suspense (<code>react-enhanced-suspense</code>) & Server
-                Functions (Reactive Strategy)
+                With Suspense &amp; Server Functions (React 19 Reactive Strategy)
               </h2>
               <p className="text-lg">
                 For fluid user experiences with progressive loading and
                 automatic updates when dependencies change. This strategy
-                combines Suspense with Server Functions for optimal performance.
+                combines React 19&apos;s native <code>&lt;Suspense&gt;</code> and <code>use()</code> primitives with Server Functions for optimal performance &mdash; with zero external libraries.
               </p>
 
               {/* Subsection: Client Components */}
@@ -200,9 +199,7 @@ export async function getProps(params) {
                   Client Components with Server Functions (Reactive Updates)
                 </h3>
                 <p>
-                  In Client Components, use <code>react-enhanced-suspense</code>{" "}
-                  to automatically re-fetch Server Functions when dependencies
-                  change via the <code>resourceId</code> prop.
+                  In Client Components, use React 19&apos;s native <code>use()</code> hook inside a <code>&lt;Suspense&gt;</code> boundary. Stabilizing the Server Function promise with <code>useMemo</code> avoids re-fetching on every render, while changing the <code>key</code> prop (or <code>id</code>) triggers the Suspense fallback smoothly without full-page reloads.
                 </p>
                 <CodeBlock
                   language="jsx"
@@ -210,13 +207,22 @@ export async function getProps(params) {
                 >
                   {`// src/[id]/page.jsx
 "use client";
+import { Suspense, use, useMemo } from "react";
 import { getPost } from "@/server-functions/get-post";
-import Suspense from "react-enhanced-suspense";
+
+function PostContent({ promise }) {
+  // Pure React 19: unroll the Flight promise inside Suspense
+  const post = use(promise);
+  return <>{post}</>;
+}
 
 export default function Page({ params: { id } }) {
+  // Pure React 19: stabilize the Server Function promise across renders based on 'id'
+  const postPromise = useMemo(() => getPost(id), [id]);
+
   return (
-    <Suspense fallback="Loading post..." resourceId={\`get-post-\${id}\`}>
-      {() => getPost(id)}
+    <Suspense key={id} fallback={<p>Loading post...</p>}>
+      <PostContent promise={postPromise} />
     </Suspense>
   );
 }`}
@@ -224,21 +230,15 @@ export default function Page({ params: { id } }) {
                 <Alert className="not-prose mt-4">
                   <RefreshCw className="h-4 w-4" />
                   <AlertTitle>
-                    <code>react-enhanced-suspense</code> Behavior
+                    React 19 Native Suspense &amp; <code>use()</code>
                   </AlertTitle>
                   <AlertDescription>
                     <div className="space-y-2">
                       <p>
-                        <strong>Standard Mode:</strong> With only{" "}
-                        <code>children</code> (React Nodes) and{" "}
-                        <code>fallback</code>, behaves like React's native
-                        Suspense.
+                        <strong>Zero External Libraries:</strong> React 19 eliminates the need for third-party enhanced suspense packages. By pairing the native <code>use()</code> hook with <code>useMemo</code> and a keyed <code>&lt;Suspense key=&#123;id&#125;&gt;</code>, React handles the full async lifecycle and pending state automatically.
                       </p>
                       <p>
-                        <strong>Enhanced Mode:</strong> With{" "}
-                        <code>resourceId</code> and <code>children</code> as a
-                        function, automatically re-evaluates when{" "}
-                        <code>resourceId</code> changes. No useEffect needed!
+                        <strong>Key-Driven Invalidation:</strong> Changing the <code>key</code> prop resets the Suspense boundary and re-triggers the fallback smoothly whenever parameters change.
                       </p>
                     </div>
                   </AlertDescription>
@@ -246,12 +246,10 @@ export default function Page({ params: { id } }) {
                 <div className="border rounded-lg p-4 bg-card not-prose mt-4">
                   <div className="flex items-center gap-2 font-semibold mb-2">
                     <Cpu className="h-5 w-5 text-green-500" />
-                    <span>Automatic Dependency Tracking</span>
+                    <span>Native Dependency Invalidation</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    The <code>resourceId</code> acts as a cache key. Change it
-                    to trigger fresh data fetching without manual cleanup or
-                    effect dependencies.
+                    Using React&apos;s standard <code>key</code> prop on <code>&lt;Suspense&gt;</code> acts as the native invalidation boundary. When <code>id</code> changes, React cleanly unmounts the previous view and displays the fallback while the new promise resolves.
                   </p>
                 </div>
               </section>
@@ -260,24 +258,30 @@ export default function Page({ params: { id } }) {
               <section id="server-streaming" className="mt-8">
                 <h3>Server Components with Server Functions (Streaming)</h3>
                 <p>
-                  In Server Components, wrap Server Function calls to stream
+                  In Server Components, wrap Server Function calls in native <code>&lt;Suspense&gt;</code> to stream
                   results to the client as they become available. Server
-                  Functions execute on the server, and Suspense streams the
-                  results.
+                  Functions execute on the server in Node.js, and Suspense streams the
+                  results incrementally.
                 </p>
                 <CodeBlock
                   language="jsx"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
                   {`// src/[id]/page.jsx
+// Server Component
+import { Suspense } from "react";
 import { getPost } from "@/server-functions/get-post";
-import Suspense from "react-enhanced-suspense";
 
-export default async function Page({ params: { id } }) {
+async function Post({ id }) {
+  // Executes on the server and returns a rendered Component
+  return await getPost(id);
+}
+
+export default function Page({ params: { id } }) {
   return (
     <div>
-      <Suspense fallback="Loading post...">
-        {getPost(id)}
+      <Suspense fallback={<p>Loading post...</p>}>
+        <Post id={id} />
       </Suspense>
     </div>
   );
@@ -300,15 +304,15 @@ export default async function Page({ params: { id } }) {
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold">
                         <FunctionSquare className="h-5 w-5 text-purple-500" />
-                        <span>react-enhanced-suspense: Server vs. Client</span>
+                        <span>React 19 Primitives: Server vs. Client</span>
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground space-y-2">
                       <div>
-                        <strong>Client Components:</strong> Requires a <code>resourceId</code> key and passing <code>children</code> as a <em>function</em> (e.g. <code>&#123;() =&gt; getPost(id)&#125;</code>) to trigger client-side reactive re-fetches when dependencies change.
+                        <strong>Client Components:</strong> Reads the Flight promise using the native <code>use(promise)</code> hook inside <code>&lt;Suspense key=&#123;id&#125;&gt;</code>, reacting cleanly when dependencies change without manual effects.
                       </div>
                       <div>
-                        <strong>Server Components:</strong> Does not use <code>resourceId</code>, and wraps the direct <em>Promise</em> invocation as a child (e.g. <code>&#123;getPost(id)&#125;</code>) to perform server-side HTML streaming.
+                        <strong>Server Components:</strong> Calls <code>await getPost(id)</code> directly within an async child component wrapped in native <code>&lt;Suspense&gt;</code> to stream HTML chunks progressively over the wire.
                       </div>
                     </CardContent>
                   </Card>
