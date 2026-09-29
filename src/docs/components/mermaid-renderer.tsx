@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import mermaid from "mermaid";
 
-// Initialize mermaid configurations globally
-mermaid.initialize({
+const mermaidConfig = {
   startOnLoad: false,
   theme: "dark",
   securityLevel: "loose",
@@ -23,7 +21,9 @@ mermaid.initialize({
     padding: 18,
     wrappingWidth: 600,
   },
-});
+};
+
+let mermaidInitialized = false;
 
 interface MermaidProps {
   chart: string;
@@ -37,7 +37,12 @@ export function Mermaid({ chart, minWidth }: MermaidProps) {
     let isMounted = true;
     const id = `mermaid-id-${Math.random().toString(36).substring(2, 9)}`;
 
-    if (ref.current) {
+    import("mermaid").then(({ default: mermaid }) => {
+      if (!isMounted || !ref.current) return;
+      if (!mermaidInitialized) {
+        mermaid.initialize(mermaidConfig);
+        mermaidInitialized = true;
+      }
       ref.current.innerHTML = "";
       mermaid
         .render(id, chart)
@@ -49,7 +54,7 @@ export function Mermaid({ chart, minWidth }: MermaidProps) {
         .catch((err) => {
           console.error("[Mermaid Render Error]:", err);
         });
-    }
+    });
 
     return () => {
       isMounted = false;

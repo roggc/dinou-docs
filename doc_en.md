@@ -1,0 +1,591 @@
+# Dinou v7: Universal Architecture and Infrastructure-Agnostic Deployment ("Deploy Everywhere")
+
+## 1. The Core Breakthrough of Dinou v7
+
+For years, modern React frameworks supporting React Server Components (RSC) have suffered from a critical industry dilemma: **vendor lock-in**. Many of the most powerful features introduced in React 19—such as Server Components, asynchronous Suspense streaming, Server Functions RPC, and Incremental Static Regeneration (ISR)—appeared tailored to execute exclusively on proprietary serverless cloud platforms or via cumbersome, resource-heavy monolithic server setups.
+
+**Dinou v7 completely breaks down that barrier:**
+> **Any Dinou application built with React 19 and Server Components can be compiled and deployed to virtually any hosting infrastructure in the world:** from a zero-cold-start Cloudflare Worker at the edge, to Deno Deploy, bare-metal Bun, traditional Node.js in Docker/Kubernetes containers, self-contained single-binary executables with zero host dependencies (`compile`), all the way to 100% free static hosting (GitHub Pages, Surge.sh, AWS S3).
+
+---
+
+## 2. The Architectural Leap: From Legacy `fork()` to the Universal Dual-Bundle Pipeline
+
+### 2.1. The Historical React 19 Bottleneck: The Dual Condition Conflict
+In React 19, a fundamental module-resolution conflict exists, commonly known as the **Dual Condition Conflict**:
+* **RSC Engine** (Server Component tree resolution): Requires modules to be imported under the `"react-server"` export condition. Under this condition, React components have no access to browser/client APIs (such as `useState`, `useEffect`, or `react-dom/server`).
+* **SSR Engine** (Streaming HTML generation): Requires modules to be imported under the `"browser"` or client environment conditions (`react-dom/server.edge` or `react-dom/server.node`).
+* If both engines are imported within the same module scope without isolation, React throws a fatal exception:
+  ```text
+  ReactServer has been imported outside of react-server condition.
+  ```
+
+### 2.2. The Legacy Approach: Child Process Forking (`child_process.fork`)
+In earlier implementations (and in many ecosystem frameworks), this conflict was circumvented in Node.js by spawning an external child process:
+1. The parent process ran the HTTP server and the SSR engine under standard module conditions.
+2. Whenever Server Components needed to be rendered, the parent process dispatched an Inter-Process Communication (IPC) message to a child process (launched with `node --conditions=react-server`).
+3. The child process rendered the RSC binary stream and streamed it back over IPC to the parent process for HTML conversion.
+
+#### Why was `fork()` unsustainable?
+* **Serialization Latency & IPC Overhead**: Every single incoming request incurred the penalty of serializing and deserializing streams across OS process boundaries.
+* **Double Memory Consumption**: Two full Node.js runtimes had to be booted and kept warm per server instance.
+* **Incompatible with Edge & Serverless Runtimes**: In environments such as **Cloudflare Workers**, **Deno Deploy**, **AWS Lambda**, or **Vercel Functions**, `child_process.fork()` **does not exist**.
+* **Incompatible with Single-Binary Compilation**: Neither `bun build --compile` nor `deno compile` can package an application that relies on spawning external runtime processes.
+
+---
+
+### 2.3. The Dinou v7 Solution: The Universal 3-Pass Ahead-of-Time (AOT) Dual-Bundle Architecture
+The architectural breakthrough originally engineered for Cloudflare Workers ([`CLOUDFLARE_WRANGLER.md`](file:///c:/Users/roggc/dev/my-dinou-apps/dinou-e2e/CLOUDFLARE_WRANGLER.md)) proved so resilient, fast, and elegant that **Dinou v7 standardized it as the canonical architecture across ALL targets (Node, Deno, Bun, and Cloudflare)**.
+
+The `fork()` mechanism has been eliminated entirely. It is replaced with an Ahead-of-Time (AOT) 3-pass compilation pipeline:
+
+```
+                            [ Incoming Request (HTTP / Fetch) ]
+                                              │
+                                              ▼
+                  ┌────────────────────────────────────────────────────────┐
+                  │                 Target Orchestrator                    │
+                  │   Node (server.mjs) / Deno (main.js) / Bun / Worker    │
+                  └───────────────────────────┬────────────────────────────┘
+                                              │
+              ┌───────────────────────────────┴───────────────────────────────┐
+              ▼                                                               ▼
+    Static Asset / SSG Cache?                                       Dynamic Route / RSC / SF?
+              │                                                               │
+              ▼                                                               ▼
+ ┌─────────────────────────┐                                    ┌───────────────────────────┐
+ │   Instant Delivery      │                                    │   Worker Orchestrator     │
+ │ (Disk / KV / CDN Assets)│                                    │   (Pass C)                │
+ └─────────────────────────┘                                    └─────────────┬─────────────┘
+                                             ┌────────────────────────────────┴────────────────────────────────┐
+                                             ▼                                                                 ▼
+                                ┌──────────────────────────────┐                                  ┌──────────────────────────────┐
+                                │     Pass A: RSC Engine       │                                  │     Pass B: SSR Engine       │
+                                │ (conditions: [react-server]) │                                  │  (conditions: [browser])     │
+                                │                              │                                  │                              │
+                                │ - React 19 Server Components │        RSC Payload Stream        │ - react-dom/server.edge      │
+                                │ - Server Functions RPC       │ ───────────────────────────────> │ - SSR Client Manifest        │
+                                │ - Client Component Proxies   │      (ReadableStream)            │ - Native Streaming HTML      │
+                                └──────────────────────────────┘                                  └──────────────┬───────────────┘
+                                                                                                                 │
+                                                                                                                 ▼
+                                                                                                  [ Streaming HTML Response ]
+```
+
+#### The 3 Compilation Passes:
+1. **Pass A — RSC Engine**:
+   - Bundled with `["react-server"]` export conditions.
+   - Transforms Client Components (`"use client"`) into lightweight proxies (`createClientModuleProxy`) via the `clientReferencesPlugin`. This allows the RSC engine to emit client reference IDs without importing or executing browser-specific code.
+   - Registers and binds Server Functions (`"use server"`).
+2. **Pass B — SSR Engine**:
+   - Bundled with `["browser"]` / client export conditions.
+   - Packages `react-dom/server.edge` (`renderToReadableStream`) along with the auto-generated `ssr-client-manifest.js`, embedding the actual client component implementations required to hydrate and stream the HTML tree.
+3. **Pass C — Orchestrator (Runtime Adapter)**:
+   - In-memory orchestration connecting Pass A and Pass B via standard W3C Web Streams (`ReadableStream`).
+   - Serves static assets with optimal caching headers and hooks up the persistence and incremental revalidation layer (ISR).
+
+---
+
+### 2.4. Dinou v7 vs v6: From Heavy Diesel Truck to Formula 1 Ferrari (The Technical Metamorphosis)
+
+The transition from Dinou v6 to Dinou v7 is not merely an incremental version bump; it represents a **complete architectural rebirth**. The most apt analogy is evolving from a **heavy diesel utility truck with trailers** into an **aerodynamic carbon-fiber Formula 1 Ferrari**:
+
+| Architectural Dimension | 🚛 Dinou v6 (Heavy Diesel Truck) | 🏎️ Dinou v7 (Formula 1 Ferrari) |
+| :--- | :--- | :--- |
+| **Rendering Engine** | `child_process.fork()` + runtime Babel JIT. Every render required heavy IPC serialization across OS process boundaries. | **Dual-Bundle AOT In-Memory**. Direct RAM stream interconnection via native React 19 Web Streams. |
+| **Chassis & Middleware** | Monolithic **Express** + `require.extensions` hacks (`asset-require-hook`, `css-require-hook`) + Chokidar. | **Pure Web Standards** (`Request`, `Response`, `ReadableStream`). Zero Express and zero runtime Babel dependencies. |
+| **Concurrency & Memory** | Required `concurrency-manager.js` to guard against CPU/RAM exhaustion ("fork bomb"). High memory overhead per process. | **Flat, predictable memory footprint**. Thousands of concurrent async streams inside the native event loop with zero forks. |
+| **SSG / ISG / ISR** | Duplicated, divergent pipelines (`generate-static-pages.js` vs `generate-static-page.js`) running on sub-processes. | **Single Unified Pipeline**: The exact same in-memory ISG engine (`storageAdapter`) pre-renders hundreds of pages in seconds. |
+| **Cross-Runtime Portability** | Fragmented and tightly coupled to Node CJS. Bun required experimental JIT plugins; impossible on Edge/Workers. | **Universal "Deploy Everywhere"**: Identical architecture across Node Standalone (`server.mjs`), Bun, Deno (single-binary), and Cloudflare. |
+| **E2E Test Performance** | Sluggish test execution (~15-20 min), prone to socket timeouts and child process IPC stalls. | **377 tests passed at 100% in ~4 minutes** across Chromium, Firefox, and WebKit simultaneously with zero failures. |
+| **Developer Experience & HMR** | Fork-dependent dev server, duplicate Chokidar watchers, full page reloads on CSS edits or directive changes. | **Single-process (0 forks)** with in-memory Dual-Engine (<80ms incremental builds), hot directive synchronization (`use client`/`use server`), React Fast Refresh with state preservation, and Hot CSS swapping without page reloads. |
+| **Code Hygiene** | Legacy bridges, redundant loaders, and runtime hooks. | **~2,200 lines of dead code eradicated** (14 obsolete files cleanly purged). |
+
+---
+
+## 3. The v7 Developer Experience (DX): Single-Process (0-Fork) Dual-Engine & Next-Gen HMR
+
+The transition to Dinou v7's Dual-Bundle architecture doesn't just supercharge production; it has completely transformed the local development experience (`npm run dev`):
+
+### 3.1. In-Process (0-Fork) Dev Server & Unified Watcher
+In previous versions, the development server spawned separate child processes to run the React Server Components engine while a separate process coordinated client asset bundling. Each process maintained its own file watcher (`chokidar`), causing duplicate disk I/O, IPC sync bottlenecks, and potential manifest divergence.
+
+In **Dinou v7**, [`dinou/node/dev.mjs`](file:///c:/Users/roggc/dev/my-dinou-apps/dinou-e2e/dinou/node/dev.mjs) unifies everything within a **single Node.js process**:
+* **Incremental In-Memory Rebuilds**: Both Pass A (RSC Engine) and Pass B (SSR Engine) utilize esbuild incremental contexts (`ctxA.rebuild()` and `ctxB.rebuild()`) that rebuild changed server modules in RAM in 30–80 ms.
+* **Centralized File Watcher**: A single Chokidar instance observes `src/`. Upon detecting changes, it notifies both the server engines and the client bundler in memory, guaranteeing manifest synchronization before dispatching client updates.
+* **Zero Zombie Processes**: Terminating the server (`Ctrl + C`) cleanly closes the process without leaving dangling child processes holding ports or consuming system RAM.
+
+### 3.2. Next-Generation React Fast Refresh & ESM-HMR
+Dinou v7 incorporates an ultra-refined HMR pipeline that guarantees state continuity across edits:
+* **Total State Preservation in Client Components (`"use client"`)**: Edits to interactive components are hot-swapped in the browser via ESM-HMR and React Refresh Runtime, flawlessly preserving hooks (`useState`, `useReducer`), form inputs, and UI component state.
+* **Hot Directive Switching**: If a developer adds or removes `"use client"` or `"use server"` from a file, Dinou immediately detects the directive change, rebuilds the client entry points, and synchronizes the Dual-Bundle engine without requiring a manual dev server restart.
+* **Static Assets & Image HMR**: Dynamic imports of images (`.png`, `.jpg`, `.svg`), fonts, and media assets in client components hot-reload reliably without crashing the React tree.
+* **Instant Hot CSS Swapping (`style-update`)**:
+  * Any edit to a `.css` file (global stylesheet, in layouts, or component-imported) is compiled and dispatched via `{ type: "style-update", url: "/styles.css" }`.
+  * The browser HMR runtime updates the `<link rel="stylesheet">` tag with a cache-busting timestamp (`?t=...`), applying visual styling changes **instantly, without full page reloads, without flickering, and without unmounting components or resetting state**.
+  * CSS entry chunks are isolated from React Refresh boundaries, preventing erroneous full reloads.
+
+### 3.3. Complete Parity Across All 3 Bundlers (Esbuild, Rollup, Webpack)
+The local development experience is identical regardless of the underlying bundler chosen:
+* `npm run dev:esbuild`: Sub-second rebuilds designed for ultra-fast day-to-day iteration.
+* `npm run dev:rollup`: Ideal for debugging production-grade ESM chunk splitting.
+* `npm run dev:webpack`: Full feature parity for enterprise ecosystems dependent on Webpack plugins.
+All three engines share identical WebSocket protocols, manifest formats, and HMR semantics.
+
+### 3.4. 100% In-Memory Architecture (Zero Disk I/O) & Server Functions Fast-Path
+
+In large-scale applications (featuring thousands of components, comprehensive technical documentation, and dozens of npm dependencies), the traditional framework bottleneck stemmed from two critical factors: **heavy disk I/O saturation during development** and **exhaustive Babel AST parsing in search of `"use server"` directives**.
+
+Dinou v7 introduces two deeply integrated architectural optimizations implemented uniformly across **Esbuild, Rollup, and Webpack**:
+
+#### A. 100% In-RAM Development (`globalThis.__DINOU_MEM_FILES__` & Zero Disk I/O)
+* **Complete Elimination of `.dinou/public` on Disk**: In development mode (`npm run dev:*`), none of the three bundlers writes files to disk. JavaScript chunks, extracted stylesheets (`styles.css`), sourcemaps (`.map`), and all 3 manifests (`react-client-manifest.json`, `server-functions-manifest.json`, and `manifest.json`) are stored directly as binary buffers in a global in-memory registry (`globalThis.__DINOU_MEM_FILES__`).
+* **Sub-Millisecond In-Memory Serving**: Dinou's dev HTTP server (`dev.mjs`) dispatches requested static assets directly from RAM in `<0.5ms`, completely bypassing filesystem open/read descriptor overhead.
+* **No Windows Antivirus or Indexing Penalties**: Eradicates the thousands of synchronous disk writes and deletes that historically throttled development on Windows due to real-time security scans and file indexers. In standard development, the `.dinou/public` directory is never even created on disk.
+* **Inspection Mode (`DINOU_WRITE_TO_DISK=true`)**: Whenever developers wish to physically inspect generated bundle outputs, toggling this environment variable instructs the dev pipeline to flush all assets to `.dinou/public`.
+* **Strict Production Integrity**: Production builds (`npm run build:*`) continue to reliably emit all optimized physical assets to `.dinou/dist3` (and `.dinou/dist2` for SSG).
+
+#### B. Reactive Server Functions Fast-Path
+* **Instant O(1) Bypass**: Previously, every `.js`, `.jsx`, `.ts`, and `.tsx` file was analyzed via regex and Babel AST traversal in Server Function loaders to inspect for `"use server"` declarations. In large codebases, this incurred seconds of redundant CPU overhead across hundreds of pure UI components and utilities.
+* **Pre-Indexed Discovery Phase**: `get-esbuild-entries`, `rollup-plugin-server-functions`, and `get-webpack-entries` pre-filter and collect modules declaring `"use server"` into a `Set` (`serverFiles`). Loaders and plugins perform an instant O(1) lookup: if a module is absent and contains no server directive, it is returned intact in microseconds, bypassing Babel parsing entirely.
+* **Dynamic Hot Reactivity**: Adding or removing `"use server"` in an existing file during an active development session is automatically detected; the index updates dynamically in memory without requiring a dev server restart.
+
+#### C. Real-World Performance Benchmarks (`dinou-docs`)
+In real-world production-scale applications such as `dinou-docs` (encompassing 2,280+ `node_modules`, dozens of documentation routes, and over 25 MB of compiled client assets):
+* **Esbuild**: Cold start slashed from **~124 seconds down to 11.2 seconds** (a **>91% speedup**) with warm starts clocking in at **8.3 seconds**.
+* **Rollup**: Client bundle completes in **21.7s** and warm total server readiness in **28.4s**.
+* **Webpack**: Bundles **25 MB of JS, 330+ assets, and 2,280 modules in 15.0 seconds**, maintaining **0 bytes** written to disk in development.
+* **100% Green Test Suite**: 377+ end-to-end Playwright tests passing cleanly across Chromium, Firefox, and WebKit on all execution targets (Node, Bun, Deno, and Cloudflare Workers).
+
+### 3.5. Intelligent & Interactive Dev Port Selection (`port-selector`)
+
+In local development, it is common to have multiple Dinou applications or other local servers running concurrently on default ports `3000` (main HTTP server) and `3001` (WebSocket HMR server). Previously, if port 3000 or 3001 was occupied, the dev server threw an `EADDRINUSE` error and exited immediately.
+
+Dinou v7 introduces an intelligent port manager ([`dinou/node/port-selector.mjs`](file:///c:/Users/roggc/dev/my-dinou-apps/dinou-e2e/dinou/node/port-selector.mjs)) with the following capabilities:
+
+* **Consecutive Free Port Pair Detection `[Port, Port + 1]`**:
+  Dinou verifies in milliseconds via `node:net` that both the HTTP server port and its companion HMR port are available. If port 3000 or 3001 is in use, it automatically finds the next available consecutive pair (e.g., `3002` for HTTP and `3003` for HMR), preserving even/odd parity so HTTP servers never clash with WebSocket endpoints.
+* **Interactive Terminal Prompt (TTY)**:
+  In interactive terminal sessions (`isTTY`), before triggering background compilation, the developer is prompted cleanly:
+  ```text
+  ⚠️  Port 3000 is in use.
+  ? Would you like to use port 3002 instead? (Y/n)
+  ```
+  - Pressing **Enter** or typing **Y** switches Dinou to the selected ports (`3002` and `3003`).
+  - Typing **N** cleanly aborts startup with exit code `0` and no stack trace clutter.
+* **Strict Protection in CI & Non-Interactive Environments**:
+  In automated CI pipelines (e.g., GitHub Actions) or piped non-interactive environments (`!process.stdout.isTTY || process.env.CI`), Dinou never hangs waiting on stdin; it logs a fatal error and exits cleanly with code `1`.
+* **Full Parity Across All 3 Bundlers (`esbuild`, `rollup`, `webpack`)**:
+  - Both `esbuild` (`esm-hmr-plugin.mjs`) and `rollup` (`rollup-plugin-esm-hmr.js`) bind the HMR WebSocket to the shifted port (`HMR_PORT = PORT + 1`).
+  - The SSR runtime dynamically injects the WebSocket URL (`ws://localhost:${HMR_PORT}`) into the browser bootstrap.
+  - In `webpack` (`webpack.config.js`), `WebpackDevServer` dynamically binds to `HMR_PORT` for its live-reload WebSocket (`ws://localhost:${HMR_PORT}/ws`) and updates its proxy target to `http://localhost:${PORT}`.
+
+---
+
+## 4. Core Architectural Highlights
+
+### 4.1. W3C Web Standards at the Foundation
+The core request orchestrator (`handleRequest` in [`dinou/core/handler.js`](file:///c:/Users/roggc/dev/my-dinou-apps/dinou-e2e/dinou/core/handler.js)) is 100% runtime-agnostic. It relies exclusively on open W3C standards:
+- Native `Request` and `Response` interfaces (Web Fetch API).
+- Native `ReadableStream` and `TransformStream` for non-blocking streaming of HTML and RSC payloads.
+- Native `Headers`, `URL`, `URLSearchParams`, and standard cookie parsers.
+
+### 4.2. Bundler-Agnostic Compilation
+Dinou does not lock you into a single bundler. The entire application pipeline seamlessly compiles using any of the three major JS bundlers:
+- **Esbuild**: Sub-second compilation for development and lightning-fast production builds.
+- **Rollup**: Highly optimized dependency graphs with precise tree-shaking.
+- **Webpack**: Full compatibility with legacy plugins and enterprise tooling.
+
+### 4.3. In-Memory Virtual File System (VFS) & Semantic Module Filtering
+To run flawlessly in environments lacking physical file systems (`workerd` in Cloudflare Workers or Deno Deploy):
+- Dinou compiles an **In-Memory Virtual File System (`__DINOU_VFS__`)** containing the route hierarchy discovered during build time.
+- **Semantic Module Filter**: Inspects transitive dependencies in `node_modules` to prevent non-standard bundles (such as legacy SystemJS or UMD wrappers found in libraries like Jotai) from corrupting the edge server bundle.
+
+### 4.4. Universal Storage & ISR Layer (`StorageAdapter`)
+Dinou decouples static cache storage and on-demand revalidation (ISR / ISG) from the local filesystem through the abstract contract in [`dinou/core/storage-adapter.js`](file:///c:/Users/roggc/dev/my-dinou-apps/dinou-e2e/dinou/core/storage-adapter.js):
+- **`FileSystemStorage`**: Used by Node.js and Bun (persists to physical disk at `.dinou/dist2`).
+- **`DenoKVStorage`**: Used by Deno CLI and Deno Deploy (persists to local disk or the globally distributed Deno KV cloud database).
+- **`CloudflareKVStorage`**: Used by Cloudflare Workers via native KV bindings (`DINOU_CACHE`).
+- **`MemoryStorage`**: In-memory caching for ephemeral environments and unit/E2E test isolation.
+
+### 4.5. Universal Middleware and Webhook Engine (`onRequest` in `dinou.config.js`)
+
+With the elimination of Express in favor of open W3C Web Standards, Dinou v7 introduces a universal middleware and webhook system via the `onRequest(request, context)` hook in [`dinou.config.js`](file:///c:/Users/roggc/dev/my-dinou-apps/dinou-e2e/dinou.config.js):
+
+* **Interception and Early Return (Webhooks & Route Guards)**:
+  The hook receives the standard `Request` and Dinou's `context` object. If the plugin returns a native `Response` (such as `Response.json(...)` or `Response.redirect(...)`), the request completes immediately in <1ms without evaluating React components or manifests.
+  - **Webhooks**: Easily handles and verifies raw body signatures (such as Stripe or Clerk webhooks via Svix) using `await request.text()`.
+  - **Route Guards**: Inspects cookies/headers and triggers early redirects (`Response.redirect(...)`).
+* **Context Enrichment (`getContext()`)**:
+  If the plugin does not return a `Response`, execution proceeds smoothly to Server Components and Server Functions. Any property attached to `context` (such as `context.user = userData` or `context.auth = authData`) is accessible synchronously anywhere on the server via `getContext()`.
+* **100% Portable**: Runs identically on Node.js, Bun, Deno, Cloudflare Workers, and Netlify Functions.
+
+---
+
+## 5. Deployment Targets & Practical Guide ("Deploy Everywhere")
+
+Dinou v7 enables deploying the exact same codebase to any of the following targets:
+
+| Deployment Target | Production Runtime | Cache / ISR Engine | Build Command | Start / Deploy Command |
+| :--- | :--- | :--- | :--- | :--- |
+| **Node.js AOT** | Node.js (>= 18) | FileSystem | `npm run build:node` | `npm run start:node` |
+| **Bun Standalone** | Bun | FileSystem | `npm run build:bun` | `npm run start:bun` |
+| **Bun Pure (Zero Node)** | Bun (100% native) | FileSystem | `npm run build:bun:pure` | `npm run start:bun` |
+| **Bun Binary (`compile`)** | None (Standalone Exe) | FileSystem | `npm run build:bun:compile` | `./dist/server` |
+| **Deno Standalone** | Deno CLI | Deno KV (Local Disk) | `npm run build:deno` | `npm run start:deno` |
+| **Deno Deploy (Edge)** | Deno Deploy | Deno KV (Global Cloud)| `npm run build:deno` | `deployctl deploy .dinou/deno/main.js` |
+| **Deno Binary (`compile`)**| None (Standalone Exe) | Deno KV (Embedded) | `npm run build:deno:compile`| `./dist/deno-server` |
+| **Cloudflare Workers** | workerd (V8 Isolates) | Cloudflare KV | `npm run build:cloudflare` | `npx wrangler deploy` |
+| **Netlify Functions v2**| Netlify Edge | CDN Cache | `npm run build` | `git push netlify` |
+| **Static Hosting (SSG)**| Web Server / CDN | Pre-rendered HTML | `npm run export-static` | Deploy `out/` folder |
+
+---
+
+### A. Deploying to Node.js (VPS, Docker, PM2, PaaS)
+With Dinou v7's AOT Dual-Bundle orchestrator, Node.js no longer spawns child processes (`fork`). Both RSC and SSR engines run in-process within the same Node instance with zero IPC latency.
+
+1. **Build**:
+   ```bash
+   npm run build:node
+   # Or with your preferred bundler: npm run build:node:esbuild / :rollup / :webpack
+   ```
+2. **Run**:
+   ```bash
+   npm run start:node
+   ```
+3. **Containerized Deployment (Dockerfile)**:
+   ```dockerfile
+   FROM node:20-alpine
+   WORKDIR /app
+   COPY package*.json ./
+   RUN npm ci --omit=dev
+   COPY . .
+   RUN npm run build:node
+   EXPOSE 3000
+   CMD ["npm", "run", "start:node"]
+   ```
+
+---
+
+### B. Deploying to Bun (Ultra-Fast Standalone or Single Binary)
+Bun provides instant startup and zero-copy kernel streaming via `Bun.file`.
+
+1. **Standard Mode (Built with Node, executed with Bun)**:
+   ```bash
+   npm run build:bun
+   npm run start:bun
+   ```
+2. **Pure Bun Mode (100% Bun, zero Node.js on the CI/Build machine)**:
+   ```bash
+   npm run build:bun:pure
+   npm run start:bun
+   ```
+3. **Self-Contained Executable (`bun build --compile`)**:
+   Packages the entire runtime, node_modules, and application into a single standalone binary:
+   ```bash
+   npm run build:bun:compile
+   # Run the resulting executable on any machine:
+   ./dist/server
+   ```
+
+---
+
+### C. Deploying to Deno and Deno Deploy
+Deno provides granular permission security, native TypeScript support, and out-of-the-box persistence via Deno KV.
+
+1. **Deno Standalone (VPS, Docker, or Linux Server)**:
+   ```bash
+   npm run build:deno
+   npm run start:deno
+   ```
+2. **Deno Deploy (Globally Distributed Serverless Edge)**:
+   ```bash
+   npm run build:deno
+   deployctl deploy --project=<my-project> .dinou/deno/main.js
+   ```
+   *Dinou automatically connects to `Deno.openKv()` in Deno Deploy, persisting ISR pages across Deno's global edge without requiring any external database configuration.*
+3. **Self-Contained Executable (`deno compile`)**:
+   Generates a single standalone executable embedding the Deno runtime, permissions, and Deno KV:
+   ```bash
+   npm run build:deno:compile
+   # Run the resulting binary directly:
+   ./dist/deno-server
+   ```
+
+---
+
+### D. Deploying to Cloudflare Workers (Wrangler)
+Executes across Cloudflare's global edge network spanning 300+ cities with sub-millisecond cold starts.
+
+1. **Build for Cloudflare**:
+   ```bash
+   npm run build:cloudflare
+   # (Generates the self-contained bundle at .dinou/cloudflare/worker.js)
+   ```
+2. **Local Preview with Wrangler**:
+   ```bash
+   npx wrangler dev --port 3000
+   ```
+3. **Deploy to Cloudflare**:
+   ```bash
+   npx wrangler deploy
+   ```
+   *(The `wrangler.toml` configuration routes static assets and SSG pages to `env.ASSETS`, serving them directly from Cloudflare's global CDN at zero compute cost)*.
+
+---
+
+### E. Deploying to Netlify (Functions v2)
+Dinou includes official support for Netlify Functions v2 via [`dinou/adapters/netlify.js`](file:///c:/Users/roggc/dev/my-dinou-apps/dinou-e2e/dinou/adapters/netlify.js):
+
+1. Create `netlify/functions/dinou.js` in your project:
+   ```javascript
+   export { default, config } from "dinou/adapters/netlify";
+   ```
+2. Configure your `netlify.toml`:
+   ```toml
+   [build]
+     command = "npm run build"
+     publish = ".dinou/dist3"
+
+   [functions]
+     directory = "netlify/functions"
+   ```
+3. With `preferStatic: true` pre-configured in the adapter, Netlify serves assets from `.dinou/dist3` directly through its CDN, invoking the serverless function only for dynamic SSR and Server Functions.
+
+---
+
+### F. 100% Pure Static Site Generation (SSG)
+If your application uses static pages and client interactivity without dynamic server-side computation, you can export it with zero backend requirements:
+
+1. **Export Static Files**:
+   ```bash
+   npm run export-static
+   ```
+   *Generates an independent, self-contained `out/` folder containing all pre-rendered HTML pages and `.rsc` binary payloads.*
+2. **Upload Anywhere**:
+   - **GitHub Pages**: `npx gh-pages -d out`
+   - **Surge.sh**: `npx surge out my-domain.surge.sh`
+   - **AWS S3 / Cloudflare Pages / DigitalOcean Spaces**: Uploading the `out/` directory directly to your storage bucket.
+
+---
+
+## 6. The Standard Static Assets Directory: `public/`
+
+Dinou v7 adheres to standard industry conventions:
+- Any file placed in `public/` (`favicon.ico`, `robots.txt`, `sitemap.xml`, images, fonts, etc.) is automatically copied to the root public output folder during compilation.
+- It is served immediately at the root URL (e.g., `public/robots.txt` -> `https://example.com/robots.txt`).
+- Full backward compatibility is preserved for projects that previously used the `favicons/` directory.
+
+---
+
+## 7. Complete `package.json` Scripts Overview
+
+Dinou v7 organizes all operations into a structured matrix categorized by **Target Platform** and **Bundler Engine**:
+
+```text
+├── build / dev / start                      (Default development and build scripts)
+│
+├── Node.js AOT Dual-Bundle:
+│   ├── build:node                           (Alias -> build:node:esbuild)
+│   ├── build:node:esbuild / :rollup / :webpack
+│   └── start:node / :esbuild / :rollup / :webpack
+│
+├── Deno & Deno Deploy:
+│   ├── build:deno                           (Generates .dinou/deno/main.js & seeds KV)
+│   ├── build:deno:esbuild / :rollup / :webpack
+│   ├── build:deno:compile                   (Compiles standalone binary for current host OS)
+│   ├── build:deno:compile:esbuild / :rollup / :webpack
+│   ├── build:deno:compile:linux             (Cross-compiles for Linux x64 -> dist/deno-server-linux)
+│   ├── build:deno:compile:linux:esbuild / :rollup / :webpack
+│   ├── build:deno:compile:linux_arm         (Cross-compiles for Linux ARM64 -> dist/deno-server-linux-arm)
+│   ├── build:deno:compile:linux_arm:esbuild / :rollup / :webpack
+│   ├── build:deno:compile:mac               (Cross-compiles for macOS Apple Silicon -> dist/deno-server-mac)
+│   ├── build:deno:compile:mac:esbuild / :rollup / :webpack
+│   ├── build:deno:compile:win               (Cross-compiles for Windows x64 -> dist/deno-server-win.exe)
+│   ├── build:deno:compile:win:esbuild / :rollup / :webpack
+│   └── start:deno                           (Runs native Deno CLI adapter)
+│
+├── Bun Standalone & Compile:
+│   ├── build:bun                            (Generates .dinou/bun/server.js)
+│   ├── build:bun:esbuild / :rollup / :webpack
+│   ├── build:bun:compile                    (Compiles standalone binary for current host OS)
+│   ├── build:bun:compile:esbuild / :rollup / :webpack
+│   ├── build:bun:compile:linux              (Cross-compiles for Linux x64 -> dist/server-linux)
+│   ├── build:bun:compile:linux:esbuild / :rollup / :webpack
+│   ├── build:bun:compile:linux_arm          (Cross-compiles for Linux ARM64 -> dist/server-linux-arm)
+│   ├── build:bun:compile:linux_arm:esbuild / :rollup / :webpack
+│   ├── build:bun:compile:mac                (Cross-compiles for macOS Apple Silicon -> dist/server-mac)
+│   ├── build:bun:compile:mac:esbuild / :rollup / :webpack
+│   ├── build:bun:compile:win                (Cross-compiles for Windows x64 -> dist/server-win.exe)
+│   ├── build:bun:compile:win:esbuild / :rollup / :webpack
+│   ├── build:bun:pure                       (100% Bun build, zero Node dependency -> :esbuild)
+│   ├── build:bun:pure:esbuild / :rollup / :webpack
+│   ├── build:bun:pure:compile               (Compiles standalone binary using 100% Bun)
+│   ├── build:bun:pure:compile:esbuild / :rollup / :webpack
+│   ├── build:bun:pure:compile:linux         (Cross-compiles for Linux x64 with 100% Bun)
+│   ├── build:bun:pure:compile:linux:esbuild / :rollup / :webpack
+│   ├── build:bun:pure:compile:linux_arm     (Cross-compiles for Linux ARM64 with 100% Bun)
+│   ├── build:bun:pure:compile:linux_arm:esbuild / :rollup / :webpack
+│   ├── build:bun:pure:compile:mac           (Cross-compiles for macOS Apple Silicon with 100% Bun)
+│   ├── build:bun:pure:compile:mac:esbuild / :rollup / :webpack
+│   ├── build:bun:pure:compile:win           (Cross-compiles for Windows x64 with 100% Bun)
+│   ├── build:bun:pure:compile:win:esbuild / :rollup / :webpack
+│   └── start:bun / :esbuild / :rollup / :webpack
+│
+├── Cloudflare Workers:
+│   ├── build:cloudflare                     (Generates .dinou/cloudflare/worker.js)
+│   ├── build:cloudflare:esbuild / :rollup / :webpack
+│   └── test:cloudflare                      (E2E tests with Wrangler and Playwright)
+│
+└── Static Site Generation (SSG):
+    ├── export-static                        (Alias -> export-static:esbuild)
+    └── export-static:esbuild / :rollup / :webpack
+```
+
+---
+
+## 8. Dev Engine & HMR Performance: The SWC Disk-Mirror Architecture
+
+### 8.1. The Scaling Challenge in Massive Projects
+In standard-sized applications (20-50 routes, such as `dinou-e2e`), Hot Module Replacement (HMR) powered by `esbuild.context()` is virtually instantaneous (**~90 ms - 110 ms**). However, when scaling to large projects such as `dinou-docs` (**163 full documentation routes, 1,107 output chunks, and 23.5 MB of emitted JavaScript**), the rebuild time degraded to **~4,065 ms** (~4 seconds).
+
+### 8.2. Forensic Diagnosis: The Two Critical Latency Bottlenecks
+By systematically auditing the rebuild lifecycle in `dinou-docs`, two critical latency bottlenecks were identified:
+1. **IPC Serialization Overhead in `build.onLoad`**:
+   To inject the React Fast Refresh runtime, a JavaScript `onLoad` hook was previously used. When a Node.js hook returns `contents`, esbuild invalidates its native Go in-memory cache and is forced to transfer the entire file contents across the Node-to-Go IPC bridge, forcing full AST re-parsing of every file on each save.
+2. **IPC Resolution Avalanche (13,318 Synchronous Calls)**:
+   A `build.onResolve({ filter: /^\./ })` hook captured all relative imports across the project, including internal imports within `node_modules` (React, Lucide icons, UI components, syntax highlighters). This triggered **13,318 IPC context switches between Go and Node.js** on every file save on Windows, running thousands of synchronous disk checks (`fs.statSync`).
+
+### 8.3. The Adopted Solution: SWC Disk-Mirror (`.dinou/swc/`)
+Instead of transforming code in memory inside esbuild's `onLoad` hook, a **Disk-Mirror Architecture with SWC** was designed:
+1. **Disk Pre-transformation (`.dinou/swc/`)**:
+   SWC compiles modified files directly into `.dinou/swc/src/...` with inline sourcemaps and React Fast Refresh annotations in just **~5 ms**.
+2. **Native Go AST Cache**:
+   By pointing esbuild's entrypoints directly to the `.js` files generated in `.dinou/swc/`, esbuild reads them straight from disk using its native Go loader, unlocking the in-memory AST cache across rebuilds for all unchanged modules.
+3. **Native Alias Resolution with `tsconfigRaw`**:
+   Instead of resolving `@/*` and `~/*` through JavaScript plugins, a `tsconfigRaw` object is dynamically injected into esbuild's configuration, mapping `@/*` to `[".dinou/swc/src/*", "src/*"]`. esbuild's Go engine resolves path aliases at native speed in memory with **zero calls to Node.js**.
+4. **Strict Asset and Stylesheet Filtering (`asset-extensions.js`)**:
+   The `onResolve` hook was constrained strictly to asset and stylesheet extensions (`.css`, `.png`, `.svg`, etc.), reusing the canonical list from `dinou/core/asset-extensions.js` backed by an in-memory resolution cache (`resolveCache`). Calls to Node.js dropped from **13,318 to just 4 calls (0 ms)**.
+
+```
+[src/ (Source Code)]
+  ├── page.tsx  ──────(SWC: Fast Refresh in 5ms)──────>  [.dinou/swc/src/page.js]
+  │                                                                 │
+  ├── button.tsx ─────(SWC: Fast Refresh in 5ms)──────>  [.dinou/swc/src/button.js]
+  │                                                                 │ (esbuild Go reads here)
+  │                                                                 ▼
+  ├── styles.css  <═══════ [swcRedirectPlugin (0ms)] ═══════════════╝ (if page.js imports CSS)
+  └── logo.png    <═══════ [swcRedirectPlugin (0ms)] ═══════════════╝ (if page.js imports Asset)
+```
+
+### 8.4. Why Vendor Pre-bundling (`node_modules`) Was Rejected
+During the research phase, pre-bundling `node_modules` dependencies (Vite-style) was thoroughly evaluated. It was verified that this approach is **unviable in an architecture with React Server Components (RSC)** due to four deterministic technical reasons:
+1. **Synchronous CommonJS `require()` Incompatibility**:
+   The RSC browser deserializer (`@roggc/react-server-dom-esm`) is packaged as CommonJS and executes `const React = require("react")`. If `react` is pre-bundled as an external ESM module (`/@deps/react.js`), the browser cannot execute a synchronous `require()` on an external ESM module, throwing the fatal error: `Dynamic require of "/@deps/react.js" is not supported`.
+2. **The "React Singleton" Rule**:
+   React strictly requires a single shared instance in browser memory. Pre-bundling certain dependencies externally while leaving others bundled internally duplicates the React runtime instance, breaking context providers (`createContext`), React hooks (`Invalid hook call`), and the React Fast Refresh dispatcher.
+3. **Hybrid Package Contamination in npm**:
+   Automatically scanning `node_modules` for the browser encounters dozens of packaging errors in libraries containing isomorphic code or importing Node.js built-ins (`fs`, `path`, `assert`, `stream`).
+4. **Coupling with the RSC Client Manifest**:
+   The React 19 client runtime must hydrate the Server Components stream in strict synchronization with the chunk identifiers in `react-client-manifest.json`, requiring a consistent, unified chunk graph.
+
+### 8.5. Performance Benchmarks and Gains
+With this architecture:
+* **Standard projects (20-50 routes)**: HMR rebuild in **~90 ms - 100 ms**.
+* **Massive projects (`dinou-docs`, 163 routes, 1,107 chunks, 23.5 MB)**:
+  - Before: **4,065 ms** (~4.1 seconds).
+  - After: **~1,100 ms - 1.500 ms** (nearly **4x** speedup).
+* **100% Robustness**: Deterministic consistency of the full esbuild graph is preserved without resorting to fragile micro-compilation heuristics.
+
+---
+
+## 9. Multi-Bundler Harmonization (Rollup, Webpack, Esbuild) and Universal Server Actions Resolution
+
+To guarantee that Dinou v7 is truly agnostic not only of the production deployment target but also of the development toolchain (`esbuild`, `rollup`, or `webpack`), a decisive architectural harmonization phase was completed:
+
+### 9.1. Symmetric Modernization of Development Bundlers
+The architectural principles of **Zero Babel in development** and **in-memory chunk serving (0-Disk I/O)** were systematically unified across all supported bundlers:
+1. **Rollup**:
+   - Total replacement of `@rollup/plugin-babel` in development with [`rollup-plugin-swc.js`](file:///c:/Users/roggc/dev/my-dinou-apps/dinou-e2e/dinou/rollup/rollup-plugins/rollup-plugin-swc.js), featuring an in-memory transpilation cache and native Rust React Fast Refresh.
+   - Integration of `rollup-plugin-memory.js` to retain emitted chunks directly in RAM and serve them to the browser in <1 ms, eliminating synchronous disk write bottlenecks.
+2. **Webpack**:
+   - Replacement of `babel-loader` with `swc-loader.js` in development mode.
+   - Integration of `webpack-memory-plugin.js` to capture compiled assets straight from Webpack's in-memory `outputFileSystem`.
+3. **Esbuild**:
+   - Consolidation of the SWC Disk-Mirror (`.dinou/swc/`) and reduction of IPC resolution overhead to 0 ms.
+
+### 9.2. Server Actions and Server Functions Resolution in the SWC Mirror
+When running under `esbuild` with the disk-backed SWC mirror, an architectural challenge arose in modules importing Server Functions:
+* **The Root Problem**: `syncAllSwcFiles` scans `src/` and deliberately skips files containing `"use server"` (since Server Functions are handled via RPC proxy modules produced by `serverFunctionsPlugin` and must not be compiled as standard client components).
+* Consequently, files like `actions.ts` or `redirect-sf.ts` never exist in `.dinou/swc/`.
+* When a client component inside `.dinou/swc/` issued a relative import (`import { ... } from "./actions"`), esbuild failed to resolve the path locally (`Could not resolve "./actions"`).
+* **The Solution**: [`swcRedirectPlugin`](file:///c:/Users/roggc/dev/my-dinou-apps/dinou-e2e/dinou/esbuild/helpers-esbuild/swc-disk-cache.mjs) was upgraded so that any relative import not found in the SWC mirror is transparently redirected back to the corresponding original file in `src/`, dynamically checking extensions (`.ts`, `.tsx`, `.js`, `/index.ts`, etc.).
+* This unified resolution: both relative imports (`./actions`) and tsconfig-based aliases (`@/demo/.../actions`) resolve identically and without friction.
+
+### 9.3. RSC Descriptors and Native Edge SSR Support (`serverModuleMap: null`)
+A foundational design principle of React 19 is that Server Actions passed into interactive props (such as `<form action={triggerRedirectAction}>`) **are not traditional serializable JavaScript closures**, but registered server references:
+* On the server, React Flight serializes an opaque reference descriptor (`$F` + URL identifier).
+* In the client (or during Edge SSR with `react-server-dom-webpack-client.edge`), React revives this descriptor by generating a `createBoundServerReference` that routes the submit to `callServer`.
+* In prior builds, if an empty non-null `serverConsumerManifest.serverModuleMap: {}` was provided during SSR, React assumed it was running in an environment where server modules should be loaded locally via `requireModule()`, causing `Could not find the module ... in the React Server Manifest` or crashing in `registerBoundServerReference`.
+* In [`dinou/core/edge-ssr.js`](file:///c:/Users/roggc/dev/my-dinou-apps/dinou-e2e/dinou/core/edge-ssr.js), `serverModuleMap: null` was explicitly set in `effectiveManifest`. This instructs React to take the clean `createBoundServerReference` code path, enabling Server Components to pass Server Actions directly into layouts or client components for seamless streaming SSR without errors.
+
+### 9.4. CI Resilience and Dead Code Removal
+* **CI Concurrency Resilience**: Playwright assertions for Server Actions and Redirection flows were updated with an explicit 15s timeout (`{ timeout: 15000 }`), absorbing initial Edge ISG warm-up times on constrained 2-vCPU GitHub Actions runners (Windows/Ubuntu).
+* **Removal of Obsolete Plugins**: Removed `babel-plugin-react-refresh-scoped-id.js`, a legacy artifact from the older Babel pipeline whose namespacing responsibilities are now handled cleanly by `react-refresh-wrap-modules.js` and SWC at bundling time.
+* **100% Green CI Matrix**: Full validation of Playwright test suites across Node (DEV with Webpack, Rollup, and Esbuild), Cloudflare Workers, Deno, Bun, and static SSG on both Ubuntu and Windows.
+
+---
+
+## 10. Public CLI Refinement, Ejected Scripts Organization, and Canonical Library-Mode Manifest Resolution
+
+To perfect the developer experience both when consuming Dinou as a dependency and when electing to eject project infrastructure, a key series of refinements were introduced into the command interface and manifest resolution pipeline:
+
+### 10.1. Public CLI Clarity and Streamlining (`cli.js`)
+* **Removal of Redundant and Ambiguous Commands**: Top-level commands `dinou build:esbuild`, `dinou build:rollup`, and `dinou build:webpack`—as well as the aliases `dinou start:esbuild`, `start:rollup`, and `start:webpack`—were removed. These commands executed only isolated client-side bundling, causing confusion for developers who expected a complete production application build (for which the canonical commands are `dinou build:node:esbuild`, `dinou build:bun`, etc.).
+* **Clear and Deterministic Hierarchy**: The public CLI surface maintains a predictable structure:
+  * General lifecycle commands: `dinou dev`, `dinou build`, `dinou start`.
+  * Runtime- and bundler-specific targets: `dinou build:<runtime>[:bundler]` and `dinou start:<runtime>[:bundler]`.
+
+### 10.2. Alignment of Ejected Scripts (`eject.js`)
+* **Explicit Internal Client Sub-Tasks (`build:client:*`)**: In the `package.json` generated by `dinou eject`, internal client bundling scripts were renamed to `build:client:esbuild`, `build:client:rollup`, and `build:client:webpack`.
+* **Relegation to the End of `scripts`**: These commands were moved to the very bottom of the `scripts` section, avoiding accidental discovery as top-level commands and clarifying that they serve as internal sub-steps invoked by full build pipelines (`build:node`, `build:cloudflare`, etc.).
+
+### 10.3. Universal Configuration Export (`dinou/config`)
+* **Parity Between Root and Ejected Packages**: The sub-path `"./config"` was explicitly added to the `"exports"` map in Dinou's root `package.json`:
+  ```json
+  "./config": {
+    "types": "./dinou/index.d.ts",
+    "import": "./dinou/core/config.js",
+    "require": "./dinou/core/config.js"
+  }
+  ```
+* **Universal Resolution**: Allows external consumer applications to write `import { defineConfig } from "dinou/config"` seamlessly whether Dinou is installed as an external package in `node_modules` or has been ejected locally.
+
+### 10.4. Canonical Manifest Names and Dinou In-Node-Modules Support
+* **Stable Framework Entry Points (`dinouClientRedirect` and `dinouLink`)**: Core internal client components (`client-redirect.jsx` and `link.jsx`) are mapped to fixed canonical entry names across all three bundlers (Esbuild, Rollup, and Webpack), ensuring dev builds predictably emit `/dinouClientRedirect.js` and `/dinouLink.js`.
+* **Rollup Resolution for Modules in `node_modules`**: Updated [`rollup-plugin-react-client-manifest.js`](file:///c:/Users/roggc/dev/my-dinou-apps/dinou-e2e/dinou/rollup/rollup-plugins/rollup-plugin-react-client-manifest.js) so that Dinou's internal modules are not discarded by third-party exclusion filters (`node_modules`) during the `transform` and `generateBundle` passes. This prevents unbundled provisional URLs (`/node_modules_dinou_dinou_core_client-redirect.js`) from leaking into RSC payloads.
+* **Defensive Normalization in `dev.mjs`**: Introduced a defensive fallback in the development server ensuring that core client component references resolve immediately to `/dinouClientRedirect.js` and `/dinouLink.js` across ESM runtimes (Esbuild and Rollup).
+
+### 10.5. Configurable `React.StrictMode` Integration and DEV-PROD Parity with React Compiler
+* **Default-On in Development**: In development mode (`dev`), the client component root (`Router` in `client.jsx`, `client-webpack.jsx`, `client-error.jsx`, and `client-error-webpack.jsx`) is automatically wrapped in `<React.StrictMode>`.
+* **Purity Gatekeeper for React Compiler**: Strict Mode double-invokes component rendering and runs a double mount-unmount-remount cycle for `useEffect` in development. This immediately surfaces impure renders, direct prop/state mutations, or missing cleanup functions (`return () => cleanup()`). By strictly enforcing the Rules of React in development (where SWC runs without the compiler for instant HMR), Dinou guarantees that when **React Compiler** (Babel) runs in production (`build`), its fine-grained auto-memoization executes with 100% fidelity without behavioral discrepancies between environments.
+* **Configurable via `dinou.config.mjs` (`reactStrictMode`)**: The `reactStrictMode?: boolean;` option was added to the `DinouConfig` interface in [`dinou/index.d.ts`](file:///c:/Users/roggc/dev/my-dinou-apps/dinou-e2e/dinou/index.d.ts) (defaulting to `true`). Developers can explicitly disable Strict Mode when integrating third-party libraries that do not tolerate double effect invocations:
+  ```javascript
+  import { defineConfig } from "dinou/config";
+
+  export default defineConfig({
+    reactStrictMode: false, // Optional (true by default)
+  });
+  ```
+* **SSR In-Memory Injection and Zero Production Overhead**: The SSR server ([`dinou/core/handler.js`](file:///c:/Users/roggc/dev/my-dinou-apps/dinou-e2e/dinou/core/handler.js)) dynamically injects `window.__DINOU_STRICT_MODE__` into the initial bootstrap script in development. In production builds (`NODE_ENV === "production"`), Strict Mode is completely bypassed, ensuring zero runtime overhead.
+* **Automated Playwright E2E Validation (`e2e/example.spec.ts`)**: Added a dedicated test route (`src/t-strict-mode`) verifying deterministically that in development the effect runs exactly twice (`effectCount === 2`) with `__DINOU_STRICT_MODE__ === true`, while in production it runs exactly once (`effectCount === 1`).
+
+---
+
+## 11. Conclusion: Freedom, Performance, and Future-Proofing
+
+The architecture of **Dinou v7** demonstrates that it is entirely possible to leverage the full power of **React 19 (Server Components, Streaming SSR, Server Functions, and ISR)** without submitting to cloud platform lock-in:
+* **Zero Child Processes (`fork`)**: A unified, lightweight, and ultra-fast in-process AOT architecture.
+* **No Platform Lock-in**: The exact same codebase runs in a Cloudflare Edge Worker, inside a Kubernetes cluster on Node.js, on a bare-metal Bun VM, or as a standalone native binary executable.
+* **Instantaneous, Scalable Development**: Two-tier architecture with SWC Disk-Mirror and native Go resolution for fast, deterministic HMR.
+* **Built on Web Standards**: Your application code relies not on proprietary vendor SDKs, but on the universal open web standards of the W3C.
