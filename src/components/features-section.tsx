@@ -98,7 +98,7 @@ export function FeaturesSection() {
   return (
     <section
       id="features"
-      className="w-full py-16 sm:py-20 md:py-24 bg-slate-50/80 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 relative"
+      className="w-full py-16 sm:py-20 md:py-24 bg-slate-50/80 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 scroll-mt-20 relative"
     >
       <div className="container px-4 md:px-6 mx-auto">
         <div className="flex flex-col items-center space-y-4 text-center mb-12 sm:mb-14">
@@ -109,10 +109,10 @@ export function FeaturesSection() {
             Dinou v7 Architecture
           </Badge>
           <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl text-slate-900 dark:text-slate-100">
-            Engineered for Absolute Freedom & Speed
+            Engineered for Freedom & Standards
           </h2>
           <p className="mx-auto max-w-[720px] text-slate-600 dark:text-slate-300 md:text-xl">
-            Discover the six core architectural pillars that make Dinou v7 the fastest, most flexible React 19 framework in the ecosystem.
+            Discover the six core architectural pillars that make Dinou v7 the most versatile and standard-compliant React 19 framework in the ecosystem.
           </p>
         </div>
 

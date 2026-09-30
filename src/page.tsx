@@ -24,7 +24,7 @@ export default function Page() {
       <div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-slate-950 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)]" />
 
       {/* Hero Section */}
-      <section id="main" className="w-full pt-16 pb-16 sm:pt-20 sm:pb-20 md:pt-24 md:pb-24 lg:pt-28 lg:pb-24 relative">
+      <section id="main" className="w-full pt-16 pb-16 sm:pt-20 sm:pb-20 md:pt-24 md:pb-24 lg:pt-28 lg:pb-24 scroll-mt-20 relative">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="flex flex-col items-center space-y-6 sm:space-y-8 text-center max-w-4xl mx-auto">
             {/* Version Badge */}
@@ -114,7 +114,7 @@ export default function Page() {
       <FeaturesSection />
 
       {/* Final Call to Action */}
-      <section id="ready" className="w-full py-20 sm:py-24 md:py-28 lg:py-32 relative overflow-hidden">
+      <section id="ready" className="w-full py-20 sm:py-24 md:py-28 lg:py-32 scroll-mt-20 relative overflow-hidden">
         <div className="container px-4 md:px-6 mx-auto text-center">
           <div className="relative rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-b from-slate-50/90 via-white/80 to-slate-50/90 dark:from-slate-900/70 dark:via-slate-950/60 dark:to-slate-900/70 p-8 sm:p-12 md:p-14 max-w-4xl mx-auto shadow-2xl backdrop-blur-md overflow-hidden">
             {/* Subtle glow effect behind CTA */}

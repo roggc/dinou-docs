@@ -38,7 +38,7 @@ export function EngineComparison() {
   return (
     <section
       id="engine-comparison"
-      className="w-full py-16 sm:py-20 md:py-24 relative bg-transparent border-0"
+      className="w-full py-16 sm:py-20 md:py-24 scroll-mt-20 relative bg-transparent border-0"
     >
       <div className="container px-4 md:px-6 mx-auto">
         <div className="flex flex-col items-center space-y-4 text-center mb-10 sm:mb-12">

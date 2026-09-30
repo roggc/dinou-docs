@@ -154,7 +154,7 @@ export function DeployMatrix() {
   return (
     <section
       id="deploy-everywhere"
-      className="w-full py-16 sm:py-20 md:py-24 bg-slate-50/80 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 relative"
+      className="w-full py-16 sm:py-20 md:py-24 bg-slate-50/80 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 scroll-mt-20 relative"
     >
       <div className="container px-4 md:px-6 mx-auto">
         <div className="flex flex-col items-center space-y-4 text-center mb-10 sm:mb-12">
