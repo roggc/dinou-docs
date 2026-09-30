@@ -48,6 +48,10 @@ export async function startEsbuildDev(options = {}) {
     __dirname,
     "../core/link.jsx"
   );
+  const absPathToSlot = path.resolve(
+    __dirname,
+    "../core/slot.js"
+  );
 
   const frameworkEntryPoints = {
     main: path.resolve(__dirname, "../core/client.jsx"),
@@ -63,6 +67,7 @@ export async function startEsbuildDev(options = {}) {
     ),
     dinouClientRedirect: absPathToClientRedirect,
     dinouLink: absPathToLink,
+    dinouSlot: absPathToSlot,
   };
 
   const changedIds = new Set();
@@ -94,6 +99,12 @@ export async function startEsbuildDev(options = {}) {
     updateManifestForModule(
       absPathToLink,
       await fs.readFile(absPathToLink, "utf8"),
+      true,
+      manifest
+    );
+    updateManifestForModule(
+      absPathToSlot,
+      await fs.readFile(absPathToSlot, "utf8"),
       true,
       manifest
     );

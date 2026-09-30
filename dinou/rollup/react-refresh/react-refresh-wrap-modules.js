@@ -6,6 +6,7 @@ const frameworkEntries = new Set([
   "serverFunctionProxy.js",
   "dinouClientRedirect.js",
   "dinouLink.js",
+  "dinouSlot.js",
   "__hmr_client__.js",
   "_commonjsHelpers.js",
 ]);

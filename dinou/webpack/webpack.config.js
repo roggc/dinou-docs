@@ -142,6 +142,7 @@ module.exports = async () => {
         "../core/client-redirect.jsx",
       ),
       dinouLink: path.resolve(__dirname, "../core/link.jsx"),
+      dinouSlot: path.resolve(__dirname, "../core/slot.js"),
       ...[...cssEntries].reduce(
         (acc, cssEntry) => ({
           ...acc,

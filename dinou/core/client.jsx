@@ -156,8 +156,8 @@ const getLayoutPayload = (layoutKey) => {
 const getErrorRSCPayload = (route, error) => {
   const url = route.split("::")[0];
   const cacheKey = `error::${url}::${error.message || String(error)}`;
-  if (cache.has(cacheKey)) {
-    return cache.get(cacheKey);
+  if (pageCache.has(cacheKey)) {
+    return pageCache.get(cacheKey);
   }
 
   const payloadUrl = "/____rsc_payload_error____" + url;
@@ -177,7 +177,7 @@ const getErrorRSCPayload = (route, error) => {
     }).then((res) => {
       if (res.headers.has("x-rsc-redirect")) {
         const redirectUrl = res.headers.get("x-rsc-redirect");
-        cache.delete(cacheKey);
+        pageCache.delete(cacheKey);
         if (window.__DINOU_ROUTER_NAVIGATE__) {
           window.__DINOU_ROUTER_NAVIGATE__(redirectUrl, { replace: true });
         } else {
@@ -194,7 +194,7 @@ const getErrorRSCPayload = (route, error) => {
       }
     }
   );
-  cache.set(cacheKey, promise);
+  pageCache.set(cacheKey, promise);
   return promise;
 };
 

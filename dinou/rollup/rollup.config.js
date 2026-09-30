@@ -59,6 +59,10 @@ module.exports = async function () {
           __dirname,
           "../core/link.jsx",
         ),
+        dinouSlot: path.resolve(
+          __dirname,
+          "../core/slot.js",
+        ),
       }
       : {
         main: path.resolve(__dirname, "../core/client.jsx"),
@@ -74,6 +78,10 @@ module.exports = async function () {
         dinouLink: path.resolve(
           __dirname,
           "../core/link.jsx",
+        ),
+        dinouSlot: path.resolve(
+          __dirname,
+          "../core/slot.js",
         ),
       },
     output: {
