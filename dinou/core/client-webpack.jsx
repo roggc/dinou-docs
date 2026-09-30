@@ -215,6 +215,12 @@ class ErrorBoundary extends Component {
     }
   }
 
+  componentDidUpdate(prevProps) {
+    if (this.state.hasError && prevProps.resetKey !== this.props.resetKey) {
+      this.setState({ hasError: false, error: null });
+    }
+  }
+
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
@@ -452,7 +458,7 @@ function Router() {
   return (
     <RouterContext.Provider value={contextValue}>
       <ErrorBoundary
-        key={navError ? "error" : "normal"}
+        resetKey={route}
         onError={setNavError}
       >
         <DinouPageContext.Provider value={pagePromise}>

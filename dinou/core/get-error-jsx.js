@@ -62,7 +62,8 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
     }
   }
 
-  if (!pagePath && isDevelopment) {
+  if (!pagePath) {
+    const isDev = isDevelopment;
     jsx = React.createElement(
       "div",
       {
@@ -81,17 +82,17 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
       React.createElement(
         "div",
         { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" } },
-        React.createElement("span", { style: { background: "#e11d48", color: "white", padding: "2px 8px", borderRadius: "9999px", fontSize: "12px", fontWeight: "bold" } }, "Dinou Dev Error"),
+        React.createElement("span", { style: { background: "#e11d48", color: "white", padding: "2px 8px", borderRadius: "9999px", fontSize: "12px", fontWeight: "bold" } }, isDev ? "Dinou Dev Error" : "Application Error"),
         React.createElement("h2", { style: { margin: 0, fontSize: "1.25rem", fontWeight: 700, color: "#881337" } }, error?.message || "Unhandled Application Error")
       ),
-      React.createElement(
+      isDev && React.createElement(
         "p",
         { style: { margin: "0 0 16px 0", fontSize: "0.875rem", color: "#9f1239", lineHeight: 1.5 } },
         "An unhandled error occurred during rendering. You can provide a custom error UI by creating an ",
         React.createElement("code", { style: { background: "#ffe4e6", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 } }, "error.tsx"),
         " file in your route folder."
       ),
-      error?.stack && React.createElement(
+      isDev && error?.stack && React.createElement(
         "pre",
         {
           style: {
@@ -108,57 +109,51 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
         error.stack
       )
     );
-  }
-
-  if (options && options.segment === "page" && !pagePath) {
-    return jsx;
-  }
-
-  if (pagePath) {
+  } else {
     const pageModule = await importModule(pagePath);
     const Page = pageModule.default ?? pageModule;
     jsx = React.createElement(Page, {
       params: dynamicParams ?? {},
       error,
     });
+  }
 
-    // Manejo segmentado para Página: Si se solicita solo el error para el slot de página
-    if (options && options.segment === "page") {
-      return jsx;
-    }
+  // Manejo segmentado para Página: Si se solicita solo el error para el slot de página
+  if (options && options.segment === "page") {
+    return jsx;
+  }
 
-    const noLayoutErrorPath = path.join(
-      path.dirname(pagePath),
-      `no_layout_error`
-    );
-    if (existsSync(noLayoutErrorPath)) {
-      return jsx;
-    }
+  const noLayoutErrorPath = pagePath
+    ? path.join(path.dirname(pagePath), "no_layout_error")
+    : null;
+  if (noLayoutErrorPath && existsSync(noLayoutErrorPath)) {
+    return jsx;
+  }
 
-    if (
-      getFilePathAndDynamicParams(
-        reqSegments,
-        query,
-        srcFolder,
-        "no_layout",
-        false
-      )[0]
-    ) {
-      return jsx;
-    }
-
-    const layouts = getFilePathAndDynamicParams(
+  if (
+    getFilePathAndDynamicParams(
       reqSegments,
       query,
       srcFolder,
-      "layout",
-      true,
-      false,
-      undefined,
-      0,
-      {},
-      true
-    );
+      "no_layout",
+      false
+    )[0]
+  ) {
+    return jsx;
+  }
+
+  const layouts = getFilePathAndDynamicParams(
+    reqSegments,
+    query,
+    srcFolder,
+    "layout",
+    true,
+    false,
+    undefined,
+    0,
+    {},
+    true
+  );
 
     if (layouts && Array.isArray(layouts)) {
       let index = 0;
@@ -261,7 +256,6 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
         index++;
       }
     }
-  }
 
   return jsx;
 }

@@ -1160,7 +1160,11 @@ async function handleRequest(request, platformContext = {}) {
         pipeRSC(jsx, bridge, manifest, platformContext);
       } catch (err) {
         console.error(`[Dinou] Error rendering RSC ${segment}:`, err);
-        const serializedError = { message: err.message || "Unknown Error", name: err.name };
+        const serializedError = {
+          message: err.message || "Unknown Error",
+          name: err.name || "Error",
+          stack: isDevelopment ? err.stack : undefined,
+        };
         const errJsx = await getErrorJSX(reqPath, queryObj, serializedError, isDevelopment, { segment });
         bridge.status(500);
         const manifest = getClientManifest();
@@ -1472,7 +1476,11 @@ async function handleRequest(request, platformContext = {}) {
               : "An error occurred in the Server Components render";
             bootstrapScriptContent += `window.__DINOU_ERROR_MESSAGE__=${JSON.stringify(
               clientErrMsg
-            )};window.__DINOU_ERROR_NAME__=${JSON.stringify(caughtError?.name || "Error")};\n`;
+            )};window.__DINOU_ERROR_NAME__=${JSON.stringify(
+              caughtError?.name || "Error"
+            )};window.__DINOU_ERROR_STACK__=${JSON.stringify(
+              isDevelopment ? (caughtError?.stack || "") : ""
+            )};\n`;
             bootstrapScriptContent += 'document.body.setAttribute("data-hydrated", "true");\n';
           }
           if (bridge._injectedScripts) {
@@ -1480,9 +1488,7 @@ async function handleRequest(request, platformContext = {}) {
             bootstrapScriptContent += clean + "\n";
           }
 
-          const clientEntry = isError
-            ? getAssetFromManifest("error.js")
-            : getAssetFromManifest("main.js");
+          const clientEntry = getAssetFromManifest("main.js");
 
           const bootstrapModules = isDevelopment
             ? [
@@ -1551,7 +1557,7 @@ async function handleRequest(request, platformContext = {}) {
             }
 
             const errorRscStream = renderRSCStream(errorJsx, clientManifest, { runtime: "edge" });
-            const errorClientEntry = getAssetFromManifest("error.js");
+            const errorClientEntry = getAssetFromManifest("main.js");
             const errorBootstrapModules = isDevelopment
               ? [
                   isWebpack ? undefined : getAssetFromManifest("runtime.js"),
@@ -1560,9 +1566,16 @@ async function handleRequest(request, platformContext = {}) {
               : [errorClientEntry];
 
             let errorBootstrapScript = "";
+            const knownLayouts = (typeof globalThis !== "undefined" && globalThis.__DINOU_LAYOUTS__) || ["", "docs"];
+            errorBootstrapScript += `window.__DINOU_LAYOUTS__ = ${JSON.stringify(knownLayouts)};\n`;
+            errorBootstrapScript += "window.__DINOU_USE_STATIC__ = false;\n";
             errorBootstrapScript += `window.__DINOU_ERROR_MESSAGE__=${JSON.stringify(
               serializedError.message
-            )};window.__DINOU_ERROR_NAME__=${JSON.stringify(serializedError.name)};\n`;
+            )};window.__DINOU_ERROR_NAME__=${JSON.stringify(
+              serializedError.name
+            )};window.__DINOU_ERROR_STACK__=${JSON.stringify(
+              isDevelopment ? (serializedError.stack || "") : ""
+            )};\n`;
             errorBootstrapScript += 'document.body.setAttribute("data-hydrated", "true");\n';
             if (isDevelopment) {
               const isStrictMode = dinouConfig?.reactStrictMode !== false;
