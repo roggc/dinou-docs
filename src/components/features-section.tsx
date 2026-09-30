@@ -24,13 +24,13 @@ export function FeaturesSection() {
     {
       icon: Gauge,
       color: "blue",
-      title: "Universal Dual-Bundle Engine",
-      description: "Ahead-of-Time in-memory orchestration. Zero child processes (fork) and zero Express.",
+      title: "Universal Streaming Engine",
+      description: "In-process orchestration using native React 19 Web Streams and standard W3C primitives.",
       bullets: [
-        "Pass A (RSC Engine) with [react-server] export conditions",
-        "Pass B (SSR Engine) with native react-dom/server.edge streaming",
-        "Direct RAM interconnection via standard W3C ReadableStream",
-        "Flat, predictable memory footprint with zero IPC latency",
+        "Native React Server Components (RSC) and asynchronous Suspense streaming",
+        "Edge-ready SSR with react-dom/server streaming pipelines",
+        "Standard W3C Request, Response, and ReadableStream architecture",
+        "Flat, predictable memory footprint with zero subprocess overhead",
       ],
     },
     {
@@ -48,13 +48,13 @@ export function FeaturesSection() {
     {
       icon: Zap,
       color: "amber",
-      title: "Next-Gen Developer Experience (DX)",
-      description: "Sub-second hot reloading with 0-disk I/O and SWC disk-mirror technology.",
+      title: "Fast Developer Experience (DX)",
+      description: "Rapid hot reloading with in-memory serving and instant feedback.",
       bullets: [
-        "100% In-RAM development (globalThis.__DINOU_MEM_FILES__)",
-        "SWC Disk-Mirror: HMR under 1.5s even across 160+ routes",
-        "Instant Hot CSS swapping (style-update) without page reload",
-        "Dynamic hot switching between 'use client' and 'use server'",
+        "In-memory development server with zero-disk I/O latency",
+        "Fast incremental rebuilds powered by SWC and modern bundlers",
+        "Instant Hot CSS swapping without full page reloads",
+        "Seamless workflow with standard React 19 ergonomics",
       ],
     },
     {
@@ -98,13 +98,13 @@ export function FeaturesSection() {
   return (
     <section
       id="features"
-      className="w-full py-20 md:py-32 bg-slate-50/70 dark:bg-slate-900/40"
+      className="w-full py-24 sm:py-32 md:py-36 bg-slate-50/80 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 relative"
     >
       <div className="container px-4 md:px-6 mx-auto">
-        <div className="flex flex-col items-center space-y-4 text-center mb-16">
+        <div className="flex flex-col items-center space-y-4 text-center mb-14 sm:mb-16">
           <Badge
             variant="outline"
-            className="px-3.5 py-1 border-slate-300 dark:border-slate-700 backdrop-blur-sm text-slate-700 dark:text-slate-300"
+            className="px-3.5 py-1 border-slate-300 dark:border-slate-700 backdrop-blur-sm text-slate-700 dark:text-slate-300 font-medium"
           >
             Dinou v7 Architecture
           </Badge>
@@ -117,7 +117,7 @@ export function FeaturesSection() {
         </div>
 
         {/* 3 columns on large screens, 2 on tablet, 1 on mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
           {features.map((feature, idx) => {
             const Icon = feature.icon;
             return (

@@ -4,47 +4,44 @@ import { Check, X, Gauge, Zap, Flame, ShieldAlert } from "lucide-react";
 export function EngineComparison() {
   const comparisonItems = [
     {
-      dimension: "RSC Engine",
-      v6: "child_process.fork() + Babel JIT IPC across OS boundaries",
-      v7: "Dual-Bundle AOT In-Memory via native React 19 Web Streams",
+      dimension: "RSC & SSR Architecture",
+      v6: "External child processes with IPC serialization overhead",
+      v7: "Native in-process streaming via React 19 Web Streams",
       v7Highlight: true,
     },
     {
-      dimension: "Chassis & Core",
-      v6: "Monolithic Express + require.extensions hacks (asset/css hooks)",
-      v7: "100% W3C Web Standards (Request, Response, ReadableStream)",
+      dimension: "Runtime Standards",
+      v6: "Monolithic Express + custom runtime hooks",
+      v7: "100% standard W3C Web APIs (Request, Response, ReadableStream)",
       v7Highlight: true,
     },
     {
       dimension: "Memory Footprint",
-      v6: "Heavy multi-process memory overhead (risk of fork-bombs)",
-      v7: "Flat, predictable RAM with thousands of async streams in-process",
+      v6: "Heavy multi-process memory overhead (multiple Node instances)",
+      v7: "Flat, predictable RAM with lightweight in-process streams",
       v7Highlight: true,
     },
     {
-      dimension: "Cross-Runtime",
-      v6: "Locked to Node.js CJS; impossible on Cloudflare Workers",
-      v7: "Deploy Everywhere: Cloudflare, Bun, Deno, Node, and single binaries",
+      dimension: "Deployment Flexibility",
+      v6: "Tied to traditional Node.js servers",
+      v7: "Universal: Cloudflare Workers, Bun, Deno, Node.js, and native binaries",
       v7Highlight: true,
     },
     {
-      dimension: "Dev Server & HMR",
-      v6: "Dual watchers, full page reloads on CSS edits, fork overhead",
-      v7: "0-Fork, 100% In-RAM (0 disk I/O), SWC Disk-Mirror, Hot CSS Swap",
-      v7Highlight: true,
-    },
-    {
-      dimension: "CI & Test Suite",
-      v6: "15-20 min test runs prone to socket IPC timeouts",
-      v7: "377 tests passed at 100% in ~4 minutes across 3 browsers",
+      dimension: "Dev Server & DX",
+      v6: "Frequent process restarts and full-page reloads",
+      v7: "Zero-disk I/O dev server with instant HMR and hot CSS updates",
       v7Highlight: true,
     },
   ];
 
   return (
-    <section className="w-full py-16 md:py-24 bg-slate-100/60 dark:bg-slate-900/40 border-y border-slate-200 dark:border-slate-800">
+    <section
+      id="engine-comparison"
+      className="w-full py-24 sm:py-32 md:py-36 relative bg-transparent border-0"
+    >
       <div className="container px-4 md:px-6 mx-auto">
-        <div className="flex flex-col items-center space-y-4 text-center mb-12">
+        <div className="flex flex-col items-center space-y-4 text-center mb-12 sm:mb-16">
           <Badge
             variant="outline"
             className="px-3.5 py-1 border-purple-500/30 text-purple-600 dark:text-purple-400 bg-purple-500/10 backdrop-blur-sm font-medium"
@@ -63,7 +60,7 @@ export function EngineComparison() {
         </div>
 
         {/* Visual Comparison Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto mb-14 sm:mb-16">
           {/* Card v6 */}
           <div className="p-6 rounded-2xl border border-slate-300/80 dark:border-slate-800 bg-white/60 dark:bg-slate-950/60 shadow-md relative overflow-hidden">
             <div className="flex items-center justify-between mb-4">
@@ -81,20 +78,20 @@ export function EngineComparison() {
               </Badge>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-              Relied on spawning separate operating system child processes (<code className="text-xs font-mono bg-slate-100 dark:bg-slate-900 px-1 py-0.5 rounded">child_process.fork</code>) to circumvent the React 19 Dual Condition Conflict, incurring heavy serialization latency and disk saturation.
+              Relied on spawning separate operating system child processes (<code className="text-xs font-mono bg-slate-100 dark:bg-slate-900 px-1 py-0.5 rounded">child_process.fork</code>), causing high memory overhead, inter-process communication bottlenecks, and lock-in to Node.js servers.
             </p>
             <div className="space-y-2 text-xs text-slate-500 border-t border-slate-200 dark:border-slate-800 pt-3">
               <div className="flex items-center gap-2">
                 <X className="w-4 h-4 text-red-500 shrink-0" />
-                <span>Heavy IPC serialization overhead on every request</span>
+                <span>Heavy subprocess overhead and process synchronization</span>
               </div>
               <div className="flex items-center gap-2">
                 <X className="w-4 h-4 text-red-500 shrink-0" />
-                <span>Express dependency & runtime Babel AST parsing</span>
+                <span>Coupled to Express and runtime code compilation</span>
               </div>
               <div className="flex items-center gap-2">
                 <X className="w-4 h-4 text-red-500 shrink-0" />
-                <span>Cannot execute on Cloudflare Workers or single binaries</span>
+                <span>Incompatible with Cloudflare Workers or standalone binaries</span>
               </div>
             </div>
           </div>
@@ -111,29 +108,29 @@ export function EngineComparison() {
                       Modern AOT
                     </Badge>
                   </h3>
-                  <span className="text-xs text-purple-600 dark:text-purple-400 font-medium">The Formula 1 Ferrari</span>
+                  <span className="text-xs text-purple-600 dark:text-purple-400 font-medium">Streamlined & Universal</span>
                 </div>
               </div>
               <div className="flex items-center gap-1 text-emerald-500 font-bold text-xs">
                 <Gauge className="w-4 h-4" />
-                <span>0-Fork</span>
+                <span>Modern Core</span>
               </div>
             </div>
             <p className="text-sm text-slate-700 dark:text-slate-300 mb-4">
-              Engineered with a universal 3-Pass Ahead-of-Time Dual-Bundle architecture. Pass A (RSC) and Pass B (SSR) interconnect in RAM via standard W3C Web Streams with zero IPC latency.
+              Built as a unified in-process engine using native W3C Web Streams and React 19 standards. Server Components (RSC) and SSR stream directly in memory with instant response times and zero subprocess overhead.
             </p>
             <div className="space-y-2 text-xs text-slate-700 dark:text-slate-200 border-t border-purple-500/20 pt-3">
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span className="font-medium">Direct RAM stream interconnection (0 forks, 0 IPC)</span>
+                <span className="font-medium">Direct in-memory streaming with zero subprocess overhead</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span className="font-medium">100% W3C Standards: zero Express, zero runtime Babel</span>
+                <span className="font-medium">100% W3C Web Standards: zero Express, zero runtime transforms</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span className="font-medium">Deploy to Edge, Bun, Deno, Node, Binaries, and SSG</span>
+                <span className="font-medium">Deploy to Edge, Bun, Deno, Node.js, native binaries, and SSG</span>
               </div>
             </div>
           </div>

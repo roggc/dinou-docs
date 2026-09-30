@@ -21,10 +21,14 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm border-slate-200 dark:border-slate-800">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-        <div className="flex items-center space-x-2">
-          <Link href="/" onClick={handleLogoClick}>
-            <img src={dinou} className="w-10" alt="Dinou Logo" width={40} />
+        <div className="flex items-center space-x-3">
+          <Link href="/" onClick={handleLogoClick} className="flex items-center space-x-2.5">
+            <img src={dinou} className="w-8 h-8 sm:w-9 sm:h-9" alt="Dinou Logo" width={36} height={36} />
+            <span className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Dinou</span>
           </Link>
+          <Badge variant="outline" className="hidden sm:inline-flex text-[11px] font-mono px-2 py-0.5 border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/5">
+            v7.0
+          </Badge>
         </div>
 
         <nav className="hidden md:flex items-center space-x-6">
@@ -35,23 +39,29 @@ export default function Header() {
             Home
           </a>
           <a
+            href="#deploy-everywhere"
+            className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
+          >
+            Deploy
+          </a>
+          <a
+            href="#engine-comparison"
+            className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
+          >
+            Evolution
+          </a>
+          <a
             href="#features"
             className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
           >
             Features
           </a>
-          <a
-            href="#development"
+          <Link
+            href="/docs"
             className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
           >
-            Quick Start
-          </a>
-          <a
-            href="#ready"
-            className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
-          >
-            Ready to Ship
-          </a>
+            Documentation
+          </Link>
         </nav>
 
         <div className="flex items-center space-x-2">

@@ -38,28 +38,27 @@ export function TerminalTabs() {
   };
 
   return (
-    <div className="relative group w-full max-w-2xl mx-auto">
-      <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition duration-700"></div>
-      <div className="relative overflow-hidden bg-slate-950 text-slate-100 border border-slate-800 shadow-2xl rounded-2xl">
+    <div className="w-full max-w-2xl mx-auto">
+      <div className="overflow-hidden bg-[#0d1117] text-slate-100 border border-slate-700/80 dark:border-slate-800 shadow-2xl rounded-2xl">
         {/* Top bar with tabs */}
-        <div className="flex items-center justify-between px-4 py-3 bg-slate-900/90 border-b border-slate-800">
+        <div className="flex items-center justify-between px-4 py-3 bg-[#161b22] border-b border-slate-800">
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-full bg-red-500/80" />
-            <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-            <div className="w-3 h-3 rounded-full bg-green-500/80" />
+            <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+            <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+            <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
             <span className="text-xs text-slate-400 font-mono ml-2">bash</span>
           </div>
 
-          <div className="flex items-center space-x-1 bg-slate-950/60 p-1 rounded-lg border border-slate-800/80">
+          <div className="flex items-center space-x-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800">
             {(["npm", "pnpm", "bun", "deno"] as PackageManager[]).map((pm) => (
               <button
                 key={pm}
                 type="button"
                 onClick={() => setActivePm(pm)}
-                className={`px-2.5 py-1 text-xs font-mono rounded-md transition-colors ${
+                className={`px-3 py-1 text-xs font-mono rounded-md transition-all ${
                   activePm === pm
                     ? "bg-blue-600 text-white font-semibold shadow-sm"
-                    : "text-slate-400 hover:text-slate-200"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
                 }`}
               >
                 {pm}
@@ -69,11 +68,11 @@ export function TerminalTabs() {
         </div>
 
         {/* Terminal Content */}
-        <div className="p-6 font-mono text-sm relative">
+        <div className="p-6 font-mono text-sm sm:text-base relative bg-[#0d1117]">
           <Button
             size="icon"
             variant="ghost"
-            className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800/80"
+            className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
             onClick={handleCopy}
             title="Copy command"
           >
@@ -85,24 +84,24 @@ export function TerminalTabs() {
             <span className="sr-only">Copy install command</span>
           </Button>
 
-          <div className="space-y-3">
+          <div className="space-y-3.5 pr-8">
             <div className="flex items-start">
-              <span className="text-emerald-400 mr-2 select-none">$</span>
-              <span className="text-slate-200 font-medium">{currentCmd.install}</span>
+              <span className="text-emerald-400 font-bold mr-2.5 select-none">$</span>
+              <span className="text-white font-semibold tracking-wide">{currentCmd.install}</span>
             </div>
-            <div className="text-slate-500 text-xs pl-4 border-l border-slate-800">
-              Initializing Dinou v7 with React 19 Dual-Bundle AOT engine...
+            <div className="text-slate-300 text-xs sm:text-sm pl-3.5 border-l-2 border-slate-700/80">
+              Creating a new Dinou app with React 19...
             </div>
-            <div className="text-emerald-400/90 text-xs pl-4 border-l border-slate-800">
-              ✔ Universal project structure ready (deploy to Node, Bun, Deno, Cloudflare)
+            <div className="text-emerald-300 text-xs sm:text-sm pl-3.5 border-l-2 border-emerald-500/60 font-medium">
+              ✔ Ready to deploy to Cloudflare, Bun, Deno, Node & SSG
             </div>
-            <div className="flex items-start pt-1">
-              <span className="text-emerald-400 mr-2 select-none">$</span>
-              <span className="text-slate-200">{currentCmd.dev}</span>
+            <div className="flex items-start pt-1.5">
+              <span className="text-emerald-400 font-bold mr-2.5 select-none">$</span>
+              <span className="text-white font-semibold tracking-wide">{currentCmd.dev}</span>
             </div>
-            <div className="text-blue-400 text-xs flex items-center gap-1.5 font-medium pt-1">
-              <span>🚀</span>
-              <span>Dinou v7 dev server listening on http://localhost:3000 (0-fork, in-RAM)</span>
+            <div className="text-sky-300 text-xs sm:text-sm flex items-center gap-2 pt-1 font-medium">
+              <span className="text-emerald-400 font-bold">➜</span>
+              <span>Local server running on <span className="text-white underline underline-offset-4 decoration-sky-400/50">http://localhost:3000</span></span>
             </div>
           </div>
         </div>

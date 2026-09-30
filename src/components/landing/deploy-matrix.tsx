@@ -37,9 +37,8 @@ const targets: TargetInfo[] = [
     docLink: "/docs/deployment",
     terminalOutput: [
       "$ npm run build:cloudflare",
-      "✔ Pass A (RSC Engine) compiled in 84ms",
-      "✔ Pass B (SSR Engine) compiled in 42ms",
-      "✔ Worker bundle generated at .dinou/cloudflare/worker.js (214 KB)",
+      "✔ Compiling Server Components and Edge SSR...",
+      "✔ Cloudflare Worker bundle generated (.dinou/cloudflare/worker.js)",
       "$ npx wrangler deploy",
       "🚀 Published to https://my-app.workers.dev (300+ edge locations)",
     ],
@@ -61,11 +60,11 @@ const targets: TargetInfo[] = [
     docLink: "/docs/deployment",
     terminalOutput: [
       "$ npm run build:bun:compile",
-      "✔ Dual-Bundle AOT in RAM compiled in 68ms",
-      "✔ Embedding Bun runtime and assets into standalone binary...",
-      "✔ Single executable binary emitted at ./dist/server (48 MB)",
+      "✔ Compiling application for Bun standalone runtime...",
+      "✔ Bundling assets into native executable binary...",
+      "✔ Single executable binary emitted at ./dist/server",
       "$ ./dist/server",
-      "🚀 Native Bun Server ready on http://localhost:3000 (0 host dependencies)",
+      "🚀 Bun server listening on http://localhost:3000 (0 host dependencies)",
     ],
   },
   {
@@ -85,9 +84,9 @@ const targets: TargetInfo[] = [
     docLink: "/docs/deployment",
     terminalOutput: [
       "$ npm run build:deno:compile",
-      "✔ Pass A & Pass B dual-engine connected via Web Streams",
-      "✔ Compiling standalone Deno binary with embedded Deno KV...",
-      "✔ Output: ./dist/deno-server (self-contained)",
+      "✔ Compiling application with embedded Deno KV adapter...",
+      "✔ Generating self-contained executable with deno compile...",
+      "✔ Output: ./dist/deno-server (self-contained binary)",
       "$ ./dist/deno-server",
       "🚀 Deno server listening on http://localhost:3000 (Deno KV enabled)",
     ],
@@ -96,23 +95,23 @@ const targets: TargetInfo[] = [
     id: "node",
     name: "Node.js AOT In-Process",
     icon: Server,
-    badge: "0-Fork Architecture",
-    tagline: "The legacy fork() model is eliminated. RSC and SSR run in-process with zero IPC latency and flat RAM.",
+    badge: "In-Process AOT",
+    tagline: "Runs React Server Components and SSR directly in-process with standard Web Streams and flat memory footprint.",
     buildCommand: "npm run build:node",
     runCommand: "npm run start:node",
     highlights: [
-      "0 child processes (goodbye fork-bomb and double RAM)",
+      "Direct in-process execution with zero child processes",
       "Native Web Streams piped directly through HTTP response",
-      "Docker/Kubernetes lightweight container friendly",
+      "Docker & Kubernetes lightweight container friendly",
       "Zero Express and zero runtime Babel overhead",
     ],
     docLink: "/docs/deployment",
     terminalOutput: [
       "$ npm run build:node",
-      "✔ Dual-Bundle AOT build completed in 1.4s",
-      "✔ Static assets optimized to .dinou/dist3",
+      "✔ Server and client bundles compiled successfully",
+      "✔ Static assets optimized in .dinou/public",
       "$ npm run start:node",
-      "🚀 Node.js AOT in-process server listening on port 3000 (Flat memory)",
+      "🚀 Node.js server listening on http://localhost:3000 (Flat memory)",
     ],
   },
   {
@@ -153,9 +152,12 @@ export function DeployMatrix() {
   const Icon = selectedTarget.icon;
 
   return (
-    <section id="deploy-everywhere" className="w-full py-16 md:py-24">
+    <section
+      id="deploy-everywhere"
+      className="w-full py-24 sm:py-32 md:py-36 bg-slate-50/80 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 relative"
+    >
       <div className="container px-4 md:px-6 mx-auto">
-        <div className="flex flex-col items-center space-y-4 text-center mb-12">
+        <div className="flex flex-col items-center space-y-4 text-center mb-12 sm:mb-14">
           <Badge
             variant="outline"
             className="px-3.5 py-1 border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10 backdrop-blur-sm font-medium"
@@ -174,7 +176,7 @@ export function DeployMatrix() {
         </div>
 
         {/* Target Buttons Pill Nav */}
-        <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-4xl mx-auto">
+        <div className="flex flex-wrap justify-center gap-2.5 mb-10 sm:mb-12 max-w-4xl mx-auto">
           {targets.map((target) => {
             const TargetIcon = target.icon;
             const isSelected = selectedTarget.id === target.id;
