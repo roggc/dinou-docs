@@ -63,10 +63,8 @@ export default function WhyDinouPage() {
               Instead of wrapping React in layers of proprietary macros, synthetic abstractions, and vendor-centric hosting contracts, Dinou embraces React as it is. It gives you complete architectural visibility, extreme performance, and true portability across every major JavaScript runtime.
             </p>
 
-            <hr className="my-8" />
-
             {/* Section 1: Philosophy */}
-            <section id="philosophy" className="scroll-mt-20">
+            <section id="philosophy" className="scroll-mt-20 mt-10 sm:mt-12">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
                 💡 Core Philosophy
               </h2>
@@ -108,7 +106,7 @@ export default function WhyDinouPage() {
             </section>
 
             {/* Section 2: Architectural Pillars */}
-            <section id="pillars" className="scroll-mt-20">
+            <section id="pillars" className="scroll-mt-20 mt-12 sm:mt-16">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
                 🏛️ Architectural Pillars
               </h2>
@@ -192,7 +190,7 @@ export default function WhyDinouPage() {
             </section>
 
             {/* Section 3: AI-Friendly by Design */}
-            <section id="why-ai" className="scroll-mt-20">
+            <section id="why-ai" className="scroll-mt-20 mt-12 sm:mt-16">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
                 🤖 AI-Friendly by Design
               </h2>
@@ -223,7 +221,7 @@ export default function WhyDinouPage() {
             </section>
 
             {/* Section 4: Feature Catalog */}
-            <section id="features" className="scroll-mt-20">
+            <section id="features" className="scroll-mt-20 mt-12 sm:mt-16">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
                 📦 Feature Catalog
               </h2>
@@ -331,7 +329,7 @@ export default function WhyDinouPage() {
             </section>
 
             {/* Section 5: Comparison Table */}
-            <section id="comparison" className="scroll-mt-20">
+            <section id="comparison" className="scroll-mt-20 mt-12 sm:mt-16">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
                 ⚖️ Dinou vs Traditional Frameworks
               </h2>
@@ -385,7 +383,7 @@ export default function WhyDinouPage() {
             </section>
 
             {/* Section 6: Next Steps */}
-            <section id="next-steps" className="scroll-mt-20">
+            <section id="next-steps" className="scroll-mt-20 mt-12 sm:mt-16">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
                 🚀 Next Steps
               </h2>
