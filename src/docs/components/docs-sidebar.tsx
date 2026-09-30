@@ -77,31 +77,6 @@ const docsNavigation = [
     ],
   },
   {
-    title: "Upgrade Guides",
-    items: [
-      {
-        title: "Overview",
-        href: "/docs/migration",
-        icon: Compass,
-      },
-      {
-        title: "Migration from v6 to v7",
-        href: "/docs/migration/v6-to-v7",
-        icon: Sparkles,
-      },
-      {
-        title: "Migration from v5 to v6",
-        href: "/docs/migration/v5-to-v6",
-        icon: RefreshCw,
-      },
-      {
-        title: "Migration from v4 to v5",
-        href: "/docs/migration/v4-to-v5",
-        icon: RefreshCw,
-      },
-    ],
-  },
-  {
     title: "Core Concepts",
     items: [
       {
@@ -253,6 +228,31 @@ const docsNavigation = [
         title: "Architecture & Internals",
         href: "/docs/internals",
         icon: Cpu,
+      },
+    ],
+  },
+  {
+    title: "Upgrade Guides",
+    items: [
+      {
+        title: "Overview",
+        href: "/docs/migration",
+        icon: Compass,
+      },
+      {
+        title: "Migration from v6 to v7",
+        href: "/docs/migration/v6-to-v7",
+        icon: Sparkles,
+      },
+      {
+        title: "Migration from v5 to v6",
+        href: "/docs/migration/v5-to-v6",
+        icon: RefreshCw,
+      },
+      {
+        title: "Migration from v4 to v5",
+        href: "/docs/migration/v4-to-v5",
+        icon: RefreshCw,
       },
     ],
   },
@@ -700,22 +700,22 @@ export function DocsSidebar() {
           </SidebarGroup>
         ))}
 
-        {/* In Docs mode: Card inviting to Ejected Reference */}
+        {/* In Docs mode: Card inviting to Architecture */}
         {!isEjected && (
           <div className="p-3 mt-4 mb-2">
-            <div className="rounded-xl border border-amber-500/20 bg-amber-50/40 dark:bg-amber-950/10 p-3 space-y-2">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                <Plug className="h-3.5 w-3.5" />
-                <span>Ejected Code?</span>
+            <div className="rounded-xl border border-blue-500/20 bg-blue-50/40 dark:bg-blue-950/10 p-3 space-y-2">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400">
+                <Cpu className="h-3.5 w-3.5" />
+                <span>Architecture</span>
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Explore the complete reference of architecture and plugins generated after running <code>npm run eject</code>.
+                Explore the complete reference of architecture, Dual-Bundle engine, and runtime pipeline of Dinou.
               </p>
               <Link
-                href="/docs/ejected-reference"
-                className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline pt-1"
+                href="/docs/internals"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline pt-1"
               >
-                <span>Ejected Reference</span>
+                <span>Architecture &amp; Internals</span>
                 <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
