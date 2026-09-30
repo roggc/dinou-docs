@@ -5,7 +5,7 @@ import { Button } from "@/docs/components/ui/button";
 import { ThemeToggle } from "@/docs/components/theme-toggle";
 import { Badge } from "@/docs/components/ui/badge";
 import { SidebarTrigger } from "@/docs/components/ui/sidebar";
-import dinou from "@/docs/images/dinou.png";
+import dinou from "@/images/dinou.png";
 import { RiNpmjsFill } from "react-icons/ri";
 import {
   Tooltip,
@@ -31,7 +31,7 @@ export function DocsHeader() {
             <span className="font-bold">Dinou</span>
             <Link href="/docs">
               <Badge variant="secondary" className="text-xs">
-                docs v6
+                docs v7
               </Badge>
             </Link>
           </div>
