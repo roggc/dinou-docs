@@ -29,7 +29,6 @@ const absPathToSlot = path.resolve(
 
 const frameworkEntryPoints = {
   main: path.resolve(__dirname, "../core/client.jsx"),
-  error: path.resolve(__dirname, "../core/client-error.jsx"),
   serverFunctionProxy: path.resolve(
     __dirname,
     "../core/server-function-proxy.js"

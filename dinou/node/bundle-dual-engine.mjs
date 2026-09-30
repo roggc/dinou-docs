@@ -140,9 +140,7 @@ export async function bundleDualEngine(options = {}) {
           const baseName = path.basename(filePath);
           if (
             baseName === "client.jsx" ||
-            baseName === "client-error.jsx" ||
-            baseName === "client-webpack.jsx" ||
-            baseName === "client-error-webpack.jsx"
+            baseName === "client-webpack.jsx"
           ) {
             continue;
           }

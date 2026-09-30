@@ -187,9 +187,7 @@ async function findClientComponents(parsedClientManifest = {}) {
         const base = path.basename(filePath);
         if (
           base === "client.jsx" ||
-          base === "client-error.jsx" ||
           base === "client-webpack.jsx" ||
-          base === "client-error-webpack.jsx" ||
           base.startsWith("react-refresh") ||
           base === "runtime.js" ||
           filePath.includes("react-refresh")

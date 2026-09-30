@@ -46,7 +46,6 @@ module.exports = async function () {
           "react-refresh/react-refresh-entry.js",
         ),
         main: path.resolve(__dirname, "../core/client.jsx"),
-        error: path.resolve(__dirname, "../core/client-error.jsx"),
         serverFunctionProxy: path.resolve(
           __dirname,
           "../core/server-function-proxy.js",
@@ -66,7 +65,6 @@ module.exports = async function () {
       }
       : {
         main: path.resolve(__dirname, "../core/client.jsx"),
-        error: path.resolve(__dirname, "../core/client-error.jsx"),
         serverFunctionProxy: path.resolve(
           __dirname,
           "../core/server-function-proxy.js",

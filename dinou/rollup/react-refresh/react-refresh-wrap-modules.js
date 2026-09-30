@@ -1,6 +1,5 @@
 const frameworkEntries = new Set([
   "main.js",
-  "error.js",
   "runtime.js",
   "refresh.js",
   "serverFunctionProxy.js",

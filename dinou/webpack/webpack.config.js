@@ -130,9 +130,6 @@ module.exports = async () => {
       main: [path.resolve(__dirname, "../core/client-webpack.jsx")].filter(
         Boolean,
       ),
-      error: [
-        path.resolve(__dirname, "../core/client-error-webpack.jsx"),
-      ].filter(Boolean),
       serverFunctionProxy: path.resolve(
         __dirname,
         "../core/server-function-proxy-webpack.js",
