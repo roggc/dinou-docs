@@ -38,10 +38,10 @@ export function EngineComparison() {
   return (
     <section
       id="engine-comparison"
-      className="w-full py-28 sm:py-36 md:py-44 lg:py-48 relative bg-transparent border-0"
+      className="w-full py-16 sm:py-20 md:py-24 relative bg-transparent border-0"
     >
       <div className="container px-4 md:px-6 mx-auto">
-        <div className="flex flex-col items-center space-y-4 text-center mb-16 sm:mb-20">
+        <div className="flex flex-col items-center space-y-4 text-center mb-10 sm:mb-12">
           <Badge
             variant="outline"
             className="px-3.5 py-1 border-purple-500/30 text-purple-600 dark:text-purple-400 bg-purple-500/10 backdrop-blur-sm font-medium"
@@ -60,7 +60,7 @@ export function EngineComparison() {
         </div>
 
         {/* Visual Comparison Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto mb-16 sm:mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto mb-10 sm:mb-12">
           {/* Card v6 */}
           <div className="p-6 rounded-2xl border border-slate-300/80 dark:border-slate-800 bg-white/60 dark:bg-slate-950/60 shadow-md relative overflow-hidden">
             <div className="flex items-center justify-between mb-4">

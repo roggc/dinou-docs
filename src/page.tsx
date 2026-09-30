@@ -24,9 +24,9 @@ export default function Page() {
       <div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-slate-950 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)]" />
 
       {/* Hero Section */}
-      <section id="main" className="w-full pt-32 pb-28 sm:pt-40 sm:pb-36 md:pt-48 md:pb-44 lg:pt-56 lg:pb-48 relative">
+      <section id="main" className="w-full pt-16 pb-16 sm:pt-20 sm:pb-20 md:pt-24 md:pb-24 lg:pt-28 lg:pb-24 relative">
         <div className="container px-4 md:px-6 mx-auto">
-          <div className="flex flex-col items-center space-y-8 sm:space-y-10 text-center max-w-4xl mx-auto">
+          <div className="flex flex-col items-center space-y-6 sm:space-y-8 text-center max-w-4xl mx-auto">
             {/* Version Badge */}
             <div className="flex justify-center">
               <Badge
@@ -52,7 +52,7 @@ export default function Page() {
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center pt-2 sm:pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center pt-2">
               <Button
                 size="lg"
                 className="text-base h-12 px-8 rounded-full shadow-lg shadow-blue-500/20 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
@@ -81,7 +81,7 @@ export default function Page() {
             </div>
 
             {/* Key Value Props */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full max-w-2xl pt-8 sm:pt-10 border-t border-slate-200 dark:border-slate-800/80">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full max-w-2xl pt-6 sm:pt-8 border-t border-slate-200 dark:border-slate-800/80">
               <div className="flex flex-col items-center p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800">
                 <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">React 19 Native</span>
                 <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">RSC, Actions & Streaming SSR</span>
@@ -97,7 +97,7 @@ export default function Page() {
             </div>
 
             {/* Terminal Tabs Component */}
-            <div className="w-full pt-8 sm:pt-12">
+            <div className="w-full pt-6 sm:pt-8">
               <TerminalTabs />
             </div>
           </div>
@@ -114,9 +114,9 @@ export default function Page() {
       <FeaturesSection />
 
       {/* Final Call to Action */}
-      <section id="ready" className="w-full py-32 sm:py-44 md:py-52 lg:py-60 relative overflow-hidden">
+      <section id="ready" className="w-full py-20 sm:py-24 md:py-28 lg:py-32 relative overflow-hidden">
         <div className="container px-4 md:px-6 mx-auto text-center">
-          <div className="relative rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-b from-slate-50/90 via-white/80 to-slate-50/90 dark:from-slate-900/70 dark:via-slate-950/60 dark:to-slate-900/70 p-10 sm:p-16 md:p-20 max-w-4xl mx-auto shadow-2xl backdrop-blur-md overflow-hidden">
+          <div className="relative rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-b from-slate-50/90 via-white/80 to-slate-50/90 dark:from-slate-900/70 dark:via-slate-950/60 dark:to-slate-900/70 p-8 sm:p-12 md:p-14 max-w-4xl mx-auto shadow-2xl backdrop-blur-md overflow-hidden">
             {/* Subtle glow effect behind CTA */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/10 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none -z-10" />
 

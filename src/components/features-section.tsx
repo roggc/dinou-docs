@@ -98,10 +98,10 @@ export function FeaturesSection() {
   return (
     <section
       id="features"
-      className="w-full py-28 sm:py-36 md:py-44 lg:py-48 bg-slate-50/80 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 relative"
+      className="w-full py-16 sm:py-20 md:py-24 bg-slate-50/80 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 relative"
     >
       <div className="container px-4 md:px-6 mx-auto">
-        <div className="flex flex-col items-center space-y-4 text-center mb-16 sm:mb-24">
+        <div className="flex flex-col items-center space-y-4 text-center mb-12 sm:mb-14">
           <Badge
             variant="outline"
             className="px-3.5 py-1 border-slate-300 dark:border-slate-700 backdrop-blur-sm text-slate-700 dark:text-slate-300 font-medium"
@@ -117,7 +117,7 @@ export function FeaturesSection() {
         </div>
 
         {/* 3 columns on large screens, 2 on tablet, 1 on mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
           {features.map((feature, idx) => {
             const Icon = feature.icon;
             return (
