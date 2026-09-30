@@ -7,7 +7,7 @@ const {
 const importModule = require("./import-module");
 const { asyncRenderJSXToClientJSX } = require("./render-jsx-to-client-jsx");
 
-async function getErrorJSX(reqPath, query, error, isDevelopment = false) {
+async function getErrorJSX(reqPath, query, error, isDevelopment = false, options = {}) {
   const srcFolder = path.resolve(process.cwd(), "src");
   const reqSegments = reqPath.split("/").filter(Boolean);
   const hasRouterSyntax = reqSegments.some((seg) => {
@@ -110,6 +110,10 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false) {
     );
   }
 
+  if (options && options.segment === "page" && !pagePath) {
+    return jsx;
+  }
+
   if (pagePath) {
     const pageModule = await importModule(pagePath);
     const Page = pageModule.default ?? pageModule;
@@ -117,6 +121,11 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false) {
       params: dynamicParams ?? {},
       error,
     });
+
+    // Manejo segmentado para Página: Si se solicita solo el error para el slot de página
+    if (options && options.segment === "page") {
+      return jsx;
+    }
 
     const noLayoutErrorPath = path.join(
       path.dirname(pagePath),

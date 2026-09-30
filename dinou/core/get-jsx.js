@@ -21,6 +21,9 @@ async function getJSX(
   const normalizedReqPath =
     "/" + reqSegments.join("/") + (reqSegments.length > 0 ? "/" : "");
 
+  let jsx;
+  let pageFunctionsProps;
+
   // 1. Manejo segmentado para Layout: Si se solicita solo el layout
   if (options && options.segment === "layout") {
     let { DinouPageSlot } = require("./slot.js");
@@ -50,130 +53,108 @@ async function getJSX(
         });
       }
     }
-    let targetLayoutPath = options.layoutPath;
-    let dParams = {};
-    let slots = {};
+    jsx = React.createElement(DinouPageSlot);
+  } else {
+    const hasRouterSyntax = reqSegments.some((seg) => {
+      const isGroup = seg.startsWith("(") && seg.endsWith(")");
 
-    if (!targetLayoutPath) {
-      const layouts = getFilePathAndDynamicParams(
+      const isDynamic = seg.startsWith("[") && seg.endsWith("]");
+      const isSlot = seg.startsWith("@");
+      const isPrivate = seg.startsWith("_");
+
+      return isGroup || isDynamic || isSlot || isPrivate;
+    });
+
+    let pagePath;
+    let folderPath = "";
+    if (!hasRouterSyntax) {
+      folderPath = path.join(srcFolder, ...reqSegments);
+      if (existsSync(folderPath)) {
+        for (const ext of [".tsx", ".ts", ".jsx", ".js"]) {
+          const candidatePath = path.join(folderPath, `page${ext}`);
+          if (existsSync(candidatePath)) {
+            pagePath = candidatePath;
+            break;
+          }
+        }
+      }
+    }
+    let dynamicParams = {};
+
+    if (!pagePath) {
+      const [filePath, dParams] = getFilePathAndDynamicParams(
         reqSegments,
         query,
         srcFolder,
-        "layout",
+      );
+      pagePath = filePath;
+      dynamicParams = dParams ?? {};
+    }
+
+    if (!pagePath || forceNotFound) {
+      if (isNotFound) isNotFound.value = true;
+      const [notFoundPath, dParams] = getFilePathAndDynamicParams(
+        reqSegments,
+        query,
+        srcFolder,
+        "not_found",
         true,
         false,
-        undefined,
-        0,
-        {},
-        true,
       );
-      if (layouts && Array.isArray(layouts) && layouts.length > 0) {
-        [targetLayoutPath, dParams, slots] = layouts[0];
-      }
-    }
+      if (!notFoundPath) {
+        jsx = React.createElement(
+          "div",
+          null,
+          `Page not found: no "page" file found for "${normalizedReqPath}"`,
+        );
+      } else {
+        const pageModule = await importModule(notFoundPath);
+        const Page = pageModule.default ?? pageModule;
+        let props = {
+          params: dParams ?? {},
+        };
+        const notFoundDir = path.dirname(notFoundPath);
 
-    if (!targetLayoutPath) {
-      return React.createElement(DinouPageSlot);
-    }
-
-    const layoutModule = await importModule(targetLayoutPath);
-    const Layout = layoutModule.default ?? layoutModule;
-
-    const updatedSlots = {};
-    if (slots && typeof slots === "object") {
-      for (const [slotName, slotValue] of Object.entries(slots)) {
-        let elementToRender;
-        if (slotValue && slotValue.slotPath) {
-          const slotModule = await importModule(slotValue.slotPath);
-          const Slot = slotModule.default ?? slotModule;
-          elementToRender = React.createElement(Slot, {
-            params: slotValue.slotParams || {},
-            key: slotName,
-            __modulePath: slotValue.slotPath,
-          });
-        } else {
-          elementToRender = slotValue;
+        const [pageFunctionsPath] = getFilePathAndDynamicParams(
+          reqSegments,
+          query,
+          notFoundDir,
+          "page_functions",
+          true,
+          true,
+          undefined,
+          reqSegments.length,
+        );
+        if (pageFunctionsPath) {
+          const pageFunctionsModule = await importModule(pageFunctionsPath);
+          const getProps = pageFunctionsModule.getProps;
+          pageFunctionsProps = await getProps?.(dParams ?? {});
+          props = { ...props, ...(pageFunctionsProps?.page ?? {}) };
         }
-        await asyncRenderJSXToClientJSX(elementToRender);
-        updatedSlots[slotName] = elementToRender;
-      }
-    }
 
-    const layoutProps = {
-      params: dParams || {},
-      ...updatedSlots,
-      children: React.createElement(DinouPageSlot),
-    };
-
-    return React.createElement(Layout, layoutProps);
-  }
-  const hasRouterSyntax = reqSegments.some((seg) => {
-    const isGroup = seg.startsWith("(") && seg.endsWith(")");
-
-    const isDynamic = seg.startsWith("[") && seg.endsWith("]");
-    const isSlot = seg.startsWith("@");
-    const isPrivate = seg.startsWith("_");
-
-    return isGroup || isDynamic || isSlot || isPrivate;
-  });
-
-  let pagePath;
-  let folderPath = "";
-  if (!hasRouterSyntax) {
-    folderPath = path.join(srcFolder, ...reqSegments);
-    if (existsSync(folderPath)) {
-      for (const ext of [".tsx", ".ts", ".jsx", ".js"]) {
-        const candidatePath = path.join(folderPath, `page${ext}`);
-        if (existsSync(candidatePath)) {
-          pagePath = candidatePath;
-          break;
+        jsx = React.createElement(Page, props);
+        const noLayoutNotFoundPath = path.join(
+          notFoundDir,
+          `no_layout_not_found`,
+        );
+        if (existsSync(noLayoutNotFoundPath)) {
+          return jsx;
         }
       }
-    }
-  }
-  let dynamicParams = {};
-
-  if (!pagePath) {
-    const [filePath, dParams] = getFilePathAndDynamicParams(
-      reqSegments,
-      query,
-      srcFolder,
-    );
-    pagePath = filePath;
-    dynamicParams = dParams ?? {};
-  }
-
-  let jsx;
-  let pageFunctionsProps;
-
-  if (!pagePath || forceNotFound) {
-    if (isNotFound) isNotFound.value = true;
-    const [notFoundPath, dParams] = getFilePathAndDynamicParams(
-      reqSegments,
-      query,
-      srcFolder,
-      "not_found",
-      true,
-      false,
-    );
-    if (!notFoundPath) {
-      jsx = React.createElement(
-        "div",
-        null,
-        `Page not found: no "page" file found for "${normalizedReqPath}"`,
-      );
     } else {
-      const pageModule = await importModule(notFoundPath);
+      if (isNotFound) isNotFound.value = false;
+      const pageModule = await importModule(pagePath);
       const Page = pageModule.default ?? pageModule;
-      let props = {
-        params: dParams ?? {},
-      };
-      const notFoundDir = path.dirname(notFoundPath);
 
+      let props = {
+        params: dynamicParams,
+      };
+
+      const pageFolder = path.dirname(pagePath);
       const [pageFunctionsPath] = getFilePathAndDynamicParams(
         reqSegments,
         query,
-        notFoundDir,
+        pageFolder,
         "page_functions",
         true,
         true,
@@ -183,52 +164,17 @@ async function getJSX(
       if (pageFunctionsPath) {
         const pageFunctionsModule = await importModule(pageFunctionsPath);
         const getProps = pageFunctionsModule.getProps;
-        pageFunctionsProps = await getProps?.(dParams ?? {});
+        pageFunctionsProps = await getProps?.(dynamicParams);
         props = { ...props, ...(pageFunctionsProps?.page ?? {}) };
       }
 
       jsx = React.createElement(Page, props);
-      const noLayoutNotFoundPath = path.join(
-        notFoundDir,
-        `no_layout_not_found`,
-      );
-      if (existsSync(noLayoutNotFoundPath)) {
-        return jsx;
-      }
-    }
-  } else {
-    if (isNotFound) isNotFound.value = false;
-    const pageModule = await importModule(pagePath);
-    const Page = pageModule.default ?? pageModule;
-
-    let props = {
-      params: dynamicParams,
-    };
-
-    const pageFolder = path.dirname(pagePath);
-    const [pageFunctionsPath] = getFilePathAndDynamicParams(
-      reqSegments,
-      query,
-      pageFolder,
-      "page_functions",
-      true,
-      true,
-      undefined,
-      reqSegments.length,
-    );
-    if (pageFunctionsPath) {
-      const pageFunctionsModule = await importModule(pageFunctionsPath);
-      const getProps = pageFunctionsModule.getProps;
-      pageFunctionsProps = await getProps?.(dynamicParams);
-      props = { ...props, ...(pageFunctionsProps?.page ?? {}) };
     }
 
-    jsx = React.createElement(Page, props);
-  }
-
-  // 2. Manejo segmentado para Página: Si se solicita solo la página, retornar sin layouts
-  if (options && options.segment === "page") {
-    return jsx;
+    // 2. Manejo segmentado para Página: Si se solicita solo la página, retornar sin layouts
+    if (options && options.segment === "page") {
+      return jsx;
+    }
   }
 
   if (

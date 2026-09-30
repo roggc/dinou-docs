@@ -976,6 +976,7 @@ async function handleRequest(request, platformContext = {}) {
           queryObj,
           clientError,
           isDevelopment,
+          { segment: "page" },
         );
         bridge.setHeader("Content-Type", "text/x-component");
         bridge.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
@@ -1160,7 +1161,7 @@ async function handleRequest(request, platformContext = {}) {
       } catch (err) {
         console.error(`[Dinou] Error rendering RSC ${segment}:`, err);
         const serializedError = { message: err.message || "Unknown Error", name: err.name };
-        const errJsx = await getErrorJSX(reqPath, queryObj, serializedError, isDevelopment);
+        const errJsx = await getErrorJSX(reqPath, queryObj, serializedError, isDevelopment, { segment });
         bridge.status(500);
         const manifest = getClientManifest();
         pipeRSC(errJsx, bridge, manifest, platformContext);
