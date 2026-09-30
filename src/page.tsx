@@ -3,13 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import {
   Rocket,
   Github,
-  BookOpen,
   Sparkles,
   ArrowRight,
-  Zap,
-  Gauge,
-  ShieldCheck,
-  Cpu,
 } from "lucide-react";
 import { Link } from "dinou";
 import { TerminalTabs } from "@/components/landing/terminal-tabs";
@@ -133,22 +128,11 @@ export default function Page() {
               <p className="text-slate-600 dark:text-slate-300 md:text-lg max-w-xl">
                 Experience the power of React 19 Server Components, Streaming SSR, and Server Functions with total freedom of infrastructure.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 w-full justify-center pt-2">
+              <div className="flex justify-center pt-2">
                 <Button size="lg" className="text-base rounded-full px-8 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20" asChild>
                   <Link href="/docs">
                     <span>Get Started Now</span>
                     <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="text-base rounded-full px-8 bg-white/70 dark:bg-slate-950/60 border-slate-300 dark:border-slate-800"
-                  asChild
-                >
-                  <Link href="/docs/why-dinou">
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    Read the Architecture
                   </Link>
                 </Button>
               </div>
