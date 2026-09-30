@@ -1,4 +1,5 @@
 const path = require("path");
+const { pathToFileURL } = require("url");
 const { existsSync } = require("./vfs");
 const React = require("react");
 const {
@@ -13,11 +14,99 @@ async function getJSX(
   isNotFound = null,
   isDevelopment = false,
   forceNotFound = false,
+  options = {},
 ) {
   const srcFolder = path.resolve(process.cwd(), "src");
   const reqSegments = reqPath.split("/").filter(Boolean);
   const normalizedReqPath =
     "/" + reqSegments.join("/") + (reqSegments.length > 0 ? "/" : "");
+
+  // 1. Manejo segmentado para Layout: Si se solicita solo el layout
+  if (options && options.segment === "layout") {
+    let { DinouPageSlot } = require("./slot.js");
+    if (
+      typeof DinouPageSlot === "function" &&
+      DinouPageSlot.$$typeof !== Symbol.for("react.client.reference")
+    ) {
+      const slotPath = path.resolve(__dirname, "slot.js");
+      const fileUrl = pathToFileURL(slotPath).href;
+      let regFn = null;
+      try {
+        const pkg = require("react-server-dom-webpack/server");
+        regFn = pkg.registerClientReference;
+      } catch (e) {}
+      if (!regFn) {
+        try {
+          const pkg = require("@roggc/react-server-dom-esm/server.node.js");
+          regFn = pkg.registerClientReference;
+        } catch (e) {}
+      }
+      if (regFn) {
+        DinouPageSlot = regFn(DinouPageSlot, fileUrl, "DinouPageSlot");
+      } else {
+        Object.defineProperties(DinouPageSlot, {
+          $$typeof: { value: Symbol.for("react.client.reference") },
+          $$id: { value: fileUrl + "#DinouPageSlot" },
+        });
+      }
+    }
+    let targetLayoutPath = options.layoutPath;
+    let dParams = {};
+    let slots = {};
+
+    if (!targetLayoutPath) {
+      const layouts = getFilePathAndDynamicParams(
+        reqSegments,
+        query,
+        srcFolder,
+        "layout",
+        true,
+        false,
+        undefined,
+        0,
+        {},
+        true,
+      );
+      if (layouts && Array.isArray(layouts) && layouts.length > 0) {
+        [targetLayoutPath, dParams, slots] = layouts[0];
+      }
+    }
+
+    if (!targetLayoutPath) {
+      return React.createElement(DinouPageSlot);
+    }
+
+    const layoutModule = await importModule(targetLayoutPath);
+    const Layout = layoutModule.default ?? layoutModule;
+
+    const updatedSlots = {};
+    if (slots && typeof slots === "object") {
+      for (const [slotName, slotValue] of Object.entries(slots)) {
+        let elementToRender;
+        if (slotValue && slotValue.slotPath) {
+          const slotModule = await importModule(slotValue.slotPath);
+          const Slot = slotModule.default ?? slotModule;
+          elementToRender = React.createElement(Slot, {
+            params: slotValue.slotParams || {},
+            key: slotName,
+            __modulePath: slotValue.slotPath,
+          });
+        } else {
+          elementToRender = slotValue;
+        }
+        await asyncRenderJSXToClientJSX(elementToRender);
+        updatedSlots[slotName] = elementToRender;
+      }
+    }
+
+    const layoutProps = {
+      params: dParams || {},
+      ...updatedSlots,
+      children: React.createElement(DinouPageSlot),
+    };
+
+    return React.createElement(Layout, layoutProps);
+  }
   const hasRouterSyntax = reqSegments.some((seg) => {
     const isGroup = seg.startsWith("(") && seg.endsWith(")");
 
@@ -135,6 +224,11 @@ async function getJSX(
     }
 
     jsx = React.createElement(Page, props);
+  }
+
+  // 2. Manejo segmentado para Página: Si se solicita solo la página, retornar sin layouts
+  if (options && options.segment === "page") {
+    return jsx;
   }
 
   if (

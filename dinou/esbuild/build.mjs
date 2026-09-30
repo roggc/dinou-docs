@@ -22,6 +22,10 @@ const absPathToLink = path.resolve(
   __dirname,
   "../core/link.jsx"
 );
+const absPathToSlot = path.resolve(
+  __dirname,
+  "../core/slot.js"
+);
 
 const frameworkEntryPoints = {
   main: path.resolve(__dirname, "../core/client.jsx"),
@@ -37,6 +41,7 @@ const frameworkEntryPoints = {
   ),
   dinouClientRedirect: absPathToClientRedirect,
   dinouLink: absPathToLink,
+  dinouSlot: absPathToSlot,
 };
 
 try {
@@ -54,6 +59,12 @@ try {
   updateManifestForModule(
     absPathToLink,
     await fs.readFile(absPathToLink, "utf8"),
+    true,
+    manifest
+  );
+  updateManifestForModule(
+    absPathToSlot,
+    await fs.readFile(absPathToSlot, "utf8"),
     true,
     manifest
   );
@@ -122,7 +133,7 @@ try {
 
   // 🏗️ Pre-render static pages (SSG) at build time
   const { execSync } = await import("node:child_process");
-  execSync(`"${process.execPath}" "${path.resolve(__dirname, "../core/run-ssg.js")}"`, {
+  execSync(`"${process.execPath}" --conditions=react-server "${path.resolve(__dirname, "../core/run-ssg.js")}"`, {
     stdio: "inherit",
     env: { ...process.env, NODE_ENV: "production" },
   });

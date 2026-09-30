@@ -20,11 +20,13 @@ import { hydrateRoot } from "react-dom/client";
 import { RouterContext } from "./navigation.js";
 import { resolveUrl, isExternalUrl } from "./navigation-utils.js";
 import { createServerFunctionProxy } from "./server-function-proxy.js";
+import { DinouPageContext, DinouPageSlot } from "./slot.js";
 
 // ====================================================================
 // 1. GLOBAL STATE (Outside the component)
 // ====================================================================
-const cache = new Map();
+const pageCache = new Map();
+const layoutCache = new Map();
 const scrollCache = new Map();
 
 const getCurrentRoute = () => window.location.pathname + window.location.search;
@@ -32,6 +34,24 @@ const getCurrentRoute = () => window.location.pathname + window.location.search;
 // ====================================================================
 // 2. PURE HELPERS
 // ====================================================================
+
+// Helper to determine active layout folder for a pathname
+const getLayoutKey = (pathname) => {
+  const layouts = (typeof window !== "undefined" && window.__DINOU_LAYOUTS__) || ["", "docs"];
+  const cleanPath = pathname.split("?")[0].split("#")[0];
+  const segments = cleanPath.split("/").filter(Boolean);
+
+  for (let i = segments.length; i >= 1; i--) {
+    const candidate = segments.slice(0, i).join("/");
+    if (layouts.includes(candidate)) {
+      return "/" + candidate;
+    }
+  }
+  if (layouts.includes("") || layouts.includes("/")) {
+    return "/";
+  }
+  return null;
+};
 
 // Helper to detect if we only change the hash on the same page
 const isHashChangeOnly = (finalPath) => {
@@ -48,43 +68,35 @@ const isHashChangeOnly = (finalPath) => {
   );
 };
 
-const getRSCPayload = (rscKey, isPrefetch = false) => {
-  const url = rscKey.split("::")[0];
-  // 1. Check Idempotence (Avoids the infinite loop of React)
-  if (cache.has(url)) {
-    return cache.get(url);
+const getPagePayload = (route, isPrefetch = false) => {
+  const url = route.split("::")[0];
+  if (pageCache.has(url)) {
+    return pageCache.get(url);
   }
 
-  // 2. Global Flags Logic (Only first time)
   let payloadUrl;
   if (window.__DINOU_USE_OLD_RSC__ || window.__DINOU_USE_STATIC__) {
     payloadUrl = window.__DINOU_USE_OLD_RSC__
       ? window.__DINOU_USE_STATIC__
-        ? "/____rsc_payload_old_static____" + url
-        : "/____rsc_payload_old____" + url
+        ? "/____rsc_page_old_static____" + url
+        : "/____rsc_page_old____" + url
       : window.__DINOU_USE_STATIC__
-        ? "/____rsc_payload_static____" + url
-        : "/____rsc_payload____" + url;
-
-    // Clean flags immediately
-    window.__DINOU_USE_OLD_RSC__ = false;
-    window.__DINOU_USE_STATIC__ = false;
+        ? "/____rsc_page_static____" + url
+        : "/____rsc_page____" + url;
   } else {
-    payloadUrl = "/____rsc_payload____" + url;
+    payloadUrl = "/____rsc_page____" + url;
   }
 
   const buildId = window.__DINOU_BUILD_ID__;
   if (buildId) {
     payloadUrl += (payloadUrl.includes("?") ? "&" : "?") + "buildId=" + buildId;
-    window.__DINOU_BUILD_ID__ = undefined;
   }
 
-  // 3. Fetch and Cache Storage
   const promise = createFromFetch(
     fetch(payloadUrl).then((res) => {
       if (res.headers.has("x-rsc-redirect")) {
         const redirectUrl = res.headers.get("x-rsc-redirect");
-        cache.delete(url);
+        pageCache.delete(url);
         if (!isPrefetch) {
           if (window.__DINOU_ROUTER_NAVIGATE__) {
             window.__DINOU_ROUTER_NAVIGATE__(redirectUrl, { replace: true });
@@ -92,8 +104,7 @@ const getRSCPayload = (rscKey, isPrefetch = false) => {
             window.location.href = redirectUrl;
           }
         }
-        // Return a promise that never resolves to avoid React Server DOM throwing "Connection closed"
-        return new Promise(() => { });
+        return new Promise(() => {});
       }
       return res;
     }),
@@ -101,10 +112,44 @@ const getRSCPayload = (rscKey, isPrefetch = false) => {
       callServer: async (id, args) => {
         const proxy = createServerFunctionProxy(id);
         return proxy(...args);
-      }
+      },
     }
   );
-  cache.set(url, promise); // <--- KEY TO AVOID LOOP
+
+  pageCache.set(url, promise);
+  return promise;
+};
+
+const getLayoutPayload = (layoutKey) => {
+  if (!layoutKey) return null;
+  if (layoutCache.has(layoutKey)) {
+    return layoutCache.get(layoutKey);
+  }
+
+  const cleanKey = layoutKey === "/" ? "" : layoutKey;
+  let layoutUrl =
+    (window.__DINOU_USE_STATIC__
+      ? "/____rsc_layout_static____"
+      : "/____rsc_layout____") + cleanKey;
+
+  const promise = createFromFetch(
+    fetch(layoutUrl).then((res) => {
+      if (!res.ok) {
+        console.warn(
+          `[Dinou Router] Layout ${layoutKey} fetch returned status ${res.status}`
+        );
+      }
+      return res;
+    }),
+    {
+      callServer: async (id, args) => {
+        const proxy = createServerFunctionProxy(id);
+        return proxy(...args);
+      },
+    }
+  );
+
+  layoutCache.set(layoutKey, promise);
   return promise;
 };
 
@@ -234,8 +279,7 @@ function Router() {
     }
 
     if (options.fresh) {
-      // console.log(`[Router] Force refreshing: ${finalPath}`);
-      cache.delete(finalPath);
+      pageCache.delete(finalPath);
     }
 
     // Normal RSC Navigation
@@ -243,7 +287,6 @@ function Router() {
       window.location.pathname + window.location.search,
       window.scrollY,
     );
-    // cache.delete(finalPath);
     if (options.replace) {
       window.history.replaceState(null, "", finalPath);
     } else {
@@ -261,7 +304,7 @@ function Router() {
   const forward = () => window.history.forward();
   const refresh = useCallback(() => {
     const currentPath = window.location.pathname + window.location.search;
-    cache.delete(currentPath);
+    pageCache.delete(currentPath);
     startTransition(() => {
       setVersion((v) => v + 1);
       setNavError(null);
@@ -273,7 +316,11 @@ function Router() {
     window.__DINOU_PREFETCH__ = (url) => {
       // 🛡️ PREFETCH PROTECTION: If it's a local hash, do nothing
       if (isHashChangeOnly(url)) return;
-      getRSCPayload(url, true);
+      const lKey = getLayoutKey(url);
+      if (lKey && !layoutCache.has(lKey)) {
+        getLayoutPayload(lKey);
+      }
+      getPagePayload(url, true);
     };
 
     window.__DINOU_ROUTER_NAVIGATE__ = navigate;
@@ -331,7 +378,6 @@ function Router() {
 
     const onPopState = () => {
       const target = getCurrentRoute();
-      // Optional: cache.delete(target); // Uncomment if you want refresh on going back
       startTransition(() => {
         setIsPopState(true);
         setRoute(target);
@@ -379,9 +425,18 @@ function Router() {
     });
   }, [route]);
 
-  // RSC Logic
-  const rscKey = route + "::" + version;
-  const content = navError ? getErrorRSCPayload(route, navError) : getRSCPayload(rscKey);
+  // RSC Segmented Navigation Logic
+  const cleanRoutePath = route.split("?")[0].split("#")[0];
+  const layoutKey = useMemo(() => getLayoutKey(cleanRoutePath), [cleanRoutePath]);
+
+  const pagePromise = useMemo(() => {
+    if (navError) return getErrorRSCPayload(route, navError);
+    return getPagePayload(route + (version ? `?v=${version}` : ""));
+  }, [route, version, navError]);
+
+  const layoutPromise = useMemo(() => {
+    return layoutKey !== null ? getLayoutPayload(layoutKey) : null;
+  }, [layoutKey]);
 
   const contextValue = useMemo(
     () => ({
@@ -401,7 +456,9 @@ function Router() {
         key={navError ? "error" : "normal"}
         onError={setNavError}
       >
-        {use(content)}
+        <DinouPageContext.Provider value={pagePromise}>
+          {layoutPromise ? use(layoutPromise) : use(pagePromise)}
+        </DinouPageContext.Provider>
       </ErrorBoundary>
     </RouterContext.Provider>
   );

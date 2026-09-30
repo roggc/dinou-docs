@@ -552,7 +552,7 @@ function createRequestContext(simReq, resBridge, platformContext = {}, dynamicSt
       const scriptTag = `<script>document.cookie = ${safeCookieStr};</script>`;
       resBridge._injectedScripts = (resBridge._injectedScripts || "") + scriptTag;
       if (resBridge.headersSent) {
-        if (!simReq.path.includes("____rsc_payload")) {
+        if (!simReq.path.includes("____rsc_")) {
           resBridge.write(scriptTag);
         }
         return;
@@ -575,7 +575,7 @@ function createRequestContext(simReq, resBridge, platformContext = {}, dynamicSt
         const scriptTag = `<script>document.cookie = ${safeCookieStr};</script>`;
         resBridge._injectedScripts = (resBridge._injectedScripts || "") + scriptTag;
         if (resBridge.headersSent) {
-          if (!simReq.path.includes("____rsc_payload")) {
+          if (!simReq.path.includes("____rsc_")) {
             resBridge.write(scriptTag);
           }
           return;
@@ -588,7 +588,7 @@ function createRequestContext(simReq, resBridge, platformContext = {}, dynamicSt
     }
     if (resBridge.headersSent) {
       if (methodName === "redirect") {
-        if (simReq.path.includes("____rsc_payload")) {
+        if (simReq.path.includes("____rsc_")) {
           return;
         }
         hasRedirected = true;
@@ -621,7 +621,7 @@ function createRequestContext(simReq, resBridge, platformContext = {}, dynamicSt
       if (typeof resolvedUrl === "string" && resolvedUrl.startsWith("/") && !resolvedUrl.startsWith("//")) {
         finalUrl = resolvedUrl;
       }
-      if (simReq.path.includes("____rsc_payload")) {
+      if (simReq.path.includes("____rsc_")) {
         resBridge.setHeader("x-rsc-redirect", finalUrl);
         resBridge.status(200).end();
         return;
@@ -990,19 +990,24 @@ async function handleRequest(request, platformContext = {}) {
     }
   }
 
-  // 6. RSC Payload Endpoints (GET /____rsc_payload____/*)
-  if (pathname.includes("____rsc_payload")) {
+  // 6. Segmented RSC Payload Endpoints (GET /____rsc_page____/*, /____rsc_layout____/*, /____rsc_payload____/*)
+  if (
+    pathname.includes("____rsc_page") ||
+    pathname.includes("____rsc_layout") ||
+    pathname.includes("____rsc_payload")
+  ) {
+    const isLayoutReq = pathname.includes("____rsc_layout");
+    const isPageReq = pathname.includes("____rsc_page");
     const isOld =
-      pathname.startsWith("/____rsc_payload_old_static____") ||
-      pathname.startsWith("/____rsc_payload_old____");
+      pathname.includes("_old_static") ||
+      pathname.includes("_old");
     const isStatic =
-      pathname.startsWith("/____rsc_payload_old_static____") ||
-      pathname.startsWith("/____rsc_payload_static____");
+      pathname.includes("_old_static") ||
+      pathname.includes("_static");
+
     const cleanPath = (pathname.endsWith("/") ? pathname : pathname + "/")
-      .replace("/____rsc_payload_old_static____", "")
-      .replace("/____rsc_payload_old____", "")
-      .replace("/____rsc_payload_static____", "")
-      .replace("/____rsc_payload____", "");
+      .replace(/^\/____rsc_(?:page|layout|payload)_(?:old_static|old|static)____/, "")
+      .replace(/^\/____rsc_(?:page|layout|payload)____/, "");
 
     const reqSegments = cleanPath.split("/").filter(Boolean);
     const srcFolder = path.resolve(process.cwd(), "src");
@@ -1015,6 +1020,14 @@ async function handleRequest(request, platformContext = {}) {
 
     const nonBuildIdQueryKeys = Object.keys(queryObj).filter((k) => k !== "buildId");
     const hasQueryParams = nonBuildIdQueryKeys.length > 0;
+
+    const targetFileName = isLayoutReq
+      ? isOld
+        ? "layout._old.rsc"
+        : "layout.rsc"
+      : isOld
+      ? "page._old.rsc"
+      : "page.rsc";
 
     if (!isDevelopment && !dynamicState.value && (!hasQueryParams || isStatic)) {
       let currentGeneratedAt = null;
@@ -1033,11 +1046,29 @@ async function handleRequest(request, platformContext = {}) {
           currentGeneratedAt &&
           queryObj.buildId !== String(currentGeneratedAt));
 
-      const payloadPath = path.resolve(
+      const actualFileName = useOld
+        ? isLayoutReq
+          ? "layout._old.rsc"
+          : "page._old.rsc"
+        : targetFileName;
+
+      let payloadPath = path.resolve(
         ".dinou/dist2",
         cleanPath.replace(/^\//, ""),
-        useOld ? "rsc._old.rsc" : "rsc.rsc",
+        actualFileName,
       );
+
+      // Legacy fallback for rsc_payload if page.rsc doesn't exist
+      if (!existsSync(payloadPath) && !isLayoutReq && !isPageReq) {
+        const legacyPath = path.resolve(
+          ".dinou/dist2",
+          cleanPath.replace(/^\//, ""),
+          useOld ? "rsc._old.rsc" : "rsc.rsc",
+        );
+        if (existsSync(legacyPath)) {
+          payloadPath = legacyPath;
+        }
+      }
 
       const distDir = path.resolve(".dinou/dist2");
       if (!payloadPath.startsWith(distDir)) {
@@ -1046,11 +1077,13 @@ async function handleRequest(request, platformContext = {}) {
 
       if (isEdgeRuntime(platformContext)) {
         const storage = getStorageAdapter();
-        const rscKey = cleanPath.replace(/^\/+/, "").replace(/\/+$/, "")
-          ? `${cleanPath.replace(/^\/+/, "").replace(/\/+$/, "")}/rsc.rsc`
-          : "rsc.rsc";
+        const cleanRel = cleanPath.replace(/^\/+/, "").replace(/\/+$/, "");
+        const rscKey = cleanRel ? `${cleanRel}/${actualFileName}` : actualFileName;
         try {
-          const cached = await storage.get(rscKey);
+          let cached = await storage.get(rscKey);
+          if (!cached && !isLayoutReq && !isPageReq) {
+            cached = await storage.get(cleanRel ? `${cleanRel}/rsc.rsc` : "rsc.rsc");
+          }
           if (cached && cached.content) {
             const contentStr = typeof cached.content === "string" ? cached.content : "";
             if (!contentStr.trimStart().startsWith("<")) {
@@ -1106,14 +1139,17 @@ async function handleRequest(request, platformContext = {}) {
     const context = createRequestContext(simReq, bridge, platformContext, dynamicState);
     copyCustomContextProperties(rootContext, context);
     const isNotFound = {};
+    const segment = isLayoutReq ? "layout" : "page";
 
     await requestStorage.run(context, async () => {
       try {
-        const jsx = await getJSX(reqPath, queryObj, isNotFound, isDevelopment, isPathBlocked);
+        const jsx = await getJSX(reqPath, queryObj, isNotFound, isDevelopment, isPathBlocked, {
+          segment,
+        });
         if (bridge.headers.has("x-rsc-redirect") || bridge.headers.has("Location")) {
           return;
         }
-        if (isNotFound.value) {
+        if (isNotFound.value && !isLayoutReq) {
           bridge.status(404);
         }
         bridge.setHeader("Content-Type", "text/x-component");
@@ -1122,7 +1158,7 @@ async function handleRequest(request, platformContext = {}) {
         const manifest = getClientManifest();
         pipeRSC(jsx, bridge, manifest, platformContext);
       } catch (err) {
-        console.error("[Dinou] Error rendering RSC payload:", err);
+        console.error(`[Dinou] Error rendering RSC ${segment}:`, err);
         const serializedError = { message: err.message || "Unknown Error", name: err.name };
         const errJsx = await getErrorJSX(reqPath, queryObj, serializedError, isDevelopment);
         bridge.status(500);
@@ -1246,7 +1282,9 @@ async function handleRequest(request, platformContext = {}) {
                   }),
                 ]);
                 const htmlText = await new Response(htmlStream).text();
+                const pageRscKey = cleanPath ? `${cleanPath}/page.rsc` : "page.rsc";
                 const rscKey = cleanPath ? `${cleanPath}/rsc.rsc` : "rsc.rsc";
+                await storage.set(pageRscKey, rscText);
                 await storage.set(rscKey, rscText);
                 const updatedMeta = {
                   status: 200,
@@ -1258,7 +1296,9 @@ async function handleRequest(request, platformContext = {}) {
                 console.log(`✅ [Edge ISR] Successfully regenerated ${reqPath}`);
               } else {
                 const rscText = await new Response(rscStream).text();
+                const pageRscKey = cleanPath ? `${cleanPath}/page.rsc` : "page.rsc";
                 const rscKey = cleanPath ? `${cleanPath}/rsc.rsc` : "rsc.rsc";
+                await storage.set(pageRscKey, rscText);
                 await storage.set(rscKey, rscText);
 
                 // Update HTML with new timestamp
@@ -1414,6 +1454,8 @@ async function handleRequest(request, platformContext = {}) {
           const [streamForSsr, streamForCache] = rscStream.tee();
 
           let bootstrapScriptContent = "";
+          const knownLayouts = (typeof globalThis !== "undefined" && globalThis.__DINOU_LAYOUTS__) || ["", "docs"];
+          bootstrapScriptContent += `window.__DINOU_LAYOUTS__ = ${JSON.stringify(knownLayouts)};\n`;
           if (shouldCacheISG) {
             bootstrapScriptContent += "window.__DINOU_USE_STATIC__ = true;\n";
           } else {

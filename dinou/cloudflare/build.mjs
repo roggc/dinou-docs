@@ -690,7 +690,7 @@ export default {
       storageInitialized = true;
     }
 
-    const isRSCPayload = url.pathname.includes("____rsc_payload");
+    const isRSCPayload = url.pathname.includes("____rsc_");
     const isServerFunction =
       url.pathname.includes("____server_function____") ||
       request.headers.get("x-server-function-call") === "1";

@@ -109,7 +109,7 @@ module.exports = async () => {
         JSON.stringify({ type: "module" }, null, 2)
       );
       const { execSync } = require("child_process");
-      execSync(`"${process.execPath}" "${path.resolve(__dirname, "../core/run-ssg.js")}"`, {
+      execSync(`"${process.execPath}" --conditions=react-server "${path.resolve(__dirname, "../core/run-ssg.js")}"`, {
         stdio: "inherit",
         env: { ...process.env, NODE_ENV: "production", DINOU_BUILD_TOOL: "webpack" },
       });
