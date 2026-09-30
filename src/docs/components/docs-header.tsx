@@ -16,7 +16,7 @@ import { Link, usePathname } from "dinou";
 
 export function DocsHeader() {
   const pathname = usePathname();
-  const isEjected = pathname.startsWith("/docs/ejected-reference");
+  const isArchitecture = pathname.startsWith("/docs/internals");
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -25,15 +25,12 @@ export function DocsHeader() {
         <div className="flex items-center gap-2 pl-4 md:pl-6">
           <SidebarTrigger className="md:hidden" />
           <div className="flex items-center space-x-2">
-            <Link href="/">
-              <img src={dinou} alt="Dinou logo" className="w-6" width={24} />
+            <Link href="/" className="flex items-center transition-opacity hover:opacity-85">
+              <img src={dinou} alt="Dinou" className="w-7 h-7 sm:w-8 sm:h-8" width={32} height={32} />
             </Link>
-            <span className="font-bold">Dinou</span>
-            <Link href="/docs">
-              <Badge variant="secondary" className="text-xs">
-                docs v7
-              </Badge>
-            </Link>
+            <Badge variant="outline" className="inline-flex text-[11px] font-mono px-2 py-0.5 border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/5">
+              v7
+            </Badge>
           </div>
 
           {/* Top navigation tabs */}
@@ -41,7 +38,7 @@ export function DocsHeader() {
             <Link
               href="/docs"
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                !isEjected
+                !isArchitecture
                   ? "bg-slate-100 dark:bg-slate-800 text-foreground font-semibold"
                   : "text-muted-foreground hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-900"
               }`}
@@ -49,17 +46,14 @@ export function DocsHeader() {
               Docs
             </Link>
             <Link
-              href="/docs/ejected-reference"
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
-                isEjected
+              href="/docs/internals"
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                isArchitecture
                   ? "bg-slate-100 dark:bg-slate-800 text-foreground font-semibold"
                   : "text-muted-foreground hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-900"
               }`}
             >
-              <span>Ejected Reference</span>
-              <span className="text-[10px] font-semibold tracking-wide uppercase px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
-                Internals
-              </span>
+              Architecture
             </Link>
           </nav>
         </div>

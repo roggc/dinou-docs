@@ -17,7 +17,11 @@ export default function Layout({
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Dinou docs</title>
+        <title>Dinou Docs | React 19 Full-Stack Framework</title>
+        <meta
+          name="description"
+          content="Official documentation for Dinou v7 — the lightweight, ejectable React 19 framework featuring React Server Components, multi-runtime deployment, and private folders."
+        />
         <link rel="icon" type="image/png" href="/favicon.ico" />
         <link
           rel="apple-touch-icon"
@@ -40,20 +44,19 @@ export default function Layout({
         {/* <link rel="preload" href="/styles.css" as="style" /> */}
         <link rel="stylesheet" href="/styles.css" precedence="default" />
       </head>
-      <body className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
+      <body className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-500/20 selection:text-blue-600 dark:selection:text-blue-400">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <SidebarProvider /*style={{ "--sidebar-width": "8rem" }}*/>
-            {/* REMUEVE EL CONTENEDOR CON GRADIENTE AQUÍ - SE MUEVE AL BODY */}
+          <SidebarProvider>
             <div className="flex flex-col min-h-screen w-full">
               <DocsHeader />
-              <div className="sidebar-layout w-full">
+              <div className="sidebar-layout w-full flex-1">
                 <DocsSidebar />
-                <div className="sidebar-content">
+                <div className="sidebar-content flex-1">
                   <main className="flex-1 w-full">
                     <ViewTransition name="docs-content">
                       {children}

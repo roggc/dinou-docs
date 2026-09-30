@@ -62,6 +62,54 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false) {
     }
   }
 
+  if (!pagePath && isDevelopment) {
+    jsx = React.createElement(
+      "div",
+      {
+        style: {
+          fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          padding: "32px",
+          maxWidth: "960px",
+          margin: "40px auto",
+          backgroundColor: "#fff1f2",
+          border: "1px solid #fecdd3",
+          borderRadius: "12px",
+          color: "#9f1239",
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+        },
+      },
+      React.createElement(
+        "div",
+        { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" } },
+        React.createElement("span", { style: { background: "#e11d48", color: "white", padding: "2px 8px", borderRadius: "9999px", fontSize: "12px", fontWeight: "bold" } }, "Dinou Dev Error"),
+        React.createElement("h2", { style: { margin: 0, fontSize: "1.25rem", fontWeight: 700, color: "#881337" } }, error?.message || "Unhandled Application Error")
+      ),
+      React.createElement(
+        "p",
+        { style: { margin: "0 0 16px 0", fontSize: "0.875rem", color: "#9f1239", lineHeight: 1.5 } },
+        "An unhandled error occurred during rendering. You can provide a custom error UI by creating an ",
+        React.createElement("code", { style: { background: "#ffe4e6", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 } }, "error.tsx"),
+        " file in your route folder."
+      ),
+      error?.stack && React.createElement(
+        "pre",
+        {
+          style: {
+            background: "#0f172a",
+            color: "#f8fafc",
+            padding: "16px",
+            borderRadius: "8px",
+            overflowX: "auto",
+            fontSize: "0.8125rem",
+            lineHeight: 1.6,
+            fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+          },
+        },
+        error.stack
+      )
+    );
+  }
+
   if (pagePath) {
     const pageModule = await importModule(pagePath);
     const Page = pageModule.default ?? pageModule;

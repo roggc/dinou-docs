@@ -1644,9 +1644,11 @@ async function doRebuild(filePath = "", eventType = "change") {
     if (needsClientBundlerRestart && clientBundlerHandle?.restart) {
       updateSpinner(`${clientDirectiveChanged ? "Directive change" : "CSS change"} in ${baseName}. Recreating bundle...`);
       await clientBundlerHandle.restart();
-      await broadcastToClients({ type: "reload" });
-      logSuccess(`Recreated bundle for ${baseName} in ${Date.now() - t0}ms`);
-      return;
+      if (!clientDirectiveChanged) {
+        await broadcastToClients({ type: "reload" });
+        logSuccess(`Recreated bundle for ${baseName} in ${Date.now() - t0}ms`);
+        return;
+      }
     }
 
     const needsStructureRebuild = isStructureChange || clientDirectiveChanged || serverDirectiveChanged;
