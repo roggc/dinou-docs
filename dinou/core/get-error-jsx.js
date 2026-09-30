@@ -7,6 +7,55 @@ const {
 const importModule = require("./import-module");
 const { asyncRenderJSXToClientJSX } = require("./render-jsx-to-client-jsx");
 
+function cleanErrorStack(stack) {
+  if (!stack || typeof stack !== "string") return "";
+  const lines = stack.split("\n");
+  const filtered = [];
+
+  for (const line of lines) {
+    if (!line.trim().startsWith("at ")) {
+      filtered.push(line);
+      continue;
+    }
+
+    // Filter out client Flight / bundler runtime internals
+    if (
+      line.includes("resolveErrorDev") ||
+      line.includes("resolveErrorModel") ||
+      line.includes("processFullStringRow") ||
+      line.includes("processFullBinaryRow") ||
+      line.includes("processBinaryChunk") ||
+      line.includes("buildFakeCallStack") ||
+      line.includes("createFakeFunction") ||
+      line.includes("initializeFakeTask") ||
+      line.includes("getRootTask") ||
+      line.includes("progress (http") ||
+      line.includes("__hmr_client__") ||
+      (line.includes("http://") && line.includes("/chunk-"))
+    ) {
+      continue;
+    }
+
+    // Filter out server engine / Node internals
+    if (
+      line.includes("node_modules/@roggc/react-server-dom-esm") ||
+      line.includes("node_modules/react-dom") ||
+      line.includes("node_modules/react/") ||
+      line.includes("node:internal") ||
+      line.includes("asyncRenderJSXToClientJSX") ||
+      line.includes("renderModelDestructive") ||
+      line.includes("renderHtmlStream") ||
+      line.includes("pipeRSC")
+    ) {
+      continue;
+    }
+
+    filtered.push(line);
+  }
+
+  return (filtered.length > 0 ? filtered : lines).join("\n").trim();
+}
+
 async function getErrorJSX(reqPath, query, error, isDevelopment = false, options = {}) {
   const srcFolder = path.resolve(process.cwd(), "src");
   const reqSegments = reqPath.split("/").filter(Boolean);
@@ -106,7 +155,7 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
             fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
           },
         },
-        error.stack
+        cleanErrorStack(error.stack)
       )
     );
   } else {

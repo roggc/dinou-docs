@@ -20,7 +20,7 @@ import { hydrateRoot } from "react-dom/client";
 import { RouterContext } from "./navigation.js";
 import { resolveUrl, isExternalUrl } from "./navigation-utils.js";
 import { createServerFunctionProxy } from "./server-function-proxy.js";
-import { DinouPageContext, DinouPageSlot } from "./slot.js";
+import { DinouPageContext, DinouPageSlot, cleanErrorStack } from "./slot.js";
 
 // ====================================================================
 // 1. GLOBAL STATE (Outside the component)
@@ -228,21 +228,61 @@ class ErrorBoundary extends Component {
       }
       const isDev = process.env.NODE_ENV !== "production";
       return (
-        <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
-          <h2>Application Error</h2>
-          <p>An unexpected error occurred on the client.</p>
-          <pre style={{ backgroundColor: "#f5f5f5", padding: "15px", borderRadius: "5px", overflowX: "auto" }}>
-            {isDev ? (
-              <>
-                <div style={{ fontWeight: "bold", marginBottom: "10px" }}>
-                  {this.state.error?.name || "Error"}: {this.state.error?.message || String(this.state.error)}
-                </div>
-                <div>{this.state.error?.stack}</div>
-              </>
-            ) : (
-              this.state.error?.message || String(this.state.error)
-            )}
-          </pre>
+        <div
+          style={{
+            fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+            padding: "32px",
+            maxWidth: "960px",
+            margin: "40px auto",
+            backgroundColor: "#fff1f2",
+            border: "1px solid #fecdd3",
+            borderRadius: "12px",
+            color: "#9f1239",
+            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
+            <span
+              style={{
+                background: "#e11d48",
+                color: "white",
+                padding: "2px 8px",
+                borderRadius: "9999px",
+                fontSize: "12px",
+                fontWeight: "bold",
+              }}
+            >
+              {isDev ? "Dinou Dev Error" : "Application Error"}
+            </span>
+            <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 700, color: "#881337" }}>
+              {this.state.error?.message || "Unhandled Application Error"}
+            </h2>
+          </div>
+          {isDev && (
+            <p style={{ margin: "0 0 16px 0", fontSize: "0.875rem", color: "#9f1239", lineHeight: 1.5 }}>
+              An unhandled error occurred during rendering. You can provide a custom error UI by creating an{" "}
+              <code style={{ background: "#ffe4e6", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>
+                error.tsx
+              </code>{" "}
+              file in your route folder.
+            </p>
+          )}
+          {isDev && this.state.error?.stack && (
+            <pre
+              style={{
+                background: "#0f172a",
+                color: "#f8fafc",
+                padding: "16px",
+                borderRadius: "8px",
+                overflowX: "auto",
+                fontSize: "0.8125rem",
+                lineHeight: 1.6,
+                fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+              }}
+            >
+              {cleanErrorStack(this.state.error.stack)}
+            </pre>
+          )}
         </div>
       );
     }

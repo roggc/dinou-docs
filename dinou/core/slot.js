@@ -10,6 +10,55 @@ const Component = typeof React.Component === "function" ? React.Component : clas
 
 export const DinouPageContext = typeof createContext === "function" ? createContext(null) : null;
 
+export function cleanErrorStack(stack) {
+  if (!stack || typeof stack !== "string") return "";
+  const lines = stack.split("\n");
+  const filtered = [];
+
+  for (const line of lines) {
+    if (!line.trim().startsWith("at ")) {
+      filtered.push(line);
+      continue;
+    }
+
+    // Filter out client Flight / bundler runtime internals
+    if (
+      line.includes("resolveErrorDev") ||
+      line.includes("resolveErrorModel") ||
+      line.includes("processFullStringRow") ||
+      line.includes("processFullBinaryRow") ||
+      line.includes("processBinaryChunk") ||
+      line.includes("buildFakeCallStack") ||
+      line.includes("createFakeFunction") ||
+      line.includes("initializeFakeTask") ||
+      line.includes("getRootTask") ||
+      line.includes("progress (http") ||
+      line.includes("__hmr_client__") ||
+      (line.includes("http://") && line.includes("/chunk-"))
+    ) {
+      continue;
+    }
+
+    // Filter out server engine / Node internals
+    if (
+      line.includes("node_modules/@roggc/react-server-dom-esm") ||
+      line.includes("node_modules/react-dom") ||
+      line.includes("node_modules/react/") ||
+      line.includes("node:internal") ||
+      line.includes("asyncRenderJSXToClientJSX") ||
+      line.includes("renderModelDestructive") ||
+      line.includes("renderHtmlStream") ||
+      line.includes("pipeRSC")
+    ) {
+      continue;
+    }
+
+    filtered.push(line);
+  }
+
+  return (filtered.length > 0 ? filtered : lines).join("\n").trim();
+}
+
 class SlotErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -35,25 +84,55 @@ class SlotErrorBoundary extends Component {
       const isDev = process.env.NODE_ENV !== "production";
       return createElement(
         "div",
-        { style: { padding: "24px", fontFamily: "system-ui, -apple-system, sans-serif" } },
-        createElement("h2", { style: { color: "#e11d48", margin: "0 0 12px 0" } }, "Page Error"),
-        createElement("p", { style: { color: "#64748b", margin: "0 0 16px 0" } }, "An unhandled error occurred inside this page component."),
+        {
+          style: {
+            fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+            padding: "32px",
+            maxWidth: "960px",
+            margin: "40px auto",
+            backgroundColor: "#fff1f2",
+            border: "1px solid #fecdd3",
+            borderRadius: "12px",
+            color: "#9f1239",
+            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+          },
+        },
         createElement(
+          "div",
+          { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" } },
+          createElement(
+            "span",
+            { style: { background: "#e11d48", color: "white", padding: "2px 8px", borderRadius: "9999px", fontSize: "12px", fontWeight: "bold" } },
+            isDev ? "Dinou Dev Error" : "Application Error"
+          ),
+          createElement(
+            "h2",
+            { style: { margin: 0, fontSize: "1.25rem", fontWeight: 700, color: "#881337" } },
+            this.state.error?.message || "Unhandled Application Error"
+          )
+        ),
+        isDev && createElement(
+          "p",
+          { style: { margin: "0 0 16px 0", fontSize: "0.875rem", color: "#9f1239", lineHeight: 1.5 } },
+          "An unhandled error occurred during rendering. You can provide a custom error UI by creating an ",
+          createElement("code", { style: { background: "#ffe4e6", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 } }, "error.tsx"),
+          " file in your route folder."
+        ),
+        isDev && this.state.error?.stack && createElement(
           "pre",
           {
             style: {
-              backgroundColor: "#0f172a",
+              background: "#0f172a",
               color: "#f8fafc",
               padding: "16px",
               borderRadius: "8px",
               overflowX: "auto",
-              fontSize: "0.85rem",
-              lineHeight: 1.5,
+              fontSize: "0.8125rem",
+              lineHeight: 1.6,
+              fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
             },
           },
-          isDev
-            ? `${this.state.error?.name || "Error"}: ${this.state.error?.message || String(this.state.error)}\n${this.state.error?.stack || ""}`
-            : this.state.error?.message || String(this.state.error)
+          cleanErrorStack(this.state.error.stack)
         )
       );
     }
