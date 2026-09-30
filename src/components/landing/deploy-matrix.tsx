@@ -154,10 +154,10 @@ export function DeployMatrix() {
   return (
     <section
       id="deploy-everywhere"
-      className="w-full py-24 sm:py-32 md:py-36 bg-slate-50/80 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 relative"
+      className="w-full py-28 sm:py-36 md:py-44 lg:py-48 bg-slate-50/80 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800 relative"
     >
       <div className="container px-4 md:px-6 mx-auto">
-        <div className="flex flex-col items-center space-y-4 text-center mb-12 sm:mb-14">
+        <div className="flex flex-col items-center space-y-4 text-center mb-16 sm:mb-20">
           <Badge
             variant="outline"
             className="px-3.5 py-1 border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10 backdrop-blur-sm font-medium"
@@ -176,7 +176,7 @@ export function DeployMatrix() {
         </div>
 
         {/* Target Buttons Pill Nav */}
-        <div className="flex flex-wrap justify-center gap-2.5 mb-10 sm:mb-12 max-w-4xl mx-auto">
+        <div className="flex flex-wrap justify-center gap-3 mb-12 sm:mb-16 max-w-4xl mx-auto">
           {targets.map((target) => {
             const TargetIcon = target.icon;
             const isSelected = selectedTarget.id === target.id;

@@ -1628,7 +1628,13 @@ async function doRebuild(filePath = "", eventType = "change") {
     const serverDirectiveChanged = isServerFile !== wasServerFile;
 
     let clientRebuildPromise = null;
-    const isClientRelevant = isClientFile || wasClientFile || clientDirectiveChanged || isCssFile;
+    const isClientRelevant =
+      isClientFile ||
+      wasClientFile ||
+      clientDirectiveChanged ||
+      isCssFile ||
+      normLower.endsWith(".tsx") ||
+      normLower.endsWith(".jsx");
     if (clientBundlerHandle?.notifyFileChanged && absFilePath && isClientRelevant) {
       clientRebuildPromise = clientBundlerHandle.notifyFileChanged(absFilePath);
     }
