@@ -22,7 +22,6 @@ import {
   Terminal,
   Layers,
   Globe,
-  FolderLock,
   Sparkles,
 } from "lucide-react";
 import { Link } from "dinou";
@@ -49,10 +48,10 @@ export default function Page() {
                 className="px-2.5 py-0.5 text-xs font-mono font-medium border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/5 rounded-full"
               >
                 <Sparkles className="w-3 h-3 mr-1 text-blue-500" />
-                Dinou v7.0
+                Dinou v7
               </Badge>
               <span className="text-xs text-muted-foreground font-medium">
-                React 19 Server Components
+                Full-Stack React 19 Framework
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
@@ -84,28 +83,36 @@ export default function Page() {
                 using transparent, standard Node.js and Web APIs.
               </p>
 
-              <div className="grid gap-4 sm:grid-cols-3 not-prose my-6">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 not-prose my-6">
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-                  <div className="text-blue-600 dark:text-blue-400 font-mono font-bold text-lg mb-1">
+                  <div className="text-blue-600 dark:text-blue-400 font-mono font-bold text-base mb-1">
                     React 19 Native
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
                     First-class RSC, Actions, Suspense streaming, and direct server data access.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-                  <div className="text-purple-600 dark:text-purple-400 font-mono font-bold text-lg mb-1">
-                    Multi-Runtime
+                  <div className="text-purple-600 dark:text-purple-400 font-mono font-bold text-base mb-1">
+                    Deploy Everywhere
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Deploy identical code to Node.js, Cloudflare Workers, Deno, or Bun.
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Compile identical code to Node.js, Cloudflare Workers, Deno, or Bun.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-                  <div className="text-emerald-600 dark:text-emerald-400 font-mono font-bold text-lg mb-1">
+                  <div className="text-cyan-600 dark:text-cyan-400 font-mono font-bold text-base mb-1">
+                    Triple-Bundler
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Switch seamlessly between esbuild, Rollup, and Webpack with zero lock-in.
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                  <div className="text-emerald-600 dark:text-emerald-400 font-mono font-bold text-base mb-1">
                     100% Ejectable
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
                     Run <code>npm run eject</code> to inspect, customize, or evolve the framework core.
                   </p>
                 </div>
@@ -140,18 +147,18 @@ export default function Page() {
                 <Card className="border-slate-200 dark:border-slate-800/80 hover:border-purple-500/40 transition-colors">
                   <CardHeader>
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/60 mb-2">
-                      <Zap className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                      <Route className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <CardTitle className="text-lg">Static-First Intelligence</CardTitle>
+                    <CardTitle className="text-lg">File-System Based Router</CardTitle>
                     <CardDescription>
-                      Automatic Static Generation with dynamic bailout.
+                      Nested layouts, route groups, and parallel slots.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Routes compile to static HTML and RSC payloads by default for edge speeds.
-                      When dynamic context like cookies or request headers are inspected, the
-                      engine automatically transitions to on-demand SSR.
+                      Organize your application intuitively inside <code>src/</code>. Build complex interfaces
+                      with nested <code>layout.tsx</code> hierarchies, dynamic parameters (<code>[slug]</code>),
+                      route groups (<code>(group)</code>), parallel slots (<code>@modal</code>), and layout resets.
                     </p>
                   </CardContent>
                 </Card>
@@ -159,18 +166,18 @@ export default function Page() {
                 <Card className="border-slate-200 dark:border-slate-800/80 hover:border-emerald-500/40 transition-colors">
                   <CardHeader>
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/60 mb-2">
-                      <FolderLock className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                      <ShieldCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <CardTitle className="text-lg">Private Folders (_prefix)</CardTitle>
+                    <CardTitle className="text-lg">Universal Middleware &amp; Context</CardTitle>
                     <CardDescription>
-                      Collocate code without polluting route URLs.
+                      Edge-ready request interception and context enrichment.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Organize collocated components, hooks, tests, and utilities inside folders
-                      starting with an underscore (e.g. <code>_components</code>, <code>_lib</code>).
-                      Dinou&apos;s router automatically ignores them during route discovery.
+                      Intercept requests before React executes with the <code>onRequest()</code> hook in{" "}
+                      <code>dinou.config.ts</code>. Fast-path webhooks (Stripe, Clerk), enforce auth guards,
+                      and share typed request context across your Server Components via <code>getContext()</code>.
                     </p>
                   </CardContent>
                 </Card>
@@ -218,16 +225,17 @@ export default function Page() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-950/60 mb-2">
                       <RefreshCw className="h-5 w-5 text-rose-600 dark:text-rose-400" />
                     </div>
-                    <CardTitle className="text-lg">Atomic ISR &amp; ISG</CardTitle>
+                    <CardTitle className="text-lg">Static-First ISR &amp; ISG</CardTitle>
                     <CardDescription>
-                      Background regeneration and on-demand paths.
+                      Build-time pre-rendering with on-demand runtime SSR.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Revalidate stale pages in the background with zero downtime using atomic disk
-                      swaps. Generate new dynamic routes on demand with Incremental Static Generation
-                      and purge caches with <code>revalidatePath()</code>.
+                      Routes pre-render to static HTML and RSC payloads at build time by default, with automatic
+                      bailout to on-demand runtime SSR when request headers or cookies are accessed.
+                      Statically cache dynamic routes on first visit (ISG), revalidate stale pages
+                      in the background via atomic disk swaps (ISR), and purge caches with <code>revalidatePath()</code>.
                     </p>
                   </CardContent>
                 </Card>
@@ -281,8 +289,24 @@ npm run dev`}
                 implementation folders reside cleanly inside <code>src/</code>:
               </p>
 
-              <div className="not-prose my-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-900 text-slate-100 p-5 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto">
-                <pre>{`my-app/
+              <div className="not-prose my-6 rounded-xl border border-slate-800 bg-slate-950 overflow-hidden shadow-md">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 bg-slate-900/60 text-xs font-mono text-slate-400">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
+                    <span className="ml-2 text-slate-400 font-medium">Directory Tree</span>
+                  </div>
+                </div>
+                <div className="p-4 sm:p-5 overflow-x-auto">
+                  <pre
+                    className="!bg-transparent !p-0 !m-0 font-mono text-xs sm:text-sm leading-relaxed"
+                    style={{ color: "#e2e8f0", backgroundColor: "transparent" }}
+                  >
+                    <code
+                      className="!bg-transparent !p-0 !m-0 font-mono text-xs sm:text-sm leading-relaxed"
+                      style={{ color: "#e2e8f0", backgroundColor: "transparent" }}
+                    >{`my-app/
 ├── src/
 │   ├── page.tsx               # Root page (/)
 │   ├── layout.tsx             # Root layout & ThemeProvider
@@ -297,19 +321,22 @@ npm run dev`}
 │           └── page.tsx       # Dynamic route segment (/docs/:slug)
 ├── dinou.config.ts            # Optional framework configuration
 ├── package.json
-└── tsconfig.json`}</pre>
+└── tsconfig.json`}</code>
+                  </pre>
+                </div>
               </div>
 
               <div className="rounded-lg border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 p-4 not-prose">
                 <div className="flex items-center gap-2 font-semibold text-blue-700 dark:text-blue-300 text-sm mb-1">
                   <Sparkles className="w-4 h-4" />
-                  Key Rule in v7: Private Folders
+                  Key Rule in v7: Private Folders (_ prefix)
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400">
-                  Any directory prefixed with <code>_</code> (like <code>_components</code> or{" "}
-                  <code>_lib</code>) is automatically ignored by Dinou&apos;s route scanner. You can
-                  safely collocate your components, styles, or utilities right next to the pages that
-                  use them.
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Any folder prefixed with <code>_</code> (such as <code>_drafts</code>) is
+                  completely ignored by the router and static build scanner,{" "}
+                  <strong>even if it contains valid <code>page.tsx</code> files</strong>. This makes it
+                  invaluable for archiving previous architectures, keeping legacy reference documentation,
+                  or isolating work-in-progress routes without exposing them publicly or causing routing conflicts.
                 </p>
               </div>
             </section>

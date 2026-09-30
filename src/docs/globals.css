@@ -346,6 +346,12 @@
 .prose pre code {
   background-color: transparent;
   padding: 0;
+  color: inherit;
+}
+
+.not-prose pre,
+.not-prose code {
+  color: inherit;
 }
 
 .prose blockquote {
