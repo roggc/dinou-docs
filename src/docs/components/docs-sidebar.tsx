@@ -32,6 +32,7 @@ import {
   Plug,
   Hexagon,
   Star,
+  Sparkles,
   Rocket,
   DraftingCompass,
   Package,
@@ -82,6 +83,11 @@ const docsNavigation = [
         title: "Overview",
         href: "/docs/migration",
         icon: Compass,
+      },
+      {
+        title: "Migration from v6 to v7",
+        href: "/docs/migration/v6-to-v7",
+        icon: Sparkles,
       },
       {
         title: "Migration from v5 to v6",

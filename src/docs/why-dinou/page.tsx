@@ -147,7 +147,7 @@ export default function WhyDinouPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="text-sm text-muted-foreground leading-relaxed">
-                    Write your application once and deploy to <strong>Node.js</strong>, <strong>Cloudflare Workers</strong>, <strong>Deno</strong>, or <strong>Bun</strong>. Furthermore, compile single-file standalone binaries for Linux, ARM, macOS, and Windows with zero external runtime dependencies.
+                    Write your application once and deploy to <strong>Node.js</strong>, <strong>Cloudflare Workers</strong>, <strong>Netlify Functions</strong>, <strong>Deno</strong>, or <strong>Bun</strong>. Furthermore, compile single-file standalone binaries for Linux, ARM, macOS, and Windows with zero external runtime dependencies.
                   </CardContent>
                 </Card>
 
@@ -297,7 +297,7 @@ export default function WhyDinouPage() {
                       Multi-Runtime &amp; Standalone Binaries
                     </h4>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Deploy seamlessly to Node.js, Cloudflare Workers, Deno, or Bun. Compile self-contained executable binaries (<code>dinou build:deno:compile</code>, <code>dinou build:bun:compile</code>) that run on servers without requiring Node, Deno, or Bun installed.
+                      Deploy seamlessly to Node.js, Cloudflare Workers, Netlify Functions, Deno, or Bun. Compile self-contained executable binaries (<code>dinou build:deno:compile</code>, <code>dinou build:bun:compile</code>) that run on servers without requiring Node, Deno, or Bun installed.
                     </p>
                   </div>
                 </div>
@@ -322,6 +322,18 @@ export default function WhyDinouPage() {
                     </h4>
                     <p className="text-sm text-muted-foreground mt-1">
                       Smooth client-side navigation with hover-based prefetching, cache busting via the <code>fresh</code> prop, and active loading indicators with the <code>useNavigationLoading</code> hook.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3.5 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-card">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-base text-slate-900 dark:text-slate-100">
+                      React StrictMode by Default (Configurable)
+                    </h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Client roots are automatically wrapped in <code>&lt;React.StrictMode&gt;</code> in development mode to enforce React best practices and ensure DEV-PROD parity with React Compiler. Easily configured or toggled via <code>reactStrictMode</code> in <code>dinou.config.mjs</code>.
                     </p>
                   </div>
                 </div>
@@ -359,7 +371,7 @@ export default function WhyDinouPage() {
                     </tr>
                     <tr className="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
                       <td className="py-3.5 px-4 font-medium text-slate-900 dark:text-slate-100">Multi-Runtime Portability</td>
-                      <td className="py-3.5 px-4 text-blue-600 dark:text-blue-400 font-semibold">Node.js, Cloudflare, Deno, Bun &amp; Binaries</td>
+                      <td className="py-3.5 px-4 text-blue-600 dark:text-blue-400 font-semibold">Node.js, Cloudflare, Netlify, Deno, Bun &amp; Binaries</td>
                       <td className="py-3.5 px-4 text-muted-foreground">Targeted heavily at specific cloud vendors</td>
                     </tr>
                     <tr className="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">

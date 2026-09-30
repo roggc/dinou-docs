@@ -97,7 +97,7 @@ export default function Page() {
                     Deploy Everywhere
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Compile identical code to Node.js, Cloudflare Workers, Deno, or Bun.
+                    Compile identical code to Node.js, Cloudflare Workers, Netlify, Deno, or Bun.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
@@ -194,8 +194,8 @@ export default function Page() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Compile your application for traditional Node.js servers, ultra-fast Bun
-                      instances, Deno microservices, or Cloudflare Workers at the edge without
+                      Compile your application for traditional Node.js servers, fast Bun
+                      instances, Deno microservices, serverless Netlify Functions, or Cloudflare Workers at the edge without
                       changing a single line of application code.
                     </p>
                   </CardContent>
