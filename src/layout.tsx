@@ -1,6 +1,5 @@
-"use client";
-
 import type { ReactNode } from "react";
+import { ViewTransition } from "react";
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import Footer from "@/components/footer";
@@ -49,7 +48,9 @@ export default function Layout({
         >
           <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
             <Header />
-            {children}
+            <ViewTransition name="page-content">
+              {children}
+            </ViewTransition>
             <Footer />
           </div>
         </ThemeProvider>

@@ -1,6 +1,5 @@
-"use client";
-
 import type { ReactNode } from "react";
+import { ViewTransition } from "react";
 import { ThemeProvider } from "@/docs/components/theme-provider";
 import { DocsHeader } from "@/docs/components/docs-header";
 import { DocsSidebar } from "@/docs/components/docs-sidebar";
@@ -55,7 +54,11 @@ export default function Layout({
               <div className="sidebar-layout w-full">
                 <DocsSidebar />
                 <div className="sidebar-content">
-                  <main className="flex-1 w-full">{children}</main>
+                  <main className="flex-1 w-full">
+                    <ViewTransition name="docs-content">
+                      {children}
+                    </ViewTransition>
+                  </main>
                 </div>
               </div>
             </div>
