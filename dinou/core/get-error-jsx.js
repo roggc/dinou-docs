@@ -204,6 +204,7 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
     true
   );
 
+    let layoutApplied = false;
     if (layouts && Array.isArray(layouts)) {
       let index = 0;
       for (const [layoutPath, dParams, slots] of layouts.reverse()) {
@@ -289,7 +290,17 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
           params: dParams,
           ...updatedSlots,
         };
-        jsx = React.createElement(Layout, props, jsx);
+        try {
+          const testElement = React.createElement(Layout, props, jsx);
+          await asyncRenderJSXToClientJSX(testElement);
+          jsx = testElement;
+          layoutApplied = true;
+        } catch (layoutErr) {
+          console.warn(
+            `[Dinou] Layout ${layoutPath} failed during error recovery, skipping this layout:`,
+            layoutErr?.message || layoutErr
+          );
+        }
         const layoutFolderPath = path.dirname(layoutPath);
         if (
           getFilePathAndDynamicParams(
@@ -305,6 +316,30 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
         index++;
       }
     }
+
+  if (options) {
+    options.hasLayout = layoutApplied;
+  }
+
+  const hasHtml = jsx?.type === "html" || (Array.isArray(jsx) && jsx.some((c) => c?.type === "html"));
+  if (!hasHtml) {
+    jsx = React.createElement(
+      "html",
+      { lang: "en" },
+      React.createElement(
+        "head",
+        null,
+        React.createElement("meta", { charSet: "UTF-8" }),
+        React.createElement("meta", { name: "viewport", content: "width=device-width, initial-scale=1" }),
+        React.createElement("title", null, isDevelopment ? "Dinou Dev Error" : "Application Error")
+      ),
+      React.createElement(
+        "body",
+        { style: { margin: 0, background: "#fff1f2", padding: "20px" } },
+        jsx
+      )
+    );
+  }
 
   return jsx;
 }

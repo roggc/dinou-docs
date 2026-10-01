@@ -1393,6 +1393,7 @@ async function handleRequest(request, platformContext = {}) {
           };
         }
 
+        let errorMeta = {};
         if (isError) {
           const serializedError = {
             message: isDevelopment
@@ -1403,7 +1404,7 @@ async function handleRequest(request, platformContext = {}) {
           };
           try {
             await requestStorage.run(context, async () => {
-              jsx = await getErrorJSX(reqPath, queryObj, serializedError, isDevelopment);
+              jsx = await getErrorJSX(reqPath, queryObj, serializedError, isDevelopment, errorMeta);
             });
           } catch (e) {
             console.error("[Edge ISG] Failed to render error JSX:", e);
@@ -1480,6 +1481,8 @@ async function handleRequest(request, platformContext = {}) {
               caughtError?.name || "Error"
             )};window.__DINOU_ERROR_STACK__=${JSON.stringify(
               isDevelopment ? (caughtError?.stack || "") : ""
+            )};window.__DINOU_ERROR_SEGMENT__=${JSON.stringify(
+              errorMeta?.hasLayout ? "page" : "layout"
             )};\n`;
             bootstrapScriptContent += 'document.body.setAttribute("data-hydrated", "true");\n';
           }
@@ -1535,9 +1538,10 @@ async function handleRequest(request, platformContext = {}) {
             };
 
             let errorJsx;
+            const errorMeta = {};
             try {
               await requestStorage.run(context, async () => {
-                errorJsx = await getErrorJSX(reqPath, queryObj, serializedError, isDevelopment);
+                errorJsx = await getErrorJSX(reqPath, queryObj, serializedError, isDevelopment, errorMeta);
               });
             } catch (errJsxErr) {
               console.error("[Edge Native SSR] Failed to get error JSX:", errJsxErr);
@@ -1547,9 +1551,15 @@ async function handleRequest(request, platformContext = {}) {
               const errMsg = isDevelopment
                 ? (ssrErr?.message || "Error")
                 : "An error occurred in the Server Components render";
+              const stackHtml = isDevelopment && serializedError.stack
+                ? `<pre style="background:#0f172a;color:#f8fafc;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.8125rem;line-height:1.6;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">${serializedError.stack.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`
+                : "";
+              const devHelp = isDevelopment
+                ? `<p style="margin:0 0 16px 0;font-size:0.875rem;color:#9f1239;line-height:1.5;">An unhandled error occurred during rendering. You can provide a custom error UI by creating an <code style="background:#ffe4e6;padding:2px 6px;border-radius:4px;font-weight:600;">error.tsx</code> file in your route folder.</p>`
+                : "";
               return {
                 type: "html",
-                html: `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Dinou</title></head><body data-hydrated="true"><div class="min-h-screen bg-slate-950 text-slate-100 p-6"><h2>Application Error</h2><p>${errMsg}</p></div></body></html>`,
+                html: `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dinou Dev Error</title></head><body style="margin:0;background:#fff1f2;padding:20px;"><div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:32px;max-width:960px;margin:40px auto;background-color:#fff1f2;border:1px solid #fecdd3;border-radius:12px;color:#9f1239;box-shadow:0 10px 25px -5px rgba(0,0,0,0.1);"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;"><span style="background:#e11d48;color:white;padding:2px 8px;border-radius:9999px;font-size:12px;font-weight:bold;">${isDevelopment ? "Dinou Dev Error" : "Application Error"}</span><h2 style="margin:0;font-size:1.25rem;font-weight:700;color:#881337;">${errMsg.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</h2></div>${devHelp}${stackHtml}</div></body></html>`,
                 status: 500,
                 headers: new Headers(bridge.headers),
                 cookies: [...bridge.cookies],
@@ -1575,6 +1585,8 @@ async function handleRequest(request, platformContext = {}) {
               serializedError.name
             )};window.__DINOU_ERROR_STACK__=${JSON.stringify(
               isDevelopment ? (serializedError.stack || "") : ""
+            )};window.__DINOU_ERROR_SEGMENT__=${JSON.stringify(
+              errorMeta?.hasLayout ? "page" : "layout"
             )};\n`;
             errorBootstrapScript += 'document.body.setAttribute("data-hydrated", "true");\n';
             if (isDevelopment) {
@@ -1588,17 +1600,37 @@ async function handleRequest(request, platformContext = {}) {
               errorBootstrapScript += `window.HMR_WEBSOCKET_URL="ws://localhost:${hmrPort}";\n`;
             }
 
-            await requestStorage.run(context, async () => {
-              htmlStream = await platformContext.renderHtmlStream(errorRscStream, {
-                bootstrapModules: errorBootstrapModules,
-                bootstrapScriptContent: errorBootstrapScript,
-                onError(err) {
-                  if (!platformContext?.isSSG || process.env.DINOU_DEBUG) {
-                    console.error("[Edge Native SSR Error Page] Stream error:", err);
-                  }
-                },
+            try {
+              await requestStorage.run(context, async () => {
+                htmlStream = await platformContext.renderHtmlStream(errorRscStream, {
+                  bootstrapModules: errorBootstrapModules,
+                  bootstrapScriptContent: errorBootstrapScript,
+                  onError(err) {
+                    if (!platformContext?.isSSG || process.env.DINOU_DEBUG) {
+                      console.error("[Edge Native SSR Error Page] Stream error:", err);
+                    }
+                  },
+                });
               });
-            });
+            } catch (errStreamErr) {
+              console.error("[Edge Native SSR] Error stream rendering failed, using emergency HTML fallback:", errStreamErr);
+              const errMsg = isDevelopment
+                ? (serializedError.message || "Error")
+                : "An error occurred in the Server Components render";
+              const stackHtml = isDevelopment && serializedError.stack
+                ? `<pre style="background:#0f172a;color:#f8fafc;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.8125rem;line-height:1.6;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;">${serializedError.stack.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>`
+                : "";
+              const devHelp = isDevelopment
+                ? `<p style="margin:0 0 16px 0;font-size:0.875rem;color:#9f1239;line-height:1.5;">An unhandled error occurred during rendering. You can provide a custom error UI by creating an <code style="background:#ffe4e6;padding:2px 6px;border-radius:4px;font-weight:600;">error.tsx</code> file in your route folder.</p>`
+                : "";
+              return {
+                type: "html",
+                html: `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dinou Dev Error</title></head><body style="margin:0;background:#fff1f2;padding:20px;"><div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:32px;max-width:960px;margin:40px auto;background-color:#fff1f2;border:1px solid #fecdd3;border-radius:12px;color:#9f1239;box-shadow:0 10px 25px -5px rgba(0,0,0,0.1);"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;"><span style="background:#e11d48;color:white;padding:2px 8px;border-radius:9999px;font-size:12px;font-weight:bold;">${isDevelopment ? "Dinou Dev Error" : "Application Error"}</span><h2 style="margin:0;font-size:1.25rem;font-weight:700;color:#881337;">${errMsg.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</h2></div>${devHelp}${stackHtml}</div></body></html>`,
+                status: 500,
+                headers: new Headers(bridge.headers),
+                cookies: [...bridge.cookies],
+              };
+            }
           }
 
           if (bridge.headers.has("Location") || (bridge.statusCode >= 300 && bridge.statusCode < 400)) {
