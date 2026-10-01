@@ -141,6 +141,9 @@ class SlotErrorBoundary extends Component {
 }
 
 function PageConsumer({ pagePromise }) {
+  if (pagePromise && pagePromise.status === "rejected") {
+    throw pagePromise.reason;
+  }
   return use ? use(pagePromise) : pagePromise;
 }
 

@@ -332,6 +332,8 @@ function Router() {
           err.name = window.__DINOU_ERROR_NAME__ || "Error";
           if (window.__DINOU_ERROR_STACK__) err.stack = window.__DINOU_ERROR_STACK__;
           const p = Promise.reject(err);
+          p.status = "rejected";
+          p.reason = err;
           p.catch(() => {});
           return p;
         })()
