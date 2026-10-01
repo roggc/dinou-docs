@@ -318,6 +318,41 @@ function parseCookieHeader(cookieHeader) {
   return cookies;
 }
 
+let discoveredLayoutsCache = null;
+let lastLayoutsDiscoveryTime = 0;
+
+function getDiscoveredLayouts() {
+  if (typeof globalThis !== "undefined" && Array.isArray(globalThis.__DINOU_LAYOUTS__) && globalThis.__DINOU_LAYOUTS__.length > 0) {
+    return globalThis.__DINOU_LAYOUTS__;
+  }
+  const now = Date.now();
+  if (discoveredLayoutsCache && now - lastLayoutsDiscoveryTime < 1000) {
+    return discoveredLayoutsCache;
+  }
+  const discovered = [];
+  const srcFolder = path.resolve(process.cwd(), "src");
+  function find(dir, rel = "") {
+    if (!existsSync(dir)) return;
+    let entries;
+    try {
+      entries = require("fs").readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        find(path.join(dir, entry.name), rel ? `${rel}/${entry.name}` : entry.name);
+      } else if (/^layout\.[jt]sx?$/.test(entry.name)) {
+        discovered.push(rel);
+      }
+    }
+  }
+  find(srcFolder);
+  discoveredLayoutsCache = discovered;
+  lastLayoutsDiscoveryTime = now;
+  return discovered;
+}
+
 /**
  * Bridges Node.js style response methods to a WHATWG Web Response.
  */
@@ -1460,7 +1495,7 @@ async function handleRequest(request, platformContext = {}) {
           const [streamForSsr, streamForCache] = rscStream.tee();
 
           let bootstrapScriptContent = "";
-          const knownLayouts = (typeof globalThis !== "undefined" && globalThis.__DINOU_LAYOUTS__) || ["", "docs"];
+          const knownLayouts = getDiscoveredLayouts();
           bootstrapScriptContent += `window.__DINOU_LAYOUTS__ = ${JSON.stringify(knownLayouts)};\n`;
           if (shouldCacheISG) {
             bootstrapScriptContent += "window.__DINOU_USE_STATIC__ = true;\n";
@@ -1576,7 +1611,7 @@ async function handleRequest(request, platformContext = {}) {
               : [errorClientEntry];
 
             let errorBootstrapScript = "";
-            const knownLayouts = (typeof globalThis !== "undefined" && globalThis.__DINOU_LAYOUTS__) || ["", "docs"];
+            const knownLayouts = getDiscoveredLayouts();
             errorBootstrapScript += `window.__DINOU_LAYOUTS__ = ${JSON.stringify(knownLayouts)};\n`;
             errorBootstrapScript += "window.__DINOU_USE_STATIC__ = false;\n";
             errorBootstrapScript += `window.__DINOU_ERROR_MESSAGE__=${JSON.stringify(

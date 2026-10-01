@@ -204,10 +204,13 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
     true
   );
 
+    const baseErrorJsx = jsx;
     let layoutApplied = false;
     if (layouts && Array.isArray(layouts)) {
+      const reversedLayouts = [...layouts].reverse();
+      let outermostLayoutApplied = false;
       let index = 0;
-      for (const [layoutPath, dParams, slots] of layouts.reverse()) {
+      for (const [layoutPath, dParams, slots] of reversedLayouts) {
         const layoutModule = await importModule(layoutPath);
         const Layout = layoutModule.default ?? layoutModule;
         const updatedSlots = {};
@@ -295,11 +298,13 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
           await asyncRenderJSXToClientJSX(testElement);
           jsx = testElement;
           layoutApplied = true;
+          outermostLayoutApplied = true;
         } catch (layoutErr) {
           console.warn(
             `[Dinou] Layout ${layoutPath} failed during error recovery, skipping this layout:`,
             layoutErr?.message || layoutErr
           );
+          outermostLayoutApplied = false;
         }
         const layoutFolderPath = path.dirname(layoutPath);
         if (
@@ -314,6 +319,14 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
           break;
         }
         index++;
+      }
+
+      // If the outermost (root) layout in this branch failed to apply, the layout chain cannot
+      // provide a root document shell (<html>/<body>) and client hydration cannot succeed.
+      // Revert to the standalone error JSX and mark hasLayout as false.
+      if (!outermostLayoutApplied) {
+        jsx = baseErrorJsx;
+        layoutApplied = false;
       }
     }
 
