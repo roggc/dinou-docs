@@ -155,7 +155,7 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
             fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
           },
         },
-        cleanErrorStack(error.stack)
+        error.stack
       )
     );
   } else {

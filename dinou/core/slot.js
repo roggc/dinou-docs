@@ -132,7 +132,7 @@ class SlotErrorBoundary extends Component {
               fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
             },
           },
-          cleanErrorStack(this.state.error.stack)
+          this.state.error.stack
         )
       );
     }
