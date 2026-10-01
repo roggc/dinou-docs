@@ -286,7 +286,29 @@ async function getJSX(
       if (index === layouts.length - 1 || resetLayoutPath) {
         props = { ...props, ...(pageFunctionsProps?.layout ?? {}) };
       }
-      jsx = React.createElement(Layout, props, jsx);
+      try {
+        const testElement = React.createElement(Layout, props, jsx);
+        await asyncRenderJSXToClientJSX(testElement);
+        jsx = testElement;
+      } catch (layoutErr) {
+        console.warn(
+          `[Dinou] Layout ${layoutPath} failed during render, isolating layout error:`,
+          layoutErr?.message || layoutErr
+        );
+        const { getErrorJSX } = require("./get-error-jsx");
+        const serializedError = {
+          message: layoutErr.message || "Unknown Error",
+          name: layoutErr.name || "Error",
+          stack: isDevelopment ? layoutErr.stack : undefined,
+        };
+        jsx = await getErrorJSX(
+          reqPath,
+          query,
+          serializedError,
+          isDevelopment,
+          { segment: "page" }
+        );
+      }
       if (resetLayoutPath) {
         break;
       }

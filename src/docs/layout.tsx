@@ -12,7 +12,6 @@ export default function Layout({
   children: ReactNode;
   sidebar?: ReactNode;
 }) {
-  a;
   return (
     <html lang="en" suppressHydrationWarning>
       <head>

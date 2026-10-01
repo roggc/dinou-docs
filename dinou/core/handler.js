@@ -1518,6 +1518,8 @@ async function handleRequest(request, platformContext = {}) {
               isDevelopment ? (caughtError?.stack || "") : ""
             )};window.__DINOU_ERROR_SEGMENT__=${JSON.stringify(
               errorMeta?.hasLayout ? "page" : "layout"
+            )};window.__DINOU_ACTIVE_LAYOUT__=${JSON.stringify(
+              errorMeta?.appliedLayoutKey || null
             )};\n`;
             bootstrapScriptContent += 'document.body.setAttribute("data-hydrated", "true");\n';
           }
@@ -1622,6 +1624,8 @@ async function handleRequest(request, platformContext = {}) {
               isDevelopment ? (serializedError.stack || "") : ""
             )};window.__DINOU_ERROR_SEGMENT__=${JSON.stringify(
               errorMeta?.hasLayout ? "page" : "layout"
+            )};window.__DINOU_ACTIVE_LAYOUT__=${JSON.stringify(
+              errorMeta?.appliedLayoutKey || null
             )};\n`;
             errorBootstrapScript += 'document.body.setAttribute("data-hydrated", "true");\n';
             if (isDevelopment) {

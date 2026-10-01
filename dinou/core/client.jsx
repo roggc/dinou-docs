@@ -231,77 +231,78 @@ class ErrorBoundary extends Component {
       }
       const isDev = process.env.NODE_ENV !== "production";
       return (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            zIndex: 999999,
-            overflow: "auto",
-            backgroundColor: "#fff1f2",
-            padding: "20px",
-            boxSizing: "border-box",
-          }}
-        >
-          <div
+        <html lang="en">
+          <head>
+            <meta charSet="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>{isDev ? "Dinou Dev Error" : "Application Error"}</title>
+          </head>
+          <body
             style={{
-              fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-              padding: "32px",
-              maxWidth: "960px",
-              margin: "40px auto",
+              margin: 0,
               backgroundColor: "#fff1f2",
-              border: "1px solid #fecdd3",
-              borderRadius: "12px",
-              color: "#9f1239",
-              boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+              padding: "20px",
+              boxSizing: "border-box",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
-              <span
-                style={{
-                  background: "#e11d48",
-                  color: "white",
-                  padding: "2px 8px",
-                  borderRadius: "9999px",
-                  fontSize: "12px",
-                  fontWeight: "bold",
-                }}
-              >
-                {isDev ? "Dinou Dev Error" : "Application Error"}
-              </span>
-              <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 700, color: "#881337" }}>
-                {this.state.error?.message || "Unhandled Application Error"}
-              </h2>
+            <div
+              style={{
+                fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                padding: "32px",
+                maxWidth: "960px",
+                margin: "40px auto",
+                backgroundColor: "#fff1f2",
+                border: "1px solid #fecdd3",
+                borderRadius: "12px",
+                color: "#9f1239",
+                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
+                <span
+                  style={{
+                    background: "#e11d48",
+                    color: "white",
+                    padding: "2px 8px",
+                    borderRadius: "9999px",
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {isDev ? "Dinou Dev Error" : "Application Error"}
+                </span>
+                <h2 style={{ margin: 0, fontSize: "1.25rem", fontWeight: 700, color: "#881337" }}>
+                  {this.state.error?.message || "Unhandled Application Error"}
+                </h2>
+              </div>
+              {isDev && (
+                <p style={{ margin: "0 0 16px 0", fontSize: "0.875rem", color: "#9f1239", lineHeight: 1.5 }}>
+                  An unhandled error occurred during rendering. You can provide a custom error UI by creating an{" "}
+                  <code style={{ background: "#ffe4e6", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>
+                    error.tsx
+                  </code>{" "}
+                  file in your route folder.
+                </p>
+              )}
+              {isDev && this.state.error?.stack && (
+                <pre
+                  style={{
+                    background: "#0f172a",
+                    color: "#f8fafc",
+                    padding: "16px",
+                    borderRadius: "8px",
+                    overflowX: "auto",
+                    fontSize: "0.8125rem",
+                    lineHeight: 1.6,
+                    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+                  }}
+                >
+                  {cleanErrorStack(this.state.error.stack)}
+                </pre>
+              )}
             </div>
-            {isDev && (
-              <p style={{ margin: "0 0 16px 0", fontSize: "0.875rem", color: "#9f1239", lineHeight: 1.5 }}>
-                An unhandled error occurred during rendering. You can provide a custom error UI by creating an{" "}
-                <code style={{ background: "#ffe4e6", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>
-                  error.tsx
-                </code>{" "}
-                file in your route folder.
-              </p>
-            )}
-            {isDev && this.state.error?.stack && (
-              <pre
-                style={{
-                  background: "#0f172a",
-                  color: "#f8fafc",
-                  padding: "16px",
-                  borderRadius: "8px",
-                  overflowX: "auto",
-                  fontSize: "0.8125rem",
-                  lineHeight: 1.6,
-                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-                }}
-              >
-                {this.state.error.stack}
-              </pre>
-            )}
-          </div>
-        </div>
+          </body>
+        </html>
       );
     }
     return this.props.children;
@@ -343,6 +344,9 @@ function Router() {
   // 🧭 NAVIGATE FUNCTION (Core Logic)
   const navigate = (href, options = {}) => {
     initialPageErrorRef.current = null;
+    if (typeof window !== "undefined" && window.__DINOU_ACTIVE_LAYOUT__) {
+      window.__DINOU_ACTIVE_LAYOUT__ = null;
+    }
     const finalPath = resolveUrl(href, window.location.pathname);
 
     // 🛡️ NAVIGATE PROTECTION: Hash Detection
@@ -463,6 +467,9 @@ function Router() {
 
     const onPopState = () => {
       initialPageErrorRef.current = null;
+      if (typeof window !== "undefined" && window.__DINOU_ACTIVE_LAYOUT__) {
+        window.__DINOU_ACTIVE_LAYOUT__ = null;
+      }
       const target = getCurrentRoute();
       startTransition(() => {
         setIsPopState(true);
@@ -513,7 +520,16 @@ function Router() {
 
   // RSC Segmented Navigation Logic
   const cleanRoutePath = route.split("?")[0].split("#")[0];
-  const layoutKey = useMemo(() => getLayoutKey(cleanRoutePath), [cleanRoutePath]);
+  const layoutKey = useMemo(() => {
+    if (
+      typeof window !== "undefined" &&
+      window.__DINOU_ACTIVE_LAYOUT__ &&
+      route === getCurrentRoute()
+    ) {
+      return window.__DINOU_ACTIVE_LAYOUT__;
+    }
+    return getLayoutKey(cleanRoutePath);
+  }, [cleanRoutePath, route]);
 
   const pagePromise = useMemo(() => {
     if (initialPageErrorRef.current && route === getCurrentRoute()) {

@@ -206,6 +206,7 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
 
     const baseErrorJsx = jsx;
     let layoutApplied = false;
+    let appliedLayoutKey = null;
     if (layouts && Array.isArray(layouts)) {
       const reversedLayouts = [...layouts].reverse();
       let outermostLayoutApplied = false;
@@ -299,6 +300,10 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
           jsx = testElement;
           layoutApplied = true;
           outermostLayoutApplied = true;
+          if (!appliedLayoutKey) {
+            const relDir = path.relative(srcFolder, path.dirname(layoutPath)).replace(/\\/g, "/");
+            appliedLayoutKey = relDir === "" ? "/" : "/" + relDir;
+          }
         } catch (layoutErr) {
           console.warn(
             `[Dinou] Layout ${layoutPath} failed during error recovery, skipping this layout:`,
@@ -327,11 +332,13 @@ async function getErrorJSX(reqPath, query, error, isDevelopment = false, options
       if (!outermostLayoutApplied) {
         jsx = baseErrorJsx;
         layoutApplied = false;
+        appliedLayoutKey = null;
       }
     }
 
   if (options) {
     options.hasLayout = layoutApplied;
+    options.appliedLayoutKey = appliedLayoutKey;
   }
 
   const hasHtml = jsx?.type === "html" || (Array.isArray(jsx) && jsx.some((c) => c?.type === "html"));
