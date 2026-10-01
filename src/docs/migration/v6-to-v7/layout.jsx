@@ -1,7 +1,6 @@
-// trigger dev rebuild 2
+// trigger dev rebuild 3
 export default function Layout({
     children,
 }) {
-    a;
     return <>{children}<div>hello</div></>;
 }

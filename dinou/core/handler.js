@@ -1410,7 +1410,7 @@ async function handleRequest(request, platformContext = {}) {
         try {
           if (!isError) {
             await requestStorage.run(context, async () => {
-              jsx = await getJSX(reqPath, queryObj, isNotFound, false, !pagePath);
+              jsx = await getJSX(reqPath, queryObj, isNotFound, isDevelopment, !pagePath);
             });
           }
         } catch (err) {
