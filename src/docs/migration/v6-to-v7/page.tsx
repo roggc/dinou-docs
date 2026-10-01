@@ -35,7 +35,6 @@ const tocItems = [
 ];
 
 export default function MigrationV6ToV7Page() {
-  a;
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
       <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
