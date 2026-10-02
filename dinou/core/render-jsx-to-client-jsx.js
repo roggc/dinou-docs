@@ -1,3 +1,10 @@
+const {
+  isPprBuildActive,
+  enterSuspense,
+  exitSuspense,
+  registerHole,
+} = require("./ppr-context.js");
+
 // Function to check if a component is a client component
 function isClientComponent(type) {
   if (!type) {
@@ -21,10 +28,10 @@ function renderJSXToClientJSX(jsx, key = null) {
   ) {
     return jsx;
   } else if (Array.isArray(jsx)) {
-    return jsx.map((child, i) =>
+    return jsx.map((child) =>
       renderJSXToClientJSX(
         child,
-        i + (typeof child?.type === "string" ? "_" + child?.type : "")
+        child?.key ?? null
       )
     );
   } else if (typeof jsx === "symbol") {
@@ -135,10 +142,10 @@ async function asyncRenderJSXToClientJSX(jsx, key = null) {
     return jsx;
   } else if (Array.isArray(jsx)) {
     return await Promise.all(
-      jsx.map((child, i) =>
+      jsx.map((child) =>
         asyncRenderJSXToClientJSX(
           child,
-          i + (typeof child?.type === "string" ? "_" + child?.type : "")
+          child?.key ?? null
         )
       )
     );
@@ -148,25 +155,66 @@ async function asyncRenderJSXToClientJSX(jsx, key = null) {
       return {
         $$typeof: Symbol.for("react.transitional.element"),
         type: Symbol.for("react.fragment"),
-        props: { key },
+        props: {},
+        key,
       };
     }
     console.error("Unsupported symbol:", String(jsx));
     throw new Error(`Unsupported symbol: ${String(jsx)}`);
   } else if (typeof jsx === "object") {
     if (jsx.$$typeof === Symbol.for("react.transitional.element")) {
-      if (
+      if (jsx.type === Symbol.for("react.suspense")) {
+        if (isPprBuildActive()) {
+          const holeId = enterSuspense();
+          try {
+            const renderedChildren = await asyncRenderJSXToClientJSX(jsx.props?.children);
+            exitSuspense();
+            return {
+              ...jsx,
+              props: {
+                ...jsx.props,
+                children: renderedChildren,
+                fallback: await asyncRenderJSXToClientJSX(jsx.props?.fallback),
+              },
+              key: key ?? jsx.key,
+            };
+          } catch (err) {
+            exitSuspense();
+            if (
+              (err && err.$$typeof === Symbol.for("dinou.ppr.postpone")) ||
+              (err && typeof err?.then === "function") ||
+              (err && err?.$$typeof === Symbol.for("react.postpone"))
+            ) {
+              registerHole(holeId, { type: err.pprType || "suspense" });
+              const renderedFallback = await asyncRenderJSXToClientJSX(jsx.props?.fallback);
+              return {
+                $$typeof: Symbol.for("react.transitional.element"),
+                type: "div",
+                props: {
+                  "data-ppr-hole": holeId,
+                  style: { display: "contents" },
+                  children: renderedFallback,
+                },
+                key: key ?? jsx.key,
+              };
+            }
+            throw err;
+          }
+        }
+        return {
+          ...jsx,
+          props: await asyncRenderJSXToClientJSX(jsx.props),
+          key: key ?? jsx.key,
+        };
+      } else if (
         jsx.type === Symbol.for("react.fragment") ||
-        jsx.type === Symbol.for("react.suspense") ||
         jsx.type === Symbol.for("react.view_transition") ||
         typeof jsx.type === "string"
       ) {
         return {
           ...jsx,
-          props: {
-            ...(await asyncRenderJSXToClientJSX(jsx.props, key ?? jsx.key)),
-            key: key ?? jsx.key,
-          },
+          props: await asyncRenderJSXToClientJSX(jsx.props),
+          key: key ?? jsx.key,
         };
       } else if (typeof jsx.type === "function") {
         const Component = jsx.type;
@@ -176,10 +224,8 @@ async function asyncRenderJSXToClientJSX(jsx, key = null) {
             ...jsx,
             $$typeof: Symbol.for("react.transitional.element"),
             type: Component,
-            props: {
-              ...(await asyncRenderJSXToClientJSX(props, key ?? jsx.key)),
-              key: key ?? jsx.key,
-            },
+            props: await asyncRenderJSXToClientJSX(props),
+            key: key ?? jsx.key,
           };
         } else {
           // Server component: execute and process
@@ -196,10 +242,8 @@ async function asyncRenderJSXToClientJSX(jsx, key = null) {
             ...jsx,
             $$typeof: Symbol.for("react.transitional.element"),
             type: jsx.type,
-            props: {
-              ...(await asyncRenderJSXToClientJSX(jsx.props, key ?? jsx.key)),
-              key: key ?? jsx.key,
-            },
+            props: await asyncRenderJSXToClientJSX(jsx.props),
+            key: key ?? jsx.key,
           };
         } else {
           const returnedJsx = await jsx.type.render(jsx.props, jsx.ref);
@@ -215,10 +259,8 @@ async function asyncRenderJSXToClientJSX(jsx, key = null) {
             ...jsx,
             $$typeof: Symbol.for("react.transitional.element"),
             type: jsx.type,
-            props: {
-              ...(await asyncRenderJSXToClientJSX(jsx.props, key ?? jsx.key)),
-              key: key ?? jsx.key,
-            },
+            props: await asyncRenderJSXToClientJSX(jsx.props),
+            key: key ?? jsx.key,
           };
         } else {
           const innerComp = jsx.type.type;

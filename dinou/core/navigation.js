@@ -88,7 +88,26 @@ export function useRouter() {
      * and re-renders the server component without a full browser reload.
      */
     refresh: () => context.refresh(),
+
+    /**
+     * Refresh a specific DinouCacheSlot without re-rendering the rest of the page.
+     * @param {string} slotId The ID or tag of the slot to refresh.
+     * @param {object} [options] Optional configuration ({ fresh?: boolean }).
+     */
+    refreshSlot: (slotId, options) => refreshSlot(slotId, options),
   };
+}
+
+export function refreshSlot(slotId, options) {
+  if (typeof window !== "undefined") {
+    if (typeof window.__DINOU_REFRESH_SLOT__ === "function") {
+      window.__DINOU_REFRESH_SLOT__(slotId, options);
+    } else {
+      window.dispatchEvent(
+        new CustomEvent("dinou:refresh-slot", { detail: { id: slotId, options } })
+      );
+    }
+  }
 }
 
 const DINOU_CONTEXT_KEY = Symbol.for("dinou.request.context.storage");
@@ -138,16 +157,24 @@ export function useSearchParams() {
         return params;
       }
     } catch (e) { }
+    return new URLSearchParams();
   }
 
   // 🔵 2. CLIENT LOGIC
   const context = useContext(RouterContext);
 
   // ⚠️ CRITICAL CHANGE: We extract .url
-  const fullRoute = typeof context === "string" ? context : context.url;
+  const fullRoute = typeof context === "string" ? context : context?.url;
 
-  if (typeof fullRoute !== "string") return new URLSearchParams();
+  if (typeof fullRoute === "string" && fullRoute.includes("?")) {
+    const searchPart = (fullRoute.split("?")[1] || "").split("#")[0];
+    return new URLSearchParams(searchPart);
+  }
 
-  const searchPart = (fullRoute.split("?")[1] || "").split("#")[0];
-  return new URLSearchParams(searchPart);
+  if (typeof window !== "undefined" && window.location && window.location.search) {
+    return new URLSearchParams(window.location.search);
+  }
+
+  return new URLSearchParams();
 }
+

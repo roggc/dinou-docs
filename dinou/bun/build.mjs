@@ -245,6 +245,9 @@ if (slotChunkId) {
   const slotChunks = isWebpackBuild
     ? (slotEntry?.chunks || [slotChunkId])
     : "DinouPageSlot";
+  const slotBoundaryChunks = isWebpackBuild
+    ? (slotEntry?.chunks || [slotChunkId])
+    : "DinouCacheSlotBoundary";
   const slotDefaultChunks = isWebpackBuild
     ? (slotEntry?.chunks || [slotChunkId])
     : "default";
@@ -252,6 +255,7 @@ if (slotChunkId) {
   for (const sp of candidateSlotPaths) {
     for (const url of generateAllUrlVariants(sp)) {
       normalizedManifest[`${url}#DinouPageSlot`] = { id: slotChunkId, chunks: slotChunks, name: "DinouPageSlot" };
+      normalizedManifest[`${url}#DinouCacheSlotBoundary`] = { id: slotChunkId, chunks: slotBoundaryChunks, name: "DinouCacheSlotBoundary" };
       normalizedManifest[`${url}#default`] = { id: slotChunkId, chunks: slotDefaultChunks, name: "default" };
       normalizedManifest[url] = { id: slotChunkId, chunks: slotDefaultChunks, name: "default" };
     }
@@ -392,7 +396,23 @@ if (!isWebpackBuild && Object.keys(parsedClientManifest).length > 0) {
 
 manifestInlines += `\nglobalThis.__DINOU_IMPORT_MAP_HTML__ = ${JSON.stringify(importMapHtml)};\n`;
 
+const discoveredLayouts = [];
+function findLayoutRoutes(dir, rel = "") {
+  if (!fs.existsSync(dir)) return;
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      findLayoutRoutes(path.join(dir, entry.name), rel ? `${rel}/${entry.name}` : entry.name);
+    } else if (/^layout\.[jt]sx?$/.test(entry.name)) {
+      discoveredLayouts.push(rel);
+    }
+  }
+}
+findLayoutRoutes(srcDir);
+manifestInlines += `\nglobalThis.__DINOU_LAYOUTS__ = ${JSON.stringify(discoveredLayouts)};\n`;
+
 if (process.env.DINOU_DEBUG) {
+
   console.log("⚡ [Dinou Bun] Building in-memory VFS for routing...");
 }
 const vfsSnapshot = {};
@@ -732,6 +752,18 @@ export default {
   fetch,
   idleTimeout: IDLE_TIMEOUT,
 };
+
+if (typeof process !== "undefined") {
+  process.on("SIGTERM", () => process.exit(0));
+  process.on("SIGINT", () => process.exit(0));
+  if (process.stdin && typeof process.stdin.on === "function") {
+    process.stdin.on("end", () => process.exit(0));
+    process.stdin.on("close", () => process.exit(0));
+    if (typeof process.stdin.unref === "function") {
+      process.stdin.unref();
+    }
+  }
+}
 `;
 const bunEntryPath = path.join(bunDir, "bun-entry.js");
 fs.writeFileSync(bunEntryPath, bunEntryContent, "utf8");

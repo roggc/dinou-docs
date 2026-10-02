@@ -7,6 +7,7 @@ const {
 } = require("./get-file-path-and-dynamic-params");
 const importModule = require("./import-module");
 const { asyncRenderJSXToClientJSX } = require("./render-jsx-to-client-jsx");
+const { getLayoutProps } = require("./layout-functions");
 
 async function getJSX(
   reqPath,
@@ -24,7 +25,7 @@ async function getJSX(
   let jsx;
   let pageFunctionsProps;
 
-  // 1. Manejo segmentado para Layout: Si se solicita solo el layout
+  // 1. Segmented handling for Layout: If only the layout is requested
   if (options && options.segment === "layout") {
     let { DinouPageSlot } = require("./slot.js");
     if (
@@ -129,7 +130,7 @@ async function getJSX(
           const pageFunctionsModule = await importModule(pageFunctionsPath);
           const getProps = pageFunctionsModule.getProps;
           pageFunctionsProps = await getProps?.(dParams ?? {});
-          props = { ...props, ...(pageFunctionsProps?.page ?? {}) };
+          props = { ...props, ...(pageFunctionsProps ?? {}) };
         }
 
         jsx = React.createElement(Page, props);
@@ -165,13 +166,13 @@ async function getJSX(
         const pageFunctionsModule = await importModule(pageFunctionsPath);
         const getProps = pageFunctionsModule.getProps;
         pageFunctionsProps = await getProps?.(dynamicParams);
-        props = { ...props, ...(pageFunctionsProps?.page ?? {}) };
+        props = { ...props, ...(pageFunctionsProps ?? {}) };
       }
 
       jsx = React.createElement(Page, props);
     }
 
-    // 2. Manejo segmentado para Página: Si se solicita solo la página, retornar sin layouts
+    // 2. Segmented handling for Page: If only the page is requested, return without layouts
     if (options && options.segment === "page") {
       return jsx;
     }
@@ -282,10 +283,8 @@ async function getJSX(
           updatedSlots[slotName] = updatedSlotElement;
         }
       }
-      let props = { params: dParams, ...updatedSlots };
-      if (index === layouts.length - 1 || resetLayoutPath) {
-        props = { ...props, ...(pageFunctionsProps?.layout ?? {}) };
-      }
+      const layoutProps = await getLayoutProps(layoutPath, dParams);
+      let props = { params: dParams, ...updatedSlots, ...(layoutProps ?? {}) };
       try {
         const testElement = React.createElement(Layout, props, null);
         await asyncRenderJSXToClientJSX(testElement);

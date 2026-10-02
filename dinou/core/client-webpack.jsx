@@ -43,12 +43,37 @@ const getLayoutKey = (pathname) => {
   const segments = cleanPath.split("/").filter(Boolean);
 
   for (let i = segments.length; i >= 1; i--) {
-    const candidate = segments.slice(0, i).join("/");
+    const candidateSegments = segments.slice(0, i);
+    const candidate = candidateSegments.join("/");
     if (layouts.includes(candidate)) {
       return "/" + candidate;
     }
+    const dynamicMatch = layouts.find((l) => {
+      const lSegs = l
+        .split("/")
+        .filter(Boolean)
+        .filter((seg) => !(seg.startsWith("(") && seg.endsWith(")")));
+      if (lSegs.length !== candidateSegments.length) return false;
+      return lSegs.every((seg, idx) => {
+        if (seg.startsWith("[") && seg.endsWith("]")) return true;
+        return seg === candidateSegments[idx];
+      });
+    });
+    if (dynamicMatch) {
+      return "/" + candidate;
+    }
   }
-  if (layouts.includes("") || layouts.includes("/")) {
+  if (
+    layouts.includes("") ||
+    layouts.includes("/") ||
+    layouts.some(
+      (l) =>
+        l
+          .split("/")
+          .filter(Boolean)
+          .filter((s) => !(s.startsWith("(") && s.endsWith(")"))).length === 0
+    )
+  ) {
     return "/";
   }
   return null;
@@ -202,8 +227,37 @@ const getErrorRSCPayload = (route, error) => {
   return promise;
 };
 
+const fetchSlotRSC = (slotId, options = {}) => {
+  const currentPath = typeof window !== "undefined" ? window.location.pathname : "/";
+  const freshQuery = options && options.fresh ? "&fresh=1" : "";
+  const slotUrl = `/____rsc_slot____/${slotId}?t=${Date.now()}${freshQuery}`;
+  return createFromFetch(
+    fetch(slotUrl, {
+      headers: {
+        "x-dinou-current-path": currentPath,
+      },
+    }),
+    {
+      callServer: async (id, args) => {
+        const proxy = createServerFunctionProxy(id);
+        return proxy(...args);
+      },
+    }
+  );
+};
+
+export const refreshSlot = (slotId, options) => {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent("dinou:refresh-slot", { detail: { id: slotId, options } })
+    );
+  }
+};
+
 if (typeof globalThis !== "undefined") {
   globalThis.__DINOU_GET_ERROR_RSC_PAYLOAD__ = getErrorRSCPayload;
+  globalThis.__DINOU_FETCH_SLOT__ = fetchSlotRSC;
+  globalThis.__DINOU_REFRESH_SLOT__ = refreshSlot;
 }
 
 class ErrorBoundary extends Component {
@@ -641,6 +695,9 @@ if (!isLayoutError) {
     window.__DINOU_ERROR_MESSAGE__,
     "- skipping client hydration to preserve the server-rendered error screen."
   );
+  if (typeof document !== "undefined" && document.body) {
+    document.body.setAttribute("data-hydrated", "true");
+  }
 }
 
 if (import.meta.hot) {

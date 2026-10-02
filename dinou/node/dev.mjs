@@ -393,10 +393,12 @@ async function updateManifestsState(options = {}) {
   }
   if (slotChunkId) {
     const slotChunks = isWebpackBuild ? (slotEntry?.chunks || [slotChunkId]) : "DinouPageSlot";
+    const slotBoundaryChunks = isWebpackBuild ? (slotEntry?.chunks || [slotChunkId]) : "DinouCacheSlotBoundary";
     const slotDefaultChunks = isWebpackBuild ? (slotEntry?.chunks || [slotChunkId]) : "default";
     for (const sp of candidateSlotPaths) {
       for (const url of generateAllUrlVariants(sp)) {
         normalized[`${url}#DinouPageSlot`] = { id: slotChunkId, chunks: slotChunks, name: "DinouPageSlot" };
+        normalized[`${url}#DinouCacheSlotBoundary`] = { id: slotChunkId, chunks: slotBoundaryChunks, name: "DinouCacheSlotBoundary" };
         normalized[`${url}#default`] = { id: slotChunkId, chunks: slotDefaultChunks, name: "default" };
         normalized[url] = { id: slotChunkId, chunks: slotDefaultChunks, name: "default" };
       }
@@ -720,6 +722,7 @@ async function updateManifestsState(options = {}) {
     if (slotCompIndex !== -1) {
       const fileUrl = pathToFileURL(clientComponents[slotCompIndex]).href;
       registerModuleMapEntry(slotChunkId, fileUrl, "DinouPageSlot");
+      registerModuleMapEntry(slotChunkId, fileUrl, "DinouCacheSlotBoundary");
       registerModuleMapEntry(slotChunkId, fileUrl, "default");
     }
   }
@@ -738,6 +741,21 @@ function generateEntryFiles() {
   const routeModulesCode = generateRouteModulesCode(projectRoot, "../..");
   fs.writeFileSync(path.join(devDir, "route-modules.mjs"), routeModulesCode, "utf8");
 
+  const discoveredLayouts = [];
+  function findLayoutRoutes(dir, rel = "") {
+    if (!fs.existsSync(dir)) return;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        findLayoutRoutes(path.join(dir, entry.name), rel ? `${rel}/${entry.name}` : entry.name);
+      } else if (/^layout\.[jt]sx?$/.test(entry.name)) {
+        discoveredLayouts.push(rel);
+      }
+    }
+  }
+  findLayoutRoutes(srcDir);
+  globalThis.__DINOU_LAYOUTS__ = discoveredLayouts;
+
   const envSetupContent = `// Auto-generated Dev Environment Setup
 if (typeof globalThis.__webpack_require__ === 'undefined') {
   globalThis.__webpack_require__ = function(id) {
@@ -753,6 +771,7 @@ if (typeof globalThis.__webpack_require__.u === 'undefined') {
 if (typeof globalThis.__webpack_chunk_load__ === 'undefined') {
   globalThis.__webpack_chunk_load__ = () => Promise.resolve();
 }
+globalThis.__DINOU_LAYOUTS__ = ${JSON.stringify(discoveredLayouts)};
 `;
   fs.writeFileSync(path.join(devDir, "env-setup.mjs"), envSetupContent, "utf8");
 

@@ -7,6 +7,56 @@ const {
 } = require("./get-file-path-and-dynamic-params");
 const importModule = require("./import-module");
 const { requestStorage } = require("./request-context.js");
+const { getLayoutProps, resolveLayoutFunctionsConfig } = require("./layout-functions");
+const { runWithPprContext, getRegisteredHoles } = require("./ppr-context.js");
+const { resolveModulePpr } = require("./resolve-module-ppr");
+const { getDinouConfig } = require("./load-dinou-config");
+
+async function resolveBuildPprForRoute(segments, pagePath, pageFunctionsPath, srcFolder) {
+  const globalCfg = await getDinouConfig();
+  let inheritedPpr = Boolean(globalCfg?.ppr);
+  try {
+    const parentLayouts = getFilePathAndDynamicParams(
+      segments || [],
+      {},
+      srcFolder,
+      "layout",
+      true,
+      false,
+      undefined,
+      0,
+      {},
+      true
+    );
+    if (parentLayouts && Array.isArray(parentLayouts)) {
+      for (const [lPath, lParams] of parentLayouts) {
+        const lConfig = await resolveLayoutFunctionsConfig(lPath, lParams);
+        if (lConfig && lConfig.ppr !== null && lConfig.ppr !== undefined) {
+          inheritedPpr = Boolean(lConfig.ppr);
+        }
+      }
+    }
+  } catch (e) {}
+
+  let explicitPagePpr = null;
+  if (pageFunctionsPath) {
+    try {
+      const module = await importModule(pageFunctionsPath);
+      explicitPagePpr = await resolveModulePpr(module);
+    } catch (e) {}
+  }
+  if (explicitPagePpr === null && typeof globalThis !== "undefined" && globalThis.__DINOU_ROUTE_METADATA__) {
+    const normKey = pageFunctionsPath ? pageFunctionsPath.replace(/\\/g, "/") : "";
+    for (const [k, meta] of Object.entries(globalThis.__DINOU_ROUTE_METADATA__)) {
+      if (meta.ppr !== undefined && (normKey === k || normKey.endsWith("/" + k) || normKey.endsWith(k))) {
+        explicitPagePpr = Boolean(meta.ppr);
+        break;
+      }
+    }
+  }
+
+  return explicitPagePpr !== null ? explicitPagePpr : inheritedPpr;
+}
 
 const staticRoutes = new Set();
 const staticMetadata = new Map();
@@ -20,8 +70,10 @@ function safeDecode(val) {
   }
 }
 
-function resolveDynamic(d) {
-  return typeof d === "function" ? Boolean(d()) : Boolean(d);
+async function isDynamicRoute(revalidate) {
+  if (revalidate === undefined || revalidate === false) return false;
+  const val = typeof revalidate === "function" ? await revalidate() : revalidate;
+  return typeof val === "number" && val < 1;
 }
 
 const { createBailoutProxy } = require("./bailout-proxy.js");
@@ -56,12 +108,17 @@ async function buildStaticPages(onProgress = null) {
       const candidateLayout = path.join(currentPath, `layout${ext}`);
       if (existsSync(candidateLayout)) {
         const routePath = segments.length ? "/" + segments.join("/") : "/";
-        staticLayouts.set(currentPath, {
-          folderPath: currentPath,
-          layoutPath: candidateLayout,
-          routePath,
-          segments,
-        });
+        const { resolveLayoutFunctionsConfig } = require("./layout-functions");
+        const layoutConfig = await resolveLayoutFunctionsConfig(candidateLayout, params);
+        if (!layoutConfig.isDynamic) {
+          staticLayouts.set(routePath, {
+            folderPath: currentPath,
+            layoutPath: candidateLayout,
+            routePath,
+            segments,
+            params,
+          });
+        }
         break;
       }
     }
@@ -108,15 +165,15 @@ async function buildStaticPages(onProgress = null) {
             segments.length,
           );
 
-          let dynamic, getStaticPaths;
+          let revalidate, getStaticPaths;
           if (pageFunctionsPath) {
             const module = await importModule(pageFunctionsPath);
             getStaticPaths = module.getStaticPaths;
-            dynamic = module.dynamic;
+            revalidate = module.revalidate;
           }
           const isLocalPage =
             pagePath && path.dirname(pagePath) === dynamicPath;
-          if (isLocalPage && !resolveDynamic(dynamic)) {
+          if (isLocalPage && !(await isDynamicRoute(revalidate))) {
             if (process.env.DINOU_DEBUG) {
               console.log(
                 `Found optional catch-all route: ${segments.join("/") ?? ""
@@ -125,7 +182,9 @@ async function buildStaticPages(onProgress = null) {
             }
             try {
               if (getStaticPaths) {
-                const paths = await getStaticPaths();
+                const paths = await (typeof getStaticPaths === "function"
+                  ? getStaticPaths()
+                  : getStaticPaths);
                 for (const pathItem of paths) {
                   // 1. Preparation of Structure and Extraction
                   const currentStructure = [...dynamicStructure, paramName];
@@ -251,15 +310,15 @@ async function buildStaticPages(onProgress = null) {
             segments.length,
           );
 
-          let dynamic, getStaticPaths;
+          let revalidate, getStaticPaths;
           if (pageFunctionsPath) {
             const module = await importModule(pageFunctionsPath);
             getStaticPaths = module.getStaticPaths;
-            dynamic = module.dynamic;
+            revalidate = module.revalidate;
           }
           const isLocalPage =
             pagePath && path.dirname(pagePath) === dynamicPath;
-          if (isLocalPage && !resolveDynamic(dynamic)) {
+          if (isLocalPage && !(await isDynamicRoute(revalidate))) {
             if (process.env.DINOU_DEBUG) {
               console.log(
                 `Found catch-all route: ${segments.join("/") ?? ""
@@ -268,7 +327,9 @@ async function buildStaticPages(onProgress = null) {
             }
             try {
               if (getStaticPaths) {
-                const paths = await getStaticPaths();
+                const paths = await (typeof getStaticPaths === "function"
+                  ? getStaticPaths()
+                  : getStaticPaths);
                 for (const pathItem of paths) {
                   const currentStructure = [...dynamicStructure, paramName];
                   const isObject =
@@ -357,15 +418,15 @@ async function buildStaticPages(onProgress = null) {
             segments.length,
           );
 
-          let dynamic, getStaticPaths;
+          let revalidate, getStaticPaths;
           if (pageFunctionsPath) {
             const module = await importModule(pageFunctionsPath);
             getStaticPaths = module.getStaticPaths;
-            dynamic = module.dynamic;
+            revalidate = module.revalidate;
           }
           const isLocalPage =
             pagePath && path.dirname(pagePath) === dynamicPath;
-          if (isLocalPage && !resolveDynamic(dynamic)) {
+          if (isLocalPage && !(await isDynamicRoute(revalidate))) {
             if (process.env.DINOU_DEBUG) {
               console.log(
                 `Found optional dynamic route: ${segments.join("/") ?? ""
@@ -374,7 +435,9 @@ async function buildStaticPages(onProgress = null) {
             }
             try {
               if (getStaticPaths) {
-                const paths = await getStaticPaths();
+                const paths = await (typeof getStaticPaths === "function"
+                  ? getStaticPaths()
+                  : getStaticPaths);
                 for (const pathItem of paths) {
                   // 1. Preparation of Structure and Extraction
                   const currentStructure = [...dynamicStructure, paramName];
@@ -482,14 +545,40 @@ async function buildStaticPages(onProgress = null) {
           );
           let dynamic;
           let getStaticPaths;
+          let revalidate;
           if (pageFunctionsPath) {
             const module = await importModule(pageFunctionsPath);
             getStaticPaths = module.getStaticPaths;
-            dynamic = module.dynamic;
+            revalidate = module.revalidate;
+          }
+          const { getLayoutFunctionsPath } = require("./layout-functions");
+          const lfPath = getLayoutFunctionsPath(dynamicPath);
+          if (lfPath) {
+            const lmod = await importModule(lfPath);
+            const lmodGetStaticPaths = lmod.getStaticPaths || lmod.default?.getStaticPaths;
+            const lmodRevalidate = lmod.revalidate || lmod.default?.revalidate;
+            if (!getStaticPaths && lmodGetStaticPaths) {
+              getStaticPaths = lmodGetStaticPaths;
+            }
+            if (revalidate === undefined && lmodRevalidate !== undefined) {
+              revalidate = lmodRevalidate;
+            }
           }
           const isLocalPage =
             pagePath && path.dirname(pagePath) === dynamicPath;
-          if (isLocalPage && !resolveDynamic(dynamic)) {
+          const [layoutPath] = getFilePathAndDynamicParams(
+            segments,
+            {},
+            dynamicPath,
+            "layout",
+            true,
+            true,
+            undefined,
+            segments.length,
+          );
+          const hasLocalLayout =
+            layoutPath && path.dirname(layoutPath) === dynamicPath;
+          if ((isLocalPage || hasLocalLayout) && !(await isDynamicRoute(revalidate))) {
             if (process.env.DINOU_DEBUG) {
               console.log(
                 `Found dynamic route: ${segments.join("/") ?? ""}/[${paramName}]`,
@@ -497,7 +586,9 @@ async function buildStaticPages(onProgress = null) {
             }
             try {
               if (getStaticPaths) {
-                const paths = await getStaticPaths();
+                const paths = await (typeof getStaticPaths === "function"
+                  ? getStaticPaths()
+                  : getStaticPaths);
                 for (const pathItem of paths) {
                   const currentStructure = [...dynamicStructure, paramName];
                   const isObject =
@@ -580,19 +671,21 @@ async function buildStaticPages(onProgress = null) {
               undefined,
               segments.length,
             );
-            let dynamic;
+            let revalidate;
             let getStaticPaths;
             if (pageFunctionsPath) {
               const module = await importModule(pageFunctionsPath);
               getStaticPaths = module.getStaticPaths;
-              dynamic = module.dynamic;
+              revalidate = module.revalidate;
             }
             const isLocalPage =
               pagePath && path.dirname(pagePath) === dynamicPath;
-            if (isLocalPage && !resolveDynamic(dynamic)) {
+            if (isLocalPage && !(await isDynamicRoute(revalidate))) {
               try {
                 if (getStaticPaths) {
-                  const paths = await getStaticPaths();
+                  const paths = await (typeof getStaticPaths === "function"
+                    ? getStaticPaths()
+                    : getStaticPaths);
                   for (const pathItem of paths) {
                     const currentStructure = dynamicStructure;
                     const isObject =
@@ -689,24 +782,29 @@ async function buildStaticPages(onProgress = null) {
       undefined,
       segments.length,
     );
-    let dynamic;
+    let revalidate;
     if (pageFunctionsPath) {
-      const module = await importModule(pageFunctionsPath);
-      dynamic = module.dynamic;
+      try {
+        const module = await importModule(pageFunctionsPath);
+        revalidate = module.revalidate;
+      } catch (e) {}
     }
 
-    if (pagePath && !resolveDynamic(dynamic) && !doNotPushAtEnd) {
+    const isPpr = await resolveBuildPprForRoute(segments, pagePath, pageFunctionsPath, srcFolder);
+
+    if (pagePath && (!(await isDynamicRoute(revalidate)) || isPpr) && !doNotPushAtEnd) {
       pages.push({
         path: currentPath,
         segments,
         params: dParams,
+        ppr: isPpr,
       });
       const routeName = segments.join("/") ? "/" + segments.join("/") : "/";
       if (typeof onProgress === "function") {
         onProgress({ phase: "crawling", route: routeName, count: pages.length });
       }
       if (process.env.DINOU_DEBUG) {
-        console.log(`Found static route: ${routeName}`);
+        console.log(`Found static route: ${routeName}${isPpr ? " (PPR)" : ""}`);
       }
     }
 
@@ -717,7 +815,7 @@ async function buildStaticPages(onProgress = null) {
   const pages = await collectPages(srcFolder);
 
   let pageIdx = 0;
-  for (const { path: folderPath, segments, params } of pages) {
+  for (const { path: folderPath, segments, params, ppr: pageIsPpr } of pages) {
     pageIdx++;
     try {
       const reqPath = segments.length ? "/" + segments.join("/") + "/" : "/";
@@ -821,7 +919,8 @@ async function buildStaticPages(onProgress = null) {
       let revalidate;
       let cacheTags = [];
       const jsx = await requestStorage.run(mockContext, async () => {
-        const [pagePath] = getFilePathAndDynamicParams(
+        return await runWithPprContext({ isPpr: Boolean(pageIsPpr) }, async () => {
+          const [pagePath] = getFilePathAndDynamicParams(
           segments,
           {},
           folderPath,
@@ -853,15 +952,18 @@ async function buildStaticPages(onProgress = null) {
           const pageFunctionsModule = await importModule(pageFunctionsPath);
           const getProps = pageFunctionsModule.getProps;
           revalidate = pageFunctionsModule.revalidate;
-          if (pageFunctionsModule.getCacheTags) {
+          const rawTags = pageFunctionsModule.getCacheTags ?? pageFunctionsModule.default?.getCacheTags;
+          if (typeof rawTags === "function") {
             try {
-              cacheTags = await pageFunctionsModule.getCacheTags(params);
+              cacheTags = await rawTags(params);
             } catch (e) {
               console.error("Error running getCacheTags in buildStaticPages:", e);
             }
+          } else if (Array.isArray(rawTags)) {
+            cacheTags = rawTags;
           }
           pageFunctionsProps = await getProps?.(params);
-          props = { ...props, ...(pageFunctionsProps?.page ?? {}) };
+          props = { ...props, ...(pageFunctionsProps ?? {}) };
         }
 
         let jsx = React.createElement(Page, props);
@@ -965,13 +1067,12 @@ async function buildStaticPages(onProgress = null) {
                 }
                 updatedSlots[slotName] = updatedSlotElement;
               }
+              const layoutProps = await getLayoutProps(layoutPath, dParams);
               let props = {
                 params: dParams,
                 ...updatedSlots,
+                ...(layoutProps ?? {}),
               };
-              if (index === layouts.length - 1 || resetLayoutPath) {
-                props = { ...props, ...(pageFunctionsProps?.layout ?? {}) };
-              }
               jsx = React.createElement(Layout, props, jsx);
               jsx = { ...jsx, __modulePath: layoutPath };
               if (resetLayoutPath) {
@@ -984,9 +1085,10 @@ async function buildStaticPages(onProgress = null) {
 
         // Render the layout-nested React element tree to client-side RSC JSON format
         return await asyncRenderJSXToClientJSX(jsx);
+        });
       });
 
-      if (!isStatic) {
+      if (!isStatic && !pageIsPpr) {
         // ❌ DO NOT save file.
         // Will behave as pure SSR at runtime.
         if (process.env.DINOU_DEBUG) {
@@ -1004,14 +1106,17 @@ async function buildStaticPages(onProgress = null) {
         cookies: mockRes._cookies,
       };
 
+      const holes = pageIsPpr ? getRegisteredHoles() : [];
       staticRoutes.add(reqPath);
       staticMetadata.set(reqPath, {
-        revalidate: typeof revalidate === "function" ? revalidate() : revalidate,
+        revalidate: typeof revalidate === "function" ? await revalidate() : revalidate,
         effects: sideEffects,
         tags: cacheTags,
+        ppr: Boolean(pageIsPpr),
+        holes,
       });
       if (process.env.DINOU_DEBUG) {
-        console.log(`Registered static page at ${reqPath}`);
+        console.log(`Registered static page at ${reqPath}${pageIsPpr ? " (PPR)" : ""}`);
       }
     } catch (err) {
       console.error(`Error building page ${segments.join("/")}:`, err);
@@ -1170,6 +1275,7 @@ async function buildStaticPage(reqPath, isDynamic = null) {
 
     let revalidate;
     let cacheTags = [];
+    let pageIsPpr = false;
     const jsx = await requestStorage.run(mockContext, async () => {
       const [pagePath, dParams] = getFilePathAndDynamicParams(
         segments,
@@ -1186,8 +1292,6 @@ async function buildStaticPage(reqPath, isDynamic = null) {
 
       const pageModule = await importModule(pagePath);
       const Page = pageModule.default ?? pageModule;
-
-      let props = { params: dParams };
       const [pageFunctionsPath] = getFilePathAndDynamicParams(
         segments,
         {},
@@ -1199,22 +1303,30 @@ async function buildStaticPage(reqPath, isDynamic = null) {
         segments.length,
       );
 
+      pageIsPpr = await resolveBuildPprForRoute(segments, pagePath, pageFunctionsPath, srcFolder);
+
+      return await runWithPprContext({ isPpr: pageIsPpr }, async () => {
+        let props = { params: dParams };
+
       let pageFunctionsProps;
       if (pageFunctionsPath) {
         const pageFunctionsModule = await importModule(pageFunctionsPath);
         const getProps = pageFunctionsModule.getProps;
-        if (isDynamic && (isDynamic.value = resolveDynamic(pageFunctionsModule.dynamic)))
-          return;
         revalidate = pageFunctionsModule.revalidate;
-        if (pageFunctionsModule.getCacheTags) {
+        if (isDynamic && (isDynamic.value = await isDynamicRoute(revalidate)))
+          return;
+        const rawTags = pageFunctionsModule.getCacheTags ?? pageFunctionsModule.default?.getCacheTags;
+        if (typeof rawTags === "function") {
           try {
-            cacheTags = await pageFunctionsModule.getCacheTags(dParams);
+            cacheTags = await rawTags(dParams);
           } catch (e) {
             console.error("Error running getCacheTags:", e);
           }
+        } else if (Array.isArray(rawTags)) {
+          cacheTags = rawTags;
         }
         pageFunctionsProps = await getProps?.(dParams);
-        props = { ...props, ...(pageFunctionsProps?.page ?? {}) };
+        props = { ...props, ...(pageFunctionsProps ?? {}) };
       }
 
       let jsx = React.createElement(Page, props);
@@ -1320,12 +1432,11 @@ async function buildStaticPage(reqPath, isDynamic = null) {
               params: dParams,
               ...updatedSlots,
             };
-            if (index === layouts.length - 1 || resetLayoutPath) {
-              layoutProps = {
-                ...layoutProps,
-                ...(pageFunctionsProps?.layout ?? {}),
-              };
-            }
+            const customLayoutProps = await getLayoutProps(layoutPath, dParams);
+            layoutProps = {
+              ...layoutProps,
+              ...(customLayoutProps ?? {}),
+            };
             jsx = React.createElement(Layout, layoutProps, jsx);
             jsx = { ...jsx, __modulePath: layoutPath };
             if (resetLayoutPath) {
@@ -1336,10 +1447,11 @@ async function buildStaticPage(reqPath, isDynamic = null) {
         }
       }
 
-      return await asyncRenderJSXToClientJSX(jsx);
+        return await asyncRenderJSXToClientJSX(jsx);
+      });
     });
 
-    if (!isStatic) {
+    if (!isStatic && !pageIsPpr) {
       // ❌ DO NOT save file.
       // It will behave as pure SSR at runtime.
       if (process.env.DINOU_DEBUG) {
@@ -1360,13 +1472,16 @@ async function buildStaticPage(reqPath, isDynamic = null) {
       cookies: mockRes._cookies,
     };
 
+    const holes = pageIsPpr ? getRegisteredHoles() : [];
     staticRoutes.add(reqPath);
     staticMetadata.set(reqPath, {
-      revalidate: revalidate?.(),
+      revalidate: typeof revalidate === "function" ? await revalidate() : revalidate,
       effects: sideEffects,
       tags: cacheTags,
+      ppr: pageIsPpr,
+      holes,
     });
-    console.warn(`Registered rebuilt static page at ${reqPath}`);
+    console.warn(`Registered rebuilt static page at ${reqPath}${pageIsPpr ? " (PPR)" : ""}`);
   } catch (error) {
     console.error(`Error building page ${reqPath}:`, error);
     throw error;
@@ -1378,7 +1493,10 @@ function getStaticPaths() {
 }
 
 function getStaticMetadata(reqPath) {
-  return staticMetadata.get(reqPath);
+  if (!reqPath) return null;
+  const noSlash = reqPath.endsWith("/") ? reqPath.slice(0, -1) : reqPath;
+  const withSlash = noSlash + "/";
+  return staticMetadata.get(reqPath) || staticMetadata.get(noSlash) || staticMetadata.get(withSlash) || null;
 }
 
 function getStaticLayouts() {
