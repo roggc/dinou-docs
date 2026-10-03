@@ -14,6 +14,8 @@ import { QuantumMeshGrid, EntropyMeter, VectorWaveCard, FluxCapacitorGauge, Spin
 export default function TestDevPageClientInverted() {
   const [activeTab, setActiveTab] = useState<"webpack" | "quantum" | "controls" | "metrics" | "benchmark" | "mesh" | "telemetry" | "console">("webpack");
   const [sliderVal, setSliderVal] = useState(99);
+  const [edgeLinkClicks, setEdgeLinkClicks] = useState(0);
+  const [lastClickedLink, setLastClickedLink] = useState("Ninguno todavía");
   const [logs, setLogs] = useState<string[]>([
     "Webpack 5 Engine Active: In-memory compiler pipeline running",
     "Inverted /test-dev/cluster-mesh to Client Component with scale hooks",
@@ -88,6 +90,72 @@ export default function TestDevPageClientInverted() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <PrecisionTimer />
             <RollupSpeedometer />
+          </div>
+
+          {/* Edge Case Link Sandbox */}
+          <div className="p-6 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-amber-500" />
+                <h4 className="font-bold text-sm text-foreground">
+                  Dinou Link Edge Cases Sandbox (href="" / to="" / sin props)
+                </h4>
+              </div>
+              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                CLICKS: {edgeLinkClicks}
+              </span>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              Comprueba la tolerancia y robustez del componente <code>&lt;Link /&gt;</code> ante props vacías o ausentes. Al hacer clic no debe arrojar error ni recargar la página.
+            </p>
+
+            <div className="text-xs font-mono text-foreground">
+              Último link clicado: <strong className="text-amber-500">{lastClickedLink}</strong>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <Link
+                href=""
+                onClick={() => {
+                  setEdgeLinkClicks((c) => c + 1);
+                  setLastClickedLink('Link 1 (href="")');
+                  addLog('Clic en Link con href=""');
+                }}
+                className="p-3.5 rounded-xl border border-amber-500/30 bg-card hover:bg-amber-500/10 text-center block transition-all active:scale-95 cursor-pointer shadow-sm"
+              >
+                <div className="text-[10px] font-mono font-bold text-amber-500">CASO 1</div>
+                <div className="text-xs font-bold text-foreground">Link con href=""</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">String vacía</div>
+              </Link>
+
+              <Link
+                to=""
+                onClick={() => {
+                  setEdgeLinkClicks((c) => c + 1);
+                  setLastClickedLink('Link 2 (to="")');
+                  addLog('Clic en Link con to=""');
+                }}
+                className="p-3.5 rounded-xl border border-orange-500/30 bg-card hover:bg-orange-500/10 text-center block transition-all active:scale-95 cursor-pointer shadow-sm"
+              >
+                <div className="text-[10px] font-mono font-bold text-orange-500">CASO 2</div>
+                <div className="text-xs font-bold text-foreground">Link con to=""</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">Alias to vacío</div>
+              </Link>
+
+              <Link
+                onClick={() => {
+                  setEdgeLinkClicks((c) => c + 1);
+                  setLastClickedLink('Link 3 (sin href ni to)');
+                  addLog('Clic en Link sin href ni to');
+                }}
+                className="p-3.5 rounded-xl border border-purple-500/30 bg-card hover:bg-purple-500/10 text-center block transition-all active:scale-95 cursor-pointer shadow-sm"
+              >
+                <div className="text-[10px] font-mono font-bold text-purple-500">CASO 3</div>
+                <div className="text-xs font-bold text-foreground">Link sin href ni to</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">Props ausentes (undefined)</div>
+              </Link>
+            </div>
           </div>
         </div>
       )}
