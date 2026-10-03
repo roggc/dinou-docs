@@ -207,7 +207,7 @@ export default function WhyDinouPage() {
                     2.3. Zero-Fork In-Process Dual-Engine
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                    Traditional dev servers run multiple child processes, IPC communication sockets, and background workers that consume gigabytes of memory and frequently disconnect.
+                    Prior versions of Dinou relied on child processes, IPC communication sockets, and background workers that consumed significant memory and added serialization latency.
                   </p>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     In Dinou v7, development runs in a single Node.js process using native ECMAScript customization hooks (<code>module.register</code>). The Dual-Bundle engine compiles client chunks and RSC/SSR server trees simultaneously in memory at startup. Every route is immediately hot and ready—no on-demand route compilation delays or navigation lag.
@@ -438,7 +438,7 @@ export default function WhyDinouPage() {
                       Granular Error Boundaries &amp; Slot Isolation
                     </h4>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Route-level <code>error.tsx</code> and <code>not-found.tsx</code> isolate exceptions locally. Parallel slot layouts (e.g. <code>@modal</code>, <code>@analytics</code>) fail gracefully without breaking the primary page or stopping compiler pipelines.
+                      Route-level <code>error.tsx</code> and <code>not_found.tsx</code> isolate exceptions locally. Parallel slot layouts (e.g. <code>@modal</code>, <code>@analytics</code>) fail gracefully without breaking the primary page or stopping compiler pipelines.
                     </p>
                   </div>
                 </div>

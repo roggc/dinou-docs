@@ -30,7 +30,7 @@ export default function Page() {
                 className="px-4 py-1.5 text-xs sm:text-sm border border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400 backdrop-blur-md font-medium rounded-full shadow-sm"
               >
                 <Sparkles className="mr-2 h-3.5 w-3.5 text-blue-500" />
-                <span>Dinou v7 — Fullstack React 19 Framework</span>
+                <span>Dinou v7 — React 19 Framework</span>
               </Badge>
             </div>
 
@@ -44,7 +44,7 @@ export default function Page() {
 
             {/* Subheading */}
             <p className="max-w-[780px] text-slate-600 dark:text-slate-300 text-lg md:text-xl leading-relaxed">
-              The modern, ejectable React 19 framework built on web standards. Build with Server Components, Partial Prerendering (PPR), 2D layered segmentation, and server actions — then deploy seamlessly to Cloudflare Workers, Bun or Deno binaries, Node.js, or static HTML with zero vendor lock-in.
+              The modern, ejectable React 19 framework built on web standards. Build with Server Components, Partial Prerendering (PPR), 2D layered segmentation, and server actions — then deploy seamlessly to Cloudflare Workers, Netlify Serverless, Bun or Deno binaries, Node.js, or static HTML with zero vendor lock-in.
             </p>
 
             {/* CTA Buttons */}
@@ -88,7 +88,7 @@ export default function Page() {
               </div>
               <div className="flex flex-col items-center p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800">
                 <span className="text-sm sm:text-base font-bold text-blue-600 dark:text-blue-400">Deploy Everywhere</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Cloudflare, Bun, Deno & Node</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Cloudflare, Netlify, Bun & Node</span>
               </div>
               <div className="flex flex-col items-center p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800">
                 <span className="text-sm sm:text-base font-bold text-purple-600 dark:text-purple-400">Zero Lock-In</span>

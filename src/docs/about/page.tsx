@@ -10,7 +10,6 @@ import {
   Scale,
   GitBranch,
   User,
-  Heart,
   Github,
   Package,
   Calendar,
@@ -23,6 +22,7 @@ import {
   Brain,
   MessageSquare,
   Bot,
+  Heart,
 } from "lucide-react";
 
 // Pure React Server Component (no 'use client')
@@ -33,13 +33,13 @@ const tocItems = [
   { id: "changelog-releases", title: "2. Changelog & Versioning", level: 2 },
   { id: "semver-policy", title: "2.1. Semantic Versioning Policy", level: 3 },
   { id: "release-notes", title: "2.2. View Full Changelog", level: 3 },
-  { id: "credits-team", title: "3. Author, AI Co-Creation & Credits", level: 2 },
+  { id: "credits-team", title: "3. Author & AI Co-Creation", level: 2 },
   { id: "creator-maintainer", title: "3.1. Creator & Core Philosophy", level: 3 },
   { id: "human-agent-interaction", title: "3.2. Human-Agent Co-Creation", level: 3 },
-  { id: "community-ecosystem", title: "3.3. Upstream Open-Source Giants", level: 3 },
   { id: "support-community", title: "4. Community & Support", level: 2 },
   { id: "contributing-discussions", title: "4.1. Discussions & Issues", level: 3 },
   { id: "github-star", title: "4.2. Star on GitHub", level: 3 },
+  { id: "acknowledgments", title: "5. Acknowledgments", level: 2 },
 ];
 
 export default function AboutPage() {
@@ -206,10 +206,10 @@ export default function AboutPage() {
               </div>
             </section>
 
-            {/* Section 3: Credits & Team */}
+            {/* Section 3: Author & AI Co-Creation */}
             <section id="credits-team" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                3. Author, AI Co-Creation &amp; Credits
+                3. Author &amp; AI Co-Creation
               </h2>
               <p>
                 Dinou is an independent open-source initiative built on the belief that developers deserve complete sovereignty over their web architecture.
@@ -234,7 +234,7 @@ export default function AboutPage() {
                           rel="noopener noreferrer"
                           className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:underline"
                         >
-                          @roggc (Rogelio)
+                          @roggc
                         </a>
                       </div>
                       <p className="text-muted-foreground text-xs leading-relaxed">
@@ -266,7 +266,7 @@ export default function AboutPage() {
                     </CardHeader>
                     <CardContent className="text-sm space-y-3">
                       <p className="text-muted-foreground text-xs leading-relaxed">
-                        Dinou v7 has been crafted through intensive <strong>human-agent interaction</strong> between <strong>@roggc</strong> and <strong>Antigravity-Gemini 3.8 Flash high</strong>.
+                        Dinou v7 has been crafted through intensive <strong>human-agent interaction</strong> between <strong>@roggc</strong> and <strong>Antigravity-Gemini 3.8 Flash high</strong> (by Google / Google DeepMind).
                       </p>
                       <p className="text-muted-foreground text-xs leading-relaxed">
                         This pairing exemplifies the modern paradigm of agentic software engineering: human architectural intuition, design criteria, and production-tested standards directing an advanced autonomous agent capable of deep codebase analysis, high-speed refactoring, cross-bundler alignment, and zero-compromise precision.
@@ -275,41 +275,6 @@ export default function AboutPage() {
                         <Bot className="h-4 w-4 text-indigo-500 shrink-0" />
                         <span>Pair-programming synergy: Human direction + Antigravity-Gemini 3.8 Flash high execution</span>
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* 3.3 Community & Upstream Giants */}
-                <div id="community-ecosystem" className="scroll-mt-20">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-semibold">
-                        <Heart className="h-5 w-5" />
-                        <h3 className="text-base font-bold">3.3. Upstream Open-Source Giants</h3>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="text-sm text-muted-foreground">
-                      <p className="text-xs mb-3">
-                        Dinou stands on the shoulders of giants across the modern web ecosystem:
-                      </p>
-                      <ul className="space-y-2 list-none pl-0 text-xs">
-                        <li className="flex items-center gap-2">
-                          <span className="text-rose-500 font-bold">•</span>
-                          <span><strong>React Core Team:</strong> For React 19, Server Components, Actions, and standard Suspense streaming.</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-rose-500 font-bold">•</span>
-                          <span><strong>Compiler Authors:</strong> Evan Wallace (esbuild), the Rollup organization, and Tobias Koppers / Webpack team.</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-rose-500 font-bold">•</span>
-                          <span><strong>Runtime Innovators:</strong> The Node.js collaborators, Cloudflare Workers team, Deno team, and Bun team.</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-rose-500 font-bold">•</span>
-                          <span><strong>Open-Source Contributors:</strong> Everyone who tests, files issues, and shares feedback.</span>
-                        </li>
-                      </ul>
                     </CardContent>
                   </Card>
                 </div>
@@ -340,7 +305,7 @@ export default function AboutPage() {
                         rel="noopener noreferrer"
                         className="font-mono text-xs text-blue-600 dark:text-blue-400 hover:underline"
                       >
-                        https://github.com/roggc/dinou
+                        github.com/roggc/dinou
                       </a>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-1">
@@ -380,6 +345,61 @@ export default function AboutPage() {
                     </Card>
                   </a>
                 </div>
+              </div>
+            </section>
+
+            {/* Section 5: Acknowledgments */}
+            <section id="acknowledgments" className="scroll-mt-20">
+              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
+                5. Acknowledgments
+              </h2>
+              <p>
+                Dinou is built on top of the open web and the generous open-source ecosystem:
+              </p>
+
+              <div className="mt-6 not-prose">
+                <Card className="border-slate-200 dark:border-slate-800 bg-card">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-semibold">
+                      <Heart className="h-5 w-5" />
+                      <h3 className="text-base font-bold">Open-Source Ecosystem &amp; Web Standards</h3>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-sm">
+                    <ul className="space-y-3 list-none pl-0 text-xs sm:text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span>
+                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">React &amp; The React Team:</strong> For React 19, the React Server Components specification, Server Actions, and standard Suspense streaming primitives.
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span>
+                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">The Bundling Ecosystem:</strong> For the pioneering work behind <strong className="text-slate-800 dark:text-slate-200">esbuild</strong>, <strong className="text-slate-800 dark:text-slate-200">Rollup</strong>, and <strong className="text-slate-800 dark:text-slate-200">Webpack</strong>, which makes Dinou&apos;s vendor-neutral bundler parity possible.
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span>
+                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">Modern JavaScript Runtimes:</strong> For advancing standard Web APIs (Fetch API, W3C Streams, WinterCG) across <strong className="text-slate-800 dark:text-slate-200">Node.js</strong>, <strong className="text-slate-800 dark:text-slate-200">Bun</strong>, <strong className="text-slate-800 dark:text-slate-200">Deno</strong>, and <strong className="text-slate-800 dark:text-slate-200">Cloudflare Workers</strong>.
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span>
+                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">Google &amp; Google DeepMind:</strong> For pioneering next-generation agentic programming with <strong className="text-slate-800 dark:text-slate-200">Antigravity</strong> and <strong className="text-slate-800 dark:text-slate-200">Gemini</strong>, empowering the rapid, high-precision human-agent co-creation of Dinou v7.
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span>
+                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">The Open Source Community:</strong> For the countless tools, libraries, and specifications shared under permissive licenses that advance modern web engineering.
+                        </span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
               </div>
             </section>
           </div>

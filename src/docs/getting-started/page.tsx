@@ -45,8 +45,8 @@ const tocItems = [
   { id: "step-structure", title: "3.2. Project Structure & Files", level: 3 },
   { id: "step-typescript", title: "3.3. TypeScript Configuration", level: 3 },
   { id: "step-scripts", title: "3.4. Package Scripts", level: 3 },
-  { id: "step-dev-server", title: "3.5. Start Development Server", level: 3 },
-  { id: "step-gitignore", title: "3.6. Configure .gitignore", level: 3 },
+  { id: "step-gitignore", title: "3.5. Configure .gitignore", level: 3 },
+  { id: "step-dev-server", title: "3.6. Start Development Server", level: 3 },
   { id: "bundler-options", title: "4. Bundler Options & Parity", level: 2 },
   { id: "bundler-esbuild", title: "4.1. Esbuild (Default Engine)", level: 3 },
   { id: "bundler-rollup-webpack", title: "4.2. Rollup & Webpack Dev", level: 3 },
@@ -202,7 +202,7 @@ npm init -y
 npm install react react-dom dinou
 
 # Install TypeScript definitions for IDE intellisense
-npm install -D @types/react @types/react-dom typescript`}
+npm install -D @types/react @types/react-dom`}
                   </CodeBlock>
                 </div>
 
@@ -309,6 +309,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                           className="!bg-transparent !p-0 !m-0 font-mono text-xs leading-relaxed"
                           style={{ color: "#e2e8f0", backgroundColor: "transparent" }}
                         >{`my-dinou-app/
+├── public/                    # Static root assets (served directly at /)
+│   ├── favicon.ico
+│   ├── robots.txt
+│   └── site.webmanifest
 ├── src/
 │   ├── page.tsx               # Root page component (RSC)
 │   ├── page_functions.ts      # Server data fetching (getProps, revalidate)
@@ -331,8 +335,22 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                     3.3. TypeScript Configuration
                   </h3>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Configure <code>tsconfig.json</code> and the ambient reference <code>dinou-env.d.ts</code>:
+                    Dinou does <strong>not force you to use TypeScript</strong>—you are completely free to write your application in standard JavaScript (<code>.js</code> / <code>.jsx</code>). However, even for pure JavaScript projects, defining a <code>tsconfig.json</code> in your project root is strongly recommended:
                   </p>
+
+                  <div className="rounded-lg border-l-4 border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 p-3.5 mb-4 not-prose">
+                    <div className="text-xs font-semibold text-amber-800 dark:text-amber-300 mb-1">
+                      💡 Why define tsconfig.json even when using JavaScript?
+                    </div>
+                    <ul className="text-xs text-muted-foreground space-y-1 list-disc pl-4 leading-relaxed">
+                      <li>
+                        <strong>Import Aliases:</strong> Dinou&apos;s build engines (esbuild, Rollup, Webpack) automatically read <code>compilerOptions.paths</code> from <code>tsconfig.json</code> to resolve clean path aliases like <code>@/*</code> into <code>src/*</code>.
+                      </li>
+                      <li>
+                        <strong>IDE Autocomplete:</strong> With <code>&quot;allowJs&quot;: true</code>, code editors (VS Code, Cursor) use <code>tsconfig.json</code> to provide full autocomplete, auto-imports, and path resolution across all <code>.js</code> and <code>.jsx</code> files.
+                      </li>
+                    </ul>
+                  </div>
 
                   <div className="space-y-3">
                     <div>
@@ -494,29 +512,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 </div>
 
                 {/* Step 3.5 */}
-                <div id="step-dev-server" className="scroll-mt-20">
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-mono">5</span>
-                    3.5. Start Development Server
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Run the development server with the fast esbuild bundler (default), or choose Rollup or Webpack:
-                  </p>
-                  <CodeBlock language="bash" containerClassName="w-full rounded-lg">
-                    {`# Start with default ultra-fast esbuild
-npm run dev
-
-# Or start with Rollup or Webpack
-npm run dev:rollup
-npm run dev:webpack`}
-                  </CodeBlock>
-                </div>
-
-                {/* Step 3.6 */}
                 <div id="step-gitignore" className="scroll-mt-20">
                   <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-mono">6</span>
-                    3.6. Configure .gitignore
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-mono">5</span>
+                    3.5. Configure .gitignore
                   </h3>
                   <p className="text-sm text-muted-foreground mb-3">
                     Create a <code>.gitignore</code> file to ignore dependencies, environment variables, build outputs, and Dinou caches:
@@ -532,6 +531,25 @@ dist
                   <p className="mt-2 text-xs text-muted-foreground">
                     <code>.dinou/</code> holds internal dev artifacts and runtime builds; <code>out/</code> contains pages generated by <code>export-static</code>; <code>dist/</code> stores compiled single-executable binaries (Deno / Bun); and <code>.wrangler/</code> stores local state when testing Cloudflare Workers.
                   </p>
+                </div>
+
+                {/* Step 3.6 */}
+                <div id="step-dev-server" className="scroll-mt-20">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-mono">6</span>
+                    3.6. Start Development Server
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Run the development server with the fast esbuild bundler (default), or choose Rollup or Webpack:
+                  </p>
+                  <CodeBlock language="bash" containerClassName="w-full rounded-lg">
+                    {`# Start with default ultra-fast esbuild
+npm run dev
+
+# Or start with Rollup or Webpack
+npm run dev:rollup
+npm run dev:webpack`}
+                  </CodeBlock>
                 </div>
               </div>
             </section>

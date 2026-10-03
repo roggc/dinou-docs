@@ -182,7 +182,7 @@ export default function DashboardLayout({ children, navStats }: any) {
   return (
     <div className="flex min-h-screen">
       <Sidebar stats={navStats} />
-      {/* 🛡️ DinouPageSlot: Children swap without remounting this layout */}
+      {/* 🛡️ Persistent Layout: Children swap without remounting this layout */}
       <main className="flex-1 p-8">{children}</main>
     </div>
   );

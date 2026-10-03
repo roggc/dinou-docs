@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, Zap, Server, Globe, Cpu, Terminal, ArrowUpRight } from "lucide-react";
+import { Check, Copy, Zap, Server, Globe, Cpu, Terminal, ArrowUpRight, Cloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "dinou";
@@ -41,6 +41,29 @@ const targets: TargetInfo[] = [
       "✔ Cloudflare Worker bundle generated (.dinou/cloudflare/worker.js)",
       "$ npx wrangler deploy",
       "🚀 Published to https://my-app.workers.dev (300+ edge locations)",
+    ],
+  },
+  {
+    id: "netlify",
+    name: "Netlify Serverless",
+    icon: Cloud,
+    badge: "Functions v2",
+    tagline: "Native Netlify Functions v2 adapter with zero-config edge routing and static CDN caching.",
+    buildCommand: "npm run build:node",
+    runCommand: "npx netlify deploy --prod",
+    highlights: [
+      "Official Netlify Functions v2 adapter (dinou/adapters/netlify)",
+      "Built-in preferStatic: true serves assets directly from global CDN edge",
+      "Dynamic SSR streaming & Server Functions invoked serverless",
+      "Zero-config routing with standard netlify.toml setup",
+    ],
+    docLink: "/docs/deployment",
+    terminalOutput: [
+      "$ npm run build:node",
+      "✔ Pre-bundled Server Components and SSR engines...",
+      "✔ Static assets ready in .dinou/dist3",
+      "$ npx netlify deploy --prod",
+      "🚀 Published to https://my-app.netlify.app (Global Edge CDN)",
     ],
   },
   {

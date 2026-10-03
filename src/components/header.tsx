@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Sparkles, Github } from "lucide-react";
+import { ArrowRight, Sparkles, Github, BookOpen } from "lucide-react";
 import dinou from "@/images/dinou.png";
 import ModeToggle from "@/components/mode-toggle";
 import { RiNpmjsFill } from "react-icons/ri";
@@ -38,6 +38,13 @@ export default function Header() {
             Home
           </a>
           <a
+            href="#segmentation"
+            title="Two-Dimensional Layered Segmentation"
+            className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
+          >
+            Segmentation
+          </a>
+          <a
             href="#deploy-everywhere"
             className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
           >
@@ -61,6 +68,19 @@ export default function Header() {
           >
             Start
           </a>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 px-3 text-xs sm:text-sm font-medium border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors shadow-none"
+            asChild
+          >
+            <Link href="/docs" className="flex items-center">
+              <BookOpen className="mr-1.5 h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+              <span>Docs</span>
+              <ArrowRight className="ml-1.5 h-3.5 w-3.5 text-slate-400" />
+            </Link>
+          </Button>
         </nav>
 
         <div className="flex items-center space-x-2">
@@ -93,12 +113,6 @@ export default function Header() {
           </Tooltip>
 
           <ModeToggle />
-          <Button size="sm" asChild>
-            <Link href="/docs">
-              Get Started
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
         </div>
       </div>
     </header>

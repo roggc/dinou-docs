@@ -177,7 +177,7 @@ export default function Page() {
                   <a href="/docs/ejected-reference/rsc-context/get-jsx"><strong><code>get-jsx.js</code> (RSC Tree Builder):</strong></a> When resolving components to construct React Server Component JSX trees, it queries <code>vfs.js</code> to verify component file paths (such as dynamic layouts or pages) before importing them.
                 </li>
                 <li>
-                  <a href="/docs/ejected-reference/rsc-context/error-handler"><strong><code>get-error-jsx.js</code> (Error Boundary Handler):</strong></a> Crawls up folders to check for boundary files (like <code>error.tsx</code> or <code>not-found.tsx</code>) using <code>vfs.js</code>'s cache, serving custom layout errors cleanly.
+                  <a href="/docs/ejected-reference/rsc-context/error-handler"><strong><code>get-error-jsx.js</code> (Error Boundary Handler):</strong></a> Crawls up folders to check for boundary files (like <code>error.tsx</code> or <code>not_found.tsx</code>) using <code>vfs.js</code>'s cache, serving custom layout errors cleanly.
                 </li>
               </ul>
             </section>

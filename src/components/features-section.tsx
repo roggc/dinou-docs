@@ -42,7 +42,7 @@ export function FeaturesSection() {
         "Cloudflare Workers: V8 isolates with Cloudflare KV at the edge",
         "Bun: Ultra-fast standalone or single self-contained executable binary",
         "Deno: Native TypeScript with embedded Deno KV & Deno Deploy",
-        "Node.js AOT in-process (Docker/K8s) & 100% Static Site Generation (SSG)",
+        "Node.js AOT in-process, Netlify Functions v2 & Static Site Export",
       ],
     },
     {

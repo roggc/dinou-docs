@@ -42,7 +42,7 @@ export function EngineComparison() {
     {
       dimension: "State Persistence on Navigation",
       v6: "Layouts unmount and lose media playback, input text, and filter state",
-      v7: "Total state preservation across sibling routes via <DinouPageSlot />",
+      v7: "Total state preservation across sibling routes (zero layout remounting)",
       v7Highlight: true,
     },
   ];

@@ -126,7 +126,7 @@ export default function MigrationV6ToV7Page() {
                     <p>• <code>revalidate</code> is strictly in <strong>seconds</strong> (e.g. <code>60</code>).</p>
                     <p>• Single source of truth: <code>revalidate = 0</code> (SSR), <code>&gt;= 1</code> (ISR), <code>false</code> (SSG).</p>
                     <p>• 0-Fork Dual-Bundle in-memory pipeline connecting RSC and SSR via W3C Web Streams.</p>
-                    <p>• Horizontal segmentation: 100% layout state preservation via <code>DinouPageSlot</code>.</p>
+                    <p>• Horizontal segmentation: 100% layout state preservation across sibling routes (zero layout remounting).</p>
                     <p>• Vertical segmentation: <code>&lt;DinouCacheSlot&gt;</code> Micro-ISR and client <code>refreshSlot()</code>.</p>
                     <p>• <strong>0ms TTFB with PPR (Partial Prerendering):</strong> Static shell prelude + React 19 <code>&lt;Suspense&gt;</code> dynamic streaming.</p>
                     <p>• True &quot;Deploy Everywhere&quot;: Node, Bun, Deno, Cloudflare Workers, Netlify v2, and Static.</p>

@@ -59,7 +59,7 @@ const tocItems = [
   { id: "layout-functions", title: "4.2. Layout Data & Horizontal ISR (layout_functions.ts)", level: 3 },
   { id: "layout-flags", title: "4.3. Layout Control Flags (reset_layout, no_layout)", level: 3 },
   { id: "error-handling", title: "4.4. Route Error Boundaries (error.tsx)", level: 3 },
-  { id: "not-found-pages", title: "4.5. Custom 404 Handlers (not-found.tsx)", level: 3 },
+  { id: "not-found-pages", title: "4.5. Custom 404 Handlers (not_found.tsx)", level: 3 },
   { id: "advanced-patterns", title: "5. Advanced Routing Patterns", level: 2 },
   { id: "route-groups", title: "5.1. Route Groups (folder)", level: 3 },
   { id: "private-folders", title: "5.2. Escaping Route Scanning (_folder)", level: 3 },
@@ -309,7 +309,7 @@ export default function Page() {
                   <li><code>page.tsx</code> components: <code>Page(&#123; params &#125;)</code></li>
                   <li><code>layout.tsx</code> components: <code>Layout(&#123; params, children &#125;)</code></li>
                   <li><code>error.tsx</code> boundaries: <code>Error(&#123; error, params &#125;)</code></li>
-                  <li><code>not-found.tsx</code> 404 pages: <code>NotFound(&#123; params &#125;)</code></li>
+                  <li><code>not_found.tsx</code> 404 pages: <code>NotFound(&#123; params &#125;)</code></li>
                   <li>Parallel slot pages: <code>SlotPage(&#123; params &#125;)</code></li>
                   <li>Server data fetching: <code>getProps(params)</code> in <code>page_functions.ts</code> and <code>layout_functions.ts</code></li>
                 </ul>
@@ -529,7 +529,7 @@ export const revalidate = 3600;`}
                       </tr>
                       <tr>
                         <td className="p-3.5 font-mono font-bold text-amber-600 dark:text-amber-400">no_layout_not_found</td>
-                        <td className="p-3.5 font-mono text-xs">not-found.tsx</td>
+                        <td className="p-3.5 font-mono text-xs">not_found.tsx</td>
                         <td className="p-3.5 text-muted-foreground leading-relaxed">
                           Prevents parent layouts from wrapping the custom 404 page.
                         </td>
@@ -593,10 +593,10 @@ export default function DashboardError({
               <div id="not-found-pages" className="scroll-mt-20 mt-8 space-y-3">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Ghost className="h-5 w-5 text-amber-500" />
-                  4.5. Custom 404 Handlers (not-found.tsx)
+                  4.5. Custom 404 Handlers (not_found.tsx)
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Define custom 404 views by placing <code>not-found.tsx</code> (or <code>not_found.tsx</code>) in any route directory. When an unmatched URL segment is requested, Dinou renders the closest 404 boundary inside its enclosing layout.
+                  Define custom 404 views by placing <code>not_found.tsx</code> in any route directory. When an unmatched URL segment is requested, Dinou renders the closest 404 boundary inside its enclosing layout.
                 </p>
               </div>
             </section>

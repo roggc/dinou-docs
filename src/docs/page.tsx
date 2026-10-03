@@ -60,14 +60,14 @@ export default function Page() {
                 Dinou v7
               </Badge>
               <span className="text-xs text-muted-foreground font-medium">
-                Full-Stack React 19 Framework
+                React 19 Framework
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
               Introduction to Dinou v7
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
-              A modern, lightweight, and ejectable Full-Stack React 19 Framework.
+              A modern, lightweight, and ejectable React 19 Framework.
               Featuring 2D Layered Segmentation, Partial Prerendering (PPR), an in-process 0-fork dual-bundle engine, and a universal multi-runtime architecture.
             </p>
           </div>
@@ -172,7 +172,7 @@ export async function getProps() {
                   <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-card text-xs">
                     <p className="font-semibold text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-1.5">
                       <ShieldCheck className="w-3.5 h-3.5" />
-                      Persistent State via &lt;DinouPageSlot /&gt;
+                      Persistent Layout State (Zero Remount)
                     </p>
                     <p className="text-muted-foreground leading-relaxed">
                       When navigating between sibling routes, the layout never unmounts. Audio/video players continue playing and sidebar search inputs remain filled.
@@ -516,8 +516,8 @@ npm run dev`}
                 7. Project Structure &amp; Conventions
               </h2>
               <p>
-                Dinou v7 uses intuitive file-system conventions. All routes, layouts, and private
-                implementation folders reside cleanly inside <code>src/</code>:
+                Dinou v7 uses intuitive file-system conventions. All routes, layouts, and application code
+                reside cleanly inside <code>src/</code>, while static public assets (favicons, manifests) are served from <code>public/</code>:
               </p>
 
               <div className="not-prose my-6 rounded-xl border border-slate-800 bg-slate-950 overflow-hidden shadow-md">
@@ -538,14 +538,20 @@ npm run dev`}
                       className="!bg-transparent !p-0 !m-0 font-mono text-xs sm:text-sm leading-relaxed"
                       style={{ color: "#e2e8f0", backgroundColor: "transparent" }}
                     >{`my-app/
+├── public/                    # Static root assets (served directly at /)
+│   ├── favicon.ico
+│   ├── robots.txt
+│   └── site.webmanifest
 ├── src/
 │   ├── page.tsx               # Root page (/)
 │   ├── layout.tsx             # Root layout & ThemeProvider
 │   ├── layout_functions.ts    # Independent layout data fetching & ISR (v7)
 │   ├── globals.css            # Tailwind / global styles
-│   ├── _components/           # 🔒 Private folder (ignored by router)
-│   │   ├── hero.tsx
-│   │   └── navbar.tsx
+│   ├── _legacy/               # 🚫 Routing-ignored folder (escapes router scan)
+│   │   ├── old-page.tsx
+│   │   └── page.tsx           # Never routed (browser returns 404 Not Found)
+│   ├── _draft/                # 🚫 Work-in-progress / unrouted code
+│   │   └── page.tsx
 │   └── docs/
 │       ├── page.tsx           # /docs documentation root
 │       ├── page_functions.ts  # Route revalidate (seconds) & getProps (v7)
@@ -564,13 +570,13 @@ npm run dev`}
               <div className="rounded-lg border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 p-4 not-prose">
                 <div className="flex items-center gap-2 font-semibold text-blue-700 dark:text-blue-300 text-sm mb-1">
                   <Sparkles className="w-4 h-4" />
-                  Key Rule in v7: Private Folders (_ prefix)
+                  Routing-Ignored Folders (_ prefix)
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Any folder prefixed with <code>_</code> (such as <code>_components</code> or <code>_drafts</code>) is
-                  completely ignored by the router and static build scanner,{" "}
-                  <strong>even if it contains valid <code>page.tsx</code> files</strong>. This makes it
-                  invaluable for colocating components, archiving previous architectures, or isolating work-in-progress routes without causing routing conflicts.
+                  Any folder prefixed with an underscore <code>_</code> (such as <code>_legacy</code> or <code>_draft</code>) completely{" "}
+                  <strong>escapes the Dinou routing system</strong>. Even if these folders or their nested subdirectories contain valid{" "}
+                  <code>page.tsx</code> files, they are never rendered or registered as routes, and any navigation to them from the browser returns a strict <strong>404 Not Found</strong>.
+                  This makes them ideal for safely preserving legacy code you don&apos;t want to delete from the repository, staging work-in-progress draft routes, or keeping scratch implementations without risking unwanted public endpoints.
                 </p>
               </div>
             </section>

@@ -558,7 +558,7 @@ app.use((req, res, next) => {
                   <strong><code>currentPath</code></strong> (String): The absolute file path of the directory reached at the current step of the recursive resolution.
                 </li>
                 <li>
-                  <strong><code>fileName</code></strong> (String): The file target base name we are searching for (defaults to <code>"page"</code> to find endpoints, but set to <code>"layout"</code> when compiling layout trees, <code>"page_functions"</code> for route configurations, or <code>"error"</code>/<code>"not-found"</code> for error boundaries).
+                  <strong><code>fileName</code></strong> (String): The file target base name we are searching for (defaults to <code>"page"</code> to find endpoints, but set to <code>"layout"</code> when compiling layout trees, <code>"page_functions"</code> for route configurations, or <code>"error"</code>/<code>"not_found"</code> for error boundaries).
                 </li>
                 <li>
                   <strong><code>withExtension</code></strong> (Boolean): Toggles file extension appending. If false, searches directories or folders matching the raw name.
@@ -567,7 +567,7 @@ app.use((req, res, next) => {
                   <strong><code>finalDestination</code></strong> (Boolean): If true, returns a match only if V8 completely exhausts the URL segments cursor. If false, permits returning the nearest parent file match (e.g. locating layout wrappers).
                 </li>
                 <li>
-                  <strong><code>lastFound</code></strong> (String): A rolling accumulator that tracks the nearest ancestor matching file found during the descent. When <code>finalDestination</code> is <code>false</code> (such as when searching for the closest <code>error.tsx</code> boundary or <code>not-found.tsx</code> fallback along a route path), <code>lastFound</code> acts as a bubble fallback. If the target folder at the end of the URL doesn't contain the requested file, the crawler returns the closest ancestor file recorded in <code>lastFound</code> in a single pass.
+                  <strong><code>lastFound</code></strong> (String): A rolling accumulator that tracks the nearest ancestor matching file found during the descent. When <code>finalDestination</code> is <code>false</code> (such as when searching for the closest <code>error.tsx</code> boundary or <code>not_found.tsx</code> fallback along a route path), <code>lastFound</code> acts as a bubble fallback. If the target folder at the end of the URL doesn't contain the requested file, the crawler returns the closest ancestor file recorded in <code>lastFound</code> in a single pass.
                 </li>
                 <li>
                   <strong><code>index</code></strong> (Number): The segment cursor pointer. Tells the crawler which segment of the <code>reqSegments</code> array is currently being evaluated.
