@@ -155,9 +155,9 @@ const docsNavigation = [
     title: "Features",
     items: [
       {
-        title: "Favicons",
-        href: "/docs/favicons",
-        icon: Code,
+        title: "Public Directory",
+        href: "/docs/public",
+        icon: FolderTree,
       },
       {
         title: "Styles",
