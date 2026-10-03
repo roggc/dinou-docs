@@ -1,4 +1,7 @@
-import { Server, Database, Cpu, ArrowLeft, RefreshCw } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Server, Database, Cpu, ArrowLeft, RefreshCw, Zap } from "lucide-react";
 
 interface ServerDataProps {
   serverTimestamp?: string;
@@ -22,6 +25,7 @@ export default function ServerDataPage({
   systemInfo,
   mockDatabaseItems = [],
 }: ServerDataProps) {
+  const [clientCount, setClientCount] = useState(1);
   return (
     <div className="space-y-6">
       {/* Header card */}
@@ -38,8 +42,21 @@ export default function ServerDataPage({
           </span>
         </div>
         <p className="text-sm text-muted-foreground">
-          This page receives its data exclusively through <code>page_functions.ts</code> via <code>getProps()</code> on the server.
+          This page receives its data exclusively through <code>page_functions.ts</code> via <code>getProps()</code> on the server, but has been inverted to a <strong>Client Component</strong> in Round 3.
         </p>
+
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+          <Zap className="h-4 w-4 text-emerald-500 animate-pulse" />
+          <span className="text-xs font-bold text-foreground">Interactive Client Inversion Multiplier:</span>
+          <span className="text-xs font-mono font-extrabold text-emerald-500">{clientCount}x</span>
+          <button
+            type="button"
+            onClick={() => setClientCount((c) => c * 2)}
+            className="ml-auto px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"
+          >
+            Double (x2)
+          </button>
+        </div>
       </div>
 
       {/* Server Metrics Cards */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Minus, RotateCcw, Sparkles, Activity, Tag } from "lucide-react";
 
 export function MiniBadge({ label, variant = "info" }: { label: string; variant?: "info" | "success" | "warn" }) {
@@ -135,4 +135,70 @@ export function StatePreserveBox() {
     </div>
   );
 }
+
+export function PrecisionTimer() {
+  const [elapsed, setElapsed] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRunning) {
+      interval = setInterval(() => {
+        setElapsed((e) => e + 10);
+      }, 10);
+    }
+    return () => clearInterval(interval);
+  }, [isRunning]);
+
+  return (
+    <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Precision Frame Chronometer</span>
+        <span className="font-mono text-sm font-extrabold text-foreground">{(elapsed / 1000).toFixed(2)}s</span>
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setIsRunning(!isRunning)}
+          className={`flex-1 py-1 rounded text-xs font-bold text-white transition-all ${
+            isRunning ? "bg-red-600 hover:bg-red-700" : "bg-emerald-600 hover:bg-emerald-700"
+          }`}
+        >
+          {isRunning ? "Pause" : "Start"}
+        </button>
+        <button
+          type="button"
+          onClick={() => { setIsRunning(false); setElapsed(0); }}
+          className="px-3 py-1 rounded border border-slate-300 dark:border-slate-700 text-xs font-bold text-muted-foreground hover:text-foreground"
+        >
+          Reset
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function RollupSpeedometer() {
+  const [speed, setSpeed] = useState(120);
+
+  return (
+    <div className="p-4 rounded-xl border border-cyan-500/20 bg-cyan-500/5 space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">Rollup Transform Velocity</span>
+        <span className="font-mono text-sm font-bold text-foreground">{speed} ops/sec</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <input
+          type="range"
+          min="10"
+          max="500"
+          value={speed}
+          onChange={(e) => setSpeed(Number(e.target.value))}
+          className="w-full accent-cyan-600"
+        />
+      </div>
+    </div>
+  );
+}
+
 
