@@ -19,7 +19,6 @@ import {
   Server,
   Database,
   Settings,
-  FileText,
   Zap,
   Code,
   ImageIcon,
@@ -85,24 +84,9 @@ const docsNavigation = [
         icon: Route,
       },
       {
-        title: "Layouts",
-        href: "/docs/layouts",
-        icon: FileText,
-      },
-      {
-        title: "Route Parameters",
-        href: "/docs/route-parameters",
-        icon: Fingerprint,
-      },
-      {
         title: "Server & Client Components",
         href: "/docs/server-client-components",
         icon: Server,
-      },
-      {
-        title: "Navigation",
-        href: "/docs/navigation",
-        icon: Globe,
       },
       {
         title: "Page Functions",
@@ -140,21 +124,6 @@ const docsNavigation = [
         icon: Atom,
       },
       {
-        title: "API Reference",
-        href: "/docs/api-reference",
-        icon: BookMarked,
-      },
-      {
-        title: "Cheatsheet",
-        href: "/docs/cheatsheet",
-        icon: ClipboardList,
-      },
-    ],
-  },
-  {
-    title: "Features",
-    items: [
-      {
         title: "Public Directory",
         href: "/docs/public",
         icon: FolderTree,
@@ -169,11 +138,6 @@ const docsNavigation = [
         href: "/docs/assets",
         icon: ImageIcon,
       },
-    ],
-  },
-  {
-    title: "Configuration",
-    items: [
       {
         title: "Env Vars",
         href: "/docs/env-vars",
@@ -190,11 +154,6 @@ const docsNavigation = [
         icon: Settings,
       },
       {
-        title: "Eject",
-        href: "/docs/eject",
-        icon: Plug,
-      },
-      {
         title: "Bundlers",
         href: "/docs/bundlers",
         icon: Boxes,
@@ -203,6 +162,26 @@ const docsNavigation = [
         title: "Deployment",
         href: "/docs/deployment",
         icon: Rocket,
+      },
+      {
+        title: "Eject",
+        href: "/docs/eject",
+        icon: Plug,
+      },
+    ],
+  },
+  {
+    title: "Reference",
+    items: [
+      {
+        title: "API Reference",
+        href: "/docs/api-reference",
+        icon: BookMarked,
+      },
+      {
+        title: "Cheatsheet",
+        href: "/docs/cheatsheet",
+        icon: ClipboardList,
       },
     ],
   },
