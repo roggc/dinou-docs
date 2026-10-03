@@ -22,15 +22,15 @@ import {
 export function FeaturesSection() {
   const features = [
     {
-      icon: Gauge,
+      icon: Layers,
       color: "blue",
-      title: "Universal Streaming Engine",
-      description: "In-process orchestration using native React 19 Web Streams and standard W3C primitives.",
+      title: "Layered Segmentation & PPR",
+      description: "2D caching and rendering architecture unifying instant static delivery with live dynamic streaming.",
       bullets: [
-        "Native React Server Components (RSC) and asynchronous Suspense streaming",
-        "Edge-ready SSR with react-dom/server streaming pipelines",
-        "Standard W3C Request, Response, and ReadableStream architecture",
-        "Flat, predictable memory footprint with zero subprocess overhead",
+        "Partial Prerendering (PPR): Instant static shell (< 20ms TTFB) + dynamic Suspense streaming",
+        "Vertical Segmentation: <DinouCacheSlot> micro-caching with in-place client refresh",
+        "Horizontal Segmentation: Decoupled layout_functions ISR (3600s) & persistent slot state",
+        "Unified seconds-based revalidate: 0 for dynamic SSR, >= 1 for ISR, false for static SSG",
       ],
     },
     {

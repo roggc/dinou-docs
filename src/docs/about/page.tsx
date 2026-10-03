@@ -4,7 +4,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/docs/components/ui/alert";
-import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/docs/components/ui/card";
 import { Badge } from "@/docs/components/ui/badge";
 import {
   Scale,
@@ -18,19 +18,28 @@ import {
   FileText,
   Star,
   Sparkles,
-  Cpu,
-  Boxes,
-  Globe,
   ShieldCheck,
   CheckCircle2,
+  Brain,
+  MessageSquare,
+  Bot,
 } from "lucide-react";
 
+// Pure React Server Component (no 'use client')
 const tocItems = [
-  { id: "license", title: "📄 License", level: 2 },
-  { id: "v7-milestones", title: "🚀 Dinou v7 Evolution", level: 2 },
-  { id: "changelog", title: "📦 Changelog & Releases", level: 2 },
-  { id: "credits", title: "👨‍💻 Credits & Team", level: 2 },
-  { id: "support", title: "⭐ Star on GitHub", level: 2 },
+  { id: "open-source-license", title: "1. Open Source License", level: 2 },
+  { id: "mit-summary", title: "1.1. MIT License Permissions", level: 3 },
+  { id: "commercial-freedom", title: "1.2. Commercial & Private Freedom", level: 3 },
+  { id: "changelog-releases", title: "2. Changelog & Versioning", level: 2 },
+  { id: "semver-policy", title: "2.1. Semantic Versioning Policy", level: 3 },
+  { id: "release-notes", title: "2.2. View Full Changelog", level: 3 },
+  { id: "credits-team", title: "3. Author, AI Co-Creation & Credits", level: 2 },
+  { id: "creator-maintainer", title: "3.1. Creator & Core Philosophy", level: 3 },
+  { id: "human-agent-interaction", title: "3.2. Human-Agent Co-Creation", level: 3 },
+  { id: "community-ecosystem", title: "3.3. Upstream Open-Source Giants", level: 3 },
+  { id: "support-community", title: "4. Community & Support", level: 2 },
+  { id: "contributing-discussions", title: "4.1. Discussions & Issues", level: 3 },
+  { id: "github-star", title: "4.2. Star on GitHub", level: 3 },
 ];
 
 export default function AboutPage() {
@@ -41,7 +50,10 @@ export default function AboutPage() {
           {/* Header */}
           <div className="mb-8 space-y-4">
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
                 Community &amp; Open Source
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
@@ -52,322 +64,322 @@ export default function AboutPage() {
               License, Changelog &amp; Credits
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              License information, Dinou v7 architectural milestones, version history, and project credits.
+              License terms, release management, human-agent engineering, and creator acknowledgments.
             </p>
           </div>
 
-          <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
+          <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words space-y-12">
             {/* Section 1: License */}
-            <section id="license" className="scroll-mt-20">
+            <section id="open-source-license" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                📄 License
+                1. Open Source License
               </h2>
               <p>
-                Dinou is open source software released under the <strong>MIT License</strong>. This is a permissive license that allows anyone to use, modify, redistribute, and integrate Dinou into both personal and commercial projects with minimal restrictions.
+                Dinou is 100% open-source software released under the <strong>MIT License</strong>. This is a permissive license that grants developers, startups, and enterprises complete freedom to use, modify, redistribute, and integrate Dinou into both personal and commercial software projects without fees or vendor lock-in.
               </p>
 
-              <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-card not-prose my-6">
-                <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100 mb-3">
-                  <Scale className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  <span>MIT License Summary</span>
+              <div className="space-y-6 not-prose mt-6">
+                <div id="mit-summary" className="scroll-mt-20 border border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-card">
+                  <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100 mb-3">
+                    <Scale className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    <h3 className="text-base font-bold">1.1. MIT License Permissions</h3>
+                  </div>
+                  <ul className="text-sm text-muted-foreground space-y-2.5 list-none pl-0">
+                    <li className="flex items-center gap-2.5">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                      <span><strong>Commercial Use:</strong> Free for commercial products, SaaS platforms, and internal tools.</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                      <span><strong>Modification:</strong> Free to modify the engine, compiler plugins, and server adapters.</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                      <span><strong>Distribution:</strong> Free to distribute copies, bundles, and standalone compiled executables.</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                      <span><strong>Sublicensing:</strong> Free to embed inside closed-source proprietary software packages.</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                      <span><strong>Simple Condition:</strong> Only requires preserving the original copyright notice in distributions.</span>
+                    </li>
+                  </ul>
                 </div>
-                <ul className="text-sm text-muted-foreground space-y-2 list-none pl-0">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                    <span>Free for personal and commercial applications</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                    <span>Free to modify, customize, and redistribute the source code</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                    <span>Free to sublicense or bundle inside proprietary distributions</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                    <span>Only requires preserving original copyright and license notice</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                    <span>Provided &quot;as is&quot; with zero warranty or liability</span>
-                  </li>
-                </ul>
-              </div>
 
-              <div className="not-prose mt-4">
-                <a
-                  href="https://github.com/roggc/dinou/blob/master/LICENSE.md"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block group"
-                >
-                  <Card className="hover:border-blue-500/50 transition-colors cursor-pointer border-l-4 border-l-blue-500">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
-                        <FileText className="h-5 w-5 text-blue-500" />
-                        <span>Read Full License (LICENSE.md)</span>
+                <div id="commercial-freedom" className="scroll-mt-20 space-y-3">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                    1.2. Commercial &amp; Private Freedom
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Unlike modern web frameworks that adopt restrictive licensing (BSL, SSPL) or design their architectures to funnel workloads toward proprietary cloud platforms, Dinou will forever remain under the permissive MIT License. Your code, your build pipeline, and your deployment infrastructure remain entirely under your control.
+                  </p>
+
+                  <div className="not-prose pt-2">
+                    <a
+                      href="https://github.com/roggc/dinou/blob/master/LICENSE.md"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block group"
+                    >
+                      <Card className="hover:border-blue-500/50 transition-colors cursor-pointer border-l-4 border-l-blue-500">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                          <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
+                            <FileText className="h-5 w-5 text-blue-500" />
+                            <span>Read Full License Text (LICENSE.md)</span>
+                          </div>
+                          <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors" />
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-muted-foreground">
+                            Inspect the complete legal MIT License text in the official GitHub repository.
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Section 2: Changelog & Versioning */}
+            <section id="changelog-releases" className="scroll-mt-20">
+              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
+                2. Changelog &amp; Versioning
+              </h2>
+              <p>
+                Dinou follows transparent release practices to keep production applications stable and predictable:
+              </p>
+
+              <div className="space-y-6 not-prose mt-6">
+                <div id="semver-policy" className="scroll-mt-20 grid gap-4 md:grid-cols-2">
+                  <Card className="border-blue-500/20 bg-blue-50/40 dark:bg-blue-900/10">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
+                        <Package className="h-5 w-5" />
+                        <h3 className="text-base font-bold">2.1. Semantic Versioning</h3>
                       </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 transition-colors" />
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        Inspect the full legal MIT License text in the official GitHub repository.
+                    <CardContent className="text-sm text-muted-foreground leading-relaxed">
+                      Dinou strictly follows SemVer (<code>MAJOR.MINOR.PATCH</code>). Breaking changes only occur across major version boundaries. Minor releases introduce backward-compatible features and performance optimizations.
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold">
+                        <Calendar className="h-5 w-5" />
+                        <h4 className="text-base font-bold">Release Transparency</h4>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-sm text-muted-foreground leading-relaxed">
+                      Each release includes detailed release notes, upgrade instructions, and commit diffs to ensure your production deployments remain completely reliable.
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div id="release-notes" className="scroll-mt-20 not-prose">
+                  <a
+                    href="https://github.com/roggc/dinou/blob/master/CHANGELOG.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block group"
+                  >
+                    <Card className="hover:border-purple-500/50 transition-colors cursor-pointer border-l-4 border-l-purple-500">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
+                          <GitBranch className="h-5 w-5 text-purple-500" />
+                          <h3 className="text-base font-bold">2.2. View Full Changelog (CHANGELOG.md)</h3>
+                        </div>
+                        <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-purple-500 transition-colors" />
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">
+                          Explore the complete timeline of enhancements, migrations, and bug fixes on GitHub.
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            {/* Section 3: Credits & Team */}
+            <section id="credits-team" className="scroll-mt-20">
+              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
+                3. Author, AI Co-Creation &amp; Credits
+              </h2>
+              <p>
+                Dinou is an independent open-source initiative built on the belief that developers deserve complete sovereignty over their web architecture.
+              </p>
+
+              <div className="space-y-6 not-prose mt-6">
+                {/* 3.1 Creator */}
+                <div id="creator-maintainer" className="scroll-mt-20">
+                  <Card className="border-purple-500/20 bg-purple-50/40 dark:bg-purple-900/10">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold">
+                        <User className="h-5 w-5" />
+                        <h3 className="text-base font-bold">3.1. Creator &amp; Core Philosophy</h3>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-sm">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Github className="h-4 w-4 text-slate-700 dark:text-slate-300" />
+                        <a
+                          href="https://github.com/roggc"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          @roggc (Rogelio)
+                        </a>
+                      </div>
+                      <p className="text-muted-foreground text-xs leading-relaxed">
+                        Created and maintained by @roggc. Driven by real-world production requirements: eliminating opaque framework magic, removing vendor lock-in, unifying multi-runtime compilation, and building developer tools that respect developer autonomy.
                       </p>
                     </CardContent>
                   </Card>
-                </a>
-              </div>
-            </section>
-
-            {/* Section 2: Dinou v7 Evolution */}
-            <section id="v7-milestones" className="scroll-mt-20 mt-12 sm:mt-16">
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                🚀 Dinou v7 Evolution
-              </h2>
-              <p>
-                Dinou v7 marks a major generational leap forward, completely redesigning the framework core around React 19 primitives and a multi-runtime compilation model:
-              </p>
-
-              <div className="grid gap-4 sm:grid-cols-2 not-prose my-6">
-                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
-                  <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400 mb-1.5">
-                    <Cpu className="h-4 w-4" />
-                    <span>React 19 &amp; RSC Native</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Native support for React Server Components, Server Functions (<code>&quot;use server&quot;</code>), Form Actions RPC, and Suspense streaming without proprietary wrappers.
-                  </p>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
-                  <div className="flex items-center gap-2 font-semibold text-cyan-600 dark:text-cyan-400 mb-1.5">
-                    <Boxes className="h-4 w-4" />
-                    <span>Triple-Bundler Parity</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Full feature parity across <strong>esbuild</strong>, <strong>Rollup</strong>, and <strong>Webpack</strong>. Switch bundlers seamlessly across dev and production.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
-                  <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400 mb-1.5">
-                    <Globe className="h-4 w-4" />
-                    <span>Multi-Runtime &amp; Binaries</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Deploy to Node.js, Cloudflare Workers, Deno, or Bun. Compile self-contained standalone executable binaries for Linux, ARM, macOS, and Windows.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
-                  <div className="flex items-center gap-2 font-semibold text-amber-600 dark:text-amber-400 mb-1.5">
-                    <ShieldCheck className="h-4 w-4" />
-                    <span>100% Ejectable Engine</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Run <code>dinou eject</code> to copy the complete framework engine, dual-bundle compilers, and server adapters directly into your project with zero vendor lock-in.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            {/* Section 3: Changelog */}
-            <section id="changelog" className="scroll-mt-20 mt-12 sm:mt-16">
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                📦 Changelog &amp; Releases
-              </h2>
-              <p>
-                For a comprehensive log of all version releases, breaking changes, bug fixes, and feature additions, consult the official <code>CHANGELOG.md</code> in the repository.
-              </p>
-
-              <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                <Card className="border-blue-500/20 bg-blue-50/40 dark:bg-blue-900/10">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
-                      <Package className="h-5 w-5" />
-                      <span>Semantic Versioning</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    Dinou strictly adheres to Semantic Versioning (SemVer: <code>MAJOR.MINOR.PATCH</code>). Breaking changes only occur across major version increments.
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold">
-                      <Calendar className="h-5 w-5" />
-                      <span>Release Transparency</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    Each release includes detailed release notes, upgrade instructions, and commit references to keep your production upgrades predictable.
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="not-prose mt-4">
-                <a
-                  href="https://github.com/roggc/dinou/blob/master/CHANGELOG.md"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block group"
-                >
-                  <Card className="hover:border-purple-500/50 transition-colors cursor-pointer border-l-4 border-l-purple-500">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
-                        <GitBranch className="h-5 w-5 text-purple-500" />
-                        <span>View Full Changelog (CHANGELOG.md)</span>
+                {/* 3.2 Human-Agent Co-Creation */}
+                <div id="human-agent-interaction" className="scroll-mt-20">
+                  <Card className="border-blue-500/30 bg-gradient-to-br from-blue-50/60 via-indigo-50/30 to-purple-50/40 dark:from-blue-950/30 dark:via-indigo-950/20 dark:to-purple-950/20 shadow-sm">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
+                          <Brain className="h-5 w-5 text-indigo-500" />
+                          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                            3.2. Human-Agent Co-Creation
+                          </h3>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className="text-[11px] font-mono border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5"
+                        >
+                          <Sparkles className="w-3 h-3 mr-1 text-indigo-500" />
+                          Antigravity-Gemini 3.8 Flash high
+                        </Badge>
                       </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-purple-500 transition-colors" />
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        Explore the complete timeline of enhancements, migrations, and bug fixes on GitHub.
+                    <CardContent className="text-sm space-y-3">
+                      <p className="text-muted-foreground text-xs leading-relaxed">
+                        Dinou v7 has been crafted through intensive <strong>human-agent interaction</strong> between <strong>@roggc</strong> and <strong>Antigravity-Gemini 3.8 Flash high</strong>.
                       </p>
+                      <p className="text-muted-foreground text-xs leading-relaxed">
+                        This pairing exemplifies the modern paradigm of agentic software engineering: human architectural intuition, design criteria, and production-tested standards directing an advanced autonomous agent capable of deep codebase analysis, high-speed refactoring, cross-bundler alignment, and zero-compromise precision.
+                      </p>
+                      <div className="p-3 rounded-lg bg-background/80 border border-indigo-500/20 text-xs text-slate-700 dark:text-slate-300 font-mono flex items-center gap-2">
+                        <Bot className="h-4 w-4 text-indigo-500 shrink-0" />
+                        <span>Pair-programming synergy: Human direction + Antigravity-Gemini 3.8 Flash high execution</span>
+                      </div>
                     </CardContent>
                   </Card>
-                </a>
+                </div>
+
+                {/* 3.3 Community & Upstream Giants */}
+                <div id="community-ecosystem" className="scroll-mt-20">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-semibold">
+                        <Heart className="h-5 w-5" />
+                        <h3 className="text-base font-bold">3.3. Upstream Open-Source Giants</h3>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-sm text-muted-foreground">
+                      <p className="text-xs mb-3">
+                        Dinou stands on the shoulders of giants across the modern web ecosystem:
+                      </p>
+                      <ul className="space-y-2 list-none pl-0 text-xs">
+                        <li className="flex items-center gap-2">
+                          <span className="text-rose-500 font-bold">•</span>
+                          <span><strong>React Core Team:</strong> For React 19, Server Components, Actions, and standard Suspense streaming.</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-rose-500 font-bold">•</span>
+                          <span><strong>Compiler Authors:</strong> Evan Wallace (esbuild), the Rollup organization, and Tobias Koppers / Webpack team.</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-rose-500 font-bold">•</span>
+                          <span><strong>Runtime Innovators:</strong> The Node.js collaborators, Cloudflare Workers team, Deno team, and Bun team.</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-rose-500 font-bold">•</span>
+                          <span><strong>Open-Source Contributors:</strong> Everyone who tests, files issues, and shares feedback.</span>
+                        </li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </section>
 
-            {/* Section 4: Credits */}
-            <section id="credits" className="scroll-mt-20 mt-12 sm:mt-16">
+            {/* Section 4: Community & Support */}
+            <section id="support-community" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                👨‍💻 Credits &amp; Team
+                4. Community &amp; Support
               </h2>
               <p>
-                Dinou was created and is actively maintained by <strong>@roggc</strong> (GitHub). The framework is born out of hands-on experience building production React applications and a vision for developer freedom without vendor lock-in.
+                Get involved with Dinou development, report issues, ask questions, or contribute improvements:
               </p>
 
-              <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                <Card className="border-purple-500/20 bg-purple-50/40 dark:bg-purple-900/10">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold">
-                      <User className="h-5 w-5" />
-                      <span>Creator &amp; Maintainer</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-sm">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Github className="h-4 w-4 text-slate-700 dark:text-slate-300" />
+              <div className="space-y-6 not-prose mt-6">
+                <div id="contributing-discussions" className="scroll-mt-20 border border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-card">
+                  <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100 mb-3">
+                    <MessageSquare className="h-5 w-5 text-blue-500" />
+                    <h3 className="text-base font-bold">4.1. Discussions &amp; Issues</h3>
+                  </div>
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-1 border-b border-slate-100 dark:border-slate-800/60">
+                      <span className="font-medium text-slate-900 dark:text-slate-200">GitHub Repository</span>
                       <a
-                        href="https://github.com/roggc"
+                        href="https://github.com/roggc/dinou"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                        className="font-mono text-xs text-blue-600 dark:text-blue-400 hover:underline"
                       >
-                        @roggc
+                        https://github.com/roggc/dinou
                       </a>
                     </div>
-                    <p className="text-muted-foreground text-xs leading-relaxed">
-                      Passionate about modern React architecture, transparent build tooling, high-performance streaming, and developer ergonomics.
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-semibold">
-                      <Heart className="h-5 w-5" />
-                      <span>Acknowledgments</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-1">
+                      <span className="font-medium text-slate-900 dark:text-slate-200">Issues &amp; Discussions</span>
+                      <a
+                        href="https://github.com/roggc/dinou/issues"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        github.com/roggc/dinou/issues
+                      </a>
                     </div>
-                  </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    <ul className="space-y-1.5 list-none pl-0 text-xs">
-                      <li className="flex items-center gap-1.5">
-                        <span className="text-rose-500">•</span>
-                        <span>The React team for React 19, Server Components &amp; Actions</span>
-                      </li>
-                      <li className="flex items-center gap-1.5">
-                        <span className="text-rose-500">•</span>
-                        <span>The esbuild, Rollup, and Webpack compiler ecosystems</span>
-                      </li>
-                      <li className="flex items-center gap-1.5">
-                        <span className="text-rose-500">•</span>
-                        <span>The Deno, Bun, and Cloudflare Workers runtime teams</span>
-                      </li>
-                      <li className="flex items-center gap-1.5">
-                        <span className="text-rose-500">•</span>
-                        <span>Contributors, testers, and the open-source community</span>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Alert className="not-prose my-6 border-slate-200 dark:border-slate-800">
-                <Sparkles className="h-4 w-4 text-blue-500" />
-                <AlertTitle className="text-slate-900 dark:text-slate-100 font-semibold">Open Source Craftsmanship</AlertTitle>
-                <AlertDescription className="text-sm text-muted-foreground mt-1">
-                  Dinou stands on the shoulders of modern web standards and open-source giants. It is designed to be a transparent, joyful, and permanent asset in your engineering toolkit.
-                </AlertDescription>
-              </Alert>
-
-              <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-5 bg-card not-prose my-6">
-                <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100 mb-3">
-                  <Github className="h-5 w-5 text-slate-800 dark:text-slate-200" />
-                  <span>Community &amp; Project Links</span>
-                </div>
-                <div className="text-sm text-muted-foreground space-y-2">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-1 border-b border-slate-100 dark:border-slate-800/60">
-                    <span className="font-medium text-slate-900 dark:text-slate-200">GitHub Repository</span>
-                    <a
-                      href="https://github.com/roggc/dinou"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-mono text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                    >
-                      https://github.com/roggc/dinou
-                    </a>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-1">
-                    <span className="font-medium text-slate-900 dark:text-slate-200">Issues &amp; Discussions</span>
-                    <a
-                      href="https://github.com/roggc/dinou/issues"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-mono text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                    >
-                      github.com/roggc/dinou/issues
-                    </a>
                   </div>
                 </div>
-              </div>
-            </section>
 
-            {/* Section 5: Support */}
-            <section id="support" className="scroll-mt-20 mt-12 sm:mt-16">
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                ⭐ Star on GitHub
-              </h2>
-              <p>
-                If you find Dinou useful or believe in vendor-agnostic, open React frameworks, please consider starring the project on GitHub! It helps increase visibility, attracts contributors, and accelerates ecosystem development.
-              </p>
-
-              <div className="not-prose mt-6">
-                <a
-                  href="https://github.com/roggc/dinou"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block group"
-                >
-                  <Card className="hover:border-amber-500/50 transition-colors cursor-pointer border-l-4 border-l-amber-500 bg-amber-50/20 dark:bg-amber-950/10">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
-                        <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
-                        <span>Star roggc/dinou on GitHub</span>
-                      </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-amber-500 transition-colors" />
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground">
-                        Support open source development with a star. Every single star counts!
-                      </p>
-                    </CardContent>
-                  </Card>
-                </a>
+                <div id="github-star" className="scroll-mt-20 not-prose">
+                  <a
+                    href="https://github.com/roggc/dinou"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block group"
+                  >
+                    <Card className="hover:border-amber-500/50 transition-colors cursor-pointer border-l-4 border-l-amber-500 bg-amber-50/20 dark:bg-amber-950/10">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
+                          <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+                          <h3 className="text-base font-bold">4.2. Star roggc/dinou on GitHub</h3>
+                        </div>
+                        <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-amber-500 transition-colors" />
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">
+                          Support vendor-agnostic open-source React tooling with a GitHub star. Every star helps increase visibility and ecosystem growth!
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </a>
+                </div>
               </div>
             </section>
           </div>

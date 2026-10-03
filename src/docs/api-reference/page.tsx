@@ -20,6 +20,15 @@ import {
   FileText,
   Replace,
   Zap,
+  Database,
+  Layers,
+  Settings,
+  CheckCircle2,
+  Code2,
+  Boxes,
+  Flame,
+  Globe,
+  Sliders,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -27,25 +36,29 @@ const tocItems = [
   { id: "components", title: "1. Components (dinou)", level: 2 },
   { id: "link", title: "<Link>", level: 3 },
   { id: "clientredirect", title: "<ClientRedirect>", level: 3 },
-  { id: "hooks-utilities", title: "2. Hooks & Utilities (dinou)", level: 2 },
+  { id: "hooks-navigation", title: "2. Hooks & Navigation (dinou)", level: 2 },
   { id: "redirect", title: "redirect()", level: 3 },
   { id: "usesearchparams", title: "useSearchParams()", level: 3 },
   { id: "usepathname", title: "usePathname()", level: 3 },
   { id: "userouter", title: "useRouter()", level: 3 },
+  { id: "refreshslot", title: "refreshSlot()", level: 3 },
   { id: "usenavigationloading", title: "useNavigationLoading()", level: 3 },
-  {
-    id: "server-utilities",
-    title: "3. Server-Only Utilities (dinou)",
-    level: 2,
-  },
+  { id: "server-context-config", title: "3. Server Context & Config (dinou)", level: 2 },
   { id: "getcontext", title: "getContext()", level: 3 },
-  {
-    id: "dinou-server",
-    title: "4. Revalidation (dinou/server)",
-    level: 2,
-  },
+  { id: "defineconfig", title: "defineConfig() & DinouConfig", level: 3 },
+  { id: "dinouplugin", title: "DinouPlugin & onRequest", level: 3 },
+  { id: "server-primitives-storage", title: "4. Server & Storage (dinou/server)", level: 2 },
+  { id: "dinoucacheslot", title: "<DinouCacheSlot>", level: 3 },
   { id: "revalidatepath", title: "revalidatePath()", level: 3 },
   { id: "revalidatetag", title: "revalidateTag()", level: 3 },
+  { id: "storage-adapters", title: "Storage Adapters", level: 3 },
+  { id: "route-segment-contracts", title: "5. Route Contracts (page_functions)", level: 2 },
+  { id: "getprops", title: "getProps()", level: 3 },
+  { id: "revalidate-config", title: "revalidate", level: 3 },
+  { id: "ppr-config", title: "ppr", level: 3 },
+  { id: "getstaticpaths", title: "getStaticPaths", level: 3 },
+  { id: "getcachetags", title: "getCacheTags", level: 3 },
+  { id: "validateparams-isg", title: "validateParams & allowISG", level: 3 },
 ];
 
 export default function Page() {
@@ -57,49 +70,56 @@ export default function Page() {
           <div className="mb-8 space-y-4">
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                📚 API Reference: Components & Utilities
+                📚 Complete API Reference
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Comprehensive reference for Dinou's built-in components, hooks,
-              and utilities available in both server and client environments.
+              Definitive TypeScript API reference for Dinou v7. Covers universal components,
+              client hooks, server-only contexts, micro-ISR primitives, storage adapters,
+              and route segment contracts.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
-            <section id="components">
-              <h2>
+            {/* ================================================================= */}
+            {/* SECTION 1: COMPONENTS */}
+            {/* ================================================================= */}
+            <section id="components" className="scroll-mt-20">
+              <h2 className="flex items-center gap-3">
                 1. Components (<code>dinou</code>)
+                <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                  Universal / Client
+                </span>
               </h2>
 
-              <section id="link">
+              <section id="link" className="scroll-mt-20">
                 <h3>
                   <code>&lt;Link&gt;</code>
                 </h3>
                 <p>
-                  The primary way to navigate between pages with client-side
-                  transitions, automatic prefetching, and cache control.
+                  The primary navigation component in Dinou. Renders a native HTML <code>&lt;a&gt;</code> tag with SPA soft navigation, automatic background prefetching on hover, and optional cache bypassing.
                 </p>
                 <CodeBlock
-                  language="jsx"
+                  language="tsx"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
                   {`import { Link } from "dinou";
 
-// Absolute path
-<Link href="/dashboard">Home</Link>
+// Absolute navigation
+<Link href="/dashboard">Dashboard</Link>
 
-// Relative path (go deeper)
-<Link href="./settings">Settings</Link>
+// Relative navigation (child route: /docs -> /docs/routing)
+<Link href="./routing">Routing Guide</Link>
 
-// Relative path (sibling)
-<Link href="../profile">Profile</Link>
+// Relative navigation (sibling route: /docs/routing -> /docs/rendering)
+<Link href="../rendering">Rendering</Link>
 
-// With options
-<Link href="/volatile-data" fresh prefetch={false}>
-  Live Status
+// Forced cache-busting navigation (fresh server data)
+<Link href="/orders" fresh prefetch={false}>
+  Live Orders
 </Link>`}
                 </CodeBlock>
+
                 <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
                   <table className="w-full text-sm text-left">
                     <thead className="bg-muted text-muted-foreground font-medium">
@@ -112,414 +132,373 @@ export default function Page() {
                     </thead>
                     <tbody className="divide-y divide-border bg-card">
                       <tr>
-                        <td className="p-4 font-mono text-xs">href</td>
+                        <td className="p-4 font-mono text-xs text-primary font-semibold">href</td>
                         <td className="p-4 font-mono text-xs">string</td>
                         <td className="p-4 font-mono text-xs">—</td>
                         <td className="p-4 text-xs">
-                          Target path. Supports absolute and relative paths.
+                          Target route path. Supports absolute (<code>/dashboard</code>) and relative (<code>./child</code>, <code>../sibling</code>) resolution.
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-4 font-mono text-xs">prefetch</td>
+                        <td className="p-4 font-mono text-xs text-primary font-semibold">prefetch</td>
                         <td className="p-4 font-mono text-xs">boolean</td>
                         <td className="p-4 font-mono text-xs">true</td>
                         <td className="p-4 text-xs">
-                          Preload code and data on hover/viewport
+                          Automatically preloads the route code and RSC payload in the background when hovered or enters viewport.
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-4 font-mono text-xs">fresh</td>
+                        <td className="p-4 font-mono text-xs text-primary font-semibold">fresh</td>
                         <td className="p-4 font-mono text-xs">boolean</td>
                         <td className="p-4 font-mono text-xs">false</td>
                         <td className="p-4 text-xs">
-                          Bypass client-side cache, fetch fresh data
+                          Bypasses the client-side RSC cache on click, forcing a fresh round-trip to the server.
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-4 font-mono text-xs">...props</td>
-                        <td className="p-4 font-mono text-xs">HTMLAnchor</td>
+                        <td className="p-4 font-mono text-xs text-primary font-semibold">...props</td>
+                        <td className="p-4 font-mono text-xs">AnchorHTMLAttributes</td>
                         <td className="p-4 font-mono text-xs">—</td>
                         <td className="p-4 text-xs">
-                          Standard anchor attributes (className, target, etc.)
+                          All standard HTML anchor attributes (<code>className</code>, <code>target</code>, <code>rel</code>, <code>onClick</code>, etc.).
                         </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
+
                 <Alert className="not-prose mt-4">
                   <LinkIcon className="h-4 w-4" />
-                  <AlertTitle>Path Resolution</AlertTitle>
+                  <AlertTitle>Filesystem Path Resolution</AlertTitle>
                   <AlertDescription>
-                    Dinou resolves paths like a file system:
+                    Dinou resolves route links analogously to standard filesystem navigation:
                     <ul className="list-disc pl-4 mt-2 space-y-1">
                       <li>
-                        <strong>Absolute:</strong> Starts with <code>/</code>{" "}
-                        (e.g.
-                        <code>/about</code>)
+                        <strong>Absolute:</strong> Starts with <code>/</code> (e.g., <code>/dashboard</code>). Always resolves from the application root.
                       </li>
                       <li>
-                        <strong>Relative (Child):</strong> No slash or{" "}
-                        <code>./</code> (e.g., <code>team</code> from{" "}
-                        <code>/about</code> → <code>/about/team</code>)
+                        <strong>Relative Child:</strong> Starts with <code>./</code> or route name (e.g., <code>./details</code> from <code>/products</code> resolves to <code>/products/details</code>).
                       </li>
                       <li>
-                        <strong>Relative (Sibling):</strong> Starts with{" "}
-                        <code>../</code> (e.g., <code>../contact</code> from{" "}
-                        <code>/about/team</code> → <code>/about/contact</code>)
+                        <strong>Relative Sibling:</strong> Starts with <code>../</code> (e.g., <code>../settings</code> from <code>/users/profile</code> resolves to <code>/users/settings</code>).
                       </li>
                     </ul>
                   </AlertDescription>
                 </Alert>
               </section>
 
-              <section id="clientredirect">
+              <section id="clientredirect" className="scroll-mt-20 mt-8">
                 <h3>
                   <code>&lt;ClientRedirect&gt;</code>
                 </h3>
                 <p>
-                  Utility component that triggers immediate client-side
-                  navigation when rendered. Recommended to use{" "}
-                  <code>redirect()</code> helper instead for better server-side
-                  handling.
+                  A client-side navigation component that performs an immediate router replace upon mounting in the browser.
                 </p>
                 <CodeBlock
-                  language="jsx"
+                  language="tsx"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
                   {`import { ClientRedirect } from "dinou";
 
-// Forces navigation to home
-return <ClientRedirect to="/" />;`}
+export default function ForbiddenView() {
+  // Triggers immediate client-side redirect to /login
+  return <ClientRedirect to="/login" />;
+}`}
                 </CodeBlock>
                 <div className="border rounded-lg p-4 bg-card not-prose mt-4">
                   <div className="flex items-center gap-2 font-semibold mb-2">
                     <Replace className="h-5 w-5 text-amber-500" />
-                    <span>Use Case</span>
+                    <span>Best Practice Recommendation</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Useful when you need to trigger navigation from within
-                    component rendering logic, but <code>redirect()</code> is
-                    generally preferred.
+                    While <code>&lt;ClientRedirect&gt;</code> is useful in purely declarative client scenarios, in Server Components, Server Functions, or <code>getProps</code> it is always recommended to use the universal <code>redirect()</code> function instead.
                   </p>
                 </div>
               </section>
             </section>
 
-            <section id="hooks-utilities">
-              <h2>
-                2. Hooks & Utilities (<code>dinou</code>)
+            {/* ================================================================= */}
+            {/* SECTION 2: HOOKS & NAVIGATION */}
+            {/* ================================================================= */}
+            <section id="hooks-navigation" className="scroll-mt-20 mt-12 pt-8 border-t">
+              <h2 className="flex items-center gap-3">
+                2. Hooks & Navigation (<code>dinou</code>)
+                <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400 ring-1 ring-inset ring-purple-500/20">
+                  Universal & Client Hooks
+                </span>
               </h2>
-              <p>Functions available in both Server and Client environments.</p>
 
-              <section id="redirect">
+              <section id="redirect" className="scroll-mt-20">
                 <h3>
-                  <code>redirect(destination)</code>
+                  <code>redirect(destination: string)</code>
                 </h3>
                 <p>
-                  A polymorphic redirect utility that immediately halts execution and redirects the user. Works everywhere across the framework: in <strong>Server Components</strong>, <strong>Client Components</strong>, <strong>Server Functions</strong> (Server Actions), and page functions lifecycle hooks (like <code>getProps</code>).
+                  A universal, polymorphic redirect utility. It terminates execution and navigates the user to a target URL. Intelligently adapts its behavior according to the current runtime execution context:
                 </p>
+
                 <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
                   <table className="w-full text-sm text-left">
                     <thead className="bg-muted text-muted-foreground font-medium">
                       <tr>
-                        <th className="p-4">Context</th>
-                        <th className="p-4">Behavior</th>
+                        <th className="p-4">Execution Context</th>
+                        <th className="p-4">Runtime Mechanism</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border bg-card">
                       <tr>
-                        <td className="p-4 font-mono text-xs">Initial SSR (Headers unsent)</td>
+                        <td className="p-4 font-mono text-xs font-semibold">Initial SSR (Headers Unsent)</td>
                         <td className="p-4 text-xs">
-                          Performs a native HTTP 307 redirect directly on the server (critical for SEO and fast hard-navigations).
+                          Issues an instant HTTP 307 Temporary Redirect response header directly from the server. Ideal for search engine bots, authentication walls, and initial entry points.
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-4 font-mono text-xs">Active Stream / Client-side</td>
+                        <td className="p-4 font-mono text-xs font-semibold">Active Streaming SSR / Client-side</td>
                         <td className="p-4 text-xs">
-                          Renders <code>&lt;ClientRedirect&gt;</code> to perform a fast client-side transition without browser reloads.
+                          Yields a client redirect element (<code>&lt;ClientRedirect&gt;</code>) that instructs the browser router to replace the current route without a full page reload.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold">Server Functions (<code>"use server"</code>)</td>
+                        <td className="p-4 text-xs">
+                          Serializes a navigation command back across the Flight stream to immediately navigate the client UI upon action completion.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold"><code>page_functions.ts</code> (<code>getProps</code>)</td>
+                        <td className="p-4 text-xs">
+                          Short-circuits page rendering during static generation or server requests, shielding protected resources.
                         </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
-                <div className="border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/10 rounded-lg p-4 bg-card not-prose mb-4">
-                  <div className="flex items-center gap-2 font-semibold mb-2 text-blue-600 dark:text-blue-400">
-                    <Replace className="h-5 w-5 text-blue-500" />
-                    <span>Path Resolution & Features</span>
-                  </div>
-                  <ul className="text-sm text-muted-foreground space-y-2 list-disc pl-5">
-                    <li><strong>Absolute Paths:</strong> Supports routing to absolute paths (e.g. <code>/dashboard</code>) and fully qualified external URLs (e.g. <code>https://google.com</code>).</li>
-                    <li><strong>Relative Paths:</strong> Resolves relative paths automatically relative to the current route (e.g., redirecting to <code>./success</code> from <code>/checkout</code> navigates to <code>/checkout/success</code>).</li>
-                    <li><strong>Server Functions:</strong> Can be thrown or returned in Server Functions to trigger redirects in response to client interactions.</li>
-                    <li><strong>Lifecycle Hooks:</strong> Can be used within <code>getProps</code> in <code>page_functions.ts</code> to shield pages and redirect users before they render.</li>
-                  </ul>
-                </div>
+
                 <CodeBlock
-                  language="javascript"
+                  language="tsx"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
                   {`import { redirect } from "dinou";
 
-// 1. In a Server Component or Client Component
-export default function Page() {
-  if (!isAuthenticated) {
-    return redirect("/login");
+// 1. In a Server Component
+export default async function AdminDashboard() {
+  const session = await getSession();
+  if (!session?.isAdmin) {
+    return redirect("/unauthorized");
   }
-  return <div>Welcome!</div>;
+  return <div>Admin Portal</div>;
 }
 
-// 2. In a page_functions.ts hook
+// 2. In page_functions.ts (getProps)
 export async function getProps() {
-  const user = await checkSession();
+  const user = await authenticate();
   if (!user) {
-    return redirect("../login"); // Relative redirect
+    return redirect("./login"); // Relative redirect
   }
   return { user };
 }
 
 // 3. In a Server Function ("use server")
-export async function handleFormSubmit() {
+export async function logoutAction() {
   "use server";
-  await savePreferences();
-  return redirect("./profile"); // Redirect relative to the form route
+  await destroySession();
+  return redirect("/login");
 }`}
                 </CodeBlock>
               </section>
 
-              <section id="usesearchparams">
+              <section id="usesearchparams" className="scroll-mt-20 mt-8">
                 <h3>
-                  <code>useSearchParams()</code> (Client Only)
+                  <code>useSearchParams()</code>
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">(Client Only)</span>
                 </h3>
                 <p>
-                  Returns a standard <code>URLSearchParams</code> object to read
-                  query string parameters inside Client Components.
+                  Returns a read-only instance of the standard Web <code>URLSearchParams</code> object to read query parameters inside Client Components. Automatically triggers re-renders when the query string changes.
                 </p>
                 <CodeBlock
-                  language="jsx"
+                  language="tsx"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
                   {`"use client";
 import { useSearchParams } from "dinou";
 
-export default function SearchPage() {
+export default function SearchBar() {
   const searchParams = useSearchParams();
-  const query = searchParams.get("q");
-  return <div>Result: {query}</div>;
+  const query = searchParams.get("q") ?? "";
+
+  return <div>Active Search Query: {query}</div>;
 }`}
                 </CodeBlock>
-                <Alert className="not-prose mt-4">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>⚠️ Hydration Behavior & Mismatch Warning</AlertTitle>
-                  <AlertDescription className="space-y-2 text-xs leading-relaxed text-muted-foreground mt-1">
+
+                <Alert className="not-prose mt-4 border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  <AlertTitle className="text-amber-800 dark:text-amber-300">
+                    SSG Hydration Best Practice
+                  </AlertTitle>
+                  <AlertDescription className="text-amber-800 dark:text-amber-300 text-xs space-y-2 mt-1">
                     <p>
-                      On statically pre-rendered pages (SSG), the server renders Client Components with
-                      empty search parameters at build time. On the client, they will hydrate with the actual browser URL search parameters.
+                      On statically pre-rendered routes (SSG), HTML is generated at build time when no client query string is known (rendering with empty params). If a Client Component immediately renders query-dependent HTML on initial load, a React hydration mismatch error can occur.
                     </p>
-                    <p className="font-semibold text-amber-600 dark:text-amber-400">
-                      If the UI immediately renders elements or text depending on the search parameters, this will trigger a React hydration mismatch error (Error #418).
+                    <p>
+                      To guarantee seamless hydration, apply one of the following two patterns:
                     </p>
-                    <div>To prevent hydration mismatches, choose one of these patterns:</div>
-                    <ul className="list-disc pl-5 space-y-1">
-                      <li className="space-y-2">
-                        <span><strong>Option 1 (Defer State - Recommended):</strong> Defer rendering or using the search parameters until the component has mounted in the browser (by copying the search params to local state inside a <code>useEffect</code>):</span>
-                        <CodeBlock language="jsx" containerClassName="mt-2 rounded-md">
-                          {`"use client";
+                    <ul className="list-disc pl-4 space-y-1">
+                      <li>
+                        <strong>Pattern A (Deferred Hydration via useEffect):</strong> Keep initial render deterministic, then synchronize params after mounting:
+                      </li>
+                    </ul>
+                    <CodeBlock language="tsx" containerClassName="mt-2 rounded-md">
+                      {`"use client";
 import { useSearchParams } from "dinou";
 import { useState, useEffect } from "react";
 
-export default function SearchPage() {
-  const rawSearchParams = useSearchParams();
-  const [searchParams, setSearchParams] = useState(new URLSearchParams());
+export default function SearchComponent() {
+  const rawParams = useSearchParams();
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
-    // Only updates in the client after hydration is complete
-    setSearchParams(rawSearchParams);
-  }, [rawSearchParams]);
+    // Synchronizes query strictly in the client after hydration
+    setQuery(rawParams.get("q") ?? "");
+  }, [rawParams]);
 
-  const query = searchParams.get("q");
-  return <div>Result: {query}</div>;
+  return <div>Query: {query}</div>;
 }`}
-                        </CodeBlock>
+                    </CodeBlock>
+                    <ul className="list-disc pl-4 space-y-1 mt-2">
+                      <li>
+                        <strong>Pattern B (Dynamic SSR):</strong> If the page fundamentally requires query parameters to render its initial HTML, switch the segment to dynamic SSR by setting <code>export const revalidate = 0;</code> in its <code>page_functions.ts</code>.
                       </li>
-                      <li><strong>Option 2 (Forced Dynamic Rendering):</strong> Switch the route to dynamic rendering on every request by exporting <code>export function dynamic() &#123; return true; &#125;</code> from its <code>page_functions.ts</code>. This ensures the server always generates the content dynamically with the actual query parameters, avoiding mismatches.</li>
                     </ul>
                   </AlertDescription>
                 </Alert>
-                
-                <div className="border border-amber-500/20 bg-amber-500/5 dark:bg-amber-500/10 rounded-lg p-4 bg-card not-prose mt-4 space-y-3">
-                  <div className="flex items-center gap-2 font-semibold text-amber-600 dark:text-amber-400">
-                    <AlertTriangle className="h-5 w-5" />
-                    <span>How Static Generation & Bailouts Work</span>
-                  </div>
-                  <div className="text-xs leading-relaxed text-muted-foreground space-y-3">
-                    <p>
-                      At server startup in production, Dinou pre-renders static pages. If a <strong>Server Component</strong> reads dynamic request data (like search params or cookies), Dinou automatically bails out and marks the route as <strong>Dynamic</strong>. However, since <strong>Client Components</strong> do not execute their component functions on the server during pre-rendering, their hooks cannot trigger a bailout. As a result, routes using search params only in Client Components remain static, rendering with empty params at build time and causing hydration mismatches in the browser unless handled properly (e.g. using Option 1).
-                    </p>
-                    <details className="group mt-3 border-t border-amber-500/10 pt-3">
-                      <summary className="cursor-pointer font-semibold text-xs text-amber-700 dark:text-amber-400 select-none hover:underline">
-                        Show Technical Details (for Ejected Code)
-                      </summary>
-                      <div className="mt-3 space-y-3">
-                        <p>
-                          Dinou executes a three-phase static generation pipeline (via the <code>generateStatic</code> process in <code>generate-static.js</code>):
-                        </p>
-                        <ol className="list-decimal pl-5 space-y-3">
-                          <li>
-                            <strong>Phase 1: Analysis &amp; Bailout Discovery (<code>buildStaticPages</code> in <code>build-static-pages.js</code>)</strong>
-                            <p className="mt-1">
-                              The generator crawls all routes and resolves their layout/page component tree. It mock-renders the tree using <code>asyncRenderJSXToClientJSX</code> in-memory.
-                            </p>
-                            <ul className="list-disc pl-5 mt-1 space-y-1">
-                              <li>
-                                <strong>Server Components:</strong> If a Server Component accesses the request context (e.g., <code>getContext().req.query</code>), a Proxy trap intercepts the access and triggers an <strong>Automatic Static Bailout</strong>. The route is marked as <strong>Dynamic</strong> and no static files are generated.
-                              </li>
-                              <li>
-                                <strong>Client Components:</strong> Client Components represent client-side code. During layout nesting and component resolution via <code>asyncRenderJSXToClientJSX</code>, they are treated as reference points and their function bodies are <strong>not executed</strong>. Because their component logic is not run, they cannot trigger the request context Proxy traps, and <strong>no static bailout occurs</strong> (the route remains marked as Static).
-                              </li>
-                            </ul>
-                          </li>
-                          <li>
-                            <strong>Phase 2: RSC Payload Generation (<code>generateStaticRSCs</code> in <code>generate-static-rscs.js</code>)</strong>
-                            <p className="mt-1">
-                              For all routes successfully marked as static in Phase 1, the generator renders the JSX tree using React's native <code>renderToPipeableStream</code> and saves the React Flight binary payload to disk as <code>rsc.rsc</code>.
-                            </p>
-                          </li>
-                          <li>
-                            <strong>Phase 3: Static HTML Generation (<code>generateStaticPages</code> in <code>generate-static-pages.js</code>)</strong>
-                            <p className="mt-1">
-                              Finally, the generator reads each <code>rsc.rsc</code> file from disk, reconstructs the JSX tree using React's <code>createFromNodeStream</code>, renders the markup to static HTML using React's <code>renderToPipeableStream</code> (from <code>react-dom/server</code>), and writes it to disk as <code>index.html</code>.
-                            </p>
-                          </li>
-                        </ol>
-                      </div>
-                    </details>
-                  </div>
-                </div>
-
-                <div className="border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/10 rounded-lg p-4 bg-card not-prose mt-4">
-                  <div className="flex items-center gap-2 font-semibold mb-2 text-blue-600 dark:text-blue-400">
-                    <Server className="h-5 w-5 text-blue-500" />
-                    <span>In Server Components</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    This hook cannot be called in Server Components because React Flight prohibits running Client Module functions on the server. To read query parameters in a Server Component, use <code>getContext()</code> instead:
-                  </p>
-                  <CodeBlock language="javascript" containerClassName="mt-2 rounded-md">
-                    {`import { getContext } from "dinou";
-
-export default async function Page() {
-  const ctx = getContext();
-  const query = ctx.req.query; // Object containing query params
-  const q = query.q;
-  return <div>Result: {q}</div>;
-}`}
-                  </CodeBlock>
-                </div>
               </section>
 
-              <section id="usepathname">
+              <section id="usepathname" className="scroll-mt-20 mt-8">
                 <h3>
-                  <code>usePathname()</code> (Client Only)
+                  <code>usePathname()</code>
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">(Client Only)</span>
                 </h3>
                 <p>
-                  Returns the current URL pathname as a string (e.g.,{" "}
-                  <code>/blog/post-1</code>) inside Client Components.
+                  Returns the active URL pathname as a string (e.g., <code>"/docs/api-reference"</code>) inside Client Components. Re-evaluates when route transitions occur.
                 </p>
                 <CodeBlock
-                  language="jsx"
+                  language="tsx"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
                   {`"use client";
 import { usePathname } from "dinou";
 
-export default function Navigation() {
+export default function Breadcrumbs() {
   const pathname = usePathname();
-  return <div>Current path: {pathname}</div>;
+  const segments = pathname.split("/").filter(Boolean);
+
+  return (
+    <nav className="flex space-x-2 text-sm text-muted-foreground">
+      <span>Home</span>
+      {segments.map((segment) => (
+        <span key={segment}>/ {segment}</span>
+      ))}
+    </nav>
+  );
 }`}
                 </CodeBlock>
                 <div className="border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/10 rounded-lg p-4 bg-card not-prose mt-4">
                   <div className="flex items-center gap-2 font-semibold mb-2 text-blue-600 dark:text-blue-400">
                     <Server className="h-5 w-5 text-blue-500" />
-                    <span>In Server Components</span>
+                    <span>Server Components Alternative</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    This hook cannot be called in Server Components. To read the pathname in a Server Component, use <code>getContext()</code>:
+                    In Server Components, Client hooks cannot execute. Instead, access the current pathname synchronously through the server request context:
                   </p>
-                  <CodeBlock language="javascript" containerClassName="mt-2 rounded-md">
+                  <CodeBlock language="tsx" containerClassName="mt-2 rounded-md">
                     {`import { getContext } from "dinou";
 
-export default async function Page() {
+export default async function ServerPage() {
   const ctx = getContext();
-  const pathname = ctx.req.path; // Current URL path
-  return <div>Current path: {pathname}</div>;
+  const currentPath = ctx?.req.path;
+  return <div>Rendered at: {currentPath}</div>;
 }`}
                   </CodeBlock>
                 </div>
               </section>
 
-              <section id="userouter">
+              <section id="userouter" className="scroll-mt-20 mt-8">
                 <h3>
-                  <code>useRouter()</code> (Client Only)
+                  <code>useRouter()</code>
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">(Client Only)</span>
                 </h3>
                 <p>
-                  Provides programmatic navigation methods inside Client
-                  Components.
+                  Provides imperative navigation and cache refreshing methods inside Client Components.
                 </p>
                 <CodeBlock
-                  language="jsx"
+                  language="tsx"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
                   {`"use client";
 import { useRouter } from "dinou";
 
-export default function Controls() {
+export default function NavigationControls() {
   const router = useRouter();
 
   return (
-    <div>
-      <button onClick={() => router.push("/home")}>Push</button>
-      <button onClick={() => router.replace("/home")}>Replace</button>
+    <div className="flex gap-2">
+      <button onClick={() => router.push("/catalog")}>Push</button>
+      <button onClick={() => router.replace("/catalog")}>Replace</button>
+      <button onClick={() => router.push("/orders", { fresh: true })}>Fresh Fetch</button>
       <button onClick={() => router.back()}>Back</button>
       <button onClick={() => router.forward()}>Forward</button>
-      <button onClick={() => router.refresh()}>Refresh Data</button>
+      <button onClick={() => router.refresh()}>Soft Refresh</button>
+      <button onClick={() => router.refreshSlot("user-cart")}>Refresh Cart Slot</button>
     </div>
   );
 }`}
                 </CodeBlock>
+
                 <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
                   <table className="w-full text-sm text-left">
                     <thead className="bg-muted text-muted-foreground font-medium">
                       <tr>
                         <th className="p-4">Method</th>
+                        <th className="p-4">Signature</th>
                         <th className="p-4">Description</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border bg-card">
                       <tr>
-                        <td className="p-4 font-mono text-xs">push(href, options?)</td>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">push</td>
+                        <td className="p-4 font-mono text-xs">(href: string, options?: NavigationOptions) =&gt; void</td>
                         <td className="p-4 text-xs">
-                          Navigates to new URL (adds to history). Supports <code>options.fresh</code> (boolean) to bypass the cache.
+                          Navigates to <code>href</code> and pushes a new entry onto the browser history stack. Pass <code>&#123; fresh: true &#125;</code> to bypass the client cache.
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-4 font-mono text-xs">replace(href, options?)</td>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">replace</td>
+                        <td className="p-4 font-mono text-xs">(href: string, options?: NavigationOptions) =&gt; void</td>
                         <td className="p-4 text-xs">
-                          Replaces current URL in history. Supports <code>options.fresh</code> (boolean) to bypass the cache.
+                          Replaces the current history entry without pushing a new one. Supports <code>&#123; fresh: true &#125;</code>.
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-4 font-mono text-xs">back()</td>
-                        <td className="p-4 text-xs">Goes back in history</td>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">back</td>
+                        <td className="p-4 font-mono text-xs">() =&gt; void</td>
+                        <td className="p-4 text-xs">Navigates back to the previous entry in browser history.</td>
                       </tr>
                       <tr>
-                        <td className="p-4 font-mono text-xs">forward()</td>
-                        <td className="p-4 text-xs">Goes forward in history</td>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">forward</td>
+                        <td className="p-4 font-mono text-xs">() =&gt; void</td>
+                        <td className="p-4 text-xs">Navigates forward to the next entry in browser history.</td>
                       </tr>
                       <tr>
-                        <td className="p-4 font-mono text-xs">refresh()</td>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">refresh</td>
+                        <td className="p-4 font-mono text-xs">() =&gt; void</td>
                         <td className="p-4 text-xs">
-                          Soft reload: refetches server data without browser
-                          refresh
+                          Triggers a soft reload: invalidates client cache for the current route, refetches the server RSC payload, and updates the DOM without destroying client state or performing a hard reload.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">refreshSlot</td>
+                        <td className="p-4 font-mono text-xs">(slotId: string, options?: &#123; fresh?: boolean &#125;) =&gt; void</td>
+                        <td className="p-4 text-xs">
+                          Refetches and updates a specific <code>&lt;DinouCacheSlot&gt;</code> without re-rendering or refetching the surrounding page components.
                         </td>
                       </tr>
                     </tbody>
@@ -527,207 +506,666 @@ export default function Controls() {
                 </div>
               </section>
 
-              <section id="usenavigationloading">
+              <section id="refreshslot" className="scroll-mt-20 mt-8">
                 <h3>
-                  <code>useNavigationLoading()</code> (Client Only)
+                  <code>refreshSlot(slotId: string, options?: &#123; fresh?: boolean &#125;)</code>
                 </h3>
                 <p>
-                  Returns a boolean indicating if a client-side navigation is in
-                  progress.
+                  A standalone client-side helper exported directly from <code>"dinou"</code>. Allows any event handler or client utility to trigger targeted revalidation of a specific <code>&lt;DinouCacheSlot&gt;</code> by its ID or tag without having to instantiate the <code>useRouter()</code> hook.
                 </p>
                 <CodeBlock
-                  language="jsx"
+                  language="tsx"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import { refreshSlot } from "dinou";
+
+// Triggered from an independent analytics or websocket listener
+function onStockUpdate(stockSymbol: string) {
+  refreshSlot(\`stock-\${stockSymbol}\`, { fresh: true });
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="usenavigationloading" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>useNavigationLoading()</code>
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">(Client Only)</span>
+                </h3>
+                <p>
+                  A hook that returns a boolean indicating whether an asynchronous SPA client-side route transition is currently pending.
+                </p>
+                <CodeBlock
+                  language="tsx"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
                   {`"use client";
 import { useNavigationLoading } from "dinou";
 
-export default function Header() {
-  const isLoading = useNavigationLoading();
+export default function TopProgressBar() {
+  const isNavigating = useNavigationLoading();
+
+  if (!isNavigating) return null;
+
   return (
-    <header>
-      {isLoading && <div className="loading-bar" />}
-      <nav>...</nav>
-    </header>
+    <div className="fixed top-0 left-0 w-full h-1 bg-blue-500 animate-pulse z-50" />
   );
 }`}
                 </CodeBlock>
               </section>
             </section>
 
-            <section id="server-utilities">
-              <h2>
-                3. Server-Only Utilities (<code>dinou</code>)
+            {/* ================================================================= */}
+            {/* SECTION 3: SERVER CONTEXT & CONFIG */}
+            {/* ================================================================= */}
+            <section id="server-context-config" className="scroll-mt-20 mt-12 pt-8 border-t">
+              <h2 className="flex items-center gap-3">
+                3. Server Context &amp; Config (<code>dinou</code>)
+                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
+                  Server-Side Execution
+                </span>
               </h2>
 
-              <section id="getcontext">
+              <section id="getcontext" className="scroll-mt-20">
                 <h3>
-                  <code>getContext()</code>
+                  <code>getContext(): RequestContextStore | undefined</code>
                 </h3>
                 <p>
-                  Retrieves the request/response context. <strong>Server-side execution contexts only</strong> (Server Components, <code>page_functions</code>/<code>getProps</code>, and <code>"use server"</code> Server Functions).
+                  Synchronously accesses the active HTTP request and response context via Node.js / V8 <code>AsyncLocalStorage</code>. Accessible inside <strong>Server Components</strong>, <strong>Server Functions (<code>"use server"</code>)</strong>, and <strong><code>page_functions.ts</code></strong> lifecycle hooks.
                 </p>
+
                 <CodeBlock
-                  language="javascript"
+                  language="tsx"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
                   {`import { getContext } from "dinou";
 
-export default async function Profile() {
+export default async function UserProfile() {
   const ctx = getContext();
-  // Access request data
-  const token = ctx.req.cookies.session_token;
+  if (!ctx) {
+    return <div>Static Build Context</div>;
+  }
+
+  // Reading request properties
+  const authCookie = ctx.req.cookies.auth_token;
   const userAgent = ctx.req.headers["user-agent"];
-  
-  // Set response headers
-  ctx.res.setHeader("Cache-Control", "public, max-age=3600");
-  
-  return <div>...</div>;
+  const clientIp = ctx.req.headers["x-forwarded-for"] || "127.0.0.1";
+  const queryParam = ctx.req.query.tab;
+
+  // Writing response properties
+  ctx.res.setHeader("X-Custom-Engine", "Dinou-v7");
+  ctx.res.cookie("last_visit", new Date().toISOString(), { httpOnly: true, secure: true });
+
+  return <div>Welcome back! Active tab: {queryParam}</div>;
 }`}
                 </CodeBlock>
+
                 <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
                   <Card>
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold">
                         <FileText className="h-5 w-5 text-blue-500" />
-                        <span>Request Object</span>
+                        <span>Request Store (<code>ctx.req</code>)</span>
                       </div>
                     </CardHeader>
-                    <CardContent className="text-sm font-mono text-xs">
-                      <div>headers, cookies, query,</div>
-                      <div>path, method</div>
+                    <CardContent className="text-xs font-mono space-y-1">
+                      <div><strong>query:</strong> Record&lt;string, string | string[]&gt;</div>
+                      <div><strong>cookies:</strong> Record&lt;string, string&gt;</div>
+                      <div><strong>headers:</strong> IncomingHttpHeaders</div>
+                      <div><strong>path:</strong> string (URL pathname)</div>
+                      <div><strong>method:</strong> &quot;GET&quot; | &quot;POST&quot; | string</div>
+                      <div><strong>env:</strong> Platform host env (Cloudflare, D1, KV)</div>
+                      <div><strong>ctx:</strong> Execution context (waitUntil)</div>
                     </CardContent>
                   </Card>
+
                   <Card>
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold">
                         <Server className="h-5 w-5 text-green-500" />
-                        <span>Response Object</span>
+                        <span>Response Proxy (<code>ctx.res</code>)</span>
                       </div>
                     </CardHeader>
-                    <CardContent className="text-sm font-mono text-xs">
-                      <div>status(), setHeader(), redirect(),</div>
-                      <div>cookie(), clearCookie()</div>
+                    <CardContent className="text-xs font-mono space-y-1">
+                      <div><strong>cookie(name, value, options?):</strong> Set cookie</div>
+                      <div><strong>clearCookie(name, options?):</strong> Expire cookie</div>
+                      <div><strong>setHeader(name, value):</strong> Set HTTP header</div>
+                      <div><strong>status(code):</strong> Set HTTP response code</div>
+                      <div><strong>redirect(status?, url):</strong> Native HTTP redirect</div>
                     </CardContent>
                   </Card>
                 </div>
-                <Alert className="not-prose mt-4 border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-900">
-                  <Shield className="h-4 w-4 text-red-600" />
-                  <AlertTitle className="text-red-600">
-                    ⚠️ Security Warning: `getContext` in Client Components
+
+                <Alert className="not-prose mt-4 border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900">
+                  <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
+                  <AlertTitle className="text-red-800 dark:text-red-300">
+                    Security Warning: Never Call `getContext` in Client Components
                   </AlertTitle>
-                  <AlertDescription className="text-red-800 dark:text-red-300">
-                    While technically available in Client Components during SSR,
-                    <strong className="font-bold">
-                      {" "}
-                      never use it directly
-                    </strong>
-                    . Any data read gets serialized into public HTML. Fetch
-                    sensitive data in Server Components and pass safe props to
-                    Client Components.
+                  <AlertDescription className="text-red-800 dark:text-red-300 text-xs">
+                    While <code>getContext()</code> is technically accessible during initial SSR in Client Component code, any secrets, session tokens, or sensitive headers read there are serialized into the public HTML and client JavaScript bundle. Always read confidential values in <strong>Server Components</strong> or <strong><code>getProps</code></strong>, sanitize them, and pass only safe props to Client Components.
                   </AlertDescription>
                 </Alert>
-                <CodeBlock
-                  language="jsx"
-                  containerClassName="w-full overflow-hidden rounded-lg mt-4"
-                  highlightLines={[3, 9]}
-                >
-                  {`"use client";
-import { getContext } from "dinou";
+              </section>
 
-// ❌ DANGEROUS PATTERN - Data leaks to HTML!
-export default function UserProfile() {
-  const ctx = getContext(); // Runs on server during SSR
-  return <div>{ctx.req.headers["authorization"]}</div>;
-  // ⚠️ The sensitive header is now visible in page source!
-}
-
-// ✅ CORRECT PATTERN
-// Fetch in Server Component, pass safe props
-export default function Page() {
-  const ctx = getContext();
-  const safeUser = { name: ctx.req.cookies.username };
-  return <ClientProfile user={safeUser} />;
-}`}
-              </CodeBlock>
-            </section>
-          </section>
-            
-          <section id="dinou-server" className="mt-12 pt-8 border-t">
-              <h2 className="flex items-center gap-3">
-                4. Revalidation (<code>dinou/server</code>)
-                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
-                  v5.1.0+
-                </span>
-              </h2>
-              <p>
-                Server-only APIs to purge and regenerate the static page cache of your application. These must be imported from the <code>"dinou/server"</code> entrypoint.
-              </p>
-
-              <section id="revalidatepath" className="mt-8">
+              <section id="defineconfig" className="scroll-mt-20 mt-8">
                 <h3>
-                  <code>revalidatePath(path)</code>
+                  <code>defineConfig(config: DinouConfig): DinouConfig</code>
                 </h3>
                 <p>
-                  Cleans the static cache files for a given route and triggers a background regeneration. Supports both absolute and relative paths.
+                  Type-safe configuration helper for your project&apos;s root configuration file (<code>dinou.config.mjs</code> or <code>dinou.config.js</code>).
                 </p>
-                <div className="border rounded-lg p-4 bg-card not-prose my-4">
-                  <div className="flex items-center gap-2 font-semibold mb-2">
-                    <Zap className="h-5 w-5 text-blue-500" />
-                    <span>Function Signature</span>
-                  </div>
-                  <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
-                    <li>
-                      <strong>Arguments:</strong> <code>path</code> (string) - The absolute path (e.g. <code>"/blog"</code>) or relative path (e.g. <code>"./"</code>, <code>"../"</code>) to revalidate.
-                    </li>
-                    <li>
-                      <strong>Returns:</strong> <code>Promise&lt;void&gt;</code>
-                    </li>
-                  </ul>
-                </div>
                 <CodeBlock
                   language="javascript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import { defineConfig } from "dinou";
+import { RedisStorage } from "dinou/server";
+import Redis from "ioredis";
+
+export default defineConfig({
+  // React 19 StrictMode in dev (defaults to true in v7)
+  reactStrictMode: true,
+
+  // Global Partial Prerendering default (can be overridden per route)
+  ppr: false,
+
+  // Distributed storage adapter for ISR cache across server clusters
+  storage: new RedisStorage(new Redis(process.env.REDIS_URL)),
+
+  // Universal Web Standards request plugins
+  plugins: [
+    {
+      name: "auth-guard",
+      async onRequest(req, ctx) {
+        if (req.url.includes("/api/secure") && !req.headers.get("authorization")) {
+          return new Response("Unauthorized", { status: 401 });
+        }
+      },
+    },
+  ],
+});`}
+                </CodeBlock>
+
+                <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-muted text-muted-foreground font-medium">
+                      <tr>
+                        <th className="p-4">Property</th>
+                        <th className="p-4">Type</th>
+                        <th className="p-4">Default</th>
+                        <th className="p-4">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border bg-card">
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">reactStrictMode</td>
+                        <td className="p-4 font-mono text-xs">boolean</td>
+                        <td className="p-4 font-mono text-xs">true</td>
+                        <td className="p-4 text-xs">
+                          Enables React StrictMode double-rendering in development mode to catch side-effects and guarantee identical execution semantics with React Compiler production builds.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">ppr</td>
+                        <td className="p-4 font-mono text-xs">boolean</td>
+                        <td className="p-4 font-mono text-xs">false</td>
+                        <td className="p-4 text-xs">
+                          Global flag enabling Partial Prerendering across all static-eligible routes. Subroutes and layouts can override this setting.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">storage</td>
+                        <td className="p-4 font-mono text-xs">StorageAdapter</td>
+                        <td className="p-4 font-mono text-xs">FileSystemStorage</td>
+                        <td className="p-4 text-xs">
+                          Custom storage adapter instance used for ISR HTML and RSC payload persistence.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">plugins</td>
+                        <td className="p-4 font-mono text-xs">DinouPlugin[]</td>
+                        <td className="p-4 font-mono text-xs">[]</td>
+                        <td className="p-4 text-xs">
+                          Array of middleware plugins executed on every incoming HTTP request before React rendering.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section id="dinouplugin" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>DinouPlugin</code> &amp; <code>onRequest</code>
+                </h3>
+                <p>
+                  Plugins run on the web server entrypoint for every HTTP request before React renders. If <code>onRequest</code> returns a standard Web <code>Response</code>, Dinou terminates the request immediately. If it returns nothing (<code>void</code>), execution proceeds to React, and any values attached to <code>context</code> are preserved and accessible anywhere via <code>getContext()</code>.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import type { DinouPlugin } from "dinou";
+
+export const telemetryPlugin: DinouPlugin = {
+  name: "telemetry",
+  async onRequest(request: Request, context) {
+    const start = Date.now();
+    
+    // Attach custom properties to the AsyncLocalStorage context
+    context.userIp = request.headers.get("cf-connecting-ip") || "unknown";
+
+    // Fast-path edge responses (e.g. Health checks)
+    if (new URL(request.url).pathname === "/healthz") {
+      return new Response(JSON.stringify({ status: "ok", latency: Date.now() - start }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+  },
+};`}
+                </CodeBlock>
+              </section>
+            </section>
+
+            {/* ================================================================= */}
+            {/* SECTION 4: SERVER PRIMITIVES & STORAGE */}
+            {/* ================================================================= */}
+            <section id="server-primitives-storage" className="scroll-mt-20 mt-12 pt-8 border-t">
+              <h2 className="flex items-center gap-3">
+                4. Server Primitives &amp; Storage (<code>dinou/server</code>)
+                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                  Micro-ISR &amp; Invalidation
+                </span>
+              </h2>
+
+              <section id="dinoucacheslot" className="scroll-mt-20">
+                <h3>
+                  <code>&lt;DinouCacheSlot&gt;</code>
+                </h3>
+                <p>
+                  The foundational primitive for <strong>Micro-ISR (Vertical 2D Segmentation)</strong>. Allows caching and revalidating independent component sub-trees inside a page without re-evaluating the parent page, re-fetching unchanged database records, or tearing down the client state.
+                </p>
+                <CodeBlock
+                  language="tsx"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import { DinouCacheSlot } from "dinou/server";
+import { TrendingSidebar } from "./trending";
+import { StockTicker } from "./ticker";
+
+export default async function FinancialDashboard() {
+  return (
+    <div className="grid grid-cols-4 gap-6">
+      <main className="col-span-3">
+        {/* Main dashboard content */}
+      </main>
+
+      {/* Cached for 60 seconds independently */}
+      <DinouCacheSlot id="trending-news" revalidate={60} tag="news">
+        <TrendingSidebar />
+      </DinouCacheSlot>
+
+      {/* Invalidated on-demand via revalidateTag("stock-aapl") or refreshSlot("ticker-aapl") */}
+      <DinouCacheSlot id="ticker-aapl" tags={["stocks", "stock-aapl"]}>
+        <StockTicker symbol="AAPL" />
+      </DinouCacheSlot>
+    </div>
+  );
+}`}
+                </CodeBlock>
+
+                <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-muted text-muted-foreground font-medium">
+                      <tr>
+                        <th className="p-4">Prop</th>
+                        <th className="p-4">Type</th>
+                        <th className="p-4">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border bg-card">
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">id</td>
+                        <td className="p-4 font-mono text-xs">string</td>
+                        <td className="p-4 text-xs">
+                          Unique identifier for targeted client-side slot refreshing via <code>refreshSlot(id)</code>.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">tag / tags</td>
+                        <td className="p-4 font-mono text-xs">string | string[]</td>
+                        <td className="p-4 text-xs">
+                          Cache tag(s) associated with this slot for server-side on-demand invalidation via <code>revalidateTag(tag)</code>.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">revalidate</td>
+                        <td className="p-4 font-mono text-xs">number</td>
+                        <td className="p-4 text-xs">
+                          Time-based TTL in seconds. Automatically refreshes the slot in the background once expired.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">children</td>
+                        <td className="p-4 font-mono text-xs">ReactNode</td>
+                        <td className="p-4 text-xs">
+                          The Server Component sub-tree to isolate and cache.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section id="revalidatepath" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>revalidatePath(path: string): Promise&lt;void&gt;</code>
+                </h3>
+                <p>
+                  Purges the cached static HTML and RSC payload for the target route and schedules immediate background regeneration.
+                </p>
+                <CodeBlock
+                  language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
                   {`import { revalidatePath } from "dinou/server";
 
-// Revalidate absolute route path
+// 1. Revalidate an absolute route
 await revalidatePath("/products");
 
-// Revalidate relative route path
+// 2. Revalidate a dynamic parameterized route
+await revalidatePath("/blog/announcing-v7");
+
+// 3. Revalidate relative to current route
 await revalidatePath("./");`}
                 </CodeBlock>
               </section>
 
-              <section id="revalidatetag" className="mt-12 pt-8 border-t">
+              <section id="revalidatetag" className="scroll-mt-20 mt-8">
                 <h3>
-                  <code>revalidateTag(tag)</code>
+                  <code>revalidateTag(tag: string): Promise&lt;void&gt;</code>
                 </h3>
                 <p>
-                  Revalidates all static pages associated with the specified cache tag.
+                  Purges and marks for regeneration all routes and all <code>&lt;DinouCacheSlot&gt;</code> instances that match the given cache tag.
                 </p>
-                <div className="border rounded-lg p-4 bg-card not-prose my-4">
-                  <div className="flex items-center gap-2 font-semibold mb-2">
-                    <Zap className="h-5 w-5 text-green-500" />
-                    <span>Function Signature</span>
-                  </div>
-                  <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
-                    <li>
-                      <strong>Arguments:</strong> <code>tag</code> (string) - The cache tag name to invalidate (e.g. <code>"products"</code>).
-                    </li>
-                    <li>
-                      <strong>Returns:</strong> <code>Promise&lt;void&gt;</code>
-                    </li>
-                  </ul>
-                </div>
                 <CodeBlock
-                  language="javascript"
+                  language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
                   {`import { revalidateTag } from "dinou/server";
 
-// Purge and regenerate all pages tagged with "catalog"
-await revalidateTag("catalog");`}
+export async function updateProduct(productId: string) {
+  "use server";
+  await db.products.update(productId, { ... });
+
+  // Invalidate every page and slot tagged with "products" or specific ID
+  await revalidateTag("products");
+  await revalidateTag(\`product-\${productId}\`);
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="storage-adapters" className="scroll-mt-20 mt-8">
+                <h3>
+                  Storage Adapters (<code>StorageAdapter</code>)
+                </h3>
+                <p>
+                  Dinou separates caching logic from storage media. All static pre-rendered pages, ISR payloads, and slot fragments are read and written through a unified <code>StorageAdapter</code> interface.
+                </p>
+
+                <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-muted text-muted-foreground font-medium">
+                      <tr>
+                        <th className="p-4">Adapter Class</th>
+                        <th className="p-4">Constructor Signature</th>
+                        <th className="p-4">Target Environment</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border bg-card">
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">FileSystemStorage</td>
+                        <td className="p-4 font-mono text-xs">new FileSystemStorage(baseDir?: string)</td>
+                        <td className="p-4 text-xs">Local development, single-node Docker, VPS servers (default).</td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">RedisStorage</td>
+                        <td className="p-4 font-mono text-xs">new RedisStorage(redisClient: any, prefix?: string)</td>
+                        <td className="p-4 text-xs">Multi-container Kubernetes clusters, AWS ECS, Google Cloud Run.</td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">CloudflareKVStorage</td>
+                        <td className="p-4 font-mono text-xs">new CloudflareKVStorage(kvNamespace: any)</td>
+                        <td className="p-4 text-xs">Cloudflare Workers &amp; Pages at edge scale.</td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">DenoKVStorage</td>
+                        <td className="p-4 font-mono text-xs">new DenoKVStorage(kvInstance?: any)</td>
+                        <td className="p-4 text-xs">Deno Deploy &amp; distributed edge runtimes.</td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">MemoryStorage</td>
+                        <td className="p-4 font-mono text-xs">new MemoryStorage()</td>
+                        <td className="p-4 text-xs">Unit tests, ephemeral preview environments.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import {
+  StorageAdapter,
+  StorageItem,
+  setStorageAdapter,
+  getStorageAdapter,
+} from "dinou/server";
+
+// Inspect or replace the storage engine programmatically at runtime
+const currentAdapter = getStorageAdapter();
+console.log("Active storage engine:", currentAdapter.constructor.name);`}
+                </CodeBlock>
+              </section>
+            </section>
+
+            {/* ================================================================= */}
+            {/* SECTION 5: ROUTE SEGMENT CONTRACTS */}
+            {/* ================================================================= */}
+            <section id="route-segment-contracts" className="scroll-mt-20 mt-12 pt-8 border-t">
+              <h2 className="flex items-center gap-3">
+                5. Route Segment Contracts (<code>page_functions</code>)
+                <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
+                  page_functions.ts &amp; layout_functions.ts
+                </span>
+              </h2>
+              <p>
+                Dinou strictly decouples UI components from server-side lifecycle contracts. Route lifecycles are declared in parallel <code>page_functions.ts</code> (or <code>layout_functions.ts</code>) files.
+              </p>
+
+              <section id="getprops" className="scroll-mt-20">
+                <h3>
+                  <code>getProps(params?: TParams): Promise&lt;TProps&gt; | TProps</code>
+                </h3>
+                <p>
+                  The server-side data loader. Returns an object of props passed directly to the corresponding <code>Page</code> or <code>Layout</code> component.
+                </p>
+                <CodeBlock
+                  language="tsx"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`// src/app/products/[id]/page_functions.ts
+import { redirect } from "dinou";
+import type { PageFunctions } from "dinou";
+
+interface ProductProps {
+  product: { id: string; title: string; price: number };
+}
+
+export const getProps: PageFunctions<{ id: string }, ProductProps>["getProps"] = async (params) => {
+  const product = await fetchProductById(params.id);
+  
+  if (!product) {
+    return redirect("/404");
+  }
+
+  // Directly returned object becomes the Page component's props
+  return { product };
+};`}
+                </CodeBlock>
+              </section>
+
+              <section id="revalidate-config" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>revalidate: number | false | (() =&gt; number | false | Promise&lt;number | false&gt;)</code>
+                </h3>
+                <p>
+                  The single source of truth for page rendering and caching modes in seconds.
+                </p>
+                <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-muted text-muted-foreground font-medium">
+                      <tr>
+                        <th className="p-4">Value</th>
+                        <th className="p-4">Rendering Strategy</th>
+                        <th className="p-4">Behavior</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border bg-card">
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary"><code>0</code> (or &lt; 1)</td>
+                        <td className="p-4 font-semibold text-xs text-blue-600 dark:text-blue-400">Dynamic SSR</td>
+                        <td className="p-4 text-xs">
+                          Renders on every single request. Completely bypasses the static cache.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary"><code>&gt;= 1</code> (e.g. <code>60</code>)</td>
+                        <td className="p-4 font-semibold text-xs text-green-600 dark:text-green-400">ISR (Incremental Static Regeneration)</td>
+                        <td className="p-4 text-xs">
+                          Cached for the specified duration in seconds. The next request after expiration triggers a background revalidation.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary"><code>false</code> (or omitted)</td>
+                        <td className="p-4 font-semibold text-xs text-purple-600 dark:text-purple-400">Static (SSG)</td>
+                        <td className="p-4 text-xs">
+                          Pre-rendered and cached indefinitely until manually purged using <code>revalidatePath</code> or <code>revalidateTag</code>.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section id="ppr-config" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>ppr: boolean | (() =&gt; boolean | Promise&lt;boolean&gt;)</code>
+                </h3>
+                <p>
+                  Enables <strong>Partial Prerendering (PPR)</strong> for the route segment or layout. When enabled, Dinou generates an instant static HTML shell and streams dynamic Suspense holes concurrently.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`// src/app/dashboard/layout_functions.ts
+export const ppr = true; // Enables PPR for /dashboard and all child routes`}
+                </CodeBlock>
+              </section>
+
+              <section id="getstaticpaths" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>getStaticPaths: StaticPathItem[] | (() =&gt; StaticPathsResult)</code>
+                </h3>
+                <p>
+                  Defines the parameter list for dynamic routes (e.g., <code>[slug]</code>, <code>[id]</code>, or <code>[...catchall]</code>) to be pre-rendered during build time (SSG). Supports strings, numbers, arrays, or parameter objects.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`// 1. Array of primitives (for single param [slug])
+export const getStaticPaths = ["announcing-v7", "migration-guide"];
+
+// 2. Array of objects (for multiple params [category]/[id])
+export const getStaticPaths = [
+  { category: "tech", id: "1" },
+  { category: "design", id: "2" },
+];
+
+// 3. Async function (fetching from CMS/Database)
+export async function getStaticPaths() {
+  const articles = await fetchAllArticles();
+  return articles.map((article) => ({ slug: article.slug }));
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="getcachetags" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>getCacheTags: string[] | ((params?: TParams) =&gt; string[] | Promise&lt;string[]&gt;)</code>
+                </h3>
+                <p>
+                  Assigns cache tags to the route for invalidation via <code>revalidateTag(tag)</code>.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`export function getCacheTags(params) {
+  return ["articles", \`article-\${params.slug}\`];
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="validateparams-isg" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>validateParams</code> &amp; <code>allowISG</code>
+                </h3>
+                <p>
+                  Fine-grained route perimeter guards and static generation controls:
+                </p>
+                <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-muted text-muted-foreground font-medium">
+                      <tr>
+                        <th className="p-4">Export Hook</th>
+                        <th className="p-4">Signature</th>
+                        <th className="p-4">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border bg-card">
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">validateParams</td>
+                        <td className="p-4 font-mono text-xs">(params?: TParams) =&gt; boolean | Promise&lt;boolean&gt;</td>
+                        <td className="p-4 text-xs">
+                          Validates dynamic route parameters before execution. Returning <code>false</code> immediately terminates the request with a clean 404 Not Found without invoking <code>getProps</code>.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">allowISG</td>
+                        <td className="p-4 font-mono text-xs">boolean | (() =&gt; boolean | Promise&lt;boolean&gt;)</td>
+                        <td className="p-4 text-xs">
+                          Controls whether dynamic routes not pre-rendered during build time by <code>getStaticPaths</code> can be generated on-demand (ISG) on the first visitor request. Default: <code>true</code>.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`// src/app/users/[id]/page_functions.ts
+export function validateParams(params) {
+  // Only allow numeric user IDs
+  return /^[0-9]+$/.test(params.id);
+}
+
+// Disallow on-demand generation; only paths defined in getStaticPaths exist
+export const allowISG = false;`}
                 </CodeBlock>
               </section>
             </section>

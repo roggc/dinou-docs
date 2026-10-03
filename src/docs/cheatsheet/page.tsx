@@ -25,25 +25,35 @@ import {
   XCircle,
   File,
   ShieldCheck,
+  Compass,
+  Database,
+  Sliders,
+  Sparkles,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
 const tocItems = [
-  { id: "file-conventions", title: "File Conventions Cheatsheet", level: 2 },
-  { id: "route-components", title: "Route Components", level: 3 },
+  { id: "file-conventions", title: "1. File Conventions Cheatsheet", level: 2 },
+  { id: "route-components", title: "Route Components & Lifecycles", level: 3 },
   { id: "layout-flags", title: "Layout Control Flags (Empty Files)", level: 3 },
-  {
-    id: "page-config-cheatsheet",
-    title: "Page Configuration (page_functions.ts) Cheatsheet",
-    level: 2,
-  },
-  { id: "getstaticpaths-ref", title: "getStaticPaths()", level: 3 },
+  { id: "route-escaping", title: "Route Escaping (_prefix)", level: 3 },
+  { id: "route-contracts", title: "2. Route Contracts (page_functions)", level: 2 },
   { id: "getprops-ref", title: "getProps(params)", level: 3 },
-  { id: "revalidate-ref", title: "revalidate()", level: 3 },
-  { id: "dynamic-ref", title: "dynamic()", level: 3 },
+  { id: "revalidate-ref", title: "revalidate (seconds)", level: 3 },
+  { id: "ppr-ref", title: "ppr (Partial Prerendering)", level: 3 },
+  { id: "getstaticpaths-ref", title: "getStaticPaths()", level: 3 },
+  { id: "getcachetags-ref", title: "getCacheTags(params)", level: 3 },
   { id: "validateparams-ref", title: "validateParams(params)", level: 3 },
   { id: "allowisg-ref", title: "allowISG()", level: 3 },
-  { id: "getcachetags-ref", title: "getCacheTags(params)", level: 3 },
+  { id: "hooks-navigation", title: "3. Navigation & Hooks Cheatsheet", level: 2 },
+  { id: "link-ref", title: "<Link> & redirect()", level: 3 },
+  { id: "router-ref", title: "useRouter() & refreshSlot()", level: 3 },
+  { id: "location-hooks", title: "usePathname() & useSearchParams()", level: 3 },
+  { id: "server-api-cheatsheet", title: "4. Server & Cache Cheatsheet", level: 2 },
+  { id: "getcontext-ref", title: "getContext() (req/res)", level: 3 },
+  { id: "cacheslot-ref", title: "<DinouCacheSlot> (Micro-ISR)", level: 3 },
+  { id: "revalidation-ref", title: "revalidatePath & revalidateTag", level: 3 },
+  { id: "config-ref", title: "dinou.config.mjs & defineConfig", level: 3 },
 ];
 
 export default function Page() {
@@ -55,94 +65,122 @@ export default function Page() {
           <div className="mb-8 space-y-4">
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Cheatsheet: Conventions & Configuration
+                ⚡ Dinou v7 Complete Cheatsheet
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Quick reference for file naming conventions and page configuration
-              functions in Dinou.
+              High-density reference for file conventions, route contracts, client navigation hooks,
+              server context, and micro-ISR cache primitives in Dinou v7.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
-            <section id="file-conventions">
-              <h2>File Conventions Cheatsheet</h2>
+            {/* ================================================================= */}
+            {/* SECTION 1: FILE CONVENTIONS */}
+            {/* ================================================================= */}
+            <section id="file-conventions" className="scroll-mt-20">
+              <h2 className="flex items-center gap-3">
+                1. File Conventions Cheatsheet
+                <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                  Filesystem
+                </span>
+              </h2>
               <p>
-                Dinou recognizes specific filenames to build the routing
-                hierarchy and control layout behavior.
+                Dinou maps directories inside <code>src/app/</code> directly to URL routes, using standardized filenames for UI components and server lifecycle contracts.
               </p>
 
-              <section id="route-components">
-                <h3>Route Components</h3>
+              <section id="route-components" className="scroll-mt-20">
+                <h3>Route Components &amp; Lifecycles</h3>
                 <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
                   <table className="w-full text-sm text-left">
                     <thead className="bg-muted text-muted-foreground font-medium">
                       <tr>
                         <th className="p-4">Filename</th>
+                        <th className="p-4">Role</th>
                         <th className="p-4">Environment</th>
                         <th className="p-4">Description</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border bg-card">
                       <tr>
-                        <td className="p-4 font-mono text-xs">
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">
                           page.{`{jsx,tsx,js,ts}`}
                         </td>
+                        <td className="p-4 text-xs font-medium">Page UI</td>
                         <td className="p-4 text-xs">Server or Client</td>
                         <td className="p-4 text-xs">
-                          The unique UI for a route
+                          The unique leaf UI component rendered for this route segment.
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-4 font-mono text-xs">
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">
                           layout.{`{jsx,tsx,js,ts}`}
                         </td>
+                        <td className="p-4 text-xs font-medium">Layout UI</td>
                         <td className="p-4 text-xs">Server or Client</td>
                         <td className="p-4 text-xs">
-                          Wraps the page and children segments
+                          Shared shell wrapping this segment and all descendant child pages. Preserves state across navigations.
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-4 font-mono text-xs">
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">
+                          page_functions.{`{ts,js}`}
+                        </td>
+                        <td className="p-4 text-xs font-medium">Page Lifecycle</td>
+                        <td className="p-4 text-xs font-semibold text-green-600 dark:text-green-400">Server Only</td>
+                        <td className="p-4 text-xs">
+                          Decoupled server contract for <code>page.tsx</code> (<code>getProps</code>, <code>revalidate</code>, <code>ppr</code>, <code>getStaticPaths</code>).
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">
+                          layout_functions.{`{ts,js}`}
+                        </td>
+                        <td className="p-4 text-xs font-medium">Layout Lifecycle</td>
+                        <td className="p-4 text-xs font-semibold text-green-600 dark:text-green-400">Server Only</td>
+                        <td className="p-4 text-xs">
+                          Decoupled server contract for <code>layout.tsx</code> (independent <code>getProps</code>, <code>ppr</code>).
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">
                           error.{`{jsx,tsx,js,ts}`}
                         </td>
+                        <td className="p-4 text-xs font-medium">Error Boundary</td>
                         <td className="p-4 text-xs">Server or Client</td>
                         <td className="p-4 text-xs">
-                          UI for 500 errors within the segment
+                          UI rendered when an unhandled 500 error occurs within this route segment.
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-4 font-mono text-xs">
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">
                           not_found.{`{jsx,tsx,js,ts}`}
                         </td>
+                        <td className="p-4 text-xs font-medium">404 Handler</td>
                         <td className="p-4 text-xs">Server or Client</td>
                         <td className="p-4 text-xs">
-                          UI for 404 not found pages within the segment
+                          UI rendered when a route does not exist or when <code>validateParams</code> returns <code>false</code>.
                         </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
+
                 <div className="border rounded-lg p-4 bg-card not-prose mt-4">
                   <div className="flex items-center gap-2 font-semibold mb-2">
                     <FolderTree className="h-5 w-5 text-purple-500" />
                     <span>Hierarchical Resolution</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Dinou searches up the directory tree for the closest
-                    matching file. A <code>not_found.tsx</code> in{" "}
-                    <code>/blog/[slug]/not_found.tsx</code>
-                    takes precedence over one in the root for{" "}
-                    <code>/blog/not_found.tsx</code>.
+                    Dinou traverses upward to the nearest matching error or 404 handler. A localized <code>src/app/blog/[slug]/not_found.tsx</code> takes precedence over the root <code>src/app/not_found.tsx</code>.
                   </p>
                 </div>
               </section>
 
-              <section id="layout-flags">
+              <section id="layout-flags" className="scroll-mt-20 mt-8">
                 <h3>Layout Control Flags (Empty Files)</h3>
                 <p>
-                  Create these <strong>empty files</strong> (no extension) to
-                  alter how layouts apply to a specific route directory.
+                  Create these <strong>empty files</strong> (no extension) in a route folder to modify the layout inheritance hierarchy without writing imperative wrappers:
                 </p>
                 <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
                   <table className="w-full text-sm text-left">
@@ -155,298 +193,488 @@ export default function Page() {
                     </thead>
                     <tbody className="divide-y divide-border bg-card">
                       <tr>
-                        <td className="p-4 font-mono text-xs">no_layout</td>
-                        <td className="p-4 font-mono text-xs">
-                          page.tsx, error.tsx, not_found.tsx
-                        </td>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">no_layout</td>
+                        <td className="p-4 font-mono text-xs">page.tsx</td>
                         <td className="p-4 text-xs">
-                          Component renders without any layout wrapping
+                          Renders the page completely bare, bypassing all parent layouts. Ideal for print views, popups, or standalone embeds.
                         </td>
                       </tr>
                       <tr className="bg-amber-50/50 dark:bg-amber-900/10">
-                        <td className="p-4 font-mono text-xs">reset_layout</td>
-                        <td className="p-4 font-mono text-xs">layout.jsx</td>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">reset_layout</td>
+                        <td className="p-4 font-mono text-xs">layout.tsx</td>
                         <td className="p-4 text-xs">
-                          <strong>Resets layout hierarchy.</strong> This layout
-                          becomes the new Root, ignoring all parent layouts.
+                          <strong>Resets the layout stack.</strong> Discards all higher-level parent layouts; this folder's <code>layout.tsx</code> becomes the new isolated Root Layout.
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-4 font-mono text-xs">
-                          no_layout_error
-                        </td>
-                        <td className="p-4 font-mono text-xs">error.jsx</td>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">no_layout_error</td>
+                        <td className="p-4 font-mono text-xs">error.tsx</td>
                         <td className="p-4 text-xs">
-                          Error page renders without any layout
+                          Renders the segment's 500 error boundary without any surrounding layout shells.
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-4 font-mono text-xs">
-                          no_layout_not_found
-                        </td>
-                        <td className="p-4 font-mono text-xs">not_found.jsx</td>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary">no_layout_not_found</td>
+                        <td className="p-4 font-mono text-xs">not_found.tsx</td>
                         <td className="p-4 text-xs">
-                          Not found page renders without any layout
+                          Renders the segment's 404 handler without any surrounding layout shells.
                         </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
-                <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                  <Card className="border-green-500/20 bg-green-50/50 dark:bg-green-900/10">
-                    <CardHeader>
-                      <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
-                        <CheckCircle2 className="h-5 w-5" />
-                        <span>Example: Marketing Site</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      <code className="block">src/marketing/layout.jsx</code>
-                      <code className="block">src/marketing/reset_layout</code>
-                      <code className="block">src/marketing/page.jsx</code>
-                      <p className="mt-2 text-xs">
-                        Result: Marketing pages use only their own layout,
-                        ignoring the global root layout.
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10">
-                    <CardHeader>
-                      <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
-                        <File className="h-5 w-5" />
-                        <span>Empty File Creation</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      <code className="block">
-                        touch src/marketing/reset_layout
-                      </code>
-                      <p className="mt-2 text-xs">
-                        No content needed. The file's presence alone triggers
-                        the behavior.
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-                <Alert className="not-prose mt-4">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Layout Isolation Strategy</AlertTitle>
-                  <AlertDescription>
-                    Use <code>reset_layout</code> to create completely isolated
-                    layout systems (e.g., marketing site vs. admin dashboard vs.
-                    documentation). Each can have its own navigation, styles,
-                    and state management.
+              </section>
+
+              <section id="route-escaping" className="scroll-mt-20 mt-8">
+                <h3>Route Escaping (<code>_prefix</code>)</h3>
+                <p>
+                  Any directory prefixed with an underscore (<code>_folder</code>) is completely ignored by the Dinou route scanner.
+                </p>
+                <Alert className="not-prose mt-4 border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900">
+                  <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  <AlertTitle className="text-amber-800 dark:text-amber-300">
+                    Important: When to use Underscore Folders
+                  </AlertTitle>
+                  <AlertDescription className="text-amber-800 dark:text-amber-300 text-xs space-y-2 mt-1">
+                    <p>
+                      In Dinou, normal project directories like <code>components/</code>, <code>hooks/</code>, <code>utils/</code>, or <code>services/</code> do <strong>NOT</strong> require an underscore prefix. They never generate routes unless they explicitly contain a <code>page.{`{jsx,tsx}`}</code> file.
+                    </p>
+                    <p>
+                      The <strong>only purpose</strong> of the <code>_</code> prefix is to escape legacy, backup, or archived code folders that already contain a <code>page.jsx</code>/<code>page.tsx</code> file that you do not want Dinou to register in the application routing table (e.g. <code>src/app/_archived-v1/page.tsx</code>).
+                    </p>
                   </AlertDescription>
                 </Alert>
               </section>
             </section>
 
-            <section id="page-config-cheatsheet">
-              <h2>
-                Page Configuration (<code>page_functions.ts</code>) Cheatsheet
+            {/* ================================================================= */}
+            {/* SECTION 2: ROUTE CONTRACTS */}
+            {/* ================================================================= */}
+            <section id="route-contracts" className="scroll-mt-20 mt-12 pt-8 border-t">
+              <h2 className="flex items-center gap-3">
+                2. Route Contracts (<code>page_functions</code>)
+                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
+                  Server Lifecycles
+                </span>
               </h2>
               <p>
-                Export these functions from{" "}
-                <code>page_functions.{`{ts,js}`}</code> to configure the
-                associated <code>page.tsx</code>.
+                Server-side contracts exported from <code>page_functions.ts</code> (or <code>layout_functions.ts</code>). Fully decoupled from React components.
               </p>
 
-              <section id="getstaticpaths-ref">
+              <section id="getprops-ref" className="scroll-mt-20">
                 <h3>
-                  <code>getStaticPaths()</code>
+                  <code>getProps(params): Promise&lt;TProps&gt; | TProps</code>
                 </h3>
                 <p>
-                  Defines paths for Static Site Generation (SSG). Paths not
-                  returned will be generated on-demand (ISG).
+                  Server-side loader that fetches data and delivers props directly to the corresponding component.
                 </p>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-                  {`export function getStaticPaths() {
-  // Simple dynamic route
-  return ["1", "2", "hello"];
-  
-  // Catch-all route
-  return [["intro"], ["api", "v1", "auth"]];
-  
-  // Complex nested route
-  return [
-    { category: "electronics", specs: ["m3", "16gb"], brand: "apple" },
-    { category: "clothing", specs: ["cotton", "white"], brand: undefined },
-  ];
+                  {`// src/app/products/[id]/page_functions.ts
+export async function getProps(params: { id: string }) {
+  const product = await db.products.findById(params.id);
+  // Directly returned object becomes props for page.tsx!
+  return { product };
 }`}
                 </CodeBlock>
-                <div className="border rounded-lg p-4 bg-card not-prose mt-4">
-                  <div className="flex items-center gap-2 font-semibold mb-2">
-                    <Layers className="h-5 w-5 text-blue-500" />
-                    <span>Automatic Route Propagation</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Static parameters propagate downwards. If{" "}
-                    <code>blog/[slug]/page_functions.ts</code> returns
-                    <code>["post-a", "post-b"]</code>, Dinou automatically
-                    generates both
-                    <code>/blog/post-a</code> and{" "}
-                    <code>/blog/post-a/details</code> (if exists).
-                  </p>
+              </section>
+
+              <section id="revalidate-ref" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>revalidate</code> (Caching Strategy in Seconds)
+                </h3>
+                <p>
+                  The single source of truth for segment caching modes. Specified in <strong>seconds</strong> as a number, <code>false</code>, or a function.
+                </p>
+                <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-muted text-muted-foreground font-medium">
+                      <tr>
+                        <th className="p-4">Value</th>
+                        <th className="p-4">Rendering Mode</th>
+                        <th className="p-4">Behavior</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border bg-card">
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary"><code>0</code> (or &lt; 1)</td>
+                        <td className="p-4 font-semibold text-xs text-blue-600 dark:text-blue-400">Dynamic SSR</td>
+                        <td className="p-4 text-xs">
+                          Re-rendered dynamically on every single HTTP request. Bypasses static cache entirely.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary"><code>&gt;= 1</code> (e.g. <code>60</code>)</td>
+                        <td className="p-4 font-semibold text-xs text-green-600 dark:text-green-400">ISR (Incremental Static Regeneration)</td>
+                        <td className="p-4 text-xs">
+                          Cached for N seconds. The next request after expiration serves stale content and triggers background regeneration.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs font-semibold text-primary"><code>false</code> (or omitted)</td>
+                        <td className="p-4 font-semibold text-xs text-purple-600 dark:text-purple-400">Static (SSG)</td>
+                        <td className="p-4 text-xs">
+                          Pre-rendered at build time and cached indefinitely until purged via <code>revalidatePath</code> or <code>revalidateTag</code>.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
-              </section>
-
-              <section id="getprops-ref" className="mt-12 pt-8 border-t">
-                <h3>
-                  <code>getProps(params)</code>
-                </h3>
-                <p>
-                  <strong>Async</strong> function to fetch data on the server
-                  and pass props to Page and Root Layout.
-                </p>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-                  {`export async function getProps(params) {
-  const data = await db.getItem(params.id);
-  return {
-    page: { item: data },        // Props for page.tsx
-    layout: { title: data.title }, // Props for Root Layout
-  };
-}`}
-                </CodeBlock>
-                <Alert className="not-prose mt-4">
-                  <FileCode className="h-4 w-4 text-blue-500" />
-                  <AlertTitle>Performance Tip: Blocking vs. Streaming</AlertTitle>
-                  <AlertDescription>
-                    Because <code>getProps</code> blocks the initial render at request time, keep it fast for dynamic routes. Note that this does not affect pre-rendered static pages (SSG) since their data is fetched at server startup. In Incremental Static Generation (ISG), it only blocks the very first request by the first visitor before the page is cached. If you need slow dynamic fetches on dynamic routes, defer them to a <code>Suspense</code> boundary wrapping a Server Function.
-                  </AlertDescription>
-                </Alert>
-              </section>
+                  {`// Static SSG (cached indefinitely)
+export const revalidate = false;
 
-              <section id="revalidate-ref" className="mt-12 pt-8 border-t">
-                <h3>
-                  <code>revalidate()</code>
-                </h3>
-                <p>
-                  Sets the Incremental Static Regeneration (ISR) time in{" "}
-                  <strong>milliseconds</strong>.
-                </p>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-                  {`export function revalidate() {
-  return 60000; // Regenerate every 60 seconds
-}`}
-                </CodeBlock>
-                <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                  <Card className="border-green-500/20 bg-green-50/50 dark:bg-green-900/10">
-                    <CardHeader>
-                      <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
-                        <CheckCircle2 className="h-5 w-5" />
-                        <span>Value: 60000</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      Regeneration is triggered by the first request after 60s.
-                    </CardContent>
-                  </Card>
-                  <Card className="border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10">
-                    <CardHeader>
-                      <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
-                        <CheckCircle2 className="h-5 w-5" />
-                        <span>Value: 0</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      No revalidation (permanently static unless rebuilt)
-                    </CardContent>
-                  </Card>
-                </div>
-              </section>
+// Dynamic SSR (every request)
+export const revalidate = 0;
 
-              <section id="dynamic-ref" className="mt-12 pt-8 border-t">
-                <h3>
-                  <code>dynamic()</code>
-                </h3>
-                <p>
-                  Forces a page to be Server-Side Rendered on every request,
-                  bypassing static generation.
-                </p>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-                  {`export function dynamic() {
-  return true; // Always SSR
-}`}
-                </CodeBlock>
-                <Alert className="not-prose mt-4">
-                  <Zap className="h-4 w-4" />
-                  <AlertTitle>Automatic Bailout</AlertTitle>
-                  <AlertDescription>
-                    Dinou is static by default. Only use <code>dynamic()</code>{" "}
-                    when you need explicit SSR behavior. The framework
-                    automatically switches to dynamic when request-specific APIs
-                    are used.
-                  </AlertDescription>
-                </Alert>
-              </section>
+// ISR (regenerate after 60 seconds)
+export const revalidate = 60;
 
-              <section id="validateparams-ref" className="mt-12 pt-8 border-t">
-                <h3>
-                  <code>validateParams(params)</code>
-                </h3>
-                <p>
-                  Validates dynamic parameters on the server prior to rendering. Returning <code>false</code> immediately blocks the request and returns a 404 response.
-                </p>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-                  {`export function validateParams(params) {
-  // Reject route parameter and return 404 instantly
-  return typeof params.id === "string" && /^\\d+$/.test(params.id);
+// Dynamic calculation based on time or environment
+export function revalidate() {
+  return process.env.NODE_ENV === "development" ? 0 : 3600;
 }`}
                 </CodeBlock>
               </section>
 
-              <section id="allowisg-ref" className="mt-12 pt-8 border-t">
+              <section id="ppr-ref" className="scroll-mt-20 mt-8">
                 <h3>
-                  <code>allowISG()</code>
+                  <code>ppr: boolean | (() =&gt; boolean | Promise&lt;boolean&gt;)</code>
                 </h3>
                 <p>
-                  Enables or disables Incremental Static Generation (ISG) on-demand for dynamic routes not generated at server startup (via <code>getStaticPaths</code>).
+                  Enables <strong>Partial Prerendering (PPR)</strong>. Pre-renders the static HTML shell at build time while streaming dynamic Suspense holes concurrently.
                 </p>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-                  {`export function allowISG() {
-  // Disable dynamic on-demand generation; serve getStaticPaths ONLY
-  return false;
+                  {`// src/app/dashboard/page_functions.ts
+export const ppr = true; // Enables PPR for this page`}
+                </CodeBlock>
+              </section>
+
+              <section id="getstaticpaths-ref" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>getStaticPaths: StaticPathItem[] | (() =&gt; StaticPathsResult)</code>
+                </h3>
+                <p>
+                  Defines the parameter paths for dynamic routes to be pre-rendered during build time (SSG). Supports strings, numbers, catch-all arrays, or parameter objects.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`// 1. Single param ([slug])
+export const getStaticPaths = ["announcing-v7", "getting-started"];
+
+// 2. Catch-all param ([...slug])
+export const getStaticPaths = [["docs", "intro"], ["docs", "routing"]];
+
+// 3. Multi-param objects ([category]/[id])
+export const getStaticPaths = [
+  { category: "books", id: "42" },
+  { category: "tech", id: "99" },
+];
+
+// 4. Async database loader
+export async function getStaticPaths() {
+  const posts = await db.posts.findMany();
+  return posts.map(p => ({ slug: p.slug }));
 }`}
                 </CodeBlock>
               </section>
 
-              <section id="getcachetags-ref" className="mt-12 pt-8 border-t">
-                <h3 className="flex items-center gap-3">
-                  <code>getCacheTags(params)</code>
-                  <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
-                    v5.1.0+
-                  </span>
+              <section id="getcachetags-ref" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>getCacheTags(params): string[] | Promise&lt;string[]&gt;</code>
                 </h3>
                 <p>
-                  Defines the static cache tags for the generated page. Can be sync or async (supporting database or CMS queries), allowing on-demand invalidation via <code>revalidateTag</code>.
+                  Associates cache tags with the route segment for on-demand invalidation via <code>revalidateTag(tag)</code>.
                 </p>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-                  {`export async function getCacheTags(params) {
-  // Can fetch data from a DB or CMS to determine tags
-  const product = await db.getProduct(params.id);
-  return ["products", product.category, \`product-\${params.id}\`];
+                  {`export function getCacheTags(params: { id: string }) {
+  return ["catalog", \`product-\${params.id}\`];
 }`}
+                </CodeBlock>
+              </section>
+
+              <section id="validateparams-ref" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>validateParams(params): boolean | Promise&lt;boolean&gt;</code>
+                </h3>
+                <p>
+                  Parameter boundary guard. Returning <code>false</code> aborts the request immediately with a 404 response before executing <code>getProps</code> or rendering components.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`export function validateParams(params: { id: string }) {
+  return /^[0-9]+$/.test(params.id); // Only numbers permitted
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="allowisg-ref" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>allowISG: boolean | (() =&gt; boolean | Promise&lt;boolean&gt;)</code>
+                </h3>
+                <p>
+                  Controls whether dynamic route parameters not generated at build time can be generated on-demand by the first visitor. Defaults to <code>true</code>.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`// Only paths defined in getStaticPaths exist; all others return 404
+export const allowISG = false;`}
+                </CodeBlock>
+              </section>
+            </section>
+
+            {/* ================================================================= */}
+            {/* SECTION 3: NAVIGATION & HOOKS */}
+            {/* ================================================================= */}
+            <section id="hooks-navigation" className="scroll-mt-20 mt-12 pt-8 border-t">
+              <h2 className="flex items-center gap-3">
+                3. Navigation &amp; Hooks Cheatsheet (<code>dinou</code>)
+                <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400 ring-1 ring-inset ring-purple-500/20">
+                  Client &amp; Universal
+                </span>
+              </h2>
+
+              <section id="link-ref" className="scroll-mt-20">
+                <h3>
+                  <code>&lt;Link&gt;</code> &amp; <code>redirect()</code>
+                </h3>
+                <p>
+                  Soft client navigation and universal server/client redirections.
+                </p>
+                <CodeBlock
+                  language="tsx"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import { Link, redirect } from "dinou";
+
+// Declarative Link with prefetch & cache bypass
+<Link href="/dashboard" fresh prefetch={true}>
+  Go to Dashboard
+</Link>
+
+// Universal Redirect (HTTP 307 if headers unsent, SPA replace if streaming/client)
+export default async function Page() {
+  if (!isAuthenticated()) {
+    return redirect("/login");
+  }
+  return <div>Welcome!</div>;
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="router-ref" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>useRouter()</code> &amp; <code>refreshSlot()</code>
+                </h3>
+                <p>
+                  Imperative client-side router controls and targeted micro-slot updates.
+                </p>
+                <CodeBlock
+                  language="tsx"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`"use client";
+import { useRouter, refreshSlot } from "dinou";
+
+export default function Controls() {
+  const router = useRouter();
+
+  return (
+    <div>
+      <button onClick={() => router.push("/orders")}>Push</button>
+      <button onClick={() => router.replace("/orders")}>Replace</button>
+      <button onClick={() => router.push("/live", { fresh: true })}>Fresh Fetch</button>
+      <button onClick={() => router.refresh()}>Soft Refresh Page</button>
+      <button onClick={() => router.refreshSlot("user-cart")}>Refresh Cart Slot</button>
+      
+      {/* Standalone refreshSlot can also be called without useRouter */}
+      <button onClick={() => refreshSlot("stock-ticker")}>Update Ticker</button>
+    </div>
+  );
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="location-hooks" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>usePathname()</code> &amp; <code>useSearchParams()</code>
+                </h3>
+                <p>
+                  Client hooks for reading route paths and URL query string parameters.
+                </p>
+                <CodeBlock
+                  language="tsx"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`"use client";
+import { usePathname, useSearchParams, useNavigationLoading } from "dinou";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const isLoading = useNavigationLoading();
+
+  const query = searchParams.get("q");
+
+  return (
+    <nav>
+      {isLoading && <div className="loading-bar" />}
+      <span>Current Path: {pathname}</span>
+      <span>Search Query: {query}</span>
+    </nav>
+  );
+}`}
+                </CodeBlock>
+              </section>
+            </section>
+
+            {/* ================================================================= */}
+            {/* SECTION 4: SERVER & CACHE */}
+            {/* ================================================================= */}
+            <section id="server-api-cheatsheet" className="scroll-mt-20 mt-12 pt-8 border-t">
+              <h2 className="flex items-center gap-3">
+                4. Server &amp; Cache Cheatsheet
+                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                  dinou &amp; dinou/server
+                </span>
+              </h2>
+
+              <section id="getcontext-ref" className="scroll-mt-20">
+                <h3>
+                  <code>getContext()</code> (Request &amp; Response Context)
+                </h3>
+                <p>
+                  Synchronous access to HTTP request and response proxy via <code>AsyncLocalStorage</code>. Usable inside Server Components, Server Functions (<code>"use server"</code>), and <code>page_functions</code>.
+                </p>
+                <CodeBlock
+                  language="tsx"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import { getContext } from "dinou";
+
+export default async function ProfilePage() {
+  const ctx = getContext();
+  if (!ctx) return null;
+
+  // Read request parameters
+  const token = ctx.req.cookies.session_id;
+  const userAgent = ctx.req.headers["user-agent"];
+  const query = ctx.req.query;
+  const path = ctx.req.path;
+
+  // Set response headers / cookies
+  ctx.res.setHeader("X-Custom-Header", "Dinou-v7");
+  ctx.res.cookie("visited", "true", { httpOnly: true });
+
+  return <div>Welcome User!</div>;
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="cacheslot-ref" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>&lt;DinouCacheSlot&gt;</code> (Micro-ISR Component)
+                </h3>
+                <p>
+                  Caches and invalidates independent sub-trees within a page without re-evaluating parent layouts or sibling components.
+                </p>
+                <CodeBlock
+                  language="tsx"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import { DinouCacheSlot } from "dinou/server";
+import { SidebarTrending } from "./trending";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="layout">
+      <main>{children}</main>
+
+      {/* Cached for 60 seconds; invalidatable via tag or slot ID */}
+      <DinouCacheSlot id="trending-feed" revalidate={60} tag="trending">
+        <SidebarTrending />
+      </DinouCacheSlot>
+    </div>
+  );
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="revalidation-ref" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>revalidatePath</code> &amp; <code>revalidateTag</code>
+                </h3>
+                <p>
+                  On-demand cache purging primitives imported from <code>"dinou/server"</code>.
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import { revalidatePath, revalidateTag } from "dinou/server";
+
+// Purge a specific path (and schedule background regeneration)
+await revalidatePath("/products/electronics");
+
+// Purge all pages and <DinouCacheSlot> components tagged with "catalog"
+await revalidateTag("catalog");`}
+                </CodeBlock>
+              </section>
+
+              <section id="config-ref" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>dinou.config.mjs</code> &amp; <code>defineConfig</code>
+                </h3>
+                <p>
+                  Root configuration file for compiler options, StrictMode, global PPR, and storage engines.
+                </p>
+                <CodeBlock
+                  language="javascript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import { defineConfig } from "dinou";
+import { RedisStorage } from "dinou/server";
+import Redis from "ioredis";
+
+export default defineConfig({
+  // React 19 StrictMode in dev (defaults to true in v7)
+  reactStrictMode: true,
+
+  // Global Partial Prerendering default
+  ppr: false,
+
+  // Pluggable distributed ISR cache adapter
+  storage: new RedisStorage(new Redis(process.env.REDIS_URL)),
+
+  // Universal Web Standards request plugins
+  plugins: [
+    {
+      name: "auth-guard",
+      async onRequest(request, context) {
+        if (request.url.includes("/admin") && !context.req.cookies.admin_token) {
+          return new Response(null, { status: 302, headers: { Location: "/login" } });
+        }
+      },
+    },
+  ],
+});`}
                 </CodeBlock>
               </section>
             </section>

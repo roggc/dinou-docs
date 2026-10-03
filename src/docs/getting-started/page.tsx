@@ -27,15 +27,35 @@ import {
   Layers,
   Sparkles,
   ShieldCheck,
+  Server,
+  Cloud,
+  Globe,
+  FileCode,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
 // Pure React Server Component (no 'use client')
 const tocItems = [
-  { id: "prerequisites", title: "Prerequisites", level: 2 },
-  { id: "quick-start", title: "Quick Start (CLI)", level: 2 },
-  { id: "manual-setup", title: "Manual Setup", level: 2 },
-  { id: "next-steps", title: "Next Steps", level: 2 },
+  { id: "prerequisites", title: "1. Prerequisites", level: 2 },
+  { id: "runtime-requirements", title: "1.1. Runtime Requirements", level: 3 },
+  { id: "quick-start", title: "2. Quick Start (CLI)", level: 2 },
+  { id: "cli-scaffolding", title: "2.1. CLI Scaffolding", level: 3 },
+  { id: "manual-setup", title: "3. Manual Project Setup", level: 2 },
+  { id: "step-dependencies", title: "3.1. Install Dependencies", level: 3 },
+  { id: "step-structure", title: "3.2. Project Structure & Files", level: 3 },
+  { id: "step-typescript", title: "3.3. TypeScript Configuration", level: 3 },
+  { id: "step-scripts", title: "3.4. Package Scripts", level: 3 },
+  { id: "step-dev-server", title: "3.5. Start Development Server", level: 3 },
+  { id: "step-gitignore", title: "3.6. Configure .gitignore", level: 3 },
+  { id: "bundler-options", title: "4. Bundler Options & Parity", level: 2 },
+  { id: "bundler-esbuild", title: "4.1. Esbuild (Default Engine)", level: 3 },
+  { id: "bundler-rollup-webpack", title: "4.2. Rollup & Webpack Dev", level: 3 },
+  { id: "production-targets", title: "5. Multi-Runtime Production", level: 2 },
+  { id: "target-node", title: "5.1. Node.js Production Server", level: 3 },
+  { id: "target-cloudflare", title: "5.2. Cloudflare Workers Edge", level: 3 },
+  { id: "target-deno-bun", title: "5.3. Deno & Bun Compilation", level: 3 },
+  { id: "target-static", title: "5.4. Static Site Generation (SSG)", level: 3 },
+  { id: "next-steps", title: "6. Next Steps & Architecture", level: 2 },
 ];
 
 export default function Page() {
@@ -66,85 +86,109 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words space-y-10">
+          <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words space-y-12">
             {/* Section 1: Prerequisites */}
             <section id="prerequisites" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                Prerequisites
+                1. Prerequisites
               </h2>
               <p>
-                Before getting started, ensure your environment meets the minimum requirements:
+                Before getting started, ensure your local environment meets the minimum requirements.
+                Dinou is engineered to leverage modern JavaScript standards with zero transpile overhead.
               </p>
-              <ul className="space-y-2">
-                <li>
-                  <strong>Node.js:</strong> Version <strong>20.6.0</strong> or higher is required.
-                  Dinou relies on native ES module loader customization hooks and modern Web Standard APIs
-                  (<code>Request</code>, <code>Response</code>, <code>ReadableStream</code>) available in modern Node.js versions.
-                </li>
-                <li>
-                  <strong>Multi-Runtime Deployments (Optional):</strong> If you plan to target Bun or Deno,
-                  ensure you have <strong>Bun 1.1+</strong> or <strong>Deno 2.0+</strong> installed on your machine.
-                </li>
-              </ul>
+
+              <div id="runtime-requirements" className="scroll-mt-20 mt-6 space-y-3">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                  1.1. Runtime Requirements
+                </h3>
+                <ul className="space-y-2.5">
+                  <li>
+                    <strong>Node.js 20.6.0+ (Required):</strong> Dinou utilizes Node&apos;s modern native ES module
+                    customization hooks (<code>module.register</code>) for zero-fork server execution and Web Standard APIs
+                    (<code>Request</code>, <code>Response</code>, <code>ReadableStream</code>, <code>Headers</code>) natively
+                    supported in modern Node.js versions.
+                  </li>
+                  <li>
+                    <strong>Bun 1.1+ (Optional):</strong> If you plan to run on Bun or compile self-contained standalone
+                    native executables using <code>npm run build:bun:compile</code>.
+                  </li>
+                  <li>
+                    <strong>Deno 2.0+ (Optional):</strong> If you target Deno or cross-compile single-file binaries
+                    for Linux, macOS, or Windows using <code>npm run build:deno:compile</code>.
+                  </li>
+                  <li>
+                    <strong>Cloudflare Wrangler (Optional):</strong> Required if you deploy to Cloudflare Workers with
+                    <code>npm run build:cloudflare</code> and preview locally with <code>wrangler dev</code>.
+                  </li>
+                </ul>
+              </div>
             </section>
 
             {/* Section 2: Quick Start */}
             <section id="quick-start" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                Quick Start (CLI)
+                2. Quick Start (CLI)
               </h2>
               <p>
                 The fastest way to scaffold a ready-to-code Dinou application is using the official CLI starter.
                 It sets up TypeScript, Tailwind CSS, sample Server Components, and the recommended directory layout:
               </p>
 
-              <CodeBlock
-                language="bash"
-                containerClassName="w-full overflow-hidden rounded-lg mt-6"
-              >
-                {`# 1. Initialize a new Dinou v7 application
+              <div id="cli-scaffolding" className="scroll-mt-20 mt-6">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+                  <Terminal className="h-5 w-5 text-blue-500" />
+                  2.1. CLI Scaffolding
+                </h3>
+
+                <CodeBlock
+                  language="bash"
+                  containerClassName="w-full overflow-hidden rounded-lg mt-2"
+                >
+                  {`# 1. Initialize a new Dinou v7 application
 npx create-dinou-app@latest my-app
 
 # 2. Enter project directory
 cd my-app
 
-# 3. Launch development server
+# 3. Launch development server (default: esbuild)
 npm run dev`}
-              </CodeBlock>
+                </CodeBlock>
 
-              <Alert className="not-prose mt-6 border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/20">
-                <Zap className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <AlertTitle className="text-blue-700 dark:text-blue-300 font-bold">
-                  ⚡ Single-Process Incremental Dual-Engine
-                </AlertTitle>
-                <AlertDescription className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mt-1">
-                  In Dinou v7, the development server runs in a unified in-process architecture with zero
-                  subprocess overhead. The Dual-Bundle engine compiles your entire application into memory at startup,
-                  meaning navigation across all routes is instant with zero on-demand compilation delays. Incremental changes
-                  are updated in milliseconds with React Fast Refresh and hot CSS injection.
-                </AlertDescription>
-              </Alert>
+                <Alert className="not-prose mt-6 border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/20">
+                  <Zap className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <AlertTitle className="text-blue-700 dark:text-blue-300 font-bold">
+                    ⚡ Single-Process Incremental Dual-Engine
+                  </AlertTitle>
+                  <AlertDescription className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mt-1">
+                    In Dinou v7, the development server runs in a unified in-process architecture with zero
+                    subprocess overhead. The Dual-Bundle engine compiles your entire application into memory at startup,
+                    meaning navigation across all routes is instant with zero on-demand compilation delays. Incremental changes
+                    are updated in milliseconds with React Fast Refresh and hot CSS injection.
+                  </AlertDescription>
+                </Alert>
+              </div>
             </section>
 
             {/* Section 3: Manual Setup */}
             <section id="manual-setup" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                Manual Setup
+                3. Manual Project Setup
               </h2>
               <p>
-                Prefer to wire up everything manually? Follow these steps to configure Dinou from scratch with
-                complete transparency:
+                Prefer to wire up everything manually? Follow these step-by-step instructions to configure Dinou
+                from scratch with complete transparency:
               </p>
 
-              <div className="space-y-8 not-prose mt-6">
-                {/* Step 1 */}
-                <div>
+              <div className="space-y-10 not-prose mt-6">
+                {/* Step 3.1 */}
+                <div id="step-dependencies" className="scroll-mt-20">
                   <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-mono">1</span>
-                    Install Dependencies
+                    3.1. Install Dependencies
                   </h3>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Initialize your project folder and install React, React DOM, and the <code>dinou</code> package:
+                    Initialize your project folder and install React 19, React DOM, and the <code>dinou</code> framework package:
                   </p>
                   <CodeBlock language="bash" containerClassName="w-full rounded-lg">
                     {`# Create and enter directory
@@ -154,22 +198,22 @@ cd my-dinou-app
 # Initialize package.json
 npm init -y
 
-# Install React and Dinou
+# Install React 19 and Dinou v7
 npm install react react-dom dinou
 
-# Optional: TypeScript definitions for IDE intellisense
-npm install -D @types/react @types/react-dom`}
+# Install TypeScript definitions for IDE intellisense
+npm install -D @types/react @types/react-dom typescript`}
                   </CodeBlock>
                 </div>
 
-                {/* Step 2 */}
-                <div>
+                {/* Step 3.2 */}
+                <div id="step-structure" className="scroll-mt-20">
                   <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-mono">2</span>
-                    Create Project Structure
+                    3.2. Project Structure &amp; Files
                   </h3>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Create the <code>src/</code> directory with a root page (<code>src/page.tsx</code>) and the recommended root layout (<code>src/layout.tsx</code>):
+                    Create the <code>src/</code> directory with a root page (<code>src/page.tsx</code>), optional server data fetching (<code>src/page_functions.ts</code>), and the root document layout (<code>src/layout.tsx</code>):
                   </p>
 
                   <div className="space-y-4">
@@ -178,17 +222,45 @@ npm install -D @types/react @types/react-dom`}
                         src/page.tsx (React Server Component)
                       </div>
                       <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                        {`// src/page.tsx - Server Component by default
-export default function Page() {
+                        {`// src/page.tsx - React Server Component (RSC)
+export default function Page({ data }: { data?: { title: string; views: number } }) {
   return (
-    <main className="p-8">
-      <h1 className="text-3xl font-bold">Hello from Dinou v7!</h1>
-      <p className="text-muted-foreground mt-2">
-        Rendered natively on the server with React 19.
+    <main className="p-8 max-w-4xl mx-auto space-y-4">
+      <h1 className="text-3xl font-bold tracking-tight">
+        {data?.title ?? "Hello from Dinou v7!"}
+      </h1>
+      <p className="text-muted-foreground">
+        Rendered natively on the server with React 19 and zero client JavaScript overhead.
       </p>
+      {data && (
+        <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-sm">
+          Dynamic views: <span className="font-mono font-bold">{data.views}</span>
+        </div>
+      )}
     </main>
   );
 }`}
+                      </CodeBlock>
+                    </div>
+
+                    <div>
+                      <div className="text-xs font-mono text-muted-foreground mb-1">
+                        src/page_functions.ts (Optional Server Data &amp; ISR Caching)
+                      </div>
+                      <CodeBlock language="typescript" containerClassName="w-full rounded-lg">
+                        {`// src/page_functions.ts - Server data contract
+export async function getProps() {
+  // Directly returns props to page.tsx - no wrapper object needed
+  return {
+    data: {
+      title: "Welcome to Dinou v7",
+      views: 1420,
+    },
+  };
+}
+
+// Optional: ISR revalidation window in seconds (direct number)
+export const revalidate = 60;`}
                       </CodeBlock>
                     </div>
 
@@ -225,7 +297,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                         <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
                         <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
                         <span className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                        <span className="ml-2 font-medium">Recommended Layout</span>
+                        <span className="ml-2 font-medium">Recommended Directory Layout</span>
                       </div>
                     </div>
                     <div className="p-4 overflow-x-auto">
@@ -238,9 +310,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                           style={{ color: "#e2e8f0", backgroundColor: "transparent" }}
                         >{`my-dinou-app/
 ├── src/
-│   ├── page.tsx               # Root page (/)
-│   ├── layout.tsx             # Root document layout (optional)
-│   └── globals.css            # Styles / Tailwind (optional)
+│   ├── page.tsx               # Root page component (RSC)
+│   ├── page_functions.ts      # Server data fetching (getProps, revalidate)
+│   ├── layout.tsx             # Root document layout (<html/head/body>)
+│   ├── layout_functions.ts    # Layout-level caching & data (optional)
+│   └── globals.css            # Styles / Tailwind CSS
 ├── dinou-env.d.ts             # Ambient framework typings
 ├── tsconfig.json              # TypeScript configuration
 ├── package.json
@@ -250,11 +324,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   </div>
                 </div>
 
-                {/* Step 3 */}
-                <div>
+                {/* Step 3.3 */}
+                <div id="step-typescript" className="scroll-mt-20">
                   <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-mono">3</span>
-                    Configure TypeScript
+                    3.3. TypeScript Configuration
                   </h3>
                   <p className="text-sm text-muted-foreground mb-3">
                     Configure <code>tsconfig.json</code> and the ambient reference <code>dinou-env.d.ts</code>:
@@ -302,11 +376,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   </div>
                 </div>
 
-                {/* Step 4 */}
-                <div>
+                {/* Step 3.4 */}
+                <div id="step-scripts" className="scroll-mt-20">
                   <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-mono">4</span>
-                    Add Scripts to package.json
+                    3.4. Package Scripts
                   </h3>
                   <p className="text-sm text-muted-foreground mb-3">
                     Add the complete set of Dinou scripts to your <code>package.json</code> to control development, multi-runtime production builds (Node, Cloudflare, Deno, Bun), binary compilation, static exports, and ejecting:
@@ -419,30 +493,30 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   </CodeBlock>
                 </div>
 
-                {/* Step 5 */}
-                <div>
+                {/* Step 3.5 */}
+                <div id="step-dev-server" className="scroll-mt-20">
                   <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-mono">5</span>
-                    Start the Development Server
+                    3.5. Start Development Server
                   </h3>
                   <p className="text-sm text-muted-foreground mb-3">
                     Run the development server with the fast esbuild bundler (default), or choose Rollup or Webpack:
                   </p>
                   <CodeBlock language="bash" containerClassName="w-full rounded-lg">
-                    {`# Start with default fast esbuild
+                    {`# Start with default ultra-fast esbuild
 npm run dev
 
-# Or test with Rollup or Webpack
+# Or start with Rollup or Webpack
 npm run dev:rollup
 npm run dev:webpack`}
                   </CodeBlock>
                 </div>
 
-                {/* Step 6 */}
-                <div>
+                {/* Step 3.6 */}
+                <div id="step-gitignore" className="scroll-mt-20">
                   <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-mono">6</span>
-                    Configure .gitignore
+                    3.6. Configure .gitignore
                   </h3>
                   <p className="text-sm text-muted-foreground mb-3">
                     Create a <code>.gitignore</code> file to ignore dependencies, environment variables, build outputs, and Dinou caches:
@@ -462,10 +536,141 @@ dist
               </div>
             </section>
 
-            {/* Section 4: Next Steps */}
+            {/* Section 4: Bundler Options & Parity */}
+            <section id="bundler-options" className="scroll-mt-20">
+              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
+                4. Bundler Options &amp; Parity
+              </h2>
+              <p>
+                Dinou is built with a vendor-neutral bundler architecture. You can switch between Esbuild, Rollup, and Webpack with complete feature parity and zero application code changes.
+              </p>
+
+              <div id="bundler-esbuild" className="scroll-mt-20 mt-6 space-y-3">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-amber-500" />
+                  4.1. Esbuild (Default Engine)
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Esbuild is the default bundler in Dinou. Written in Go, it delivers sub-second cold starts, instant in-memory bundling, and near-zero latency incremental compilation with React Fast Refresh:
+                </p>
+                <CodeBlock language="bash" containerClassName="w-full rounded-lg">
+                  {`npm run dev
+# or explicitly:
+npm run dev:esbuild`}
+                </CodeBlock>
+              </div>
+
+              <div id="bundler-rollup-webpack" className="scroll-mt-20 mt-8 space-y-3">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Boxes className="h-5 w-5 text-purple-500" />
+                  4.2. Rollup &amp; Webpack Dev
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Need deep ecosystem plugin integration or enterprise Webpack configurations? Dinou features dedicated Rollup and Webpack dev engines with full in-memory caching and React Fast Refresh support:
+                </p>
+                <CodeBlock language="bash" containerClassName="w-full rounded-lg">
+                  {`# Run with Rollup
+npm run dev:rollup
+
+# Run with Webpack
+npm run dev:webpack`}
+                </CodeBlock>
+                <p className="text-xs text-muted-foreground">
+                  Every engine implements the identical React 19 RSC streaming contract, CSS module processing, and asset resolution rules.
+                </p>
+              </div>
+            </section>
+
+            {/* Section 5: Multi-Runtime Production Targets */}
+            <section id="production-targets" className="scroll-mt-20">
+              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
+                5. Multi-Runtime Production
+              </h2>
+              <p>
+                Dinou v7 treats execution runtimes as first-class compilation targets. From a single codebase in <code>src/</code>, you can build optimized production bundles for Node.js, Cloudflare Workers, Deno, Bun, or fully static sites.
+              </p>
+
+              <div id="target-node" className="scroll-mt-20 mt-6 space-y-3">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Server className="h-5 w-5 text-blue-500" />
+                  5.1. Node.js Production Server
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Compile an optimized production server targeting Node.js with native HTTP/2 and streaming support:
+                </p>
+                <CodeBlock language="bash" containerClassName="w-full rounded-lg">
+                  {`# Build for Node.js
+npm run build:node
+
+# Start the production server
+npm run start:node`}
+                </CodeBlock>
+              </div>
+
+              <div id="target-cloudflare" className="scroll-mt-20 mt-8 space-y-3">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Cloud className="h-5 w-5 text-orange-500" />
+                  5.2. Cloudflare Workers Edge
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Build a lightweight edge worker that runs on Cloudflare Workers with zero cold starts and global edge distribution:
+                </p>
+                <CodeBlock language="bash" containerClassName="w-full rounded-lg">
+                  {`# Build for Cloudflare Workers
+npm run build:cloudflare
+
+# Preview locally with Wrangler
+npx wrangler dev`}
+                </CodeBlock>
+              </div>
+
+              <div id="target-deno-bun" className="scroll-mt-20 mt-8 space-y-3">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Cpu className="h-5 w-5 text-emerald-500" />
+                  5.3. Deno &amp; Bun Compilation
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Compile your full-stack Dinou app into a self-contained, single-file native executable with zero external dependencies:
+                </p>
+                <CodeBlock language="bash" containerClassName="w-full rounded-lg">
+                  {`# Compile standalone binary with Deno
+npm run build:deno:compile
+
+# Cross-compile for Linux, macOS, or Windows
+npm run build:deno:compile:linux
+npm run build:deno:compile:mac
+npm run build:deno:compile:win
+
+# Compile standalone binary with Bun
+npm run build:bun:compile`}
+                </CodeBlock>
+                <p className="text-xs text-muted-foreground">
+                  Binaries are output directly to <code>dist/</code>, ready for distribution, Docker containers, or zero-config deployment.
+                </p>
+              </div>
+
+              <div id="target-static" className="scroll-mt-20 mt-8 space-y-3">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-cyan-500" />
+                  5.4. Static Site Generation (SSG)
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Pre-render your entire application into static HTML and RSC payloads for hosting on GitHub Pages, AWS S3, or any static CDN:
+                </p>
+                <CodeBlock language="bash" containerClassName="w-full rounded-lg">
+                  {`# Export fully static site
+npm run export-static`}
+                </CodeBlock>
+                <p className="text-xs text-muted-foreground">
+                  Output is written to <code>out/</code>, complete with static assets, pre-rendered HTML documents, and client JavaScript chunks.
+                </p>
+              </div>
+            </section>
+
+            {/* Section 6: Next Steps */}
             <section id="next-steps" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                Next Steps
+                6. Next Steps &amp; Architecture
               </h2>
               <p>
                 Now that your project is running, explore these core guides to master the Dinou v7 architecture:

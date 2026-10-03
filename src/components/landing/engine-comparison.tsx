@@ -33,6 +33,18 @@ export function EngineComparison() {
       v7: "Zero-disk I/O dev server with instant HMR and hot CSS updates",
       v7Highlight: true,
     },
+    {
+      dimension: "Rendering & Caching Model",
+      v6: "All-or-nothing page caching (dynamic boolean + revalidate in ms)",
+      v7: "2D Layered Segmentation (PPR, layout_functions & <DinouCacheSlot> in seconds)",
+      v7Highlight: true,
+    },
+    {
+      dimension: "State Persistence on Navigation",
+      v6: "Layouts unmount and lose media playback, input text, and filter state",
+      v7: "Total state preservation across sibling routes via <DinouPageSlot />",
+      v7Highlight: true,
+    },
   ];
 
   return (

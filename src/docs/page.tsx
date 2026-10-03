@@ -23,16 +23,25 @@ import {
   Layers,
   Globe,
   Sparkles,
+  Box,
+  Split,
+  Clock,
+  CheckCircle2,
 } from "lucide-react";
 import { Link } from "dinou";
 
-// Pure React Server Component (no 'use client')
 const tocItems = [
-  { id: "what-is-dinou", title: "What is Dinou v7?", level: 2 },
-  { id: "core-pillars", title: "Core Pillars", level: 2 },
-  { id: "quick-start", title: "Quick Start", level: 2 },
-  { id: "project-structure", title: "Project Structure", level: 2 },
-  { id: "next-steps", title: "Next Steps", level: 2 },
+  { id: "what-is-dinou", title: "1. What is Dinou v7?", level: 2 },
+  { id: "layered-segmentation", title: "2. 2D Layered Segmentation & PPR", level: 2 },
+  { id: "horizontal-segmentation", title: "2.1. Horizontal Layout ISR", level: 3 },
+  { id: "vertical-segmentation", title: "2.2. Vertical <DinouCacheSlot>", level: 3 },
+  { id: "partial-prerendering", title: "2.3. Partial Prerendering (PPR)", level: 3 },
+  { id: "dual-bundle-engine", title: "3. 0-Fork Dual-Bundle Engine", level: 2 },
+  { id: "unified-caching", title: "4. Unified Caching & Data Contract", level: 2 },
+  { id: "core-pillars", title: "5. Core Architectural Pillars", level: 2 },
+  { id: "quick-start", title: "6. Quick Start in 60 Seconds", level: 2 },
+  { id: "project-structure", title: "7. Project Structure & Conventions", level: 2 },
+  { id: "next-steps", title: "8. Next Steps & Guides", level: 2 },
 ];
 
 export default function Page() {
@@ -59,8 +68,7 @@ export default function Page() {
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
               A modern, lightweight, and ejectable Full-Stack React 19 Framework.
-              Built on standard Web APIs, uncompromising developer freedom, and a
-              multi-runtime architecture that runs anywhere.
+              Featuring 2D Layered Segmentation, Partial Prerendering (PPR), an in-process 0-fork dual-bundle engine, and a universal multi-runtime architecture.
             </p>
           </div>
 
@@ -68,7 +76,7 @@ export default function Page() {
             {/* Section 1: What is Dinou v7 */}
             <section id="what-is-dinou" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                What is Dinou v7?
+                1. What is Dinou v7?
               </h2>
               <p>
                 <strong>Dinou v7</strong> is engineered from first principles to
@@ -79,8 +87,8 @@ export default function Page() {
               <p>
                 Every feature—from <strong>React Server Components (RSC)</strong> and{" "}
                 <strong>Server Functions (<code>&apos;use server&apos;</code>)</strong> to
-                Suspense streaming and Incremental Static Regeneration (ISR)—is implemented
-                using transparent, standard Node.js and Web APIs.
+                Suspense streaming, <strong>Partial Prerendering (PPR)</strong>, and <strong>Two-Dimensional Layered Segmentation</strong>—is implemented
+                using transparent Web standards (W3C Request, Response, and ReadableStream).
               </p>
 
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 not-prose my-6">
@@ -89,7 +97,15 @@ export default function Page() {
                     React 19 Native
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    First-class RSC, Actions, Suspense streaming, and direct server data access.
+                    First-class RSC, Server Actions, Suspense streaming, and direct server data access.
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                  <div className="text-cyan-600 dark:text-cyan-400 font-mono font-bold text-base mb-1">
+                    Layered Segmentation
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    PPR, horizontal layout ISR via <code>layout_functions</code>, and vertical micro-caching.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
@@ -97,15 +113,7 @@ export default function Page() {
                     Deploy Everywhere
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Compile identical code to Node.js, Cloudflare Workers, Netlify, Deno, or Bun.
-                  </p>
-                </div>
-                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-                  <div className="text-cyan-600 dark:text-cyan-400 font-mono font-bold text-base mb-1">
-                    Triple-Bundler
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Switch seamlessly between esbuild, Rollup, and Webpack with zero lock-in.
+                    Compile identical code to Cloudflare Workers, Bun, Deno, Node.js, or static SSG.
                   </p>
                 </div>
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
@@ -113,16 +121,242 @@ export default function Page() {
                     100% Ejectable
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Run <code>npm run eject</code> to inspect, customize, or evolve the framework core.
+                    Run <code>npm run eject</code> to inspect, customize, or own the entire framework engine.
                   </p>
                 </div>
               </div>
             </section>
 
-            {/* Section 2: Core Pillars */}
+            {/* Section 2: 2D Layered Segmentation & PPR */}
+            <section id="layered-segmentation" className="scroll-mt-20">
+              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
+                2. Two-Dimensional Layered Segmentation &amp; PPR
+              </h2>
+              <p>
+                Dinou v7 eliminates all-or-nothing caching models. Instead of forcing an entire route to be either 100% static or 100% dynamic, Dinou divides rendering and caching across two independent dimensions:
+              </p>
+
+              {/* Subsection 2.1: Horizontal */}
+              <div id="horizontal-segmentation" className="mt-8 scroll-mt-20">
+                <h3 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-purple-500" />
+                  <span>2.1. Horizontal Segmentation (Routes &amp; Layouts)</span>
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  In Dinou v7, layouts and pages operate on decoupled architectural planes. Layouts can declare their own data fetching and independent cache lifetimes using <code>layout_functions.ts</code>:
+                </p>
+
+                <div className="not-prose my-4">
+                  <CodeBlock language="typescript">
+                    {`// src/dashboard/layout_functions.ts
+export const revalidate = 3600; // Cache layout shell for 1 hour
+export const tags = ["dashboard-shell", "nav-stats"];
+
+export async function getProps() {
+  const globalStats = await fetchGlobalStats();
+  return { globalStats };
+}`}
+                  </CodeBlock>
+                </div>
+
+                <div className="not-prose grid gap-3 sm:grid-cols-2 my-4">
+                  <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-card text-xs">
+                    <p className="font-semibold text-purple-600 dark:text-purple-400 mb-1 flex items-center gap-1.5">
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      Decoupled Layout Invalidation
+                    </p>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Calling <code>revalidateTag(&quot;dashboard-shell&quot;)</code> purges only the layout shell without forcing the re-rendering of dozens of underlying child pages.
+                    </p>
+                  </div>
+                  <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-card text-xs">
+                    <p className="font-semibold text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      Persistent State via &lt;DinouPageSlot /&gt;
+                    </p>
+                    <p className="text-muted-foreground leading-relaxed">
+                      When navigating between sibling routes, the layout never unmounts. Audio/video players continue playing and sidebar search inputs remain filled.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Subsection 2.2: Vertical */}
+              <div id="vertical-segmentation" className="mt-8 scroll-mt-20">
+                <h3 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Box className="h-5 w-5 text-emerald-500" />
+                  <span>2.2. Vertical Segmentation (&lt;DinouCacheSlot&gt;)</span>
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  Vertical segmentation allows component-level micro-caching within a single page or layout. Wrap expensive Server Components in <code>&lt;DinouCacheSlot&gt;</code> for independent TTLs and client-driven in-place refreshes:
+                </p>
+
+                <div className="not-prose my-4">
+                  <CodeBlock language="tsx">
+                    {`// src/dashboard/page.tsx
+import { DinouCacheSlot } from "dinou";
+import LiveMetrics from "./metrics";
+import RefreshButton from "./refresh-button";
+
+export default function Dashboard() {
+  return (
+    <div className="grid grid-cols-2 gap-6">
+      {/* 🎯 Micro-ISR: Cached independently for 60 seconds */}
+      <DinouCacheSlot id="metrics" tag="metrics-tag" revalidate={60}>
+        <LiveMetrics />
+      </DinouCacheSlot>
+
+      {/* 🔄 In-place client refresh button (Zero page reload) */}
+      <RefreshButton slotId="metrics" />
+    </div>
+  );
+}
+
+// Client Component: Refresh only this slot without reloading the page!
+// import { refreshSlot } from "dinou";
+// <button onClick={() => refreshSlot("metrics")}>Refresh Metrics Only</button>`}
+                  </CodeBlock>
+                </div>
+              </div>
+
+              {/* Subsection 2.3: PPR */}
+              <div id="partial-prerendering" className="mt-8 scroll-mt-20">
+                <h3 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-cyan-500" />
+                  <span>2.3. Partial Prerendering (PPR)</span>
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  Partial Prerendering delivers an instant static shell at <strong>&lt; 20ms TTFB</strong> from edge CDN cache, while dynamic components wrapped in React 19 <code>&lt;Suspense&gt;</code> execute concurrently and stream in over the wire to atomically replace fallbacks:
+                </p>
+
+                <div className="not-prose my-4">
+                  <CodeBlock language="tsx">
+                    {`// src/feed/page_functions.ts
+export const ppr = true; // Enable PPR on this route
+
+// src/feed/page.tsx
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import UserProfileFeed from "./user-feed";
+
+export default function FeedPage() {
+  return (
+    <div>
+      {/* ⚡ Static Shell: Served instantly in < 20ms */}
+      <h1 className="text-3xl font-bold">Your Activity</h1>
+
+      {/* 🌊 Dynamic Hole: Streamed concurrently in the background */}
+      <Suspense fallback={<Skeleton className="h-48 w-full" />}>
+        <UserProfileFeed />
+      </Suspense>
+    </div>
+  );
+}`}
+                  </CodeBlock>
+                </div>
+              </div>
+            </section>
+
+            {/* Section 3: 0-Fork Dual-Bundle Engine */}
+            <section id="dual-bundle-engine" className="scroll-mt-20">
+              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
+                3. The 0-Fork Dual-Bundle Engine
+              </h2>
+              <p>
+                React 19 imposes strict dual export conditions: Server Components must resolve under <code>&quot;react-server&quot;</code>, while Client Components and SSR require <code>&quot;browser&quot;</code> / client conditions.
+              </p>
+              <p>
+                Legacy meta-frameworks solved this by spawning separate processes via <code>child_process.fork()</code>, causing IPC serialization latency, doubling memory consumption, and breaking compatibility with edge runtimes (Cloudflare Workers, single-binary Bun).
+              </p>
+              <p>
+                <strong>Dinou v7 standardizes an in-process 3-pass Ahead-of-Time (AOT) dual-bundle pipeline across all runtimes:</strong>
+              </p>
+
+              <div className="not-prose grid gap-4 md:grid-cols-3 my-6">
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-card">
+                  <Badge variant="outline" className="mb-2 text-blue-500 border-blue-500/20">Pass A: RSC Engine</Badge>
+                  <h4 className="font-semibold text-sm mb-1 text-slate-900 dark:text-slate-100">react-server Condition</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Compiles Server Components, binds Server Functions (<code>&apos;use server&apos;</code>), and converts Client Components to lightweight reference descriptors.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-card">
+                  <Badge variant="outline" className="mb-2 text-purple-500 border-purple-500/20">Pass B: SSR Engine</Badge>
+                  <h4 className="font-semibold text-sm mb-1 text-slate-900 dark:text-slate-100">browser / Edge Condition</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Bundles <code>react-dom/server.edge</code> and client manifests with physical component implementations for streaming HTML and hydration.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-card">
+                  <Badge variant="outline" className="mb-2 text-emerald-500 border-emerald-500/20">Pass C: Orchestrator</Badge>
+                  <h4 className="font-semibold text-sm mb-1 text-slate-900 dark:text-slate-100">W3C Web Streams</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Zero-overhead in-memory connection piping RSC payloads directly into SSR via native <code>ReadableStream</code> primitives.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Section 4: Unified Caching & Data Contract */}
+            <section id="unified-caching" className="scroll-mt-20">
+              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
+                4. Unified Caching &amp; Data Contract
+              </h2>
+              <p>
+                Dinou v7 establishes clean, unambiguous contracts for data fetching and caching:
+              </p>
+
+              <div className="not-prose space-y-4 my-6">
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-card">
+                  <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-100 mb-2">
+                    1. Direct Props Return in <code>getProps</code>
+                  </h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                    The legacy v6 <code>&#123; page: ... &#125;</code> wrapper is completely removed. In Dinou v7, <code>getProps</code> directly returns the component props object:
+                  </p>
+                  <CodeBlock language="typescript">
+                    {`// ✅ Dinou v7: Direct props return
+export async function getProps({ params }) {
+  const user = await fetchUser(params.id);
+  return {
+    user,
+    title: \`Profile of \${user.name}\`,
+  };
+}`}
+                  </CodeBlock>
+                </div>
+
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-card">
+                  <h4 className="font-semibold text-sm text-slate-900 dark:text-slate-100 mb-2">
+                    2. Single Source of Truth: <code>revalidate</code> in Seconds (<code>s</code>)
+                  </h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                    The <code>dynamic</code> keyword is removed. <code>revalidate</code> in <strong>seconds</strong> governs all rendering and caching behaviors:
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-3 text-xs font-mono">
+                    <div className="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                      <span className="text-blue-600 dark:text-blue-400 font-bold block">revalidate = 0</span>
+                      <span className="text-muted-foreground font-sans">Live SSR on every request</span>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold block">revalidate &gt;= 1</span>
+                      <span className="text-muted-foreground font-sans">ISR with background SWR (e.g. 60s)</span>
+                    </div>
+                    <div className="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                      <span className="text-purple-600 dark:text-purple-400 font-bold block">revalidate = false</span>
+                      <span className="text-muted-foreground font-sans">Permanent Static SSG</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Section 5: Core Pillars */}
             <section id="core-pillars" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-6">
-                Core Architectural Pillars
+                5. Core Architectural Pillars
               </h2>
               <div className="grid gap-5 md:grid-cols-2 not-prose">
                 <Card className="border-slate-200 dark:border-slate-800/80 hover:border-blue-500/40 transition-colors">
@@ -130,13 +364,13 @@ export default function Page() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/60 mb-2">
                       <Cpu className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <CardTitle className="text-lg">React 19 & RSC Core</CardTitle>
+                    <CardTitle className="text-lg">React 19 &amp; RSC Core</CardTitle>
                     <CardDescription>
                       Server-first rendering with zero bundle overhead.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       Components render on the server by default. Client JavaScript is only sent
                       for interactive components marked with <code>&apos;use client&apos;</code>.
                       Execute server-side logic seamlessly with React 19 Server Functions.
@@ -155,7 +389,7 @@ export default function Page() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       Organize your application intuitively inside <code>src/</code>. Build complex interfaces
                       with nested <code>layout.tsx</code> hierarchies, dynamic parameters (<code>[slug]</code>),
                       route groups (<code>(group)</code>), parallel slots (<code>@modal</code>), and layout resets.
@@ -174,7 +408,7 @@ export default function Page() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       Intercept requests before React executes with the <code>onRequest()</code> hook in{" "}
                       <code>dinou.config.ts</code>. Fast-path webhooks (Stripe, Clerk), enforce auth guards,
                       and share typed request context across your Server Components via <code>getContext()</code>.
@@ -193,9 +427,9 @@ export default function Page() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       Compile your application for traditional Node.js servers, fast Bun
-                      instances, Deno microservices, serverless Netlify Functions, or Cloudflare Workers at the edge without
+                      standalone servers, single native executable binaries, Deno Deploy, or Cloudflare Workers at the edge without
                       changing a single line of application code.
                     </p>
                   </CardContent>
@@ -212,10 +446,10 @@ export default function Page() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       Choose <strong>esbuild</strong> for blazing fast development bundling, or switch
                       to <strong>Rollup</strong> or <strong>Webpack</strong> for specialized enterprise plugins
-                      using familiar npm script targets.
+                      with complete performance parity.
                     </p>
                   </CardContent>
                 </Card>
@@ -225,27 +459,24 @@ export default function Page() {
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-950/60 mb-2">
                       <RefreshCw className="h-5 w-5 text-rose-600 dark:text-rose-400" />
                     </div>
-                    <CardTitle className="text-lg">Static-First ISR &amp; ISG</CardTitle>
+                    <CardTitle className="text-lg">Zero-Disk Dev DX</CardTitle>
                     <CardDescription>
-                      Build-time pre-rendering with on-demand runtime SSR.
+                      100% in-memory serving with instant HMR and CSS injection.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Routes pre-render to static HTML and RSC payloads at build time by default, with automatic
-                      bailout to on-demand runtime SSR when request headers or cookies are accessed.
-                      Statically cache dynamic routes on first visit (ISG), revalidate stale pages
-                      in the background via atomic disk swaps (ISR), and purge caches with <code>revalidatePath()</code>.
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Development builds emit directly to memory buffers (<code>globalThis.__DINOU_MEM_FILES__</code>), bypassing disk I/O entirely. Features instant Hot CSS swapping, React Fast Refresh, and fast SWC caching.
                     </p>
                   </CardContent>
                 </Card>
               </div>
             </section>
 
-            {/* Section 3: Quick Start */}
+            {/* Section 6: Quick Start */}
             <section id="quick-start" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                Quick Start in 60 Seconds
+                6. Quick Start in 60 Seconds
               </h2>
               <p>
                 Get a fully configured Dinou v7 application with React 19, Tailwind CSS, and
@@ -279,10 +510,10 @@ npm run dev`}
               </p>
             </section>
 
-            {/* Section 4: Project Structure */}
+            {/* Section 7: Project Structure */}
             <section id="project-structure" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                Project Structure
+                7. Project Structure &amp; Conventions
               </h2>
               <p>
                 Dinou v7 uses intuitive file-system conventions. All routes, layouts, and private
@@ -310,16 +541,20 @@ npm run dev`}
 ├── src/
 │   ├── page.tsx               # Root page (/)
 │   ├── layout.tsx             # Root layout & ThemeProvider
+│   ├── layout_functions.ts    # Independent layout data fetching & ISR (v7)
 │   ├── globals.css            # Tailwind / global styles
 │   ├── _components/           # 🔒 Private folder (ignored by router)
 │   │   ├── hero.tsx
 │   │   └── navbar.tsx
 │   └── docs/
 │       ├── page.tsx           # /docs documentation root
+│       ├── page_functions.ts  # Route revalidate (seconds) & getProps (v7)
 │       ├── layout.tsx         # /docs dedicated layout & sidebar
+│       ├── layout_functions.ts# /docs layout cache lifetime & tags
 │       └── [slug]/
-│           └── page.tsx       # Dynamic route segment (/docs/:slug)
-├── dinou.config.ts            # Optional framework configuration
+│           ├── page.tsx       # Dynamic route segment (/docs/:slug)
+│           └── page_functions.ts # Dynamic param validation & ISR
+├── dinou.config.ts            # Optional framework configuration (ppr: true)
 ├── package.json
 └── tsconfig.json`}</code>
                   </pre>
@@ -332,19 +567,18 @@ npm run dev`}
                   Key Rule in v7: Private Folders (_ prefix)
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Any folder prefixed with <code>_</code> (such as <code>_drafts</code>) is
+                  Any folder prefixed with <code>_</code> (such as <code>_components</code> or <code>_drafts</code>) is
                   completely ignored by the router and static build scanner,{" "}
                   <strong>even if it contains valid <code>page.tsx</code> files</strong>. This makes it
-                  invaluable for archiving previous architectures, keeping legacy reference documentation,
-                  or isolating work-in-progress routes without exposing them publicly or causing routing conflicts.
+                  invaluable for colocating components, archiving previous architectures, or isolating work-in-progress routes without causing routing conflicts.
                 </p>
               </div>
             </section>
 
-            {/* Section 5: Next Steps */}
+            {/* Section 8: Next Steps */}
             <section id="next-steps" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                Next Steps
+                8. Next Steps &amp; Guides
               </h2>
               <p>
                 Explore the documentation to dive deeper into the architecture, routing, and deployment guides:
@@ -356,13 +590,13 @@ npm run dev`}
                   className="h-auto p-4 justify-between border-slate-200 dark:border-slate-800 hover:border-blue-500/40 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors group"
                   asChild
                 >
-                  <Link href="/docs/getting-started" className="flex items-center justify-between w-full">
+                  <Link href="/docs/migration/v6-to-v7" className="flex items-center justify-between w-full">
                     <div className="text-left">
                       <div className="font-semibold text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        Getting Started Guide
+                        v6 to v7 Migration Guide
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Step-by-step installation, dependencies, and configuration.
+                        Breaking changes, direct props, and upgrade instructions.
                       </div>
                     </div>
                     <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors ml-2" />
@@ -374,13 +608,13 @@ npm run dev`}
                   className="h-auto p-4 justify-between border-slate-200 dark:border-slate-800 hover:border-blue-500/40 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors group"
                   asChild
                 >
-                  <Link href="/docs/routing" className="flex items-center justify-between w-full">
+                  <Link href="/docs/rendering" className="flex items-center justify-between w-full">
                     <div className="text-left">
                       <div className="font-semibold text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        Routing &amp; Layouts
+                        Rendering Strategies &amp; PPR
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        File-system routing, groups, parameters, and layout resets.
+                        PPR, static bailout, micro-caching, and ISR.
                       </div>
                     </div>
                     <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors ml-2" />
@@ -392,13 +626,13 @@ npm run dev`}
                   className="h-auto p-4 justify-between border-slate-200 dark:border-slate-800 hover:border-blue-500/40 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors group"
                   asChild
                 >
-                  <Link href="/docs/server-client-components" className="flex items-center justify-between w-full">
+                  <Link href="/docs/layouts" className="flex items-center justify-between w-full">
                     <div className="text-left">
                       <div className="font-semibold text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        Server vs Client Components
+                        Layouts &amp; layout_functions
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Master the RSC mental model and client boundaries.
+                        Horizontal segmentation and persistent navigation slots.
                       </div>
                     </div>
                     <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors ml-2" />
@@ -410,13 +644,13 @@ npm run dev`}
                   className="h-auto p-4 justify-between border-slate-200 dark:border-slate-800 hover:border-blue-500/40 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors group"
                   asChild
                 >
-                  <Link href="/docs/internals" className="flex items-center justify-between w-full">
+                  <Link href="/docs/deployment" className="flex items-center justify-between w-full">
                     <div className="text-left">
                       <div className="font-semibold text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        Architecture &amp; Internals
+                        Universal Deployment
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Under the hood: IPC, HTML streaming, and the dual-engine.
+                        Deploying to Cloudflare Workers, Bun, Deno, and Node.js.
                       </div>
                     </div>
                     <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors ml-2" />
@@ -428,7 +662,7 @@ npm run dev`}
         </div>
       </main>
 
-      {/* Sidebar TOC - Visible on Desktop */}
+      {/* Sidebar TOC - Visible on Desktop with independent left-scroll */}
       <aside className="hidden xl:block w-64 pl-8 py-8 lg:py-10 shrink-0">
         <div className="sticky top-20">
           <TableOfContents items={tocItems} />
