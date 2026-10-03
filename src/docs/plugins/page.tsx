@@ -12,16 +12,41 @@ import {
   CardHeader,
   CardTitle,
 } from "@/docs/components/ui/card";
-import { Puzzle, Server, RefreshCw, ShieldAlert, Cpu } from "lucide-react";
+import {
+  Puzzle,
+  Server,
+  RefreshCw,
+  ShieldAlert,
+  Cpu,
+  Zap,
+  Settings,
+  CheckCircle2,
+  Code2,
+  ShieldCheck,
+  Layers,
+  Lock,
+  ArrowRight,
+  Flame,
+} from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
+import { Link } from "dinou";
 
 const tocItems = [
-  { id: "overview", title: "🔌 Overview", level: 2 },
-  { id: "configuration", title: "⚙️ Configuration File", level: 2 },
-  { id: "plugin-hooks", title: "⚓ Plugin Hooks", level: 2 },
-  { id: "on-server-init", title: "1. onServerInit", level: 3 },
-  { id: "on-request-context", title: "2. onRequestContext", level: 3 },
-  { id: "try-catch-isolation", title: "🛡️ Try-Catch & Fault Isolation", level: 2 },
+  { id: "overview", title: "Configuration & Plugin System", level: 2 },
+  { id: "config-file", title: "The dinou.config.mjs File", level: 2 },
+  { id: "config-options", title: "Top-Level Configuration Options", level: 2 },
+  { id: "ppr-option", title: "Global Partial Prerendering (ppr)", level: 3 },
+  { id: "strict-mode-option", title: "React StrictMode (reactStrictMode)", level: 3 },
+  { id: "storage-option", title: "Storage Adapter (storage)", level: 3 },
+  { id: "plugins-option", title: "Plugins Array (plugins)", level: 3 },
+  { id: "plugin-architecture", title: "Dinou Plugin Architecture (onRequest)", level: 2 },
+  { id: "pattern-intercept", title: "Pattern 1: Short-Circuit & Webhooks (Returning Response)", level: 3 },
+  { id: "pattern-context", title: "Pattern 2: Middleware & Context Mutation (getContext)", level: 3 },
+  { id: "real-world-examples", title: "Real-World Plugin Examples", level: 2 },
+  { id: "example-auth", title: "Authentication Guard & Session Injection", level: 3 },
+  { id: "example-webhook", title: "Stripe / Clerk Webhook Handler", level: 3 },
+  { id: "plugin-registration-order", title: "Registration & Execution Pipeline Order", level: 2 },
+  { id: "fault-isolation", title: "Fault Isolation & Error Handling", level: 2 },
 ];
 
 export default function Page() {
@@ -33,160 +58,470 @@ export default function Page() {
           <div className="mb-8 space-y-4">
             <div className="flex items-center space-x-3">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Plugin System
+                Configuration &amp; Plugins
               </h1>
-              <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
-                v5.2.0+
+              <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                v7 Core
               </span>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Extend your Dinou application, register custom Express middlewares or endpoints, and propagate context variables without ejecting.
+              Customize your Dinou application with <code>dinou.config.mjs</code>, enable global Partial Prerendering (PPR), configure React StrictMode, and hook into the request lifecycle using Web Standards plugins.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
-            <blockquote>
-              <strong>Dinou's lightweight plugin architecture provides a modular way to plug in third-party integrations (like Clerk, Stripe, or custom i18n routing) while preserving the ability to update the underlying framework engine.</strong>
-            </blockquote>
-
-            <hr className="my-8" />
-
-            {/* OVERVIEW */}
+            {/* Overview */}
             <section id="overview">
-              <h2>🔌 Overview</h2>
+              <h2>Configuration &amp; Plugin System</h2>
               <p>
-                Before this feature, adding middlewares or customizing the React Server Components context required running <code>npm run eject</code> to directly modify the core Express <code>server.js</code> file.
+                In <strong>Dinou v7</strong>, the configuration and plugin architecture is built entirely on modern <strong>Web Standards</strong> (the standard <code>Request</code> and <code>Response</code> interfaces).
               </p>
               <p>
-                With the new plugin system, you can package Express routing, global request interceptors, and context propagation logic in standard, isolated plugin objects declared inside <code>dinou.config.js</code>.
+                Through <code>dinou.config.mjs</code>, you can:
               </p>
-            </section>
+              <ul>
+                <li>
+                  <strong>Enable Global PPR:</strong> Automatically generate static shells with dynamic streaming Suspense holes for all static-eligible routes.
+                </li>
+                <li>
+                  <strong>Configure React StrictMode:</strong> Ensure dev-time safety and compiler compatibility across your component tree.
+                </li>
+                <li>
+                  <strong>Mount Universal Middlewares:</strong> Intercept incoming HTTP requests, enforce security policies, or handle webhooks without ejecting.
+                </li>
+                <li>
+                  <strong>Propagate Server Context:</strong> Attach session, user, or localization data to <code>context</code>, instantly accessible in Server Components and Server Functions via <code>getContext()</code>.
+                </li>
+              </ul>
 
-            {/* CONFIGURATION */}
-            <section id="configuration">
-              <h2>⚙️ Configuration File</h2>
-              <p>
-                To register plugins, create a <code>dinou.config.js</code> file at the root of your project using CommonJS (<code>module.exports</code>). The server dynamically loads this configuration file during startup:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`// dinou.config.js
-module.exports = {
-  plugins: [
-    // Register your plugins here
-  ]
-};`}</CodeBlock>
+              <div className="grid gap-4 sm:grid-cols-3 not-prose my-6">
+                <Card className="border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm">
+                      <Zap className="h-4 w-4" />
+                      <span>Web Standards First</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-xs text-muted-foreground">
+                    Native <code>Request</code> &amp; <code>Response</code> APIs. Zero dependency on legacy Node.js Express wrappers.
+                  </CardContent>
+                </Card>
+
+                <Card className="border-purple-500/20 bg-purple-50/50 dark:bg-purple-900/10">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold text-sm">
+                      <Flame className="h-4 w-4" />
+                      <span>PPR &amp; Rendering Flags</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-xs text-muted-foreground">
+                    Control global Partial Prerendering and React StrictMode from a single configuration source.
+                  </CardContent>
+                </Card>
+
+                <Card className="border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-900/10">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
+                      <ShieldCheck className="h-4 w-4" />
+                      <span>Context Propagation</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-xs text-muted-foreground">
+                    Inject authenticated user or tenant data into RSC via <code>AsyncLocalStorage</code> and <code>getContext()</code>.
+                  </CardContent>
+                </Card>
               </div>
             </section>
 
-            {/* PLUGIN HOOKS */}
-            <section id="plugin-hooks">
-              <h2>⚓ Plugin Hooks</h2>
+            {/* Config File */}
+            <section id="config-file" className="mt-12">
+              <h2>The dinou.config.mjs File</h2>
               <p>
-                A plugin is a standard JavaScript object containing a <code>name</code> and one or more lifecycle hooks:
+                Dinou automatically discovers your configuration file at the root of your project. The recommended format is ES Modules (<code>dinou.config.mjs</code> or <code>dinou.config.ts</code>) using the <code>defineConfig</code> helper:
               </p>
 
-              <section id="on-server-init">
-                <h3>1. <code>onServerInit(app)</code></h3>
-                <p>
-                  Triggers immediately after the Express app and cookie-parser are initialized, but before other default body-parsers or routing handlers.
-                </p>
-                <div className="border rounded-lg p-4 bg-card not-prose my-4">
-                  <div className="flex items-center gap-2 font-semibold mb-2 text-purple-600 dark:text-purple-400">
-                    <Server className="h-5 w-5" />
-                    <span>Express Middleware & Custom Routing</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Use this hook to mount standard Express middlewares, register custom REST endpoints, or handle raw Webhooks (such as Stripe or Clerk) before they hit the main page routing engine.
-                  </p>
-                  <CodeBlock language="javascript">{`const customLoggingPlugin = {
-  name: "request-logger",
-  onServerInit(app) {
-    app.use((req, res, next) => {
-      console.log(\`[\${req.method}] \${req.path}\`);
-      next();
-    });
-  }
-};`}</CodeBlock>
-                </div>
-              </section>
+              <CodeBlock
+                language="typescript"
+                containerClassName="w-full overflow-hidden rounded-lg"
+              >
+{`// dinou.config.mjs
+import { defineConfig } from "dinou";
 
-              <section id="on-request-context">
-                <h3>2. <code>onRequestContext(req, res, context)</code></h3>
-                <p>
-                  Triggers whenever Dinou creates the execution context for React Server Components. This hook executes across three distinct environments:
-                </p>
-                <ul className="list-disc pl-6 space-y-1">
-                  <li><strong>Standard Page Routing</strong>: during dynamic request-time rendering in the main Express process.</li>
-                  <li><strong>Server Actions</strong>: during execution of Server Functions (Actions).</li>
-                  <li><strong>SSR Child Process</strong>: inside the child process spawned by Dinou to render the React tree to HTML (handling both static path pre-compilation during server startup and initial HTML loads/reloads).</li>
-                </ul>
-                <div className="border rounded-lg p-4 bg-card not-prose my-4">
-                  <div className="flex items-center gap-2 font-semibold mb-2 text-blue-600 dark:text-blue-400">
-                    <RefreshCw className="h-5 w-5" />
-                    <span>RSC Context Injection</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Modify the <code>context.req</code> object to expose custom variables (like session details or localized language dictionaries) to your page layouts and server functions.
-                  </p>
-                  <CodeBlock language="javascript">{`const customContextPlugin = {
-  name: "custom-context-inject",
-  onRequestContext(req, res, context) {
-    // Expose a custom variable in RSC context
-    context.req.customVal = "hello-from-plugin";
-  }
-};`}</CodeBlock>
-                </div>
+export default defineConfig({
+  // Global Partial Prerendering (v7)
+  ppr: false,
 
-                <h3>Consuming Context in Your Application</h3>
-                <p>
-                  Once a custom property is injected into the context via a plugin, it becomes accessible in any server-side file (including Server Components, <code>getProps</code> inside <code>page_functions.ts</code>, or Server Functions) by calling <code>getContext()</code>:
-                </p>
-                <div className="not-prose my-4">
-                  <CodeBlock language="typescript">{`// src/actions.ts (Server Functions)
-"use server";
+  // React StrictMode in development (defaults to true in v7)
+  reactStrictMode: true,
 
-import { getContext } from "dinou";
-
-export async function myServerAction() {
-  const context = getContext();
-  const customVal = context?.req?.customVal; // Returns "hello-from-plugin"
-  
-  if (customVal === "hello-from-plugin") {
-    // Perform localized or session-specific logic...
-  }
-}`}</CodeBlock>
-                </div>
-              </section>
+  // Array of Web Standards plugins
+  plugins: [],
+});`}
+              </CodeBlock>
+              <p className="text-xs text-muted-foreground mt-2">
+                Dinou also supports <code>dinou.config.js</code>, <code>dinou.config.cjs</code>, and <code>dinou.config.ts</code>.
+              </p>
             </section>
 
-            {/* TRY-CATCH ISOLATION */}
-            <section id="try-catch-isolation">
-              <h2>🛡️ Try-Catch & Fault Isolation</h2>
+            {/* Top-Level Config Options */}
+            <section id="config-options" className="mt-12">
+              <h2>Top-Level Configuration Options</h2>
               <p>
-                Dinou provides built-in try-catch wrappers around all plugin hook calls. This ensures high robustness and keeps your production site alive:
+                The <code>DinouConfig</code> schema provides top-level controls for runtime behavior and compilation:
+              </p>
+
+              {/* PPR Option */}
+              <div id="ppr-option" className="mt-8 space-y-3">
+                <h3 className="text-lg font-bold">1. Global Partial Prerendering (<code>ppr</code>)</h3>
+                <p>
+                  <strong>Dinou v7</strong> introduces first-class <strong>Partial Prerendering (PPR)</strong>. When <code>ppr: true</code> is configured globally in <code>dinou.config.mjs</code>:
+                </p>
+                <ul>
+                  <li>
+                    All static-eligible routes pre-render an instant static HTML shell at build/ISR time.
+                  </li>
+                  <li>
+                    Dynamic components wrapped in React <code>&lt;Suspense&gt;</code> leave streaming placeholder holes that resume and stream from the server upon request.
+                  </li>
+                </ul>
+                <CodeBlock
+                  language="javascript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`// dinou.config.mjs
+export default defineConfig({
+  ppr: true, // Enables Partial Prerendering across all eligible routes
+});`}
+                </CodeBlock>
+                <p className="text-xs text-muted-foreground">
+                  You can still override PPR on a per-route or per-layout basis inside <code>page_functions.ts</code> or <code>layout_functions.ts</code> by exporting <code>export const ppr = false;</code>.
+                </p>
+              </div>
+
+              {/* Strict Mode Option */}
+              <div id="strict-mode-option" className="mt-8 space-y-3">
+                <h3 className="text-lg font-bold">2. React StrictMode (<code>reactStrictMode</code>)</h3>
+                <p>
+                  In Dinou v7, <code>reactStrictMode</code> defaults to <code>true</code>. When active in development mode, React intentionally invokes components and effects twice to identify unintended side effects and ensure strict compliance with the React Compiler.
+                </p>
+                <CodeBlock
+                  language="javascript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`// dinou.config.mjs
+export default defineConfig({
+  // Enabled by default (recommended). Set to false to disable:
+  reactStrictMode: false,
+});`}
+                </CodeBlock>
+              </div>
+
+              {/* Storage Option */}
+              <div id="storage-option" className="mt-8 space-y-3">
+                <h3 className="text-lg font-bold">3. Storage Adapter (<code>storage</code>)</h3>
+                <p>
+                  Dinou&apos;s ISR and ISG caching engine uses a pluggable storage adapter. By default, Dinou uses the local filesystem (in Node.js/Bun) or Deno KV (in Deno). You can supply a custom storage adapter (such as Redis or Cloudflare KV) in <code>dinou.config.mjs</code>:
+                </p>
+                <CodeBlock
+                  language="javascript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`// dinou.config.mjs
+import { myCustomRedisStorage } from "./src/lib/storage-redis";
+
+export default defineConfig({
+  storage: myCustomRedisStorage,
+});`}
+                </CodeBlock>
+              </div>
+
+              {/* Plugins Option */}
+              <div id="plugins-option" className="mt-8 space-y-3">
+                <h3 className="text-lg font-bold">4. Plugins Array (<code>plugins</code>)</h3>
+                <p>
+                  An array of plugin objects conforming to the <code>DinouPlugin</code> interface, executed sequentially on every incoming request.
+                </p>
+              </div>
+            </section>
+
+            {/* Plugin Architecture */}
+            <section id="plugin-architecture" className="mt-12">
+              <h2>Dinou Plugin Architecture (onRequest)</h2>
+              <p>
+                In Dinou v7, a plugin is an object containing an optional <code>name</code> and the <code>onRequest</code> lifecycle hook:
+              </p>
+              <CodeBlock
+                language="typescript"
+                containerClassName="w-full overflow-hidden rounded-lg"
+              >
+{`export interface DinouPlugin {
+  name?: string;
+  onRequest?(
+    request: Request,
+    context: RequestContextStore
+  ): Promise<Response | void> | Response | void;
+}`}
+              </CodeBlock>
+
+              <p className="mt-4">
+                The <code>onRequest</code> hook receives the standard Web <code>Request</code> object and Dinou&apos;s <code>RequestContextStore</code>. It can execute in two distinct operational patterns:
+              </p>
+
+              {/* Pattern 1 */}
+              <div id="pattern-intercept" className="mt-8 space-y-3">
+                <h3 className="text-lg font-bold">Pattern 1: Short-Circuit &amp; Webhooks (Returning Response)</h3>
+                <p>
+                  If <code>onRequest</code> returns a Web <code>Response</code> instance, Dinou <strong>immediately returns that response to the client</strong> and aborts further processing. React Server Component rendering is completely bypassed:
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`const healthCheckPlugin = {
+  name: "health-check",
+  onRequest(request) {
+    const url = new URL(request.url);
+    if (url.pathname === "/healthz") {
+      return Response.json({ status: "ok", timestamp: Date.now() });
+    }
+  },
+};`}
+                </CodeBlock>
+              </div>
+
+              {/* Pattern 2 */}
+              <div id="pattern-context" className="mt-8 space-y-3">
+                <h3 className="text-lg font-bold">Pattern 2: Middleware &amp; Context Mutation (getContext)</h3>
+                <p>
+                  If <code>onRequest</code> returns <code>void</code> (or <code>undefined</code>), request processing continues normally. Any property attached to <code>context</code> is preserved in <code>AsyncLocalStorage</code> and becomes accessible in any server-side module:
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`const userSessionPlugin = {
+  name: "user-session",
+  async onRequest(request, context) {
+    const sessionCookie = context.req.cookies["session_id"];
+    if (sessionCookie) {
+      // Validate session and attach user object
+      const user = await validateSession(sessionCookie);
+      context.user = user;
+    }
+  },
+};`}
+                </CodeBlock>
+
+                <p className="mt-3">
+                  In your Server Components or Server Functions, consume the attached data using <code>getContext()</code>:
+                </p>
+                <CodeBlock
+                  language="tsx"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`// src/app/profile/page.tsx (Server Component)
+import { getContext } from "dinou";
+
+export default function ProfilePage() {
+  const context = getContext();
+  const user = context?.user;
+
+  if (!user) {
+    return <p>Please sign in to view your profile.</p>;
+  }
+
+  return <h1>Welcome back, {user.name}!</h1>;
+}`}
+                </CodeBlock>
+              </div>
+            </section>
+
+            {/* Real-World Examples */}
+            <section id="real-world-examples" className="mt-12">
+              <h2>Real-World Plugin Examples</h2>
+
+              {/* Example Auth */}
+              <div id="example-auth" className="mt-8 space-y-3">
+                <h3 className="text-lg font-bold">1. Authentication Guard &amp; Session Injection</h3>
+                <p>
+                  Protect administrative routes and inject validated user sessions before React begins rendering:
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`// plugins/auth-guard.ts
+import type { DinouPlugin } from "dinou";
+
+export function authGuardPlugin(): DinouPlugin {
+  return {
+    name: "auth-guard",
+    async onRequest(request, context) {
+      const url = new URL(request.url);
+
+      // Protect /admin routes
+      if (url.pathname.startsWith("/admin")) {
+        const token = context.req.cookies["auth_token"];
+        if (!token) {
+          // Redirect unauthorized visitors immediately
+          return Response.redirect(new URL("/login", request.url), 302);
+        }
+
+        const user = await verifyToken(token);
+        if (!user || user.role !== "admin") {
+          return new Response("Forbidden", { status: 403 });
+        }
+
+        // Attach verified user to context
+        context.user = user;
+      }
+    },
+  };
+}`}
+                </CodeBlock>
+              </div>
+
+              {/* Example Webhook */}
+              <div id="example-webhook" className="mt-8 space-y-3">
+                <h3 className="text-lg font-bold">2. Stripe / Clerk Webhook Handler</h3>
+                <p>
+                  Handle raw incoming webhooks with custom signature verification:
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`// plugins/stripe-webhook.ts
+import type { DinouPlugin } from "dinou";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+export function stripeWebhookPlugin(): DinouPlugin {
+  return {
+    name: "stripe-webhook",
+    async onRequest(request) {
+      const url = new URL(request.url);
+      if (url.pathname === "/api/webhooks/stripe" && request.method === "POST") {
+        const sig = request.headers.get("stripe-signature");
+        const rawBody = await request.text();
+
+        try {
+          const event = stripe.webhooks.constructEvent(
+            rawBody,
+            sig!,
+            process.env.STRIPE_WEBHOOK_SECRET!
+          );
+
+          if (event.type === "checkout.session.completed") {
+            // Process payment event
+          }
+
+          return Response.json({ received: true });
+        } catch (err: any) {
+          return new Response(\`Webhook Error: \${err.message}\`, { status: 400 });
+        }
+      }
+    },
+  };
+}`}
+                </CodeBlock>
+              </div>
+            </section>
+
+            {/* Registration & Execution Pipeline Order */}
+            <section id="plugin-registration-order" className="mt-12">
+              <h2>Registration &amp; Execution Pipeline Order</h2>
+              <p>
+                To register your plugins, pass them into the <code>plugins</code> array of <code>defineConfig</code> in <code>dinou.config.mjs</code>:
+              </p>
+
+              <CodeBlock
+                language="typescript"
+                containerClassName="w-full overflow-hidden rounded-lg"
+              >
+{`// dinou.config.mjs
+import { defineConfig } from "dinou";
+import { requestLoggerPlugin } from "./plugins/logger";
+import { stripeWebhookPlugin } from "./plugins/stripe-webhook";
+import { authGuardPlugin } from "./plugins/auth-guard";
+
+export default defineConfig({
+  ppr: true,
+  reactStrictMode: true,
+  plugins: [
+    // 1. Observability: Runs first on every incoming request
+    requestLoggerPlugin(),
+
+    // 2. Webhooks: Intercepts /api/webhooks/* and short-circuits early
+    stripeWebhookPlugin(),
+
+    // 3. Auth Guard: Validates credentials and enriches context.user
+    authGuardPlugin(),
+  ],
+});`}
+              </CodeBlock>
+
+              <div className="border rounded-xl p-5 bg-card not-prose my-6 space-y-3">
+                <div className="flex items-center gap-2 font-semibold text-sm">
+                  <Layers className="h-4 w-4 text-purple-500" />
+                  <span>Pipeline Execution Rules</span>
+                </div>
+                <ol className="list-decimal pl-5 text-xs text-muted-foreground space-y-2 leading-relaxed">
+                  <li>
+                    <strong>Strict Sequential Execution:</strong> Plugins execute top-to-bottom in the exact order they are declared in the array (<code>plugins[0]</code> &rarr; <code>plugins[1]</code> &rarr; <code>plugins[2]</code>). Dinou awaits each plugin&apos;s <code>onRequest</code> promise before evaluating the next.
+                  </li>
+                  <li>
+                    <strong>Short-Circuit Precedence:</strong> If a plugin returns a <code>Response</code> instance (e.g. returning <code>Response.json()</code> from a webhook or <code>Response.redirect()</code> from a guard), the pipeline terminates <strong>immediately</strong>. Subsequent plugins in the array and React page rendering are completely skipped.
+                  </li>
+                  <li>
+                    <strong>Cumulative Context Sharing:</strong> Context mutations are cumulative. A plugin downstream in the array receives the exact <code>context</code> object enriched by previous upstream plugins.
+                  </li>
+                </ol>
+              </div>
+
+              <div className="space-y-2 mt-4 text-xs text-muted-foreground">
+                <p className="font-semibold text-foreground text-sm">Recommended Layering Order:</p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li><strong>Layer 1 (Global Observability &amp; Headers):</strong> Request logging, performance metrics, and CORS headers.</li>
+                  <li><strong>Layer 2 (Public Webhooks &amp; Health Checks):</strong> Webhook listeners that must bypass authentication (e.g., Stripe, Clerk, <code>/healthz</code>).</li>
+                  <li><strong>Layer 3 (Session &amp; Tenant Identification):</strong> Cookie parsers, auth token validation, and multi-tenant resolution that mutate <code>context</code>.</li>
+                  <li><strong>Layer 4 (Route Guards &amp; Permissions):</strong> Access-control checks that inspect <code>context.user</code> and issue redirects if unauthorized.</li>
+                </ul>
+              </div>
+            </section>
+
+            {/* Fault Isolation */}
+            <section id="fault-isolation" className="mt-12">
+              <h2>Fault Isolation &amp; Error Handling</h2>
+              <p>
+                Dinou provides built-in try-catch fault isolation for all active plugins:
               </p>
               <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
                 <Card>
-                  <CardHeader>
-                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold">
-                      <Cpu className="h-5 w-5" />
-                      <span>Diagnostics</span>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold text-sm">
+                      <Cpu className="h-4 w-4" />
+                      <span>Plugin Attribution</span>
                     </div>
                   </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    Plugins are identified by their <code>name</code> field. During startup, Dinou logs each active plugin name. If a hook crashes, Dinou logs a diagnostic error referencing the specific plugin name.
+                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
+                    Plugins are identified by their <code>name</code> property. If an unhandled exception occurs inside <code>onRequest</code>, Dinou logs an informative error attributing the failure to that specific plugin name:
+                    <code className="block mt-2 p-2 rounded bg-slate-100 dark:bg-slate-800 text-[11px] font-mono text-foreground">
+                      [Dinou Plugin Error: &quot;my-plugin&quot;]: TypeError ...
+                    </code>
                   </CardContent>
                 </Card>
 
                 <Card>
-                  <CardHeader>
-                    <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-semibold">
-                      <ShieldAlert className="h-5 w-5" />
-                      <span>Crash Prevention</span>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
+                      <ShieldCheck className="h-4 w-4" />
+                      <span>Graceful Fallback</span>
                     </div>
                   </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    If one plugin throws an error (e.g. attempting to read a missing cookie or performing a failed lookup), it is isolated. Other active plugins and standard route compilation remain completely unaffected.
+                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
+                    If an unhandled exception is thrown by a plugin, Dinou catches it safely and returns a standard <code>500 Internal Server Error</code> response, preventing server crash or zombie process states.
                   </CardContent>
                 </Card>
               </div>
