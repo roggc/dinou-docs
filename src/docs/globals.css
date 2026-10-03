@@ -249,6 +249,42 @@
   background-color: var(--foreground);
 }
 
+/* Discreet, polished scrollbar for Table of Contents */
+.scrollbar-toc {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+}
+
+.scrollbar-toc::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-toc::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-toc::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.3);
+  border-radius: 9999px;
+}
+
+.scrollbar-toc::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(148, 163, 184, 0.6);
+}
+
+.dark .scrollbar-toc {
+  scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
+}
+
+.dark .scrollbar-toc::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.25);
+}
+
+.dark .scrollbar-toc::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(148, 163, 184, 0.5);
+}
+
+
 /* Prose styles for documentation content */
 .prose {
   max-width: none;
