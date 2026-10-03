@@ -49,7 +49,7 @@ export default function ServerDataPage({
             <RefreshCw className="h-3.5 w-3.5 text-emerald-500" />
             Server Timestamp (SSR)
           </div>
-          <div className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+          <div suppressHydrationWarning className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
             {serverTimestamp}
           </div>
         </div>

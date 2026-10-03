@@ -5,7 +5,7 @@ import { Button } from "@/docs/components/ui/button";
 import { ThemeToggle } from "@/docs/components/theme-toggle";
 import { Badge } from "@/docs/components/ui/badge";
 import { SidebarTrigger } from "@/docs/components/ui/sidebar";
-import dinou from "@/images/dinou.png";
+import dinou from "@/docs/images/dinou.png";
 import { RiNpmjsFill } from "react-icons/ri";
 import {
   Tooltip,
@@ -37,21 +37,19 @@ export function DocsHeader() {
           <nav className="hidden sm:flex items-center space-x-1 ml-3 md:ml-6 pl-3 md:pl-6 border-l border-slate-200 dark:border-slate-800">
             <Link
               href="/docs"
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                !isArchitecture
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${!isArchitecture
                   ? "bg-slate-100 dark:bg-slate-800 text-foreground font-semibold"
                   : "text-muted-foreground hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-900"
-              }`}
+                }`}
             >
               Docs
             </Link>
             <Link
               href="/docs/internals"
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                isArchitecture
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${isArchitecture
                   ? "bg-slate-100 dark:bg-slate-800 text-foreground font-semibold"
                   : "text-muted-foreground hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-900"
-              }`}
+                }`}
             >
               Architecture
             </Link>

@@ -50,7 +50,10 @@ export default function InvertedServerCounterPage({
           <span className="px-2.5 py-1 rounded-md bg-background border border-slate-200 dark:border-slate-800">
             PID: {serverHost?.pid}
           </span>
-          <span className="px-2.5 py-1 rounded-md bg-background border border-slate-200 dark:border-slate-800">
+          <span
+            suppressHydrationWarning
+            className="px-2.5 py-1 rounded-md bg-background border border-slate-200 dark:border-slate-800"
+          >
             Timestamp: {serverTimestamp}
           </span>
         </div>
