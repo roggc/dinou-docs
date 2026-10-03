@@ -31,7 +31,7 @@ export default function QuantumVaultPage({
       {/* Breadcrumb back */}
       <div className="flex items-center justify-between">
         <Link
-          to="/test-dev"
+          href="/test-dev"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Back to Test Hub

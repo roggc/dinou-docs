@@ -184,7 +184,7 @@ export function RollupSpeedometer() {
   return (
     <div className="p-4 rounded-xl border border-cyan-500/20 bg-cyan-500/5 space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">Rollup Transform Velocity</span>
+        <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">Transform Velocity</span>
         <span className="font-mono text-sm font-bold text-foreground">{speed} ops/sec</span>
       </div>
       <div className="flex items-center gap-2">
@@ -200,5 +200,48 @@ export function RollupSpeedometer() {
     </div>
   );
 }
+
+export function WebpackStressCard() {
+  const [bundlesCount, setBundlesCount] = useState(42);
+  const [cacheHits, setCacheHits] = useState(99.4);
+
+  return (
+    <div className="p-6 rounded-2xl border border-rose-500/30 bg-gradient-to-br from-rose-500/10 via-pink-500/5 to-transparent space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Activity className="h-5 w-5 text-rose-500" />
+          <h4 className="font-bold text-sm text-foreground">Webpack 5 Dual-Bundle In-Memory Probe</h4>
+        </div>
+        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-500 border border-rose-500/20">
+          REACT SERVER DOM WEBPACK
+        </span>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Comprueba la reactividad de hooks en caliente mientras Webpack gestiona el React Server Plugin.
+      </p>
+      <div className="flex items-center justify-between pt-1">
+        <div className="text-xs font-mono">
+          Chunks en memoria: <strong className="text-rose-500">{bundlesCount}</strong>
+        </div>
+        <div className="text-xs font-mono">
+          Cache hit ratio: <strong className="text-emerald-500">{cacheHits}%</strong>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setBundlesCount((b) => b + 1);
+            setCacheHits((c) => Number(Math.min(99.9, c + 0.1).toFixed(1)));
+          }}
+          className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-all active:scale-95"
+        >
+          Simulate Hot Update (+1 Chunk)
+        </button>
+      </div>
+    </div>
+  );
+}
+
 
 

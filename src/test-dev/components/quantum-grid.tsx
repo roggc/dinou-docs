@@ -182,3 +182,35 @@ export function QuantumMeshGrid() {
     </div>
   );
 }
+
+export function SuperconductingRing() {
+  const [kelvin, setKelvin] = useState(4.2);
+
+  return (
+    <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 space-y-2">
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-bold flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+          <Atom className="h-3.5 w-3.5 animate-spin" /> Cryogenic Superconducting Ring
+        </span>
+        <span className="font-mono font-bold text-xs">{kelvin} K</span>
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setKelvin((k) => Number(Math.max(0.1, k - 0.5).toFixed(1)))}
+          className="flex-1 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-mono text-xs font-bold"
+        >
+          Liquid Helium Cooling (-0.5K)
+        </button>
+        <button
+          type="button"
+          onClick={() => setKelvin(4.2)}
+          className="px-3 py-1 rounded border border-blue-500/30 text-blue-600 dark:text-blue-300 font-mono text-xs font-bold"
+        >
+          Reset 4.2K
+        </button>
+      </div>
+    </div>
+  );
+}
+

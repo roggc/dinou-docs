@@ -3,22 +3,22 @@
 import { useState } from "react";
 import { Link } from "dinou";
 import { Sparkles, Layers, Activity, ArrowRight, Gauge, Cpu, Flame, CheckCircle, RefreshCcw, Box, HardDrive, Terminal, Wifi, Atom, Zap, ShieldCheck } from "lucide-react";
-import { DynamicCounter, LiveTelemetry, MiniBadge, LiveCpuIndicator, StatePreserveBox, PrecisionTimer, RollupSpeedometer } from "./components/counter";
+import { DynamicCounter, LiveTelemetry, MiniBadge, LiveCpuIndicator, StatePreserveBox, PrecisionTimer, RollupSpeedometer, WebpackStressCard } from "./components/counter";
 import { StatsWidget, BenchmarkCard, ClusterHealthBar } from "./components/stats-widget";
 import { MemoryGauge, SparklineChart } from "./components/memory-gauge";
 import { TerminalConsole, StatusPill } from "./components/terminal-console";
 import { RollupBenchmarkGrid, LatencyRadar } from "./components/rollup-benchmark";
 import { ClusterMeshViewer } from "./components/cluster-grid";
-import { QuantumMeshGrid, EntropyMeter, VectorWaveCard, FluxCapacitorGauge, SpinStateIndicator } from "./components/quantum-grid";
+import { QuantumMeshGrid, EntropyMeter, VectorWaveCard, FluxCapacitorGauge, SpinStateIndicator, SuperconductingRing } from "./components/quantum-grid";
 
 export default function TestDevPageClientInverted() {
-  const [activeTab, setActiveTab] = useState<"controls" | "metrics" | "benchmark" | "mesh" | "quantum" | "telemetry" | "console">("quantum");
-  const [sliderVal, setSliderVal] = useState(94);
+  const [activeTab, setActiveTab] = useState<"webpack" | "quantum" | "controls" | "metrics" | "benchmark" | "mesh" | "telemetry" | "console">("webpack");
+  const [sliderVal, setSliderVal] = useState(99);
   const [logs, setLogs] = useState<string[]>([
-    "Round 3 Hyper-Stress: Quantum Vault RSC + Client registered",
-    "Inverted /test-dev/server-data to Client Component with hook",
-    "Compiled QuantumMeshGrid, EntropyMeter, VectorWaveCard",
-    "PrecisionTimer & RollupSpeedometer mounted via HMR",
+    "Webpack 5 Engine Active: In-memory compiler pipeline running",
+    "Inverted /test-dev/cluster-mesh to Client Component with scale hooks",
+    "Mounted WebpackStressCard & SuperconductingRing",
+    "Created /test-dev/webpack-stream dynamic RSC route",
   ]);
 
   const addLog = (msg: string) => {
@@ -28,25 +28,25 @@ export default function TestDevPageClientInverted() {
   return (
     <div className="space-y-6">
       {/* Paradigm Inversion Hero */}
-      <div className="p-6 rounded-3xl border border-cyan-500/30 bg-gradient-to-br from-cyan-500/10 via-purple-500/5 to-amber-500/10 backdrop-blur-sm space-y-4">
+      <div className="p-6 rounded-3xl border border-rose-500/30 bg-gradient-to-br from-rose-500/10 via-amber-500/5 to-cyan-500/10 backdrop-blur-sm space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-600 text-white shadow-md shadow-cyan-500/20">
-              <Atom className="h-5 w-5" />
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-600 text-white shadow-md shadow-rose-500/20">
+              <Flame className="h-5 w-5" />
             </span>
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                Stress Test: Rollup Round 3 (Hyper-Stress Engine)
+                Stress Test: Webpack 5 Dual-Bundle (Turbulence Engine)
               </h2>
               <p className="text-xs text-muted-foreground">
-                Doble inversión RSC &harr; Client, rutas dinámicas calientes y 20+ named exports concurrentes.
+                react-server-dom-webpack, inversión dinámica RSC &harr; Client y 20+ exports reactivos.
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <MiniBadge label="ROLLUP ROUND 3 LIVE" variant="success" />
-            <span className="text-xs font-mono px-3 py-1 rounded-full bg-cyan-600 text-white font-bold animate-pulse">
+            <MiniBadge label="WEBPACK 5 LIVE" variant="warn" />
+            <span className="text-xs font-mono px-3 py-1 rounded-full bg-rose-600 text-white font-bold animate-pulse">
               HOT RELOAD ACTIVE
             </span>
           </div>
@@ -57,7 +57,7 @@ export default function TestDevPageClientInverted() {
 
         {/* Interactive Tab Controls */}
         <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-800/60">
-          {(["quantum", "controls", "metrics", "benchmark", "mesh", "telemetry", "console"] as const).map((tab) => (
+          {(["webpack", "quantum", "controls", "metrics", "benchmark", "mesh", "telemetry", "console"] as const).map((tab) => (
             <button
               key={tab}
               type="button"
@@ -67,17 +67,32 @@ export default function TestDevPageClientInverted() {
               }}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${
                 activeTab === tab
-                  ? "bg-cyan-600 text-white shadow-sm"
+                  ? "bg-rose-600 text-white shadow-sm"
                   : "bg-background text-muted-foreground hover:text-foreground border border-slate-200 dark:border-slate-800"
               }`}
             >
-              {tab === "quantum" ? "⚛ Quantum (New)" : tab}
+              {tab === "webpack" ? "🔥 Webpack (New)" : tab}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Tab 0: New Quantum Hyper-Stress Components */}
+      {/* Tab 0: New Webpack Stress Components */}
+      {activeTab === "webpack" && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <WebpackStressCard />
+            <SuperconductingRing />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <PrecisionTimer />
+            <RollupSpeedometer />
+          </div>
+        </div>
+      )}
+
+      {/* Tab 1: Quantum Hyper-Stress Components */}
       {activeTab === "quantum" && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -91,19 +106,14 @@ export default function TestDevPageClientInverted() {
             <EntropyMeter />
             <VectorWaveCard />
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <PrecisionTimer />
-            <RollupSpeedometer />
-          </div>
         </div>
       )}
 
-      {/* Tab 1: Named Export Counter & Sliders & State Preservation */}
+      {/* Tab 2: Named Export Counter & Sliders & State Preservation */}
       {activeTab === "controls" && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <DynamicCounter initialCount={25} step={5} />
+            <DynamicCounter initialCount={50} step={10} />
 
             <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-card space-y-4">
               <div className="flex items-center justify-between">
@@ -115,7 +125,7 @@ export default function TestDevPageClientInverted() {
               </div>
 
               <p className="text-xs text-muted-foreground">
-                Ajusta el slider para comprobar la reactividad en Rollup sin pérdida de estado:
+                Ajusta el slider para comprobar la reactividad en Webpack sin pérdida de estado:
               </p>
 
               <input
@@ -124,7 +134,7 @@ export default function TestDevPageClientInverted() {
                 max="100"
                 value={sliderVal}
                 onChange={(e) => setSliderVal(Number(e.target.value))}
-                className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500"
               />
 
               <div className="flex justify-between text-[11px] font-mono text-muted-foreground">
@@ -139,7 +149,7 @@ export default function TestDevPageClientInverted() {
         </div>
       )}
 
-      {/* Tab 2: Live Metrics */}
+      {/* Tab 3: Live Metrics */}
       {activeTab === "metrics" && (
         <div className="space-y-4">
           <ClusterHealthBar />
@@ -151,7 +161,7 @@ export default function TestDevPageClientInverted() {
         </div>
       )}
 
-      {/* Tab 3: Rollup Dual-Bundle Benchmark */}
+      {/* Tab 4: Rollup Dual-Bundle Benchmark */}
       {activeTab === "benchmark" && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -166,14 +176,14 @@ export default function TestDevPageClientInverted() {
         </div>
       )}
 
-      {/* Tab 4: Cluster Mesh Topology */}
+      {/* Tab 5: Cluster Mesh Topology */}
       {activeTab === "mesh" && (
         <div className="space-y-4">
           <ClusterMeshViewer />
         </div>
       )}
 
-      {/* Tab 5: Telemetry */}
+      {/* Tab 6: Telemetry */}
       {activeTab === "telemetry" && (
         <div className="space-y-4">
           <LiveTelemetry />
@@ -189,7 +199,7 @@ export default function TestDevPageClientInverted() {
         </div>
       )}
 
-      {/* Tab 6: Interactive Console */}
+      {/* Tab 7: Interactive Console */}
       {activeTab === "console" && (
         <TerminalConsole />
       )}
@@ -197,15 +207,33 @@ export default function TestDevPageClientInverted() {
       {/* Subroutes Navigation Bar using Dinou Link */}
       <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-card space-y-3">
         <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
-          <Box className="h-4 w-4 text-purple-500" />
+          <Box className="h-4 w-4 text-rose-500" />
           Deep &amp; Nested Router Showcase (SPA Link Navigation)
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Link
+            href="/test-dev/webpack-stream"
+            className="p-3 rounded-xl border border-rose-500/30 bg-rose-500/5 hover:border-rose-500 transition-all block"
+          >
+            <div className="text-[10px] font-bold text-rose-500 mb-0.5">WEBPACK STREAM (NEW)</div>
+            <div className="font-bold text-xs text-foreground">/webpack-stream &rarr;</div>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Live in-memory RSC stream</p>
+          </Link>
+
+          <Link
+            href="/test-dev/cluster-mesh"
+            className="p-3 rounded-xl border border-blue-500/30 bg-blue-500/5 hover:border-blue-500 transition-all block"
+          >
+            <div className="text-[10px] font-bold text-blue-500 mb-0.5">INVERTED CLIENT MESH</div>
+            <div className="font-bold text-xs text-foreground">/cluster-mesh &rarr;</div>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Inverted to Client Component</p>
+          </Link>
+
+          <Link
             href="/test-dev/quantum-vault"
             className="p-3 rounded-xl border border-cyan-500/30 bg-cyan-500/5 hover:border-cyan-500 transition-all block"
           >
-            <div className="text-[10px] font-bold text-cyan-500 mb-0.5">QUANTUM VAULT (ROUND 3)</div>
+            <div className="text-[10px] font-bold text-cyan-500 mb-0.5">QUANTUM VAULT</div>
             <div className="font-bold text-xs text-foreground">/quantum-vault &rarr;</div>
             <p className="text-[10px] text-muted-foreground mt-0.5">RSC + embedded client hooks</p>
           </Link>
@@ -217,24 +245,6 @@ export default function TestDevPageClientInverted() {
             <div className="text-[10px] font-bold text-emerald-500 mb-0.5">INVERTED SERVER-DATA</div>
             <div className="font-bold text-xs text-foreground">/server-data &rarr;</div>
             <p className="text-[10px] text-muted-foreground mt-0.5">RSC &rarr; Client inversion</p>
-          </Link>
-
-          <Link
-            href="/test-dev/cluster-mesh"
-            className="p-3 rounded-xl border border-blue-500/30 bg-blue-500/5 hover:border-blue-500 transition-all block"
-          >
-            <div className="text-[10px] font-bold text-blue-500 mb-0.5">CLUSTER MESH</div>
-            <div className="font-bold text-xs text-foreground">/cluster-mesh &rarr;</div>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Multi-node topology test</p>
-          </Link>
-
-          <Link
-            href="/test-dev/deep/alpha/beta/gamma"
-            className="p-3 rounded-xl border border-purple-500/30 bg-purple-500/5 hover:border-purple-500 transition-all block"
-          >
-            <div className="text-[10px] font-bold text-purple-500 mb-0.5">CATCH-ALL SLUG</div>
-            <div className="font-bold text-xs text-foreground">/deep/alpha/beta/gamma &rarr;</div>
-            <p className="text-[10px] text-muted-foreground mt-0.5">3-segment dynamic catch-all</p>
           </Link>
         </div>
       </div>
