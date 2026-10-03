@@ -9,6 +9,14 @@ const normKey = (p) => {
   return s;
 };
 
+const stripNamespace = (p) => {
+  if (!p) return "";
+  if (/^[a-zA-Z]:[/\\]/.test(p)) {
+    return p;
+  }
+  return p.replace(/^[a-zA-Z0-9_-]+:/, "");
+};
+
 export default function stableChunkNamesAndMapsPlugin({ dev = true, changedIds } = {}) {
   let isInitial = true;
   const processedContentsCache = new Map();
@@ -108,7 +116,7 @@ export default function stableChunkNamesAndMapsPlugin({ dev = true, changedIds }
             if (isIncremental) {
               const inputFiles = Object.keys(output.inputs || {});
               const touchesChanged = inputFiles.some((m) => {
-                const clean = m.replace(/^[a-zA-Z0-9_-]+:/, "");
+                const clean = stripNamespace(m);
                 return changedIds.has(normKey(clean));
               });
               if (!touchesChanged && processedContentsCache.has(relPath)) {
@@ -163,7 +171,7 @@ export default function stableChunkNamesAndMapsPlugin({ dev = true, changedIds }
               const outputInfo = outputs[oldRelPath];
               const inputFiles = Object.keys(outputInfo?.inputs || {});
               const touchesChanged = inputFiles.some((m) => {
-                const clean = m.replace(/^[a-zA-Z0-9_-]+:/, "");
+                const clean = stripNamespace(m);
                 return changedIds.has(normKey(clean));
               });
               if (!touchesChanged) continue;

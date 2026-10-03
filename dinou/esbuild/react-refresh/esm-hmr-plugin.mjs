@@ -18,6 +18,15 @@ const normKey = (p) => {
   }
   return s;
 };
+
+const stripNamespace = (p) => {
+  if (!p) return "";
+  if (/^[a-zA-Z]:[/\\]/.test(p)) {
+    return p;
+  }
+  return p.replace(/^[a-zA-Z0-9_-]+:/, "");
+};
+
 let serverStarted = false;
 
 const swcGlobalCache = new Map();
@@ -223,7 +232,7 @@ export default function esmHmrPlugin({
           if (!hasUserCode) continue;
 
           const isChangedByModule = !isInitialBuild && inputFiles.some((modulePath) => {
-            const cleanPath = modulePath.replace(/^[a-zA-Z0-9_-]+:/, "");
+            const cleanPath = stripNamespace(modulePath);
             return changedIds.has(normKey(cleanPath));
           });
 
@@ -339,7 +348,7 @@ export default function esmHmrPlugin({
           const modules = Object.keys(chunk?.inputs ?? {});
 
           const isChangedByModule = modules.some((modulePath) => {
-            const cleanPath = modulePath.replace(/^[a-zA-Z0-9_-]+:/, "");
+            const cleanPath = stripNamespace(modulePath);
             const norm = normKey(cleanPath);
             const lower = norm.toLowerCase();
             if (

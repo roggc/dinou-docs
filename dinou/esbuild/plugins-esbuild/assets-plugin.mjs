@@ -16,6 +16,14 @@ const normKey = (p) => {
   return s;
 };
 
+const stripNamespace = (p) => {
+  if (!p) return "";
+  if (/^[a-zA-Z]:[/\\]/.test(p)) {
+    return p;
+  }
+  return p.replace(/^[a-zA-Z0-9_-]+:/, "");
+};
+
 export default function assetsPlugin({ include = regex, changedIds } = {}) {
   let isInitial = true;
   let cachedRenames = new Map();
@@ -264,7 +272,7 @@ export default function assetsPlugin({ include = regex, changedIds } = {}) {
               const outputInfo = result.metafile.outputs[relPath];
               const inputFiles = Object.keys(outputInfo?.inputs || {});
               const touchesChanged = inputFiles.some((m) => {
-                const clean = m.replace(/^[a-zA-Z0-9_-]+:/, "");
+                const clean = stripNamespace(m);
                 return changedIds.has(normKey(clean));
               });
               if (!touchesChanged) continue;
