@@ -9,6 +9,7 @@ export function Link({
   children,
   prefetch = true,
   fresh = false,
+  onClick,
   ...props
 }) {
   const targetHref = href || to || "";
@@ -24,6 +25,11 @@ export function Link({
   };
 
   const handleClick = (e) => {
+    if (onClick) {
+      onClick(e);
+    }
+
+    if (e.defaultPrevented) return;
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || isExternalUrl(targetHref)) return;
 
     e.preventDefault();
@@ -34,10 +40,10 @@ export function Link({
 
   return (
     <a
-      href={resolvedHref}
+      {...props}
+      href={resolvedHref || undefined}
       onClick={handleClick}
       onMouseEnter={handlePrefetch}
-      {...props}
     >
       {children}
     </a>

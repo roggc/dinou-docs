@@ -98,7 +98,7 @@ export default function TestDevPageClientInverted() {
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-amber-500" />
                 <h4 className="font-bold text-sm text-foreground">
-                  Dinou Link Edge Cases Sandbox (href="" / to="" / sin props)
+                  Dinou Link Edge Cases Sandbox (v2 Composed Click)
                 </h4>
               </div>
               <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
