@@ -8,6 +8,7 @@ import { EsmHmrEngine } from "./esm-hmr/server.js";
 import { fileURLToPath } from "node:url";
 import write from "../helpers-esbuild/write.mjs";
 import normalizePath from "../helpers-esbuild/normalize-path.mjs";
+import stripNamespace from "../helpers-esbuild/strip-namespace.mjs";
 
 const norm = (p) => path.resolve(p).replace(/\\/g, "/");
 const normKey = (p) => {
@@ -17,14 +18,6 @@ const normKey = (p) => {
     s = s.replace(/^([a-zA-Z]):/, (_, d) => d.toLowerCase() + ":");
   }
   return s;
-};
-
-const stripNamespace = (p) => {
-  if (!p) return "";
-  if (/^[a-zA-Z]:[/\\]/.test(p)) {
-    return p;
-  }
-  return p.replace(/^[a-zA-Z0-9_-]+:/, "");
 };
 
 let serverStarted = false;

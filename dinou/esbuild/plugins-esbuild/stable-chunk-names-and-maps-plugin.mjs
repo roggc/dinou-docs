@@ -1,4 +1,5 @@
 import path from "node:path";
+import stripNamespace from "../helpers-esbuild/strip-namespace.mjs";
 
 const normKey = (p) => {
   if (!p) return "";
@@ -7,14 +8,6 @@ const normKey = (p) => {
     s = s.replace(/^([a-zA-Z]):/, (_, d) => d.toLowerCase() + ":");
   }
   return s;
-};
-
-const stripNamespace = (p) => {
-  if (!p) return "";
-  if (/^[a-zA-Z]:[/\\]/.test(p)) {
-    return p;
-  }
-  return p.replace(/^[a-zA-Z0-9_-]+:/, "");
 };
 
 export default function stableChunkNamesAndMapsPlugin({ dev = true, changedIds } = {}) {
