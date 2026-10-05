@@ -25,7 +25,7 @@ const navItems = [
   { href: "#dx", label: "DX", title: "Fast Developer Experience: Sub-5ms HMR" },
   { href: "#bundlers", label: "Bundlers", title: "Tri-Bundler Engine: esbuild, Rollup & Webpack" },
   { href: "#eject", label: "Eject", title: "Framework Sovereignty & Zero Lock-in" },
-  { href: "#engine-comparison", label: "Evolution" },
+  { href: "#engine-comparison", label: "Evolution", title: "Not Just a Version Bump: Architectural Metamorphosis" },
   { href: "#ready", label: "Start" },
 ];
 
