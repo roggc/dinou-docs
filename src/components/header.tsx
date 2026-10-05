@@ -211,7 +211,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm border-slate-200 dark:border-slate-800">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
         <div className="flex items-center space-x-2.5">
-          <Link href="/" onClick={handleLogoClick} className="flex items-center transition-opacity hover:opacity-85">
+          <Link href="/" onClick={handleLogoClick} className="flex items-center transition-opacity hover:opacity-85 cursor-pointer">
             <img src={dinou} className="w-8 h-8 sm:w-9 sm:h-9" alt="Dinou" width={36} height={36} />
           </Link>
           <Badge variant="outline" className="inline-flex text-[11px] font-mono px-2 py-0.5 border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/5">
@@ -231,7 +231,7 @@ export default function Header() {
                 href={item.href}
                 title={item.title}
                 onClick={(e) => handleNavClick(e, item.href)}
-                className={`text-xs xl:text-sm font-medium transition-colors py-1 relative z-10 whitespace-nowrap ${
+                className={`text-xs xl:text-sm font-medium transition-colors py-1 relative z-10 whitespace-nowrap cursor-pointer ${
                   isActive
                     ? "text-blue-600 dark:text-blue-400 font-semibold"
                     : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"

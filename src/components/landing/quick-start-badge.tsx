@@ -31,7 +31,7 @@ export function QuickStartBadge() {
           <button
             type="button"
             onClick={() => setSelected("npm")}
-            className={`px-2.5 py-0.5 text-xs font-mono font-medium rounded-full transition-all duration-150 ${
+            className={`px-2.5 py-0.5 text-xs font-mono font-medium rounded-full transition-all duration-150 cursor-pointer ${
               selected === "npm"
                 ? "bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-xs font-semibold"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
@@ -42,7 +42,7 @@ export function QuickStartBadge() {
           <button
             type="button"
             onClick={() => setSelected("npx")}
-            className={`px-2.5 py-0.5 text-xs font-mono font-medium rounded-full transition-all duration-150 ${
+            className={`px-2.5 py-0.5 text-xs font-mono font-medium rounded-full transition-all duration-150 cursor-pointer ${
               selected === "npx"
                 ? "bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-xs font-semibold"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
@@ -56,7 +56,7 @@ export function QuickStartBadge() {
         <button
           type="button"
           onClick={handleCopy}
-          className="flex items-center gap-2 text-left group pr-1 sm:pr-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
+          className="flex items-center gap-2 text-left group pr-1 sm:pr-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full cursor-pointer"
           title="Click to copy command"
           aria-label={`Copy command: ${command}`}
         >

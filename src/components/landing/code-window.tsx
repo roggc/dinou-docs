@@ -65,7 +65,7 @@ export function CodeWindow({
         <button
           type="button"
           onClick={handleCopy}
-          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-100 bg-slate-800/80 hover:bg-slate-800 px-2.5 py-1 rounded-md transition-colors"
+          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-100 bg-slate-800/80 hover:bg-slate-800 px-2.5 py-1 rounded-md transition-colors cursor-pointer"
         >
           {copied ? (
             <>

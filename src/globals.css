@@ -125,6 +125,31 @@
     @apply bg-background text-foreground;
   }
 
+  /* Universal pointer cursor for all interactive elements */
+  button,
+  [role="button"],
+  [role="tab"],
+  [role="menuitem"],
+  [role="option"],
+  [role="switch"],
+  [role="checkbox"],
+  [role="radio"],
+  [type="button"],
+  [type="reset"],
+  [type="submit"],
+  summary,
+  a,
+  label[for],
+  select {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [disabled],
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
   :root {
     --sidebar: oklch(0.985 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
