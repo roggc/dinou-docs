@@ -59,6 +59,11 @@ const tocItems = [
   { id: "getstaticpaths", title: "getStaticPaths", level: 3 },
   { id: "getcachetags", title: "getCacheTags", level: 3 },
   { id: "validateparams-isg", title: "validateParams & allowISG", level: 3 },
+  { id: "type-safe-routing", title: "6. Type-Safe Routing (dinou)", level: 2 },
+  { id: "pageprops", title: "PageProps<T>", level: 3 },
+  { id: "layoutprops", title: "LayoutProps<T>", level: 3 },
+  { id: "routeparams", title: "RouteParams<T>", level: 3 },
+  { id: "dinouroute", title: "DinouRoute", level: 3 },
 ];
 
 export default function Page() {
@@ -133,10 +138,10 @@ export default function Page() {
                     <tbody className="divide-y divide-border bg-card">
                       <tr>
                         <td className="p-4 font-mono text-xs text-primary font-semibold">href</td>
-                        <td className="p-4 font-mono text-xs">string</td>
+                        <td className="p-4 font-mono text-xs">DinouRoute (string)</td>
                         <td className="p-4 font-mono text-xs">—</td>
                         <td className="p-4 text-xs">
-                          Target route path. Supports absolute (<code>/dashboard</code>) and relative (<code>./child</code>, <code>../sibling</code>) resolution.
+                          Target route path. Strictly typed with <code>DinouRoute</code> for instant IDE autocomplete and dead-link detection. Supports absolute (<code>/dashboard</code>), relative (<code>./child</code>, <code>../sibling</code>), query strings, and external URLs.
                         </td>
                       </tr>
                       <tr>
@@ -465,14 +470,14 @@ export default function NavigationControls() {
                     <tbody className="divide-y divide-border bg-card">
                       <tr>
                         <td className="p-4 font-mono text-xs font-semibold text-primary">push</td>
-                        <td className="p-4 font-mono text-xs">(href: string, options?: NavigationOptions) =&gt; void</td>
+                        <td className="p-4 font-mono text-xs">(href: DinouRoute, options?: NavigationOptions) =&gt; void</td>
                         <td className="p-4 text-xs">
-                          Navigates to <code>href</code> and pushes a new entry onto the browser history stack. Pass <code>&#123; fresh: true &#125;</code> to bypass the client cache.
+                          Navigates to <code>href</code> (autocompleted via <code>DinouRoute</code>) and pushes a new entry onto the browser history stack. Pass <code>&#123; fresh: true &#125;</code> to bypass the client cache.
                         </td>
                       </tr>
                       <tr>
                         <td className="p-4 font-mono text-xs font-semibold text-primary">replace</td>
-                        <td className="p-4 font-mono text-xs">(href: string, options?: NavigationOptions) =&gt; void</td>
+                        <td className="p-4 font-mono text-xs">(href: DinouRoute, options?: NavigationOptions) =&gt; void</td>
                         <td className="p-4 text-xs">
                           Replaces the current history entry without pushing a new one. Supports <code>&#123; fresh: true &#125;</code>.
                         </td>
@@ -1166,6 +1171,128 @@ export function validateParams(params) {
 
 // Disallow on-demand generation; only paths defined in getStaticPaths exist
 export const allowISG = false;`}
+                </CodeBlock>
+              </section>
+            </section>
+
+            {/* ================================================================= */}
+            {/* SECTION 6: TYPE-SAFE ROUTING */}
+            {/* ================================================================= */}
+            <section id="type-safe-routing" className="scroll-mt-20 mt-12 pt-8 border-t">
+              <h2 className="flex items-center gap-3">
+                6. Type-Safe Routing (<code>dinou</code>)
+                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                  Zero-Runtime Type System
+                </span>
+              </h2>
+              <p>
+                Dinou v7 introduces zero-runtime type safety with auto-generated declaration files and seamless IDE autocompletion for routes and parameters.
+              </p>
+
+              {/* PageProps */}
+              <section id="pageprops" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>PageProps&lt;T&gt;</code>
+                </h3>
+                <p>
+                  Official TypeScript interface for typing React Page components (<code>page.tsx</code>). Takes the route pattern string as a generic parameter and automatically infers the strongly typed <code>params</code> object.
+                </p>
+
+                <CodeBlock
+                  language="tsx"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import type { PageProps } from "dinou";
+
+// Trigger Ctrl + Space inside "" to pick from all registered routes
+export default function BlogPost({ params }: PageProps<"/blog/[slug]">) {
+  // ✅ params.slug is strongly typed as string
+  return <h1>Post: {params.slug}</h1>;
+}`}
+                </CodeBlock>
+              </section>
+
+              {/* LayoutProps */}
+              <section id="layoutprops" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>LayoutProps&lt;T&gt;</code>
+                </h3>
+                <p>
+                  Official TypeScript interface for typing React Layout components (<code>layout.tsx</code>). In addition to inferred <code>params</code>, it strictly types <code>children: React.ReactNode</code>.
+                </p>
+
+                <CodeBlock
+                  language="tsx"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import type { LayoutProps } from "dinou";
+
+export default function BlogLayout({ children, params }: LayoutProps<"/blog/[slug]">) {
+  return (
+    <section>
+      <header>Category: {params.slug}</header>
+      <main>{children}</main>
+    </section>
+  );
+}`}
+                </CodeBlock>
+              </section>
+
+              {/* RouteParams */}
+              <section id="routeparams" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>RouteParams&lt;T&gt;</code>
+                </h3>
+                <p>
+                  A standalone utility type representing the inferred parameters dictionary of a given route pattern. Ideal for server functions, services, and error boundary components that do not receive standard React page props.
+                </p>
+
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import type { RouteParams } from "dinou";
+
+// 1. In server-side page_functions.ts
+export async function getProps(params: RouteParams<"/blog/[slug]">) {
+  return {
+    postTitle: \`Title for \${params.slug}\`,
+  };
+}
+
+// 2. In error.tsx boundaries
+interface ErrorProps {
+  error: Error;
+  params: RouteParams<"/blog/[slug]">;
+}`}
+                </CodeBlock>
+              </section>
+
+              {/* DinouRoute */}
+              <section id="dinouroute" className="scroll-mt-20 mt-8">
+                <h3>
+                  <code>DinouRoute</code>
+                </h3>
+                <p>
+                  A union type representing all valid destinations in the application. Powers <code>&lt;Link href&gt;</code> and <code>router.push(href)</code>, and can be imported to type custom navigation components.
+                </p>
+
+                <CodeBlock
+                  language="tsx"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import type { DinouRoute } from "dinou";
+import { Link } from "dinou";
+
+// Typing reusable navigation buttons with project-wide autocompletion
+interface NavButtonProps {
+  href: DinouRoute;
+  label: string;
+}
+
+export function NavButton({ href, label }: NavButtonProps) {
+  return <Link href={href}>{label}</Link>;
+}`}
                 </CodeBlock>
               </section>
             </section>

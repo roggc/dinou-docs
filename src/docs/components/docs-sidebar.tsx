@@ -47,6 +47,7 @@ import {
   Compass,
   ArrowLeft,
   ArrowRight,
+  ShieldCheck,
 } from "lucide-react";
 
 const docsNavigation = [
@@ -82,6 +83,11 @@ const docsNavigation = [
         title: "Routing",
         href: "/docs/routing",
         icon: Route,
+      },
+      {
+        title: "Type-Safe Routing",
+        href: "/docs/type-safe-routing",
+        icon: ShieldCheck,
       },
       {
         title: "Server & Client Components",

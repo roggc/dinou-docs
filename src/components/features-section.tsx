@@ -51,10 +51,10 @@ export function FeaturesSection() {
       title: "Fast Developer Experience (DX)",
       description: "Rapid hot reloading with in-memory serving and instant feedback.",
       bullets: [
+        "Zero-Runtime Type-Safe Routing: compile-time route validation & IDE autocomplete (<Link>, PageProps)",
         "In-memory development server with zero-disk I/O latency",
         "Fast incremental rebuilds powered by SWC and modern bundlers",
         "Instant Hot CSS swapping without full page reloads",
-        "Seamless workflow with standard React 19 ergonomics",
       ],
     },
     {

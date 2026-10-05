@@ -830,6 +830,23 @@ dist
                     </p>
                   </Link>
                 </Card>
+
+                <Card className="hover:border-emerald-500/40 transition-colors group sm:col-span-2">
+                  <Link href="/docs/type-safe-routing" className="block h-full p-5">
+                    <div className="flex items-start justify-between w-full mb-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
+                        <ShieldCheck className="h-5 w-5" />
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
+                    </div>
+                    <CardTitle className="text-base group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors mb-1">
+                      Type-Safe Routing (New in v7)
+                    </CardTitle>
+                    <p className="text-xs text-muted-foreground">
+                      Discover zero-runtime type safety with auto-generated route definitions, IDE autocomplete, and typed PageProps, LayoutProps &amp; RouteParams.
+                    </p>
+                  </Link>
+                </Card>
               </div>
             </section>
           </div>

@@ -98,6 +98,30 @@ export default function Page() {
             <p className="text-xl text-muted-foreground leading-relaxed">
               Master Dinou&apos;s file-system router: nested layouts with independent Horizontal ISR, parallel slots with error isolation, layout control flags, and soft client navigation.
             </p>
+
+            {/* Type-Safe Routing Callout */}
+            <div className="not-prose rounded-xl border border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/20 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 my-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
+                    Looking for Type-Safe Routing?
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Dinou v7 introduces zero-runtime type safety with auto-generated route definitions, IDE autocomplete, and typed <code>PageProps</code> &amp; <code>&lt;Link&gt;</code>.
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/docs/type-safe-routing"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline shrink-0"
+              >
+                <span>Type-Safe Guide</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words space-y-12">
@@ -303,26 +327,27 @@ export default function Page() {
                   3.1. Dynamic Params Prop Injection
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  The parsed <code>params</code> dictionary is passed directly as a prop to components and as a direct argument to server functions:
+                  In Dinou v7, parameters are strictly typed using <code>PageProps</code>, <code>LayoutProps</code>, and <code>RouteParams</code>:
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-5">
-                  <li><code>page.tsx</code> components: <code>Page(&#123; params &#125;)</code></li>
-                  <li><code>layout.tsx</code> components: <code>Layout(&#123; params, children &#125;)</code></li>
-                  <li><code>error.tsx</code> boundaries: <code>Error(&#123; error, params &#125;)</code></li>
+                  <li><code>page.tsx</code> components: <code>Page(&#123; params &#125;: PageProps&lt;&quot;/blog/[slug]&quot;&gt;)</code></li>
+                  <li><code>layout.tsx</code> components: <code>Layout(&#123; params, children &#125;: LayoutProps&lt;&quot;/blog/[slug]&quot;&gt;)</code></li>
+                  <li><code>error.tsx</code> boundaries: <code>Error(&#123; error, params &#125;: &#123; error: Error; params: RouteParams&lt;&quot;/blog/[slug]&quot;&gt; &#125;)</code></li>
                   <li><code>not_found.tsx</code> 404 pages: <code>NotFound(&#123; params &#125;)</code></li>
                   <li>Parallel slot pages: <code>SlotPage(&#123; params &#125;)</code></li>
-                  <li>Server data fetching: <code>getProps(params)</code> in <code>page_functions.ts</code> and <code>layout_functions.ts</code></li>
+                  <li>Server data fetching: <code>getProps(params: RouteParams&lt;&quot;/blog/[slug]&quot;&gt;)</code> in <code>page_functions.ts</code></li>
                 </ul>
 
                 <CodeBlock language="tsx" containerClassName="w-full rounded-lg mt-3">
                   {`// src/blog/[slug]/page.tsx
-export default function BlogPost({
-  params,
-  post,
-}: {
-  params: { slug: string };
+import type { PageProps } from "dinou";
+
+interface BlogPostProps extends PageProps<"/blog/[slug]"> {
   post?: { title: string; content: string };
-}) {
+}
+
+export default function BlogPost({ params, post }: BlogPostProps) {
+  // ✅ params.slug is strongly typed as string automatically
   return (
     <article className="p-6">
       <h1 className="text-2xl font-bold">{post?.title ?? params.slug}</h1>
@@ -777,13 +802,19 @@ export default function DashboardError({
 export function NavigationBar() {
   return (
     <nav className="flex gap-4">
-      {/* Default: hover-based prefetch active */}
+      {/* ✅ Type-Safe href: autocompleted in your IDE via DinouRoute */}
       <Link href="/dashboard">Dashboard</Link>
+
+      {/* ✅ Dynamic interpolation typed against registered routes */}
+      <Link href={\`/blog/\${post.slug}\`}>Post</Link>
 
       {/* Disable prefetch for heavy routes */}
       <Link href="/analytics" prefetch={false}>
         Analytics
       </Link>
+
+      {/* ❌ TypeScript compile error on invalid/dead links */}
+      {/* <Link href="/broken-link">Broken</Link> */}
     </nav>
   );
 }`}

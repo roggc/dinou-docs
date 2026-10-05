@@ -87,7 +87,7 @@ export default function Page() {
               <p>
                 Every feature—from <strong>React Server Components (RSC)</strong> and{" "}
                 <strong>Server Functions (<code>&apos;use server&apos;</code>)</strong> to
-                Suspense streaming, <strong>Partial Prerendering (PPR)</strong>, and <strong>Two-Dimensional Layered Segmentation</strong>—is implemented
+                Suspense streaming, <strong>Partial Prerendering (PPR)</strong>, <strong>Two-Dimensional Layered Segmentation</strong>, and <strong>Zero-Runtime Type-Safe Routing</strong>—is implemented
                 using transparent Web standards (W3C Request, Response, and ReadableStream).
               </p>
 
@@ -383,16 +383,14 @@ export async function getProps({ params }) {
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/60 mb-2">
                       <Route className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <CardTitle className="text-lg">File-System Based Router</CardTitle>
+                    <CardTitle className="text-lg">Type-Safe File-System Router</CardTitle>
                     <CardDescription>
-                      Nested layouts, route groups, and parallel slots.
+                      Nested layouts, route groups, and zero-runtime type safety.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Organize your application intuitively inside <code>src/</code>. Build complex interfaces
-                      with nested <code>layout.tsx</code> hierarchies, dynamic parameters (<code>[slug]</code>),
-                      route groups (<code>(group)</code>), parallel slots (<code>@modal</code>), and layout resets.
+                      Organize your application intuitively inside <code>src/</code>. Features instant IDE route autocompletion, compile-time dead-link validation, strictly typed <code>PageProps</code> &amp; <code>LayoutProps</code>, parallel slots (<code>@modal</code>), and layout resets with zero bundle overhead.
                     </p>
                   </CardContent>
                 </Card>

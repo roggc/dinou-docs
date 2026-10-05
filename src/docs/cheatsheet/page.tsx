@@ -49,6 +49,7 @@ const tocItems = [
   { id: "link-ref", title: "<Link> & redirect()", level: 3 },
   { id: "router-ref", title: "useRouter() & refreshSlot()", level: 3 },
   { id: "location-hooks", title: "usePathname() & useSearchParams()", level: 3 },
+  { id: "type-safe-ref", title: "Type-Safe Routing (Level 1 & 2)", level: 3 },
   { id: "server-api-cheatsheet", title: "4. Server & Cache Cheatsheet", level: 2 },
   { id: "getcontext-ref", title: "getContext() (req/res)", level: 3 },
   { id: "cacheslot-ref", title: "<DinouCacheSlot> (Micro-ISR)", level: 3 },
@@ -538,6 +539,50 @@ export default function Navbar() {
       {isLoading && <div className="loading-bar" />}
       <span>Current Path: {pathname}</span>
       <span>Search Query: {query}</span>
+    </nav>
+  );
+}`}
+                </CodeBlock>
+              </section>
+
+              <section id="type-safe-ref" className="scroll-mt-20 mt-8">
+                <h3>
+                  Type-Safe Routing (Level 1 &amp; Level 2)
+                </h3>
+                <p>
+                  Zero-runtime type safety with auto-generated declaration files and IDE autocomplete.
+                </p>
+                <CodeBlock
+                  language="tsx"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+                  {`import type { PageProps, LayoutProps, RouteParams, DinouRoute } from "dinou";
+import { Link, useRouter } from "dinou";
+
+// 1. Level 2: Typed Page Component
+export default function BlogPost({ params }: PageProps<"/blog/[slug]">) {
+  return <h1>Post: {params.slug}</h1>; // params.slug is strongly typed string
+}
+
+// 2. Level 2: Typed Layout Component
+export function BlogLayout({ children, params }: LayoutProps<"/blog/[slug]">) {
+  return <section><header>{params.slug}</header>{children}</section>;
+}
+
+// 3. Level 2: Typed Server Function
+export async function getProps(params: RouteParams<"/blog/[slug]">) {
+  return { title: \`Post \${params.slug}\` };
+}
+
+// 4. Level 1: Typed Navigation (<Link> and useRouter)
+export function NavBar() {
+  const router = useRouter();
+  return (
+    <nav>
+      {/* ✅ Autocompleted in IDE & dead links caught at compile-time */}
+      <Link href="/about">About</Link>
+      <Link href={\`/blog/\${post.slug}\`}>Post</Link>
+      <button onClick={() => router.push("/dashboard")}>Dashboard</button>
     </nav>
   );
 }`}
