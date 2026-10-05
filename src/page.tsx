@@ -7,7 +7,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Link } from "dinou";
-import { TerminalTabs } from "@/components/landing/terminal-tabs";
 import { React19Showcase } from "@/components/landing/react-19-showcase";
 import { DeployMatrix } from "@/components/landing/deploy-matrix";
 import { RoutingShowcase } from "@/components/landing/routing-showcase";
@@ -19,6 +18,7 @@ import { DxShowcase } from "@/components/landing/dx-showcase";
 import { TriBundlerShowcase } from "@/components/landing/tri-bundler-showcase";
 import { EjectShowcase } from "@/components/landing/eject-showcase";
 import { EngineComparison } from "@/components/landing/engine-comparison";
+import { QuickStartBadge } from "@/components/landing/quick-start-badge";
 
 export default function Page() {
   return (
@@ -83,29 +83,9 @@ export default function Page() {
               </Button>
             </div>
 
-            {/* Key Value Props (4 Pillars in v7) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full max-w-4xl pt-6 sm:pt-8 border-t border-slate-200 dark:border-slate-800/80">
-              <div className="flex flex-col items-center p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800">
-                <span className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">React 19 Native</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">RSC, Actions & Streaming SSR</span>
-              </div>
-              <div className="flex flex-col items-center p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800">
-                <span className="text-sm sm:text-base font-bold text-cyan-600 dark:text-cyan-400">PPR & Segmentation</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">PPR, Slots & Layout ISR</span>
-              </div>
-              <div className="flex flex-col items-center p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800">
-                <span className="text-sm sm:text-base font-bold text-blue-600 dark:text-blue-400">Deploy Everywhere</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Cloudflare, Netlify, Bun & Node</span>
-              </div>
-              <div className="flex flex-col items-center p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800">
-                <span className="text-sm sm:text-base font-bold text-purple-600 dark:text-purple-400">Zero Lock-In</span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">100% Ejectable Dual-Bundle</span>
-              </div>
-            </div>
-
-            {/* Terminal Tabs Component */}
-            <div className="w-full pt-6 sm:pt-8">
-              <TerminalTabs />
+            {/* Quick Start Command Badge */}
+            <div className="pt-2 sm:pt-4 flex justify-center">
+              <QuickStartBadge />
             </div>
           </div>
         </div>
