@@ -12,6 +12,7 @@ import { React19Showcase } from "@/components/landing/react-19-showcase";
 import { DeployMatrix } from "@/components/landing/deploy-matrix";
 import { RoutingShowcase } from "@/components/landing/routing-showcase";
 import { TypeSafeShowcase } from "@/components/landing/type-safe-showcase";
+import { SsgShowcase } from "@/components/landing/ssg-showcase";
 import { SegmentationShowcase } from "@/components/landing/segmentation-showcase";
 import { MiddlewareShowcase } from "@/components/landing/middleware-showcase";
 import { DxShowcase } from "@/components/landing/dx-showcase";
@@ -121,6 +122,9 @@ export default function Page() {
 
       {/* Zero-Runtime Type-Safe Routing Showcase */}
       <TypeSafeShowcase />
+
+      {/* Static by Default (SSG, ISR, ISG) Showcase */}
+      <SsgShowcase />
 
       {/* Layered Segmentation & PPR Showcase */}
       <SegmentationShowcase />

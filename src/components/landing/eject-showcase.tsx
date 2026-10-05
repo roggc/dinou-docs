@@ -58,7 +58,7 @@ export function EjectShowcase() {
   return (
     <section
       id="eject"
-      className="w-full py-16 sm:py-20 md:py-24 scroll-mt-20 relative bg-slate-50/50 dark:bg-slate-900/30 border-y border-slate-200/80 dark:border-slate-800"
+      className="w-full py-16 sm:py-20 md:py-24 scroll-mt-20 relative bg-transparent"
     >
       <div className="container px-4 md:px-6 mx-auto">
         {/* Section Header */}

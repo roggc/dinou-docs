@@ -20,6 +20,7 @@ const navItems = [
   { href: "#deploy-everywhere", label: "Deploy", title: "Universal Multi-Runtime Deploy" },
   { href: "#routing", label: "Routing", title: "Intuitive File-Based Routing" },
   { href: "#type-safe", label: "Type-Safe", title: "Zero-Runtime Type-Safe Routing" },
+  { href: "#ssg", label: "SSG", title: "Static by Default: SSG, ISR & ISG" },
   { href: "#segmentation", label: "Segmentation", title: "Two-Dimensional Layered Segmentation" },
   { href: "#middleware", label: "Middleware", title: "Universal Middleware & Webhooks (dinou.config.mjs)" },
   { href: "#dx", label: "DX", title: "Fast Developer Experience: Sub-5ms HMR" },
@@ -218,7 +219,7 @@ export default function Header() {
           </Badge>
         </div>
 
-        <nav ref={navRef} className="hidden lg:flex items-center space-x-2 xl:space-x-3 2xl:space-x-4 relative py-1">
+        <nav ref={navRef} className="hidden lg:flex items-center space-x-1.5 xl:space-x-2.5 2xl:space-x-3.5 relative py-1">
           {navItems.map((item) => {
             const isActive = activeSection === item.href;
             return (
