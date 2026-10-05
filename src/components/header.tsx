@@ -11,12 +11,196 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "dinou";
 
+const navItems = [
+  { href: "#main", label: "Home" },
+  { href: "#deploy-everywhere", label: "Deploy" },
+  { href: "#segmentation", label: "Segmentation", title: "Two-Dimensional Layered Segmentation" },
+  { href: "#type-safe", label: "Type-Safe", title: "Zero-Runtime Type-Safe Routing" },
+  { href: "#engine-comparison", label: "Evolution" },
+  { href: "#features", label: "Features" },
+  { href: "#ready", label: "Start" },
+];
+
 export default function Header() {
-  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const [activeSection, setActiveSection] = useState<string>("#main");
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 });
+  const navRef = useRef<HTMLElement>(null);
+  const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
+  const isClickScrollingRef = useRef(false);
+  const scrollEndTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const clearScrollLock = () => {
+    isClickScrollingRef.current = false;
+    if (scrollEndTimerRef.current) {
+      clearTimeout(scrollEndTimerRef.current);
+      scrollEndTimerRef.current = null;
+    }
   };
+
+  const lockScrollForClick = () => {
+    isClickScrollingRef.current = true;
+    if (scrollEndTimerRef.current) {
+      clearTimeout(scrollEndTimerRef.current);
+    }
+
+    // Generous fallback safety timeout (4000ms) for very long scroll distances (e.g. Home to Start)
+    scrollEndTimerRef.current = setTimeout(() => {
+      clearScrollLock();
+    }, 4000);
+  };
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const mainEl = document.getElementById("main");
+    if (mainEl) {
+      e.preventDefault();
+      setActiveSection("#main");
+      if (window.scrollY > 10) {
+        lockScrollForClick();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+  };
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const id = href.slice(1);
+    const targetEl = document.getElementById(id);
+    if (targetEl) {
+      const top = targetEl.getBoundingClientRect().top + window.scrollY - 70;
+      const currentScroll = window.scrollY;
+
+      setActiveSection(href);
+
+      if (Math.abs(top - currentScroll) > 10) {
+        lockScrollForClick();
+        window.scrollTo({ top, behavior: "smooth" });
+      }
+    } else {
+      window.location.href = `/${href}`;
+    }
+  };
+
+  // Scroll Spy: track visible section based on scroll position
+  useEffect(() => {
+    const sectionIds = navItems.map((item) => item.href.slice(1));
+
+    const updateActiveSection = () => {
+      // 1. If at the top of the page
+      if (window.scrollY < 120) {
+        setActiveSection("#main");
+        return;
+      }
+
+      // 2. If scrolled to the bottom of the page
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 80
+      ) {
+        setActiveSection("#ready");
+        return;
+      }
+
+      // 3. Find which section is currently centered in viewport
+      const scrollPosition = window.scrollY + 200;
+      let current = "#main";
+
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el) {
+          const top = el.getBoundingClientRect().top + window.scrollY;
+          if (top <= scrollPosition) {
+            current = `#${id}`;
+          }
+        }
+      }
+
+      setActiveSection(current);
+    };
+
+    const handleScroll = () => {
+      // If we are currently in programmatic smooth scroll from a click:
+      if (isClickScrollingRef.current) {
+        // Reset the idle debounce timer on every scroll frame.
+        // Once scrolling ceases for 120ms, the smooth travel has finished.
+        if (scrollEndTimerRef.current) {
+          clearTimeout(scrollEndTimerRef.current);
+        }
+        scrollEndTimerRef.current = setTimeout(() => {
+          isClickScrollingRef.current = false;
+          updateActiveSection();
+        }, 120);
+
+        return; // Do NOT let intermediate scroll frames overwrite activeSection!
+      }
+
+      updateActiveSection();
+    };
+
+    const handleScrollEnd = () => {
+      if (isClickScrollingRef.current) {
+        clearScrollLock();
+        updateActiveSection();
+      }
+    };
+
+    // Release programmatic lock if user manually scrolls with wheel or touch
+    const handleUserInterrupt = () => {
+      if (isClickScrollingRef.current) {
+        clearScrollLock();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scrollend", handleScrollEnd, { passive: true });
+    document.addEventListener("scrollend", handleScrollEnd, { passive: true });
+    window.addEventListener("wheel", handleUserInterrupt, { passive: true });
+    window.addEventListener("touchmove", handleUserInterrupt, { passive: true });
+    updateActiveSection();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scrollend", handleScrollEnd);
+      document.removeEventListener("scrollend", handleScrollEnd);
+      window.removeEventListener("wheel", handleUserInterrupt);
+      window.removeEventListener("touchmove", handleUserInterrupt);
+      if (scrollEndTimerRef.current) {
+        clearTimeout(scrollEndTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Update sliding indicator position based on activeSection
+  useEffect(() => {
+    const updatePosition = () => {
+      const el = linkRefs.current[activeSection];
+      const nav = navRef.current;
+      if (el && nav) {
+        const navRect = nav.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+        setIndicatorStyle({
+          left: elRect.left - navRect.left,
+          width: elRect.width,
+          opacity: 1,
+        });
+      }
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+
+    if (typeof document !== "undefined" && document.fonts) {
+      document.fonts.ready.then(updatePosition);
+    }
+
+    const timer = setTimeout(updatePosition, 150);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      clearTimeout(timer);
+    };
+  }, [activeSection]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm border-slate-200 dark:border-slate-800">
@@ -30,56 +214,43 @@ export default function Header() {
           </Badge>
         </div>
 
-        <nav className="hidden md:flex items-center space-x-6">
-          <a
-            href="#main"
-            className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
-          >
-            Home
-          </a>
-          <a
-            href="#deploy-everywhere"
-            className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
-          >
-            Deploy
-          </a>
-          <a
-            href="#segmentation"
-            title="Two-Dimensional Layered Segmentation"
-            className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
-          >
-            Segmentation
-          </a>
-          <a
-            href="#type-safe"
-            title="Zero-Runtime Type-Safe Routing"
-            className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
-          >
-            Type-Safe
-          </a>
-          <a
-            href="#engine-comparison"
-            className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
-          >
-            Evolution
-          </a>
-          <a
-            href="#features"
-            className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
-          >
-            Features
-          </a>
-          <a
-            href="#ready"
-            className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
-          >
-            Start
-          </a>
+        <nav ref={navRef} className="hidden md:flex items-center space-x-6 relative py-1">
+          {navItems.map((item) => {
+            const isActive = activeSection === item.href;
+            return (
+              <a
+                key={item.href}
+                ref={(el) => {
+                  linkRefs.current[item.href] = el;
+                }}
+                href={item.href}
+                title={item.title}
+                onClick={(e) => handleNavClick(e, item.href)}
+                className={`text-sm font-medium transition-colors py-1 relative z-10 ${
+                  isActive
+                    ? "text-blue-600 dark:text-blue-400 font-semibold"
+                    : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                }`}
+              >
+                {item.label}
+              </a>
+            );
+          })}
+
+          {/* Sliding indicator underscore */}
+          <span
+            className="absolute -bottom-0.5 h-[2.5px] bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 rounded-full transition-all duration-300 ease-out pointer-events-none shadow-sm shadow-blue-500/30"
+            style={{
+              left: `${indicatorStyle.left}px`,
+              width: `${indicatorStyle.width}px`,
+              opacity: indicatorStyle.opacity,
+            }}
+          />
 
           <Button
             variant="outline"
             size="sm"
-            className="h-8 px-3 text-xs sm:text-sm font-medium border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors shadow-none"
+            className="h-8 px-3 text-xs sm:text-sm font-medium border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors shadow-none ml-2"
             asChild
           >
             <Link href="/docs" className="flex items-center">
