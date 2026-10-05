@@ -21,10 +21,11 @@ const navItems = [
   { href: "#routing", label: "Routing", title: "Intuitive File-Based Routing" },
   { href: "#type-safe", label: "Type-Safe", title: "Zero-Runtime Type-Safe Routing" },
   { href: "#segmentation", label: "Segmentation", title: "Two-Dimensional Layered Segmentation" },
+  { href: "#middleware", label: "Middleware", title: "Universal Middleware & Webhooks (dinou.config.mjs)" },
+  { href: "#dx", label: "DX", title: "Fast Developer Experience: Sub-5ms HMR" },
   { href: "#bundlers", label: "Bundlers", title: "Tri-Bundler Engine: esbuild, Rollup & Webpack" },
   { href: "#eject", label: "Eject", title: "Framework Sovereignty & Zero Lock-in" },
   { href: "#engine-comparison", label: "Evolution" },
-  { href: "#features", label: "Features" },
   { href: "#ready", label: "Start" },
 ];
 
@@ -217,7 +218,7 @@ export default function Header() {
           </Badge>
         </div>
 
-        <nav ref={navRef} className="hidden lg:flex items-center space-x-3 xl:space-x-4 2xl:space-x-5 relative py-1">
+        <nav ref={navRef} className="hidden lg:flex items-center space-x-2 xl:space-x-3 2xl:space-x-4 relative py-1">
           {navItems.map((item) => {
             const isActive = activeSection === item.href;
             return (

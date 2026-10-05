@@ -13,10 +13,11 @@ import { DeployMatrix } from "@/components/landing/deploy-matrix";
 import { RoutingShowcase } from "@/components/landing/routing-showcase";
 import { TypeSafeShowcase } from "@/components/landing/type-safe-showcase";
 import { SegmentationShowcase } from "@/components/landing/segmentation-showcase";
+import { MiddlewareShowcase } from "@/components/landing/middleware-showcase";
+import { DxShowcase } from "@/components/landing/dx-showcase";
 import { TriBundlerShowcase } from "@/components/landing/tri-bundler-showcase";
 import { EjectShowcase } from "@/components/landing/eject-showcase";
 import { EngineComparison } from "@/components/landing/engine-comparison";
-import { FeaturesSection } from "@/components/features-section";
 
 export default function Page() {
   return (
@@ -124,6 +125,12 @@ export default function Page() {
       {/* Layered Segmentation & PPR Showcase */}
       <SegmentationShowcase />
 
+      {/* Universal Middleware & Webhooks Showcase */}
+      <MiddlewareShowcase />
+
+      {/* Fast Developer Experience (DX) Showcase */}
+      <DxShowcase />
+
       {/* Tri-Bundler Engine (esbuild, Rollup, Webpack) Showcase */}
       <TriBundlerShowcase />
 
@@ -132,9 +139,6 @@ export default function Page() {
 
       {/* From Heavy Truck to Formula 1 Engine Comparison */}
       <EngineComparison />
-
-      {/* 6 Architectural Pillars */}
-      <FeaturesSection />
 
       {/* Final Call to Action */}
       <section id="ready" className="w-full py-20 sm:py-24 md:py-28 lg:py-32 scroll-mt-20 relative overflow-hidden">
