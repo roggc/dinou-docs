@@ -8,12 +8,13 @@ import {
 } from "lucide-react";
 import { Link } from "dinou";
 import { TerminalTabs } from "@/components/landing/terminal-tabs";
-import { SegmentationShowcase } from "@/components/landing/segmentation-showcase";
-import { DeployMatrix } from "@/components/landing/deploy-matrix";
-import { TypeSafeShowcase } from "@/components/landing/type-safe-showcase";
-import { EjectShowcase } from "@/components/landing/eject-showcase";
-import { TriBundlerShowcase } from "@/components/landing/tri-bundler-showcase";
 import { React19Showcase } from "@/components/landing/react-19-showcase";
+import { DeployMatrix } from "@/components/landing/deploy-matrix";
+import { RoutingShowcase } from "@/components/landing/routing-showcase";
+import { TypeSafeShowcase } from "@/components/landing/type-safe-showcase";
+import { SegmentationShowcase } from "@/components/landing/segmentation-showcase";
+import { TriBundlerShowcase } from "@/components/landing/tri-bundler-showcase";
+import { EjectShowcase } from "@/components/landing/eject-showcase";
 import { EngineComparison } from "@/components/landing/engine-comparison";
 import { FeaturesSection } from "@/components/features-section";
 
@@ -108,23 +109,26 @@ export default function Page() {
         </div>
       </section>
 
+      {/* Pure React 19 Native Engine (RSC & Server Functions) Showcase */}
+      <React19Showcase />
+
       {/* Deploy Everywhere Interactive Showcase */}
       <DeployMatrix />
 
-      {/* Layered Segmentation & PPR Showcase */}
-      <SegmentationShowcase />
+      {/* Intuitive File-Based Routing Showcase */}
+      <RoutingShowcase />
 
       {/* Zero-Runtime Type-Safe Routing Showcase */}
       <TypeSafeShowcase />
 
-      {/* Framework Sovereignty & Zero Lock-in (Eject) Showcase */}
-      <EjectShowcase />
+      {/* Layered Segmentation & PPR Showcase */}
+      <SegmentationShowcase />
 
       {/* Tri-Bundler Engine (esbuild, Rollup, Webpack) Showcase */}
       <TriBundlerShowcase />
 
-      {/* Pure React 19 Native Engine (RSC & Server Functions) Showcase */}
-      <React19Showcase />
+      {/* Framework Sovereignty & Zero Lock-in (Eject) Showcase */}
+      <EjectShowcase />
 
       {/* From Heavy Truck to Formula 1 Engine Comparison */}
       <EngineComparison />

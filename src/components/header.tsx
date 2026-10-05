@@ -16,12 +16,13 @@ import { Link } from "dinou";
 
 const navItems = [
   { href: "#main", label: "Home" },
-  { href: "#deploy-everywhere", label: "Deploy" },
-  { href: "#segmentation", label: "Segmentation", title: "Two-Dimensional Layered Segmentation" },
+  { href: "#react-19", label: "RSC", title: "Pure React 19 Engine: RSC & Server Functions" },
+  { href: "#deploy-everywhere", label: "Deploy", title: "Universal Multi-Runtime Deploy" },
+  { href: "#routing", label: "Routing", title: "Intuitive File-Based Routing" },
   { href: "#type-safe", label: "Type-Safe", title: "Zero-Runtime Type-Safe Routing" },
-  { href: "#eject", label: "Eject", title: "Framework Sovereignty & Zero Lock-in" },
+  { href: "#segmentation", label: "Segmentation", title: "Two-Dimensional Layered Segmentation" },
   { href: "#bundlers", label: "Bundlers", title: "Tri-Bundler Engine: esbuild, Rollup & Webpack" },
-  { href: "#react-19", label: "React 19", title: "Pure React 19 Engine: RSC & Server Functions" },
+  { href: "#eject", label: "Eject", title: "Framework Sovereignty & Zero Lock-in" },
   { href: "#engine-comparison", label: "Evolution" },
   { href: "#features", label: "Features" },
   { href: "#ready", label: "Start" },
