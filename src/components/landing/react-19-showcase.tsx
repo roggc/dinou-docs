@@ -4,18 +4,14 @@ import { useState } from "react";
 import {
   Sparkles,
   Zap,
-  Layers,
   ArrowRight,
-  Code2,
-  Copy,
-  Check,
   CheckCircle2,
   Server,
-  Radio,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "dinou";
+import { CodeWindow } from "./code-window";
 
 type React19Tab = "actions" | "rsc";
 
@@ -108,15 +104,8 @@ export default async function DashboardPage() {
 
 export function React19Showcase() {
   const [activeTab, setActiveTab] = useState<React19Tab>("actions");
-  const [copied, setCopied] = useState(false);
 
   const current = configs[activeTab];
-
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <section
@@ -219,34 +208,15 @@ export function React19Showcase() {
           </div>
 
           {/* Right: Code Viewer */}
-          <div className="lg:col-span-7 flex flex-col justify-between p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  <Code2 className="w-4 h-4 text-cyan-500" />
-                  <span className="font-mono text-xs text-slate-600 dark:text-slate-300">
-                    {current.codeFile}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleCopy(current.codeSnippet)}
-                  className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
-                >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copied ? "Copied" : "Copy"}</span>
-                </button>
-              </div>
-
-              {/* Code Box */}
-              <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-900 text-slate-100 font-mono text-xs sm:text-sm p-4 sm:p-5">
-                <pre className="text-slate-200 leading-relaxed overflow-x-auto whitespace-pre">
-                  {current.codeSnippet}
-                </pre>
-              </div>
-            </div>
-
-            <div className="pt-4 mt-4 text-xs text-slate-500 dark:text-slate-400 text-center">
+          <div className="lg:col-span-7 flex flex-col justify-between">
+            <CodeWindow
+              filename={current.codeFile}
+              code={current.codeSnippet}
+              language="tsx"
+              statusLeft="React 19 Native Primitives"
+              statusRight="W3C Web Streams"
+            />
+            <div className="pt-4 text-xs text-slate-500 dark:text-slate-400 text-center font-mono">
               100% compliant with React 19 specification &bull; Zero vendor-specific patches
             </div>
           </div>

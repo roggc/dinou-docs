@@ -7,8 +7,6 @@ import {
   Sparkles,
   RefreshCw,
   Zap,
-  Check,
-  Copy,
   Clock,
   ArrowRight,
   ShieldCheck,
@@ -18,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "dinou";
+import { CodeWindow } from "./code-window";
 
 type SegmentationTab = "ppr" | "vertical" | "horizontal";
 
@@ -217,15 +216,8 @@ export default function DashboardLayout({ children, navStats }: any) {
 
 export function SegmentationShowcase() {
   const [activeTab, setActiveTab] = useState<SegmentationTab>("ppr");
-  const [copied, setCopied] = useState(false);
 
   const activeConfig = tabConfigs[activeTab];
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(activeConfig.codeSnippet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <section
@@ -371,52 +363,13 @@ export function SegmentationShowcase() {
 
           {/* Right Column: Code Editor Preview (7 cols) */}
           <div className="lg:col-span-7">
-            <div className="rounded-2xl border border-slate-800 bg-[#0d1117] text-slate-100 shadow-2xl overflow-hidden">
-              {/* Editor Header */}
-              <div className="flex items-center justify-between px-4 py-3 bg-[#161b22] border-b border-slate-800">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-                  <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-                  <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
-                  <span className="text-xs text-slate-400 font-mono ml-2">
-                    {activeConfig.codeFile}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-100 bg-slate-800/80 hover:bg-slate-800 px-2.5 py-1 rounded-md transition-colors"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="text-emerald-400 font-medium">Copied</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copy</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {/* Code Area */}
-              <div className="p-4 sm:p-5 overflow-x-auto text-xs sm:text-sm font-mono leading-relaxed bg-[#0d1117]">
-                <pre className="text-slate-200">
-                  <code>{activeConfig.codeSnippet}</code>
-                </pre>
-              </div>
-
-              {/* Editor Footer / Info Bar */}
-              <div className="px-4 py-2.5 bg-[#161b22]/70 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Native React 19 RSC Pipeline
-                </span>
-                <span>TypeScript 5+ Ready</span>
-              </div>
-            </div>
+            <CodeWindow
+              filename={activeConfig.codeFile}
+              code={activeConfig.codeSnippet}
+              language="tsx"
+              statusLeft="Native React 19 RSC Pipeline"
+              statusRight="TypeScript 5+ Ready"
+            />
           </div>
         </div>
       </div>

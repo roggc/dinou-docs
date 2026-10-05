@@ -6,8 +6,6 @@ import {
   MousePointerClick,
   Layers,
   Zap,
-  Check,
-  Copy,
   ArrowRight,
   Code2,
   Cpu,
@@ -18,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "dinou";
+import { CodeWindow } from "./code-window";
 
 type TypeSafeTab = "navigation" | "params" | "architecture";
 
@@ -200,15 +199,8 @@ declare module "dinou" {
 
 export function TypeSafeShowcase() {
   const [activeTab, setActiveTab] = useState<TypeSafeTab>("navigation");
-  const [copied, setCopied] = useState(false);
 
   const activeConfig = tabConfigs[activeTab];
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(activeConfig.codeSnippet);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
     <section
@@ -309,55 +301,13 @@ export function TypeSafeShowcase() {
 
           {/* Right Column: Code Showcase with simulated IDE chrome */}
           <div className="lg:col-span-7">
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-950 overflow-hidden shadow-2xl">
-              {/* Window Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900/80">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                  <span className="text-xs font-mono text-slate-400 ml-2">
-                    {activeConfig.codeFile}
-                  </span>
-                </div>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={handleCopy}
-                  className="h-7 text-xs text-slate-400 hover:text-white hover:bg-slate-800 px-2"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 mr-1 text-emerald-400" />
-                      <span className="text-emerald-400 font-medium">Copied</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5 mr-1" />
-                      <span>Copy</span>
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {/* Code Editor Body */}
-              <div className="p-4 sm:p-5 font-mono text-xs sm:text-[13px] leading-relaxed overflow-x-auto text-slate-200">
-                <pre tabIndex={0} className="focus:outline-none">
-                  <code>{activeConfig.codeSnippet}</code>
-                </pre>
-              </div>
-
-              {/* Bottom IDE Status Bar */}
-              <div className="flex items-center justify-between px-4 py-2 bg-slate-900 border-t border-slate-800/80 text-[11px] font-mono text-slate-400">
-                <div className="flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>TypeScript 5.x</span>
-                  <span>•</span>
-                  <span>Dinou Route Scanner (&lt;2ms)</span>
-                </div>
-                <span className="text-slate-500">UTF-8</span>
-              </div>
-            </div>
+            <CodeWindow
+              filename={activeConfig.codeFile}
+              code={activeConfig.codeSnippet}
+              language="tsx"
+              statusLeft="Dinou Route Scanner (<2ms)"
+              statusRight="TypeScript 5.x"
+            />
           </div>
         </div>
       </div>
