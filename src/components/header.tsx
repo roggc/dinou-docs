@@ -251,11 +251,13 @@ export default function Header() {
               opacity: indicatorStyle.opacity,
             }}
           />
+        </nav>
 
+        <div className="flex items-center space-x-1.5 sm:space-x-2">
           <Button
             variant="outline"
             size="sm"
-            className="h-8 px-3 text-xs sm:text-sm font-medium border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors shadow-none ml-2"
+            className="h-8 px-3 text-xs sm:text-sm font-medium border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors shadow-none mr-1"
             asChild
           >
             <Link href="/docs" className="flex items-center">
@@ -264,9 +266,7 @@ export default function Header() {
               <ArrowRight className="ml-1.5 h-3.5 w-3.5 text-slate-400" />
             </Link>
           </Button>
-        </nav>
 
-        <div className="flex items-center space-x-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="sm" asChild>

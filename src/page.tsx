@@ -43,15 +43,18 @@ export default function Page() {
 
             {/* Main Headline */}
             <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-slate-900 dark:text-white leading-[1.12]">
-              <span className="text-blue-600 dark:text-blue-500">Dinou</span> — Build with React 19.
-              <span className="block mt-2 sm:mt-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent pb-2">
-                Deploy Everywhere.
+              <span className="block text-blue-600 dark:text-blue-500">Dinou</span>
+              <span className="block mt-1 sm:mt-2 text-slate-900 dark:text-white">
+                Build with React 19
+              </span>
+              <span className="block mt-1 sm:mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent pb-2">
+                Deploy Everywhere
               </span>
             </h1>
 
             {/* Subheading */}
             <p className="max-w-[780px] text-slate-600 dark:text-slate-300 text-lg md:text-xl leading-relaxed">
-              The modern, ejectable React 19 framework built on web standards. Build with Server Components, Partial Prerendering (PPR), 2D layered segmentation, and server actions — then deploy seamlessly to Cloudflare Workers, Netlify Serverless, Bun or Deno binaries, Node.js, or static HTML with zero vendor lock-in.
+              The ejectable React 19 framework built on web standards. Build full-stack apps and deploy anywhere with zero vendor lock-in.
             </p>
 
             {/* CTA Buttons */}
