@@ -5,6 +5,21 @@ import { Check, Copy } from "lucide-react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism/index.js";
 
+// Transparent One Dark theme ensuring no unwanted line backgrounds/highlights
+const cleanOneDark = {
+  ...oneDark,
+  'code[class*="language-"]': {
+    ...oneDark['code[class*="language-"]'],
+    background: "transparent",
+    textShadow: "none",
+  },
+  'pre[class*="language-"]': {
+    ...oneDark['pre[class*="language-"]'],
+    background: "transparent",
+    textShadow: "none",
+  },
+};
+
 interface CodeWindowProps {
   filename: string;
   code: string;
@@ -70,7 +85,7 @@ export function CodeWindow({
       <div className="overflow-x-auto flex-1 text-xs sm:text-[13px] leading-relaxed bg-[#0d1117]">
         <SyntaxHighlighter
           language={language}
-          style={oneDark}
+          style={cleanOneDark}
           customStyle={{
             margin: 0,
             padding: "1.25rem",
@@ -78,6 +93,11 @@ export function CodeWindow({
             fontSize: "inherit",
             lineHeight: "1.65",
             fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+          }}
+          codeTagProps={{
+            style: {
+              background: "transparent",
+            },
           }}
           wrapLines={false}
           wrapLongLines={false}
