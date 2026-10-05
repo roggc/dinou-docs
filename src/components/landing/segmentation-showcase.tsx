@@ -222,7 +222,7 @@ export function SegmentationShowcase() {
   return (
     <section
       id="segmentation"
-      className="w-full py-16 sm:py-20 md:py-24 scroll-mt-20 relative bg-transparent"
+      className="w-full pt-8 pb-16 sm:pt-10 sm:pb-20 md:pt-12 md:pb-24 lg:pt-14 lg:pb-24 scroll-mt-16 relative bg-transparent"
     >
       <div className="container px-4 md:px-6 mx-auto">
         {/* Section Header */}

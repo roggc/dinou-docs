@@ -75,7 +75,7 @@ export default function Header() {
     const id = href.slice(1);
     const targetEl = document.getElementById(id);
     if (targetEl) {
-      const top = targetEl.getBoundingClientRect().top + window.scrollY - 70;
+      const top = targetEl.getBoundingClientRect().top + window.scrollY - 64;
       const currentScroll = window.scrollY;
 
       setActiveSection(href);
