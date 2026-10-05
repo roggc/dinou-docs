@@ -264,59 +264,46 @@ export function TypeSafeShowcase() {
             <div className="space-y-3">
               <Badge
                 variant="outline"
-                className={`text-xs px-2.5 py-0.5 font-mono ${activeConfig.badgeColor}`}
+                className={`text-xs px-3 py-1 font-mono ${activeConfig.badgeColor}`}
               >
                 {activeConfig.badge}
               </Badge>
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+              <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
                 {activeConfig.headline}
               </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              <p className="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
                 {activeConfig.description}
               </p>
             </div>
 
-            {/* Feature Bullets */}
-            <div className="space-y-3 pt-2">
-              {activeConfig.features.map((feat, idx) => {
-                const Icon = feat.icon;
-                return (
-                  <div
-                    key={idx}
-                    className="flex items-start gap-3 p-3 rounded-xl border border-slate-200/70 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/40"
-                  >
-                    <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
-                        {feat.title}
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                        {feat.desc}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Key Stat & CTA Card */}
-            <div className="p-4 rounded-xl border border-blue-500/20 bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-purple-500/10 flex items-center justify-between">
+            {/* Key Stat & Promise Card */}
+            <div className="p-5 rounded-2xl border border-blue-500/20 bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-purple-500/10 flex items-center justify-between">
               <div>
-                <div className="text-2xl font-black text-blue-600 dark:text-blue-400 font-mono">
+                <div className="text-3xl font-black text-blue-600 dark:text-blue-400 font-mono">
                   {activeConfig.stat}
                 </div>
-                <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                <div className="text-sm text-slate-700 dark:text-slate-300 font-medium mt-0.5">
                   {activeConfig.statLabel}
                 </div>
               </div>
-              <Button size="sm" variant="outline" className="border-blue-500/30 text-xs" asChild>
+              <Button size="sm" variant="outline" className="border-blue-500/30 text-xs sm:text-sm" asChild>
                 <Link href="/docs/type-safe-routing">
-                  <span>Full Guide</span>
+                  <span>Routing Guide</span>
                   <ArrowRight className="w-3.5 h-3.5 ml-1" />
                 </Link>
               </Button>
+            </div>
+
+            {/* Clear, readable benefits */}
+            <div className="space-y-3 pt-1">
+              <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/60 dark:bg-slate-900/40 flex items-center gap-3 text-sm text-slate-700 dark:text-slate-200">
+                <CheckCircle2 className="w-5 h-5 text-blue-500 shrink-0" />
+                <span>Instant autocompletion on all project routes and dynamic paths</span>
+              </div>
+              <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/60 dark:bg-slate-900/40 flex items-center gap-3 text-sm text-slate-700 dark:text-slate-200">
+                <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                <span>Zero client bundle weight — resolved entirely by TypeScript compiler</span>
+              </div>
             </div>
           </div>
 

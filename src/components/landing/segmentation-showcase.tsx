@@ -295,33 +295,33 @@ export function SegmentationShowcase() {
               <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                 {activeConfig.headline}
               </h3>
-              <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm sm:text-base">
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-base">
                 {activeConfig.description}
               </p>
             </div>
 
             {/* Visual Metric Card */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800 shadow-sm relative overflow-hidden">
+            <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80 mb-3">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80 mb-4">
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   Real-World Benchmark
                 </span>
                 <span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
                   Verified v7
                 </span>
               </div>
-              <div className="flex items-baseline gap-2">
+              <div className="flex items-baseline gap-2.5">
                 <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-blue-600 dark:text-blue-400">
                   {activeConfig.visualPreview.stat}
                 </span>
-                <span className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
+                <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">
                   {activeConfig.visualPreview.statLabel}
                 </span>
               </div>
-              <div className="mt-4 space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+              <div className="mt-4 space-y-2.5 text-sm text-slate-700 dark:text-slate-200">
+                <div className="flex items-start gap-2.5">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
                   <div>
                     <strong className="text-slate-900 dark:text-white">
                       {activeConfig.visualPreview.shellTitle}:
@@ -329,8 +329,8 @@ export function SegmentationShowcase() {
                     {activeConfig.visualPreview.shellDesc}
                   </div>
                 </div>
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 shrink-0" />
+                <div className="flex items-start gap-2.5">
+                  <div className="w-2 h-2 rounded-full bg-purple-500 mt-1.5 shrink-0" />
                   <div>
                     <strong className="text-slate-900 dark:text-white">
                       {activeConfig.visualPreview.streamTitle}:
@@ -341,29 +341,16 @@ export function SegmentationShowcase() {
               </div>
             </div>
 
-            {/* Feature Bullets */}
-            <div className="space-y-3 pt-1">
-              {activeConfig.features.map((feat, i) => {
-                const Icon = feat.icon;
-                return (
-                  <div
-                    key={i}
-                    className="flex items-start gap-3 p-3 rounded-xl bg-white/70 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800/80"
-                  >
-                    <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
-                        {feat.title}
-                      </h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                        {feat.desc}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+            {/* Quick Benefits */}
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-blue-500 shrink-0" />
+                <span>Zero Database Blocking</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                <RefreshCw className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span>Atomic UI Replacement</span>
+              </div>
             </div>
 
             {/* Link to docs */}

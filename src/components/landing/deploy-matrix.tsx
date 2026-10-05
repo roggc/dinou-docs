@@ -249,18 +249,18 @@ export function DeployMatrix() {
                 </div>
               </div>
 
-              <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+              <p className="text-slate-700 dark:text-slate-200 text-base leading-relaxed">
                 {selectedTarget.tagline}
               </p>
 
-              <div className="pt-2 space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Architecture Highlights
+              <div className="pt-2 space-y-2.5">
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">
+                  Key Advantages
                 </span>
                 <ul className="space-y-2">
-                  {selectedTarget.highlights.map((h) => (
-                    <li key={h} className="text-xs text-slate-600 dark:text-slate-300 flex items-start gap-2">
-                      <span className="text-emerald-500 font-bold shrink-0">✓</span>
+                  {selectedTarget.highlights.slice(0, 3).map((h) => (
+                    <li key={h} className="text-sm text-slate-600 dark:text-slate-300 flex items-start gap-2.5">
+                      <span className="text-emerald-500 font-bold shrink-0 mt-0.5">✓</span>
                       <span>{h}</span>
                     </li>
                   ))}
@@ -270,63 +270,63 @@ export function DeployMatrix() {
 
             <div className="pt-6 mt-6 border-t border-slate-200 dark:border-slate-800 space-y-3">
               <div className="flex items-center justify-between text-xs text-slate-500">
-                <span>Build Command</span>
+                <span className="font-medium">One-Command Build</span>
                 <button
                   type="button"
                   onClick={() => handleCopy(selectedTarget.buildCommand)}
-                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium inline-flex items-center gap-1"
+                  className="text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium inline-flex items-center gap-1.5"
                 >
-                  {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copied ? "Copied" : "Copy"}</span>
                 </button>
               </div>
-              <div className="px-3 py-2 rounded-lg bg-slate-950 font-mono text-xs text-slate-200 flex items-center justify-between">
+              <div className="px-3.5 py-2.5 rounded-xl bg-slate-950 font-mono text-xs sm:text-sm text-slate-200 flex items-center justify-between border border-slate-800">
                 <code>{selectedTarget.buildCommand}</code>
               </div>
 
-              <Button variant="outline" size="sm" className="w-full mt-2" asChild>
+              <Button variant="outline" size="sm" className="w-full mt-2 text-sm" asChild>
                 <Link href={selectedTarget.docLink}>
                   <span>Read Deployment Guide</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 ml-1.5" />
+                  <ArrowUpRight className="w-4 h-4 ml-1.5" />
                 </Link>
               </Button>
             </div>
           </div>
 
           {/* Right: Simulated Live Terminal */}
-          <div className="lg:col-span-7 rounded-2xl overflow-hidden border border-slate-800 bg-[#0d1117] text-slate-200 shadow-2xl flex flex-col font-mono text-xs">
+          <div className="lg:col-span-7 rounded-2xl overflow-hidden border border-slate-800 bg-[#0d1117] text-slate-200 shadow-2xl flex flex-col font-mono text-xs sm:text-sm">
             <div className="flex items-center justify-between px-4 py-3 bg-[#161b22] border-b border-slate-800">
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
                 <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
                 <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
-                <span className="text-[11px] text-slate-400 ml-2">deploy-{selectedTarget.id}.sh</span>
+                <span className="text-xs text-slate-400 ml-2">deploy-{selectedTarget.id}.sh</span>
               </div>
-              <span className="text-[10px] text-slate-500 uppercase tracking-widest">
-                AOT Dual-Bundle Engine
+              <span className="text-[11px] text-slate-500 uppercase tracking-widest font-sans">
+                Universal Runtime
               </span>
             </div>
 
-            <div className="p-6 space-y-3.5 overflow-x-auto flex-1 flex flex-col justify-center">
+            <div className="p-6 space-y-4 overflow-x-auto flex-1 flex flex-col justify-center">
               {selectedTarget.terminalOutput.map((line, idx) => {
                 if (line.startsWith("$")) {
                   return (
-                    <div key={idx} className="flex items-center text-slate-100 font-semibold pt-1">
-                      <span className="text-emerald-400 mr-2 select-none">$</span>
+                    <div key={idx} className="flex items-center text-slate-100 font-semibold text-sm">
+                      <span className="text-emerald-400 mr-2.5 select-none">$</span>
                       <span>{line.slice(2)}</span>
                     </div>
                   );
                 }
                 if (line.startsWith("✔")) {
                   return (
-                    <div key={idx} className="text-emerald-400/90 pl-4 border-l border-emerald-500/30">
+                    <div key={idx} className="text-emerald-400/90 pl-4 border-l-2 border-emerald-500/40 text-xs sm:text-sm">
                       {line}
                     </div>
                   );
                 }
                 if (line.startsWith("🚀")) {
                   return (
-                    <div key={idx} className="text-blue-400 font-medium pl-4 border-l border-blue-500/40 pt-1">
+                    <div key={idx} className="text-blue-400 font-medium pl-4 border-l-2 border-blue-500/50 pt-1 text-xs sm:text-sm">
                       {line}
                     </div>
                   );

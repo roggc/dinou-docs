@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
   Sparkles,
-  Server,
   Zap,
   Layers,
   ArrowRight,
@@ -11,17 +10,14 @@ import {
   Copy,
   Check,
   CheckCircle2,
-  Split,
-  Laptop,
+  Server,
   Radio,
-  Workflow,
-  Globe,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "dinou";
 
-type React19Tab = "actions" | "flight" | "pipeline";
+type React19Tab = "actions" | "rsc";
 
 interface TabConfig {
   id: React19Tab;
@@ -32,127 +28,80 @@ interface TabConfig {
   description: string;
   codeFile: string;
   codeSnippet: string;
-  highlights: {
-    title: string;
-    desc: string;
-  }[];
+  benefits: string[];
 }
 
 const configs: Record<React19Tab, TabConfig> = {
   actions: {
     id: "actions",
-    title: "1. Server Functions",
-    badge: "Direct Server Actions",
+    title: "1. Server Functions ('use server')",
+    badge: "Direct RPC",
     badgeColor: "border-cyan-500/30 text-cyan-600 dark:text-cyan-400 bg-cyan-500/10",
-    headline: "Direct Server-Side Execution with 'use server'",
+    headline: "Backend Logic Directly in Your Components",
     description:
-      "Execute backend logic directly from your React components without writing manual API routes, serialization boilerplate, or state synchronizers. Fully compatible with React 19 useActionState and useOptimistic.",
+      "Execute backend mutations directly from your React components without writing manual API endpoints, fetch boilerplate, or serialization layers. 100% native React 19.",
     codeFile: "src/components/newsletter.tsx",
     codeSnippet: `// 1. Direct Server Function (runs securely on backend)
-async function subscribeUser(formData: FormData) {
+async function subscribe(formData: FormData) {
   "use server";
-  const email = formData.get("email") as string;
-  await db.subscribers.insert({ email, date: new Date() });
-  return { success: true, email };
+  const email = formData.get("email");
+  await db.subscribers.insert({ email });
+  return { success: true };
 }
 
-// 2. React 19 Client Component using standard Action hooks
-export function NewsletterForm() {
+// 2. Client Component using React 19 native action hook
+export function Newsletter() {
   const [state, formAction, isPending] = useActionState(
-    async (_prev: any, fd: FormData) => await subscribeUser(fd),
+    async (_prev, fd) => await subscribe(fd),
     null
   );
 
   return (
     <form action={formAction}>
-      <input name="email" type="email" placeholder="you@example.com" required />
+      <input name="email" type="email" placeholder="you@domain.com" />
       <button disabled={isPending}>
-        {isPending ? "Subscribing..." : "Join Newsletter"}
+        {isPending ? "Subscribing..." : "Join"}
       </button>
-      {state?.success && <p>Subscribed: {state.email}</p>}
     </form>
   );
 }`,
-    highlights: [
-      {
-        title: "Zero API Routes Needed",
-        desc: "Calls backend functions transparently over secure, typed HTTP POST dispatches.",
-      },
-      {
-        title: "React 19 Native Hooks",
-        desc: "First-class integration with useActionState, useOptimistic, and useFormStatus.",
-      },
-      {
-        title: "Automatic Revalidation",
-        desc: "Server mutations can trigger immediate cache invalidation and UI streaming updates.",
-      },
+    benefits: [
+      "Zero manual API routes or fetch wrappers needed",
+      "Native React 19 useActionState and useOptimistic support",
     ],
   },
-  flight: {
-    id: "flight",
-    title: "2. RSC Flight Wire Protocol",
+  rsc: {
+    id: "rsc",
+    title: "2. Server Components (RSC)",
     badge: "0kb Client Bundle",
     badgeColor: "border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10",
-    headline: "Streaming React Flight Protocol over W3C Streams",
+    headline: "0kb JavaScript Shipped for Server Code",
     description:
-      "Server Components never send JavaScript to the client. Dinou serializes your React component tree into React Flight chunks, streaming them over native Web Streams for instant progressive rendering.",
-    codeFile: "network/flight-stream.txt",
-    codeSnippet: `// Raw React Flight Stream emitted by Dinou over W3C ReadableStream:
-1:I["dinou/client/link.js",["Link"],""]
-2:{"name":"Dinou v7","stars":1240,"status":"online"}
-0:["$","main",null,{"children":[
-  ["$","h1",null,{"children":"Dinou Dashboard"}],
-  ["$","p",null,{"children":["Live Stars: ",["$","b",null,{"children":"1,240"}]]}],
-  ["$","$L1",null,{"href":"/docs","children":"Explore Docs"}]
-]}]`,
-    highlights: [
-      {
-        title: "0kb JavaScript for Server Code",
-        desc: "Heavy libraries (markdown parsers, date formatters, DB drivers) never reach the browser.",
-      },
-      {
-        title: "W3C Web Standards",
-        desc: "Streamed via standard ReadableStream across Cloudflare, Netlify, Bun, and Node.",
-      },
-      {
-        title: "Interactive Client Leaves",
-        desc: "Only interactive components (buttons, forms, modals) download client JavaScript.",
-      },
-    ],
-  },
-  pipeline: {
-    id: "pipeline",
-    title: "3. Dual-Process SSR Engine",
-    badge: "Process Isolation",
-    badgeColor: "border-purple-500/30 text-purple-600 dark:text-purple-400 bg-purple-500/10",
-    headline: "Collision-Free V8 RSC Isolation",
-    description:
-      "React 19 contains two conflicting module registries: 'react-server' and 'react-dom/server'. Dinou cleanly isolates RSC compilation and HTML SSR deserialization, communicating via high-performance IPC pipes.",
-    codeFile: "dinou/server/main-server.js",
-    codeSnippet: `// Dinou Dual-Process IPC Pipeline Architecture:
-// -------------------------------------------------------------
-// Process A: RSC Flight Generator (react-server condition)
-//   └─ Evaluates Server Components, executes DB queries
-//   └─ Emits React Flight Wire Stream via IPC Pipe (fd:4)
-//
-// Process B: HTML SSR Deserializer (react-dom/server)
-//   └─ Receives Flight stream from IPC
-//   └─ Renders progressive HTML with renderToPipeableStream
-//   └─ Streams final HTML directly to the browser
-// -------------------------------------------------------------`,
-    highlights: [
-      {
-        title: "No V8 Module Collisions",
-        desc: "Guarantees zero memory corruption between server-only and client-only React globals.",
-      },
-      {
-        title: "Sub-Millisecond IPC",
-        desc: "Streams Flight buffers across file descriptors with minimal CPU and memory overhead.",
-      },
-      {
-        title: "Portable Everywhere",
-        desc: "Compiles down into single-threaded isolates on Cloudflare Workers and multi-threaded Node.",
-      },
+      "Render markdown parsers, database queries, and heavy backend dependencies on the server. Dinou streams progressive React Flight chunks over standard W3C Web Streams.",
+    codeFile: "src/dashboard/page.tsx",
+    codeSnippet: `// Pure Server Component: 0kb sent to browser
+import { db } from "@/lib/db";
+import { MarkdownParser } from "@/lib/heavy-parser";
+import { InteractiveChart } from "./client-chart"; // "use client"
+
+export default async function DashboardPage() {
+  // Direct database query on server
+  const reports = await db.reports.findLatest();
+  const summaryHtml = MarkdownParser.render(reports.raw);
+
+  return (
+    <main className="space-y-6">
+      <h1>Production Analytics</h1>
+      <div dangerouslySetInnerHTML={{ __html: summaryHtml }} />
+
+      {/* Only this interactive leaf downloads client JS */}
+      <InteractiveChart data={reports.metrics} />
+    </main>
+  );
+}`,
+    benefits: [
+      "Heavy dependencies stay 100% on the server",
+      "Progressive streaming over standard W3C ReadableStream",
     ],
   },
 };
@@ -192,29 +141,27 @@ export function React19Showcase() {
             </span>
           </h2>
 
-          <p className="text-slate-600 dark:text-slate-300 md:text-lg max-w-2xl leading-relaxed">
-            Dinou is not an old framework retrofitted for React 19. It was engineered from day one
-            around React 19 primitives: native RSC, Server Functions, and streaming Web standards.
+          <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg max-w-2xl leading-relaxed">
+            Dinou was engineered from the ground up for React 19 primitives: native Server Components,
+            direct Server Functions, and streaming Web standards.
           </p>
 
-          {/* Interactive Mode Tabs */}
-          <div className="flex flex-wrap justify-center gap-2 p-1.5 rounded-2xl bg-slate-200/80 dark:bg-slate-800/80 border border-slate-300/60 dark:border-slate-700/60 backdrop-blur-sm mt-4">
-            {(["actions", "flight", "pipeline"] as React19Tab[]).map((tabId) => {
+          {/* Tab Switcher */}
+          <div className="flex justify-center gap-2 p-1.5 rounded-xl bg-slate-200/80 dark:bg-slate-800/80 border border-slate-300/60 dark:border-slate-700/60 mt-4">
+            {(["actions", "rsc"] as React19Tab[]).map((tabId) => {
               const tab = configs[tabId];
               const isSelected = activeTab === tabId;
               return (
                 <button
                   key={tabId}
                   onClick={() => setActiveTab(tabId)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 ${
+                  className={`flex items-center gap-2 px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
                     isSelected
                       ? "bg-white dark:bg-slate-950 text-cyan-600 dark:text-cyan-400 shadow-sm"
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
-                  {tabId === "actions" && <Zap className="w-4 h-4" />}
-                  {tabId === "flight" && <Radio className="w-4 h-4" />}
-                  {tabId === "pipeline" && <Workflow className="w-4 h-4" />}
+                  {tabId === "actions" ? <Zap className="w-4 h-4" /> : <Server className="w-4 h-4" />}
                   <span>{tab.title}</span>
                 </button>
               );
@@ -223,45 +170,35 @@ export function React19Showcase() {
         </div>
 
         {/* Tab Content Display */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch max-w-6xl mx-auto">
-          {/* Left: Overview & Highlights */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-6xl mx-auto">
+          {/* Left: Overview & Key Benefits */}
           <div className="lg:col-span-5 flex flex-col justify-between p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div className="space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="space-y-3">
                 <Badge className={current.badgeColor}>
                   {current.badge}
                 </Badge>
-                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
-                  React 19 Standards
-                </span>
-              </div>
-
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-snug">
+                <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white leading-snug">
                   {current.headline}
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                <p className="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
                   {current.description}
                 </p>
               </div>
 
-              <div className="space-y-3">
-                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              {/* Key Benefits */}
+              <div className="space-y-3 pt-2">
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">
                   Architectural Guarantees
                 </span>
                 <div className="space-y-2.5">
-                  {current.highlights.map((h, i) => (
+                  {current.benefits.map((benefit, i) => (
                     <div
                       key={i}
-                      className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 space-y-1"
+                      className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 flex items-center gap-3 text-sm text-slate-700 dark:text-slate-200"
                     >
-                      <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-cyan-500" />
-                        <span>{h.title}</span>
-                      </div>
-                      <p className="text-xs text-slate-600 dark:text-slate-400 pl-5 leading-relaxed">
-                        {h.desc}
-                      </p>
+                      <CheckCircle2 className="w-5 h-5 text-cyan-500 shrink-0" />
+                      <span>{benefit}</span>
                     </div>
                   ))}
                 </div>
@@ -269,10 +206,10 @@ export function React19Showcase() {
             </div>
 
             <div className="pt-6 border-t border-slate-200 dark:border-slate-800 mt-6 flex items-center justify-between">
-              <span className="text-xs text-slate-500 dark:text-slate-400">
-                W3C Streams &bull; React Flight
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                W3C Web Standards
               </span>
-              <Button size="sm" variant="outline" className="text-xs border-cyan-500/30 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/10" asChild>
+              <Button size="sm" variant="outline" className="text-xs sm:text-sm border-cyan-500/30 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/10" asChild>
                 <Link href="/docs/server-client-components">
                   <span>RSC Guide</span>
                   <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
@@ -292,6 +229,7 @@ export function React19Showcase() {
                   </span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => handleCopy(current.codeSnippet)}
                   className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
@@ -301,14 +239,14 @@ export function React19Showcase() {
               </div>
 
               {/* Code Box */}
-              <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-900 text-slate-100 font-mono text-xs p-4 sm:p-5">
+              <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-900 text-slate-100 font-mono text-xs sm:text-sm p-4 sm:p-5">
                 <pre className="text-slate-200 leading-relaxed overflow-x-auto whitespace-pre">
                   {current.codeSnippet}
                 </pre>
               </div>
             </div>
 
-            <div className="pt-4 mt-4 text-[11px] text-slate-500 dark:text-slate-400 text-center">
+            <div className="pt-4 mt-4 text-xs text-slate-500 dark:text-slate-400 text-center">
               100% compliant with React 19 specification &bull; Zero vendor-specific patches
             </div>
           </div>
