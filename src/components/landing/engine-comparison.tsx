@@ -63,7 +63,7 @@ export function EngineComparison() {
           <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl text-slate-900 dark:text-white">
             From Heavy Truck to{" "}
             <span className="bg-gradient-to-r from-red-500 via-pink-600 to-purple-600 bg-clip-text text-transparent">
-              Formula 1 Ferrari
+              Formula 1
             </span>
           </h2>
           <p className="max-w-[760px] text-slate-600 dark:text-slate-400 md:text-lg">
@@ -156,7 +156,7 @@ export function EngineComparison() {
                 <tr>
                   <th className="py-3 px-4 sm:px-6">Architectural Dimension</th>
                   <th className="py-3 px-4 sm:px-6">🚛 Dinou v6 (Truck)</th>
-                  <th className="py-3 px-4 sm:px-6 text-purple-600 dark:text-purple-400 font-bold">🏎️ Dinou v7 (Ferrari)</th>
+                  <th className="py-3 px-4 sm:px-6 text-purple-600 dark:text-purple-400 font-bold">🏎️ Dinou v7 (Formula 1)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-600 dark:text-slate-400">

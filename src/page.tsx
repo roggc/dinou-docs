@@ -10,6 +10,7 @@ import { Link } from "dinou";
 import { TerminalTabs } from "@/components/landing/terminal-tabs";
 import { SegmentationShowcase } from "@/components/landing/segmentation-showcase";
 import { DeployMatrix } from "@/components/landing/deploy-matrix";
+import { TypeSafeShowcase } from "@/components/landing/type-safe-showcase";
 import { EngineComparison } from "@/components/landing/engine-comparison";
 import { FeaturesSection } from "@/components/features-section";
 
@@ -104,13 +105,16 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Layered Segmentation & PPR Showcase */}
-      <SegmentationShowcase />
-
       {/* Deploy Everywhere Interactive Showcase */}
       <DeployMatrix />
 
-      {/* From Truck to Formula 1 Engine Comparison */}
+      {/* Layered Segmentation & PPR Showcase */}
+      <SegmentationShowcase />
+
+      {/* Zero-Runtime Type-Safe Routing Showcase */}
+      <TypeSafeShowcase />
+
+      {/* From Heavy Truck to Formula 1 Engine Comparison */}
       <EngineComparison />
 
       {/* 6 Architectural Pillars */}

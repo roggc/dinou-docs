@@ -38,6 +38,12 @@ export default function Header() {
             Home
           </a>
           <a
+            href="#deploy-everywhere"
+            className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
+          >
+            Deploy
+          </a>
+          <a
             href="#segmentation"
             title="Two-Dimensional Layered Segmentation"
             className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
@@ -45,10 +51,11 @@ export default function Header() {
             Segmentation
           </a>
           <a
-            href="#deploy-everywhere"
+            href="#type-safe"
+            title="Zero-Runtime Type-Safe Routing"
             className="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
           >
-            Deploy
+            Type-Safe
           </a>
           <a
             href="#engine-comparison"
