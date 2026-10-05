@@ -19,6 +19,9 @@ const navItems = [
   { href: "#deploy-everywhere", label: "Deploy" },
   { href: "#segmentation", label: "Segmentation", title: "Two-Dimensional Layered Segmentation" },
   { href: "#type-safe", label: "Type-Safe", title: "Zero-Runtime Type-Safe Routing" },
+  { href: "#eject", label: "Eject", title: "Framework Sovereignty & Zero Lock-in" },
+  { href: "#bundlers", label: "Bundlers", title: "Tri-Bundler Engine: esbuild, Rollup & Webpack" },
+  { href: "#react-19", label: "React 19", title: "Pure React 19 Engine: RSC & Server Functions" },
   { href: "#engine-comparison", label: "Evolution" },
   { href: "#features", label: "Features" },
   { href: "#ready", label: "Start" },
@@ -85,8 +88,6 @@ export default function Header() {
 
   // Scroll Spy: track visible section based on scroll position
   useEffect(() => {
-    const sectionIds = navItems.map((item) => item.href.slice(1));
-
     const updateActiveSection = () => {
       // 1. If at the top of the page
       if (window.scrollY < 120) {
@@ -107,7 +108,8 @@ export default function Header() {
       const scrollPosition = window.scrollY + 200;
       let current = "#main";
 
-      for (const id of sectionIds) {
+      for (const item of navItems) {
+        const id = item.href.slice(1);
         const el = document.getElementById(id);
         if (el) {
           const top = el.getBoundingClientRect().top + window.scrollY;
@@ -170,7 +172,7 @@ export default function Header() {
         clearTimeout(scrollEndTimerRef.current);
       }
     };
-  }, []);
+  }, [navItems]);
 
   // Update sliding indicator position based on activeSection
   useEffect(() => {
@@ -214,7 +216,7 @@ export default function Header() {
           </Badge>
         </div>
 
-        <nav ref={navRef} className="hidden md:flex items-center space-x-6 relative py-1">
+        <nav ref={navRef} className="hidden lg:flex items-center space-x-3 xl:space-x-4 2xl:space-x-5 relative py-1">
           {navItems.map((item) => {
             const isActive = activeSection === item.href;
             return (
@@ -226,7 +228,7 @@ export default function Header() {
                 href={item.href}
                 title={item.title}
                 onClick={(e) => handleNavClick(e, item.href)}
-                className={`text-sm font-medium transition-colors py-1 relative z-10 ${
+                className={`text-xs xl:text-sm font-medium transition-colors py-1 relative z-10 whitespace-nowrap ${
                   isActive
                     ? "text-blue-600 dark:text-blue-400 font-semibold"
                     : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"

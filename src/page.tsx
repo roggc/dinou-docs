@@ -11,6 +11,9 @@ import { TerminalTabs } from "@/components/landing/terminal-tabs";
 import { SegmentationShowcase } from "@/components/landing/segmentation-showcase";
 import { DeployMatrix } from "@/components/landing/deploy-matrix";
 import { TypeSafeShowcase } from "@/components/landing/type-safe-showcase";
+import { EjectShowcase } from "@/components/landing/eject-showcase";
+import { TriBundlerShowcase } from "@/components/landing/tri-bundler-showcase";
+import { React19Showcase } from "@/components/landing/react-19-showcase";
 import { EngineComparison } from "@/components/landing/engine-comparison";
 import { FeaturesSection } from "@/components/features-section";
 
@@ -113,6 +116,15 @@ export default function Page() {
 
       {/* Zero-Runtime Type-Safe Routing Showcase */}
       <TypeSafeShowcase />
+
+      {/* Framework Sovereignty & Zero Lock-in (Eject) Showcase */}
+      <EjectShowcase />
+
+      {/* Tri-Bundler Engine (esbuild, Rollup, Webpack) Showcase */}
+      <TriBundlerShowcase />
+
+      {/* Pure React 19 Native Engine (RSC & Server Functions) Showcase */}
+      <React19Showcase />
 
       {/* From Heavy Truck to Formula 1 Engine Comparison */}
       <EngineComparison />
