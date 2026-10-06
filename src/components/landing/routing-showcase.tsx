@@ -49,14 +49,10 @@ const tabConfigs: Record<RoutingTab, TabConfig> = {
     description:
       "Every folder in src/ maps directly to a clean route. Nested layout.tsx files wrap child pages without remounting during navigation, preserving client state, audio playback, and scroll positions.",
     codeFile: "src/dashboard/layout.tsx",
-    codeSnippet: `import { Link } from "dinou";
+    codeSnippet: `import { Link, type LayoutProps } from "dinou";
 
 // Nested layout wraps all /dashboard/* child pages
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: LayoutProps) {
   return (
     <div className="flex min-h-screen">
       {/* Persistent sidebar: never remounts across child route changes */}
@@ -100,18 +96,16 @@ export default function DashboardLayout({
     badgeColor: "border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10",
     headline: "Parametric & Wildcard URL Matching",
     description:
-      "Handle dynamic parameters with [id] and multi-segment wildcards with [...slug]. Parameters and query strings are parsed and injected directly into your server component props.",
+      "Handle dynamic parameters with [id] and multi-segment wildcards with [...slug]. Route parameters are typed via PageProps, while query strings are accessed via useSearchParams().",
     codeFile: "src/shop/[category]/[id]/page.tsx",
-    codeSnippet: `interface PageProps {
-  params: {
-    category: string;
-    id: string;
-  };
-  searchParams: Record<string, string | string[]>;
-}
+    codeSnippet: `import type { PageProps } from "dinou";
+import { db } from "@/lib/db";
 
-// Automatically matches URL: /shop/:category/:id
-export default async function ProductPage({ params, searchParams }: PageProps) {
+// Matches /shop/:category/:id with strongly typed params via PageProps
+// Query strings (?sort=asc) are read via useSearchParams() in client components
+export default async function ProductPage({
+  params,
+}: PageProps<"/shop/[category]/[id]">) {
   const { category, id } = params;
   const product = await db.products.findById(id);
 
@@ -126,8 +120,8 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
     features: [
       {
         icon: Route,
-        title: "Direct Prop Injection",
-        desc: "`params` and `searchParams` are cleanly passed to page functions without extra hooks.",
+        title: "Type-Safe PageProps",
+        desc: "`params` is strongly typed via PageProps<T>. Query strings are read with `useSearchParams()`.",
       },
       {
         icon: Globe,
@@ -159,17 +153,21 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
 // ├── (app)/                <- Route group: URL is /dashboard
 // │   └── dashboard/
 // │       ├── @modal/       <- Parallel slot: rendered in layout
-// │       │   └── settings/page.tsx
+// │       │   └── page.tsx
 // │       ├── layout.tsx
 // │       └── page.tsx
+
+import type { LayoutProps } from "dinou";
+
+// Extend LayoutProps to include parallel slot props
+interface DashboardLayoutProps extends LayoutProps {
+  modal: React.ReactNode;
+}
 
 export default function AppLayout({
   children,
   modal,
-}: {
-  children: React.ReactNode;
-  modal: React.ReactNode;
-}) {
+}: DashboardLayoutProps) {
   return (
     <>
       {children}

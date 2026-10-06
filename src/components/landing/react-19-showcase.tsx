@@ -26,6 +26,8 @@ interface TabConfig {
   codeSnippet?: string;
   files?: CodeFile[];
   benefits: string[];
+  docLink: string;
+  docLabel: string;
 }
 
 const configs: Record<React19Tab, TabConfig> = {
@@ -68,6 +70,8 @@ export default async function DashboardPage() {
       "Heavy dependencies stay 100% on the server",
       "Progressive streaming over standard W3C ReadableStream",
     ],
+    docLink: "/docs/server-client-components",
+    docLabel: "RSC Guide",
   },
   actions: {
     id: "actions",
@@ -132,6 +136,8 @@ export function Newsletter() {
       "File-level 'use server' ensures strict separation of backend logic",
       "Native React 19 useActionState and useOptimistic support",
     ],
+    docLink: "/docs/server-functions",
+    docLabel: "Server Functions Guide",
   },
 };
 
@@ -232,8 +238,8 @@ export function React19Showcase() {
                 W3C Web Standards
               </span>
               <Button size="sm" variant="outline" className="text-xs sm:text-sm border-cyan-500/30 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/10" asChild>
-                <Link href="/docs/server-client-components">
-                  <span>RSC Guide</span>
+                <Link href={current.docLink}>
+                  <span>{current.docLabel}</span>
                   <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                 </Link>
               </Button>
