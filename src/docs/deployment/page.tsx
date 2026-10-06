@@ -232,23 +232,12 @@ dinou start:node`}
             <section id="netlify-serverless" className="mt-12">
               <h2>2. Netlify (Serverless Functions v2)</h2>
               <p>
-                In <strong>Dinou v7</strong>, Netlify is a first-class supported serverless target! Dinou includes a specialized <strong>Netlify Functions v2 Adapter</strong> (<code>dinou/adapters/netlify.js</code>) that plugs Dinou&apos;s universal Web Standards handler directly into Netlify&apos;s modern edge infrastructure.
+                In <strong>Dinou v7</strong>, Netlify is a first-class supported serverless target. During <code>npm run build</code>, Dinou automatically pre-bundles a specialized <strong>Netlify Functions v2 Adapter</strong> directly into <code>.dinou/dist3/server/netlify.js</code>.
               </p>
               
               <div className="space-y-4 my-4">
                 <p>
-                  <strong>Step 1:</strong> Create the Netlify function entry point at <code>netlify/functions/dinou.js</code>:
-                </p>
-                <CodeBlock
-                  language="javascript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// netlify/functions/dinou.js
-export { default, config } from "dinou/adapters/netlify";`}
-                </CodeBlock>
-
-                <p>
-                  <strong>Step 2:</strong> Configure your project with a <code>netlify.toml</code> file in the repository root:
+                  <strong>Step 1:</strong> Configure your project with a <code>netlify.toml</code> file in the repository root:
                 </p>
                 <CodeBlock
                   language="toml"
@@ -256,11 +245,50 @@ export { default, config } from "dinou/adapters/netlify";`}
                 >
 {`# netlify.toml
 [build]
-  command = "dinou build:node"
+  command = "npm run build"
   publish = ".dinou/dist3"
 
+[build.environment]
+  NODE_VERSION = "22"
+
+[environment]
+  NODE_ENV = "production"
+
 [functions]
-  directory = "netlify/functions"`}
+  directory = ".dinou/dist3/server"
+  node_bundler = "none"
+  included_files = [
+    "package.json",
+    "tsconfig.json",
+    "dinou.config.*",
+    "src/**",
+    "dinou/**",
+    ".dinou/**",
+    "node_modules/**",
+    "!node_modules/@swc/**",
+    "!node_modules/typescript/**",
+    "!node_modules/webpack*/**",
+    "!node_modules/@esbuild/**",
+    "!node_modules/esbuild/**",
+    "!node_modules/@rollup/**",
+    "!node_modules/rollup/**",
+    "!node_modules/.cache/**",
+    "!node_modules/@types/**"
+  ]`}
+                </CodeBlock>
+
+                <p>
+                  <strong>Step 2:</strong> Deploy to Netlify:
+                </p>
+                <CodeBlock
+                  language="bash"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`# Option A: Automatic Git-based CI/CD (Recommended)
+git push origin main
+
+# Option B: Manual deployment using Netlify CLI
+npx netlify deploy --prod`}
                 </CodeBlock>
               </div>
 
@@ -270,7 +298,7 @@ export { default, config } from "dinou/adapters/netlify";`}
                   <span>How Netlify Functions v2 Works in Dinou</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  The adapter exports <code>config = &#123; path: &quot;/*&quot;, preferStatic: true &#125;</code>. Because <code>preferStatic: true</code> is active, Netlify serves all client assets, CSS, images, and pre-rendered pages directly from <code>.dinou/dist3</code> through its global edge CDN with zero compute cost. Dynamic routes, SSR streaming, and React Server Functions are routed to your serverless function automatically.
+                  The pre-bundled adapter in <code>.dinou/dist3/server/netlify.js</code> exports <code>config = &#123; path: &quot;/*&quot;, preferStatic: true &#125;</code>. Because <code>preferStatic: true</code> is active, Netlify serves all client assets, CSS, images, and pre-rendered pages directly from <code>.dinou/dist3</code> through its global edge CDN with zero compute cost. Dynamic routes, SSR streaming, and React Server Functions are routed to the serverless function automatically. With <code>node_bundler = &quot;none&quot;</code>, Netlify runs the pre-bundled adapter cleanly without double-bundling conflicts.
                 </p>
               </div>
             </section>
@@ -279,21 +307,68 @@ export { default, config } from "dinou/adapters/netlify";`}
             <section id="cloudflare-workers" className="mt-12">
               <h2>3. Cloudflare Workers &amp; Pages</h2>
               <p>
-                Dinou provides native compilation for Cloudflare&apos;s V8-based edge runtime:
+                Dinou provides native ahead-of-time compilation for Cloudflare&apos;s V8-based <code>workerd</code> edge runtime. It compiles Server Components and SSR into standard W3C Web Streams with sub-millisecond cold starts across 300+ cities:
               </p>
-              <CodeBlock
-                language="bash"
-                containerClassName="w-full overflow-hidden rounded-lg"
-              >
-{`# Build for Cloudflare Workers
-dinou build:cloudflare
 
-# Deploy using Wrangler
+              <div className="space-y-4 my-4">
+                <p>
+                  <strong>Step 1:</strong> Compile your application for Cloudflare Workers:
+                </p>
+                <CodeBlock
+                  language="bash"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`# Build edge worker bundle (.dinou/cloudflare/worker.js)
+npm run build:cloudflare`}
+                </CodeBlock>
+
+                <p>
+                  <strong>Step 2:</strong> Configure your project with a <code>wrangler.toml</code> file in the repository root:
+                </p>
+                <CodeBlock
+                  language="toml"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`# wrangler.toml
+name = "my-dinou-app"
+main = ".dinou/cloudflare/worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Serve client bundles, CSS, and static assets directly via Cloudflare CDN
+[assets]
+directory = ".dinou/dist3"
+
+# Optional: Bind KV namespace for persistent ISR route caching
+# [[kv_namespaces]]
+# binding = "DINOU_CACHE"
+# id = "<your-kv-namespace-id>"`}
+                </CodeBlock>
+
+                <p>
+                  <strong>Step 3:</strong> Test locally or deploy to Cloudflare:
+                </p>
+                <CodeBlock
+                  language="bash"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`# Preview locally with Wrangler (defaults to port 3000)
+npx wrangler dev
+
+# Deploy to Cloudflare Workers edge network
 npx wrangler deploy`}
-              </CodeBlock>
-              <p className="text-xs text-muted-foreground mt-2">
-                Cloudflare KV, D1 databases, and R2 buckets are injected seamlessly into Server Components via <code>platformContext.env</code>.
-              </p>
+                </CodeBlock>
+              </div>
+
+              <div className="rounded-xl border p-4 bg-card not-prose space-y-2 my-4">
+                <div className="flex items-center gap-2 font-semibold text-sm text-blue-600 dark:text-blue-400">
+                  <Zap className="h-4 w-4" />
+                  <span>How Cloudflare Workers Works in Dinou v7</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Dinou generates a self-contained Dual-Bundle orchestrator at <code>.dinou/cloudflare/worker.js</code>. Static assets and pre-rendered pages are served instantly by Cloudflare&apos;s global CDN through <code>env.ASSETS</code>. When bound to <code>env.DINOU_CACHE</code>, Dinou automatically activates <code>CloudflareKVStorage</code> to persist Incremental Static Regeneration (ISR) route caches across the edge. Secrets, D1 databases, and R2 buckets are injected seamlessly into Server Components via <code>platformContext.env</code>.
+                </p>
+              </div>
             </section>
 
             {/* 4. Deno Deploy (deno-edge) & Compile Target */}

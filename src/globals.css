@@ -258,4 +258,8 @@
     transform: translateY(0);
   }
 }
-   
+
+/* Prevent Tailwind CSS .table utility class from turning Prism TOML table tokens into block-level tables */
+code .token.table {
+  display: inline !important;
+}

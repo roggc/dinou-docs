@@ -18,6 +18,9 @@ const cleanOneDark = {
     background: "transparent",
     textShadow: "none",
   },
+  table: {
+    display: "inline",
+  },
 };
 
 export interface CodeFile {
