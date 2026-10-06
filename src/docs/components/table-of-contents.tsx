@@ -15,30 +15,83 @@ interface TableOfContentsProps {
 }
 
 export function TableOfContents({ items, className }: TableOfContentsProps) {
-  const [activeId, setActiveId] = useState<string>("");
+  const [activeId, setActiveId] = useState<string>(() => {
+    if (typeof window !== "undefined" && window.location.hash) {
+      const hash = window.location.hash.slice(1);
+      if (items.some((item) => item.id === hash)) {
+        return hash;
+      }
+    }
+    return items[0]?.id || "";
+  });
   const navRef = useRef<HTMLElement>(null);
   const activeLinkRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: "0% 0% -80% 0%" }
-    );
+    if (items.length === 0) return;
 
-    items.forEach((item) => {
-      const element = document.getElementById(item.id);
-      if (element) {
-        observer.observe(element);
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const innerHeight = window.innerHeight;
+      const scrollHeight = document.documentElement.scrollHeight;
+
+      // 1. Bottom of page detection:
+      // When reaching the end of the document, activate the last item in the list
+      // even if the section is too short to physically scroll up to the top offset threshold.
+      if (
+        scrollHeight > innerHeight + 80 &&
+        innerHeight + Math.ceil(scrollY) >= scrollHeight - 50
+      ) {
+        setActiveId(items[items.length - 1].id);
+        return;
       }
-    });
 
-    return () => observer.disconnect();
+      // 2. Reading offset (sticky navbar is 56px + clearance)
+      const HEADER_OFFSET = 120;
+
+      let currentActiveId = items[0]?.id || "";
+      for (const item of items) {
+        const el = document.getElementById(item.id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= HEADER_OFFSET) {
+            currentActiveId = item.id;
+          } else {
+            // Document order guarantees subsequent items will be below threshold
+            break;
+          }
+        }
+      }
+
+      setActiveId(currentActiveId);
+    };
+
+    // Set initial position
+    handleScroll();
+
+    let rafId: number;
+    const onScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(handleScroll);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash && items.some((item) => item.id === hash)) {
+        setActiveId(hash);
+      }
+    };
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("hashchange", handleHashChange);
+    };
   }, [items]);
 
   // Keep active link visible in the independently scrollable TOC container
@@ -85,6 +138,7 @@ export function TableOfContents({ items, className }: TableOfContentsProps) {
                 key={item.id}
                 ref={isActive ? activeLinkRef : null}
                 href={`#${item.id}`}
+                onClick={() => setActiveId(item.id)}
                 className={cn(
                   "block py-1 text-sm transition-colors hover:text-foreground leading-snug text-left",
                   item.level === 2 && "pl-0 font-medium",
