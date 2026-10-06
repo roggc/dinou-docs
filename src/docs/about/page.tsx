@@ -61,7 +61,7 @@ export default function AboutPage() {
               </Badge>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              License, Changelog &amp; Credits
+              About Dinou: License, Credits &amp; Community
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
               License terms, release management, human-agent engineering, and creator acknowledgments.
