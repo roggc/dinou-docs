@@ -9,7 +9,6 @@ import {
   Database,
   ArrowRight,
   Boxes,
-  ShieldCheck,
   Layers,
   Globe,
   Sparkles,
@@ -21,7 +20,7 @@ import {
   FolderTree,
   Clock,
   Brain,
-  Terminal,
+  ShieldCheck,
 } from "lucide-react";
 import { Link } from "dinou";
 
@@ -208,16 +207,20 @@ npm run dev`}
                   </ul>
                 </div>
 
-                {/* 3.8 Single-Process In-Memory Dual Engine */}
+                {/* 2.8 Single-Process Dual-Bundle Engine (0-Fork) */}
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
                   <div className="flex items-center gap-2 font-semibold text-sm text-slate-900 dark:text-slate-100 mb-2">
                     <Cpu className="w-4 h-4 text-emerald-500" />
-                    <span>Single-Process In-Memory Dual Engine</span>
+                    <span>Single-Process Dual-Bundle Engine (0-Fork)</span>
                   </div>
+                  <p className="text-xs text-muted-foreground mb-2.5 leading-relaxed">
+                    React 19 requires conflicting module conditions: <code>&quot;react-server&quot;</code> for Server Components vs. <code>&quot;browser&quot;</code> for SSR. Instead of spawning separate Node.js subprocesses via <code>child_process.fork()</code>, Dinou compiles both in a <strong>single in-memory process</strong> through a 3-pass pipeline:
+                  </p>
                   <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5 leading-relaxed">
-                    <li>Runs both the React Server Component (RSC) compiler and the SSR engine concurrently within a <strong>single in-memory process</strong>.</li>
-                    <li>Eliminates <code>child_process.fork()</code>, removing inter-process communication (IPC) serialization bottlenecks and halving memory consumption.</li>
-                    <li>Enables native compatibility with edge and isolated runtimes (Cloudflare Workers, Bun, Deno) where process spawning is strictly prohibited.</li>
+                    <li><strong>Pass A (RSC Engine):</strong> Bundles with <code>[&quot;react-server&quot;]</code> conditions, binding Server Functions and generating client reference descriptors.</li>
+                    <li><strong>Pass B (SSR Engine):</strong> Bundles with <code>[&quot;browser&quot;]</code> conditions, packaging <code>react-dom/server.edge</code> and client hydration manifests.</li>
+                    <li><strong>Pass C (Orchestration):</strong> Bridges RSC and SSR via standard W3C <code>ReadableStream</code> with zero disk I/O and zero IPC serialization latency.</li>
+                    <li><strong>Deploy Anywhere:</strong> Halves memory consumption and enables native execution on edge runtimes (Cloudflare Workers, Deno, Bun) where process spawning is strictly prohibited. <Link href="/docs/migration/v6-to-v7#dual-bundle-engine" className="text-blue-500 hover:underline font-medium">Read architectural specification &rarr;</Link></li>
                   </ul>
                 </div>
 
@@ -312,36 +315,22 @@ npm run dev`}
                 <strong>Dinou is engineered to be readily analyzed, understood, and modified by both human developers and AI agents.</strong> Its engine is lean, transparent, and strictly adheres to standard React and web platform primitives.
               </p>
 
-              <div className="space-y-4 not-prose my-6">
-                <div className="p-4 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/30 dark:bg-blue-950/20">
-                  <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                    <Brain className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                    <h4 className="text-sm font-bold">Complete Context Ingestion</h4>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    AI assistants can easily ingest and comprehend Dinou&apos;s entire file router, in-process dual-bundle compilation engine, and runtime adapters within a single prompt context, eliminating guesswork and out-of-context hallucinations.
-                  </p>
+              <div className="not-prose my-6 p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 space-y-3">
+                <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100 text-sm">
+                  <Brain className="w-4 h-4 text-blue-500" />
+                  <span>Effortless Context Ingestion &amp; Full Ejectability</span>
                 </div>
-
-                <div className="p-4 rounded-xl border border-purple-200 dark:border-purple-900/60 bg-purple-50/30 dark:bg-purple-950/20">
-                  <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                    <ShieldCheck className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                    <h4 className="text-sm font-bold">Deterministic Bug Diagnosis</h4>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Transparent execution paths and standard web primitives (W3C Fetch <code>Request</code>/<code>Response</code>, native Web Streams) enable AI agents to diagnose bugs accurately and propose exact, working patches on the first attempt without breaking hidden framework macros.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/30 dark:bg-emerald-950/20">
-                  <div className="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                    <Terminal className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                    <h4 className="text-sm font-bold">Autonomous Ejected Customization</h4>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    When you run <code>npm run eject</code>, an AI assistant can immediately help you implement custom edge middlewares, tailor compilation plugins, or build custom streaming handlers directly in your codebase with full visibility into the server engine.
-                  </p>
-                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  While common needs like custom middlewares, request lifecycle hooks, and plugins are handled cleanly through <code>dinou.config.mjs</code>, Dinou offers an unmatched advantage for AI-assisted workflows:
+                </p>
+                <ul className="text-xs text-muted-foreground space-y-2 list-disc pl-5 leading-relaxed">
+                  <li>
+                    <strong>Immediate Context Comprehension:</strong> Because Dinou avoids layers of hidden macros and convoluted runtime indirection, coding assistants can ingest the entire execution flow in a single prompt, diagnosing errors deterministically without hallucinations.
+                  </li>
+                  <li>
+                    <strong>Ejection for Edge-Case Fixes &amp; Unreleased Features:</strong> In the rare scenario where your application encounters an internal engine bug or requires an unreleased low-level feature, running <code>npm run eject</code> copies the complete, readable engine into your repository. Thanks to Dinou&apos;s lean codebase, an AI agent can ingest the internal engine in seconds, inspect the exact execution flow, and autonomously patch or implement the required feature directly in your project.
+                  </li>
+                </ul>
               </div>
             </section>
 
