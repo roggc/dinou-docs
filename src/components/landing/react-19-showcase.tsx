@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "dinou";
-import { CodeWindow } from "./code-window";
+import { CodeWindow, type CodeFile } from "./code-window";
 
 type React19Tab = "actions" | "rsc";
 
@@ -22,60 +22,27 @@ interface TabConfig {
   badgeColor: string;
   headline: string;
   description: string;
-  codeFile: string;
-  codeSnippet: string;
+  codeFile?: string;
+  codeSnippet?: string;
+  files?: CodeFile[];
   benefits: string[];
 }
 
 const configs: Record<React19Tab, TabConfig> = {
-  actions: {
-    id: "actions",
-    title: "1. Server Functions ('use server')",
-    badge: "Direct RPC",
-    badgeColor: "border-cyan-500/30 text-cyan-600 dark:text-cyan-400 bg-cyan-500/10",
-    headline: "Backend Logic Directly in Your Components",
-    description:
-      "Execute backend mutations directly from your React components without writing manual API endpoints, fetch boilerplate, or serialization layers. 100% native React 19.",
-    codeFile: "src/components/newsletter.tsx",
-    codeSnippet: `// 1. Direct Server Function (runs securely on backend)
-async function subscribe(formData: FormData) {
-  "use server";
-  const email = formData.get("email");
-  await db.subscribers.insert({ email });
-  return { success: true };
-}
-
-// 2. Client Component using React 19 native action hook
-export function Newsletter() {
-  const [state, formAction, isPending] = useActionState(
-    async (_prev, fd) => await subscribe(fd),
-    null
-  );
-
-  return (
-    <form action={formAction}>
-      <input name="email" type="email" placeholder="you@domain.com" />
-      <button disabled={isPending}>
-        {isPending ? "Subscribing..." : "Join"}
-      </button>
-    </form>
-  );
-}`,
-    benefits: [
-      "Zero manual API routes or fetch wrappers needed",
-      "Native React 19 useActionState and useOptimistic support",
-    ],
-  },
   rsc: {
     id: "rsc",
-    title: "2. Server Components (RSC)",
+    title: "1. Server Components (RSC)",
     badge: "0kb Client Bundle",
     badgeColor: "border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10",
     headline: "0kb JavaScript Shipped for Server Code",
     description:
       "Render markdown parsers, database queries, and heavy backend dependencies on the server. Dinou streams progressive React Flight chunks over standard W3C Web Streams.",
-    codeFile: "src/dashboard/page.tsx",
-    codeSnippet: `// Pure Server Component: 0kb sent to browser
+    files: [
+      {
+        filename: "src/dashboard/page.tsx",
+        badge: "RSC",
+        language: "tsx",
+        code: `// Pure Server Component: 0kb sent to browser
 import { db } from "@/lib/db";
 import { MarkdownParser } from "@/lib/heavy-parser";
 import { InteractiveChart } from "./client-chart"; // "use client"
@@ -95,15 +62,81 @@ export default async function DashboardPage() {
     </main>
   );
 }`,
+      },
+    ],
     benefits: [
       "Heavy dependencies stay 100% on the server",
       "Progressive streaming over standard W3C ReadableStream",
     ],
   },
+  actions: {
+    id: "actions",
+    title: "2. Server Functions ('use server')",
+    badge: "Direct RPC",
+    badgeColor: "border-cyan-500/30 text-cyan-600 dark:text-cyan-400 bg-cyan-500/10",
+    headline: "Dedicated 'use server' Modules with Zero Boilerplate",
+    description:
+      "In Dinou, Server Functions are declared in dedicated modules starting with 'use server' at the file level. Client components import and call them as seamless RPCs with automatic type safety.",
+    files: [
+      {
+        filename: "src/actions/newsletter.ts",
+        badge: '"use server"',
+        language: "typescript",
+        code: `"use server";
+
+import { db } from "@/lib/db";
+
+// 1. File-level "use server" directive:
+// Every exported function becomes a secure Server Function (RPC)
+export async function subscribe(formData: FormData) {
+  const email = formData.get("email");
+  if (!email || typeof email !== "string") {
+    throw new Error("Valid email is required");
+  }
+
+  await db.subscribers.insert({ email, createdAt: new Date() });
+  return { success: true };
+}`,
+      },
+      {
+        filename: "src/components/newsletter.tsx",
+        badge: '"use client"',
+        language: "tsx",
+        code: `"use client";
+
+import { useActionState } from "react";
+import { subscribe } from "@/actions/newsletter";
+
+// 2. Client Component importing the Server Function directly
+export function Newsletter() {
+  const [state, formAction, isPending] = useActionState(
+    async (_prev, fd) => await subscribe(fd),
+    null
+  );
+
+  return (
+    <form action={formAction} className="space-y-4">
+      <input name="email" type="email" placeholder="you@domain.com" required />
+      <button type="submit" disabled={isPending}>
+        {isPending ? "Subscribing..." : "Join Newsletter"}
+      </button>
+      {state?.success && (
+        <p className="text-emerald-400 text-sm font-medium">Subscribed successfully!</p>
+      )}
+    </form>
+  );
+}`,
+      },
+    ],
+    benefits: [
+      "File-level 'use server' ensures strict separation of backend logic",
+      "Native React 19 useActionState and useOptimistic support",
+    ],
+  },
 };
 
 export function React19Showcase() {
-  const [activeTab, setActiveTab] = useState<React19Tab>("actions");
+  const [activeTab, setActiveTab] = useState<React19Tab>("rsc");
 
   const current = configs[activeTab];
 
@@ -137,7 +170,7 @@ export function React19Showcase() {
 
           {/* Tab Switcher */}
           <div className="flex justify-center gap-2 p-1.5 rounded-xl bg-slate-200/80 dark:bg-slate-800/80 border border-slate-300/60 dark:border-slate-700/60 mt-4">
-            {(["actions", "rsc"] as React19Tab[]).map((tabId) => {
+            {(["rsc", "actions"] as React19Tab[]).map((tabId) => {
               const tab = configs[tabId];
               const isSelected = activeTab === tabId;
               return (
@@ -150,7 +183,7 @@ export function React19Showcase() {
                       : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
-                  {tabId === "actions" ? <Zap className="w-4 h-4" /> : <Server className="w-4 h-4" />}
+                  {tabId === "rsc" ? <Server className="w-4 h-4" /> : <Zap className="w-4 h-4" />}
                   <span>{tab.title}</span>
                 </button>
               );
@@ -212,6 +245,7 @@ export function React19Showcase() {
             <CodeWindow
               filename={current.codeFile}
               code={current.codeSnippet}
+              files={current.files}
               language="tsx"
               statusLeft="React 19 Native Primitives"
               statusRight="W3C Web Streams"
