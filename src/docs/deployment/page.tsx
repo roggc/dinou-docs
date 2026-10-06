@@ -182,7 +182,7 @@ export default function Page() {
                     <tr>
                       <td className="p-3.5 font-semibold text-foreground">Bun Standalone Binary</td>
                       <td className="p-3.5 font-mono">dinou build:bun:compile</td>
-                      <td className="p-3.5 font-mono">./dist/bun-server</td>
+                      <td className="p-3.5 font-mono">./dist/server</td>
                     </tr>
                     <tr>
                       <td className="p-3.5 font-semibold text-foreground">Static HTML Export (SSG)</td>
@@ -458,26 +458,27 @@ dinou build:deno:compile:win        # Microsoft Windows executable`}
                 language="bash"
                 containerClassName="w-full overflow-hidden rounded-lg"
               >
-{`# Standard Bun build and execution
+{`# 1. Standard Bun build and execution
 dinou build:bun
 dinou start:bun
 
-# Pure Bun (100% native Bun APIs, zero Node compatibility overhead)
+# 2. Pure Bun (100% Bun execution, 0 Node.js on the machine)
 dinou build:bun:pure
 dinou start:bun
 
-# Standalone Bun single-file compilation
+# 3. Standalone Bun single-file binary compilation
 dinou build:bun:compile
-./dist/bun-server
+./dist/server
 
-# Standalone Pure Bun binary compilation
+# 4. Pure Bun standalone binary compilation (100% Bun from build to exe)
 dinou build:bun:pure:compile
+./dist/server
 
-# Cross-compilation targets
-dinou build:bun:compile:linux
-dinou build:bun:compile:linux_arm
-dinou build:bun:compile:mac
-dinou build:bun:compile:win`}
+# Cross-compilation targets:
+dinou build:bun:compile:linux      # x86_64 Linux
+dinou build:bun:compile:linux_arm  # ARM64 Linux (AWS Graviton)
+dinou build:bun:compile:mac        # Apple macOS (Apple Silicon)
+dinou build:bun:compile:win        # Windows executable (.exe)`}
               </CodeBlock>
             </section>
 
