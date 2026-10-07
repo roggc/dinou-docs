@@ -343,8 +343,8 @@ export const revalidate = 0; // Live SSR on every request`}
                   Dinou v7 splits client requests into two decoupled endpoints:
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-5 my-2">
-                  <li><strong>Layout Plane (<code>____rsc_layout____</code>):</strong> Renders exclusively the outer layout shell and parallel slots, embedding a dynamic marker (<code>&lt;DinouPageSlot /&gt;</code>) where child content will reside.</li>
-                  <li><strong>Page Plane (<code>____rsc_page____</code>):</strong> Renders exclusively the leaf page component (<code>&lt;Page /&gt;</code>).</li>
+                  <li><strong>Layout Plane:</strong> Renders exclusively the outer layout shell and parallel slots, establishing the boundary where child content will reside.</li>
+                  <li><strong>Page Plane:</strong> Renders exclusively the leaf page component (<code>&lt;Page /&gt;</code>).</li>
                 </ul>
                 <p className="mt-2 text-sm text-muted-foreground">
                   When navigating between sibling routes sharing a layout, the layout <strong>never unmounts or re-executes</strong>. State is 100% preserved. Furthermore, the layout cache is query-string aware (<code>searchPart</code>), so modifying query parameters (e.g. <code>?tab=billing</code>) updates layout slots in real time without tearing down the shell.
@@ -364,7 +364,7 @@ export const revalidate = 0; // Live SSR on every request`}
                 <CodeBlock language="typescript" containerClassName="w-full rounded-lg not-prose my-3">
                   {`// src/dashboard/layout_functions.ts
 export const revalidate = 3600; // Cache the layout shell for 1 hour
-export const tags = ["dashboard-shell", "nav-links"];
+export const getCacheTags = ["dashboard-shell", "nav-links"];
 export const allowISG = true;
 
 export async function validateParams(params) {
@@ -518,7 +518,7 @@ export default function DashboardPage() {
                   In earlier versions, when an unhandled server error occurred within a layout, the error handler injected a fallback <code>&lt;html&gt;&lt;body&gt;</code> envelope. Because the layout already produced an HTML shell, this resulted in an invalid nested <code>&lt;html&gt;</code> document, triggering fatal React 19 hydration mismatch crashes on the client.
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Dinou v7 tracks <code>layoutApplied</code> in <code>getErrorJSX</code>. When an application layout is present, error JSX is injected directly into the layout&apos;s active slot (<code>&lt;DinouPageSlot /&gt;</code>). The document structure remains 100% valid HTML, and interactive navigation elements (sidebars, headers) remain operational.
+                  Dinou v7 tracks <code>layoutApplied</code> in <code>getErrorJSX</code>. When an application layout is present, error JSX is injected directly into the layout&apos;s active content area. The document structure remains 100% valid HTML, and interactive navigation elements (sidebars, headers) remain operational.
                 </p>
               </div>
 

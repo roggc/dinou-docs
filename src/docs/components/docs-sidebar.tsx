@@ -80,6 +80,11 @@ const docsNavigation = [
         icon: Route,
       },
       {
+        title: "Navigation",
+        href: "/docs/navigation",
+        icon: Compass,
+      },
+      {
         title: "Type-Safe Routing",
         href: "/docs/type-safe-routing",
         icon: ShieldCheck,

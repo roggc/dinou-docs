@@ -15,15 +15,7 @@ interface TableOfContentsProps {
 }
 
 export function TableOfContents({ items, className }: TableOfContentsProps) {
-  const [activeId, setActiveId] = useState<string>(() => {
-    if (typeof window !== "undefined" && window.location.hash) {
-      const hash = window.location.hash.slice(1);
-      if (items.some((item) => item.id === hash)) {
-        return hash;
-      }
-    }
-    return items[0]?.id || "";
-  });
+  const [activeId, setActiveId] = useState<string>(() => items[0]?.id || "");
   const navRef = useRef<HTMLElement>(null);
   const activeLinkRef = useRef<HTMLAnchorElement>(null);
 
@@ -66,8 +58,13 @@ export function TableOfContents({ items, className }: TableOfContentsProps) {
       setActiveId(currentActiveId);
     };
 
-    // Set initial position
-    handleScroll();
+    // If there is an active hash in the URL on mount, activate it; otherwise compute scroll position
+    const currentHash = window.location.hash.slice(1);
+    if (currentHash && items.some((item) => item.id === currentHash)) {
+      setActiveId(currentHash);
+    } else {
+      handleScroll();
+    }
 
     let rafId: number;
     const onScroll = () => {

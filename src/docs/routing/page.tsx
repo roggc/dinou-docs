@@ -31,14 +31,8 @@ import {
   Compass,
   FileCode,
   ShieldCheck,
-  RefreshCw,
-  Terminal,
   Flag,
-  SearchX,
   AlertCircle,
-  Zap,
-  RefreshCcw,
-  Globe,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -57,7 +51,7 @@ const tocItems = [
   { id: "query-params", title: "3.3. Query Parameters Access", level: 3 },
   { id: "layouts-special-files", title: "4. Layouts & Special Files", level: 2 },
   { id: "nested-layouts", title: "4.1. Nested Layouts (layout.tsx)", level: 3 },
-  { id: "layout-functions", title: "4.2. Layout Data & Horizontal ISR (layout_functions.ts)", level: 3 },
+  { id: "layout-functions", title: "4.2. Horizontal Segmentation & layout_functions.ts", level: 3 },
   { id: "layout-flags", title: "4.3. Layout Control Flags (reset_layout, no_layout)", level: 3 },
   { id: "error-handling", title: "4.4. Error Pages (error.tsx)", level: 3 },
   { id: "not-found-pages", title: "4.5. Custom 404 Pages (not_found.tsx)", level: 3 },
@@ -66,13 +60,6 @@ const tocItems = [
   { id: "private-folders", title: "5.2. Escaping Route Scanning (_folder)", level: 3 },
   { id: "parallel-routes", title: "5.3. Parallel Routes & Slots (@slot)", level: 3 },
   { id: "error-containment", title: "5.4. Slot Error Containment Architecture", level: 3 },
-  { id: "client-navigation", title: "6. Client Navigation & Soft Transitions", level: 2 },
-  { id: "link-component", title: "6.1. The <Link> Component & Prefetching", level: 3 },
-  { id: "fresh-prop", title: "6.2. The fresh Prop (Cache Busting)", level: 3 },
-  { id: "programmatic-navigation", title: "6.3. Programmatic Navigation (useRouter)", level: 3 },
-  { id: "navigation-hooks", title: "6.4. Navigation State Hooks & Utilities", level: 3 },
-  { id: "relative-routing", title: "7. Relative Routing Rules", level: 2 },
-  { id: "directory-first", title: "7.1. Directory-First URL Resolution", level: 3 },
 ];
 
 export default function Page() {
@@ -94,10 +81,10 @@ export default function Page() {
               </Badge>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Routing, Layouts &amp; Navigation
+              Routing &amp; Layouts
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Master Dinou&apos;s file-system router: nested layouts with independent Horizontal ISR, parallel slots with error isolation, layout control flags, and soft client navigation.
+              Master Dinou&apos;s file-system router: nested layouts with independent Horizontal ISR, parallel slots with error isolation, route parameters, and layout control flags.
             </p>
 
             {/* Type-Safe Routing Callout */}
@@ -570,25 +557,79 @@ export default function DashboardLayout({
               <div id="layout-functions" className="scroll-mt-20 mt-8 space-y-4">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-indigo-500" />
-                  4.2. Layout Data &amp; Horizontal ISR (layout_functions.ts)
+                  4.2. Horizontal Segmentation &amp; layout_functions.ts
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  In Dinou v7, layouts can declare their own independent data fetching and caching lifecycle via <code>layout_functions.ts</code>. This is <strong>Horizontal Layout ISR</strong>:
+                  In traditional SSR frameworks, layout shells and child pages are tightly coupled. Navigating to a dynamic child route often forces the entire layout to re-evaluate, resetting video playback, collapsing open menus, or wiping sidebar search state.
                 </p>
+
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Dinou v7 introduces <strong>Horizontal Layered Segmentation</strong>. Layouts and pages travel on completely separate execution, streaming, and caching pathways:
+                </p>
+
+                <div className="grid md:grid-cols-2 gap-4 not-prose my-4">
+                  <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20 space-y-2">
+                    <div className="flex items-center gap-2 font-bold text-xs text-blue-600 dark:text-blue-400">
+                      <Layers className="h-4 w-4" />
+                      1. The Layout Plane
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Renders exclusively the outer layout shell and any parallel slots, establishing the boundary where child page content is mounted.
+                    </p>
+                    <ul className="text-[11px] text-muted-foreground space-y-1 list-disc pl-4">
+                      <li>Governed by <code>layout_functions.ts</code></li>
+                      <li>Maintains its own independent cache TTL</li>
+                      <li><strong>Never unmounts or re-executes</strong> during sibling navigations</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-purple-500/20 bg-purple-50/30 dark:bg-purple-950/20 space-y-2">
+                    <div className="flex items-center gap-2 font-bold text-xs text-purple-600 dark:text-purple-400">
+                      <Split className="h-4 w-4" />
+                      2. The Page Plane
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Renders exclusively the active leaf page component (<code>&lt;Page /&gt;</code>) and streams into the layout&apos;s page slot.
+                    </p>
+                    <ul className="text-[11px] text-muted-foreground space-y-1 list-disc pl-4">
+                      <li>Governed by <code>page_functions.ts</code></li>
+                      <li>Can be highly dynamic or real-time SSR</li>
+                      <li>Navigating between siblings updates <em>only</em> this plane</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    Decoupled Lifecycles in Practice: layout_functions.ts
+                  </h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Because layouts and pages are horizontally decoupled, they can declare completely independent caching lifetimes (TTL / ISR). A layout shell can cache for hours while its child pages revalidate every few seconds:
+                  </p>
+                </div>
 
                 <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
                   {`// src/dashboard/[teamId]/layout_functions.ts - Independent Layout ISR
 import type { RouteParams } from "dinou";
 
+// 1. Data Fetching for the Layout Shell
 export async function getProps(params: RouteParams<"/dashboard/[teamId]">) {
   const team = await fetchTeamData(params.teamId);
   return { team };
 }
 
-// Layout caches independently for 1 hour (3600 seconds)
-// Child pages inside this dashboard can update every 10 seconds without invalidating this layout!
-export const revalidate = 3600;`}
+// 2. Independent Cache Lifetime (1 hour)
+// Child pages inside this dashboard can update every 5 seconds without invalidating this shell!
+export const revalidate = 3600;
+
+// 3. Granular Invalidation Tags (constant or function getCacheTags)
+// Calling revalidateTag("team-shell") purges only the layout without wiping child page caches.
+export const getCacheTags = ["team-shell"];`}
                 </CodeBlock>
+
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Props returned by <code>getProps</code> in <code>layout_functions.ts</code> are automatically injected into <code>layout.tsx</code> as top-level props alongside <code>children</code>, <code>params</code>, and any parallel slots.
+                </p>
               </div>
 
               <div id="layout-flags" className="scroll-mt-20 mt-8 space-y-4">
@@ -980,235 +1021,44 @@ export default function Layout({
               </div>
             </section>
 
-            {/* Section 6: Client Navigation & Soft Transitions */}
-            <section id="client-navigation" className="scroll-mt-20">
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                6. Client Navigation &amp; Soft Transitions
-              </h2>
-              <p>
-                Dinou provides smooth single-page application (SPA) client navigation with automatic hover prefetching, cache controls, and transition loading states.
-              </p>
-
-              <div id="link-component" className="scroll-mt-20 mt-6 space-y-4">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Compass className="h-5 w-5 text-blue-500" />
-                  6.1. The &lt;Link&gt; Component &amp; Prefetching
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Use the <code>&lt;Link&gt;</code> component imported from <code>&quot;dinou&quot;</code>. It intercepts click events for instant client-side route transitions and automatically prefetches the target page in the background on mouse hover:
-                </p>
-
-                <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                  {`import { Link } from "dinou";
-
-export function NavigationBar() {
-  return (
-    <nav className="flex gap-4">
-      {/* ✅ Type-Safe href: autocompleted in your IDE via DinouRoute */}
-      <Link href="/dashboard">Dashboard</Link>
-
-      {/* ✅ Dynamic interpolation typed against registered routes */}
-      <Link href={\`/blog/\${post.slug}\`}>Post</Link>
-
-      {/* Disable prefetch for heavy routes */}
-      <Link href="/analytics" prefetch={false}>
-        Analytics
-      </Link>
-
-      {/* ❌ TypeScript compile error on invalid/dead links */}
-      {/* <Link href="/broken-link">Broken</Link> */}
-    </nav>
-  );
-}`}
-                </CodeBlock>
-
-                <Alert className="not-prose my-4">
-                  <Globe className="h-4 w-4" />
-                  <AlertTitle>Native Anchor Elements</AlertTitle>
-                  <AlertDescription className="text-xs">
-                    Standard HTML <code>&lt;a&gt;</code> tags also trigger client-side soft navigation via global event delegation in Dinou, but they lack smart features like hover prefetching and the <code>fresh</code> prop provided by <code>&lt;Link&gt;</code>.
-                  </AlertDescription>
-                </Alert>
-              </div>
-
-              <div id="fresh-prop" className="scroll-mt-20 mt-8 space-y-3">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <RefreshCcw className="h-5 w-5 text-blue-500" />
-                  6.2. The fresh Prop (Cache Busting)
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Passing the <code>fresh</code> prop bypasses the Client Router Cache and forces a fetch of the latest data directly from the server:
-                </p>
-                <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                  {`// Forces latest server render, bypassing client cache
-<Link href="/live-feed" fresh>
-  Live Feed
-</Link>`}
-                </CodeBlock>
-              </div>
-
-              <div id="programmatic-navigation" className="scroll-mt-20 mt-8 space-y-4">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Terminal className="h-5 w-5 text-indigo-500" />
-                  6.3. Programmatic Navigation (useRouter)
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  To navigate imperatively, use the <code>useRouter()</code> hook inside <strong>Client Components</strong>:
-                </p>
-
-                <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                  {`"use client";
-
-import { useRouter } from "dinou";
-
-export default function LoginButton() {
-  const router = useRouter();
-
-  const handleLogin = async () => {
-    await loginUser();
-    // Navigate programmatically
-    router.push("/dashboard");
-  };
-
-  return <button onClick={handleLogin}>Log In</button>;
-}`}
-                </CodeBlock>
-
-                <div className="not-prose overflow-x-auto rounded-xl border border-border shadow-sm mt-4">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-muted text-muted-foreground font-medium text-xs uppercase tracking-wider">
-                      <tr>
-                        <th className="p-3.5 w-48">Method</th>
-                        <th className="p-3.5">Behavior &amp; Description</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border bg-card text-xs sm:text-sm">
-                      <tr>
-                        <td className="p-3.5 font-mono text-blue-600 dark:text-blue-400 font-semibold">router.push(href, options)</td>
-                        <td className="p-3.5 text-muted-foreground">Navigates to the route and adds a new entry to the browser history stack. Supports <code>&#123; fresh: true &#125;</code>.</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3.5 font-mono text-blue-600 dark:text-blue-400 font-semibold">router.replace(href, options)</td>
-                        <td className="p-3.5 text-muted-foreground">Navigates to the route, replacing the current history entry without pushing a new history state.</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3.5 font-mono text-blue-600 dark:text-blue-400 font-semibold">router.back()</td>
-                        <td className="p-3.5 text-muted-foreground">Navigates back to the previous page in history (equivalent to clicking the browser Back button).</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3.5 font-mono text-blue-600 dark:text-blue-400 font-semibold">router.forward()</td>
-                        <td className="p-3.5 text-muted-foreground">Navigates forward to the next page in the history stack.</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3.5 font-mono text-purple-600 dark:text-purple-400 font-semibold">router.refresh()</td>
-                        <td className="p-3.5 text-muted-foreground"><strong>Soft Reload:</strong> Re-fetches the current route data from the server and updates server components without losing client React state or scroll position.</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3.5 font-mono text-purple-600 dark:text-purple-400 font-semibold">router.refreshSlot(slotId)</td>
-                        <td className="p-3.5 text-muted-foreground">Re-fetches and updates an individual <code>&lt;DinouCacheSlot&gt;</code> component without re-rendering the surrounding page.</td>
-                      </tr>
-                    </tbody>
-                  </table>
+            {/* Next Steps: Navigation & Type Safety */}
+            <div className="not-prose pt-8 border-t grid sm:grid-cols-2 gap-4">
+              <Link
+                href="/docs/navigation"
+                className="group p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-card hover:border-blue-500/50 hover:shadow-md transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-1.5">
+                    <span>Next Guide</span>
+                    <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                  <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                    Client Navigation &amp; Transitions
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Learn how &lt;Link&gt;, hover prefetching, cache busting (fresh), useRouter, navigation hooks, and directory-first relative routing work.
+                  </p>
                 </div>
-              </div>
+              </Link>
 
-              <div id="navigation-hooks" className="scroll-mt-20 mt-8 space-y-4">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-amber-500" />
-                  6.4. Navigation State Hooks &amp; Utilities
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Dinou exports dedicated hooks and client utilities from <code>&quot;dinou&quot;</code> to inspect active route states and trigger targeted updates:
-                </p>
-
-                <div className="grid gap-4 sm:grid-cols-2 not-prose mt-2 text-xs">
-                  <div className="p-4 rounded-xl border bg-card">
-                    <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">usePathname()</span>
-                    <p className="text-muted-foreground mt-1.5 leading-relaxed">
-                      Returns the current normalized pathname (e.g. <code>&quot;/blog/hello&quot;</code>). Universal: executes seamlessly during server-side SSR and on the client!
-                    </p>
+              <Link
+                href="/docs/type-safe-routing"
+                className="group p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-card hover:border-blue-500/50 hover:shadow-md transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className="text-xs font-semibold text-purple-600 dark:text-purple-400 mb-1 flex items-center gap-1.5">
+                    <span>Advanced</span>
+                    <ShieldCheck className="h-3.5 w-3.5" />
                   </div>
-
-                  <div className="p-4 rounded-xl border bg-card">
-                    <span className="font-mono font-bold text-purple-600 dark:text-purple-400 text-sm">useSearchParams()</span>
-                    <p className="text-muted-foreground mt-1.5 leading-relaxed">
-                      Returns a standard Web <code>URLSearchParams</code> instance to inspect active query parameters.
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-xl border bg-card">
-                    <span className="font-mono font-bold text-amber-600 dark:text-amber-400 text-sm">useNavigationLoading()</span>
-                    <p className="text-muted-foreground mt-1.5 leading-relaxed">
-                      Boolean flag indicating whether a client route transition is actively pending in React 19 concurrent mode.
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-xl border bg-card">
-                    <span className="font-mono font-bold text-blue-600 dark:text-blue-400 text-sm">refreshSlot(slotId)</span>
-                    <p className="text-muted-foreground mt-1.5 leading-relaxed">
-                      Client utility function to imperatively trigger an in-place background refresh of an individual <code>&lt;DinouCacheSlot&gt;</code> without reloading the page.
-                    </p>
-                  </div>
+                  <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                    Type-Safe Routing
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Explore Dinou&apos;s zero-runtime type safety with auto-generated route definitions, autocomplete, and compile-time validation.
+                  </p>
                 </div>
-              </div>
-            </section>
-
-            {/* Section 7: Relative Routing Rules */}
-            <section id="relative-routing" className="scroll-mt-20">
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                7. Relative Routing Rules
-              </h2>
-              <p>
-                Dinou resolves relative navigation paths using a <strong>Directory-First Convention</strong>. This provides intuitive navigation that mimics your file system.
-              </p>
-
-              <div id="directory-first" className="scroll-mt-20 mt-6 space-y-4">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Globe className="h-5 w-5 text-indigo-500" />
-                  7.1. Directory-First URL Resolution
-                </h3>
-
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  In a standard web browser, a URL like <code>/blog/hello</code> (without a trailing slash) treats <code>hello</code> as a file name, so a link to <code>about</code> resolves to <code>/blog/about</code>.
-                </p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  <strong>In Dinou, every route is treated as a directory</strong> because each page is a folder containing a <code>page.tsx</code> component (e.g. <code>src/blog/hello/page.tsx</code>). Resolving relatively from a page navigates relative to that route&apos;s folder:
-                </p>
-
-                <div className="not-prose overflow-x-auto rounded-xl border border-border shadow-sm mt-4">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-muted text-muted-foreground font-medium text-xs uppercase tracking-wider">
-                      <tr>
-                        <th className="p-3.5 w-1/3">Current Path</th>
-                        <th className="p-3.5 w-1/3">Relative Target</th>
-                        <th className="p-3.5 w-1/3">Resolved Path</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border bg-card font-mono text-xs">
-                      <tr>
-                        <td className="p-3.5">/blog/hello</td>
-                        <td className="p-3.5 text-indigo-600 dark:text-indigo-400">about</td>
-                        <td className="p-3.5 font-bold text-slate-800 dark:text-slate-100">/blog/hello/about</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3.5">/blog/hello</td>
-                        <td className="p-3.5 text-indigo-600 dark:text-indigo-400">./about</td>
-                        <td className="p-3.5 font-bold text-slate-800 dark:text-slate-100">/blog/hello/about</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3.5">/blog/hello</td>
-                        <td className="p-3.5 text-purple-600 dark:text-purple-400">../about</td>
-                        <td className="p-3.5 font-bold text-slate-800 dark:text-slate-100">/blog/about</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <p className="text-xs text-muted-foreground mt-3">
-                  This rule applies uniformly across all navigation methods, including the <code>&lt;Link&gt;</code> component and programmatic calls like <code>router.push()</code>.
-                </p>
-              </div>
-            </section>
+              </Link>
+            </div>
           </div>
         </div>
       </main>
