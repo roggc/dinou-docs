@@ -435,12 +435,12 @@ npm run dev`}
                       <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-500/10 text-purple-500 shrink-0">
                         <Cpu className="w-4 h-4" />
                       </div>
-                      <span>Server &amp; Client Components</span>
+                      <span>Component Architecture</span>
                     </div>
                     <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all mt-1" />
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Master the boundary between React Server Components and interactive client components.
+                    Master the React 19 dual-component model, serializable flight boundaries, and granular cache slots.
                   </p>
                 </Link>
 

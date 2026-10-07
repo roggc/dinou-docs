@@ -591,10 +591,10 @@ export default function WhyDinouPage() {
                       <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
                     </div>
                     <CardTitle className="text-base group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors mb-1">
-                      Server &amp; Client Components
+                      Component Architecture
                     </CardTitle>
                     <p className="text-xs text-muted-foreground">
-                      Master the boundary between React Server Components and interactive client components.
+                      Master React Server Components (RSC), flight boundaries, and granular caching patterns.
                     </p>
                   </Link>
                 </Card>

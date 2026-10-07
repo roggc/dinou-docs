@@ -90,10 +90,10 @@ export default function Page() {
               </Badge>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Server vs. Client Components
+              Component Architecture
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Understand the dual-component architecture of React 19 and how Dinou blends server-side data access, zero-JS payloads, and high-performance client interactivity.
+              Master the React 19 dual-component model, serializable flight boundaries, component-level micro-caching with &lt;DinouCacheSlot&gt;, Partial Prerendering (PPR), and high-performance rendering strategies in Dinou.
             </p>
           </div>
 

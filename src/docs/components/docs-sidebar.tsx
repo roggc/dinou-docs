@@ -90,7 +90,7 @@ const docsNavigation = [
         icon: ShieldCheck,
       },
       {
-        title: "Server & Client Components",
+        title: "Component Architecture",
         href: "/docs/server-client-components",
         icon: Server,
       },

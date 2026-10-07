@@ -651,10 +651,10 @@ npm run dev:webpack   # Dedicated Webpack engine`}
                       <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
                     </div>
                     <CardTitle className="text-base group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors mb-1">
-                      Server vs Client Components
+                      Component Architecture
                     </CardTitle>
                     <p className="text-xs text-muted-foreground">
-                      Master React Server Components (RSC) and define explicit client boundaries.
+                      Master React Server Components (RSC), flight boundaries, and granular cache slots.
                     </p>
                   </Link>
                 </Card>
