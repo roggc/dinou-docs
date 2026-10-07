@@ -742,10 +742,10 @@ export function SearchFilter() {
               </h3>
               <p>
                 Defines which dynamic parameter combinations should be
-                pre-rendered at build/server startup time (SSG). Any dynamic path
-                not returned will be generated on-demand when first requested
-                (Incremental Static Generation), unless disabled via{" "}
-                <code>allowISG</code>.
+                pre-rendered at build/server startup time (SSG). By default, any dynamic path
+                not returned is generated on-demand when first requested and <strong>cached
+                statically for all subsequent visitors</strong> (Incremental Static Generation / ISG),
+                unless disabled via <code>allowISG: false</code> (which strictly restricts routes to the pre-rendered list and returns <code>404</code> for any other path).
               </p>
 
               {/* 2.1 Constant vs Function */}
@@ -775,8 +775,14 @@ export function SearchFilter() {
                         sections without extra function execution overhead:
                       </p>
                       <CodeBlock language="typescript" hideHeader>
-{`// Exported directly as a constant
-export const getStaticPaths = ["foo", "bar"];`}
+{`// src/blog/[slug]/page_functions.ts
+import type { PageFunctions, RouteParams } from "dinou";
+
+// Best Practice: Type-safe constant array
+export const getStaticPaths: PageFunctions<RouteParams<"/blog/[slug]">]["getStaticPaths"] = [
+  "foo",
+  "bar",
+];`}
                       </CodeBlock>
                     </CardContent>
                   </Card>
@@ -794,11 +800,15 @@ export const getStaticPaths = ["foo", "bar"];`}
                         databases at build time:
                       </p>
                       <CodeBlock language="typescript" hideHeader>
-{`// Exported as an async function
-export async function getStaticPaths() {
+{`// src/blog/[slug]/page_functions.ts
+import type { PageFunctions, RouteParams } from "dinou";
+import { db } from "@/lib/db";
+
+// Best Practice: Type-safe async function loader
+export const getStaticPaths: PageFunctions<RouteParams<"/blog/[slug]">]["getStaticPaths"] = async () => {
   const ids = await db.getTopProductIds();
   return ids;
-}`}
+};`}
                       </CodeBlock>
                     </CardContent>
                   </Card>
@@ -837,6 +847,18 @@ export async function getStaticPaths() {
                       </tr>
                       <tr>
                         <td className="p-4 font-mono text-xs">
+                          <strong>Optional Simple</strong> (<code>[[id]]</code> or{" "}
+                          <code>[[slug]]</code>)
+                        </td>
+                        <td className="p-4 font-mono text-xs">
+                          <code>(string | number | undefined)[]</code>
+                        </td>
+                        <td className="p-4 font-mono text-xs">
+                          <code>[undefined, &quot;foo&quot;, &quot;bar&quot;]</code>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs">
                           <strong>Catch-all</strong> (<code>[...slug]</code>)
                         </td>
                         <td className="p-4 font-mono text-xs">
@@ -850,15 +872,62 @@ export async function getStaticPaths() {
                       </tr>
                       <tr>
                         <td className="p-4 font-mono text-xs">
-                          <strong>Nested / Multi-parameter</strong>
+                          <strong>Optional Catch-all</strong> (<code>[[...slug]]</code>)
                         </td>
                         <td className="p-4 font-mono text-xs">
-                          <code>Record&lt;string, any&gt;[]</code>
+                          <code>(string[] | undefined)[]</code>
                         </td>
                         <td className="p-4 font-mono text-xs">
                           <code>
-                            {`[{ id: "1", category: "tech" }]`}
+                            [[], [&quot;a&quot;], [&quot;a&quot;, &quot;b&quot;]]
                           </code>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs">
+                          <strong>Nested / Multi-parameter</strong> (<code>[category]/[id]</code>)
+                        </td>
+                        <td className="p-4 font-mono text-xs">
+                          <code>Record&lt;string, string | number&gt;[]</code>
+                        </td>
+                        <td className="p-4 font-mono text-xs">
+                          <code>
+                            {`[{ category: "tech", id: "1" }]`}
+                          </code>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs">
+                          <strong>Complex Nested + Catch-all</strong> (<code>[lang]/[category]/[...slug]</code>)
+                        </td>
+                        <td className="p-4 font-mono text-xs">
+                          <code>Record&lt;string, string | string[]&gt;[]</code>
+                        </td>
+                        <td className="p-4 font-mono text-xs">
+                          <code>
+                            {`[{ lang: "en", category: "api", slug: ["v2", "auth"] }]`}
+                          </code>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-4 font-mono text-xs">
+                          <strong>All-Inclusive Matrix</strong> (<code>shop/[category]/[id]/[[format]]/[[...tags]]</code>)
+                          <span className="block text-[11px] text-amber-600 dark:text-amber-400 font-sans mt-0.5">
+                            * Respects Dinou&apos;s No-Gap Rule (optionals must be trailing)
+                          </span>
+                        </td>
+                        <td className="p-4 font-mono text-xs">
+                          <code>Record&lt;string, string | number | string[] | undefined&gt;[]</code>
+                        </td>
+                        <td className="p-4 font-mono text-xs space-y-1.5">
+                          <div>
+                            <code>{`{ category: "shoes", id: 42, format: undefined, tags: undefined }`}</code>
+                            <span className="block text-[11px] text-muted-foreground font-sans">→ Pre-renders: <code>/shop/shoes/42</code></span>
+                          </div>
+                          <div>
+                            <code>{`{ category: "shoes", id: 42, format: "pdf", tags: ["sale", "pro"] }`}</code>
+                            <span className="block text-[11px] text-muted-foreground font-sans">→ Pre-renders: <code>/shop/shoes/42/pdf/sale/pro</code></span>
+                          </div>
                         </td>
                       </tr>
                     </tbody>
@@ -874,9 +943,14 @@ export async function getStaticPaths() {
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// src/blog/[id]/page_functions.ts
+import type { PageFunctions, RouteParams } from "dinou";
 
-// Constant export:
-export const getStaticPaths = ["1", "2", "3"];
+// Best Practice: Type-safe constant array
+export const getStaticPaths: PageFunctions<RouteParams<"/blog/[id]">]["getStaticPaths"] = [
+  "1",
+  "2",
+  "3",
+];
 // Generates /blog/1, /blog/2, /blog/3`}
                 </CodeBlock>
               </section>
@@ -889,8 +963,10 @@ export const getStaticPaths = ["1", "2", "3"];
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// src/docs/[...slug]/page_functions.ts
+import type { PageFunctions, RouteParams } from "dinou";
 
-export const getStaticPaths = [
+// Best Practice: Type-safe catch-all segments (string[][])
+export const getStaticPaths: PageFunctions<RouteParams<"/docs/[...slug]">]["getStaticPaths"] = [
   ["intro"],             // Generates /docs/intro
   ["api", "v1", "auth"], // Generates /docs/api/v1/auth
 ];`}
@@ -1016,10 +1092,20 @@ export const getStaticPaths = [
                             hideHeader
                           >
 {`// src/case3/[slug]/page_functions.ts
-export const getStaticPaths = ["foo", "bar"];
+import type { PageFunctions, RouteParams } from "dinou";
+
+export const getStaticPaths: PageFunctions<RouteParams<"/case3/[slug]">]["getStaticPaths"] = [
+  "foo",
+  "bar",
+];
 
 // src/case3/[slug]/[id]/page_functions.ts
-export const getStaticPaths = ["100", "200"];
+import type { PageFunctions, RouteParams } from "dinou";
+
+export const getStaticPaths: PageFunctions<RouteParams<"/case3/[slug]/[id]">]["getStaticPaths"] = [
+  "100",
+  "200",
+];
 // Generates:
 // /case3/foo/100, /case3/foo/200
 // /case3/bar/100, /case3/bar/200`}
@@ -1057,21 +1143,22 @@ export const getStaticPaths = ["100", "200"];
                 >
 {`// Structure: src/shop/[category]/[...specs]/[[brand]]/page_functions.ts
 // ([category] and [...specs] do NOT have their own page.tsx)
+import type { PageFunctions, RouteParams } from "dinou";
 
-export function getStaticPaths() {
-  return [
-    {
-      category: "electronics",
-      specs: ["m3", "16gb"],
-      brand: "apple",
-    },
-    {
-      category: "clothing",
-      specs: ["cotton", "white"],
-      brand: undefined, // Valid: optional segment at the end of the route
-    },
-  ];
-}`}
+export const getStaticPaths: PageFunctions<
+  RouteParams<"/shop/[category]/[...specs]/[[brand]]">
+>["getStaticPaths"] = [
+  {
+    category: "electronics",
+    specs: ["m3", "16gb"],
+    brand: "apple",
+  },
+  {
+    category: "clothing",
+    specs: ["cotton", "white"],
+    brand: undefined, // Valid: optional segment at the end of the route (No-Gap Rule)
+  },
+];`}
                 </CodeBlock>
                 <Alert className="not-prose mt-4">
                   <AlertCircle className="h-4 w-4" />
@@ -1139,15 +1226,18 @@ export function getStaticPaths() {
                   containerClassName="w-full overflow-hidden rounded-lg mt-4"
                 >
 {`// src/products/[id]/page_functions.ts
+import type { PageFunctions, RouteParams } from "dinou";
+import { db } from "@/lib/db";
 
-export async function getStaticPaths() {
+// Best Practice: Type-safe async generator querying a database or CMS
+export const getStaticPaths: PageFunctions<RouteParams<"/products/[id]">]["getStaticPaths"] = async () => {
   // Only pre-generate the top 50 products at build time
   const featured = await db.getFeaturedProducts({ limit: 50 });
   return featured.map((p) => p.id);
   
   // Any product ID outside the top 50 will be generated
-  // on-demand when first requested by a user (ISG).
-}`}
+  // on-demand when first requested and cached statically (ISG).
+};`}
                 </CodeBlock>
               </section>
             </section>
