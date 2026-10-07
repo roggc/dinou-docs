@@ -95,14 +95,24 @@ const docsNavigation = [
         icon: Server,
       },
       {
-        title: "Page Functions",
+        title: "Page & Layout Functions",
         href: "/docs/page-functions",
         icon: DraftingCompass,
+      },
+      {
+        title: "Static & Dynamic Rendering",
+        href: "/docs/rendering",
+        icon: Shredder,
       },
       {
         title: "Server Functions",
         href: "/docs/server-functions",
         icon: Zap,
+      },
+      {
+        title: "On-Demand Revalidation",
+        href: "/docs/revalidation",
+        icon: RefreshCw,
       },
       {
         title: "Data Fetching",
@@ -113,16 +123,6 @@ const docsNavigation = [
         title: "Advanced Patterns",
         href: "/docs/pattern",
         icon: Brain,
-      },
-      {
-        title: "Rendering",
-        href: "/docs/rendering",
-        icon: Shredder,
-      },
-      {
-        title: "On-Demand Revalidation",
-        href: "/docs/revalidation",
-        icon: RefreshCw,
       },
       {
         title: "React Compiler",
