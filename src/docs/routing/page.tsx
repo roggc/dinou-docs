@@ -13,6 +13,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/docs/components/ui/alert";
+import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 import {
   Split,
   Layers,
@@ -45,7 +46,7 @@ import { CodeBlock } from "@/docs/components/code-block";
 const tocItems = [
   { id: "overview", title: "1. Overview & Directory Conventions", level: 2 },
   { id: "core-conventions", title: "1.1. Core File Conventions", level: 3 },
-  { id: "route-resolution", title: "1.2. In-Process Route Resolution", level: 3 },
+  { id: "route-resolution", title: "1.2. In-Memory Route Resolution", level: 3 },
   { id: "route-types", title: "2. Route Types & Pattern Matching", level: 2 },
   { id: "static-dynamic", title: "2.1. Static & Dynamic Segments", level: 3 },
   { id: "catch-all", title: "2.2. Catch-All & Optional Catch-All", level: 3 },
@@ -58,9 +59,9 @@ const tocItems = [
   { id: "nested-layouts", title: "4.1. Nested Layouts (layout.tsx)", level: 3 },
   { id: "layout-functions", title: "4.2. Layout Data & Horizontal ISR (layout_functions.ts)", level: 3 },
   { id: "layout-flags", title: "4.3. Layout Control Flags (reset_layout, no_layout)", level: 3 },
-  { id: "error-handling", title: "4.4. Route Error Boundaries (error.tsx)", level: 3 },
-  { id: "not-found-pages", title: "4.5. Custom 404 Handlers (not_found.tsx)", level: 3 },
-  { id: "advanced-patterns", title: "5. Advanced Routing Patterns", level: 2 },
+  { id: "error-handling", title: "4.4. Error Pages (error.tsx)", level: 3 },
+  { id: "not-found-pages", title: "4.5. Custom 404 Pages (not_found.tsx)", level: 3 },
+  { id: "route-organization", title: "5. Route Organization & Parallel Slots", level: 2 },
   { id: "route-groups", title: "5.1. Route Groups (folder)", level: 3 },
   { id: "private-folders", title: "5.2. Escaping Route Scanning (_folder)", level: 3 },
   { id: "parallel-routes", title: "5.3. Parallel Routes & Slots (@slot)", level: 3 },
@@ -69,7 +70,7 @@ const tocItems = [
   { id: "link-component", title: "6.1. The <Link> Component & Prefetching", level: 3 },
   { id: "fresh-prop", title: "6.2. The fresh Prop (Cache Busting)", level: 3 },
   { id: "programmatic-navigation", title: "6.3. Programmatic Navigation (useRouter)", level: 3 },
-  { id: "navigation-hooks", title: "6.4. Navigation State Hooks", level: 3 },
+  { id: "navigation-hooks", title: "6.4. Navigation State Hooks & Utilities", level: 3 },
   { id: "relative-routing", title: "7. Relative Routing Rules", level: 2 },
   { id: "directory-first", title: "7.1. Directory-First URL Resolution", level: 3 },
 ];
@@ -164,13 +165,27 @@ export default function Page() {
               <div id="route-resolution" className="scroll-mt-20 mt-8 space-y-3">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Compass className="h-5 w-5 text-indigo-500" />
-                  1.2. In-Process Route Resolution
+                  1.2. In-Memory Route Resolution
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Dinou resolves routes in-memory with zero subprocess latency. At startup, the engine registers all source files and resolves matching file paths, extracted dynamic parameters (<code>params</code>), nested layout hierarchies, and parallel slots in a single deterministic pass.
+                  You never write central routing tables or configure URL maps manually. The folder structure inside <code>src/</code> is your single source of truth.
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Supported source file extensions include <code>.tsx</code>, <code>.ts</code>, <code>.jsx</code>, and <code>.js</code> across all routes.
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  When a request arrives (for example, <code>/blog/hello-world</code>), Dinou matches it entirely in memory:
+                </p>
+                <ul className="text-xs sm:text-sm text-muted-foreground space-y-1.5 list-disc pl-5 leading-relaxed">
+                  <li>
+                    <strong>Instant matching:</strong> Directly locates <code>src/blog/[slug]/page.tsx</code> in memory with zero subprocess overhead or disk I/O latency.
+                  </li>
+                  <li>
+                    <strong>Parameter extraction:</strong> Automatically parses dynamic segments into typed <code>params</code> (e.g. <code>&#123; slug: &quot;hello-world&quot; &#125;</code>).
+                  </li>
+                  <li>
+                    <strong>Layout nesting:</strong> Automatically wraps the page inside its parent layouts (<code>src/layout.tsx</code> &rarr; <code>src/blog/layout.tsx</code>).
+                  </li>
+                </ul>
+                <p className="text-xs text-muted-foreground mt-2">
+                  You can use <code>.tsx</code>, <code>.ts</code>, <code>.jsx</code>, or <code>.js</code> interchangeably across all pages and layouts.
                 </p>
               </div>
             </section>
@@ -216,8 +231,18 @@ export default function Page() {
                       <tr>
                         <td className="p-3.5 font-semibold">Optional Single</td>
                         <td className="p-3.5 font-mono text-xs">src/shop/[[category]]/page.tsx</td>
-                        <td className="p-3.5 font-mono text-xs">/shop or /shop/shoes</td>
-                        <td className="p-3.5 font-mono text-xs text-blue-600 dark:text-blue-400"><code>&#123; category: undefined &#125;</code> or <code>&#123; category: &quot;shoes&quot; &#125;</code></td>
+                        <td className="p-3.5 font-mono text-xs">
+                          <div className="space-y-1.5">
+                            <div>/shop</div>
+                            <div>/shop/shoes</div>
+                          </div>
+                        </td>
+                        <td className="p-3.5 font-mono text-xs text-blue-600 dark:text-blue-400">
+                          <div className="space-y-1.5">
+                            <div><code>&#123; category: undefined &#125;</code></div>
+                            <div><code>&#123; category: &quot;shoes&quot; &#125;</code></div>
+                          </div>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -250,8 +275,18 @@ export default function Page() {
                       <tr>
                         <td className="p-3.5 font-semibold">Optional Catch-all</td>
                         <td className="p-3.5 font-mono text-xs">src/docs/[[...slug]]/page.tsx</td>
-                        <td className="p-3.5 font-mono text-xs">/docs or /docs/a/b</td>
-                        <td className="p-3.5 font-mono text-xs text-purple-600 dark:text-purple-400"><code>&#123; slug: [] &#125;</code> or <code>&#123; slug: [&quot;a&quot;, &quot;b&quot;] &#125;</code></td>
+                        <td className="p-3.5 font-mono text-xs">
+                          <div className="space-y-1.5">
+                            <div>/docs</div>
+                            <div>/docs/a/b</div>
+                          </div>
+                        </td>
+                        <td className="p-3.5 font-mono text-xs text-purple-600 dark:text-purple-400">
+                          <div className="space-y-1.5">
+                            <div><code>&#123; slug: [] &#125;</code></div>
+                            <div><code>&#123; slug: [&quot;a&quot;, &quot;b&quot;] &#125;</code></div>
+                          </div>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -329,12 +364,12 @@ export default function Page() {
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   In Dinou v7, parameters are strictly typed using <code>PageProps</code>, <code>LayoutProps</code>, and <code>RouteParams</code>:
                 </p>
-                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-5">
+                <ul className="text-sm text-muted-foreground space-y-1.5 list-disc pl-5">
                   <li><code>page.tsx</code> components: <code>Page(&#123; params &#125;: PageProps&lt;&quot;/blog/[slug]&quot;&gt;)</code></li>
                   <li><code>layout.tsx</code> components: <code>Layout(&#123; params, children &#125;: LayoutProps&lt;&quot;/blog/[slug]&quot;&gt;)</code></li>
                   <li><code>error.tsx</code> boundaries: <code>Error(&#123; error, params &#125;: &#123; error: Error; params: RouteParams&lt;&quot;/blog/[slug]&quot;&gt; &#125;)</code></li>
-                  <li><code>not_found.tsx</code> 404 pages: <code>NotFound(&#123; params &#125;)</code></li>
-                  <li>Parallel slot pages: <code>SlotPage(&#123; params &#125;)</code></li>
+                  <li><code>not_found.tsx</code> 404 pages: <code>NotFound(&#123; params &#125;: PageProps&lt;&quot;/blog/[slug]&quot;&gt;)</code></li>
+                  <li>Parallel slot pages (<code>@slot/page.tsx</code>): <code>SlotPage(&#123; params &#125;: PageProps&lt;&quot;/dashboard/[teamId]&quot;&gt;)</code></li>
                   <li>Server data fetching: <code>getProps(params: RouteParams&lt;&quot;/blog/[slug]&quot;&gt;)</code> in <code>page_functions.ts</code></li>
                 </ul>
 
@@ -361,7 +396,7 @@ export default function BlogPost({ params, post }: BlogPostProps) {
                   <AlertCircle className="h-4 w-4 text-indigo-500" />
                   <AlertTitle>Strict Signature Rule</AlertTitle>
                   <AlertDescription className="text-xs text-muted-foreground mt-1">
-                    In <code>page_functions.ts</code> and <code>layout_functions.ts</code>, Dinou passes the parameters dictionary directly as the <strong>first argument</strong>: use <code>getProps(params)</code> and <code>validateParams(params)</code> (do <strong>not</strong> write <code>getProps(&#123; params &#125;)</code>). However, in React components (<code>page.tsx</code>, <code>layout.tsx</code>, <code>error.tsx</code>), <code>params</code> is passed as a component prop: <code>export default function Page(&#123; params &#125;)</code>.
+                    In <code>page_functions.ts</code> and <code>layout_functions.ts</code>, Dinou passes the parameters dictionary directly as the <strong>first argument</strong>: use <code>getProps(params)</code> and <code>validateParams(params)</code> (do <strong>not</strong> write <code>getProps(&#123; params &#125;)</code>). However, in React components (<code>page.tsx</code>, <code>layout.tsx</code>, <code>error.tsx</code>, <code>not_found.tsx</code>), <code>params</code> is passed as a component prop: <code>export default function Page(&#123; params &#125;)</code>.
                   </AlertDescription>
                 </Alert>
               </div>
@@ -377,20 +412,35 @@ export default function BlogPost({ params, post }: BlogPostProps) {
 
                 <CodeBlock language="typescript" containerClassName="w-full rounded-lg mt-2">
                   {`// src/product/[id]/page_functions.ts
-export function validateParams(params: { id: string }) {
+import type { RouteParams } from "dinou";
+
+export function validateParams(params: RouteParams<"/product/[id]">) {
   // Ensure the product ID is strictly numeric; otherwise render 404
   return /^\\d+$/.test(params.id);
 }
 
-export async function getProps(params: { id: string }) {
+export async function getProps(params: RouteParams<"/product/[id]">) {
   // Only called if validateParams returned true
   const product = await db.products.findById(params.id);
   return { product };
 }`}
                 </CodeBlock>
-                <p className="text-xs text-muted-foreground">
-                  Works consistently in dynamic server rendering, Incremental Static Generation (ISG), and static site exports.
-                </p>
+                <div className="rounded-xl border border-border/80 bg-muted/30 p-3.5 space-y-2 text-xs text-muted-foreground mt-3">
+                  <div className="font-semibold text-foreground">
+                    Guaranteed behavior across all rendering modes:
+                  </div>
+                  <ul className="space-y-1.5 list-disc pl-4 leading-relaxed">
+                    <li>
+                      <strong>Dynamic SSR:</strong> Returns an instant 404 without running <code>getProps</code>, preventing wasteful database queries on invalid URLs.
+                    </li>
+                    <li>
+                      <strong>Incremental Static Generation (ISG / ISR):</strong> Prevents invalid URLs from triggering on-demand page generation or polluting edge caches with broken pages.
+                    </li>
+                    <li>
+                      <strong>Static Site Exports (SSG):</strong> Only valid parameter combinations generate HTML files during <code>dinou export</code>.
+                    </li>
+                  </ul>
+                </div>
               </div>
 
               <div id="query-params" className="scroll-mt-20 mt-8 space-y-3">
@@ -399,44 +449,70 @@ export async function getProps(params: { id: string }) {
                   3.3. Query Parameters Access
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Query parameters (e.g. <code>?search=react&amp;sort=asc</code>) are deliberately isolated from static route matching to preserve edge cache stability. Access query strings using the official Dinou utilities:
+                  Query parameters (e.g. <code>?search=react&amp;sort=asc</code>) are deliberately isolated from static route matching to preserve edge cache stability. In Dinou, <code>useSearchParams()</code> is a <strong>universal hook</strong> that works seamlessly in <strong>both Server Components and Client Components</strong>:
                 </p>
 
                 <div className="grid gap-4 md:grid-cols-2 not-prose mt-3">
                   <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-card">
                     <div className="text-xs font-mono font-semibold text-blue-600 dark:text-blue-400 mb-1">
-                      Client Components (&quot;use client&quot;)
+                      Universal: Server &amp; Client Components
                     </div>
                     <p className="text-xs text-muted-foreground mb-2">
-                      Use the <code>useSearchParams()</code> hook. It returns a standard Web <code>URLSearchParams</code> instance:
+                      Use <code>useSearchParams()</code> anywhere. It returns a standard Web <code>URLSearchParams</code> instance:
                     </p>
                     <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
                       {`import { useSearchParams } from "dinou";
 
-export function SearchFilter() {
+// Works identically in Server Components & "use client"!
+export default function SearchPage() {
   const searchParams = useSearchParams();
-  const q = searchParams.get("search");
-  return <div>Query: {q}</div>;
+  const q = searchParams.get("search") ?? "";
+  return <div>Search: {q}</div>;
 }`}
                     </CodeBlock>
                   </div>
 
                   <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-card">
                     <div className="text-xs font-mono font-semibold text-purple-600 dark:text-purple-400 mb-1">
-                      Server Side (RSC / Functions)
+                      page_functions.ts &amp; Server Functions
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Access the request query object via <code>getContext().req.query</code>:
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Outside React components (where hooks cannot run), access the active query via <code>getContext().req.query</code>:
                     </p>
-                    <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                      {`import { getContext } from "dinou";
+                    <TabbedCodeBlock
+                      defaultTab="page-functions"
+                      tabs={[
+                        {
+                          id: "page-functions",
+                          label: "page_functions.ts",
+                          language: "tsx",
+                          code: `import { getContext } from "dinou";
 
-export default function SearchPage() {
+// src/search/page_functions.ts
+// getContext() is available in getProps, validateParams, etc.
+export async function getProps() {
   const { req } = getContext();
-  const query = req.query?.search;
-  return <div>Search: {query}</div>;
-}`}
-                    </CodeBlock>
+  const search = req.query?.search;
+  return { search };
+}`,
+                        },
+                        {
+                          id: "server-functions",
+                          label: 'Server Functions ("use server")',
+                          language: "tsx",
+                          code: `"use server"; // Declared at the top of the file
+
+import { getContext } from "dinou";
+
+// src/actions/items.ts
+export async function filterItems() {
+  const { req } = getContext();
+  const search = req.query?.search;
+  return db.items.find({ q: search });
+}`,
+                        },
+                      ]}
+                    />
                   </div>
                 </div>
               </div>
@@ -465,18 +541,19 @@ export default function SearchPage() {
                 </p>
 
                 <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                  {`// src/dashboard/layout.tsx
+                  {`// src/dashboard/[teamId]/layout.tsx
 import type { ReactNode } from "react";
+import type { LayoutProps } from "dinou";
+
+interface DashboardLayoutProps extends LayoutProps<"/dashboard/[teamId]"> {
+  sidebar?: ReactNode; // Parallel slot (@sidebar)
+}
 
 export default function DashboardLayout({
   children,
   params,
   sidebar,
-}: {
-  children: ReactNode;
-  params: { teamId?: string };
-  sidebar?: ReactNode;
-}) {
+}: DashboardLayoutProps) {
   return (
     <div className="flex min-h-screen">
       <aside className="w-64 border-r p-4">{sidebar}</aside>
@@ -500,8 +577,10 @@ export default function DashboardLayout({
                 </p>
 
                 <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                  {`// src/dashboard/layout_functions.ts - Independent Layout ISR
-export async function getProps(params: { teamId?: string }) {
+                  {`// src/dashboard/[teamId]/layout_functions.ts - Independent Layout ISR
+import type { RouteParams } from "dinou";
+
+export async function getProps(params: RouteParams<"/dashboard/[teamId]">) {
   const team = await fetchTeamData(params.teamId);
   return { team };
 }
@@ -540,23 +619,29 @@ export const revalidate = 3600;`}
                       </tr>
                       <tr>
                         <td className="p-3.5 font-mono font-bold text-purple-600 dark:text-purple-400">no_layout</td>
-                        <td className="p-3.5 font-mono text-xs">page.tsx</td>
+                        <td className="p-3.5 font-mono text-xs">
+                          <div className="space-y-0.5">
+                            <div>page.tsx</div>
+                            <div>not_found.tsx</div>
+                            <div>error.tsx</div>
+                          </div>
+                        </td>
                         <td className="p-3.5 text-muted-foreground leading-relaxed">
-                          Bypasses all layouts entirely. The page renders raw without any parent layout wrapper (ideal for embeddable widgets, checkout modals, or pure HTML canvas views).
+                          Bypasses all layouts entirely across the route. The page, custom 404, and error boundary render raw without any parent layout wrappers (ideal for embeddable widgets, checkout modals, or pure HTML canvas views).
                         </td>
                       </tr>
                       <tr>
                         <td className="p-3.5 font-mono font-bold text-rose-600 dark:text-rose-400">no_layout_error</td>
                         <td className="p-3.5 font-mono text-xs">error.tsx</td>
                         <td className="p-3.5 text-muted-foreground leading-relaxed">
-                          Prevents parent layouts from wrapping the error boundary UI.
+                          Granular override: prevents parent layouts from wrapping the error boundary UI only, while preserving layouts for the regular page.
                         </td>
                       </tr>
                       <tr>
                         <td className="p-3.5 font-mono font-bold text-amber-600 dark:text-amber-400">no_layout_not_found</td>
                         <td className="p-3.5 font-mono text-xs">not_found.tsx</td>
                         <td className="p-3.5 text-muted-foreground leading-relaxed">
-                          Prevents parent layouts from wrapping the custom 404 page.
+                          Granular override: prevents parent layouts from wrapping the custom 404 page only, while preserving layouts for the regular page.
                         </td>
                       </tr>
                     </tbody>
@@ -579,22 +664,22 @@ export const revalidate = 3600;`}
               <div id="error-handling" className="scroll-mt-20 mt-8 space-y-4">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <ShieldAlert className="h-5 w-5 text-rose-500" />
-                  4.4. Route Error Boundaries (error.tsx)
+                  4.4. Error Pages (error.tsx)
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Create an <code>error.tsx</code> file in any route directory to catch and isolate runtime errors locally. If an exception occurs in a child component, Dinou bubbles up to the closest <code>error.tsx</code>, rendering it while keeping all parent layouts interactive:
                 </p>
 
                 <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                  {`// src/dashboard/error.tsx
-"use client"; // Optional: Can be Server or Client Component
+                  {`// src/dashboard/[teamId]/error.tsx
+import type { RouteParams } from "dinou";
 
 export default function DashboardError({
   error,
   params,
 }: {
-  error: { message: string; name: string; stack?: string };
-  params: Record<string, string>;
+  error: Error;
+  params: RouteParams<"/dashboard/[teamId]">;
 }) {
   return (
     <div className="p-6 rounded-xl border border-rose-500/20 bg-rose-50/20">
@@ -618,37 +703,142 @@ export default function DashboardError({
               <div id="not-found-pages" className="scroll-mt-20 mt-8 space-y-3">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Ghost className="h-5 w-5 text-amber-500" />
-                  4.5. Custom 404 Handlers (not_found.tsx)
+                  4.5. Custom 404 Pages (not_found.tsx)
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Define custom 404 views by placing <code>not_found.tsx</code> in any route directory. When an unmatched URL segment is requested, Dinou renders the closest 404 boundary inside its enclosing layout.
+                  Define custom 404 views by placing <code>not_found.tsx</code> in any route directory. When an unmatched URL segment is requested, Dinou bubbles up to render the closest <code>not_found.tsx</code> template inside its enclosing layout.
+                </p>
+
+                <CodeBlock language="tsx" containerClassName="w-full rounded-lg mt-3">
+                  {`// src/not_found.tsx (Global) or src/blog/[slug]/not_found.tsx (Scoped)
+import { Link, type PageProps } from "dinou";
+
+export default function NotFound({ params }: PageProps) {
+  return (
+    <div className="flex flex-col items-center justify-center p-8 text-center">
+      <h2 className="text-3xl font-bold">404 - Not Found</h2>
+      <p className="mt-2 text-muted-foreground">
+        The requested page could not be located.
+      </p>
+      <Link
+        href="/"
+        className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium text-sm"
+      >
+        Back to Home
+      </Link>
+    </div>
+  );
+}`}
+                </CodeBlock>
+
+                <p className="text-xs text-muted-foreground">
+                  When nested in a dynamic folder (such as <code>src/blog/[slug]/not_found.tsx</code>), it automatically receives route <code>params</code> via <code>PageProps</code>.
                 </p>
               </div>
             </section>
 
-            {/* Section 5: Advanced Routing Patterns */}
-            <section id="advanced-patterns" className="scroll-mt-20">
+            {/* Section 5: Route Organization & Parallel Slots */}
+            <section id="route-organization" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                5. Advanced Routing Patterns
+                5. Route Organization &amp; Parallel Slots
               </h2>
               <p>
-                Dinou provides advanced structural patterns to organize enterprise codebases cleanly without impacting URL ergonomics:
+                Dinou provides dedicated directory conventions to organize enterprise codebases cleanly and compose parallel UI slots without impacting URL ergonomics:
               </p>
 
-              <div id="route-groups" className="scroll-mt-20 mt-6 space-y-3">
+              <div id="route-groups" className="scroll-mt-20 mt-6 space-y-4">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Layers className="h-5 w-5 text-indigo-500" />
                   5.1. Route Groups <code>(folder)</code>
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Folders wrapped in parentheses are <strong>omitted</strong> from the public URL path. They allow you to organize routes logically, split layouts, or create multiple root layouts without changing URLs:
+                  Folders wrapped in parentheses (e.g. <code>(auth)</code>, <code>(marketing)</code>) are <strong>omitted from the public URL path</strong>. They serve two fundamental architectural purposes in Dinou:
                 </p>
 
-                <div className="not-prose bg-muted/60 p-4 rounded-xl font-mono text-xs space-y-1.5 border">
-                  <div>src/(auth)/login/page.tsx &rarr; <span className="font-bold text-blue-600 dark:text-blue-400">/login</span></div>
-                  <div>src/(auth)/register/page.tsx &rarr; <span className="font-bold text-blue-600 dark:text-blue-400">/register</span></div>
-                  <div>src/(marketing)/about/page.tsx &rarr; <span className="font-bold text-blue-600 dark:text-blue-400">/about</span></div>
-                  <div>src/(marketing)/(nested)/pricing/page.tsx &rarr; <span className="font-bold text-blue-600 dark:text-blue-400">/pricing</span></div>
+                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-5">
+                  <li>
+                    <strong>Logical Organization:</strong> Group related routes together without introducing unwanted segment prefixes in the URL.
+                  </li>
+                  <li>
+                    <strong>Multiple Root Layouts:</strong> Apply completely different top-level layout wrappers to different areas of your application without URL changes.
+                  </li>
+                </ul>
+
+                {/* Multiple Root Layouts Feature Card */}
+                <div className="space-y-4 mt-4">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-card p-5 not-prose space-y-4">
+                    <div className="flex items-center gap-2 font-bold text-sm text-slate-900 dark:text-white">
+                      <Sparkles className="h-4 w-4 text-indigo-500" />
+                      Multiple Root Layouts in Practice
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      In conventional file-system routers, a single global layout forces all pages to share the same top navigation bar and footer. With Dinou Route Groups, you can create <strong>independent root layouts</strong> for marketing pages versus authentication screens:
+                    </p>
+
+                    <div className="grid lg:grid-cols-2 gap-4">
+                      {/* Directory Tree */}
+                      <div className="p-4 rounded-lg bg-muted/60 border font-mono text-xs space-y-1.5">
+                        <div className="text-slate-500 dark:text-slate-400 font-semibold mb-2">// Directory Structure</div>
+                        <div>src/</div>
+                        <div className="pl-3">
+                          <span className="text-indigo-600 dark:text-indigo-400 font-semibold">├── (marketing)/</span>
+                          <span className="text-muted-foreground"> &mdash; Public layout branch</span>
+                        </div>
+                        <div className="pl-6">├── layout.tsx <span className="text-slate-400">(Navbar, Footer, Hero)</span></div>
+                        <div className="pl-6">├── page.tsx <span className="text-blue-600 dark:text-blue-400 font-bold">&rarr; /</span></div>
+                        <div className="pl-6">├── about/page.tsx <span className="text-blue-600 dark:text-blue-400 font-bold">&rarr; /about</span></div>
+                        <div className="pl-6">└── pricing/page.tsx <span className="text-blue-600 dark:text-blue-400 font-bold">&rarr; /pricing</span></div>
+                        <div className="pl-3 mt-2">
+                          <span className="text-purple-600 dark:text-purple-400 font-semibold">└── (auth)/</span>
+                          <span className="text-muted-foreground"> &mdash; Minimalist auth branch</span>
+                        </div>
+                        <div className="pl-6">├── layout.tsx <span className="text-slate-400">(Centered card, no Navbar)</span></div>
+                        <div className="pl-6">├── login/page.tsx <span className="text-blue-600 dark:text-blue-400 font-bold">&rarr; /login</span></div>
+                        <div className="pl-6">└── register/page.tsx <span className="text-blue-600 dark:text-blue-400 font-bold">&rarr; /register</span></div>
+                      </div>
+
+                      {/* Layout Resolution Breakdown */}
+                      <div className="flex flex-col justify-between p-4 rounded-lg bg-muted/60 border text-xs">
+                        <div>
+                          <div className="font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                            How Dinou Resolves Layouts:
+                          </div>
+                          <ul className="space-y-2 text-muted-foreground">
+                            <li className="flex items-start gap-2">
+                              <span className="text-indigo-500 font-bold">&bull;</span>
+                              <span>
+                                <strong>Independent Filesystem Paths:</strong> <code>src/(marketing)/layout.tsx</code> and <code>src/(auth)/layout.tsx</code> live in distinct disk directories, so there is zero file collision.
+                              </span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-blue-500 font-bold">&bull;</span>
+                              <span>
+                                <strong>Request to <code>/pricing</code>:</strong> Dinou crawls into <code>(marketing)</code>, matches <code>pricing/page.tsx</code>, and wraps it exclusively with the marketing layout.
+                              </span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-purple-500 font-bold">&bull;</span>
+                              <span>
+                                <strong>Request to <code>/login</code>:</strong> Dinou crawls into <code>(auth)</code>, matches <code>login/page.tsx</code>, and wraps it exclusively with the auth layout.
+                              </span>
+                            </li>
+                          </ul>
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 text-[11px] text-muted-foreground">
+                          💡 <em>Root Hierarchy:</em> If you also place a top-level <code>src/layout.tsx</code>, both groups nest inside it (e.g. for HTML <code>&lt;head&gt;</code> or global fonts). If omitted, each group acts as a completely separate root layout.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Alert className="not-prose border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/20">
+                    <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    <AlertTitle>Avoid URL Path Collisions</AlertTitle>
+                    <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1">
+                      Because parenthesized folder names are stripped from the public URL, different route groups cannot define identical URL paths. For example, creating both <code>src/(marketing)/about/page.tsx</code> and <code>src/(auth)/about/page.tsx</code> would cause a build/resolution collision because both map to <code>/about</code>.
+                    </AlertDescription>
+                  </Alert>
                 </div>
               </div>
 
@@ -714,17 +904,29 @@ export default function DashboardError({
                     <p className="text-muted-foreground mb-2">
                       Slots are passed as named props directly alongside <code>children</code>:
                     </p>
-                    <code className="text-xs bg-muted p-2 rounded block font-mono">
-                      {`export default function Layout({
+                    <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
+                      {`import type { ReactNode } from "react";
+import type { LayoutProps } from "dinou";
+
+interface DashboardLayoutProps extends LayoutProps<"/dashboard"> {
+  sidebar?: ReactNode;
+  analytics?: ReactNode;
+}
+
+export default function Layout({
   children,
   sidebar,
-  analytics
-}: {
-  children: ReactNode;
-  sidebar: ReactNode;
-  analytics: ReactNode;
-})`}
-                    </code>
+  analytics,
+}: DashboardLayoutProps) {
+  return (
+    <div className="flex">
+      <aside>{sidebar}</aside>
+      <main>{children}</main>
+      <section>{analytics}</section>
+    </div>
+  );
+}`}
+                    </CodeBlock>
                   </div>
                 </div>
               </div>
@@ -763,15 +965,15 @@ export default function DashboardError({
                     </CardContent>
                   </Card>
 
-                  <Card className="border-l-4 border-l-purple-500">
+                  <Card className="border-l-4 border-l-emerald-500">
                     <CardHeader className="p-4 pb-2">
                       <div className="flex items-center gap-2 font-bold text-xs">
-                        <RefreshCw className="h-4 w-4 text-purple-500" />
-                        Targeted Slot Refresh
+                        <Layers className="h-4 w-4 text-emerald-500" />
+                        Layout &amp; Sibling Resilience
                       </div>
                     </CardHeader>
                     <CardContent className="p-4 pt-2 text-xs text-muted-foreground">
-                      Slots can be refreshed independently from the client using <code>refreshSlot(&quot;sidebar&quot;)</code> or via cache invalidation tags without triggering a full page re-render.
+                      Sibling slots, the main <code>children</code> page, and parent layouts remain fully mounted and interactive even if an individual slot fails to render.
                     </CardContent>
                   </Card>
                 </div>
@@ -903,7 +1105,7 @@ export default function LoginButton() {
                       </tr>
                       <tr>
                         <td className="p-3.5 font-mono text-purple-600 dark:text-purple-400 font-semibold">router.refreshSlot(slotId)</td>
-                        <td className="p-3.5 text-muted-foreground">Re-fetches and updates an individual parallel slot or cache slot without re-rendering the surrounding page.</td>
+                        <td className="p-3.5 text-muted-foreground">Re-fetches and updates an individual <code>&lt;DinouCacheSlot&gt;</code> component without re-rendering the surrounding page.</td>
                       </tr>
                     </tbody>
                   </table>
@@ -913,10 +1115,10 @@ export default function LoginButton() {
               <div id="navigation-hooks" className="scroll-mt-20 mt-8 space-y-4">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Zap className="h-5 w-5 text-amber-500" />
-                  6.4. Navigation State Hooks
+                  6.4. Navigation State Hooks &amp; Utilities
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Dinou exports dedicated hooks from <code>&quot;dinou&quot;</code> to inspect active route states:
+                  Dinou exports dedicated hooks and client utilities from <code>&quot;dinou&quot;</code> to inspect active route states and trigger targeted updates:
                 </p>
 
                 <div className="grid gap-4 sm:grid-cols-2 not-prose mt-2 text-xs">
@@ -944,7 +1146,7 @@ export default function LoginButton() {
                   <div className="p-4 rounded-xl border bg-card">
                     <span className="font-mono font-bold text-blue-600 dark:text-blue-400 text-sm">refreshSlot(slotId)</span>
                     <p className="text-muted-foreground mt-1.5 leading-relaxed">
-                      Utility function to imperatively trigger a background refresh of an isolated parallel slot or <code>&lt;DinouCacheSlot&gt;</code>.
+                      Client utility function to imperatively trigger an in-place background refresh of an individual <code>&lt;DinouCacheSlot&gt;</code> without reloading the page.
                     </p>
                   </div>
                 </div>
