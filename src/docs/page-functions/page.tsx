@@ -27,6 +27,15 @@ import {
   Timer,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
+import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/docs/components/ui/table";
 
 const tocItems = [
   {
@@ -197,10 +206,108 @@ export default function Page() {
                 </Card>
               </div>
 
-              <p>
-                Both files implement the exact same unified interface:{" "}
-                <code>RouteSegmentConfig&lt;TParams, TProps&gt;</code>.
-              </p>
+              <div className="my-6 p-5 sm:p-6 rounded-xl border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20 not-prose space-y-4">
+                <div className="flex items-center gap-2 font-bold text-base text-blue-700 dark:text-blue-300">
+                  <ShieldCheck className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <span>The Unified Architectural Contract: RouteSegmentConfig&lt;TParams, TProps&gt;</span>
+                </div>
+                
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  In Dinou, every server-side configuration file implements the exact same foundational contract: <strong><code>RouteSegmentConfig</code></strong>. 
+                  This is the framework&apos;s underlying &quot;abstract&quot; interface defining all segment capabilities. For day-to-day application code, Dinou exports two concrete, role-based aliases: <strong><code>PageFunctions</code></strong> (for pages) and <strong><code>LayoutFunctions</code></strong> (for layouts):
+                </p>
+
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`// Exported directly from "dinou" (dinou/index.d.ts):
+
+/**
+ * Foundational "abstract" interface governing all route segments in Dinou.
+ */
+export interface RouteSegmentConfig<TParams = any, TProps = any> {
+  // Partial Prerendering (PPR) configuration
+  ppr?: boolean | (() => boolean | Promise<boolean>);
+
+  // Cache & revalidation strategy (< 1 = Dynamic SSR, >= 1 = ISR, false = Static)
+  revalidate?: number | false | (() => number | false | Promise<number | false>);
+
+  // Cache tags for on-demand invalidation via revalidateTag(tag)
+  getCacheTags?: string[] | ((params?: TParams) => string[] | Promise<string[]>);
+
+  // Path generator for SSG (constant array or sync/async function)
+  getStaticPaths?: StaticPathItem<TParams>[] | (() => StaticPathsResult<TParams>);
+
+  // Server loader providing direct props to the component
+  getProps?: (params?: TParams) => TProps | Promise<TProps>;
+
+  // Parameter validator guard (returns false to halt and return 404)
+  validateParams?: (params?: TParams) => boolean | Promise<boolean>;
+
+  // Controls whether Incremental Static Generation (ISG) is allowed for ungenerated paths
+  allowISG?: boolean | (() => boolean | Promise<boolean>);
+}
+
+/**
+ * Concrete semantic alias to import and use in 'page_functions.ts'
+ */
+export type PageFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TParams, TProps>;
+
+/**
+ * Concrete semantic alias to import and use in 'layout_functions.ts'
+ */
+export type LayoutFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TParams, TProps>;`}
+                </CodeBlock>
+
+                {/* Practical Quick Rule */}
+                <div className="rounded-lg border bg-background/80 overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/40">
+                        <TableHead className="w-1/3 text-xs font-semibold">Where to use</TableHead>
+                        <TableHead className="w-1/3 text-xs font-semibold">Type to import</TableHead>
+                        <TableHead className="text-xs font-semibold">Purpose</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold text-blue-600 dark:text-blue-400">
+                          src/.../page_functions.ts
+                        </TableCell>
+                        <TableCell className="font-mono text-xs font-bold text-foreground">
+                          PageFunctions
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          Types data loading (<code>getProps</code>), static paths, and cache for the <strong>page</strong>.
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                          src/.../layout_functions.ts
+                        </TableCell>
+                        <TableCell className="font-mono text-xs font-bold text-foreground">
+                          LayoutFunctions
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          Types data loading (<code>getProps</code>) and independent cache for the <strong>layout</strong> shell.
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold text-purple-600 dark:text-purple-400">
+                          Plugins &amp; Shared Utils
+                        </TableCell>
+                        <TableCell className="font-mono text-xs font-bold text-foreground">
+                          RouteSegmentConfig
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          Base &quot;abstract&quot; interface for generic utilities that process arbitrary route segments.
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
             </section>
 
             {/* 1. getProps */}
@@ -244,23 +351,38 @@ export default function Page() {
 
               <div className="space-y-4">
                 <p className="font-semibold text-sm text-muted-foreground">
-                  Example: Page Component Loader
+                  Example: Type-Safe Page Component Loader
                 </p>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// src/blog/[slug]/page_functions.ts
-export async function getProps(params: { slug: string }) {
-  const post = await db.getPost(params.slug);
-  // Directly returns the props for page.tsx
-  return { post };
+import type { PageFunctions, RouteParams } from "dinou";
+import { db, type Post } from "@/lib/db";
+
+export interface BlogPostData {
+  post: Post;
 }
 
+// Best Practice: Type getProps using PageFunctions for strict parameters & return contract
+export const getProps: PageFunctions<RouteParams<"/blog/[slug]">, BlogPostData>["getProps"] = async (params) => {
+  const post = await db.getPost(params?.slug);
+  // Directly returns BlogPostData for page.tsx
+  return { post };
+};
+
 // src/blog/[slug]/page.tsx
-export default function BlogPost({ post }: { post: Post }) {
+import type { PageProps } from "dinou";
+import type { BlogPostData } from "./page_functions";
+
+// Best Practice: Extend PageProps with the loader's returned BlogPostData
+interface BlogPostProps extends PageProps<"/blog/[slug]">, BlogPostData {}
+
+export default function BlogPost({ params, post }: BlogPostProps) {
   return (
     <article>
+      <span className="text-xs text-muted-foreground">Route: /blog/{params.slug}</span>
       <h1>{post.title}</h1>
       <div>{post.content}</div>
     </article>
@@ -268,28 +390,39 @@ export default function BlogPost({ post }: { post: Post }) {
 }`}
                 </CodeBlock>
 
-                <p className="font-semibold text-sm text-muted-foreground mt-4">
-                  Example: Layout Component Loader
+                <p className="font-semibold text-sm text-muted-foreground mt-6">
+                  Example: Type-Safe Layout Component Loader
                 </p>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// src/blog/layout_functions.ts
-export async function getProps() {
+import type { LayoutFunctions } from "dinou";
+import { db } from "@/lib/db";
+
+export interface BlogLayoutData {
+  categories: string[];
+}
+
+// Best Practice: Type layout server functions with LayoutFunctions
+export const getProps: LayoutFunctions<any, BlogLayoutData>["getProps"] = async () => {
   const categories = await db.getCategories();
   // Directly returns props for layout.tsx
   return { categories };
-}
+};
 
 // src/blog/layout.tsx
+import type { LayoutProps } from "dinou";
+import type { BlogLayoutData } from "./layout_functions";
+
+// Best Practice: Extend LayoutProps for automatic typing of children and params
+interface BlogLayoutProps extends LayoutProps, BlogLayoutData {}
+
 export default function BlogLayout({
   children,
   categories,
-}: {
-  children: React.ReactNode;
-  categories: string[];
-}) {
+}: BlogLayoutProps) {
   return (
     <div className="blog-shell">
       <BlogSidebar categories={categories} />
@@ -300,17 +433,303 @@ export default function BlogLayout({
                 </CodeBlock>
               </div>
 
-              <Alert className="not-prose mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Design Note</AlertTitle>
-                <AlertDescription>
-                  <code>getProps</code> only receives <code>params</code>. For
-                  request-specific dynamic context such as <code>searchParams</code>{" "}
-                  or <code>cookies</code>, read them directly within Server
-                  Components using React <code>&lt;Suspense&gt;</code> or invoke
-                  Server Functions to prevent blocking the initial HTML render.
-                </AlertDescription>
-              </Alert>
+              <div className="not-prose my-8 rounded-xl border border-blue-500/20 bg-gradient-to-b from-blue-50/40 via-background to-muted/20 dark:from-blue-950/20 dark:via-background dark:to-muted/10 p-5 sm:p-6 space-y-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600/10 text-blue-600 dark:text-blue-400">
+                        <Cpu className="h-4 w-4" />
+                      </span>
+                      <h4 className="text-base font-bold text-foreground">
+                        Deep-Dive Architecture: Why <code>getProps</code> Only Receives <code>params</code> &amp; The Dynamic Bailout Mechanism
+                      </h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Learn why Dinou separates route parameters (<code>params</code>) from dynamic request data (<code>cookies</code>, <code>headers</code>, and <code>query params</code>), how accessing them in <code>getProps</code> triggers an automatic switch to dynamic rendering (bailout), and how to stream cookie- or auth-dependent components with React <code>&lt;Suspense&gt;</code> without delaying the initial HTML delivery.
+                    </p>
+                  </div>
+                </div>
+
+                {/* The Core Architectural Reason: Resource Identity vs Connection Data */}
+                <div className="rounded-lg border bg-card p-4 space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-foreground">
+                    <Zap className="h-4 w-4 text-amber-500" />
+                    <span>Resource Identity &amp; Cache Integrity</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Route <code>params</code> (e.g. <code>/blog/[slug]</code>) identify the <em>resource</em>, not the visitor. Because the content for a given route is identical for everyone, Dinou can run <code>getProps</code> in advance—at build time (SSG) or on first request (ISR)—and safely pre-render and cache the HTML (in static storage, server memory, reverse proxies, or CDNs). In contrast, <code>cookies</code>, <code>headers</code>, and <code>query params</code> belong to a specific HTTP connection. If <code>getProps</code> relied on them, the output could contain private user data, making shared caching impossible and forcing the server to render every request on demand.
+                  </p>
+                </div>
+
+                {/* Grid 2: What triggers Bailout */}
+                <div className="rounded-lg border overflow-hidden bg-card">
+                  <div className="bg-muted/50 px-4 py-3 border-b flex items-center justify-between">
+                    <div className="text-xs font-semibold text-foreground flex items-center gap-2">
+                      <ShieldCheck className="h-4 w-4 text-blue-500" />
+                      <span>The Dynamic Bailout Mechanism: Why It Exists &amp; When It Triggers</span>
+                    </div>
+                    <span className="text-[11px] font-mono text-muted-foreground">Cache Protection</span>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Dinou features an automatic <strong>bailout mechanism</strong> that is essential for cache integrity: it guarantees that personalized or per-request data is never accidentally baked into public static HTML or shared caches. Calling <code>getContext()</code> itself <strong>does NOT</strong> trigger a bailout; the switch to Dynamic SSR happens only when your code actually reads request-specific properties:
+                    </p>
+
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/20">
+                          <TableHead className="w-1/3 text-xs">Property Accessed</TableHead>
+                          <TableHead className="w-1/4 text-xs">Behavior</TableHead>
+                          <TableHead className="text-xs">Why?</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="font-mono text-xs text-rose-600 dark:text-rose-400 font-semibold">
+                            req.cookies
+                          </TableCell>
+                          <TableCell>
+                            <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 px-2 py-0.5 text-[11px] font-medium text-rose-600 dark:text-rose-400">
+                              Bailout to Dynamic
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            Session tokens and user identity vary per request; cannot be cached statically.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-mono text-xs text-rose-600 dark:text-rose-400 font-semibold">
+                            req.headers
+                          </TableCell>
+                          <TableCell>
+                            <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 px-2 py-0.5 text-[11px] font-medium text-rose-600 dark:text-rose-400">
+                              Bailout to Dynamic
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            Request headers (e.g. <code>authorization</code>, <code>user-agent</code>) are unique per connection.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-mono text-xs text-rose-600 dark:text-rose-400 font-semibold">
+                            req.query
+                          </TableCell>
+                          <TableCell>
+                            <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 px-2 py-0.5 text-[11px] font-medium text-rose-600 dark:text-rose-400">
+                              Bailout to Dynamic
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            URL query parameters (<code>?q=...</code>) are unconstrained runtime inputs.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-mono text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                            req.path, req.method
+                          </TableCell>
+                          <TableCell>
+                            <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                              Preserves Static
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            The normalized segment path is deterministic and safe during SSG/ISR generation.
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+
+                {/* Grid 3: Why PPR Cannot Save getProps */}
+                <div className="rounded-lg border bg-amber-500/10 border-amber-500/20 p-4 space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-amber-700 dark:text-amber-300">
+                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                    <span>Why Partial Prerendering (PPR) Cannot Prevent getProps Bailout</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Inside Server Components, Partial Prerendering (PPR) can isolate dynamic accesses inside <code>&lt;Suspense&gt;</code> boundaries while preserving the static shell. However, <strong><code>getProps</code> executes outside React before component rendering begins</strong>. Because <code>getProps</code> is never wrapped by a <code>&lt;Suspense&gt;</code> boundary, reading <code>cookies</code> or <code>query</code> inside <code>getProps</code> forces the entire route to bail out from static generation directly into Dynamic SSR.
+                  </p>
+                </div>
+
+                {/* Practical Architecture: Where to Handle Each Data Type */}
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <div className="text-xs font-bold text-foreground flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-emerald-500" />
+                      <span>The Recommended Pattern: Where Each Type of Data Belongs</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      To keep pages pre-renderable (SSG/ISR) and instant to load, organize your data into its natural layer: route data in <code>getProps</code>, session cookies inside <code>&lt;Suspense&gt;</code>, and query parameters via the universal <code>useSearchParams()</code> hook (in Server Components with <code>&lt;Suspense&gt;</code> or in Client Components):
+                    </p>
+                  </div>
+
+                  <TabbedCodeBlock
+                    tabs={[
+                      {
+                        id: "page_functions",
+                        label: "page_functions.ts (Route)",
+                        language: "typescript",
+                        code: `// src/blog/[slug]/page_functions.ts
+import type { PageFunctions, RouteParams } from "dinou";
+import { db, type Post } from "@/lib/db";
+
+export interface BlogPostData {
+  post: Post;
+}
+
+// 1. Pure route loader: depends solely on params
+// Cached statically for all visitors (SSG / ISR)
+export const getProps: PageFunctions<RouteParams<"/blog/[slug]">, BlogPostData>["getProps"] = async (params) => {
+  const post = await db.getPost(params?.slug);
+  return { post };
+};`,
+                      },
+                      {
+                        id: "page",
+                        label: "page.tsx (Page Shell)",
+                        language: "tsx",
+                        code: `// src/blog/[slug]/page.tsx
+import { Suspense } from "react";
+import type { PageProps } from "dinou";
+import type { BlogPostData } from "./page_functions";
+import { UserSession } from "./user-session";
+import { RelatedPosts } from "./related-posts";
+import { SearchFilter } from "./search-filter";
+
+interface BlogPostProps extends PageProps<"/blog/[slug]">, BlogPostData {}
+
+export default function BlogPostPage({ params, post }: BlogPostProps) {
+  return (
+    <article className="post-container">
+      {/* 1. Instant static shell: delivered immediately from cache */}
+      <header>
+        <span className="text-xs text-muted-foreground">Route: /blog/{params.slug}</span>
+        <h1>{post.title}</h1>
+        {/* Client Component using useSearchParams() for instant input sync */}
+        <SearchFilter />
+      </header>
+
+      <div className="post-body">{post.content}</div>
+
+      {/* 2. Dynamic cookie component streamed via Suspense */}
+      <Suspense fallback={<div className="text-xs text-muted-foreground">Loading session...</div>}>
+        <UserSession />
+      </Suspense>
+
+      {/* 3. Server Component using useSearchParams() streamed via Suspense */}
+      <Suspense fallback={<div className="text-xs text-muted-foreground">Filtering articles...</div>}>
+        <RelatedPosts />
+      </Suspense>
+    </article>
+  );
+}`,
+                      },
+                      {
+                        id: "user_session",
+                        label: "user-session.tsx (Cookies)",
+                        language: "tsx",
+                        code: `// src/blog/[slug]/user-session.tsx (Server Component)
+import { getContext } from "dinou";
+import { auth } from "@/lib/auth";
+
+// Cookie & auth access isolated inside Suspense:
+// Streaming this component prevents getProps from bailing out to Dynamic SSR!
+export async function UserSession() {
+  const { req } = getContext();
+  const sessionToken = req?.cookies?.session;
+  const user = sessionToken ? await auth.verify(sessionToken) : null;
+
+  if (!user) {
+    return <a href="/login" className="text-xs font-semibold">Sign In</a>;
+  }
+
+  return (
+    <aside className="user-badge">
+      <span>Welcome back, <strong>{user.name}</strong>!</span>
+    </aside>
+  );
+}`,
+                      },
+                      {
+                        id: "related_posts",
+                        label: "related-posts.tsx (Server Query)",
+                        language: "tsx",
+                        code: `// src/blog/[slug]/related-posts.tsx (Server Component)
+import { useSearchParams } from "dinou";
+import { db } from "@/lib/db";
+
+// Universal hook in a Server Component:
+// Reads ctx.req.query to fetch filtered data from the DB on the server.
+// Because it reads query, wrap it in <Suspense> in page.tsx so the post shell stays static!
+export async function RelatedPosts() {
+  const searchParams = useSearchParams();
+  const tag = searchParams.get("tag") ?? "featured";
+  const articles = await db.getPostsByTag(tag);
+
+  return (
+    <section className="related-posts">
+      <h3>Articles matching "?tag={tag}"</h3>
+      <ul>
+        {articles.map((item) => (
+          <li key={item.id}>{item.title}</li>
+        ))}
+      </ul>
+    </section>
+  );
+}`,
+                      },
+                      {
+                        id: "search_filter",
+                        label: "search-filter.tsx (Client Query)",
+                        language: "tsx",
+                        code: `// src/blog/[slug]/search-filter.tsx (Client Component)
+"use client";
+
+import { useSearchParams } from "dinou";
+
+// Universal hook in a Client Component:
+// Reads URL params on the browser for reactive input state without contacting the server
+export function SearchFilter() {
+  const searchParams = useSearchParams();
+  const currentTag = searchParams.get("tag") ?? "";
+
+  return (
+    <input
+      type="search"
+      defaultValue={currentTag}
+      placeholder="Filter by tag (?tag=...)..."
+      className="text-xs border rounded px-2 py-1"
+    />
+  );
+}`,
+                      },
+                    ]}
+                  />
+
+                  {/* Key Takeaways */}
+                  <div className="grid gap-2 sm:grid-cols-3 pt-1">
+                    <div className="rounded-lg border bg-muted/20 p-3 space-y-1">
+                      <span className="text-xs font-bold text-foreground">1. Route Data (Params)</span>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        Handled in <code>getProps</code>. Pure and cacheable for all visitors (SSG/ISR).
+                      </p>
+                    </div>
+                    <div className="rounded-lg border bg-muted/20 p-3 space-y-1">
+                      <span className="text-xs font-bold text-foreground">2. Cookies &amp; Headers</span>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        Handled in Server Components inside <code>&lt;Suspense&gt;</code> to stream without bailing out the whole page.
+                      </p>
+                    </div>
+                    <div className="rounded-lg border bg-muted/20 p-3 space-y-1">
+                      <span className="text-xs font-bold text-foreground">3. Universal useSearchParams()</span>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        Works in <strong>Server Components</strong> (streamed with <code>&lt;Suspense&gt;</code>) and in <strong>Client Components</strong> (for instant UI state).
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </section>
 
             {/* 2. getStaticPaths */}
@@ -1038,20 +1457,17 @@ export function getCacheTags(params: { id: string }) {
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <h3>
-                8. TypeScript Reference (<code>RouteSegmentConfig</code>)
+                8. TypeScript Reference (<code>RouteSegmentConfig</code>, <code>PageFunctions</code> &amp; <code>LayoutFunctions</code>)
               </h3>
               <p>
-                Both <code>PageFunctions</code> and <code>LayoutFunctions</code>{" "}
-                export types are governed by <code>RouteSegmentConfig</code> in{" "}
-                <code>dinou</code>:
+                Dinou structures its type system around an <strong>abstract architectural interface</strong> (<code>RouteSegmentConfig</code>) and two <strong>concrete, role-based aliases</strong> (<code>PageFunctions</code> and <code>LayoutFunctions</code>):
               </p>
 
               <CodeBlock
                 language="typescript"
                 containerClassName="w-full overflow-hidden rounded-lg mt-4"
               >
-{`import type { PageFunctions, LayoutFunctions, RouteSegmentConfig } from "dinou";
-
+{`// 1. The underlying abstract base interface (Root Architecture Contract in "dinou")
 export interface RouteSegmentConfig<TParams = any, TProps = any> {
   // Partial Prerendering toggle
   ppr?: boolean | (() => boolean | Promise<boolean>);
@@ -1075,8 +1491,105 @@ export interface RouteSegmentConfig<TParams = any, TProps = any> {
 
   // Incremental Static Generation opt-out
   allowISG?: boolean | (() => boolean | Promise<boolean>);
-}`}
+}
+
+// 2. Concrete semantic aliases for application developers
+export type PageFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TParams, TProps>;
+export type LayoutFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TParams, TProps>;`}
               </CodeBlock>
+
+              {/* Practical Rule Table */}
+              <div className="not-prose my-6 rounded-xl border overflow-hidden">
+                <div className="bg-muted/60 p-4 border-b">
+                  <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                    Practical Rule: Which Type Should You Import &amp; Use?
+                  </h4>
+                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/20">
+                      <TableHead className="w-1/4">File / Target</TableHead>
+                      <TableHead className="w-1/3">Type to Import &amp; Use</TableHead>
+                      <TableHead>Role &amp; Responsibility</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-mono text-xs font-semibold text-blue-600 dark:text-blue-400">
+                        page_functions.ts
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">
+                        <code>import type &#123; PageFunctions &#125; from &quot;dinou&quot;</code>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        Defines server hooks, static paths, and data loading directly for the route&apos;s <strong>page component</strong> (<code>page.tsx</code>).
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-mono text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                        layout_functions.ts
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">
+                        <code>import type &#123; LayoutFunctions &#125; from &quot;dinou&quot;</code>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        Defines server hooks and independent caching/data loaders for the segment&apos;s <strong>layout shell</strong> (<code>layout.tsx</code>).
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="font-mono text-xs font-semibold text-purple-600 dark:text-purple-400">
+                        Framework Utils &amp; Plugins
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">
+                        <code>import type &#123; RouteSegmentConfig &#125; from &quot;dinou&quot;</code>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        Use the abstract base contract only when writing generic utilities, middlewares, or plugins that manipulate arbitrary route segments without distinguishing between pages and layouts.
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Why does Dinou separate them */}
+              <div className="not-prose my-6 grid gap-4 md:grid-cols-3">
+                <Card className="border-blue-500/20 bg-blue-50/20 dark:bg-blue-950/10">
+                  <CardHeader className="pb-2">
+                    <div className="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+                      <FileCode className="h-4 w-4 text-blue-500" />
+                      1. Semantic Intent
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
+                    Seeing <code>import type &#123; PageFunctions &#125;</code> in a page file immediately clarifies intent and self-documents that the functions belong to the page tier.
+                  </CardContent>
+                </Card>
+
+                <Card className="border-indigo-500/20 bg-indigo-50/20 dark:bg-indigo-950/10">
+                  <CardHeader className="pb-2">
+                    <div className="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+                      <Split className="h-4 w-4 text-indigo-500" />
+                      2. Mental Separation
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
+                    Reinforces Dinou&apos;s horizontal segment isolation: layouts have independent cacheLifetimes and props from child pages.
+                  </CardContent>
+                </Card>
+
+                <Card className="border-emerald-500/20 bg-emerald-50/20 dark:bg-emerald-950/10">
+                  <CardHeader className="pb-2">
+                    <div className="text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                      <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                      3. Future Extensibility
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
+                    If future Dinou versions introduce layout-only properties (e.g. scroll boundaries) or page-only hooks, your application code remains completely decoupled and non-breaking.
+                  </CardContent>
+                </Card>
+              </div>
             </section>
 
             {/* 9. End-to-End Type-Safe Example */}
@@ -1188,17 +1701,99 @@ export const getCacheTags: PageFunctions<BlogParams>["getCacheTags"] = (params) 
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// src/blog/[slug]/page.tsx
+import type { PageProps } from "dinou";
 import type { BlogPageProps } from "./page_functions";
 
-export default function BlogPostPage({ post, views }: BlogPageProps) {
+// Extend PageProps to receive both route params and loader data with full type safety
+interface BlogPostPageProps extends PageProps<"/blog/[slug]">, BlogPageProps {}
+
+export default function BlogPostPage({ params, post, views }: BlogPostPageProps) {
   return (
     <article className="max-w-2xl mx-auto py-8">
+      <span className="text-xs text-muted-foreground font-mono">/blog/{params.slug}</span>
       <h1 className="text-3xl font-bold">{post.title}</h1>
       <div className="text-sm text-muted-foreground my-2">
         By {post.author} • {views.toLocaleString()} views
       </div>
       <div className="prose mt-6">{post.content}</div>
     </article>
+  );
+}`}
+                </CodeBlock>
+
+                <p className="font-semibold text-sm text-muted-foreground mt-8">
+                  3. Defining <code>src/blog/layout_functions.ts</code>
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`// src/blog/layout_functions.ts
+import type { LayoutFunctions } from "dinou";
+import { db } from "@/lib/db";
+
+// 1. Define layout data contract
+export interface BlogCategory {
+  id: string;
+  name: string;
+  count: number;
+}
+
+export interface BlogLayoutData {
+  categories: BlogCategory[];
+  featuredSlug: string;
+}
+
+// 2. Dedicated layout loader typed via LayoutFunctions
+export const getProps: LayoutFunctions<any, BlogLayoutData>["getProps"] = async () => {
+  const categories = await db.categories.findMany();
+  const featured = await db.posts.findFirst({ where: { featured: true } });
+
+  // Injected directly as props into layout.tsx
+  return {
+    categories,
+    featuredSlug: featured?.slug ?? "welcome",
+  };
+};
+
+// 3. Segment-level caching strategy for the layout shell
+export const revalidate: LayoutFunctions["revalidate"] = 300; // Layout revalidates every 5 mins
+export const ppr: LayoutFunctions["ppr"] = true;`}
+                </CodeBlock>
+
+                <p className="font-semibold text-sm text-muted-foreground mt-6">
+                  4. Consuming Props in <code>src/blog/layout.tsx</code>
+                </p>
+                <CodeBlock
+                  language="tsx"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`// src/blog/layout.tsx
+import type { LayoutProps } from "dinou";
+import type { BlogLayoutData } from "./layout_functions";
+
+// Extend LayoutProps to receive children, segment params, and layout loader data
+interface BlogLayoutComponentProps extends LayoutProps, BlogLayoutData {}
+
+export default function BlogLayout({
+  children,
+  categories,
+  featuredSlug,
+}: BlogLayoutComponentProps) {
+  return (
+    <div className="blog-container">
+      <aside className="blog-sidebar">
+        <h3>Categories</h3>
+        <ul>
+          {categories.map((c) => (
+            <li key={c.id}>{c.name} ({c.count})</li>
+          ))}
+        </ul>
+      </aside>
+      <main className="blog-content">
+        {children}
+      </main>
+    </div>
   );
 }`}
                 </CodeBlock>
@@ -1210,11 +1805,13 @@ export default function BlogPostPage({ post, views }: BlogPageProps) {
                   <AlertTitle>Alternative Object Destructuring Pattern</AlertTitle>
                   <AlertDescription>
                     You can also declare a single config object typed with{" "}
-                    <code>PageFunctions&lt;BlogParams, BlogPageProps&gt;</code> and
+                    <code>PageFunctions&lt;BlogParams, BlogPageProps&gt;</code> (for pages) or{" "}
+                    <code>LayoutFunctions&lt;any, BlogLayoutData&gt;</code> (for layouts) and
                     export its properties directly:
-                    <div className="mt-2">
+                    <div className="mt-2 space-y-3">
                       <CodeBlock language="typescript" hideHeader>
-{`const config: PageFunctions<BlogParams, BlogPageProps> = {
+{`// 1. Page Config Object in src/blog/[slug]/page_functions.ts
+const pageConfig: PageFunctions<BlogParams, BlogPageProps> = {
   ppr: true,
   revalidate: 60,
   getStaticPaths: ["welcome", "announcement"],
@@ -1226,7 +1823,19 @@ export default function BlogPostPage({ post, views }: BlogPageProps) {
   getCacheTags: (params) => ["blog", \`post-\${params?.slug}\`],
 };
 
-export const { ppr, revalidate, getStaticPaths, getProps, validateParams, getCacheTags } = config;`}
+export const { ppr, revalidate, getStaticPaths, getProps, validateParams, getCacheTags } = pageConfig;
+
+// 2. Layout Config Object in src/blog/layout_functions.ts
+const layoutConfig: LayoutFunctions<any, BlogLayoutData> = {
+  revalidate: 300,
+  ppr: true,
+  getProps: async () => ({
+    categories: await fetchCategories(),
+    featuredSlug: "welcome",
+  }),
+};
+
+export const { revalidate: layoutRevalidate, ppr: layoutPpr, getProps: layoutGetProps } = layoutConfig;`}
                       </CodeBlock>
                     </div>
                   </AlertDescription>
