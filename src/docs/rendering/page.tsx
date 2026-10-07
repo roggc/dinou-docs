@@ -198,8 +198,7 @@ export default function Page() {
                 1. Static Site Generation (SSG) &amp; Bailout
               </h3>
               <p>
-                Pure static rendering pre-generates HTML files during the build
-                or server startup. Static pages achieve the fastest possible Time
+                Pure static rendering pre-generates HTML files during the build phase (<code>dinou build</code>). Production server startup is instantaneous, and static pages achieve the fastest possible Time
                 to First Byte (TTFB) and can be cached by edge CDNs globally.
               </p>
 

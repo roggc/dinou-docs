@@ -89,48 +89,38 @@ const tocItems = [
     level: 3,
   },
   {
-    id: "normalization-guarantee",
-    title: "2.8. Normalization Guarantee",
-    level: 3,
-  },
-  {
     id: "async-support",
-    title: "2.9. Async Support (CMS & DB)",
+    title: "2.8. Async Support (CMS & DB)",
     level: 3,
-  },
-  {
-    id: "revalidate",
-    title: "3. revalidate (ISR & Dynamic SSR Escape)",
-    level: 2,
-  },
-  {
-    id: "ppr",
-    title: "4. ppr (Partial Prerendering)",
-    level: 2,
   },
   {
     id: "validateparams",
-    title: "5. validateParams (Route Parameter Validation)",
+    title: "3. validateParams (Route Parameter Validation)",
     level: 2,
   },
   {
     id: "allowisg",
-    title: "6. allowISG (Incremental Static Opt-Out)",
+    title: "4. allowISG (Incremental Static Opt-Out)",
+    level: 2,
+  },
+  {
+    id: "revalidate",
+    title: "5. revalidate (ISR & Dynamic SSR Escape)",
     level: 2,
   },
   {
     id: "getcachetags",
-    title: "7. getCacheTags (Cache Tagging)",
+    title: "6. getCacheTags (Cache Tagging)",
     level: 2,
   },
   {
-    id: "typescript-reference",
-    title: "8. TypeScript Reference (RouteSegmentConfig)",
+    id: "ppr",
+    title: "7. ppr (Partial Prerendering)",
     level: 2,
   },
   {
     id: "type-safe-example",
-    title: "9. End-to-End Type-Safe Example",
+    title: "8. End-to-End Type-Safe Example",
     level: 2,
   },
 ];
@@ -306,6 +296,45 @@ export type LayoutFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TP
                       </TableRow>
                     </TableBody>
                   </Table>
+                </div>
+
+                {/* 3 Architectural Reasons for Separation */}
+                <div className="pt-2 grid gap-4 md:grid-cols-3">
+                  <Card className="border-blue-500/20 bg-background/60">
+                    <CardHeader className="pb-2">
+                      <div className="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+                        <FileCode className="h-4 w-4 text-blue-500" />
+                        1. Semantic Intent
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground leading-relaxed">
+                      Seeing <code>import type &#123; PageFunctions &#125;</code> in a page file immediately clarifies intent and self-documents that the functions belong to the page tier.
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-indigo-500/20 bg-background/60">
+                    <CardHeader className="pb-2">
+                      <div className="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+                        <Split className="h-4 w-4 text-indigo-500" />
+                        2. Mental Separation
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground leading-relaxed">
+                      Reinforces Dinou&apos;s horizontal segment isolation: layouts have independent cacheLifetimes and props from child pages.
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-emerald-500/20 bg-background/60">
+                    <CardHeader className="pb-2">
+                      <div className="text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                        <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                        3. Future Extensibility
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground leading-relaxed">
+                      If future Dinou versions introduce layout-only properties (e.g. scroll boundaries) or page-only hooks, your application code remains completely decoupled and non-breaking.
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
             </section>
@@ -742,7 +771,7 @@ export function SearchFilter() {
               </h3>
               <p>
                 Defines which dynamic parameter combinations should be
-                pre-rendered at build/server startup time (SSG). By default, any dynamic path
+                pre-rendered at build time (SSG). By default, any dynamic path
                 not returned is generated on-demand when first requested and <strong>cached
                 statically for all subsequent visitors</strong> (Incremental Static Generation / ISG),
                 unless disabled via <code>allowISG: false</code> (which strictly restricts routes to the pre-rendered list and returns <code>404</code> for any other path).
@@ -873,6 +902,9 @@ export const getStaticPaths: PageFunctions<RouteParams<"/blog/[slug]">]["getStat
                       <tr>
                         <td className="p-4 font-mono text-xs">
                           <strong>Optional Catch-all</strong> (<code>[[...slug]]</code>)
+                          <span className="block text-[11px] text-muted-foreground font-sans mt-0.5">
+                            * Use <code>[]</code> (empty array) to pre-render the root path
+                          </span>
                         </td>
                         <td className="p-4 font-mono text-xs">
                           <code>(string[] | undefined)[]</code>
@@ -935,42 +967,119 @@ export const getStaticPaths: PageFunctions<RouteParams<"/blog/[slug]">]["getStat
                 </div>
               </section>
 
-              {/* 2.3 Simple Routes */}
+              {/* 2.3 Simple Dynamic Routes */}
               <section id="simple-routes" className="mt-8 scroll-mt-20">
                 <h4>2.3. Simple Dynamic Routes</h4>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/blog/[id]/page_functions.ts
+                <p>
+                  Simple dynamic routes match a single URL segment. Dinou supports both required segments (<code>[id]</code>) and optional segments (<code>[[category]]</code>):
+                </p>
+
+                <div className="not-prose my-4">
+                  <TabbedCodeBlock
+                    tabs={[
+                      {
+                        id: "standard-simple",
+                        label: "Standard [id]",
+                        language: "typescript",
+                        code: `// src/blog/[id]/page_functions.ts
 import type { PageFunctions, RouteParams } from "dinou";
 
-// Best Practice: Type-safe constant array
+// Best Practice: Type-safe constant array (string[] or number[])
 export const getStaticPaths: PageFunctions<RouteParams<"/blog/[id]">]["getStaticPaths"] = [
   "1",
   "2",
   "3",
 ];
-// Generates /blog/1, /blog/2, /blog/3`}
-                </CodeBlock>
+// Generates /blog/1, /blog/2, /blog/3`,
+                      },
+                      {
+                        id: "optional-simple",
+                        label: "Optional [[category]]",
+                        language: "typescript",
+                        code: `// src/shop/[[category]]/page_functions.ts
+import type { PageFunctions, RouteParams } from "dinou";
+
+// Pass undefined to pre-render the base route without the segment
+export const getStaticPaths: PageFunctions<
+  RouteParams<"/shop/[[category]]">
+>["getStaticPaths"] = [
+  undefined,     // Generates /shop (root path, params.category will be undefined)
+  "electronics", // Generates /shop/electronics
+  "clothing",    // Generates /shop/clothing
+];`,
+                      },
+                    ]}
+                  />
+                </div>
+
+                <Alert className="not-prose mt-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Optional Simple: Root Path &amp; ES6 Default Values</AlertTitle>
+                  <AlertDescription className="space-y-1.5 text-xs">
+                    <div>
+                      <strong>What to return in <code>getStaticPaths</code>:</strong> Return <code>undefined</code> to pre-render the base route without the optional segment (e.g. <code>/shop</code>).
+                    </div>
+                    <div>
+                      <strong>What <code>page.tsx</code> receives:</strong> When visiting the root route, <code>params.category</code> is strictly <code>undefined</code> (never an empty string <code>&quot;&quot;</code> or <code>null</code>). This allows native JavaScript ES6 default destructuring to kick in seamlessly: <code>{`export default function Page({ params: { category = "all" } }: PageProps)`}</code>.
+                    </div>
+                  </AlertDescription>
+                </Alert>
               </section>
 
               {/* 2.4 Catch-all Routes */}
               <section id="catch-all-routes" className="mt-8 scroll-mt-20">
                 <h4>2.4. Catch-all Routes</h4>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/docs/[...slug]/page_functions.ts
+                <p>
+                  Catch-all routes match multiple dynamic path segments. Dinou supports both standard catch-alls (<code>[...slug]</code>) and optional catch-alls (<code>[[...slug]]</code>):
+                </p>
+
+                <div className="not-prose my-4">
+                  <TabbedCodeBlock
+                    tabs={[
+                      {
+                        id: "standard-catchall",
+                        label: "Standard [...slug]",
+                        language: "typescript",
+                        code: `// src/docs/[...slug]/page_functions.ts
 import type { PageFunctions, RouteParams } from "dinou";
 
 // Best Practice: Type-safe catch-all segments (string[][])
+// Each entry represents an array of path segments
 export const getStaticPaths: PageFunctions<RouteParams<"/docs/[...slug]">]["getStaticPaths"] = [
   ["intro"],             // Generates /docs/intro
   ["api", "v1", "auth"], // Generates /docs/api/v1/auth
-];`}
-                </CodeBlock>
+];`,
+                      },
+                      {
+                        id: "optional-catchall",
+                        label: "Optional [[...slug]]",
+                        language: "typescript",
+                        code: `// src/docs/[[...slug]]/page_functions.ts
+import type { PageFunctions, RouteParams } from "dinou";
+
+// Pass an empty array [] to pre-render the root route (/docs)
+export const getStaticPaths: PageFunctions<RouteParams<"/docs/[[...slug]]">>["getStaticPaths"] = [
+  [],                    // Generates /docs (root path)
+  ["intro"],             // Generates /docs/intro
+  ["api", "v1", "auth"], // Generates /docs/api/v1/auth
+];`,
+                      },
+                    ]}
+                  />
+                </div>
+
+                <Alert className="not-prose mt-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Optional Catch-all: Root Path &amp; Param Guarantee</AlertTitle>
+                  <AlertDescription className="space-y-1.5 text-xs">
+                    <div>
+                      <strong>What to return in <code>getStaticPaths</code>:</strong> To pre-render the root page without any segments (e.g. <code>/docs</code>), return an empty array <code>[]</code> (or <code>undefined</code>). <em>Never</em> return <code>[undefined]</code> or <code>[[undefined]]</code>.
+                    </div>
+                    <div>
+                      <strong>What <code>page.tsx</code> receives:</strong> In Dinou, <code>params.slug</code> is <strong>guaranteed to always be an array</strong> (<code>string[]</code>). For the root page, it receives an empty array <code>[]</code> (length 0). It is <strong>never</strong> <code>undefined</code>, <strong>never</strong> <code>[undefined]</code>, and <strong>never</strong> a bare string. You can safely call <code>params.slug.join(&quot;/&quot;)</code> or <code>params.slug.length</code> without defensive <code>Array.isArray()</code> checks.
+                    </div>
+                  </AlertDescription>
+                </Alert>
               </section>
 
               {/* 2.5 Route Propagation */}
@@ -1027,16 +1136,27 @@ export const getStaticPaths: PageFunctions<RouteParams<"/docs/[...slug]">]["getS
               >
                 <h4>2.6. Nested Pages &amp; The &quot;Chain of Responsibility&quot;</h4>
                 <p>
-                  When nesting routes,{" "}
-                  <strong>dependency flows strictly downwards</strong>. If an
-                  intermediate segment contains a <code>page.tsx</code>, it acts
-                  as a mandatory gatekeeper in the static generation chain.
+                  When nesting routes where <strong>both the parent and the child segment have their own <code>page.tsx</code></strong>, static generation follows a strict top-down &quot;chain of responsibility&quot;:
                 </p>
-                <p>
-                  If a parent segment returns an empty array,{" "}
-                  <strong>the generator stops at that level</strong>. It will not
-                  reach child sub-pages, even if those child pages define their
-                  own valid <code>getStaticPaths</code>.
+
+                {/* Route Tree Diagram */}
+                <div className="border rounded-lg p-4 bg-muted/30 not-prose my-4 space-y-2">
+                  <div className="flex items-center gap-2 font-semibold text-xs text-foreground">
+                    <FolderTree className="h-4 w-4 text-primary" />
+                    <span>Example Project Structure: <code>/shop/[category]/[id]</code></span>
+                  </div>
+                  <div className="font-mono text-xs text-muted-foreground space-y-1 pl-6 border-l-2 border-border ml-2">
+                    <div>📁 <code>src/shop/[category]/</code></div>
+                    <div className="pl-4">├── 📄 <code>page.tsx</code> <span className="text-foreground font-sans text-[11px]">(Parent page: <code>/shop/[category]</code>)</span></div>
+                    <div className="pl-4">├── ⚙️ <code>page_functions.ts</code> <span className="text-foreground font-sans text-[11px]">(Parent gatekeeper)</span></div>
+                    <div className="pl-4">└── 📁 <code>[id]/</code></div>
+                    <div className="pl-8">├── 📄 <code>page.tsx</code> <span className="text-foreground font-sans text-[11px]">(Child page: <code>/shop/[category]/[id]</code>)</span></div>
+                    <div className="pl-8">└── ⚙️ <code>page_functions.ts</code> <span className="text-foreground font-sans text-[11px]">(Child loader)</span></div>
+                  </div>
+                </div>
+
+                <p className="text-sm text-muted-foreground">
+                  Because the parent folder contains a <code>page.tsx</code>, Dinou must generate valid parent pages first before it can traverse down to the child level. The parent acts as a <strong>mandatory gatekeeper</strong>:
                 </p>
 
                 <div className="flex flex-col md:grid md:grid-cols-2 md:gap-6 not-prose my-6">
@@ -1049,22 +1169,19 @@ export const getStaticPaths: PageFunctions<RouteParams<"/docs/[...slug]">]["getS
                           <span>❌ Broken Chain</span>
                         </div>
                       </CardHeader>
-                      <CardContent className="text-sm">
+                      <CardContent className="text-sm space-y-2">
                         <p>
-                          If <code>src/case3/[slug]/page_functions.ts</code>{" "}
-                          returns <code>[]</code>:
+                          If <code>src/shop/[category]/page_functions.ts</code> returns an empty array <code>[]</code>:
                         </p>
-                        <ol className="list-decimal pl-4 mt-2 space-y-1">
+                        <ol className="list-decimal pl-4 space-y-1 text-xs text-muted-foreground">
                           <li>
-                            Dinou attempts to build <code>/case3/[slug]</code>.
+                            Dinou attempts to build parent category routes (<code>/shop/[category]</code>).
                           </li>
                           <li>
-                            No paths are returned; no parent directory entries
-                            exist.
+                            Since <code>[]</code> is returned, no parent category folders or HTML files are created.
                           </li>
                           <li>
-                            <strong>Result:</strong> The build process never
-                            attempts to generate child <code>[id]</code>.
+                            <strong>Result:</strong> Dinou halts at the parent level. It never invokes the child <code>[id]/page_functions.ts</code>, so no child product pages are generated.
                           </li>
                         </ol>
                       </CardContent>
@@ -1080,10 +1197,9 @@ export const getStaticPaths: PageFunctions<RouteParams<"/docs/[...slug]">]["getS
                           <span>✅ Functional Chain</span>
                         </div>
                       </CardHeader>
-                      <CardContent className="text-sm">
+                      <CardContent className="text-sm space-y-2">
                         <p>
-                          The parent resolves its own level first, enabling
-                          children to run:
+                          The parent resolves its own categories first, unlocking the child level:
                         </p>
                         <div className="mt-2">
                           <CodeBlock
@@ -1091,24 +1207,25 @@ export const getStaticPaths: PageFunctions<RouteParams<"/docs/[...slug]">]["getS
                             containerClassName="w-full overflow-hidden rounded-lg text-xs"
                             hideHeader
                           >
-{`// src/case3/[slug]/page_functions.ts
+{`// 1. Parent: src/shop/[category]/page_functions.ts
 import type { PageFunctions, RouteParams } from "dinou";
 
-export const getStaticPaths: PageFunctions<RouteParams<"/case3/[slug]">]["getStaticPaths"] = [
-  "foo",
-  "bar",
+export const getStaticPaths: PageFunctions<RouteParams<"/shop/[category]">]["getStaticPaths"] = [
+  "shoes",
+  "shirts",
 ];
 
-// src/case3/[slug]/[id]/page_functions.ts
+// 2. Child: src/shop/[category]/[id]/page_functions.ts
 import type { PageFunctions, RouteParams } from "dinou";
 
-export const getStaticPaths: PageFunctions<RouteParams<"/case3/[slug]/[id]">]["getStaticPaths"] = [
+export const getStaticPaths: PageFunctions<RouteParams<"/shop/[category]/[id]">]["getStaticPaths"] = [
   "100",
   "200",
 ];
-// Generates:
-// /case3/foo/100, /case3/foo/200
-// /case3/bar/100, /case3/bar/200`}
+
+// Automatically generates 4 static pages:
+// /shop/shoes/100, /shop/shoes/200
+// /shop/shirts/100, /shop/shirts/200`}
                           </CodeBlock>
                         </div>
                       </CardContent>
@@ -1120,8 +1237,7 @@ export const getStaticPaths: PageFunctions<RouteParams<"/case3/[slug]/[id]">]["g
                   <ArrowRight className="h-4 w-4" />
                   <AlertTitle>Rule of Thumb</AlertTitle>
                   <AlertDescription>
-                    Every intermediate <code>page.tsx</code> in the hierarchy is
-                    responsible for opening the door to its nested descendants.
+                    Every intermediate dynamic segment with its own <code>page.tsx</code> is responsible for opening the door to its descendants. (If an intermediate segment does <em>not</em> have a <code>page.tsx</code>, see Section 2.7 for pass-through segments).
                   </AlertDescription>
                 </Alert>
               </section>
@@ -1134,88 +1250,86 @@ export const getStaticPaths: PageFunctions<RouteParams<"/case3/[slug]/[id]">]["g
                 <h4>2.7. Nested &amp; Pass-through Segments</h4>
                 <p>
                   When you have multiple dynamic segments in a path{" "}
-                  <strong>without intermediate pages</strong>, return an{" "}
+                  <strong>without intermediate pages</strong> (the intermediate folders do not have a <code>page.tsx</code>), the leaf segment returns an{" "}
                   <strong>Object</strong> mapping all parameter names at once:
                 </p>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// Structure: src/shop/[category]/[...specs]/[[brand]]/page_functions.ts
-// ([category] and [...specs] do NOT have their own page.tsx)
+
+                <div className="not-prose my-4">
+                  <TabbedCodeBlock
+                    tabs={[
+                      {
+                        id: "passthrough-catchall",
+                        label: "1. Pass-Through with Catch-all",
+                        language: "typescript",
+                        code: `// Structure: src/shop/[category]/[brand]/[...specs]/page_functions.ts
+// ([category] and [brand] do NOT have their own page.tsx; [...specs] is terminal)
 import type { PageFunctions, RouteParams } from "dinou";
 
 export const getStaticPaths: PageFunctions<
-  RouteParams<"/shop/[category]/[...specs]/[[brand]]">
+  RouteParams<"/shop/[category]/[brand]/[...specs]">
 >["getStaticPaths"] = [
   {
     category: "electronics",
-    specs: ["m3", "16gb"],
     brand: "apple",
+    specs: ["m3", "16gb"],
+    // → Pre-renders: /shop/electronics/apple/m3/16gb
   },
   {
     category: "clothing",
-    specs: ["cotton", "white"],
-    brand: undefined, // Valid: optional segment at the end of the route (No-Gap Rule)
+    brand: "nike",
+    specs: ["running", "shoes", "air"],
+    // → Pre-renders: /shop/clothing/nike/running/shoes/air
   },
-];`}
-                </CodeBlock>
-                <Alert className="not-prose mt-4">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>No-Gap Rule</AlertTitle>
-                  <AlertDescription>
-                    You can use <code>undefined</code> for an optional segment{" "}
-                    <strong>
-                      only if all subsequent segments are also <code>undefined</code>
-                    </strong>
-                    . You cannot leave a gap (an undefined segment followed by a
-                    defined one).
-                  </AlertDescription>
-                </Alert>
-              </section>
+];`,
+                      },
+                      {
+                        id: "passthrough-optional",
+                        label: "2. Pass-Through with Optional Segment",
+                        language: "typescript",
+                        code: `// Structure: src/shop/[category]/[id]/[[format]]/page_functions.ts
+// ([category] and [id] do NOT have their own page.tsx; [[format]] is terminal)
+import type { PageFunctions, RouteParams } from "dinou";
 
-              {/* 2.8 Normalization Guarantee */}
-              <section
-                id="normalization-guarantee"
-                className="mt-8 scroll-mt-20"
-              >
-                <h4>2.8. Normalization Guarantee</h4>
-                <p>
-                  Dinou guarantees that <code>params</code> shapes are 100%
-                  consistent between build-time SSG and request-time SSR:
-                </p>
-                <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center gap-2 font-semibold">
-                        <Cpu className="h-5 w-5 text-blue-500" />
-                        <span>Catch-all Segments</span>
+export const getStaticPaths: PageFunctions<
+  RouteParams<"/shop/[category]/[id]/[[format]]">
+>["getStaticPaths"] = [
+  {
+    category: "electronics",
+    id: "macbook-pro",
+    format: "json",
+    // → Pre-renders: /shop/electronics/macbook-pro/json
+  },
+  {
+    category: "clothing",
+    id: "hoodie",
+    format: undefined, // Valid: trailing optional segment without trailing gap
+    // → Pre-renders: /shop/clothing/hoodie
+  },
+];`,
+                      },
+                    ]}
+                  />
+                </div>
+
+                <div className="space-y-3 mt-4">
+                  <Alert className="not-prose">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Terminal Catch-all &amp; No-Gap Rules</AlertTitle>
+                    <AlertDescription className="space-y-1 text-xs">
+                      <div>
+                        <strong>1. Catch-all must be terminal:</strong> A catch-all segment (<code>[...slug]</code>) greedily absorbs all remaining path segments to the end of the URL, so it must always be the final folder of a route.
                       </div>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      Always normalized to an <code>Array</code> (e.g.,{" "}
-                      <code>undefined</code> becomes <code>[]</code>,{" "}
-                      <code>&quot;val&quot;</code> becomes{" "}
-                      <code>[&quot;val&quot;]</code>).
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center gap-2 font-semibold">
-                        <Settings className="h-5 w-5 text-purple-500" />
-                        <span>Optional Single Segments</span>
+                      <div>
+                        <strong>2. No-Gap Rule for optionals:</strong> An optional segment (<code>[[format]]</code>) can be set to <code>undefined</code> <strong>only if all subsequent segments are also <code>undefined</code></strong>. You cannot have an undefined segment followed by a defined one.
                       </div>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      Consistently remain <code>undefined</code> if omitted.
-                    </CardContent>
-                  </Card>
+                    </AlertDescription>
+                  </Alert>
                 </div>
               </section>
 
-              {/* 2.9 Async Support */}
+              {/* 2.8 Async Support */}
               <section id="async-support" className="mt-8 scroll-mt-20">
-                <h4>2.9. Async Support (CMS &amp; DB)</h4>
+                <h4>2.8. Async Support (CMS &amp; DB)</h4>
                 <p>
                   <code>getStaticPaths</code> can be an <code>async</code>{" "}
                   function, allowing you to query external headless CMSs,
@@ -1242,11 +1356,182 @@ export const getStaticPaths: PageFunctions<RouteParams<"/products/[id]">]["getSt
               </section>
             </section>
 
-            {/* 3. revalidate */}
+            {/* 3. validateParams */}
+            <section
+              id="validateparams"
+              className="mt-12 pt-8 border-t scroll-mt-20"
+            >
+              <h3>
+                3. <code>validateParams</code> (Route Parameter Validation)
+              </h3>
+              <p>
+                Validates dynamic parameters (such as <code>[id]</code> or{" "}
+                <code>[...slug]</code>) on the server prior to rendering. If{" "}
+                <code>validateParams</code> returns <code>false</code> (or a
+                falsy value), Dinou immediately terminates request processing and
+                issues a <strong>404 Not Found</strong> response.
+              </p>
+
+              <div className="border rounded-lg p-4 bg-card not-prose my-4">
+                <div className="flex items-center gap-2 font-semibold mb-2">
+                  <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <span>Function Signature</span>
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                  <li>
+                    <strong>Arguments:</strong> <code>params?: TParams</code>{" "}
+                    (The normalized route parameters object)
+                  </li>
+                  <li>
+                    <strong>Returns:</strong> <code>boolean | Promise&lt;boolean&gt;</code>{" "}
+                    (Return <code>false</code> to abort rendering and return 404)
+                  </li>
+                </ul>
+              </div>
+
+              <CodeBlock
+                language="typescript"
+                containerClassName="w-full overflow-hidden rounded-lg mt-4"
+              >
+{`// src/posts/[id]/page_functions.ts
+import type { PageFunctions, RouteParams } from "dinou";
+
+// Best Practice: Type-safe route parameter validation
+export const validateParams: PageFunctions<
+  RouteParams<"/posts/[id]">
+>["validateParams"] = (params) => {
+  // Only allow positive integer IDs; reject malformed requests with 404
+  return typeof params?.id === "string" && /^\\d+$/.test(params.id);
+};`}
+              </CodeBlock>
+
+              <div className="border rounded-lg p-5 bg-card not-prose my-6 space-y-4">
+                <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
+                  <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                  <span>Universal Gatekeeper: Authority Across All Rendering Modes</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  <code>validateParams</code> is the <strong>first line of defense</strong> executed by the Dinou server engine on every incoming request. It has ultimate veto power regardless of whether the route is pure static (SSG), on-demand (ISG), or dynamic (SSR):
+                </p>
+
+                <div className="grid gap-3 sm:grid-cols-3 text-xs">
+                  <div className="p-3 rounded-lg border bg-muted/40 space-y-1.5">
+                    <span className="font-semibold text-blue-600 dark:text-blue-400 block">
+                      1. With ISG (allowISG: true)
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Rejects malformed or invalid IDs <strong>before</strong> on-demand generation starts. Prevents wasteful database queries and stops bots from polluting disk/KV cache with junk pages.
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-lg border bg-muted/40 space-y-1.5">
+                    <span className="font-semibold text-amber-600 dark:text-amber-400 block">
+                      2. With Strict SSG (allowISG: false)
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Ultimate veto: even if a static HTML file was pre-rendered by <code>getStaticPaths</code> at build time, returning <code>false</code> immediately blocks delivery with 404, preventing obsolete or revoked pages from being served.
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-lg border bg-muted/40 space-y-1.5">
+                    <span className="font-semibold text-purple-600 dark:text-purple-400 block">
+                      3. With Dynamic SSR (revalidate &lt; 1)
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Protects your live server from malicious parameter inputs. Rendering halts and returns 404 <strong>before</strong> <code>getProps</code> or your page component runs.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 4. allowISG */}
+            <section id="allowisg" className="mt-12 pt-8 border-t scroll-mt-20">
+              <h3>
+                4. <code>allowISG</code> (Incremental Static Opt-Out)
+              </h3>
+              <p>
+                Controls whether dynamic paths that were not pre-rendered at
+                build time (via <code>getStaticPaths</code> during <code>dinou build</code>) are allowed to be
+                generated on-demand on the first incoming user request. In Dinou v7, pre-rendering happens strictly during the build phase, ensuring production server startup is instantaneous.
+              </p>
+
+              <div className="border rounded-lg p-4 bg-card not-prose my-4">
+                <div className="flex items-center gap-2 font-semibold mb-2">
+                  <Settings className="h-5 w-5 text-blue-500" />
+                  <span>Opt-Out Behavior</span>
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                  <li>
+                    <strong>Default:</strong> <code>true</code>. Any valid path
+                    not pre-generated at build time is generated on-demand and
+                    cached.
+                  </li>
+                  <li>
+                    <strong>Strict SSG (false):</strong> Returning <code>false</code>{" "}
+                    disables on-demand generation. Any request to a path not
+                    included in <code>getStaticPaths</code> returns 404 immediately.
+                  </li>
+                  <li>
+                    <strong>Async Kill-Switch:</strong> Returning a <code>Promise&lt;boolean&gt;</code> dynamically evaluates runtime flags or system load before permitting on-demand generation.
+                  </li>
+                </ul>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2 not-prose my-4">
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400">
+                      <CheckCircle2 className="h-5 w-5" />
+                      <span>Static Boolean (Strict SSG)</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-sm space-y-2">
+                    <p className="text-muted-foreground">
+                      Disables on-demand generation permanently. Any path not returned by <code>getStaticPaths</code> returns 404 immediately:
+                    </p>
+                    <CodeBlock language="typescript" hideHeader>
+{`// src/blog/[slug]/page_functions.ts
+import type { PageFunctions } from "dinou";
+
+// Strictly serve build-time pre-rendered paths
+export const allowISG: PageFunctions["allowISG"] = false;`}
+                    </CodeBlock>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400">
+                      <Zap className="h-5 w-5" />
+                      <span>Async Function (Dynamic Kill-Switch)</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-sm space-y-2">
+                    <p className="text-muted-foreground">
+                      Dynamically toggles ISG via remote config or feature flags (e.g. Redis, LaunchDarkly) to protect upstream databases:
+                    </p>
+                    <CodeBlock language="typescript" hideHeader>
+{`// src/blog/[slug]/page_functions.ts
+import type { PageFunctions } from "dinou";
+import { getFeatureFlag } from "@/lib/flags";
+
+// Protect origin database during maintenance or traffic spikes
+export const allowISG: PageFunctions["allowISG"] = async () => {
+  const isgAllowed = await getFeatureFlag("allow_ondemand_rendering");
+  return isgAllowed;
+};`}
+                    </CodeBlock>
+                  </CardContent>
+                </Card>
+              </div>
+            </section>
+
+            {/* 5. revalidate */}
             <section id="revalidate" className="mt-12 pt-8 border-t scroll-mt-20">
               <div className="flex items-center gap-3">
                 <h3 className="m-0">
-                  3. <code>revalidate</code> (ISR &amp; Dynamic SSR Escape)
+                  5. <code>revalidate</code> (ISR &amp; Dynamic SSR Escape)
                 </h3>
               </div>
               <p className="mt-4">
@@ -1300,22 +1585,30 @@ export const getStaticPaths: PageFunctions<RouteParams<"/products/[id]">]["getSt
 
               <div className="space-y-4">
                 <p className="font-semibold text-sm text-muted-foreground">
-                  Examples: Constant or Function Declaration
+                  Type-Safe Examples: Constant or Function Declaration
                 </p>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// 1. Force Dynamic SSR on every request (replaces legacy 'dynamic' export)
-export const revalidate = 0;
+{`// src/posts/[id]/page_functions.ts
+import type { PageFunctions } from "dinou";
+import { getArticleStatus } from "@/lib/articles";
+
+// 1. Force Dynamic SSR on every request (< 1 or 0, replaces legacy 'dynamic' export)
+export const revalidate: PageFunctions["revalidate"] = 0;
 
 // 2. Incremental Static Regeneration (re-evaluates every 60 seconds)
-export const revalidate = 60;
+// export const revalidate: PageFunctions["revalidate"] = 60;
 
-// 3. Or export as a sync or async function
-export function revalidate() {
-  return 120; // 2 minutes
-}`}
+// 3. Pure Static (SSG): Cached indefinitely until on-demand invalidation
+// export const revalidate: PageFunctions["revalidate"] = false;
+
+// 4. Type-safe async function: adjust TTL dynamically based on content volatility
+// export const revalidate: PageFunctions["revalidate"] = async () => {
+//   const status = await getArticleStatus();
+//   return status.isBreakingNews ? 15 : 3600; // 15s for breaking news, 1h for standard stories
+// };`}
                 </CodeBlock>
               </div>
 
@@ -1326,17 +1619,108 @@ export function revalidate() {
                   In previous versions of Dinou, dynamic rendering was toggled
                   using <code>export function dynamic()</code>. In Dinou v7,{" "}
                   <code>dynamic</code> has been completely removed. Setting{" "}
-                  <code>export const revalidate = 0;</code> (or any value &lt; 1)
+                  <code>export const revalidate: PageFunctions[&quot;revalidate&quot;] = 0;</code> (or any value &lt; 1)
                   is the official, unified way to escape static generation.
                 </AlertDescription>
               </Alert>
             </section>
 
-            {/* 4. ppr */}
+            {/* 6. getCacheTags */}
+            <section
+              id="getcachetags"
+              className="mt-12 pt-8 border-t scroll-mt-20"
+            >
+              <div className="flex items-center gap-3">
+                <h3 className="m-0">
+                  6. <code>getCacheTags</code> (Cache Tagging)
+                </h3>
+              </div>
+              <p className="mt-4">
+                Assigns custom tags to the static page cache files, allowing the
+                page to be purged and regenerated on-demand using{" "}
+                <a
+                  href="/docs/revalidation#revalidatetag"
+                  className="text-primary font-medium underline underline-offset-4 hover:opacity-80"
+                >
+                  <code>revalidateTag(tag)</code> (On-Demand Revalidation)
+                </a>
+                .
+              </p>
+
+              <div className="border rounded-lg p-4 bg-card not-prose my-4">
+                <div className="flex items-center gap-2 font-semibold mb-2">
+                  <Tag className="h-5 w-5 text-blue-500" />
+                  <span>Declaration Formats</span>
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                  <li>
+                    <strong>Constant Array:</strong>{" "}
+                    <code>export const getCacheTags = [&quot;catalog&quot;];</code>
+                  </li>
+                  <li>
+                    <strong>Sync Function:</strong>{" "}
+                    Derives tags directly from route parameters (e.g. <code>`product-${'{'}params?.id{'}'}`</code>).
+                  </li>
+                  <li>
+                    <strong>Async Function:</strong>{" "}
+                    Awaits database or CMS metadata to attach relational tags (e.g. categories, vendors) that do not appear in the URL.
+                  </li>
+                </ul>
+              </div>
+
+              <TabbedCodeBlock
+                containerClassName="mt-4"
+                tabs={[
+                  {
+                    id: "sync",
+                    label: "Sync (Param-Based)",
+                    language: "typescript",
+                    code: `// src/products/[id]/page_functions.ts
+import type { PageFunctions, RouteParams } from "dinou";
+
+// Best Practice: Type-safe synchronous cache tags
+export const getCacheTags: PageFunctions<
+  RouteParams<"/products/[id]">
+>["getCacheTags"] = (params) => {
+  // Associate the generated page with a general tag and a product tag
+  return [
+    "products",
+    \`product-\${params?.id}\`
+  ];
+};`,
+                  },
+                  {
+                    id: "async",
+                    label: "Async (Database / Metadata Lookup)",
+                    language: "typescript",
+                    code: `// src/products/[id]/page_functions.ts
+import type { PageFunctions, RouteParams } from "dinou";
+import { db } from "@/lib/db";
+
+// Best Practice: Type-safe async tag resolver
+export const getCacheTags: PageFunctions<
+  RouteParams<"/products/[id]">
+>["getCacheTags"] = async (params) => {
+  // Query product relationships to attach category and brand tags not present in URL
+  const product = await db.products.findById(params?.id);
+
+  return [
+    "products",
+    \`product-\${params?.id}\`,
+    \`category-\${product.categorySlug}\`,
+    \`brand-\${product.brandSlug}\`,
+  ];
+};`,
+                  },
+                ]}
+              />
+            </section>
+
+            {/* 7. ppr */}
             <section id="ppr" className="mt-12 pt-8 border-t scroll-mt-20">
               <div className="flex items-center gap-3">
                 <h3 className="m-0">
-                  4. <code>ppr</code> (Partial Prerendering)
+                  7. <code>ppr</code> (Partial Prerendering)
                 </h3>
                 <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400 ring-1 ring-inset ring-purple-500/20">
                   New in v7
@@ -1348,32 +1732,71 @@ export function revalidate() {
                 dynamic server-side rendering over a single HTTP response.
               </p>
 
-              <div className="border rounded-lg p-4 bg-card not-prose my-6">
-                <div className="flex items-center gap-2 font-semibold mb-2">
+              <div className="border rounded-lg p-5 bg-card not-prose my-6 space-y-3">
+                <div className="flex items-center gap-2 font-semibold text-foreground">
                   <Zap className="h-5 w-5 text-purple-500" />
-                  <span>How PPR Operates in Dinou</span>
+                  <span>How PPR Works: Instant Shell + Progressive Streaming</span>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  When <code>ppr</code> is enabled in <code>page_functions.ts</code>{" "}
-                  or <code>layout_functions.ts</code>, Dinou generates an instant
-                  static HTML shell for all non-Suspended elements. Dynamic holes
-                  wrapped in React <code>&lt;Suspense&gt;</code> are then streamed
-                  as RSC chunks as soon as their server data resolves, without
-                  waiting for the whole page.
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  PPR eliminates the traditional trade-off between static and dynamic rendering by dividing the page into two phases over a <strong>single HTTP connection</strong>:
                 </p>
+                <div className="grid gap-3 sm:grid-cols-2 text-xs">
+                  <div className="p-3 rounded-lg border bg-muted/40 space-y-1">
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400 block">
+                      1. Instant Static Shell (0ms TTFB)
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      All static UI (layouts, headers, navigation) along with the skeleton placeholders defined in <code>&lt;Suspense fallback=&#123;...&#125;&gt;</code> are delivered immediately to the browser with zero server wait time.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-lg border bg-muted/40 space-y-1">
+                    <span className="font-semibold text-purple-600 dark:text-purple-400 block">
+                      2. Parallel Component Streaming
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Async Server Components wrapped in <code>&lt;Suspense&gt;</code> execute concurrently on the server. As each component resolves its database or API queries, its HTML/RSC chunk is streamed down to replace the skeleton in-place.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4 bg-card not-prose my-4">
+                <div className="flex items-center gap-2 font-semibold mb-2">
+                  <Settings className="h-5 w-5 text-purple-500" />
+                  <span>Declaration Formats &amp; Type Signature</span>
+                </div>
+                <div className="font-mono text-xs bg-muted/60 p-2.5 rounded-md mb-3 text-purple-700 dark:text-purple-300">
+                  type PPRConfig = boolean | (() =&gt; boolean | Promise&lt;boolean&gt;);
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1.5 list-disc pl-4">
+                  <li>
+                    <strong>Boolean Flag:</strong> <code>export const ppr: PageFunctions[&quot;ppr&quot;] = true;</code> (or <code>false</code> to opt out).
+                  </li>
+                  <li>
+                    <strong>Sync Function:</strong> <code>() =&gt; boolean</code> (e.g. evaluate environment variables or server conditions).
+                  </li>
+                  <li>
+                    <strong>Async Function:</strong> <code>() =&gt; Promise&lt;boolean&gt;</code> (e.g. await remote feature flags or rollout gates).
+                  </li>
+                </ul>
               </div>
 
               <CodeBlock
                 language="typescript"
-                containerClassName="w-full overflow-hidden rounded-lg"
+                containerClassName="w-full overflow-hidden rounded-lg mt-4"
               >
 {`// src/dashboard/page_functions.ts
+import type { PageFunctions } from "dinou";
+import { getFeatureFlag } from "@/lib/flags";
 
-// Enable Partial Prerendering as a constant
-export const ppr = true;
+// 1. Static Boolean (Standard): Enable PPR for this route
+export const ppr: PageFunctions["ppr"] = true;
 
-// Or as a function (sync or async)
-// export function ppr() { return true; }`}
+// 2. Dynamic Async Function: Evaluate remote rollout flags or A/B testing
+// export const ppr: PageFunctions["ppr"] = async () => {
+//   const isPPREnabled = await getFeatureFlag("enable_ppr_dashboard");
+//   return isPPREnabled;
+// };`}
               </CodeBlock>
 
               <CodeBlock
@@ -1392,7 +1815,7 @@ export default function DashboardPage() {
         <h1>Dashboard Overview</h1>
       </header>
 
-      {/* 2. Dynamic hole streamed in over HTTP once server data is ready */}
+      {/* 2. Dynamic component streamed over HTTP once server data resolves */}
       <Suspense fallback={<UserStatsSkeleton />}>
         <UserStats />
       </Suspense>
@@ -1402,294 +1825,14 @@ export default function DashboardPage() {
               </CodeBlock>
             </section>
 
-            {/* 5. validateParams */}
-            <section
-              id="validateparams"
-              className="mt-12 pt-8 border-t scroll-mt-20"
-            >
-              <h3>
-                5. <code>validateParams</code> (Route Parameter Validation)
-              </h3>
-              <p>
-                Validates dynamic parameters (such as <code>[id]</code> or{" "}
-                <code>[...slug]</code>) on the server prior to rendering. If{" "}
-                <code>validateParams</code> returns <code>false</code> (or a
-                falsy value), Dinou immediately terminates request processing and
-                issues a <strong>404 Not Found</strong> response.
-              </p>
-
-              <div className="border rounded-lg p-4 bg-card not-prose my-4">
-                <div className="flex items-center gap-2 font-semibold mb-2">
-                  <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  <span>Function Signature</span>
-                </div>
-                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
-                  <li>
-                    <strong>Arguments:</strong> <code>params?: TParams</code>{" "}
-                    (The normalized route parameters object)
-                  </li>
-                  <li>
-                    <strong>Returns:</strong> <code>boolean | Promise&lt;boolean&gt;</code>{" "}
-                    (Return <code>false</code> to abort rendering and return 404)
-                  </li>
-                </ul>
-              </div>
-
-              <CodeBlock
-                language="typescript"
-                containerClassName="w-full overflow-hidden rounded-lg mt-4"
-              >
-{`// src/posts/[id]/page_functions.ts
-
-export async function validateParams(params: { id: string }) {
-  // Only allow positive integer IDs; reject malformed requests with 404
-  return typeof params.id === "string" && /^\\d+$/.test(params.id);
-}`}
-              </CodeBlock>
-            </section>
-
-            {/* 6. allowISG */}
-            <section id="allowisg" className="mt-12 pt-8 border-t scroll-mt-20">
-              <h3>
-                6. <code>allowISG</code> (Incremental Static Opt-Out)
-              </h3>
-              <p>
-                Controls whether dynamic paths that were not pre-rendered during
-                server startup (via <code>getStaticPaths</code>) are allowed to be
-                generated on-demand on the first incoming user request.
-              </p>
-
-              <div className="border rounded-lg p-4 bg-card not-prose my-4">
-                <div className="flex items-center gap-2 font-semibold mb-2">
-                  <Settings className="h-5 w-5 text-blue-500" />
-                  <span>Opt-Out Behavior</span>
-                </div>
-                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
-                  <li>
-                    <strong>Default:</strong> <code>true</code>. Any valid path
-                    not pre-generated at build time is generated on-demand and
-                    cached.
-                  </li>
-                  <li>
-                    <strong>Strict SSG (false):</strong> Returning <code>false</code>{" "}
-                    disables on-demand generation. Any request to a path not
-                    included in <code>getStaticPaths</code> returns 404 immediately.
-                  </li>
-                </ul>
-              </div>
-
-              <CodeBlock
-                language="typescript"
-                containerClassName="w-full overflow-hidden rounded-lg mt-4"
-              >
-{`// src/blog/[slug]/page_functions.ts
-
-// Disable on-demand generation; only serve pre-rendered paths
-export const allowISG = false;
-
-// Or as a function
-// export function allowISG() { return false; }`}
-              </CodeBlock>
-            </section>
-
-            {/* 7. getCacheTags */}
-            <section
-              id="getcachetags"
-              className="mt-12 pt-8 border-t scroll-mt-20"
-            >
-              <div className="flex items-center gap-3">
-                <h3 className="m-0">
-                  7. <code>getCacheTags</code> (Cache Tagging)
-                </h3>
-              </div>
-              <p className="mt-4">
-                Assigns custom tags to the static page cache files, allowing the
-                page to be purged and regenerated on-demand using{" "}
-                <code>revalidateTag(tag)</code>.
-              </p>
-
-              <div className="border rounded-lg p-4 bg-card not-prose my-4">
-                <div className="flex items-center gap-2 font-semibold mb-2">
-                  <Tag className="h-5 w-5 text-blue-500" />
-                  <span>Declaration Formats</span>
-                </div>
-                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
-                  <li>
-                    <strong>Constant Array:</strong>{" "}
-                    <code>export const getCacheTags = [&quot;catalog&quot;];</code>
-                  </li>
-                  <li>
-                    <strong>Function (Sync/Async):</strong>{" "}
-                    <code>getCacheTags(params) =&gt; string[] | Promise&lt;string[]&gt;</code>
-                  </li>
-                </ul>
-              </div>
-
-              <CodeBlock
-                language="typescript"
-                containerClassName="w-full overflow-hidden rounded-lg mt-4"
-              >
-{`// src/products/[id]/page_functions.ts
-
-export function getCacheTags(params: { id: string }) {
-  // Associate the generated page with a general tag and a product tag
-  return [
-    "products",
-    \`product-\${params.id}\`
-  ];
-}`}
-              </CodeBlock>
-            </section>
-
-            {/* 8. TypeScript Reference */}
-            <section
-              id="typescript-reference"
-              className="mt-12 pt-8 border-t scroll-mt-20"
-            >
-              <h3>
-                8. TypeScript Reference (<code>RouteSegmentConfig</code>, <code>PageFunctions</code> &amp; <code>LayoutFunctions</code>)
-              </h3>
-              <p>
-                Dinou structures its type system around an <strong>abstract architectural interface</strong> (<code>RouteSegmentConfig</code>) and two <strong>concrete, role-based aliases</strong> (<code>PageFunctions</code> and <code>LayoutFunctions</code>):
-              </p>
-
-              <CodeBlock
-                language="typescript"
-                containerClassName="w-full overflow-hidden rounded-lg mt-4"
-              >
-{`// 1. The underlying abstract base interface (Root Architecture Contract in "dinou")
-export interface RouteSegmentConfig<TParams = any, TProps = any> {
-  // Partial Prerendering toggle
-  ppr?: boolean | (() => boolean | Promise<boolean>);
-
-  // Cache & revalidation strategy in seconds (< 1 = Dynamic SSR, >= 1 = ISR, false = Static)
-  revalidate?: number | false | (() => number | false | Promise<number | false>);
-
-  // Cache tags for on-demand invalidation via revalidateTag(tag)
-  getCacheTags?: string[] | ((params?: TParams) => string[] | Promise<string[]>);
-
-  // Path generator for SSG (constant array or sync/async function)
-  getStaticPaths?:
-    | StaticPathItem<TParams>[]
-    | (() => StaticPathsResult<TParams>);
-
-  // Direct component props loader
-  getProps?: (params?: TParams) => TProps | Promise<TProps>;
-
-  // Route parameter validator (returns false to 404)
-  validateParams?: (params?: TParams) => boolean | Promise<boolean>;
-
-  // Incremental Static Generation opt-out
-  allowISG?: boolean | (() => boolean | Promise<boolean>);
-}
-
-// 2. Concrete semantic aliases for application developers
-export type PageFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TParams, TProps>;
-export type LayoutFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TParams, TProps>;`}
-              </CodeBlock>
-
-              {/* Practical Rule Table */}
-              <div className="not-prose my-6 rounded-xl border overflow-hidden">
-                <div className="bg-muted/60 p-4 border-b">
-                  <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                    Practical Rule: Which Type Should You Import &amp; Use?
-                  </h4>
-                </div>
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/20">
-                      <TableHead className="w-1/4">File / Target</TableHead>
-                      <TableHead className="w-1/3">Type to Import &amp; Use</TableHead>
-                      <TableHead>Role &amp; Responsibility</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="font-mono text-xs font-semibold text-blue-600 dark:text-blue-400">
-                        page_functions.ts
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        <code>import type &#123; PageFunctions &#125; from &quot;dinou&quot;</code>
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        Defines server hooks, static paths, and data loading directly for the route&apos;s <strong>page component</strong> (<code>page.tsx</code>).
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-mono text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-                        layout_functions.ts
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        <code>import type &#123; LayoutFunctions &#125; from &quot;dinou&quot;</code>
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        Defines server hooks and independent caching/data loaders for the segment&apos;s <strong>layout shell</strong> (<code>layout.tsx</code>).
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-mono text-xs font-semibold text-purple-600 dark:text-purple-400">
-                        Framework Utils &amp; Plugins
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">
-                        <code>import type &#123; RouteSegmentConfig &#125; from &quot;dinou&quot;</code>
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
-                        Use the abstract base contract only when writing generic utilities, middlewares, or plugins that manipulate arbitrary route segments without distinguishing between pages and layouts.
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-
-              {/* Why does Dinou separate them */}
-              <div className="not-prose my-6 grid gap-4 md:grid-cols-3">
-                <Card className="border-blue-500/20 bg-blue-50/20 dark:bg-blue-950/10">
-                  <CardHeader className="pb-2">
-                    <div className="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
-                      <FileCode className="h-4 w-4 text-blue-500" />
-                      1. Semantic Intent
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
-                    Seeing <code>import type &#123; PageFunctions &#125;</code> in a page file immediately clarifies intent and self-documents that the functions belong to the page tier.
-                  </CardContent>
-                </Card>
-
-                <Card className="border-indigo-500/20 bg-indigo-50/20 dark:bg-indigo-950/10">
-                  <CardHeader className="pb-2">
-                    <div className="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
-                      <Split className="h-4 w-4 text-indigo-500" />
-                      2. Mental Separation
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
-                    Reinforces Dinou&apos;s horizontal segment isolation: layouts have independent cacheLifetimes and props from child pages.
-                  </CardContent>
-                </Card>
-
-                <Card className="border-emerald-500/20 bg-emerald-50/20 dark:bg-emerald-950/10">
-                  <CardHeader className="pb-2">
-                    <div className="text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
-                      <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                      3. Future Extensibility
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
-                    If future Dinou versions introduce layout-only properties (e.g. scroll boundaries) or page-only hooks, your application code remains completely decoupled and non-breaking.
-                  </CardContent>
-                </Card>
-              </div>
-            </section>
-
-            {/* 9. End-to-End Type-Safe Example */}
+            {/* 8. End-to-End Type-Safe Example */}
             <section
               id="type-safe-example"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <div className="flex items-center gap-3">
                 <h3 className="m-0">
-                  9. End-to-End Type-Safe Example (<code>page_functions.ts</code>)
+                  8. End-to-End Type-Safe Example (<code>page_functions.ts</code>)
                 </h3>
               </div>
               <p className="mt-4">
@@ -1731,12 +1874,10 @@ export type LayoutFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TP
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// src/blog/[slug]/page_functions.ts
-import type { PageFunctions } from "dinou";
+import type { PageFunctions, RouteParams } from "dinou";
 
-// 1. Define route parameter types
-export interface BlogParams {
-  slug: string;
-}
+// 1. Route parameters automatically inferred from the route string pattern
+type BlogParams = RouteParams<"/blog/[slug]">; // Inferred as: { slug: string }
 
 // 2. Define page props types
 export interface BlogPost {
@@ -1749,7 +1890,6 @@ export interface BlogPost {
 
 export interface BlogPageProps {
   post: BlogPost;
-  views: number;
 }
 
 // 3. Static Paths (constant array or function)
@@ -1758,19 +1898,19 @@ export const getStaticPaths: PageFunctions<BlogParams>["getStaticPaths"] = [
   "building-with-dinou-v7",
 ];
 
-// 4. Props loader with strict parameter and return type checking
+// 4. Props loader: loads static article content for the 0ms shell
 export const getProps: PageFunctions<BlogParams, BlogPageProps>["getProps"] = async (params) => {
   // params?.slug is strongly typed as string | undefined
   const post = await db.posts.findUnique({ where: { slug: params?.slug } });
-  const views = await db.analytics.getViews(params?.slug);
+  if (!post) throw new Error("Post not found");
 
   // Directly returns BlogPageProps (type error if shape doesn't match!)
-  return { post, views };
+  return { post };
 };
 
 // 5. Caching Strategy & PPR configuration
 export const revalidate: PageFunctions["revalidate"] = 60; // ISR 60s
-export const ppr: PageFunctions["ppr"] = true;             // Partial Prerendering
+export const ppr: PageFunctions["ppr"] = true;             // PPR: Static shell + Suspense streaming
 
 // 6. Parameter validation hook (returns false to abort with 404)
 export const validateParams: PageFunctions<BlogParams>["validateParams"] = (params) => {
@@ -1791,21 +1931,29 @@ export const getCacheTags: PageFunctions<BlogParams>["getCacheTags"] = (params) 
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// src/blog/[slug]/page.tsx
+import { Suspense } from "react";
 import type { PageProps } from "dinou";
 import type { BlogPageProps } from "./page_functions";
+import { RealtimeViews, ViewsSkeleton } from "./components";
 
 // Extend PageProps to receive both route params and loader data with full type safety
 interface BlogPostPageProps extends PageProps<"/blog/[slug]">, BlogPageProps {}
 
-export default function BlogPostPage({ params, post, views }: BlogPostPageProps) {
+export default function BlogPostPage({ params, post }: BlogPostPageProps) {
   return (
     <article className="max-w-2xl mx-auto py-8">
+      {/* 1. Static shell (pre-rendered at build time, delivered with 0ms TTFB) */}
       <span className="text-xs text-muted-foreground font-mono">/blog/{params.slug}</span>
       <h1 className="text-3xl font-bold">{post.title}</h1>
       <div className="text-sm text-muted-foreground my-2">
-        By {post.author} • {views.toLocaleString()} views
+        By {post.author} • published {post.publishedAt}
       </div>
       <div className="prose mt-6">{post.content}</div>
+
+      {/* 2. PPR Dynamic Stream: Real-time analytics streamed in via Suspense */}
+      <Suspense fallback={<ViewsSkeleton />}>
+        <RealtimeViews slug={params.slug} />
+      </Suspense>
     </article>
   );
 }`}
@@ -1819,10 +1967,13 @@ export default function BlogPostPage({ params, post, views }: BlogPostPageProps)
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// src/blog/layout_functions.ts
-import type { LayoutFunctions } from "dinou";
+import type { LayoutFunctions, RouteParams } from "dinou";
 import { db } from "@/lib/db";
 
-// 1. Define layout data contract
+// 1. Layout parameters for /blog (static route segment without dynamic params = {})
+type BlogLayoutParams = RouteParams<"/blog">;
+
+// 2. Define layout data contract
 export interface BlogCategory {
   id: string;
   name: string;
@@ -1834,8 +1985,8 @@ export interface BlogLayoutData {
   featuredSlug: string;
 }
 
-// 2. Dedicated layout loader typed via LayoutFunctions
-export const getProps: LayoutFunctions<any, BlogLayoutData>["getProps"] = async () => {
+// 3. Dedicated layout loader typed via LayoutFunctions
+export const getProps: LayoutFunctions<BlogLayoutParams, BlogLayoutData>["getProps"] = async () => {
   const categories = await db.categories.findMany();
   const featured = await db.posts.findFirst({ where: { featured: true } });
 
@@ -1846,7 +1997,7 @@ export const getProps: LayoutFunctions<any, BlogLayoutData>["getProps"] = async 
   };
 };
 
-// 3. Segment-level caching strategy for the layout shell
+// 4. Segment-level caching strategy for the layout shell
 export const revalidate: LayoutFunctions["revalidate"] = 300; // Layout revalidates every 5 mins
 export const ppr: LayoutFunctions["ppr"] = true;`}
                 </CodeBlock>
@@ -1863,7 +2014,7 @@ import type { LayoutProps } from "dinou";
 import type { BlogLayoutData } from "./layout_functions";
 
 // Extend LayoutProps to receive children, segment params, and layout loader data
-interface BlogLayoutComponentProps extends LayoutProps, BlogLayoutData {}
+interface BlogLayoutComponentProps extends LayoutProps<"/blog">, BlogLayoutData {}
 
 export default function BlogLayout({
   children,
