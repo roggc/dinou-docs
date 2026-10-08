@@ -489,7 +489,7 @@ npm run dev`}
                       <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 shrink-0">
                         <Zap className="w-4 h-4" />
                       </div>
-                      <span>Rendering Strategies &amp; PPR</span>
+                      <span>Static &amp; Dynamic Rendering</span>
                     </div>
                     <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all mt-1" />
                   </div>
