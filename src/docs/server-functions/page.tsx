@@ -7,6 +7,7 @@ import {
   AlertTitle,
 } from "@/docs/components/ui/alert";
 import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
+import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 import {
   Zap,
   Server,
@@ -22,6 +23,8 @@ import {
   Send,
   Sliders,
   Layers,
+  Info,
+  Globe,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -32,73 +35,48 @@ const tocItems = [
     level: 2,
   },
   {
-    id: "component-vs-data",
-    title: "1. Returning JSX Components vs Data",
+    id: "ui-component-streaming",
+    title: "1. Returning Live React Components (UI Streaming)",
     level: 2,
-  },
-  {
-    id: "suspense-integration",
-    title: "2. React 19 Suspense & use() Integration",
-    level: 2,
-  },
-  {
-    id: "server-components-usage",
-    title: "2.1. In Server Components (Async / Await)",
-    level: 3,
-  },
-  {
-    id: "client-components-usage",
-    title: "2.2. In Client Components (with use())",
-    level: 3,
   },
   {
     id: "server-actions",
-    title: "3. Server Actions & Form Mutations",
+    title: "2. Server Actions & Form Mutations",
     level: 2,
   },
   {
-    id: "progressive-enhancement",
-    title: "3.1. Native Progressive Enhancement",
+    id: "server-form-actions",
+    title: "2.1. Server Actions in Forms",
     level: 3,
   },
   {
     id: "react-19-form-hooks",
-    title: "3.2. React 19 Hooks: useActionState & useFormStatus",
+    title: "2.2. React 19 Hooks: useActionState & useFormStatus",
     level: 3,
   },
   {
     id: "optimistic-updates",
-    title: "3.3. Optimistic Updates with useOptimistic",
+    title: "2.3. Optimistic Updates with useOptimistic",
     level: 3,
   },
   {
     id: "request-context",
-    title: "4. Request Context, Cookies & Headers (getContext)",
+    title: "3. Request Context, Cookies & Headers (getContext)",
     level: 2,
   },
   {
     id: "reading-request",
-    title: "4.1. Reading Query, Headers & Cookies",
+    title: "3.1. Reading Query, Headers & Cookies",
     level: 3,
   },
   {
     id: "mutating-cookies",
-    title: "4.2. Setting & Clearing Cookies",
+    title: "3.2. Setting & Clearing Cookies",
     level: 3,
   },
   {
     id: "redirects",
-    title: "5. Redirections (redirect)",
-    level: 2,
-  },
-  {
-    id: "cache-revalidation",
-    title: "6. Cache Revalidation (revalidatePath & revalidateTag)",
-    level: 2,
-  },
-  {
-    id: "security-best-practices",
-    title: "7. Security & Input Validation",
+    title: "4. Redirections (redirect)",
     level: 2,
   },
 ];
@@ -119,7 +97,7 @@ export default function Page() {
               Execute asynchronous server logic directly from your components
               with seamless Flight RPC. Dinou uniquely allows Server Functions
               to return live, rendered React components as well as serializable
-              data, with native React 19 primitives and progressive enhancement.
+              data, with native React 19 form actions and hooks.
             </p>
           </div>
 
@@ -129,9 +107,9 @@ export default function Page() {
               <h2>Overview &amp; &quot;use server&quot; Directive</h2>
               <p>
                 Server Functions are asynchronous JavaScript/TypeScript functions
-                that run exclusively in the Node.js server runtime. You declare
+                that run exclusively in the server runtime. In Dinou, you declare
                 them by adding the <code>&quot;use server&quot;</code> directive at
-                the top of an action file or within an async function scope.
+                the top of a dedicated action file (module-level directive).
               </p>
 
               <div className="grid gap-6 md:grid-cols-3 not-prose my-6">
@@ -178,36 +156,30 @@ export default function Page() {
               </div>
             </section>
 
-            {/* 1. Component vs Data */}
+            {/* 1. Returning Live React Components (UI Streaming) */}
             <section
-              id="component-vs-data"
+              id="ui-component-streaming"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
+              <div id="component-vs-data" className="scroll-mt-20" />
+              <div id="suspense-integration" className="scroll-mt-20" />
               <h3>
-                1. Returning JSX Components vs Data
+                1. Returning Live React Components (UI Streaming)
               </h3>
               <p>
-                Dinou provides the flexibility to return either raw serializable
-                data (for form state and mutations) or rendered JSX component trees
-                (for on-demand UI streaming):
+                Dinou uniquely allows Server Functions to return fully rendered React component trees directly over Flight RPC. In Server Components, the component is awaited directly inside native <code>&lt;Suspense&gt;</code>; in Client Components, the returned promise is unwrapped with React 19&apos;s <code>use()</code> hook:
               </p>
 
-              <div className="space-y-6">
-                <div>
-                  <h4 className="text-base font-semibold mb-2">
-                    Pattern A: Returning a Rendered React Component (UI Streaming)
-                  </h4>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    The server performs database queries, renders the component
-                    tree with Server and Client components, and returns a live RSC
-                    payload:
-                  </p>
-                  <CodeBlock
-                    language="tsx"
-                    containerClassName="w-full overflow-hidden rounded-lg"
-                  >
-{`// src/actions/get-post-card.tsx
-"use server";
+              <div className="not-prose my-6">
+                <TabbedCodeBlock
+                  defaultTab="action"
+                  tabs={[
+                    {
+                      id: "action",
+                      label: "actions/get-post-card.tsx (Server Function)",
+                      language: "tsx",
+                      code: `// src/actions/get-post-card.tsx
+"use server"; // 👈 Module-level directive in Dinou
 
 import db from "@/lib/db";
 import { PostCard } from "@/components/post-card";
@@ -218,78 +190,19 @@ export async function getPostCard(postId: string) {
 
   // Returns a rendered JSX component directly over Flight RPC!
   return <PostCard post={post} />;
-}`}
-                  </CodeBlock>
-                </div>
-
-                <div>
-                  <h4 className="text-base font-semibold mb-2">
-                    Pattern B: Returning Serializable Data (Mutations &amp; State)
-                  </h4>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Useful for form mutations, validation results, and status
-                    messages:
-                  </p>
-                  <CodeBlock
-                    language="typescript"
-                    containerClassName="w-full overflow-hidden rounded-lg"
-                  >
-{`// src/actions/subscribe.ts
-"use server";
-
-import db from "@/lib/db";
-
-export async function subscribeNewsletter(email: string) {
-  if (!email || !email.includes("@")) {
-    return { success: false, error: "Invalid email address" };
-  }
-
-  await db.subscribers.create({ data: { email } });
-  return { success: true, message: "Welcome to the newsletter!" };
-}`}
-                  </CodeBlock>
-                </div>
-              </div>
-            </section>
-
-            {/* 2. Suspense Integration */}
-            <section
-              id="suspense-integration"
-              className="mt-12 pt-8 border-t scroll-mt-20"
-            >
-              <h3>
-                2. React 19 Suspense &amp; <code>use()</code> Integration
-              </h3>
-              <p>
-                Dinou relies entirely on pure <strong>React 19 primitives</strong>{" "}
-                (<code>&lt;Suspense&gt;</code> and <code>use()</code>) without
-                requiring heavy external state management libraries for async data
-                fetching.
-              </p>
-
-              {/* 2.1 In Server Components */}
-              <section
-                id="server-components-usage"
-                className="mt-6 scroll-mt-20"
-              >
-                <h4>2.1. In Server Components (Async / Await)</h4>
-                <p>
-                  In Server Components, you can directly <code>await</code> Server
-                  Functions inside an async component wrapped in React&apos;s
-                  native <code>&lt;Suspense&gt;</code>. React streams HTML
-                  progressively as promises resolve:
-                </p>
-
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/blog/page.tsx
+}`,
+                    },
+                    {
+                      id: "server-comp",
+                      label: "blog/page.tsx (Server Component)",
+                      language: "tsx",
+                      code: `// src/blog/page.tsx
+// Server Component: directly await the Server Function with React 19 Suspense
 import { Suspense } from "react";
 import { getPostCard } from "@/actions/get-post-card";
 
 async function PostSlot({ id }: { id: string }) {
-  // Directly awaited on the server
+  // Directly awaited on the server during SSR / streaming
   return await getPostCard(id);
 }
 
@@ -304,28 +217,14 @@ export default function BlogPage() {
       </Suspense>
     </section>
   );
-}`}
-                </CodeBlock>
-              </section>
-
-              {/* 2.2 In Client Components */}
-              <section
-                id="client-components-usage"
-                className="mt-8 scroll-mt-20"
-              >
-                <h4>2.2. In Client Components (with <code>use()</code>)</h4>
-                <p>
-                  When calling Server Functions from Client Components, the call
-                  returns a standard JavaScript Promise over Flight RPC. In React
-                  19, you read this promise with the native <code>use()</code>{" "}
-                  hook inside a <code>&lt;Suspense&gt;</code> boundary:
-                </p>
-
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/components/post-viewer.tsx
+}`,
+                    },
+                    {
+                      id: "client-comp",
+                      label: "blog/page.tsx (Client Component)",
+                      language: "tsx",
+                      code: `// src/blog/page.tsx
+// Client Component: unwrap the Flight RPC promise with React 19 use()
 "use client";
 
 import { useState, use, Suspense } from "react";
@@ -337,7 +236,7 @@ function PostStream({ promise }: { promise: Promise<React.ReactNode> }) {
   return <>{content}</>;
 }
 
-export default function PostViewer() {
+export default function BlogPage() {
   const [postId, setPostId] = useState("post-1");
   const [postPromise, setPostPromise] = useState(() => getPostCard("post-1"));
 
@@ -347,8 +246,10 @@ export default function PostViewer() {
   };
 
   return (
-    <div>
-      <div className="flex gap-2 mb-4">
+    <section className="space-y-4">
+      <h1 className="text-2xl font-bold">Featured Story</h1>
+
+      <div className="flex gap-2">
         <button onClick={() => loadPost("post-1")} className="btn">Post 1</button>
         <button onClick={() => loadPost("post-2")} className="btn">Post 2</button>
       </div>
@@ -357,20 +258,44 @@ export default function PostViewer() {
       <Suspense key={postId} fallback={<p>Streaming post from server...</p>}>
         <PostStream promise={postPromise} />
       </Suspense>
-    </div>
+    </section>
   );
-}`}
-                </CodeBlock>
-              </section>
+}`,
+                    },
+                  ]}
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 not-prose mt-4 text-xs text-muted-foreground">
+                <div className="border rounded-lg p-3 bg-muted/20 border-border space-y-1">
+                  <div className="font-semibold text-foreground flex items-center gap-1.5">
+                    <Server className="h-4 w-4 text-blue-500" />
+                    <span>In Server Components (Async / Await)</span>
+                  </div>
+                  <p>
+                    Directly <code>await</code> the Server Function inside an async component. React streams HTML progressively as promises resolve.
+                  </p>
+                </div>
+
+                <div className="border rounded-lg p-3 bg-muted/20 border-border space-y-1">
+                  <div className="font-semibold text-foreground flex items-center gap-1.5">
+                    <Sparkles className="h-4 w-4 text-amber-500" />
+                    <span>In Client Components (with <code>use()</code>)</span>
+                  </div>
+                  <p>
+                    Dispatches Flight RPC returning a Promise. React 19&apos;s native <code>use(promise)</code> unrolls it synchronously inside <code>&lt;Suspense&gt;</code> without external state libraries.
+                  </p>
+                </div>
+              </div>
             </section>
 
-            {/* 3. Server Actions */}
+            {/* 2. Server Actions */}
             <section
               id="server-actions"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <h3>
-                3. Server Actions &amp; Form Mutations
+                2. Server Actions &amp; Form Mutations
               </h3>
               <p>
                 Server Functions passed to the <code>action</code> prop of a{" "}
@@ -378,51 +303,83 @@ export default function PostViewer() {
                 act as <strong>Server Actions</strong>.
               </p>
 
-              {/* 3.1 Progressive Enhancement */}
+              {/* 2.1 Server Actions in Forms */}
               <section
-                id="progressive-enhancement"
+                id="server-form-actions"
                 className="mt-6 scroll-mt-20"
               >
-                <h4>3.1. Native Progressive Enhancement</h4>
+                <h4>2.1. Server Actions in Forms</h4>
                 <p>
-                  Dinou supports Server Actions in both <strong>Server Components</strong>{" "}
-                  and <strong>Client Components</strong>. When defined in a Server
-                  Component, forms submit and mutate data via standard HTTP POST
-                  even if JavaScript is disabled or still downloading in the browser:
+                  In Dinou, Server Actions are declared in dedicated server files with the <code>&quot;use server&quot;</code> directive at the top. You can pass them directly to the <code>action</code> attribute of a <code>&lt;form&gt;</code> in both <strong>Server Components</strong> and <strong>Client Components</strong>:
                 </p>
 
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/newsletter/page.tsx
-// Server Component (No "use client" needed!)
+                <div className="not-prose my-4">
+                  <TabbedCodeBlock
+                    defaultTab="page"
+                    tabs={[
+                      {
+                        id: "page",
+                        label: "newsletter/page.tsx (Server Component)",
+                        language: "tsx",
+                        code: `// src/newsletter/page.tsx
+// Server Component (invoking Server Action directly)
 import { subscribeNewsletter } from "@/actions/subscribe";
 
 export default function NewsletterPage() {
-  async function action(formData: FormData) {
-    "use server";
-    const email = formData.get("email") as string;
-    await subscribeNewsletter(email);
-  }
-
   return (
-    <form action={action} className="flex gap-2">
+    <form action={subscribeNewsletter} className="flex gap-2">
       <input name="email" type="email" placeholder="name@domain.com" required className="input" />
       <button type="submit" className="btn-primary">Subscribe</button>
     </form>
   );
-}`}
-                </CodeBlock>
+}`,
+                      },
+                      {
+                        id: "action",
+                        label: "actions/subscribe.ts (Server Action)",
+                        language: "typescript",
+                        code: `// src/actions/subscribe.ts
+"use server"; // 👈 Required at the module level in Dinou
+
+import db from "@/lib/db";
+
+export async function subscribeNewsletter(formData: FormData) {
+  const email = formData.get("email") as string;
+  await db.subscribers.create({ data: { email } });
+}`,
+                      },
+                    ]}
+                  />
+                </div>
+
+                <div className="border rounded-lg p-3 bg-muted/20 border-border text-xs text-muted-foreground space-y-1">
+                  <div className="font-semibold text-foreground">💡 Important: Module-Level Directives &amp; Client Execution</div>
+                  <p>
+                    Dinou requires the <code>&quot;use server&quot;</code> directive to be placed at the <strong>top of the action file</strong> (not inline within function bodies). When a form submits, Dinou&apos;s client runtime transparently dispatches a Flight RPC request (<code>POST /____server_function____</code>) to execute the server action and receive updated UI state.
+                  </p>
+                </div>
+
+                <div className="border rounded-lg p-3.5 bg-muted/20 border-border text-xs text-muted-foreground space-y-1.5 mt-3">
+                  <div className="font-semibold text-foreground flex items-center gap-1.5">
+                    <Info className="h-4 w-4 text-blue-500" />
+                    <span>What does <code>subscribeNewsletter</code> return? (Understanding <code>void</code> / <code>undefined</code>)</span>
+                  </div>
+                  <p className="leading-relaxed">
+                    This action returns <code>Promise&lt;void&gt;</code>, which resolves to <strong><code>undefined</code></strong>. In pure React 19 form actions (<code>&lt;form action=&#123;subscribeNewsletter&#125;&gt;</code>), this is completely standard for <em>fire-and-forget</em> mutations: the browser submits the form data, the server executes the database write, and no state payload is needed by the UI.
+                  </p>
+                  <p className="leading-relaxed">
+                    <strong>When should a Server Action return a value?</strong> If your UI needs to display interactive feedback (such as <em>&quot;Subscribed successfully!&quot;</em> or validation errors), the action should return a serializable payload (e.g. <code>&#123; success: true, message: &quot;...&quot; &#125;</code>) and be wired to React 19&apos;s <strong><code>useActionState</code></strong> hook (as explained in Section 2.2 below). Other common patterns include performing a server-side <code>redirect()</code> or calling <code>revalidatePath()</code> before completing.
+                  </p>
+                </div>
               </section>
 
-              {/* 3.2 React 19 Hooks */}
+              {/* 2.2 React 19 Hooks */}
               <section
                 id="react-19-form-hooks"
                 className="mt-8 scroll-mt-20"
               >
                 <h4>
-                  3.2. React 19 Hooks: <code>useActionState</code> &amp;{" "}
+                  2.2. React 19 Hooks: <code>useActionState</code> &amp;{" "}
                   <code>useFormStatus</code>
                 </h4>
                 <p>
@@ -458,11 +415,15 @@ export default function NewsletterPage() {
                   </Card>
                 </div>
 
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg mt-4"
-                >
-{`// src/components/create-post-form.tsx
+                <div className="not-prose my-4">
+                  <TabbedCodeBlock
+                    defaultTab="client"
+                    tabs={[
+                      {
+                        id: "client",
+                        label: "create-post-form.tsx (Client Component)",
+                        language: "tsx",
+                        code: `// src/components/create-post-form.tsx
 "use client";
 
 import { useActionState } from "react";
@@ -481,6 +442,7 @@ function SubmitButton() {
 const initialState: FormState = { success: false, message: "" };
 
 export function CreatePostForm() {
+  // useActionState binds the server action to form state and tracks submission
   const [state, formAction, isPending] = useActionState(createPostAction, initialState);
 
   return (
@@ -497,26 +459,67 @@ export function CreatePostForm() {
       <SubmitButton />
     </form>
   );
-}`}
-                </CodeBlock>
+}`,
+                      },
+                      {
+                        id: "server",
+                        label: "actions/posts.ts (Server Action)",
+                        language: "typescript",
+                        code: `// src/actions/posts.ts
+"use server"; // 👈 Module-level directive required in Dinou
+
+import db from "@/lib/db";
+
+export type FormState = {
+  success: boolean;
+  message: string;
+};
+
+// Server Action receives (prevState, formData) when bound to useActionState
+export async function createPostAction(
+  prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const title = (formData.get("title") as string)?.trim();
+  const content = (formData.get("content") as string)?.trim();
+
+  if (!title || title.length < 3) {
+    return { success: false, message: "Title must be at least 3 characters." };
+  }
+
+  if (!content) {
+    return { success: false, message: "Content cannot be empty." };
+  }
+
+  await db.posts.create({ data: { title, content } });
+  return { success: true, message: "Post published successfully!" };
+}`,
+                      },
+                    ]}
+                  />
+                </div>
               </section>
 
-              {/* 3.3 Optimistic Updates */}
+              {/* 2.3 Optimistic Updates */}
               <section
                 id="optimistic-updates"
                 className="mt-8 scroll-mt-20"
               >
-                <h4>3.3. Optimistic Updates with <code>useOptimistic</code></h4>
+                <h4>2.3. Optimistic Updates with <code>useOptimistic</code></h4>
                 <p>
                   With React 19&apos;s <code>useOptimistic</code>, you can update
                   the user interface immediately before the server responds:
                 </p>
 
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/components/like-button.tsx
+                <div className="not-prose my-4">
+                  <TabbedCodeBlock
+                    defaultTab="client"
+                    tabs={[
+                      {
+                        id: "client",
+                        label: "like-button.tsx (Client Component)",
+                        language: "tsx",
+                        code: `// src/components/like-button.tsx
 "use client";
 
 import { useOptimistic, useTransition } from "react";
@@ -531,8 +534,8 @@ export function LikeButton({ postId, initialLikes }: { postId: string; initialLi
 
   const handleClick = () => {
     startTransition(async () => {
-      setOptimisticLikes(1); // Optimistically increment
-      await toggleLikeAction(postId);
+      setOptimisticLikes(1); // Optimistically increment in 0ms on client
+      await toggleLikeAction(postId); // Dispatches Server Action via Flight RPC
     });
   };
 
@@ -541,18 +544,53 @@ export function LikeButton({ postId, initialLikes }: { postId: string; initialLi
       ❤️ {optimisticLikes}
     </button>
   );
-}`}
-                </CodeBlock>
+}`,
+                      },
+                      {
+                        id: "server",
+                        label: "actions/likes.ts (Server Action)",
+                        language: "typescript",
+                        code: `// src/actions/likes.ts
+"use server"; // 👈 Module-level directive required in Dinou
+
+import db from "@/lib/db";
+
+export async function toggleLikeAction(postId: string) {
+  // Updates like count on the database
+  await db.posts.update({
+    where: { id: postId },
+    data: { likes: { increment: 1 } },
+  });
+
+  return { success: true };
+}`,
+                      },
+                    ]}
+                  />
+                </div>
+
+                <div className="border rounded-lg p-3.5 bg-muted/20 border-border text-xs text-muted-foreground space-y-1.5 mt-3">
+                  <div className="font-semibold text-foreground flex items-center gap-1.5">
+                    <Info className="h-4 w-4 text-blue-500" />
+                    <span>Why is there no <code>&lt;Suspense&gt;</code> boundary here?</span>
+                  </div>
+                  <p className="leading-relaxed">
+                    <code>&lt;Suspense&gt;</code> only activates when a component <em>suspends</em> (by throwing a pending Promise, such as with <code>React.use(promise)</code> or an async Server Component).
+                  </p>
+                  <p className="leading-relaxed">
+                    In contrast, <strong><code>useOptimistic</code> does the exact opposite of suspending</strong>: it synchronously paints the temporary new value (e.g. switching immediately from <code>10</code> to <code>11</code>) in <strong>0ms</strong> on the client, avoiding loading spinners or skeleton fallbacks entirely while the Server Action runs in the background. It relies strictly on React 19 transitions (<code>useTransition</code> or Form Actions). If the server call succeeds, React seamlessly commits the real server state; if it fails, React automatically rolls back to the initial value with zero boilerplate.
+                  </p>
+                </div>
               </section>
             </section>
 
-            {/* 4. Request Context */}
+            {/* 3. Request Context */}
             <section
               id="request-context"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <h3>
-                4. Request Context, Cookies &amp; Headers (<code>getContext</code>)
+                3. Request Context, Cookies &amp; Headers (<code>getContext</code>)
               </h3>
               <p>
                 Dinou provides <code>getContext()</code> (exported from{" "}
@@ -590,9 +628,9 @@ export function LikeButton({ postId, initialLikes }: { postId: string; initialLi
                 </ul>
               </div>
 
-              {/* 4.1 Reading */}
+              {/* 3.1 Reading */}
               <section id="reading-request" className="mt-6 scroll-mt-20">
-                <h4>4.1. Reading Query, Headers &amp; Cookies</h4>
+                <h4>3.1. Reading Query, Headers &amp; Cookies</h4>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
@@ -615,9 +653,9 @@ export async function getCurrentUser() {
                 </CodeBlock>
               </section>
 
-              {/* 4.2 Mutating Cookies */}
+              {/* 3.2 Mutating Cookies */}
               <section id="mutating-cookies" className="mt-8 scroll-mt-20">
-                <h4>4.2. Setting &amp; Clearing Cookies</h4>
+                <h4>3.2. Setting &amp; Clearing Cookies</h4>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
@@ -656,10 +694,10 @@ export async function logoutAction() {
               </section>
             </section>
 
-            {/* 5. Redirects */}
+            {/* 4. Redirects */}
             <section id="redirects" className="mt-12 pt-8 border-t scroll-mt-20">
               <h3>
-                5. Redirections (<code>redirect</code>)
+                4. Redirections (<code>redirect</code>)
               </h3>
               <p>
                 Dinou provides a universal <code>redirect(destination)</code>{" "}
@@ -669,19 +707,17 @@ export async function logoutAction() {
               <div className="border rounded-lg p-4 bg-card not-prose my-6">
                 <div className="flex items-center gap-2 font-semibold mb-2">
                   <ArrowRightLeft className="h-5 w-5 text-indigo-500" />
-                  <span>Dual Execution Behavior</span>
+                  <span>Universal Execution Behavior</span>
                 </div>
                 <ul className="text-sm text-muted-foreground space-y-2 list-disc pl-4">
                   <li>
-                    <strong>Hard HTTP Redirect (307):</strong> If headers have
-                    not yet been sent during Server Component rendering or a Server
-                    Action POST request, Dinou performs an HTTP 307 redirect.
+                    <strong>In Server Functions (Soft SPA Navigation):</strong> When called inside a Server Function (e.g. form mutations or RPC calls), Dinou automatically performs a smooth client-side transition to the destination route via the SPA router <strong>without a full page reload</strong>.
                   </li>
                   <li>
-                    <strong>Soft SPA Navigation:</strong> If response streaming
-                    has already started or the call executes in a client context,
-                    it returns a lightweight client-side navigation component
-                    that transitions without a full page reload.
+                    <strong>In Server Components (Initial SSR):</strong> If headers have not yet been sent, Dinou issues a clean HTTP 302 redirect for SEO and search engine crawlers. If response streaming has already started, it completes the transition on the client upon hydration.
+                  </li>
+                  <li>
+                    <strong>In Client Components (Declarative Redirects):</strong> When called directly in client components during render, it triggers an immediate client router replacement (<code>router.replace()</code>) without reloading the page.
                   </li>
                 </ul>
               </div>
@@ -699,165 +735,370 @@ import db from "@/lib/db";
 export async function completeOrder(orderId: string) {
   await db.orders.updateStatus(orderId, "PAID");
 
-  // Redirect user to the confirmation page
+  // Automatically navigates the client router to the success page
   return redirect(\`/checkout/\${orderId}/success\`);
 }`}
               </CodeBlock>
-            </section>
 
-            {/* 6. Cache Revalidation */}
-            <section
-              id="cache-revalidation"
-              className="mt-12 pt-8 border-t scroll-mt-20"
-            >
-              <h3>
-                6. Cache Revalidation (<code>revalidatePath</code> &amp;{" "}
-                <code>revalidateTag</code>)
-              </h3>
-              <p>
-                When a Server Action mutates data in a database, static SSG pages
-                and ISR caches might still hold stale content. Dinou provides
-                on-demand invalidation utilities exported from{" "}
-                <code>&quot;dinou/server&quot;</code>:
-              </p>
+              {/* Deep Dive Callout Box */}
+              <div className="border rounded-lg p-5 bg-muted/20 not-prose my-6 space-y-4">
+                <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
+                  <Sparkles className="h-4 w-4 text-purple-500" />
+                  <span>Deep Dive: When are HTTP Headers Sent vs. Unsent in Dinou?</span>
+                </div>
 
-              <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400">
-                      <FileCode className="h-5 w-5" />
-                      <span>revalidatePath(path)</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    Purges the cached HTML and RSC payload for a specific route
-                    path (e.g. <code>/blog</code> or <code>/products/12</code>),
-                    forcing it to regenerate.
-                  </CardContent>
-                </Card>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  A foundational question when handling redirects across hybrid architectures is: <em>How does Dinou determine whether <code>redirect()</code> issues an HTTP 302 vs. a client-side transition, and is calling <code>redirect()</code> in a Server Component equivalent to invoking it via a Server Function?</em>
+                </p>
 
-                <Card>
-                  <CardHeader>
-                    <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400">
-                      <RefreshCw className="h-5 w-5" />
-                      <span>revalidateTag(tag)</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    Purges all routes and <code>&lt;DinouCacheSlot&gt;</code>{" "}
-                    components associated with that tag (defined via{" "}
-                    <code>getCacheTags</code>).
-                  </CardContent>
-                </Card>
-              </div>
-
-              <CodeBlock
-                language="typescript"
-                containerClassName="w-full overflow-hidden rounded-lg"
-              >
-{`// src/actions/update-product.ts
-"use server";
-
-import { revalidatePath, revalidateTag } from "dinou/server";
-import db from "@/lib/db";
-
-export async function updateProductPrice(id: string, newPrice: number) {
-  // 1. Mutate database
-  await db.products.update({ where: { id }, data: { price: newPrice } });
-
-  // 2. Invalidate specific product path
-  await revalidatePath(\`/products/\${id}\`);
-
-  // 3. Invalidate all catalog pages tagged with "catalog"
-  await revalidateTag("catalog");
-
-  return { success: true };
-}`}
-              </CodeBlock>
-            </section>
-
-            {/* 7. Security Best Practices */}
-            <section
-              id="security-best-practices"
-              className="mt-12 pt-8 border-t scroll-mt-20"
-            >
-              <h3>
-                7. Security &amp; Input Validation
-              </h3>
-              <p>
-                Server Functions are exposed as HTTP POST endpoints over the
-                network. Always treat them with the same security rigor as
-                traditional REST or GraphQL APIs:
-              </p>
-
-              <div className="space-y-4 my-6">
-                <div className="border rounded-lg p-4 bg-card not-prose">
-                  <div className="flex items-center gap-2 font-semibold mb-2">
-                    <Lock className="h-5 w-5 text-red-500" />
-                    <span>1. Always Authenticate &amp; Authorize</span>
+                {/* The Equivalence Principle */}
+                <div className="p-3.5 rounded-md bg-purple-500/10 border border-purple-500/20 space-y-1.5 text-xs">
+                  <div className="font-semibold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    <span>The Equivalence Principle in Server Components</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Never rely on client-side state. Verify session cookies via{" "}
-                    <code>getContext()</code> inside the Server Function before
-                    executing any sensitive mutation.
+                  <p className="text-muted-foreground leading-relaxed">
+                    Calling <code>redirect()</code> directly inside a Server Component vs. calling an imported Server Function (e.g., <code>await verifyUser()</code>) from that Server Component is <strong>functionally identical</strong>. Because both run inside the same server Node.js process during the same SSR request lifecycle, they share the exact same request context and streaming state.
                   </p>
                 </div>
 
-                <div className="border rounded-lg p-4 bg-card not-prose">
-                  <div className="flex items-center gap-2 font-semibold mb-2">
-                    <ShieldCheck className="h-5 w-5 text-emerald-500" />
-                    <span>2. Schema Validation (Zod / Valibot)</span>
+                {/* 4 Execution Contexts */}
+                <div className="space-y-4 text-xs">
+                  {/* Case 1 */}
+                  <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/20 space-y-3">
+                    <div className="grid md:grid-cols-12 gap-4 items-start">
+                      <div className="md:col-span-5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="font-semibold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+                            <Globe className="h-4 w-4" />
+                            <span>1. SSR: Root / page_functions.ts / Plugin</span>
+                          </div>
+                          <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium">
+                            HTTP 302
+                          </span>
+                        </div>
+                        <p className="text-muted-foreground leading-relaxed">
+                          Occurs inside <code>getProps()</code> in <code>page_functions.ts</code>, at the top level of the root <code>page.tsx</code> Server Component (outside any <code>&lt;Suspense&gt;</code> boundary), or in a global plugin hook (<code>onRequestContext</code>) in <code>dinou.config.mjs</code>.
+                        </p>
+                        <p className="text-muted-foreground leading-relaxed">
+                          Because zero HTML bytes have reached the wire (<code>headersSent === false</code>), Dinou issues a clean <strong>HTTP 302</strong> with a <code>Location</code> header. <strong>Crucial for SEO crawlers and search indexers.</strong>
+                        </p>
+                      </div>
+                      <div className="md:col-span-7">
+                        <TabbedCodeBlock
+                          defaultTab="get-props"
+                          tabs={[
+                            {
+                              id: "get-props",
+                              label: "page_functions.ts",
+                              language: "typescript",
+                              code: `// src/dashboard/page_functions.ts
+import { redirect } from "dinou";
+import { getContext } from "dinou/server";
+
+export async function getProps() {
+  const { req } = getContext();
+  if (!req.cookies.session_token) {
+    // Evaluated before page rendering -> HTTP 302 redirect
+    return redirect("/login");
+  }
+  return { user: { name: "Alex" } };
+}`,
+                            },
+                            {
+                              id: "server-comp",
+                              label: "page.tsx (Server Component)",
+                              language: "tsx",
+                              code: `// src/dashboard/page.tsx (Server Component root)
+import { redirect } from "dinou";
+import { getContext } from "dinou/server";
+
+export default async function DashboardPage() {
+  const { req } = getContext();
+  if (!req.cookies.session_token) {
+    // At root before stream begins -> HTTP 302 redirect
+    return redirect("/login");
+  }
+
+  return <h1>Welcome to Dashboard</h1>;
+}`,
+                            },
+                            {
+                              id: "plugin",
+                              label: "dinou.config.mjs (Plugin)",
+                              language: "javascript",
+                              code: `// dinou.config.mjs (Global Plugin Hook)
+export default {
+  plugins: [
+    {
+      name: "auth-guard",
+      onRequestContext(req, res, context) {
+        // Runs pre-flight before SSR or route resolution
+        if (req.path.startsWith("/dashboard") && !req.cookies.session_token) {
+          return context.res.redirect("/login");
+        }
+      },
+    },
+  ],
+};`,
+                            },
+                          ]}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Validate all input parameters against a schema validator.
-                    Never trust raw values from <code>formData.get(...)</code>.
-                  </p>
+
+                  {/* Case 2 */}
+                  <div className="p-4 rounded-lg bg-amber-500/5 border border-amber-500/20 space-y-3">
+                    <div className="grid md:grid-cols-12 gap-4 items-start">
+                      <div className="md:col-span-5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+                            <Zap className="h-4 w-4" />
+                            <span>2. SSR: Deferred &lt;Suspense&gt;</span>
+                          </div>
+                          <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium">
+                            Client Hydration
+                          </span>
+                        </div>
+                        <p className="text-muted-foreground leading-relaxed">
+                          Occurs inside an async child wrapped in <code>&lt;Suspense fallback=&#123;&lt;Skeleton /&gt;&#125;&gt;</code>. React opens the HTTP connection with status <code>200 OK</code> immediately to stream the initial shell.
+                        </p>
+                        <p className="text-muted-foreground leading-relaxed">
+                          At HTTP protocol level, an open <code>200 OK</code> stream cannot turn into a <code>302</code>. Dinou safely emits <code>&lt;ClientRedirect /&gt;</code>, completing the transition upon browser hydration without breaking the stream.
+                        </p>
+                      </div>
+                      <div className="md:col-span-7">
+                        <CodeBlock
+                          language="tsx"
+                          containerClassName="w-full overflow-hidden rounded-md text-xs"
+                        >
+{`// src/reports/page.tsx (Server Component)
+import { Suspense } from "react";
+import { redirect } from "dinou";
+
+async function RestrictedReport() {
+  const isAllowed = await checkUserAccess();
+  if (!isAllowed) {
+    // 200 OK stream already open -> <ClientRedirect />
+    return redirect("/unauthorized");
+  }
+  return <div>Financial Metrics</div>;
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<p>Loading financial report...</p>}>
+      <RestrictedReport />
+    </Suspense>
+  );
+}`}
+                        </CodeBlock>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Case 3 */}
+                  <div className="p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/20 space-y-3">
+                    <div className="grid md:grid-cols-12 gap-4 items-start">
+                      <div className="md:col-span-5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                            <ArrowRightLeft className="h-4 w-4" />
+                            <span>3. Server Function from Client</span>
+                          </div>
+                          <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium">
+                            Soft SPA Navigation
+                          </span>
+                        </div>
+                        <p className="text-muted-foreground leading-relaxed">
+                          Triggered from browser interactions (form actions or button clicks) via a dedicated <code>POST</code> request.
+                        </p>
+                        <p className="text-muted-foreground leading-relaxed">
+                          Dinou executes the server mutation and intercepts <code>redirect()</code> before streaming (headers unsent), returning redirect metadata. The client proxy navigates via the SPA router <strong>without a full page reload</strong>.
+                        </p>
+                      </div>
+                      <div className="md:col-span-7">
+                        <CodeBlock
+                          language="typescript"
+                          containerClassName="w-full overflow-hidden rounded-md text-xs"
+                        >
+{`// src/actions/cart.ts
+"use server";
+
+import { redirect } from "dinou";
+import db from "@/lib/db";
+
+export async function checkoutAction(formData: FormData) {
+  const order = await db.orders.create({ ... });
+
+  // Dedicated POST: soft SPA navigation in browser
+  return redirect(\`/checkout/\${order.id}/success\`);
+}`}
+                        </CodeBlock>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Case 4 */}
+                  <div className="p-4 rounded-lg bg-indigo-500/5 border border-indigo-500/20 space-y-3">
+                    <div className="grid md:grid-cols-12 gap-4 items-start">
+                      <div className="md:col-span-5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="font-semibold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+                            <Sparkles className="h-4 w-4" />
+                            <span>4. Client Component In-Render</span>
+                          </div>
+                          <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-medium">
+                            router.replace()
+                          </span>
+                        </div>
+                        <p className="text-muted-foreground leading-relaxed">
+                          When called directly inside a client component during browser rendering, no network request is sent to the server.
+                        </p>
+                        <p className="text-muted-foreground leading-relaxed">
+                          Dinou immediately delegates to <code>router.replace()</code> in the client SPA router, smoothly updating the URL and view in 0ms without a page reload.
+                        </p>
+                      </div>
+                      <div className="md:col-span-7">
+                        <CodeBlock
+                          language="tsx"
+                          containerClassName="w-full overflow-hidden rounded-md text-xs"
+                        >
+{`// src/components/client-guard.tsx
+"use client";
+
+import { redirect } from "dinou";
+
+export function ClientGuard({ isAllowed }: { isAllowed: boolean }) {
+  if (!isAllowed) {
+    // In-browser render: executes router.replace() in SPA router
+    return redirect("/forbidden");
+  }
+
+  return <button className="btn">Control Panel</button>;
+}`}
+                        </CodeBlock>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Reference Table */}
+                <div className="border rounded-md overflow-x-auto bg-background">
+                  <table className="w-full text-left text-xs border-collapse min-w-[760px]">
+                    <thead>
+                      <tr className="border-b bg-muted/40 font-semibold text-foreground">
+                        <th className="p-2.5 w-[22%]">Invocation Context</th>
+                        <th className="p-2.5 w-[14%]">Headers Sent?</th>
+                        <th className="p-2.5 w-[40%]">Resulting Mechanism</th>
+                        <th className="p-2.5 w-[24%]">Recommended For</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border text-muted-foreground">
+                      <tr>
+                        <td className="p-2.5 font-medium text-foreground align-top">
+                          1. SSR Root (page_functions.ts, page.tsx, Plugin)
+                        </td>
+                        <td className="p-2.5 align-top">
+                          <span className="text-emerald-600 dark:text-emerald-400 font-mono font-medium">No</span>
+                        </td>
+                        <td className="p-2.5 align-top space-y-1">
+                          <div className="font-semibold text-foreground">
+                            Hard HTTP Redirect (Status 302)
+                          </div>
+                          <p className="text-[11px] leading-relaxed">
+                            Server issues an <code>HTTP/1.1 302 Found</code> with a <code>Location</code> header. The browser or search crawler intercepts it at the protocol level and fetches the new page as a fresh document.
+                          </p>
+                        </td>
+                        <td className="p-2.5 align-top text-[11px] leading-relaxed">
+                          Auth guards (<code>getProps</code>), root guards, global middleware plugins, SEO canonicals
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-medium text-foreground align-top">
+                          2. SSR: Deferred (&lt;Suspense&gt;)
+                        </td>
+                        <td className="p-2.5 align-top">
+                          <span className="text-amber-600 dark:text-amber-400 font-mono font-medium">Yes</span>
+                          <span className="block text-[10px] text-muted-foreground">(200 OK stream open)</span>
+                        </td>
+                        <td className="p-2.5 align-top space-y-1">
+                          <div className="font-semibold text-foreground">
+                            Streaming Fallback (<code>&lt;ClientRedirect /&gt;</code>)
+                          </div>
+                          <p className="text-[11px] leading-relaxed">
+                            Because the <code>200 OK</code> chunked stream cannot be rewritten to a <code>302</code>, Dinou injects <code>&lt;ClientRedirect /&gt;</code> into the stream. The browser router transitions upon hydration without aborting the connection.
+                          </p>
+                        </td>
+                        <td className="p-2.5 align-top text-[11px] leading-relaxed">
+                          Deferred conditional access, late data-dependent checks inside Suspense
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-medium text-foreground align-top">
+                          3. Server Function (from Client Action)
+                        </td>
+                        <td className="p-2.5 align-top">
+                          <span className="text-emerald-600 dark:text-emerald-400 font-mono font-medium">No</span>
+                          <span className="block text-[10px] text-muted-foreground">(standard POST)</span>
+                        </td>
+                        <td className="p-2.5 align-top space-y-1">
+                          <div className="font-semibold text-foreground">
+                            Soft SPA Navigation (Status 200)
+                          </div>
+                          <p className="text-[11px] leading-relaxed">
+                            Server returns HTTP <code>200 OK</code> with redirection metadata. Dinou&apos;s client runtime intercepts it and navigates via the SPA router without a full page reload or loss of client state.
+                          </p>
+                        </td>
+                        <td className="p-2.5 align-top text-[11px] leading-relaxed">
+                          Form submissions, shopping cart checkout, stateful mutations
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-2.5 font-medium text-foreground align-top">
+                          4. Client Component (Render)
+                        </td>
+                        <td className="p-2.5 align-top">
+                          <span className="text-muted-foreground font-mono font-medium">N/A</span>
+                          <span className="block text-[10px] text-muted-foreground">(in-browser)</span>
+                        </td>
+                        <td className="p-2.5 align-top space-y-1">
+                          <div className="font-semibold text-foreground">
+                            Client Router Replacement (<code>router.replace()</code>)
+                          </div>
+                          <p className="text-[11px] leading-relaxed">
+                            Executes 100% in the browser with zero server roundtrip. Immediately dispatches <code>router.replace()</code> in the client SPA router, updating route and UI in 0ms.
+                          </p>
+                        </td>
+                        <td className="p-2.5 align-top text-[11px] leading-relaxed">
+                          Pure UI state redirection, client-side permission gates
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
-              <CodeBlock
-                language="typescript"
-                containerClassName="w-full overflow-hidden rounded-lg"
-              >
-{`// src/actions/safe-post-action.ts
-"use server";
-
-import { getContext } from "dinou";
-import { z } from "zod";
-import db from "@/lib/db";
-
-const PostSchema = z.object({
-  title: z.string().min(5).max(120),
-  content: z.string().min(10),
-});
-
-export async function createPostSecure(formData: FormData) {
-  // 1. Verify Authentication
-  const context = getContext();
-  const token = context?.req.cookies["session_token"];
-  const user = await verifyUser(token);
-  if (!user) {
-    return { success: false, error: "Unauthorized access" };
-  }
-
-  // 2. Validate Inputs
-  const parsed = PostSchema.safeParse({
-    title: formData.get("title"),
-    content: formData.get("content"),
-  });
-
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.flatten().fieldErrors };
-  }
-
-  // 3. Perform mutation securely
-  const post = await db.posts.create({
-    data: { ...parsed.data, authorId: user.id },
-  });
-
-  return { success: true, postId: post.id };
-}`}
-              </CodeBlock>
+              {/* Revalidation Cross-Link Banner */}
+              <div className="border rounded-lg p-4 bg-muted/20 not-prose my-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="font-semibold text-sm text-foreground flex items-center gap-1.5">
+                    <RefreshCw className="h-4 w-4 text-emerald-500" />
+                    <span>Looking for Cache Revalidation?</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Learn how to purge stale SSG pages and ISR cache slots on-demand using <code>revalidatePath</code> and <code>revalidateTag</code> in the dedicated guide.
+                  </p>
+                </div>
+                <a
+                  href="/docs/revalidation"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline whitespace-nowrap px-3 py-1.5 rounded-md border border-border bg-background hover:bg-muted transition-colors flex-shrink-0"
+                >
+                  <span>Revalidation Guide</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </a>
+              </div>
             </section>
           </div>
         </div>
