@@ -17,6 +17,14 @@ import {
 import { AlertTriangle, Info, Workflow } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/docs/components/ui/table";
 
 const tocItems = [
   {
@@ -127,6 +135,16 @@ function MetricCard({
 }
 
 export default function DataFetchingPage() {
+  const scrollToStrategy = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+      window.history.pushState(null, "", `#${id}`);
+    } else {
+      window.location.hash = id;
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
       <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
@@ -320,6 +338,467 @@ export default function DataFetchingPage() {
                       </Badge>
                     </a>
                   ))}
+                </div>
+              </div>
+
+              {/* Data Fetching & Rendering Strategies Matrix */}
+              <div className="mt-8">
+                <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+                  <div>
+                    <h3 className="text-lg font-bold tracking-tight text-foreground">
+                      Data Fetching &amp; Rendering Strategies Matrix
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                      Detailed comparison across execution timing, TTFB, streaming resolution, server/database pressure, network waterfalls, and freshness:
+                    </p>
+                  </div>
+                </div>
+
+                <div className="not-prose my-4 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-card shadow-xs">
+                  <div className="overflow-x-auto">
+                    <Table className="w-full text-xs">
+                      <TableHeader className="bg-slate-50 dark:bg-slate-900/60 border-b">
+                        <TableRow>
+                          <TableHead className="w-10 text-center font-bold">#</TableHead>
+                          <TableHead className="min-w-[190px] font-bold">Strategy / Pattern</TableHead>
+                          <TableHead className="min-w-[140px] font-bold">Execution Context</TableHead>
+                          <TableHead className="min-w-[115px] font-bold">TTFB (First Byte)</TableHead>
+                          <TableHead className="min-w-[125px] font-bold">Stream / Content Ready</TableHead>
+                          <TableHead className="min-w-[125px] font-bold">Server &amp; DB Load</TableHead>
+                          <TableHead className="min-w-[90px] font-bold text-center">Network Waterfall?</TableHead>
+                          <TableHead className="min-w-[105px] font-bold">Data Freshness</TableHead>
+                          <TableHead className="min-w-[200px] font-bold">Ideal Use Case</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                        {/* Row 1 */}
+                        <TableRow
+                          onClick={() => scrollToStrategy("strategy-1")}
+                          className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">1</TableCell>
+                          <TableCell>
+                            <a href="#strategy-1" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                              RSC Direct await (SSG)
+                            </a>
+                            <div className="text-[11px] text-muted-foreground">Top-level <code>await</code> or <code>getProps</code> in Server Component</div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Build Time (<code>npm run build</code>)</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              0ms (CDN Edge)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              Instant (0ms)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              Zero (Build Time)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
+                          <TableCell className="text-muted-foreground">Fixed at build</TableCell>
+                          <TableCell className="text-muted-foreground">Blogs, documentation, static marketing pages.</TableCell>
+                        </TableRow>
+
+                        {/* Row 2 */}
+                        <TableRow
+                          onClick={() => scrollToStrategy("strategy-2")}
+                          className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-rose-600 dark:text-rose-400 font-bold">2</TableCell>
+                          <TableCell>
+                            <a href="#strategy-2" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                              RSC Direct await (Dynamic)
+                            </a>
+                            <div className="text-[11px] text-muted-foreground">Top-level <code>await</code> or <code>getProps</code> without <code>&lt;Suspense&gt;</code></div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Per Request (Server)</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
+                              Slow (Blocked)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground font-mono text-[11px]">N/A (Blocks TTFB)</span>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
+                              Heavy (100% queries)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
+                          <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
+                          <TableCell className="text-muted-foreground">Private views where entire UI requires a single critical query and waiting is acceptable.</TableCell>
+                        </TableRow>
+
+                        {/* Row 3 */}
+                        <TableRow
+                          onClick={() => scrollToStrategy("strategy-3")}
+                          className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">3</TableCell>
+                          <TableCell>
+                            <a href="#strategy-3" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                              RSC with &lt;Suspense&gt; (SSG)
+                            </a>
+                            <div className="text-[11px] text-muted-foreground">Static route with async component boundary</div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Build Time (Compiler awaits)</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              0ms (CDN Edge)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              Instant (0ms)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              Zero (Build Time)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
+                          <TableCell className="text-muted-foreground">Fixed at build</TableCell>
+                          <TableCell className="text-muted-foreground">Decoupled async components in static pages; outputs final HTML without showing fallback.</TableCell>
+                        </TableRow>
+
+                        {/* Row 4 */}
+                        <TableRow
+                          onClick={() => scrollToStrategy("strategy-4")}
+                          className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-amber-600 dark:text-amber-400 font-bold">4</TableCell>
+                          <TableCell>
+                            <a href="#strategy-4" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                              RSC with &lt;Suspense&gt; (Dynamic)
+                            </a>
+                            <div className="text-[11px] text-muted-foreground">Streaming SSR on demand (without PPR)</div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Per Request (Server streaming)</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
+                              Fast (Early Layout)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
+                              Slow (Waits 1-3s DB)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
+                              Heavy (100% queries)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
+                          <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
+                          <TableCell className="text-muted-foreground">Dynamic routes on runtimes without edge caching or when PPR is disabled.</TableCell>
+                        </TableRow>
+
+                        {/* Row 5 */}
+                        <TableRow
+                          onClick={() => scrollToStrategy("strategy-5")}
+                          className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">5</TableCell>
+                          <TableCell>
+                            <a href="#strategy-5" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                              RSC with &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Static / Asymmetric ISR)
+                            </a>
+                            <div className="text-[11px] text-muted-foreground">Pre-rendered static shell with decoupled slot TTL or <code>refreshSlot()</code></div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Build Time (Pre-rendered) + On-Demand Slot Reval</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              0ms (CDN Edge)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              Instant (~0-2ms)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              Near-Zero (Decoupled)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
+                          <TableCell className="text-amber-600 dark:text-amber-400 font-medium">Decoupled TTL / refreshSlot()</TableCell>
+                          <TableCell className="text-muted-foreground">Static/ISR pages (e.g. 24h page revalidate) containing a widget (stock, pricing) needing fast updates (60s) or surgical in-place client refreshes.</TableCell>
+                        </TableRow>
+
+                        {/* Row 6 */}
+                        <TableRow
+                          onClick={() => scrollToStrategy("strategy-6")}
+                          className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">6</TableCell>
+                          <TableCell>
+                            <a href="#strategy-6" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                              RSC with &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Dynamic)
+                            </a>
+                            <div className="text-[11px] text-muted-foreground">Dynamic streaming with vertical Micro-ISR (TTL cache)</div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Per Request (Cache hit: ~2ms / Miss: async query)</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
+                              Fast (Early Layout)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              Instant (~2ms Cache)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              Near-Zero (99% Offload)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
+                          <TableCell className="text-amber-600 dark:text-amber-400 font-medium">TTL / Tag Reval</TableCell>
+                          <TableCell className="text-muted-foreground">Dynamic routes (with session/cookies) containing heavy widgets (analytics, feeds). Flushes layout instantly; slot streams from cache without DB load.</TableCell>
+                        </TableRow>
+
+                        {/* Row 7 */}
+                        <TableRow
+                          onClick={() => scrollToStrategy("strategy-7")}
+                          className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">7</TableCell>
+                          <TableCell>
+                            <a href="#strategy-7" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                              RSC with &lt;Suspense&gt; (PPR Hybrid)
+                            </a>
+                            <div className="text-[11px] text-muted-foreground">Partial Prerendering (Static Shell + Live Uncached Hole)</div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Static Shell (Build) + Live Hole (Server on every request)</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              0ms (Shell from Edge)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
+                              Slow (Hole waits for DB)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
+                              Heavy (100% Hole queries)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
+                          <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
+                          <TableCell className="text-muted-foreground">Instant static layout from Edge with zero-delay live streamed data for real-time personalization.</TableCell>
+                        </TableRow>
+
+                        {/* Row 8 */}
+                        <TableRow
+                          onClick={() => scrollToStrategy("strategy-8")}
+                          className="cursor-pointer hover:bg-emerald-100/60 dark:hover:bg-emerald-950/40 bg-emerald-50/30 dark:bg-emerald-950/20 border-l-2 border-emerald-500 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-emerald-600 dark:text-emerald-400 font-bold">8</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <a href="#strategy-8" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                                PPR + &lt;DinouCacheSlot&gt; (PPR Hybrid Synergy)
+                              </a>
+                              <span className="text-[9px] uppercase px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold tracking-wider">Synergy</span>
+                            </div>
+                            <div className="text-[11px] text-muted-foreground">Static Edge Shell + Cached Streamed Hole (Max Concurrency)</div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Edge CDN (Shell) + Server Cache Storage (Slot)</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              0ms (Edge) + ~5ms (Slot)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              Instant (~2-5ms Cache)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              Near-Zero (99.9% Offload)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
+                          <TableCell className="text-amber-600 dark:text-amber-400 font-medium">TTL / Tag Reval</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            <strong className="text-emerald-600 dark:text-emerald-400">Peak Performance:</strong> Instant CDN paint (0ms TTFB) with 99.9% database query offload. Ideal for high-traffic stores, trending catalog pages, and viral portals.
+                          </TableCell>
+                        </TableRow>
+
+                        {/* Row 9 */}
+                        <TableRow
+                          onClick={() => scrollToStrategy("strategy-9")}
+                          className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-amber-600 dark:text-amber-400 font-bold">9</TableCell>
+                          <TableCell>
+                            <a href="#strategy-9" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                              RSC Promise ➔ Client use() (Dynamic / PPR)
+                            </a>
+                            <div className="text-[11px] text-muted-foreground">RSC initiates un-awaited Promise; Client unwraps via <code>use()</code></div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Server starts query; Client suspends</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              0ms (with PPR)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
+                              Waits for Promise
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
+                              Heavy (Live query)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
+                          <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
+                          <TableCell className="text-muted-foreground">Interactive stateful widgets (charts, canvas, filters) needing fresh streaming data.</TableCell>
+                        </TableRow>
+
+                        {/* Row 10 */}
+                        <TableRow
+                          onClick={() => scrollToStrategy("strategy-10")}
+                          className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">10</TableCell>
+                          <TableCell>
+                            <a href="#strategy-10" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                              Client-First getProps (SSG)
+                            </a>
+                            <div className="text-[11px] text-muted-foreground"><code>page_functions.ts</code> + Client Component</div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Build Time (<code>npm run build</code>)</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              0ms (CDN Edge)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              Instant (0ms)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              Zero (Build Time)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
+                          <TableCell className="text-muted-foreground">Fixed at build</TableCell>
+                          <TableCell className="text-muted-foreground">Dinou Client-First model for highly interactive static web applications.</TableCell>
+                        </TableRow>
+
+                        {/* Row 11 */}
+                        <TableRow
+                          onClick={() => scrollToStrategy("strategy-11")}
+                          className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-rose-600 dark:text-rose-400 font-bold">11</TableCell>
+                          <TableCell>
+                            <a href="#strategy-11" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                              Client-First getProps (Dynamic)
+                            </a>
+                            <div className="text-[11px] text-muted-foreground"><code>page_functions.ts</code> + Client Component in SSR</div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Per Request (Server awaits <code>getProps</code>)</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
+                              Slow (Blocked)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground font-mono text-[11px]">N/A (Blocks TTFB)</span>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
+                              Heavy (100% queries)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
+                          <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
+                          <TableCell className="text-muted-foreground">Complex SPAs where developers prefer classic React hooks and tolerate TTFB wait.</TableCell>
+                        </TableRow>
+
+                        {/* Row 12 */}
+                        <TableRow
+                          onClick={() => scrollToStrategy("strategy-12")}
+                          className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-amber-600 dark:text-amber-400 font-bold">12</TableCell>
+                          <TableCell>
+                            <a href="#strategy-12" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                              Client Calling Server Function (Initial Mount - Dynamic RPC)
+                            </a>
+                            <div className="text-[11px] text-muted-foreground">Client Component calls <code>&quot;use server&quot;</code> during initial mount</div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Client RPC on mount</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
+                              Fast (Shell Only)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
+                              Delayed (Waterfall)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
+                              Heavy (100% RPC queries)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-rose-600 dark:text-rose-400">Yes (Waterfall)</TableCell>
+                          <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
+                          <TableCell className="text-muted-foreground">Supported, but sub-optimal compared to pattern 9 (RSC Promise streaming) due to the second HTTP round trip.</TableCell>
+                        </TableRow>
+
+                        {/* Row 13 */}
+                        <TableRow
+                          onClick={() => scrollToStrategy("strategy-13")}
+                          className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-slate-600 dark:text-slate-400 font-bold">13</TableCell>
+                          <TableCell>
+                            <a href="#strategy-13" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                              Client Calling Server Function (User Action - Dynamic RPC)
+                            </a>
+                            <div className="text-[11px] text-muted-foreground">Invoked on user button click, form submission, or mutation</div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Client on user action (POST RPC)</TableCell>
+                          <TableCell>
+                            <span className="font-mono text-xs text-muted-foreground">N/A (Post-Load)</span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground font-mono text-[11px]">N/A (User Event)</span>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700 font-mono text-[10px]">
+                              On-Demand (Per Action)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
+                          <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
+                          <TableCell className="text-muted-foreground">Form submissions, state persistence, on-demand data refreshes, and RPC actions.</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               </div>
             </section>
