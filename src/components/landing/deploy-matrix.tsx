@@ -225,7 +225,7 @@ directory = ".dinou/dist3"
     "build": "dinou build:deno",
     "start": "deno run --unstable-kv -A dinou/adapters/deno.js",
     "compile": "dinou build:deno:compile",
-    "deploy": "deployctl deploy --project=my-app .dinou/deno/main.js"
+    "deploy": "deno deploy --project=my-app .dinou/deno/main.js"
   },
   "compilerOptions": {
     "jsx": "react-jsx",

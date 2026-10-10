@@ -70,16 +70,16 @@ export default function Page() {
             <section id="overview">
               <h2>Deploy Everywhere with Dinou v7</h2>
               <p>
-                In previous generations of React Server Components, deploying outside specific vendor clouds was complicated by runtime flag requirements (such as <code>--conditions react-server</code>).
+                Before Dinou v7, deploying React Server Components to serverless platforms (like Netlify) was impossible due to the need to pass the <code>--conditions react-server</code> flag. While on a VPS or custom server (like DigitalOcean) you could configure Node runtime flags, serverless and edge environments offered no control over them.
               </p>
               <p>
-                <strong>Dinou v7 solves this completely</strong>: through its pre-bundled dual-engine architecture, server bundles are compiled with all React Server conditions pre-resolved. You can deploy Dinou to virtually any infrastructure:
+                <strong>Dinou v7 solves this completely</strong>: through its pre-bundled dual-engine architecture, server bundles are compiled with all React Server conditions pre-resolved at build time. You can now deploy Dinou to virtually any infrastructure:
               </p>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 not-prose my-6">
-                <Card className="border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10">
+                <Card className="border-slate-500/20 bg-slate-50/50 dark:bg-slate-900/20">
                   <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm">
+                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-semibold text-sm">
                       <Server className="h-4 w-4" />
                       <span>Node.js &amp; Containers</span>
                     </div>
@@ -89,7 +89,7 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-900/10">
+                <Card className="border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/10">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
                       <Zap className="h-4 w-4" />
@@ -101,9 +101,9 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-purple-500/20 bg-purple-50/50 dark:bg-purple-900/10">
+                <Card className="border-rose-500/20 bg-rose-50/50 dark:bg-rose-950/10">
                   <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold text-sm">
+                    <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-semibold text-sm">
                       <Cloud className="h-4 w-4" />
                       <span>Cloudflare Workers</span>
                     </div>
@@ -162,7 +162,7 @@ export default function Page() {
                     <tr>
                       <td className="p-3.5 font-semibold text-foreground">Deno Deploy (Edge / Cloud)</td>
                       <td className="p-3.5 font-mono">dinou build:deno</td>
-                      <td className="p-3.5 font-mono">deployctl deploy --project=&lt;app&gt; .dinou/deno/main.js</td>
+                      <td className="p-3.5 font-mono">deno deploy --project=&lt;app&gt; .dinou/deno/main.js</td>
                     </tr>
                     <tr>
                       <td className="p-3.5 font-semibold text-foreground">Deno Standalone Server</td>
@@ -181,7 +181,7 @@ export default function Page() {
                     </tr>
                     <tr>
                       <td className="p-3.5 font-semibold text-foreground">Bun Standalone Binary</td>
-                      <td className="p-3.5 font-mono">dinou build:bun:compile</td>
+                      <td className="p-3.5 font-mono">dinou build:bun:compile / dinou build:bun:pure:compile</td>
                       <td className="p-3.5 font-mono">./dist/server</td>
                     </tr>
                     <tr>
@@ -211,20 +211,11 @@ dinou build:node
 dinou start:node`}
               </CodeBlock>
 
-              <div className="grid gap-4 sm:grid-cols-2 not-prose my-6">
-                <div className="p-4 rounded-lg border bg-card space-y-1.5">
-                  <div className="font-semibold text-sm text-foreground">Railway / Render / Fly.io</div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Set <strong>Build Command</strong> to <code>npm run build:node</code> and <strong>Start Command</strong> to <code>npm run start:node</code>. All platform ports (<code>PORT</code>) are detected automatically.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-lg border bg-card space-y-1.5">
-                  <div className="font-semibold text-sm text-foreground">DigitalOcean App Platform</div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Configure Node.js component with <code>npm run build:node</code> and run command <code>npm run start:node</code>. Pre-bundled architecture eliminates any need for manual Node flags.
-                  </p>
-                </div>
+              <div className="p-4 rounded-lg border bg-card space-y-1.5 not-prose my-6">
+                <div className="font-semibold text-sm text-foreground">PaaS & Cloud Hosts (Railway, Render, Fly.io, DigitalOcean App Platform)</div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Set <strong>Build Command</strong> to <code>npm run build:node</code> and <strong>Start Command</strong> to <code>npm run start:node</code>. All platform-assigned ports (<code>PORT</code>) are detected automatically, and Dinou&apos;s pre-bundled architecture eliminates any need for manual Node flags.
+                </p>
               </div>
             </section>
 
@@ -287,7 +278,8 @@ dinou start:node`}
 {`# Option A: Automatic Git-based CI/CD (Recommended)
 git push origin main
 
-# Option B: Manual deployment using Netlify CLI
+# Option B: Manual deployment using Netlify CLI (requires local build)
+npm run build
 npx netlify deploy --prod`}
                 </CodeBlock>
               </div>
@@ -361,12 +353,12 @@ npx wrangler deploy`}
               </div>
 
               <div className="rounded-xl border p-4 bg-card not-prose space-y-2 my-4">
-                <div className="flex items-center gap-2 font-semibold text-sm text-blue-600 dark:text-blue-400">
+                <div className="flex items-center gap-2 font-semibold text-sm text-rose-600 dark:text-rose-400">
                   <Zap className="h-4 w-4" />
                   <span>How Cloudflare Workers Works in Dinou v7</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Dinou generates a self-contained Dual-Bundle orchestrator at <code>.dinou/cloudflare/worker.js</code>. Static assets and pre-rendered pages are served instantly by Cloudflare&apos;s global CDN through <code>env.ASSETS</code>. When bound to <code>env.DINOU_CACHE</code>, Dinou automatically activates <code>CloudflareKVStorage</code> to persist Incremental Static Regeneration (ISR) route caches across the edge. Secrets, D1 databases, and R2 buckets are injected seamlessly into Server Components via <code>platformContext.env</code>.
+                  Dinou generates a self-contained Dual-Bundle orchestrator at <code>.dinou/cloudflare/worker.js</code>. Static assets and pre-rendered pages are served instantly by Cloudflare&apos;s global CDN through <code>env.ASSETS</code>. When bound to <code>env.DINOU_CACHE</code>, Dinou automatically activates <code>CloudflareKVStorage</code> to persist Incremental Static Regeneration (ISR) route caches across the edge. Secrets, D1 databases, and R2 buckets are injected seamlessly into Server Components via <code>getContext().env</code>.
                 </p>
               </div>
             </section>
@@ -395,17 +387,18 @@ npx wrangler deploy`}
 {`# 1. Build bundle targeting Deno Edge (deno-edge)
 dinou build:deno
 
-# 2. Deploy directly to Deno Deploy using deployctl:
-deployctl deploy --project=<my-project> .dinou/deno/main.js
+# 2. Deploy directly to Deno Deploy using native Deno CLI (Deno 2+):
+deno deploy --project=<my-project> .dinou/deno/main.js
 
-# Or configure GitHub Actions integration to deploy automatically on git push!`}
+# (Legacy Deno setups used the separate 'deployctl' CLI)
+# Or configure GitHub integration to deploy automatically on git push!`}
                   </CodeBlock>
                 </div>
 
                 {/* Deno Standalone Server */}
                 <div className="rounded-xl border p-5 bg-card space-y-3">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
-                    <Server className="h-4 w-4 text-blue-500" />
+                    <Server className="h-4 w-4 text-amber-500" />
                     <span>B. Deno Standalone Server (VPS / Docker)</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
@@ -533,7 +526,8 @@ ENV PORT=3000
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.dinou ./.dinou
-COPY --from=builder /app/dinou ./dinou
+# (Optional) Only include if your project is ejected:
+# COPY --from=builder /app/dinou ./dinou
 
 # Run as non-root user for security
 USER node
@@ -554,7 +548,7 @@ CMD ["npm", "run", "start:node"]`}
                 <li><strong>Fly.io:</strong> <code>fly secrets set DATABASE_URL=&quot;...&quot;</code>.</li>
                 <li><strong>Netlify:</strong> Site Configuration &rarr; Environment variables.</li>
                 <li><strong>Cloudflare:</strong> <code>wrangler secret put MY_SECRET</code>.</li>
-                <li><strong>Deno Deploy:</strong> Project Settings &rarr; Environment Variables (or via <code>deployctl</code>).</li>
+                <li><strong>Deno Deploy:</strong> Project Settings &rarr; Environment Variables (or via <code>deno deploy</code>).</li>
               </ul>
             </section>
 
@@ -577,11 +571,11 @@ CMD ["npm", "run", "start:node"]`}
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span><strong>Static Asset Caching:</strong> Ensure reverse proxies (Nginx, CloudFlare) serve <code>/assets/*</code> with <code>Cache-Control: public, max-age=31536000, immutable</code>.</span>
+                    <span><strong>Static Asset Caching:</strong> Fast browser caching for instant subsequent loads (handled automatically by Dinou for all hashed bundles in <code>/assets/*</code>).</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span><strong>SSL / HTTPS Termination:</strong> Ensure your domain uses HTTPS with valid TLS certificates (automatically managed by Netlify, Cloudflare, Fly, and Railway).</span>
+                    <span><strong>SSL / HTTPS Active:</strong> Ensure your production domain uses HTTPS (automatic on Netlify, Cloudflare, Railway, and Fly.io; configure via Caddy or Nginx with Let&apos;s Encrypt if using a self-hosted VPS).</span>
                   </li>
                 </ul>
               </div>
