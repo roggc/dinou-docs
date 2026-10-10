@@ -37,11 +37,11 @@ const tocItems = [
   { id: "server-security-model", title: "The Server-Only Security Model", level: 2 },
   { id: "where-they-work", title: "Where Environment Variables Work", level: 3 },
   { id: "client-safety", title: "Safe Propagation to Client Components", level: 3 },
-  { id: "env-files", title: "Defining .env Files & Precedence", level: 2 },
+  { id: "env-files", title: "Defining .env Files", level: 2 },
   { id: "platforms-runtimes", title: "Multi-Platform Runtimes", level: 2 },
   { id: "node-bun", title: "Node.js & Bun (process.env)", level: 3 },
-  { id: "cloudflare", title: "Cloudflare Workers (platformContext.env)", level: 3 },
-  { id: "deno", title: "Deno (Deno.env & Permissions)", level: 3 },
+  { id: "cloudflare", title: "Cloudflare Workers (process.env & Bindings)", level: 3 },
+  { id: "deno", title: "Deno (process.env & --allow-env)", level: 3 },
   { id: "typed-validation", title: "Type-Safe Environment Validation (Zod)", level: 2 },
   { id: "security-shield", title: "Anti-Leak Security & Bot Shield", level: 2 },
 ];
@@ -59,7 +59,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Manage database credentials, API tokens, and runtime configuration securely with Dinou&apos;s server-only security architecture and multi-platform runtime adapters.
+              Manage database credentials, API tokens, and runtime bindings securely with Dinou&apos;s server-only isolation model across Node.js, Bun, Deno, and Cloudflare Workers.
             </p>
           </div>
 
@@ -68,25 +68,11 @@ export default function Page() {
             <section id="overview">
               <h2>Environment Variables in Dinou</h2>
               <p>
-                Dinou is designed with a <strong>secure-by-default</strong> philosophy. In modern full-stack web applications, accidental exposure of database passwords or third-party API private keys to the client browser is one of the most common security vulnerabilities.
+                Dinou isolates all environment variables strictly to the server runtime. Values are never automatically bundled, replaced, or inlined into client-side JavaScript chunks, ensuring secrets like database passwords or private API keys remain 100% on the server.
               </p>
-              <p>
-                In Dinou:
-              </p>
-              <ul>
-                <li>
-                  Environment variables are <strong>strictly isolated to the server runtime</strong> (Node.js, Bun, Deno, or Cloudflare Workers).
-                </li>
-                <li>
-                  Dinou <strong>never automatically injects or inlines</strong> <code>process.env</code> variables into client-side JavaScript bundles.
-                </li>
-                <li>
-                  Variables are evaluated dynamically at server runtime, ensuring that secrets can be updated without rebuilding your static code.
-                </li>
-              </ul>
 
               <div className="grid gap-4 sm:grid-cols-3 not-prose my-6">
-                <Card className="border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-900/10">
+                <Card className="border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/10">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
                       <ShieldCheck className="h-4 w-4" />
@@ -94,31 +80,31 @@ export default function Page() {
                     </div>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground">
-                    Bundlers will never leak <code>.env</code> values into client chunks. Secrets stay 100% on the server.
+                    Bundlers never inject <code>process.env</code> into client chunks. Secrets never reach the browser.
                   </CardContent>
                 </Card>
 
-                <Card className="border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10">
+                <Card className="border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/10">
                   <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm">
+                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold text-sm">
                       <Cloud className="h-4 w-4" />
                       <span>Multi-Runtime Ready</span>
                     </div>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground">
-                    Works seamlessly across Node.js, Bun, Deno, and Cloudflare Workers (<code>platformContext.env</code>).
+                    Use <code>process.env</code> across Node, Bun, and Deno, and <code>getContext().env</code> for Cloudflare Workers bindings.
                   </CardContent>
                 </Card>
 
-                <Card className="border-purple-500/20 bg-purple-50/50 dark:bg-purple-900/10">
+                <Card className="border-slate-500/20 bg-slate-50/50 dark:bg-slate-900/20">
                   <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold text-sm">
-                      <Lock className="h-4 w-4" />
+                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-semibold text-sm">
+                      <Lock className="h-4 w-4 text-emerald-500" />
                       <span>Bot Shield Protected</span>
                     </div>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground">
-                    Dinou&apos;s built-in HTTP scanner filter rejects all requests targeting <code>.env</code> files.
+                    Dinou&apos;s core HTTP scanner defense immediately rejects external requests targeting <code>.env</code> files.
                   </CardContent>
                 </Card>
               </div>
@@ -128,10 +114,7 @@ export default function Page() {
             <section id="server-security-model" className="mt-12">
               <h2>The Server-Only Security Model</h2>
               <p>
-                In many single-page frameworks, developers are used to prefixing variables (like <code>NEXT_PUBLIC_</code> or <code>VITE_</code>) to expose them to the browser. While convenient, this often leads developers to mistakenly believe client-side code is a safe place to hold secrets.
-              </p>
-              <p>
-                Dinou takes an explicit approach: <strong>Client Components cannot access <code>process.env</code> directly</strong>. If a client component needs a configuration value (such as a public analytics ID or Stripe publishable key), you pass it explicitly as a prop from a Server Component.
+                In Dinou, <strong>Client Components cannot access <code>process.env</code> directly</strong>. If a client component needs a configuration value (such as a public analytics ID or Stripe publishable key), pass it explicitly as a prop from a Server Component.
               </p>
 
               {/* Sub-section: Where They Work */}
@@ -143,7 +126,7 @@ export default function Page() {
                 <div className="grid gap-3 sm:grid-cols-2 not-prose my-4">
                   <div className="p-3.5 rounded-lg border bg-card space-y-1">
                     <div className="flex items-center gap-2 font-semibold text-xs text-foreground">
-                      <Server className="h-4 w-4 text-blue-500" />
+                      <Server className="h-4 w-4 text-emerald-500" />
                       <span>Server Components (RSC)</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -153,7 +136,7 @@ export default function Page() {
 
                   <div className="p-3.5 rounded-lg border bg-card space-y-1">
                     <div className="flex items-center gap-2 font-semibold text-xs text-foreground">
-                      <Zap className="h-4 w-4 text-purple-500" />
+                      <Zap className="h-4 w-4 text-amber-500" />
                       <span>Server Functions (&quot;use server&quot;)</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -174,10 +157,10 @@ export default function Page() {
                   <div className="p-3.5 rounded-lg border bg-card space-y-1">
                     <div className="flex items-center gap-2 font-semibold text-xs text-foreground">
                       <Terminal className="h-4 w-4 text-amber-500" />
-                      <span>Server Adapters &amp; Middleware</span>
+                      <span>Plugins &amp; Server Config</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Configure server ports, session cookies, and runtime flags in your HTTP handlers.
+                      Read environment variables (such as <code>PORT</code> or service keys) in <code>dinou.config.mjs</code> and plugins.
                     </p>
                   </div>
                 </div>
@@ -243,7 +226,7 @@ export default function CheckoutPage() {
 
             {/* Defining .env files */}
             <section id="env-files" className="mt-12">
-              <h2>Defining .env Files &amp; Precedence</h2>
+              <h2>Defining .env Files</h2>
               <p>
                 In local development, Dinou loads variables from your project root <code>.env</code> file:
               </p>
@@ -291,14 +274,14 @@ APP_URL="http://localhost:3000"`}
             <section id="platforms-runtimes" className="mt-12">
               <h2>Multi-Platform Runtimes</h2>
               <p>
-                Dinou is runtime-agnostic. Depending on your deployment target, variables are resolved according to each platform&apos;s standard convention:
+                Dinou is runtime-agnostic. For standard environment variables and secrets (like <code>DATABASE_URL</code> or <code>API_SECRET</code>), you can write <code>process.env</code> uniformly across all deployment targets:
               </p>
 
               {/* Sub-section: Node.js & Bun */}
               <div id="node-bun" className="mt-8 space-y-3">
                 <h3 className="text-lg font-bold">Node.js &amp; Bun (process.env)</h3>
                 <p>
-                  In standard Node.js and Bun server adapters, environment variables reside on the global <code>process.env</code> object:
+                  In Node.js and Bun server adapters, environment variables reside natively on the global <code>process.env</code> object:
                 </p>
                 <CodeBlock
                   language="typescript"
@@ -314,39 +297,51 @@ const port = Number(process.env.PORT || 3000);`}
 
               {/* Sub-section: Cloudflare Workers */}
               <div id="cloudflare" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">Cloudflare Workers (platformContext.env)</h3>
+                <h3 className="text-lg font-bold">Cloudflare Workers (process.env &amp; Bindings)</h3>
                 <p>
-                  In Cloudflare Workers and Cloudflare Pages, environment variables, secrets, and bindings (like KV namespaces, D1 databases, or R2 buckets) do not live on a global <code>process.env</code> object.
+                  In Cloudflare Workers, standard text secrets and environment variables configured in <code>wrangler.toml</code> or the Cloudflare dashboard are available via <code>process.env</code> (when <code>compatibility_flags = [&quot;nodejs_compat&quot;]</code> is enabled) or via <code>getContext().env</code>:
                 </p>
-                <p>
-                  Dinou passes the Worker environment object directly through <code>platformContext.env</code>:
-                </p>
+
+                <div className="rounded-xl border border-amber-500/20 bg-amber-50/40 dark:bg-amber-950/10 p-4 not-prose space-y-2 my-4">
+                  <div className="flex items-center gap-2 font-semibold text-sm text-amber-700 dark:text-amber-400">
+                    <Layers className="h-4 w-4" />
+                    <span>Cloudflare Resource Bindings vs. Environment Variables</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    By definition, <code>.env</code> files and <code>process.env</code> only store plain text strings. However, Cloudflare also provides <strong>Resource Bindings</strong> (live JavaScript instances with async methods for KV, D1 SQL databases, and R2 buckets) through its runtime <code>env</code> object. In Dinou, you can access both text secrets and live resource bindings uniformly anywhere on the server via <code>getContext().env</code>.
+                  </p>
+                </div>
+
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// Inside page_functions.ts or custom server handlers:
-export async function getProps(context) {
-  // In Cloudflare Workers, platformContext.env contains secrets and bindings:
-  const env = context.platformContext?.env || process.env;
-  
-  // Access secrets configured in wrangler.toml or Cloudflare dashboard:
-  const apiSecret = env.MY_API_SECRET;
-  
-  // Access KV or D1 bindings:
-  const kv = env.MY_KV_NAMESPACE;
-  const user = await kv.get("user:123");
+{`import { getContext } from "dinou";
+
+// Inside page_functions.ts (getProps), Server Components, or Server Functions:
+export async function getProps(params) {
+  // 1. Text secrets (work via process.env or getContext().env):
+  const apiSecret = process.env.MY_API_SECRET;
+
+  // 2. Cloudflare Resource Bindings (KV, D1, R2 live objects):
+  const { env } = getContext();
+  const kv = env?.MY_KV_NAMESPACE;
+  const user = kv ? await kv.get("user:123") : null;
 
   return { user };
 }`}
                 </CodeBlock>
+
+                <p className="text-xs text-muted-foreground">
+                  Inside Server Functions (<code>&quot;use server&quot;</code>), call <code>getContext()</code> directly to access D1 databases (<code>env.DB</code>) or KV namespaces for database queries and mutations.
+                </p>
               </div>
 
               {/* Sub-section: Deno */}
               <div id="deno" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">Deno (Deno.env &amp; Permissions)</h3>
+                <h3 className="text-lg font-bold">Deno (process.env &amp; --allow-env)</h3>
                 <p>
-                  In Deno, environment variable access is protected by Deno&apos;s security sandbox. When running Dinou with Deno, ensure the <code>--allow-env</code> permission flag is enabled:
+                  In Deno, environment variable access is protected by Deno&apos;s security sandbox. When launching Dinou on Deno, enable the <code>--allow-env</code> permission flag:
                 </p>
                 <CodeBlock
                   language="bash"
@@ -355,7 +350,7 @@ export async function getProps(context) {
 {`deno run --allow-net --allow-read --allow-write --allow-env dinou/adapters/deno.js`}
                 </CodeBlock>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  In application code, Dinou normalizes Deno variables so you can access them via <code>Deno.env.get(&quot;KEY&quot;)</code> or the Node-compatible <code>process.env.KEY</code>.
+                  With <code>--allow-env</code> active, Deno&apos;s native Node compatibility allows you to read variables via <code>process.env.KEY</code> uniformly, or via <code>Deno.env.get(&quot;KEY&quot;)</code>.
                 </p>
               </div>
             </section>
