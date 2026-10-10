@@ -778,7 +778,7 @@ export async function completeOrder(orderId: string) {
                           </span>
                         </div>
                         <p className="text-muted-foreground leading-relaxed">
-                          Occurs inside <code>getProps()</code> in <code>page_functions.ts</code>, at the top level of the root <code>page.tsx</code> Server Component (outside any <code>&lt;Suspense&gt;</code> boundary), or in a global plugin hook (<code>onRequestContext</code>) in <code>dinou.config.mjs</code>.
+                          Occurs inside <code>getProps()</code> in <code>page_functions.ts</code>, at the top level of the root <code>page.tsx</code> Server Component (outside any <code>&lt;Suspense&gt;</code> boundary), or in a global plugin hook (<code>onRequest</code>) in <code>dinou.config.mjs</code>.
                         </p>
                         <p className="text-muted-foreground leading-relaxed">
                           Because zero HTML bytes have reached the wire (<code>headersSent === false</code>), Dinou issues a clean <strong>HTTP 302</strong> with a <code>Location</code> header. <strong>Crucial for SEO crawlers and search indexers.</strong>
@@ -793,8 +793,7 @@ export async function completeOrder(orderId: string) {
                               label: "page_functions.ts",
                               language: "typescript",
                               code: `// src/dashboard/page_functions.ts
-import { redirect } from "dinou";
-import { getContext } from "dinou/server";
+import { redirect, getContext } from "dinou";
 
 export async function getProps() {
   const { req } = getContext();
@@ -810,8 +809,7 @@ export async function getProps() {
                               label: "page.tsx (Server Component)",
                               language: "tsx",
                               code: `// src/dashboard/page.tsx (Server Component root)
-import { redirect } from "dinou";
-import { getContext } from "dinou/server";
+import { redirect, getContext } from "dinou";
 
 export default async function DashboardPage() {
   const { req } = getContext();
@@ -828,19 +826,23 @@ export default async function DashboardPage() {
                               label: "dinou.config.mjs (Plugin)",
                               language: "javascript",
                               code: `// dinou.config.mjs (Global Plugin Hook)
-export default {
+import { defineConfig } from "dinou/config";
+
+export default defineConfig({
   plugins: [
     {
       name: "auth-guard",
-      onRequestContext(req, res, context) {
+      async onRequest(request, context) {
+        const url = new URL(request.url);
+        const cookieHeader = request.headers.get("cookie") || "";
         // Runs pre-flight before SSR or route resolution
-        if (req.path.startsWith("/dashboard") && !req.cookies.session_token) {
-          return context.res.redirect("/login");
+        if (url.pathname.startsWith("/dashboard") && !cookieHeader.includes("session_token=")) {
+          return Response.redirect(new URL("/login", request.url), 302);
         }
       },
     },
   ],
-};`,
+});`,
                             },
                           ]}
                         />
