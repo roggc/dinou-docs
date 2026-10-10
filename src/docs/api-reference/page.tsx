@@ -48,8 +48,17 @@ const tocItems = [
   { id: "usepathname-server", title: "in Server Components", level: 4 },
   { id: "usepathname-client", title: "in Client Components", level: 4 },
   { id: "userouter", title: "useRouter()", level: 3 },
+  { id: "userouter-methods", title: "Methods Reference", level: 4 },
+  { id: "userouter-caching", title: "Client Cache & Options", level: 4 },
+  { id: "userouter-examples", title: "Production Patterns", level: 4 },
   { id: "refreshslot", title: "refreshSlot()", level: 3 },
+  { id: "refreshslot-parameters", title: "Parameters & Wildcard", level: 4 },
+  { id: "refreshslot-architecture", title: "Targeted Revalidation", level: 4 },
+  { id: "refreshslot-examples", title: "Production Patterns", level: 4 },
   { id: "usenavigationloading", title: "useNavigationLoading()", level: 3 },
+  { id: "usenavigationloading-behavior", title: "Trigger Events & SSR", level: 4 },
+  { id: "usenavigationloading-architecture", title: "Non-Blocking Transitions", level: 4 },
+  { id: "usenavigationloading-examples", title: "Production Indicators", level: 4 },
   { id: "server-context-config", title: "3. Server Context & Config (dinou)", level: 2 },
   { id: "getcontext", title: "getContext()", level: 3 },
   { id: "defineconfig", title: "defineConfig() & DinouConfig", level: 3 },
@@ -1162,135 +1171,838 @@ export function NavLink({ href, children, exact = false }: NavLinkProps) {
               </section>
 
               <section id="userouter" className="scroll-mt-20 mt-8">
-                <h3>
-                  <code>useRouter()</code>
-                  <span className="ml-2 text-xs font-normal text-muted-foreground">(Client Only)</span>
-                </h3>
-                <p>
-                  Provides imperative navigation and cache refreshing methods inside Client Components.
+                <div className="flex items-center gap-2">
+                  <h3 className="m-0">
+                    <code>useRouter()</code>
+                  </h3>
+                  <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                    "use client"
+                  </span>
+                  <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                    Type-Safe Routing
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  Provides programmatic navigation, browser history controls, and cache refreshing methods inside Client Components. It enables smooth client-side navigation without full page reloads, letting you redirect users after actions (like form submissions) or refresh server data while keeping your client state intact.
                 </p>
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-                  {`"use client";
-import { useRouter } from "dinou";
 
-export default function NavigationControls() {
+                {/* Client-Only Execution Notice */}
+                <div className="p-3.5 rounded-lg bg-card border border-border not-prose my-4 space-y-2 text-xs">
+                  <div className="font-semibold text-foreground flex items-center gap-1.5">
+                    <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>Client-Only Execution</span>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed">
+                    <code>useRouter()</code> is strictly a <strong>Client Component hook</strong> and must only be used in files with <code>&quot;use client&quot;</code>. Navigation methods (such as <code>push</code> or <code>replace</code>) must be invoked inside browser event handlers (e.g. <code>onClick</code>, <code>onSubmit</code>) or <code>useEffect</code>. To navigate or redirect from <strong>Server Components</strong> or <strong>Server Functions</strong>, use the universal <code>redirect(&quot;/path&quot;)</code> function instead.
+                  </p>
+                </div>
+
+                {/* ============================================================= */}
+                {/* SUBSECTION 1: METHODS REFERENCE */}
+                {/* ============================================================= */}
+                <div id="userouter-methods" className="scroll-mt-20 mt-6 pt-4 border-t border-border/60">
+                  <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
+                    <Code2 className="h-4 w-4 text-emerald-500" />
+                    <span>Methods Reference</span>
+                  </h4>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    All navigation methods are fully typed. Routes are autocompleted and validated at compile time via the <code>DinouRoute</code> union type.
+                  </p>
+
+                  <div className="not-prose overflow-x-auto rounded-lg border border-border mt-3">
+                    <table className="w-full text-xs text-left border-collapse min-w-[700px]">
+                      <thead className="bg-muted/50 border-b border-border text-muted-foreground font-semibold">
+                        <tr>
+                          <th className="p-3">Method</th>
+                          <th className="p-3">Signature</th>
+                          <th className="p-3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border bg-card text-muted-foreground">
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">push</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                            (href: DinouRoute, options?: NavigationOptions) =&gt; void
+                          </td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Navigates to <code>href</code> and pushes a new entry onto the browser history stack. Validates route patterns via <code>DinouRoute</code>. Pass <code>&#123; fresh: true &#125;</code> to bypass the client-side memory cache and force a new flight request to the server.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">replace</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                            (href: DinouRoute, options?: NavigationOptions) =&gt; void
+                          </td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Navigates to <code>href</code> by replacing the current browser history entry (preventing the back button from returning to the previous screen). Also supports <code>&#123; fresh: true &#125;</code>.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">back</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                            () =&gt; void
+                          </td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Navigates back to the preceding entry in the browser history stack (equivalent to executing <code>window.history.back()</code> or clicking the browser&apos;s Back button). Restores saved scroll position automatically.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">forward</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                            () =&gt; void
+                          </td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Navigates forward to the next entry in the browser history stack (equivalent to executing <code>window.history.forward()</code>).
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">refresh</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                            (options?: &#123; layout?: boolean &#125;) =&gt; void
+                          </td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Performs a <strong>Soft Reload</strong>: purges the active page from the client memory cache, requests a fresh RSC payload from the server, and reconciles the DOM in a transition without reloading the browser or wiping client <code>useState</code>. Pass <code>&#123; layout: true &#125;</code> to invalidate the layout cache and re-render server layouts as well.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">refreshSlot</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                            (slotId: string, options?: &#123; fresh?: boolean &#125;) =&gt; void
+                          </td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Revalidates an isolated <code>&lt;DinouCacheSlot&gt;</code> on the current page without re-rendering or refetching surrounding components or layouts. Pass <code>&#123; fresh: true &#125;</code> to bypass the slot&apos;s server-side storage cache (ignoring any unexpired revalidate TTL) and force an immediate live re-render on the backend. This method is <strong>completely equivalent</strong> to the standalone <a href="#refreshslot" className="text-primary underline"><code>refreshSlot()</code></a> helper exported directly from <code>&quot;dinou&quot;</code>.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* ============================================================= */}
+                {/* SUBSECTION 2: CLIENT CACHE & REFRESH OPTIONS */}
+                {/* ============================================================= */}
+                <div id="userouter-caching" className="scroll-mt-20 mt-8 pt-4 border-t border-border/60">
+                  <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-amber-500" />
+                    <span>Client Cache &amp; Refresh Architecture</span>
+                  </h4>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    Dinou maintains an in-memory client-side cache (<code>pageCache</code> and <code>layoutCache</code>) to guarantee instant, 0ms latency when users navigate between previously visited routes. Understanding how to manage this cache is essential when mutating data or building real-time dashboards.
+                  </p>
+
+                  <div className="grid md:grid-cols-2 gap-4 my-4 not-prose text-xs">
+                    <div className="p-4 rounded-lg bg-card border border-border space-y-2">
+                      <div className="font-semibold text-foreground flex items-center gap-1.5">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                        <span>The <code>&#123; fresh: true &#125;</code> Option</span>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        By default, navigating to a previously visited URL retrieves its cached RSC flight tree. When a user submits an order, changes their profile, or deletes an item, pass <code>&#123; fresh: true &#125;</code> to <code>router.push()</code> or <code>router.replace()</code>.
+                      </p>
+                      <p className="text-muted-foreground leading-relaxed">
+                        This immediately purges the target route from <code>pageCache</code>, ensuring the client receives updated server-rendered data without relying on stale client memory.
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-lg bg-card border border-border space-y-2">
+                      <div className="font-semibold text-foreground flex items-center gap-1.5">
+                        <Layers className="h-4 w-4 text-blue-500" />
+                        <span>The <code>&#123; layout: true &#125;</code> Option</span>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        To optimize performance, Dinou reuses parent layout Server Components across page transitions. Calling <code>router.refresh()</code> re-runs page components while keeping the layout intact.
+                      </p>
+                      <p className="text-muted-foreground leading-relaxed">
+                        If your mutation impacts layout-level elements (such as updating an organization switcher, unread message badges in the global navbar, or user profile headers), pass <code>router.refresh(&#123; layout: true &#125;)</code> to re-evaluate and re-render layout Server Components.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Soft Reload vs Hard Reload Comparison */}
+                  <div className="not-prose rounded-lg border border-border bg-card p-4 text-xs space-y-3">
+                    <div className="font-semibold text-foreground text-sm flex items-center gap-2">
+                      <ArrowRightLeft className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                      <span>Soft Reload (<code>router.refresh()</code>) vs. Hard Reload (<code>window.location.reload()</code>)</span>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5 bg-emerald-500/5 p-3 rounded border border-emerald-500/20">
+                        <div className="font-semibold text-emerald-700 dark:text-emerald-300">
+                          router.refresh() (Soft Reload)
+                        </div>
+                        <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+                          <li>Fetches updated RSC stream directly from the server.</li>
+                          <li><strong>Preserves React state:</strong> <code>useState</code>, input cursor, and modal open states remain intact.</li>
+                          <li>Smooth visual transition without white screen flashes.</li>
+                          <li>Maintains client-side scroll position.</li>
+                        </ul>
+                      </div>
+                      <div className="space-y-1.5 bg-muted/40 p-3 rounded border border-border">
+                        <div className="font-semibold text-foreground">
+                          window.location.reload() (Hard Reload)
+                        </div>
+                        <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+                          <li>Destroys the entire JavaScript execution context.</li>
+                          <li><strong>Wipes all client state:</strong> forms, focused elements, and in-memory caches are lost.</li>
+                          <li>Full browser document reload with visible white flash.</li>
+                          <li>Re-downloads and re-executes all static assets and bundles.</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ============================================================= */}
+                {/* SUBSECTION 3: PRODUCTION PATTERNS */}
+                {/* ============================================================= */}
+                <div id="userouter-examples" className="scroll-mt-20 mt-8 pt-4 border-t border-border/60">
+                  <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
+                    <Sliders className="h-4 w-4 text-emerald-500" />
+                    <span>Production Implementation Patterns</span>
+                  </h4>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    Explore canonical implementations for post-mutation redirection, live polling, and targeted slot revalidation.
+                  </p>
+
+                  <div className="not-prose my-4">
+                    <TabbedCodeBlock
+                      defaultTab="mutation"
+                      tabs={[
+                        {
+                          id: "mutation",
+                          label: "post-mutation.tsx (Form Action)",
+                          language: "tsx",
+                          code: `// src/components/create-product-form.tsx (Client Component)
+"use client";
+
+import { useTransition, useState } from "react";
+import { useRouter } from "dinou";
+import { createProductAction } from "@/actions/products";
+
+export function CreateProductForm() {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    startTransition(async () => {
+      try {
+        const result = await createProductAction(formData);
+        
+        // Navigate with fresh: true to bypass client cache and show live data
+        router.push(\`/products/\${result.id}\`, { fresh: true });
+      } catch (err: any) {
+        setError(err.message || "Failed to create product");
+      }
+    });
+  };
 
   return (
-    <div className="flex gap-2">
-      <button onClick={() => router.push("/catalog")}>Push</button>
-      <button onClick={() => router.replace("/catalog")}>Replace</button>
-      <button onClick={() => router.push("/orders", { fresh: true })}>Fresh Fetch</button>
-      <button onClick={() => router.back()}>Back</button>
-      <button onClick={() => router.forward()}>Forward</button>
-      <button onClick={() => router.refresh()}>Soft Refresh</button>
-      <button onClick={() => router.refreshSlot("user-cart")}>Refresh Cart Slot</button>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <input name="title" placeholder="Product name..." required />
+      <button type="submit" disabled={isPending}>
+        {isPending ? "Creating..." : "Create Product"}
+      </button>
+      {error && <p className="text-red-500">{error}</p>}
+    </form>
+  );
+}`,
+                        },
+                        {
+                          id: "polling",
+                          label: "live-poller.tsx (Live Dashboard)",
+                          language: "tsx",
+                          code: `// src/components/live-metrics-header.tsx (Client Component)
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "dinou";
+
+export function LiveMetricsHeader() {
+  const router = useRouter();
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+  const [searchFilter, setSearchFilter] = useState("");
+
+  useEffect(() => {
+    // Polls fresh server data every 30 seconds
+    const interval = setInterval(() => {
+      // Soft reloads server components: local searchFilter and focus are preserved!
+      router.refresh();
+      setLastRefreshed(new Date());
+    }, 30_000);
+
+    return () => clearInterval(interval);
+  }, [router]);
+
+  return (
+    <div className="flex items-center justify-between p-4 border-b">
+      <div>
+        <h2 className="font-semibold text-sm">Real-Time Metrics</h2>
+        <span className="text-xs text-muted-foreground">
+          Last updated: {lastRefreshed.toLocaleTimeString()}
+        </span>
+      </div>
+
+      {/* Local state is NOT wiped when router.refresh() runs in the background */}
+      <input
+        type="search"
+        value={searchFilter}
+        onChange={(e) => setSearchFilter(e.target.value)}
+        placeholder="Filter metrics locally..."
+        className="text-xs px-2 py-1 border rounded"
+      />
+
+      <button
+        onClick={() => {
+          router.refresh({ layout: true });
+          setLastRefreshed(new Date());
+        }}
+        className="text-xs bg-secondary px-3 py-1.5 rounded hover:bg-secondary/80"
+      >
+        Refresh All (Including Layout)
+      </button>
     </div>
   );
-}`}
-                </CodeBlock>
+}`,
+                        },
+                        {
+                          id: "slot-refresh",
+                          label: "cart-drawer.tsx (Slot Revalidation)",
+                          language: "tsx",
+                          code: `// src/components/cart-drawer.tsx (Client Component)
+"use client";
 
-                <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-muted text-muted-foreground font-medium">
-                      <tr>
-                        <th className="p-4">Method</th>
-                        <th className="p-4">Signature</th>
-                        <th className="p-4">Description</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border bg-card">
-                      <tr>
-                        <td className="p-4 font-mono text-xs font-semibold text-primary">push</td>
-                        <td className="p-4 font-mono text-xs">(href: DinouRoute, options?: NavigationOptions) =&gt; void</td>
-                        <td className="p-4 text-xs">
-                          Navigates to <code>href</code> (autocompleted via <code>DinouRoute</code>) and pushes a new entry onto the browser history stack. Pass <code>&#123; fresh: true &#125;</code> to bypass the client cache.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="p-4 font-mono text-xs font-semibold text-primary">replace</td>
-                        <td className="p-4 font-mono text-xs">(href: DinouRoute, options?: NavigationOptions) =&gt; void</td>
-                        <td className="p-4 text-xs">
-                          Replaces the current history entry without pushing a new one. Supports <code>&#123; fresh: true &#125;</code>.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="p-4 font-mono text-xs font-semibold text-primary">back</td>
-                        <td className="p-4 font-mono text-xs">() =&gt; void</td>
-                        <td className="p-4 text-xs">Navigates back to the previous entry in browser history.</td>
-                      </tr>
-                      <tr>
-                        <td className="p-4 font-mono text-xs font-semibold text-primary">forward</td>
-                        <td className="p-4 font-mono text-xs">() =&gt; void</td>
-                        <td className="p-4 text-xs">Navigates forward to the next entry in browser history.</td>
-                      </tr>
-                      <tr>
-                        <td className="p-4 font-mono text-xs font-semibold text-primary">refresh</td>
-                        <td className="p-4 font-mono text-xs">(options?: &#123; layout?: boolean &#125;) =&gt; void</td>
-                        <td className="p-4 text-xs">
-                          Triggers a soft reload: invalidates client cache for the current route, refetches the server RSC payload, and updates the DOM without destroying client state. Pass <code>&#123; layout: true &#125;</code> to also re-render layouts.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="p-4 font-mono text-xs font-semibold text-primary">refreshSlot</td>
-                        <td className="p-4 font-mono text-xs">(slotId: string, options?: &#123; fresh?: boolean &#125;) =&gt; void</td>
-                        <td className="p-4 text-xs">
-                          Refetches and updates a specific <code>&lt;DinouCacheSlot&gt;</code> without re-rendering or refetching the surrounding page components.
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+import { useRouter } from "dinou";
+import { updateQuantityAction } from "@/actions/cart";
+
+export function CartItemRow({ item }: { item: { id: string; qty: number } }) {
+  const router = useRouter();
+
+  const handleUpdate = async (delta: number) => {
+    await updateQuantityAction(item.id, item.qty + delta);
+
+    // Surgically revalidates only the <DinouCacheSlot id="cart-counter" /> and
+    // <DinouCacheSlot id="cart-totals" /> without refetching the full page
+    router.refreshSlot("cart-counter", { fresh: true });
+    router.refreshSlot("cart-totals", { fresh: true });
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <button onClick={() => handleUpdate(-1)}>-</button>
+      <span>{item.qty}</span>
+      <button onClick={() => handleUpdate(1)}>+</button>
+    </div>
+  );
+}`,
+                        },
+                      ]}
+                    />
+                  </div>
+
+                  <div className="p-3.5 rounded-lg bg-card border border-border text-xs not-prose space-y-2 mt-4">
+                    <div className="font-semibold text-foreground flex items-center gap-1.5">
+                      <Zap className="h-3.5 w-3.5 text-amber-500" />
+                      <span>Coordination with <code>useNavigationLoading()</code></span>
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Every call to <code>router.push()</code>, <code>router.replace()</code>, or <code>router.refresh()</code> wraps its state updates in React&apos;s transition engine (<code>startTransition</code>). To show global loading spinners or top progress indicators across transitions, subscribe to the <a href="#usenavigationloading" className="text-primary underline"><code>useNavigationLoading()</code></a> hook.
+                    </p>
+                  </div>
                 </div>
               </section>
 
               <section id="refreshslot" className="scroll-mt-20 mt-8">
-                <h3>
-                  <code>refreshSlot(slotId: string, options?: &#123; fresh?: boolean &#125;)</code>
-                </h3>
-                <p>
-                  A standalone client-side helper exported directly from <code>"dinou"</code>. Allows any event handler or client utility to trigger targeted revalidation of a specific <code>&lt;DinouCacheSlot&gt;</code> by its ID or tag without having to instantiate the <code>useRouter()</code> hook.
+                <div className="flex items-center gap-2">
+                  <h3 className="m-0">
+                    <code>refreshSlot()</code>
+                  </h3>
+                  <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                    "use client"
+                  </span>
+                  <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400 ring-1 ring-inset ring-purple-500/20">
+                    Micro-ISR Primitives
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  A standalone client-side helper that triggers targeted, isolated revalidation of one or all <code>&lt;DinouCacheSlot&gt;</code> components on the active page. Because it is a pure JavaScript function rather than a React hook, it can be called from anywhere in your client application—including React components, external event listeners, WebSocket handlers, and state management stores.
                 </p>
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-                  {`import { refreshSlot } from "dinou";
 
-// Triggered from an independent analytics or websocket listener
-function onStockUpdate(stockSymbol: string) {
-  refreshSlot(\`stock-\${stockSymbol}\`, { fresh: true });
-}`}
-                </CodeBlock>
+                {/* Equivalence Callout */}
+                <div className="p-3.5 rounded-lg bg-card border border-border not-prose my-4 space-y-1.5 text-xs">
+                  <div className="font-semibold text-foreground flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    <span>Equivalence with <code>router.refreshSlot()</code></span>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed">
+                    <code>refreshSlot(slotId, options)</code> is <strong>100% equivalent</strong> to <code>router.refreshSlot(slotId, options)</code> from <code>useRouter()</code>. While <code>useRouter()</code> requires a React component context, this standalone export can be called inside global callbacks, timers, or third-party service listeners without instantiating any hooks.
+                  </p>
+                </div>
+
+                {/* ============================================================= */}
+                {/* SUBSECTION 1: PARAMETERS & WILDCARDS */}
+                {/* ============================================================= */}
+                <div id="refreshslot-parameters" className="scroll-mt-20 mt-6 pt-4 border-t border-border/60">
+                  <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
+                    <Code2 className="h-4 w-4 text-emerald-500" />
+                    <span>Parameters &amp; Wildcard Support</span>
+                  </h4>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    Accepts a specific slot ID or a wildcard string to update multiple slots in parallel.
+                  </p>
+
+                  <div className="not-prose overflow-x-auto rounded-lg border border-border mt-3">
+                    <table className="w-full text-xs text-left border-collapse min-w-[650px]">
+                      <thead className="bg-muted/50 border-b border-border text-muted-foreground font-semibold">
+                        <tr>
+                          <th className="p-3">Parameter</th>
+                          <th className="p-3">Type</th>
+                          <th className="p-3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border bg-card text-muted-foreground">
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">slotId</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                            string
+                          </td>
+                          <td className="p-3 align-top leading-relaxed space-y-1">
+                            <p>
+                              The unique identifier matching the <code>id</code> prop of a mounted <code>&lt;DinouCacheSlot&gt;</code> (e.g. <code>&quot;cart-counter&quot;</code>, <code>&quot;stock-aapl&quot;</code>).
+                            </p>
+                            <p className="text-[11px] text-foreground font-semibold">
+                              Wildcard <code>&quot;*&quot;</code> Support:
+                            </p>
+                            <p>
+                              Passing <code>&quot;*&quot;</code> targets <strong>every active slot</strong> mounted on the current page simultaneously, executing their revalidation in parallel with a single call.
+                            </p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">options.fresh</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                            boolean (optional)
+                          </td>
+                          <td className="p-3 align-top leading-relaxed space-y-1">
+                            <p>
+                              Controls whether the server can return cached slot storage:
+                            </p>
+                            <ul className="list-disc pl-4 space-y-0.5">
+                              <li>
+                                <strong><code>false</code> (default):</strong> Checks the server-side cache. If the slot&apos;s revalidation TTL has not expired, returns the cached result.
+                              </li>
+                              <li>
+                                <strong><code>true</code>:</strong> Bypasses the server-side cache entirely (even if the TTL is still valid), forces an immediate live re-render on the backend, updates the storage cache, and delivers fresh UI to the client.
+                              </li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* ============================================================= */}
+                {/* SUBSECTION 2: TARGETED REVALIDATION ARCHITECTURE */}
+                {/* ============================================================= */}
+                <div id="refreshslot-architecture" className="scroll-mt-20 mt-8 pt-4 border-t border-border/60">
+                  <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
+                    <Layers className="h-4 w-4 text-purple-500" />
+                    <span>Targeted Revalidation Architecture</span>
+                  </h4>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    How client-side slot refreshing delivers surgical UI updates without full page or route re-rendering.
+                  </p>
+
+                  <div className="grid md:grid-cols-2 gap-4 my-4 not-prose text-xs">
+                    <div className="p-4 rounded-lg bg-card border border-border space-y-2">
+                      <div className="font-semibold text-foreground flex items-center gap-1.5">
+                        <Zap className="h-4 w-4 text-amber-500" />
+                        <span>Surgical Component-Level Updates</span>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Unlike full route reloads (which re-run page Server Components), <code>refreshSlot()</code> communicates directly with the specific mounted <code>&lt;DinouCacheSlot&gt;</code> sub-tree.
+                      </p>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Surrounding components, parent layouts, and sibling elements are completely untouched. Local client state (input focus, scroll position, and open modals) remains completely stable.
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-lg bg-card border border-border space-y-2">
+                      <div className="font-semibold text-foreground flex items-center gap-1.5">
+                        <ArrowRightLeft className="h-4 w-4 text-emerald-500" />
+                        <span>Client vs. Server Revalidation</span>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        <strong>Server-Side (<code>revalidateTag</code> / <code>revalidatePath</code> / <code>revalidatePage</code>):</strong> Purges cached HTML/JSON in storage during background jobs or server actions. Affects future incoming visits.
+                      </p>
+                      <p className="text-muted-foreground leading-relaxed">
+                        <strong>Client-Side (<code>refreshSlot</code>):</strong> Actively pulls and renders the new UI into the user&apos;s current browser session in real time without refreshing the page.
+                      </p>
+                    </div>
+
+                    <div className="md:col-span-2 p-4 rounded-lg bg-card border border-border space-y-2">
+                      <div className="font-semibold text-foreground flex items-center gap-1.5">
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                        <span>Why <code>refreshSlot(&quot;*&quot;, &#123; fresh: true &#125;)</code> is Unique</span>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        When you execute a soft route refresh via <code>router.refresh()</code>, Dinou re-runs the outer page Server Component, but any mounted <code>&lt;DinouCacheSlot&gt;</code> continues serving its cached JSX from storage as long as its <code>revalidate</code> TTL has not expired.
+                      </p>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Because <code>router.refresh()</code> cannot pass freshness parameters down to individual slot caches, calling <code>refreshSlot(&quot;*&quot;, &#123; fresh: true &#125;)</code> is the only client mechanism available to command every cached slot component on the active page to bypass storage and recalculate live on the server.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ============================================================= */}
+                {/* SUBSECTION 3: PRODUCTION PATTERNS */}
+                {/* ============================================================= */}
+                <div id="refreshslot-examples" className="scroll-mt-20 mt-8 pt-4 border-t border-border/60">
+                  <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
+                    <Sliders className="h-4 w-4 text-emerald-500" />
+                    <span>Production Implementation Patterns</span>
+                  </h4>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    Explore real-world patterns for real-time WebSocket events, wildcard dashboard refreshing, and external state stores.
+                  </p>
+
+                  <div className="not-prose my-4">
+                    <TabbedCodeBlock
+                      defaultTab="websocket"
+                      tabs={[
+                        {
+                          id: "websocket",
+                          label: "realtime-socket.ts (Pure JS Listener)",
+                          language: "typescript",
+                          code: `// src/services/realtime-socket.ts (Pure TypeScript / Non-React)
+import { refreshSlot } from "dinou";
+
+// Initialize WebSocket connection outside the React component tree
+const socket = new WebSocket("wss://api.example.com/realtime");
+
+socket.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+
+  if (message.type === "PRICE_UPDATE") {
+    // Surgically revalidates only the specific ticker slot in the active page
+    refreshSlot(\`ticker-\${message.symbol.toLowerCase()}\`, { fresh: true });
+  }
+
+  if (message.type === "NOTIFICATION_RECEIVED") {
+    // Updates the unread counter badge slot
+    refreshSlot("notifications-badge", { fresh: true });
+  }
+};`,
+                        },
+                        {
+                          id: "wildcard",
+                          label: "dashboard-toolbar.tsx (Wildcard Refresh)",
+                          language: "tsx",
+                          code: `// src/components/dashboard-toolbar.tsx (Client Component)
+"use client";
+
+import { useState } from "react";
+import { refreshSlot } from "dinou";
+
+export function DashboardToolbar() {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefreshAll = () => {
+    setIsRefreshing(true);
+
+    // "*" instructs Dinou to revalidate every mounted <DinouCacheSlot> across the page
+    refreshSlot("*", { fresh: true });
+
+    setTimeout(() => setIsRefreshing(false), 600);
+  };
+
+  return (
+    <div className="flex items-center justify-between p-4 bg-card border rounded-lg">
+      <h2 className="text-sm font-semibold">Analytics Overview</h2>
+      <button
+        onClick={handleRefreshAll}
+        disabled={isRefreshing}
+        className="px-3 py-1.5 text-xs bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
+      >
+        {isRefreshing ? "Updating all slots..." : "Refresh All Widgets"}
+      </button>
+    </div>
+  );
+}`,
+                        },
+                        {
+                          id: "mutation-store",
+                          label: "cart-store.ts (State Action)",
+                          language: "typescript",
+                          code: `// src/stores/cart-store.ts (Client Action / Store)
+import { refreshSlot } from "dinou";
+
+export async function onCartItemAdded(productId: string) {
+  await fetch(\`/api/cart/items\`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ productId, quantity: 1 }),
+  });
+
+  // Revalidate the cart summary slot and checkout totals immediately
+  refreshSlot("cart-summary", { fresh: true });
+  refreshSlot("checkout-totals", { fresh: true });
+}`,
+                        },
+                      ]}
+                    />
+                  </div>
+                </div>
               </section>
 
               <section id="usenavigationloading" className="scroll-mt-20 mt-8">
-                <h3>
-                  <code>useNavigationLoading()</code>
-                  <span className="ml-2 text-xs font-normal text-muted-foreground">(Client Only)</span>
-                </h3>
-                <p>
-                  A hook that returns a boolean indicating whether an asynchronous SPA client-side route transition is currently pending.
+                <div className="flex items-center gap-2">
+                  <h3 className="m-0">
+                    <code>useNavigationLoading()</code>
+                  </h3>
+                  <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                    "use client"
+                  </span>
+                  <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                    React 19 Transitions
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  A Client Component hook that returns a boolean indicating whether an asynchronous SPA client-side route navigation or soft refresh is currently in progress. It subscribes to Dinou&apos;s router transition state, allowing you to render sleek progress bars, loading spinners, or disabled button states while the server renders and streams the new route payload.
                 </p>
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-                  {`"use client";
+
+                {/* SSR Safety Callout */}
+                <div className="p-3.5 rounded-lg bg-card border border-border not-prose my-4 space-y-1.5 text-xs">
+                  <div className="font-semibold text-foreground flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    <span>SSR Safety &amp; Zero Hydration Mismatch</span>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed">
+                    On the server (during SSR and static build generation), <code>useNavigationLoading()</code> unconditionally returns <code>false</code>. This guarantees that initial server-rendered HTML documents are never emitted with flashing progress bars or active loading spinners, eliminating layout shifts and preventing hydration mismatch errors.
+                  </p>
+                </div>
+
+                {/* ============================================================= */}
+                {/* SUBSECTION 1: TRIGGER EVENTS & RUNTIME BEHAVIOR */}
+                {/* ============================================================= */}
+                <div id="usenavigationloading-behavior" className="scroll-mt-20 mt-6 pt-4 border-t border-border/60">
+                  <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
+                    <Code2 className="h-4 w-4 text-emerald-500" />
+                    <span>Trigger Events &amp; Scope</span>
+                  </h4>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    Overview of user actions that activate the transition state versus actions that remain localized.
+                  </p>
+
+                  <div className="not-prose overflow-x-auto rounded-lg border border-border mt-3">
+                    <table className="w-full text-xs text-left border-collapse min-w-[650px]">
+                      <thead className="bg-muted/50 border-b border-border text-muted-foreground font-semibold">
+                        <tr>
+                          <th className="p-3">Category</th>
+                          <th className="p-3">Trigger Mechanism</th>
+                          <th className="p-3">Activates Loading?</th>
+                          <th className="p-3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border bg-card text-muted-foreground">
+                        <tr>
+                          <td className="p-3 font-medium text-foreground align-top">Link Navigation</td>
+                          <td className="p-3 font-mono text-[11px] align-top">&lt;Link href=&quot;...&quot;&gt;</td>
+                          <td className="p-3 align-top font-semibold text-emerald-600 dark:text-emerald-400">Yes</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Internal page transitions via declarative Link components trigger React transitions immediately on click.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-medium text-foreground align-top">Imperative Navigation</td>
+                          <td className="p-3 font-mono text-[11px] align-top">router.push() / router.replace()</td>
+                          <td className="p-3 align-top font-semibold text-emerald-600 dark:text-emerald-400">Yes</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Programmatic redirects triggered in form submissions, callbacks, or buttons.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-medium text-foreground align-top">History Traversal</td>
+                          <td className="p-3 font-mono text-[11px] align-top">Browser Back / Forward / popstate</td>
+                          <td className="p-3 align-top font-semibold text-emerald-600 dark:text-emerald-400">Yes</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Activating browser history buttons triggers transition state while restoring the destination page.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-medium text-foreground align-top">Soft Route Reload</td>
+                          <td className="p-3 font-mono text-[11px] align-top">router.refresh()</td>
+                          <td className="p-3 align-top font-semibold text-emerald-600 dark:text-emerald-400">Yes</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Refetching the active route&apos;s RSC payload runs within a transition, preserving client state.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-medium text-foreground align-top">Targeted Micro-ISR</td>
+                          <td className="p-3 font-mono text-[11px] align-top">refreshSlot()</td>
+                          <td className="p-3 align-top font-semibold text-muted-foreground">No</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Localized slot revalidation uses its own internal <code>&lt;Suspense&gt;</code> boundary; does not toggle global navigation loading.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-medium text-foreground align-top">Deferred Data Streaming</td>
+                          <td className="p-3 font-mono text-[11px] align-top">&lt;Suspense fallback=&#123;...&#125;&gt;</td>
+                          <td className="p-3 align-top font-semibold text-muted-foreground">No</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Late-arriving streamed chunks inside an active view render their own fallbacks independently.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* ============================================================= */}
+                {/* SUBSECTION 2: CONCURRENT TRANSITION ARCHITECTURE */}
+                {/* ============================================================= */}
+                <div id="usenavigationloading-architecture" className="scroll-mt-20 mt-8 pt-4 border-t border-border/60">
+                  <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-amber-500" />
+                    <span>Non-Blocking Concurrent Transitions</span>
+                  </h4>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    How React 19 concurrent transitions keep the user interface responsive during flight fetches.
+                  </p>
+
+                  <div className="grid md:grid-cols-2 gap-4 my-4 not-prose text-xs">
+                    <div className="p-4 rounded-lg bg-card border border-border space-y-2">
+                      <div className="font-semibold text-foreground flex items-center gap-1.5">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                        <span>Responsive, Non-Freezing UI</span>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        In traditional single-page apps, clicking a link often causes the screen to freeze or clear immediately. In Dinou, navigations execute within React&apos;s <code>startTransition</code>.
+                      </p>
+                      <p className="text-muted-foreground leading-relaxed">
+                        The current screen remains fully responsive, interactive, and scrollable while the server computes and streams the destination page in the background.
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-lg bg-card border border-border space-y-2">
+                      <div className="font-semibold text-foreground flex items-center gap-1.5">
+                        <Layers className="h-4 w-4 text-blue-500" />
+                        <span>Atomic Screen Replacement</span>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Dinou preserves the existing view until the server has streamed enough of the new route to render its initial component shell.
+                      </p>
+                      <p className="text-muted-foreground leading-relaxed">
+                        The transition completes atomically: <code>useNavigationLoading()</code> flips back to <code>false</code> precisely when the new DOM is painted, eliminating blank screen flashes.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ============================================================= */}
+                {/* SUBSECTION 3: PRODUCTION INDICATORS */}
+                {/* ============================================================= */}
+                <div id="usenavigationloading-examples" className="scroll-mt-20 mt-8 pt-4 border-t border-border/60">
+                  <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
+                    <Sliders className="h-4 w-4 text-emerald-500" />
+                    <span>Production Implementation Patterns</span>
+                  </h4>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    Explore real-world patterns for top progress bars, accessible screen readers, and double-click navigation guards.
+                  </p>
+
+                  <div className="not-prose my-4">
+                    <TabbedCodeBlock
+                      defaultTab="progress-bar"
+                      tabs={[
+                        {
+                          id: "progress-bar",
+                          label: "top-progress-bar.tsx (Slim Top Bar)",
+                          language: "tsx",
+                          code: `// src/components/top-progress-bar.tsx (Client Component)
+"use client";
+
 import { useNavigationLoading } from "dinou";
 
-export default function TopProgressBar() {
+export function TopProgressBar() {
   const isNavigating = useNavigationLoading();
 
   if (!isNavigating) return null;
 
   return (
-    <div className="fixed top-0 left-0 w-full h-1 bg-blue-500 animate-pulse z-50" />
+    <div
+      role="progressbar"
+      aria-label="Loading page"
+      className="fixed top-0 left-0 right-0 h-0.5 z-50 bg-primary overflow-hidden shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+    >
+      <div className="h-full w-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-[shimmer_1.5s_infinite]" />
+    </div>
   );
-}`}
-                </CodeBlock>
+}`,
+                        },
+                        {
+                          id: "spinner",
+                          label: "global-spinner.tsx (Floating Status)",
+                          language: "tsx",
+                          code: `// src/components/global-spinner.tsx (Client Component)
+"use client";
+
+import { useNavigationLoading } from "dinou";
+
+export function GlobalNavigationIndicator() {
+  const isNavigating = useNavigationLoading();
+
+  if (!isNavigating) return null;
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-2 bg-card border rounded-full shadow-lg text-xs font-medium text-foreground transition-all"
+    >
+      <div className="h-3 w-3 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      <span>Loading content...</span>
+    </div>
+  );
+}`,
+                        },
+                        {
+                          id: "guard-button",
+                          label: "nav-button.tsx (Double-Click Guard)",
+                          language: "tsx",
+                          code: `// src/components/nav-button.tsx (Client Component)
+"use client";
+
+import { useNavigationLoading, useRouter } from "dinou";
+
+interface NavButtonProps {
+  href: string;
+  children: React.ReactNode;
+}
+
+export function NavButton({ href, children }: NavButtonProps) {
+  const router = useRouter();
+  const isNavigating = useNavigationLoading();
+
+  return (
+    <button
+      onClick={() => router.push(href)}
+      disabled={isNavigating}
+      className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+    >
+      {isNavigating ? "Navigating..." : children}
+    </button>
+  );
+}`,
+                        },
+                      ]}
+                    />
+                  </div>
+                </div>
               </section>
             </section>
 
