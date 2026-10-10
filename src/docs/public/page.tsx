@@ -15,20 +15,11 @@ import {
 import {
   FolderTree,
   Zap,
-  Globe,
-  FileText,
   ShieldCheck,
-  CheckCircle2,
-  XCircle,
-  Copy,
   ArrowRight,
-  Sparkles,
   Layers,
-  Image as ImageIcon,
-  Share2,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
-import { Link } from "dinou";
 
 const tocItems = [
   { id: "overview", title: "1. Overview & Architecture", level: 2 },
@@ -41,7 +32,6 @@ const tocItems = [
   { id: "domain-verification", title: "Domain Verification & .well-known", level: 3 },
   { id: "og-social", title: "OpenGraph & Social Share Cards", level: 3 },
   { id: "public-vs-assets", title: "4. public/ vs Imported Assets", level: 2 },
-  { id: "migration-legacy", title: "5. Migration from Legacy favicons/", level: 2 },
 ];
 
 export default function Page() {
@@ -70,7 +60,7 @@ export default function Page() {
             <section id="overview" className="scroll-mt-20">
               <h2 className="flex items-center gap-3">
                 1. Overview &amp; Architecture
-                <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
                   Static Filesystem
                 </span>
               </h2>
@@ -88,10 +78,10 @@ export default function Page() {
                 </p>
 
                 <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                  <Card className="border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/10">
+                  <Card className="border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
                     <CardHeader>
-                      <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400">
-                        <Zap className="h-5 w-5 text-blue-500" />
+                      <div className="flex items-center gap-2 font-semibold text-slate-700 dark:text-slate-300">
+                        <Zap className="h-5 w-5 text-slate-500" />
                         <span>Development Mode (`dinou dev`)</span>
                       </div>
                     </CardHeader>
@@ -144,7 +134,7 @@ export default function Page() {
                 </div>
 
                 <Alert className="not-prose mt-4">
-                  <ShieldCheck className="h-4 w-4 text-blue-500" />
+                  <ShieldCheck className="h-4 w-4 text-emerald-500" />
                   <AlertTitle>Why Bypassing the Bundler Matters</AlertTitle>
                   <AlertDescription className="text-xs space-y-1 mt-1">
                     <p>
@@ -197,7 +187,7 @@ export default function Page() {
             <section id="url-mapping" className="scroll-mt-20 mt-12 pt-8 border-t">
               <h2 className="flex items-center gap-3">
                 2. URL Mapping &amp; Serving
-                <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400 ring-1 ring-inset ring-purple-500/20">
+                <span className="inline-flex items-center rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-700 dark:text-slate-300 ring-1 ring-inset ring-slate-200 dark:ring-slate-700">
                   Routing
                 </span>
               </h2>
@@ -219,22 +209,22 @@ export default function Page() {
                     <tr>
                       <td className="p-4 font-mono text-xs">public/favicon.ico</td>
                       <td className="p-4 font-mono text-xs text-primary font-semibold">/favicon.ico</td>
-                      <td className="p-4 text-xs font-medium text-green-600 dark:text-green-400">✓ Correct</td>
+                      <td className="p-4 text-xs font-medium text-emerald-600 dark:text-emerald-400">✓ Correct</td>
                     </tr>
                     <tr>
                       <td className="p-4 font-mono text-xs">public/robots.txt</td>
                       <td className="p-4 font-mono text-xs text-primary font-semibold">/robots.txt</td>
-                      <td className="p-4 text-xs font-medium text-green-600 dark:text-green-400">✓ Correct</td>
+                      <td className="p-4 text-xs font-medium text-emerald-600 dark:text-emerald-400">✓ Correct</td>
                     </tr>
                     <tr>
                       <td className="p-4 font-mono text-xs">public/images/og-image.png</td>
                       <td className="p-4 font-mono text-xs text-primary font-semibold">/images/og-image.png</td>
-                      <td className="p-4 text-xs font-medium text-green-600 dark:text-green-400">✓ Correct</td>
+                      <td className="p-4 text-xs font-medium text-emerald-600 dark:text-emerald-400">✓ Correct</td>
                     </tr>
-                    <tr className="bg-red-500/5">
+                    <tr className="bg-rose-500/5">
                       <td className="p-4 font-mono text-xs text-muted-foreground">public/favicon.ico</td>
-                      <td className="p-4 font-mono text-xs text-red-600 dark:text-red-400 line-through">/public/favicon.ico</td>
-                      <td className="p-4 text-xs font-medium text-red-600 dark:text-red-400">✗ 404 Not Found</td>
+                      <td className="p-4 font-mono text-xs text-rose-600 dark:text-rose-400 line-through">/public/favicon.ico</td>
+                      <td className="p-4 text-xs font-medium text-rose-600 dark:text-rose-400">✗ 404 Not Found</td>
                     </tr>
                   </tbody>
                 </table>
@@ -420,13 +410,13 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
                     <tr>
                       <th className="p-4">Feature</th>
                       <th className="p-4">Static Directory (<code>public/</code>)</th>
-                      <th className="p-4">Imported Assets (<code>src/assets/</code>)</th>
+                      <th className="p-4">Imported Assets (<code>src/</code>)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border bg-card">
                     <tr>
                       <td className="p-4 font-semibold text-xs">Filesystem Location</td>
-                      <td className="p-4 font-mono text-xs"><code>./public/*</code> (project root)</td>
+                      <td className="p-4 font-mono text-xs"><code>./public/**/*</code></td>
                       <td className="p-4 font-mono text-xs"><code>./src/**/*</code></td>
                     </tr>
                     <tr>
@@ -434,14 +424,14 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
                       <td className="p-4 text-xs font-medium text-emerald-600 dark:text-emerald-400">
                         None (Bypasses bundlers entirely)
                       </td>
-                      <td className="p-4 text-xs font-medium text-blue-600 dark:text-blue-400">
+                      <td className="p-4 text-xs font-medium text-slate-700 dark:text-slate-300">
                         Processed by Webpack, Rollup, or Esbuild
                       </td>
                     </tr>
                     <tr>
                       <td className="p-4 font-semibold text-xs">Production Destination</td>
-                      <td className="p-4 font-mono text-xs"><code>.dinou/dist3/*</code></td>
-                      <td className="p-4 font-mono text-xs"><code>.dinou/dist2/*</code> (Client bundle)</td>
+                      <td className="p-4 font-mono text-xs"><code>.dinou/dist3/**/*</code></td>
+                      <td className="p-4 font-mono text-xs"><code>.dinou/dist3/assets/*</code></td>
                     </tr>
                     <tr>
                       <td className="p-4 font-semibold text-xs">URL Path &amp; Naming</td>
@@ -449,18 +439,16 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
                         <strong>Fixed, exact filename</strong> (e.g. <code>/favicon.ico</code>)
                       </td>
                       <td className="p-4 text-xs">
-                        <strong>Content-hashed filename</strong> (e.g. <code>/logo.a9f2bc.png</code>)
+                        <strong>Path-hashed filename</strong> (e.g. <code>/assets/logo-a9f2bc.png</code>)
                       </td>
                     </tr>
                     <tr>
                       <td className="p-4 font-semibold text-xs">Referencing Syntax</td>
                       <td className="p-4 font-mono text-xs"><code>&lt;img src=&quot;/images/hero.png&quot; /&gt;</code></td>
-                      <td className="p-4 font-mono text-xs"><code>import hero from &quot;./hero.png&quot;;</code></td>
-                    </tr>
-                    <tr>
-                      <td className="p-4 font-semibold text-xs">Cache-Busting Strategy</td>
-                      <td className="p-4 text-xs">Manual URL query parameter (<code>?v=2</code>)</td>
-                      <td className="p-4 text-xs">Automatic immutable content hash</td>
+                      <td className="p-4 font-mono text-xs space-y-1">
+                        <div><code>import hero from &quot;./hero.png&quot;;</code></div>
+                        <div><code>&lt;img src={"{hero}"} /&gt;</code></div>
+                      </td>
                     </tr>
                     <tr>
                       <td className="p-4 font-semibold text-xs">Best For</td>
@@ -473,43 +461,6 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
                     </tr>
                   </tbody>
                 </table>
-              </div>
-            </section>
-
-            {/* ================================================================= */}
-            {/* SECTION 5: MIGRATION FROM LEGACY FAVICONS/ */}
-            {/* ================================================================= */}
-            <section id="migration-legacy" className="scroll-mt-20 mt-12 pt-8 border-t">
-              <h2 className="flex items-center gap-3">
-                5. Migration from Legacy <code>favicons/</code>
-                <span className="inline-flex items-center rounded-md bg-zinc-500/10 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 ring-1 ring-inset ring-zinc-500/20">
-                  Upgrading to v7
-                </span>
-              </h2>
-              <p>
-                In early versions of Dinou, static assets were strictly scoped to a root <code>favicons/</code> folder.
-                In Dinou v7, this concept has been broadened into the universal <code>public/</code> directory standard:
-              </p>
-
-              <div className="border border-border rounded-lg p-4 bg-card not-prose my-4 space-y-3">
-                <div className="flex items-center gap-2 font-semibold text-sm">
-                  <Copy className="h-5 w-5 text-primary" />
-                  <span>Migration Steps:</span>
-                </div>
-                <ol className="list-decimal pl-5 text-xs text-muted-foreground space-y-2">
-                  <li>
-                    Create a <code>public/</code> folder at the project root if it does not already exist.
-                  </li>
-                  <li>
-                    Move all contents from your existing <code>favicons/</code> directory into <code>public/</code>.
-                  </li>
-                  <li>
-                    Delete the legacy <code>favicons/</code> folder.
-                  </li>
-                  <li>
-                    Ensure your <code>&lt;link rel=&quot;icon&quot;&gt;</code> tags in <code>src/app/layout.tsx</code> point directly to root paths (e.g., <code>href=&quot;/favicon.ico&quot;</code>).
-                  </li>
-                </ol>
               </div>
             </section>
           </div>

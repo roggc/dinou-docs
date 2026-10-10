@@ -37,7 +37,7 @@ const tocItems = [
   },
   {
     id: "bundler-integration",
-    title: "2. Bundler Integration Matrix (v7 Strategy)",
+    title: "2. Bundler Integration Matrix",
     level: 2,
   },
   {
@@ -47,7 +47,7 @@ const tocItems = [
   },
   {
     id: "react-strict-mode",
-    title: "3. React StrictMode (Default: true in v7)",
+    title: "3. React StrictMode (Default: true)",
     level: 2,
   },
   {
@@ -78,7 +78,7 @@ export default function Page() {
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 React Compiler &amp; StrictMode
               </h1>
-              <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2 py-1 text-xs font-medium text-purple-600 dark:text-purple-400 ring-1 ring-inset ring-purple-500/20">
+              <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
                 Dinou v7
               </span>
             </div>
@@ -103,9 +103,9 @@ export default function Page() {
               </p>
 
               <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                <Card className="border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20">
+                <Card className="border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
                   <CardHeader>
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
+                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-semibold">
                       <Code className="h-5 w-5" />
                       <span>Cleaner Codebase</span>
                     </div>
@@ -164,7 +164,7 @@ function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
   return <OrderList items={filtered} onSelect={handleSelect} />;
 }
 
-// ✅ Dinou v7: Plain Idiomatic React (React Compiler Active)
+// ✅ Dinou: Plain Idiomatic React (React Compiler Active)
 function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
   // ✨ Automatically memoized by the React Compiler
   const filtered = items.filter((item) => item.category === filter);
@@ -185,10 +185,10 @@ function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <h3>
-                2. Bundler Integration Matrix (v7 Strategy)
+                2. Bundler Integration Matrix
               </h3>
               <p>
-                Dinou v7 adopts a targeted compilation model across supported
+                Dinou adopts a targeted compilation model across supported
                 bundlers to optimize the balance between <strong>instant developer
                 iteration (HMR)</strong> and <strong>maximum production performance</strong>.
               </p>
@@ -205,7 +205,7 @@ function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
                     <div className="p-4 bg-muted/50 rounded-lg border border-border">
                       <div className="font-bold text-sm mb-2 flex items-center justify-between">
                         <span>Webpack</span>
-                        <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                        <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                           Dev &amp; Prod
                         </span>
                       </div>
@@ -228,7 +228,7 @@ function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
                     <div className="p-4 bg-muted/50 rounded-lg border border-border">
                       <div className="font-bold text-sm mb-2 flex items-center justify-between">
                         <span>Rollup</span>
-                        <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                        <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400">
                           Prod Only
                         </span>
                       </div>
@@ -315,14 +315,14 @@ function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
             >
               <div className="flex items-center gap-3">
                 <h3 className="m-0">
-                  3. React StrictMode (Default: <code>true</code> in v7)
+                  3. React StrictMode (Default: <code>true</code>)
                 </h3>
                 <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
                   Safety Guarantee
                 </span>
               </div>
               <p className="mt-4">
-                Dinou v7 introduces <code>reactStrictMode: true</code> by default
+                Dinou introduces <code>reactStrictMode: true</code> by default
                 in development mode.
               </p>
 
@@ -338,8 +338,8 @@ function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
                   <strong>what works in development behaves identically in production</strong>.
                 </p>
 
-                <div className="border border-purple-500/20 bg-purple-50/30 dark:bg-purple-950/20 rounded-lg p-4 not-prose my-6">
-                  <div className="flex items-center gap-2 font-semibold text-purple-600 dark:text-purple-400 mb-2">
+                <div className="border border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/20 rounded-lg p-4 not-prose my-6">
+                  <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400 mb-2">
                     <ShieldCheck className="h-5 w-5" />
                     <span>How StrictMode Bridges Dev and Prod</span>
                   </div>
@@ -376,7 +376,7 @@ function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
               <section id="configuring-strict-mode" className="mt-8 scroll-mt-20">
                 <h4>3.2. Configuring <code>reactStrictMode</code> in <code>dinou.config.mjs</code></h4>
                 <p>
-                  <code>reactStrictMode</code> is enabled by default in Dinou v7.
+                  <code>reactStrictMode</code> is enabled by default in Dinou.
                   You can configure it explicitly in your configuration file:
                 </p>
 
@@ -409,7 +409,7 @@ export default defineConfig({
               </h3>
               <p>
                 To get the maximum benefit from the React Compiler and StrictMode in
-                Dinou v7, follow these core principles:
+                Dinou, follow these core principles:
               </p>
 
               <div className="space-y-4 my-6 not-prose">
@@ -440,7 +440,7 @@ export default defineConfig({
                 <div className="border rounded-lg p-4 bg-card">
                   <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400 mb-1">
                     <CheckCircle2 className="h-4 w-4" />
-                    <span>3. Isolate Side Effects to useEffect or Server Actions</span>
+                    <span>3. Isolate Side Effects to useEffect or Server Functions</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Timers, DOM subscriptions, and network mutations belong inside event
