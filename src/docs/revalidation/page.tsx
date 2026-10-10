@@ -640,7 +640,8 @@ export async function syncInventory() {
                 <h4>4.1. Tag Assignment (<code>getCacheTags</code>)</h4>
                 <p>
                   To attach cache tags to a route, export <code>getCacheTags</code> from your{" "}
-                  <code>page_functions.ts</code> or <code>layout_functions.ts</code>:
+                  <code>page_functions.ts</code> (using <code>PageFunctions</code>) or{" "}
+                  <code>layout_functions.ts</code> (using <code>LayoutFunctions</code>):
                 </p>
 
                 <div className="grid gap-6 md:grid-cols-2 not-prose my-4">
@@ -655,9 +656,14 @@ export async function syncInventory() {
                       <p className="text-muted-foreground">
                         Ideal for fixed tags on static routes:
                       </p>
-                      <CodeBlock language="typescript" hideHeader>
+                      <CodeBlock language="typescript">
 {`// src/blog/page_functions.ts
-export const getCacheTags = ["blog", "marketing"];`}
+import type { PageFunctions } from "dinou";
+
+export const getCacheTags: PageFunctions["getCacheTags"] = [
+  "blog",
+  "marketing",
+];`}
                       </CodeBlock>
                     </CardContent>
                   </Card>
@@ -673,14 +679,42 @@ export const getCacheTags = ["blog", "marketing"];`}
                       <p className="text-muted-foreground">
                         Ideal for dynamic, parameter-driven tags:
                       </p>
-                      <CodeBlock language="typescript" hideHeader>
+                      <CodeBlock language="typescript">
 {`// src/products/[id]/page_functions.ts
-export function getCacheTags({ id }: { id: string }) {
-  return ["products", \`product-\${id}\`];
+import type { RouteParams } from "dinou";
+
+export function getCacheTags(params: RouteParams<"/products/[id]">) {
+  return ["products", \`product-\${params.id}\`];
 }`}
                       </CodeBlock>
                     </CardContent>
                   </Card>
+                </div>
+
+                <div className="mt-4 not-prose">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    You can also type the full contract using <code>PageFunctions</code> (or <code>LayoutFunctions</code>) together with <code>RouteParams</code>:
+                  </p>
+                  <CodeBlock language="typescript">
+{`// src/products/[id]/page_functions.ts
+import type { PageFunctions, RouteParams } from "dinou";
+
+export const getCacheTags: PageFunctions<
+  RouteParams<"/products/[id]">
+>["getCacheTags"] = (params) => {
+  return ["products", \`product-\${params?.id}\`];
+};`}
+                  </CodeBlock>
+
+                  <Alert className="border-blue-500/20 bg-blue-50/40 dark:bg-blue-950/20 mt-4">
+                    <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <AlertTitle className="text-sm font-semibold text-blue-900 dark:text-blue-200">
+                      Transparent Sync and Async Support
+                    </AlertTitle>
+                    <AlertDescription className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                      The type declaration remains identical whether <code>getCacheTags</code> is synchronous or <code>async</code> (such as querying a database or CMS with <code>await</code>). Dinou&apos;s return contract (<code>string[] | Promise&lt;string[]&gt;</code>) and <code>RouteParams</code> polymorphically accommodate both forms without requiring separate types.
+                    </AlertDescription>
+                  </Alert>
                 </div>
               </section>
 
@@ -696,7 +730,7 @@ export function getCacheTags({ id }: { id: string }) {
                 </div>
 
                 <p className="mt-4">
-                  In Dinou v7, <code>revalidateTag(tag)</code> inspects where the tag was defined and executes
+                  In Dinou, <code>revalidateTag(tag, options?)</code> inspects where the tag was defined and executes
                   the most surgical revalidation action possible:
                 </p>
 
@@ -709,10 +743,13 @@ export function getCacheTags({ id }: { id: string }) {
                       </div>
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground space-y-1.5">
-                      <p>Defined in <code>layout_functions.ts</code> (stored in <code>layout.metadata.json</code>).</p>
+                      <p>Defined in <code>layout_functions.ts</code>.</p>
                       <p>
-                        Dinou runs internal <code>revalidateLayout(path)</code>, regenerating{" "}
-                        <strong>exclusively <code>layout.rsc</code></strong>. Child pages and HTML remain untouched!
+                        <strong>Default (<code>revalidateTag(tag)</code>):</strong> Dinou runs internal <code>revalidateLayout(path)</code>, regenerating{" "}
+                        <strong>exclusively <code>layout.rsc</code></strong>. Child pages and HTML remain untouched for maximum speed!
+                      </p>
+                      <p>
+                        <strong>With cascade (<code>revalidateTag(tag, {`{ cascade: true }`})</code>):</strong> Dinou executes <code>revalidatePath(path, {`{ cascade: true }`})</code>, regenerating <code>layout.rsc</code> and cascading to all child pages to bake the new layout into their <code>index.html</code> (eliminating hydration mismatches).
                       </p>
                     </CardContent>
                   </Card>
@@ -725,10 +762,13 @@ export function getCacheTags({ id }: { id: string }) {
                       </div>
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground space-y-1.5">
-                      <p>Defined in <code>page_functions.ts</code> (stored in <code>metadata.json</code>).</p>
+                      <p>Defined in <code>page_functions.ts</code>.</p>
                       <p>
-                        Dinou runs internal <code>revalidatePath(path)</code>, regenerating{" "}
-                        <strong><code>page.rsc</code> and <code>index.html</code></strong>. Parent layouts remain untouched.
+                        Dinou executes <strong><code>revalidatePage(path)</code></strong>, regenerating{" "}
+                        <strong>exclusively <code>page.rsc</code> and <code>index.html</code></strong>.
+                      </p>
+                      <p>
+                        Parent layouts remain completely untouched—even if the page shares a folder with a <code>layout.tsx</code>—avoiding unnecessary layout recompilations.
                       </p>
                     </CardContent>
                   </Card>
@@ -741,9 +781,12 @@ export function getCacheTags({ id }: { id: string }) {
                       </div>
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground space-y-1.5">
-                      <p>Defined in <code>&lt;DinouCacheSlot&gt;</code> (stored in <code>slot.metadata.json</code>).</p>
+                      <p>Defined in <code>&lt;DinouCacheSlot&gt;</code>.</p>
                       <p>
-                        Dinou purges <strong>only the slot directory or KV key</strong> without touching the host page.
+                        Dinou purges <strong>only the slot directory or KV key</strong> without touching the host page or layouts.
+                      </p>
+                      <p>
+                        The component fragment is re-rendered on the next visit or updated in-place via client <code>refreshSlot</code>.
                       </p>
                     </CardContent>
                   </Card>
@@ -765,9 +808,46 @@ export function getCacheTags({ id }: { id: string }) {
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">
                       Declare the tag <strong>only in <code>layout_functions.ts</code></strong> (e.g.{" "}
-                      <code>[&quot;dashboard-shell&quot;]</code>). Rebuilding the layout shell will not trigger
-                      expensive re-rendering of all child pages.
+                      <code>[&quot;dashboard-shell&quot;]</code>). Rebuilding the layout shell regenerates only{" "}
+                      <code>layout.rsc</code> and does not trigger expensive re-rendering of all child pages.
                     </p>
+
+                    <Alert className="mt-3 border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/20">
+                      <AlertTriangle className="h-4 w-4 text-amber-500" />
+                      <AlertTitle className="text-xs font-semibold text-amber-900 dark:text-amber-200">
+                        Critical Scale Alert: Hydration Mismatch vs. Server Crash (100k+ Pages)
+                      </AlertTitle>
+                      <AlertDescription className="text-xs text-muted-foreground mt-2 space-y-2 leading-relaxed">
+                        <p>
+                          <strong>The Hydration Mismatch Hazard:</strong> Because surgical layout revalidation updates only{" "}
+                          <code>layout.rsc</code>, existing static <code>index.html</code> files remain unchanged. While SPA client navigation stays instant and perfectly synchronized, a hard browser reload (F5 or direct link) will receive the older static HTML with the prior layout markup, which can trigger a <strong>Hydration Mismatch</strong> when React 19 hydrates against the fresh <code>layout.rsc</code> stream.
+                        </p>
+                        <p>
+                          <strong>Why NOT use <code>cascade: true</code> at scale?</strong> If your application features a large product catalog (e.g. 100,000+ pre-rendered pages), running <code>cascade: true</code> on a shared or root layout will attempt to regenerate 100,000 static HTML files simultaneously. This causes sudden CPU saturation, memory exhaustion, and catastrophic server crashes or gateway timeouts.
+                        </p>
+                        <p className="font-semibold text-foreground pt-1">
+                          Scale-Safe Architectural Solutions (Without Cascading):
+                        </p>
+                        <ul className="list-disc pl-4 space-y-1.5">
+                          <li>
+                            <strong>Defer Volatile State to Client Components:</strong> Keep the server layout shell structurally invariant. Mutable or fast-changing UI elements (e.g. promo banners, flash deals, cart badges, user session data) should be Client Components (<code>&quot;use client&quot;</code>) that render an invariant placeholder or container in SSR and populate fresh data on the client. Because the static HTML never changes, there is zero risk of Hydration Mismatch on hard reloads (F5), and zero child pages need regeneration.
+                          </li>
+                          <li>
+                            <strong>Leverage Partial Prerendering (PPR) with <code>&lt;Suspense&gt;</code>:</strong> Wrap dynamic layout sections in <code>&lt;Suspense fallback=&#123;&lt;Skeleton /&gt;&#125;&gt;</code>. Dinou serves the static shell instantly (0ms TTFB) and streams live, personalized server chunks down the open HTTP connection, avoiding stale baked HTML in <code>index.html</code> without re-rendering child pages.
+                          </li>
+                          <li>
+                            <strong>Scope Cascading Tags to Bounded Sub-Layouts:</strong> Never attach layout revalidation tags to root or large-catalog wrappers. Keep root shells purely static, and reserve layout tagging with <code>cascade: true</code> strictly for bounded feature modules (such as <code>/dashboard</code> or <code>/account</code>) where child routes are limited to a small, predictable number of pages.
+                          </li>
+                          <li>
+                            <strong>Rely on Lazy Time-Based ISR for Catalog Pages:</strong> When child pages define <code>revalidate = N</code>, they naturally re-render their full static HTML on demand upon the next user visit, absorbing layout updates gradually in the background without any upfront mass-regeneration spike.
+                          </li>
+                        </ul>
+
+                        <p className="text-muted-foreground pt-1 italic text-[11px]">
+                          <strong>Note on <code>&lt;DinouCacheSlot&gt;</code>:</strong> Micro-ISR slots optimize dynamic SSR routes (<code>revalidate: 0</code>) and SPA client refreshes (via <code>refreshSlot</code>) by avoiding redundant server work. However, in pure static SSG pages where <code>index.html</code> was baked at build time, slots alone cannot rewrite the physical HTML file on disk or CDN during hard reloads (F5).
+                        </p>
+                      </AlertDescription>
+                    </Alert>
                   </div>
 
                   <div className="p-4 rounded-lg border border-border bg-card">
@@ -788,10 +868,19 @@ export function getCacheTags({ id }: { id: string }) {
                       <span>Rule 3: Full Module Invalidation (Layout + Children)</span>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      Use <code>revalidatePath(&quot;/dashboard&quot;, {`{ cascade: true }`})</code> or share the same tag
+                      Use <code>revalidatePath(&quot;/dashboard&quot;, {`{ cascade: true }`})</code>, call <code>revalidateTag(&quot;dashboard&quot;, {`{ cascade: true }`})</code>, or share the same tag
                       in both <code>layout_functions.ts</code> and child <code>page_functions.ts</code>. This guarantees
                       zero hydration mismatches when structural navigation changes.
                     </p>
+                    <div className="mt-2.5 pt-2.5 border-t border-border/60">
+                      <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1.5">
+                        <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                        <span>High-Scale Caution: Reserve strictly for bounded modules</span>
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+                        Never apply <code>cascade: true</code> or shared tags to root layouts or large catalogs wrapping thousands of pages (e.g. 100k+ products). Doing so triggers a simultaneous regeneration avalanche that will saturate server CPU and RAM, risking service degradation or fatal server crashes. At massive scale, use the architectural alternatives detailed in the Scale Alert above (Client Components, PPR, or lazy time-based ISR).
+                      </p>
+                    </div>
                   </div>
                 </div>
               </section>
@@ -818,6 +907,8 @@ import { DinouCacheSlot } from "dinou";
 </DinouCacheSlot>
 
 // In your Server Action:
+"use server";
+
 import { revalidateTag } from "dinou/server";
 
 export async function refreshTrends() {
