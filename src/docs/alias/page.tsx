@@ -72,9 +72,9 @@ export default function Page() {
               </p>
 
               <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                <Card className="border-red-500/20 bg-red-50/40 dark:bg-red-950/10">
+                <Card className="border-rose-500/20 bg-rose-50/30 dark:bg-rose-950/10">
                   <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-semibold text-sm">
+                    <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-semibold text-sm">
                       <FolderTree className="h-4 w-4" />
                       <span>Fragile Relative Imports (Before)</span>
                     </div>
@@ -106,7 +106,7 @@ export default function Page() {
             <section id="tsconfig-setup" className="mt-12">
               <h2>Configuring tsconfig.json</h2>
               <p>
-                To enable the standard <code>@/*</code> alias pointing to your <code>src/</code> directory, configure <code>baseUrl</code> and <code>paths</code> in your project root <code>tsconfig.json</code>:
+                To enable the standard <code>@/*</code> alias pointing to your <code>src/</code> directory, configure <code>paths</code> in your project root <code>tsconfig.json</code>:
               </p>
 
               <CodeBlock
@@ -115,7 +115,6 @@ export default function Page() {
               >
 {`{
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },
@@ -152,7 +151,6 @@ export default function Page() {
                 >
 {`{
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
       "@components/*": ["src/components/*"],
@@ -165,7 +163,7 @@ export default function Page() {
 }`}
                 </CodeBlock>
                 <p className="text-xs text-muted-foreground">
-                  Dinou parses every alias mapping at startup, resolving wildcards (<code>/*</code>) relative to the defined <code>baseUrl</code>.
+                  Dinou parses every alias mapping at startup, resolving wildcards (<code>/*</code>) relative to the project root.
                 </p>
               </div>
             </section>
@@ -179,7 +177,7 @@ export default function Page() {
 
               <div className="border rounded-xl p-5 bg-card not-prose my-4 space-y-3">
                 <div className="flex items-center gap-2 font-semibold text-sm">
-                  <Layers className="h-4 w-4 text-purple-500" />
+                  <Layers className="h-4 w-4 text-emerald-500" />
                   <span>Resolution Pipeline Steps</span>
                 </div>
                 <ol className="list-decimal pl-5 text-xs text-muted-foreground space-y-2 leading-relaxed">
@@ -377,9 +375,9 @@ export function Hero() {
                 </div>
 
                 <div className="p-4 rounded-lg border bg-card not-prose space-y-1.5">
-                  <div className="font-semibold text-sm text-foreground">Check &quot;baseUrl&quot; in tsconfig.json</div>
+                  <div className="font-semibold text-sm text-foreground">Paths resolve relative to tsconfig.json</div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Always set <code>&quot;baseUrl&quot;: &quot;.&quot;</code> in <code>tsconfig.json</code>. If <code>baseUrl</code> is omitted, relative path alias targets (like <code>src/*</code>) may not resolve predictably across different operating systems.
+                    With modern TypeScript (<code>&quot;moduleResolution&quot;: &quot;bundler&quot;</code>), <code>paths</code> mappings resolve directly relative to the project root without needing the deprecated <code>baseUrl</code> option.
                   </p>
                 </div>
 

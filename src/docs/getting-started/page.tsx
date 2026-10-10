@@ -328,7 +328,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                       <CodeBlock language="json" containerClassName="w-full rounded-lg">
                         {`{
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },

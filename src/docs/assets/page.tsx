@@ -2,31 +2,22 @@
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/docs/components/ui/alert";
-import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
 } from "@/docs/components/ui/card";
 import {
   Image as ImageIcon,
   Video,
   Music,
-  FolderTree,
-  AlertCircle,
-  CheckCircle2,
   Zap,
-  Layers,
   Sparkles,
   ShieldCheck,
+  FolderTree,
   ArrowRight,
-  Code2,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
+import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 import { Link } from "dinou";
 
 const tocItems = [
@@ -34,11 +25,8 @@ const tocItems = [
   { id: "imported-vs-public", title: "Imported Assets vs Public Directory", level: 2 },
   { id: "supported-formats", title: "Supported Extensions (21 Formats)", level: 2 },
   { id: "usage-examples", title: "Usage in Server & Client Components", level: 2 },
-  { id: "images", title: "Images (Raster & Vector)", level: 3 },
-  { id: "video-audio", title: "Video & Audio Media", level: 3 },
-  { id: "svg-patterns", title: "SVG Handling Patterns", level: 3 },
   { id: "path-aliases", title: "Path Aliases in Asset Imports", level: 2 },
-  { id: "caching-bundling", title: "Asset Hashing & Immutable Caching", level: 2 },
+  { id: "caching-bundling", title: "Production Build Output (.dinou/dist3/assets)", level: 2 },
   { id: "typescript-support", title: "TypeScript Declarations (dinou/env)", level: 2 },
   { id: "custom-extensions", title: "Extending Custom Formats (Eject)", level: 2 },
 ];
@@ -56,7 +44,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Import images, videos, and audio files directly into your components with automatic content-hashing, static optimization, and ambient TypeScript support for <strong>21 media formats</strong>.
+              Import images, videos, and audio files directly into your components with deterministic path-based hashing and ambient TypeScript support for <strong>21 media formats</strong>.
             </p>
           </div>
 
@@ -69,10 +57,10 @@ export default function Page() {
               </p>
               <ol>
                 <li>
-                  <strong>Fingerprints the file:</strong> Computes a cryptographic content-hash based on the asset content.
+                  <strong>Fingerprints the file:</strong> Generates a deterministic path/name-based hash.
                 </li>
                 <li>
-                  <strong>Emits the asset:</strong> Copies the optimized asset to the build output directory under <code>/assets/[name]-[hash].[ext]</code>.
+                  <strong>Emits the asset:</strong> Copies the file to the client distribution directory under <code>.dinou/dist3/assets/[name]-[hash].[ext]</code>.
                 </li>
                 <li>
                   <strong>Returns a string URL:</strong> Resolves the JavaScript import to the final public URL string (e.g. <code>&quot;/assets/logo-8f1e2a.png&quot;</code>).
@@ -80,10 +68,10 @@ export default function Page() {
               </ol>
 
               <div className="grid gap-4 sm:grid-cols-3 not-prose my-6">
-                <Card className="border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10">
+                <Card className="border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
                   <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm">
-                      <Sparkles className="h-4 w-4" />
+                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-semibold text-sm">
+                      <Sparkles className="h-4 w-4 text-emerald-500" />
                       <span>RSC &amp; SSR Safe</span>
                     </div>
                   </CardHeader>
@@ -92,19 +80,19 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-purple-500/20 bg-purple-50/50 dark:bg-purple-900/10">
+                <Card className="border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/10">
                   <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold text-sm">
+                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold text-sm">
                       <Zap className="h-4 w-4" />
-                      <span>Immutable Caching</span>
+                      <span>Zero Name Collisions</span>
                     </div>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground">
-                    Content-hashed URLs can be served with aggressive <code>max-age=31536000, immutable</code> browser cache headers.
+                    Deterministic path-scoped hashes prevent filename collisions when different components import assets with the same name.
                   </CardContent>
                 </Card>
 
-                <Card className="border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-900/10">
+                <Card className="border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/10">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
                       <ShieldCheck className="h-4 w-4" />
@@ -120,57 +108,26 @@ export default function Page() {
 
             {/* Imported vs Public Directory */}
             <section id="imported-vs-public" className="mt-12">
-              <h2>Imported Assets vs Public Directory</h2>
-              <p>
-                Dinou provides two complementary ways to manage static files. Understanding when to use each ensures optimal caching and bundle performance:
-              </p>
-
-              <div className="not-prose my-6 overflow-x-auto">
-                <table className="w-full text-sm border-collapse border rounded-lg overflow-hidden">
-                  <thead>
-                    <tr className="bg-slate-100 dark:bg-slate-800 text-left">
-                      <th className="p-3 font-semibold border-b">Feature</th>
-                      <th className="p-3 font-semibold border-b text-blue-600 dark:text-blue-400">Imported Assets (src/)</th>
-                      <th className="p-3 font-semibold border-b text-muted-foreground">Public Directory (public/)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y text-xs">
-                    <tr>
-                      <td className="p-3 font-medium">Location</td>
-                      <td className="p-3 font-mono">src/components/, src/assets/</td>
-                      <td className="p-3 font-mono">public/ (project root)</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3 font-medium">Access Method</td>
-                      <td className="p-3 font-mono">import logo from &quot;./logo.png&quot;</td>
-                      <td className="p-3 font-mono">&lt;img src=&quot;/favicon.ico&quot; /&gt;</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3 font-medium">Bundler Processing</td>
-                      <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">Processed, fingerprinted, tree-shaken</td>
-                      <td className="p-3 text-muted-foreground">Bypasses bundlers (direct copy)</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3 font-medium">Cache Invalidation</td>
-                      <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">Automatic via content hash</td>
-                      <td className="p-3 text-muted-foreground">Manual cache-busting required</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3 font-medium">Type Safety</td>
-                      <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">Verified by TypeScript (dinou/env)</td>
-                      <td className="p-3 text-muted-foreground">Unchecked raw URL strings</td>
-                    </tr>
-                    <tr>
-                      <td className="p-3 font-medium">Recommended For</td>
-                      <td className="p-3">Component icons, UI graphics, illustrations, media</td>
-                      <td className="p-3"><code>robots.txt</code>, <code>favicon.ico</code>, <code>sitemap.xml</code>, static files</td>
-                    </tr>
-                  </tbody>
-                </table>
+              <h2>Imported Assets vs. Public Directory</h2>
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 p-5 not-prose my-6 space-y-3">
+                <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
+                  <FolderTree className="h-4 w-4 text-emerald-500" />
+                  <span>Two Complementary Asset Strategies</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  In Dinou, files imported inside your code (<code>src/**/*</code>) are processed by bundlers, fingerprinted with deterministic path-based hashes, and emitted into <code>.dinou/dist3/assets/*</code> with immutable caching. In contrast, files placed in <code>public/</code> bypass bundlers entirely and are copied directly into the web root with fixed, unhashed URLs (ideal for <code>favicon.ico</code>, <code>robots.txt</code>, and verification files).
+                </p>
+                <div className="pt-2 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <span className="text-muted-foreground">Looking for the detailed side-by-side feature matrix?</span>
+                  <Link
+                    href="/docs/public#public-vs-assets"
+                    className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 hover:underline shrink-0"
+                  >
+                    <span>View Public vs. Imported Assets Matrix</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                For more details on static file serving that bypasses the bundlers, refer to the <Link href="/docs/public" className="underline font-semibold text-foreground">Public Directory Documentation</Link>.
-              </p>
             </section>
 
             {/* Supported Extensions */}
@@ -192,7 +149,7 @@ export default function Page() {
                   <tbody className="divide-y divide-border bg-card text-xs">
                     <tr>
                       <td className="p-3.5 font-semibold flex items-center gap-2">
-                        <ImageIcon className="h-4 w-4 text-blue-500" />
+                        <ImageIcon className="h-4 w-4 text-emerald-500" />
                         <span>Images (10)</span>
                       </td>
                       <td className="p-3.5 font-mono text-foreground font-semibold">
@@ -204,7 +161,7 @@ export default function Page() {
                     </tr>
                     <tr>
                       <td className="p-3.5 font-semibold flex items-center gap-2">
-                        <Video className="h-4 w-4 text-purple-500" />
+                        <Video className="h-4 w-4 text-amber-500" />
                         <span>Video (6)</span>
                       </td>
                       <td className="p-3.5 font-mono text-foreground font-semibold">
@@ -235,20 +192,17 @@ export default function Page() {
             <section id="usage-examples" className="mt-12">
               <h2>Usage in Server &amp; Client Components</h2>
               <p>
-                Importing media files works identically in both Server Components (RSC) and Client Components (<code>&quot;use client&quot;</code>).
+                Importing media files works identically in both Server Components (RSC) and Client Components (<code>&quot;use client&quot;</code>). Imported assets resolve to fingerprinted URL strings that can be passed directly to standard JSX elements like <code>&lt;img&gt;</code>, <code>&lt;video&gt;</code>, <code>&lt;audio&gt;</code>, or Web Audio APIs:
               </p>
 
-              {/* Sub-section: Images */}
-              <div id="images" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">Images (Raster &amp; Vector)</h3>
-                <p>
-                  Importing an image returns its fingerprinted URL string, which can be passed directly to standard JSX <code>&lt;img&gt;</code> elements:
-                </p>
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/components/avatar.tsx
+              <TabbedCodeBlock
+                containerClassName="w-full overflow-hidden rounded-lg my-6"
+                tabs={[
+                  {
+                    id: "images",
+                    label: "src/components/avatar.tsx (Images)",
+                    language: "tsx",
+                    code: `// src/components/avatar.tsx
 import userAvatar from "./avatar.webp";
 import defaultIcon from "./user-placeholder.svg";
 
@@ -267,21 +221,13 @@ export function UserAvatar({ hasCustomPhoto }: { hasCustomPhoto?: boolean }) {
       />
     </div>
   );
-}`}
-                </CodeBlock>
-              </div>
-
-              {/* Sub-section: Video & Audio */}
-              <div id="video-audio" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">Video &amp; Audio Media</h3>
-                <p>
-                  Video and audio files are imported in the same manner and fed to HTML5 media tags:
-                </p>
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/components/media-hero.tsx
+}`,
+                  },
+                  {
+                    id: "video-audio",
+                    label: "src/components/media-hero.tsx (Video & Audio)",
+                    language: "tsx",
+                    code: `// src/components/media-hero.tsx
 "use client";
 
 import heroBgVideo from "./hero-ambient.mp4";
@@ -312,47 +258,17 @@ export function MediaHero() {
         <h1 className="text-3xl font-bold">Experience Dinou</h1>
         <button
           onClick={playSound}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition shadow"
+          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold transition shadow"
         >
           Play Welcome Chime
         </button>
       </div>
     </div>
   );
-}`}
-                </CodeBlock>
-              </div>
-
-              {/* Sub-section: SVG Patterns */}
-              <div id="svg-patterns" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">SVG Handling Patterns</h3>
-                <p>
-                  SVGs can be used in two primary ways depending on your styling requirements:
-                </p>
-                <div className="grid gap-4 sm:grid-cols-2 not-prose my-4">
-                  <div className="rounded-lg border bg-card p-4 space-y-2">
-                    <div className="font-semibold text-sm text-foreground">1. As an External Asset (&lt;img&gt;)</div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Best for complex illustrations and logos that do not need dynamic CSS color changes.
-                    </p>
-                    <code className="block p-2 rounded bg-slate-100 dark:bg-slate-800 text-[11px]">
-                      import logo from &quot;./logo.svg&quot;;<br />
-                      &lt;img src=&#123;logo&#125; alt=&quot;Logo&quot; /&gt;
-                    </code>
-                  </div>
-                  <div className="rounded-lg border bg-card p-4 space-y-2">
-                    <div className="font-semibold text-sm text-foreground">2. As Inline JSX Component</div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Best for interactive UI icons where you need Tailwind classes (e.g. <code>className=&quot;fill-current text-blue-500&quot;</code>).
-                    </p>
-                    <code className="block p-2 rounded bg-slate-100 dark:bg-slate-800 text-[11px]">
-                      export function Icon(&#123; className &#125;) &#123;<br />
-                      &nbsp;&nbsp;return &lt;svg className=&#123;className&#125;&gt;...&lt;/svg&gt;;<br />
-                      &#125;
-                    </code>
-                  </div>
-                </div>
-              </div>
+}`,
+                  },
+                ]}
+              />
             </section>
 
             {/* Path Aliases */}
@@ -371,44 +287,31 @@ import heroBanner from "@/assets/images/banner.webp";`}
               </CodeBlock>
             </section>
 
-            {/* Asset Hashing & Caching */}
+            {/* Production Build Output */}
             <section id="caching-bundling" className="mt-12">
-              <h2>Asset Hashing &amp; Immutable Caching</h2>
+              <h2>Production Build Output (<code>.dinou/dist3/assets/</code>)</h2>
               <p>
-                When building for production (<code>dinou build</code>), Dinou writes fingerprinted files into the distribution directory:
+                When building for production (<code>dinou build</code>), Dinou bundles and emits all imported media files into the client distribution directory under <code>.dinou/dist3/assets/</code>, assigning each file a scoped, deterministic name:
               </p>
               <CodeBlock
                 language="text"
-                containerClassName="w-full overflow-hidden rounded-lg"
+                containerClassName="w-full overflow-hidden rounded-lg my-4"
               >
 {`.dinou/dist3/assets/
 ├── logo-4b2a8f.png
 ├── banner-9c1d3e.webp
 └── intro-sound-7e2f1a.mp3`}
               </CodeBlock>
-
-              <div className="rounded-xl border p-4 bg-card not-prose space-y-2 my-4">
-                <div className="flex items-center gap-2 font-semibold text-sm">
-                  <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                  <span>Production Caching Strategy</span>
-                </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Because every asset file name contains a hash representing its exact binary content, edge CDNs and browsers can cache assets indefinitely without risk of stale content:
-                </p>
-                <code className="block p-2.5 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono">
-                  Cache-Control: public, max-age=31536000, immutable
-                </code>
-                <p className="text-xs text-muted-foreground">
-                  When you modify an asset, its hash changes, producing a new URL that browsers download immediately.
-                </p>
-              </div>
+              <p className="text-xs text-muted-foreground">
+                This structure ensures that assets imported across different components never collide in filename, while keeping bundled media cleanly separated from root static files.
+              </p>
             </section>
 
             {/* TypeScript Support */}
             <section id="typescript-support" className="mt-12">
               <h2>TypeScript Declarations (dinou/env)</h2>
               <p>
-                Starting with <strong>Dinou v6.1.0</strong> and <strong>v7</strong>, ambient type declarations for all 21 media extensions are packaged directly into <code>dinou/env</code>.
+                Ambient type declarations for all 21 media extensions are packaged directly into <code>dinou/env</code>.
               </p>
               <p>
                 Verify that <code>dinou-env.d.ts</code> exists in your project root:
@@ -429,7 +332,6 @@ import heroBanner from "@/assets/images/banner.webp";`}
               >
 {`{
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },
@@ -446,19 +348,6 @@ import heroBanner from "@/assets/images/banner.webp";`}
   ]
 }`}
               </CodeBlock>
-
-              <Alert className="not-prose mt-4">
-                <Code2 className="h-4 w-4" />
-                <AlertTitle>Legacy Projects (v6.0.1 or earlier)</AlertTitle>
-                <AlertDescription className="text-xs">
-                  If working on an older project prior to <code>dinou/env</code>, you can define ambient asset types manually in <code>src/assets.d.ts</code>:
-                  <code className="block mt-1 p-2 rounded bg-slate-100 dark:bg-slate-800 text-[11px]">
-                    declare module &quot;*.png&quot; &#123; const value: string; export default value; &#125;<br />
-                    declare module &quot;*.webp&quot; &#123; const value: string; export default value; &#125;<br />
-                    declare module &quot;*.svg&quot; &#123; const value: string; export default value; &#125;
-                  </code>
-                </AlertDescription>
-              </Alert>
             </section>
 
             {/* Custom Extensions */}
