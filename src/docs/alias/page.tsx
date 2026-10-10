@@ -14,7 +14,6 @@ import {
 } from "@/docs/components/ui/card";
 import {
   FolderTree,
-  Settings,
   Zap,
   CheckCircle2,
   FileCode,
@@ -23,7 +22,6 @@ import {
   Terminal,
   ArrowRight,
   ShieldCheck,
-  Layers,
   Code2,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
@@ -33,7 +31,6 @@ const tocItems = [
   { id: "overview", title: "Import Aliases in Dinou", level: 2 },
   { id: "tsconfig-setup", title: "Configuring tsconfig.json", level: 2 },
   { id: "multiple-aliases", title: "Defining Multiple Granular Aliases", level: 3 },
-  { id: "how-dinou-resolves", title: "How Dinou Resolves Aliases Internally", level: 2 },
   { id: "universal-support", title: "Where Aliases Work (Code, CSS, & Assets)", level: 2 },
   { id: "code-imports", title: "TypeScript & JavaScript Modules", level: 3 },
   { id: "css-imports", title: "CSS @import Rules", level: 3 },
@@ -165,38 +162,6 @@ export default function Page() {
                 <p className="text-xs text-muted-foreground">
                   Dinou parses every alias mapping at startup, resolving wildcards (<code>/*</code>) relative to the project root.
                 </p>
-              </div>
-            </section>
-
-            {/* How Dinou Resolves Aliases */}
-            <section id="how-dinou-resolves" className="mt-12">
-              <h2>How Dinou Resolves Aliases Internally</h2>
-              <p>
-                Under the hood, Dinou centralizes path alias resolution in its core resolver (<code>getAbsPathWithExt</code>). When any bundler (esbuild, rollup, webpack) or runtime loader encounters an import specifier:
-              </p>
-
-              <div className="border rounded-xl p-5 bg-card not-prose my-4 space-y-3">
-                <div className="flex items-center gap-2 font-semibold text-sm">
-                  <Layers className="h-4 w-4 text-emerald-500" />
-                  <span>Resolution Pipeline Steps</span>
-                </div>
-                <ol className="list-decimal pl-5 text-xs text-muted-foreground space-y-2 leading-relaxed">
-                  <li>
-                    <strong>Config Ingestion:</strong> Reads <code>tsconfig.json</code> and normalizes alias wildcards into an in-memory <code>Map&lt;string, AliasTarget&gt;</code>.
-                  </li>
-                  <li>
-                    <strong>Specifier Matching:</strong> If the imported string starts with a recognized alias (e.g. <code>@/components/header</code>), it calculates the absolute path on disk.
-                  </li>
-                  <li>
-                    <strong>File Extension Probing:</strong> If no extension is specified, Dinou tests candidate file extensions (<code>.ts</code>, <code>.tsx</code>, <code>.js</code>, <code>.jsx</code>) sequentially.
-                  </li>
-                  <li>
-                    <strong>Directory Index Probing:</strong> If the target points to a folder, Dinou checks for an <code>index.ts</code>, <code>index.tsx</code>, <code>index.js</code>, or <code>index.jsx</code>.
-                  </li>
-                  <li>
-                    <strong>Dual-Engine Sync:</strong> The exact same resolved path is delivered to both the Server Component compiler and Client Component bundler, preventing split-brain module resolution.
-                  </li>
-                </ol>
               </div>
             </section>
 
@@ -349,17 +314,6 @@ export function Hero() {
                   </p>
                 </div>
               </div>
-
-              <Alert className="not-prose mt-4">
-                <Settings className="h-4 w-4" />
-                <AlertTitle>VS Code / Cursor Recommendation</AlertTitle>
-                <AlertDescription className="text-xs leading-relaxed mt-1">
-                  To ensure your editor always prefers alias paths over relative paths when auto-importing, add the following to your <code>.vscode/settings.json</code>:
-                  <code className="block mt-2 p-2 rounded bg-slate-100 dark:bg-slate-800 text-[11px] font-mono">
-                    &#123; &quot;typescript.preferences.importModuleSpecifier&quot;: &quot;non-relative&quot; &#125;
-                  </code>
-                </AlertDescription>
-              </Alert>
             </section>
 
             {/* Troubleshooting */}

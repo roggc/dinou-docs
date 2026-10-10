@@ -29,6 +29,7 @@ import {
   Flame,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
+import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 import { Link } from "dinou";
 
 const tocItems = [
@@ -40,11 +41,10 @@ const tocItems = [
   { id: "storage-option", title: "Storage Adapter (storage)", level: 3 },
   { id: "plugins-option", title: "Plugins Array (plugins)", level: 3 },
   { id: "plugin-architecture", title: "Dinou Plugin Architecture (onRequest)", level: 2 },
+  { id: "context-reference", title: "The context Object (RequestContextStore)", level: 3 },
   { id: "pattern-intercept", title: "Pattern 1: Short-Circuit & Webhooks (Returning Response)", level: 3 },
   { id: "pattern-context", title: "Pattern 2: Middleware & Context Mutation (getContext)", level: 3 },
   { id: "real-world-examples", title: "Real-World Plugin Examples", level: 2 },
-  { id: "example-auth", title: "Authentication Guard & Session Injection", level: 3 },
-  { id: "example-webhook", title: "Stripe / Clerk Webhook Handler", level: 3 },
   { id: "plugin-registration-order", title: "Registration & Execution Pipeline Order", level: 2 },
   { id: "fault-isolation", title: "Fault Isolation & Error Handling", level: 2 },
 ];
@@ -56,13 +56,10 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Configuration &amp; Plugins
               </h1>
-              <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
-                v7 Core
-              </span>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
               Customize your Dinou application with <code>dinou.config.mjs</code>, enable global Partial Prerendering (PPR), configure React StrictMode, and hook into the request lifecycle using Web Standards plugins.
@@ -95,9 +92,9 @@ export default function Page() {
               </ul>
 
               <div className="grid gap-4 sm:grid-cols-3 not-prose my-6">
-                <Card className="border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10">
+                <Card className="border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/10">
                   <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm">
+                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
                       <Zap className="h-4 w-4" />
                       <span>Web Standards First</span>
                     </div>
@@ -107,9 +104,9 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-purple-500/20 bg-purple-50/50 dark:bg-purple-900/10">
+                <Card className="border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/10">
                   <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold text-sm">
+                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold text-sm">
                       <Flame className="h-4 w-4" />
                       <span>PPR &amp; Rendering Flags</span>
                     </div>
@@ -119,10 +116,10 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-900/10">
+                <Card className="border-slate-500/20 bg-slate-50/50 dark:bg-slate-900/20">
                   <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
-                      <ShieldCheck className="h-4 w-4" />
+                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-semibold text-sm">
+                      <ShieldCheck className="h-4 w-4 text-emerald-500" />
                       <span>Context Propagation</span>
                     </div>
                   </CardHeader>
@@ -146,13 +143,18 @@ export default function Page() {
               >
 {`// dinou.config.mjs
 import { defineConfig } from "dinou";
+// Optional: import storage adapters if running custom ISR persistence
+// import { CloudflareKVStorage } from "dinou/server";
 
 export default defineConfig({
-  // Global Partial Prerendering (v7)
+  // Global Partial Prerendering default (can be overridden per route)
   ppr: false,
 
   // React StrictMode in development (defaults to true in v7)
   reactStrictMode: true,
+
+  // Custom storage adapter for ISR / route caching (defaults to FileSystemStorage in Node / KV in Deno)
+  // storage: new CloudflareKVStorage(env.MY_KV),
 
   // Array of Web Standards plugins
   plugins: [],
@@ -264,7 +266,105 @@ export default defineConfig({
               </CodeBlock>
 
               <p className="mt-4">
-                The <code>onRequest</code> hook receives the standard Web <code>Request</code> object and Dinou&apos;s <code>RequestContextStore</code>. It can execute in two distinct operational patterns:
+                The <code>onRequest</code> hook receives the standard Web <code>Request</code> object and Dinou&apos;s mutable <code>RequestContextStore</code>.
+              </p>
+
+              {/* The context Object */}
+              <div id="context-reference" className="mt-8 space-y-4">
+                <h3 className="text-lg font-bold">The context Object (RequestContextStore)</h3>
+                <p>
+                  The <code>context</code> parameter provides access to parsed request metadata, response mutation helpers, platform edge bindings, and custom shared state:
+                </p>
+
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`export interface RequestContextStore {
+  /** Parsed incoming request metadata */
+  req: {
+    path: string;                    // Normalized URL pathname (e.g. "/admin/settings")
+    method: string;                  // HTTP method ("GET", "POST", etc.)
+    cookies: Record<string, string>; // Parsed cookie key-value pairs
+    headers: Record<string, string>; // Lowercased incoming HTTP headers
+    query: Record<string, string>;   // Parsed URL search parameters
+    env?: Record<string, any>;       // Platform environment bindings
+    ctx?: any;                       // Platform execution context
+  };
+
+  /** Outgoing response mutation helpers */
+  res: {
+    cookie(name: string, value: string, options?: CookieOptions): void;
+    clearCookie(name: string, options?: CookieOptions): void;
+    setHeader(name: string, value: string): void;
+    status(code: number): void;
+    redirect(url: string): void;
+    redirect(status: number, url: string): void;
+  };
+
+  /** Direct platform bindings (Cloudflare Workers KV, D1, R2, etc.) */
+  env?: Record<string, any>;
+
+  /** Platform runtime context (e.g. ctx.waitUntil for background execution) */
+  ctx?: { waitUntil(promise: Promise<any>): void };
+
+  /** Custom state attached by plugins (context.user, context.session, etc.) */
+  [key: string]: any;
+}`}
+                </CodeBlock>
+
+                <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-muted text-muted-foreground font-medium">
+                      <tr>
+                        <th className="p-3">Property</th>
+                        <th className="p-3">Type</th>
+                        <th className="p-3">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border bg-card text-xs">
+                      <tr>
+                        <td className="p-3 font-mono font-semibold text-foreground">context.req</td>
+                        <td className="p-3 font-mono text-muted-foreground">Object</td>
+                        <td className="p-3 text-muted-foreground">
+                          Parsed request helpers: <code>cookies</code>, <code>headers</code>, <code>query</code>, <code>path</code>, and <code>method</code>.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 font-mono font-semibold text-foreground">context.res</td>
+                        <td className="p-3 font-mono text-muted-foreground">ResponseProxy</td>
+                        <td className="p-3 text-muted-foreground">
+                          Response mutation helpers: <code>cookie()</code>, <code>clearCookie()</code>, <code>setHeader()</code>, <code>status()</code>, and <code>redirect()</code>.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 font-mono font-semibold text-foreground">context.env</td>
+                        <td className="p-3 font-mono text-muted-foreground">Record&lt;string, any&gt;</td>
+                        <td className="p-3 text-muted-foreground">
+                          Direct platform bindings in serverless/edge runtimes (e.g. Cloudflare KV, D1 databases, R2 buckets).
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 font-mono font-semibold text-foreground">context.ctx</td>
+                        <td className="p-3 font-mono text-muted-foreground">ExecutionContext</td>
+                        <td className="p-3 text-muted-foreground">
+                          Platform execution context, allowing <code>ctx.waitUntil(promise)</code> for non-blocking background tasks without delaying the HTTP response.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 font-mono font-semibold text-foreground">context[key]</td>
+                        <td className="p-3 font-mono text-muted-foreground">any</td>
+                        <td className="p-3 text-muted-foreground">
+                          Any custom property attached directly to <code>context</code> (e.g. <code>context.user</code>, <code>context.session</code>) is preserved in <code>AsyncLocalStorage</code> and accessible anywhere via <code>getContext()</code>.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <p className="mt-8">
+                The <code>onRequest</code> hook can execute in two distinct operational patterns:
               </p>
 
               {/* Pattern 1 */}
@@ -339,18 +439,18 @@ export default function ProfilePage() {
             {/* Real-World Examples */}
             <section id="real-world-examples" className="mt-12">
               <h2>Real-World Plugin Examples</h2>
+              <p>
+                In production applications, plugins allow you to keep authentication guards, raw webhook endpoints, and pipeline registration cleanly separated and composable:
+              </p>
 
-              {/* Example Auth */}
-              <div id="example-auth" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">1. Authentication Guard &amp; Session Injection</h3>
-                <p>
-                  Protect administrative routes and inject validated user sessions before React begins rendering:
-                </p>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// plugins/auth-guard.ts
+              <TabbedCodeBlock
+                containerClassName="w-full overflow-hidden rounded-lg my-6"
+                tabs={[
+                  {
+                    id: "auth-guard",
+                    label: "plugins/auth-guard.ts",
+                    language: "typescript",
+                    code: `// plugins/auth-guard.ts
 import type { DinouPlugin } from "dinou";
 
 export function authGuardPlugin(): DinouPlugin {
@@ -377,21 +477,13 @@ export function authGuardPlugin(): DinouPlugin {
       }
     },
   };
-}`}
-                </CodeBlock>
-              </div>
-
-              {/* Example Webhook */}
-              <div id="example-webhook" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">2. Stripe / Clerk Webhook Handler</h3>
-                <p>
-                  Handle raw incoming webhooks with custom signature verification:
-                </p>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// plugins/stripe-webhook.ts
+}`,
+                  },
+                  {
+                    id: "stripe-webhook",
+                    label: "plugins/stripe-webhook.ts",
+                    language: "typescript",
+                    code: `// plugins/stripe-webhook.ts
 import type { DinouPlugin } from "dinou";
 import Stripe from "stripe";
 
@@ -424,23 +516,13 @@ export function stripeWebhookPlugin(): DinouPlugin {
       }
     },
   };
-}`}
-                </CodeBlock>
-              </div>
-            </section>
-
-            {/* Registration & Execution Pipeline Order */}
-            <section id="plugin-registration-order" className="mt-12">
-              <h2>Registration &amp; Execution Pipeline Order</h2>
-              <p>
-                To register your plugins, pass them into the <code>plugins</code> array of <code>defineConfig</code> in <code>dinou.config.mjs</code>:
-              </p>
-
-              <CodeBlock
-                language="typescript"
-                containerClassName="w-full overflow-hidden rounded-lg"
-              >
-{`// dinou.config.mjs
+}`,
+                  },
+                  {
+                    id: "dinou-config",
+                    label: "dinou.config.mjs",
+                    language: "typescript",
+                    code: `// dinou.config.mjs
 import { defineConfig } from "dinou";
 import { requestLoggerPlugin } from "./plugins/logger";
 import { stripeWebhookPlugin } from "./plugins/stripe-webhook";
@@ -459,12 +541,22 @@ export default defineConfig({
     // 3. Auth Guard: Validates credentials and enriches context.user
     authGuardPlugin(),
   ],
-});`}
-              </CodeBlock>
+});`,
+                  },
+                ]}
+              />
+            </section>
+
+            {/* Registration & Execution Pipeline Order */}
+            <section id="plugin-registration-order" className="mt-12">
+              <h2>Registration &amp; Execution Pipeline Order</h2>
+              <p>
+                To register your plugins, pass them into the <code>plugins</code> array of <code>defineConfig</code> in <code>dinou.config.mjs</code> (as shown in the configuration tab above). Dinou executes plugins sequentially according to their position in the array:
+              </p>
 
               <div className="border rounded-xl p-5 bg-card not-prose my-6 space-y-3">
                 <div className="flex items-center gap-2 font-semibold text-sm">
-                  <Layers className="h-4 w-4 text-purple-500" />
+                  <Layers className="h-4 w-4 text-amber-500" />
                   <span>Pipeline Execution Rules</span>
                 </div>
                 <ol className="list-decimal pl-5 text-xs text-muted-foreground space-y-2 leading-relaxed">
