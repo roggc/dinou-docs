@@ -120,7 +120,7 @@ const docsNavigation = [
         icon: Database,
       },
       {
-        title: "Advanced Patterns",
+        title: "The Dinou Pattern",
         href: "/docs/pattern",
         icon: Brain,
       },

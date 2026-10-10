@@ -1,6 +1,7 @@
 "use client";
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
+import { Badge } from "@/docs/components/ui/badge";
 import {
   Alert,
   AlertDescription,
@@ -27,23 +28,24 @@ import {
   AlertTriangle,
   ArrowRight,
   Code2,
+  Info,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
+import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 
 const tocItems = [
   { id: "concept", title: "The Concept & Architecture", level: 2 },
   { id: "flight-rpc", title: "Flight RPC & Headless Updaters", level: 3 },
   { id: "architecture-flow", title: "5-Step Execution Lifecycle", level: 3 },
   { id: "implementation", title: "Step-by-Step Implementation", level: 2 },
-  { id: "step-1-store", title: "1. The Native Store (useSyncExternalStore)", level: 3 },
+  { id: "step-1-store", title: "1. The Global Store (Zustand)", level: 3 },
   { id: "step-2-updater", title: "2. The Headless Client Updater", level: 3 },
   { id: "step-3-mutation", title: "3. Server Function Mutation", level: 3 },
   { id: "step-4-query", title: "4. Server Data Query Function", level: 3 },
   { id: "step-5-display", title: "5. Display Component", level: 3 },
   { id: "step-6-page", title: "6. Putting It All Together in the Page", level: 3 },
-  { id: "external-stores", title: "Integration with External Stores (Zustand)", level: 2 },
+  { id: "zero-dependency", title: "Zero-Dependency Option (useSyncExternalStore)", level: 2 },
   { id: "comparison", title: "Comparison & Key Advantages", level: 2 },
-  { id: "best-practices", title: "Best Practices & Error Handling", level: 2 },
 ];
 
 export default function Page() {
@@ -53,15 +55,35 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-foreground bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+              >
+                Architectural Pattern
+              </Badge>
+              <Badge
+                variant="outline"
+                className="font-mono text-xs text-emerald-700 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/30"
+              >
+                Surgical Reactivity
+              </Badge>
+              <Badge
+                variant="outline"
+                className="font-mono text-xs text-muted-foreground"
+              >
+                Flight RPC + Global Store
+              </Badge>
+            </div>
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Advanced Patterns: The &quot;Dinou Pattern&quot;
+                The Dinou Pattern
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Combine Server Functions, Headless Client Updaters, and pure React 19 primitives
-              (<code>useSyncExternalStore</code>, <code>use()</code>, and <code>&lt;Suspense&gt;</code>)
-              for surgical reactivity &mdash; with <strong>zero external dependencies required</strong> (and full compatibility with external state managers like Zustand or Jotai).
+              Combine Server Functions, Headless Client Updaters, and React 19 primitives
+              (<code>use()</code> and <code>&lt;Suspense&gt;</code>) with your global store (such as <strong>Zustand</strong>)
+              for surgical, zero-layout-shift reactivity &mdash; without route-wide reloads or lost input focus.
             </p>
           </div>
 
@@ -70,7 +92,7 @@ export default function Page() {
             <section id="concept">
               <h2>The Concept &amp; Architecture</h2>
               <p>
-                In standard React Server Component frameworks, mutations often require triggering a full-tree re-render via route revalidation (such as <code>revalidatePath</code>). While simple, full-page revalidation can cause unnecessary re-renders of unrelated components, reset unsaved form inputs, or cause layout shifts.
+                In full-stack React applications, mutations often trigger broad page re-renders or full route re-fetches. This can cause unnecessary re-renders of unrelated components, reset unsaved form inputs, or cause visible layout shifts.
               </p>
               <p>
                 The <strong>Dinou Pattern</strong> offers a modern alternative by leveraging the unique ability of Server Functions to return Client Components directly over the React Flight RPC protocol. After executing a mutation securely in Node.js, the server returns an invisible <strong>Headless State Updater</strong> component that:
@@ -95,7 +117,7 @@ export default function Page() {
                 </p>
                 <div className="grid gap-4 sm:grid-cols-2 not-prose my-4">
                   <div className="rounded-lg border bg-card p-4 space-y-2">
-                    <div className="flex items-center gap-2 font-semibold text-sm text-blue-600 dark:text-blue-400">
+                    <div className="flex items-center gap-2 font-semibold text-sm text-emerald-600 dark:text-emerald-400">
                       <Cpu className="h-4 w-4" />
                       <span>Server Authority</span>
                     </div>
@@ -104,7 +126,7 @@ export default function Page() {
                     </p>
                   </div>
                   <div className="rounded-lg border bg-card p-4 space-y-2">
-                    <div className="flex items-center gap-2 font-semibold text-sm text-purple-600 dark:text-purple-400">
+                    <div className="flex items-center gap-2 font-semibold text-sm text-emerald-600 dark:text-emerald-400">
                       <Layers className="h-4 w-4" />
                       <span>Client Synchronization</span>
                     </div>
@@ -124,12 +146,12 @@ export default function Page() {
 
                 <div className="border rounded-xl p-5 bg-card not-prose mt-4 shadow-sm">
                   <div className="flex items-center gap-2 font-semibold mb-4 text-sm">
-                    <Puzzle className="h-5 w-5 text-purple-500" />
+                    <Puzzle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                     <span>Lifecycle Timeline</span>
                   </div>
                   <div className="space-y-3 text-sm">
                     <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</div>
+                      <div className="w-6 h-6 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</div>
                       <div>
                         <div className="font-semibold text-foreground">Client Invocation</div>
                         <div className="text-xs text-muted-foreground">User submits an action; client invokes the Server Function (e.g. <code>addPatternTask()</code>) and sets a mutation promise into a headless boundary.</div>
@@ -143,21 +165,21 @@ export default function Page() {
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">3</div>
+                      <div className="w-6 h-6 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">3</div>
                       <div>
                         <div className="font-semibold text-foreground">Flight Stream Response</div>
                         <div className="text-xs text-muted-foreground">Rather than raw JSON, the server streams back the invisible <code>&lt;PatternTaskUpdater /&gt;</code> Client Component.</div>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">4</div>
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">4</div>
                       <div>
                         <div className="font-semibold text-foreground">Headless Mount &amp; Store Update</div>
-                        <div className="text-xs text-muted-foreground">The updater mounts (rendering <code>null</code>), and its <code>useEffect</code> signals the native store via <code>useSyncExternalStore</code>.</div>
+                        <div className="text-xs text-muted-foreground">The updater mounts (rendering <code>null</code>), and its <code>useEffect</code> invalidates the key in the global store (e.g. <code>useTaskStore.getState().invalidateTasks()</code>).</div>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">5</div>
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">5</div>
                       <div>
                         <div className="font-semibold text-foreground">Surgical Stream Re-fetch</div>
                         <div className="text-xs text-muted-foreground">Only the dependent query <code>&lt;Suspense&gt;</code> boundary re-fetches and streams the updated list, leaving form focus and scroll untouched.</div>
@@ -172,50 +194,34 @@ export default function Page() {
             <section id="implementation" className="mt-12">
               <h2>Step-by-Step Implementation</h2>
               <p>
-                Here is the complete, modular implementation using native React 19 primitives with zero external packages.
+                Here is the complete, modular implementation showing how Server Functions, Flight RPC, and Zustand orchestrate surgical reactivity without route revalidations:
               </p>
 
-              {/* Step 1: Native Store */}
+              {/* Step 1: Global Store */}
               <div id="step-1-store" className="mt-8">
-                <h3>1. The Native Store (React 19 <code>useSyncExternalStore</code>)</h3>
+                <h3>1. The Global Store (Zustand)</h3>
                 <p>
-                  Create a lightweight singleton store with native React 19 primitives. It has zero external dependencies, is lightweight, and is 100% SSR-safe:
+                  A minimal store holding a reactive invalidation key. Any global state manager (such as Zustand, Jotai, or Redux) works identically:
                 </p>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// src/pattern-store.ts
-import { useSyncExternalStore } from "react";
+{`// src/stores/task-store.ts
+import { create } from "zustand";
 
-// Pure native React 19 global state (0 external dependencies)
-let tasksListKey = 0;
-const listeners = new Set<() => void>();
+interface TaskStore {
+  tasksKey: number;
+  invalidateTasks: () => void;
+}
 
-export const patternStore = {
-  getSnapshot: () => tasksListKey,
-  incrementTasksListKey: () => {
-    tasksListKey += 1;
-    listeners.forEach((listener) => listener());
-  },
-  subscribe: (listener: () => void) => {
-    listeners.add(listener);
-    return () => {
-      listeners.delete(listener);
-    };
-  },
-};
-
-export function useTasksListKey(): number {
-  return useSyncExternalStore(
-    patternStore.subscribe,
-    patternStore.getSnapshot,
-    patternStore.getSnapshot // Server snapshot for SSR hydration safety
-  );
-}`}
+export const useTaskStore = create<TaskStore>((set) => ({
+  tasksKey: 0,
+  invalidateTasks: () => set((state) => ({ tasksKey: state.tasksKey + 1 })),
+}));`}
                 </CodeBlock>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  <strong>SSR Compatibility:</strong> Providing <code>patternStore.getSnapshot</code> as the third argument ensures identical initial values during server rendering and client hydration, preventing hydration mismatch warnings.
+                  <strong>Why it matters:</strong> Calling <code>invalidateTasks()</code> increments <code>tasksKey</code>, signaling subscribing components to re-fetch their Suspense stream without triggering route-wide re-renders.
                 </p>
               </div>
 
@@ -223,7 +229,7 @@ export function useTasksListKey(): number {
               <div id="step-2-updater" className="mt-8">
                 <h3>2. The Headless Client Updater</h3>
                 <p>
-                  An invisible Client Component that renders <code>null</code> (0 DOM elements), but synchronizes the store when mounted:
+                  An invisible Client Component that renders <code>null</code> (0 DOM elements), but invokes the store&apos;s invalidation action when mounted:
                 </p>
                 <CodeBlock
                   language="tsx"
@@ -232,14 +238,13 @@ export function useTasksListKey(): number {
 {`// src/components/pattern-updater.tsx
 "use client";
 import { useEffect } from "react";
-import { patternStore } from "../pattern-store";
+import { useTaskStore } from "../stores/task-store";
 
-export default function PatternTaskUpdater({ id, taskText }: { id?: string; taskText?: string }) {
+export default function PatternTaskUpdater({ id }: { id?: string }) {
   useEffect(() => {
-    // When mounted on the client after Server Function completes,
-    // atomically updates the React store
-    patternStore.incrementTasksListKey();
-  }, [id, taskText]);
+    // Atomically signal the store outside the render cycle
+    useTaskStore.getState().invalidateTasks();
+  }, [id]);
 
   return null; // Headless component: emits zero DOM nodes and 0 layout shifts
 }`}
@@ -275,7 +280,7 @@ export async function addPatternTask(text: string): Promise<ReactNode> {
   }
 
   // The server orchestrates the client by returning the Headless Updater!
-  return <PatternTaskUpdater key={id} id={id} taskText={trimmed} />;
+  return <PatternTaskUpdater key={id} id={id} />;
 }`}
                 </CodeBlock>
               </div>
@@ -340,17 +345,19 @@ export default function PatternTasksList({ tasks }: { tasks: PatternTaskItem[] }
               <div id="step-6-page" className="mt-8">
                 <h3>6. Putting It All Together in the Page</h3>
                 <p>
-                  The view coordinates mutation promises and queries with React 19&apos;s native <code>use()</code> hook and <code>&lt;Suspense&gt;</code>:
+                  The view coordinates mutation promises and queries with React 19&apos;s native <code>use()</code> hook and <code>&lt;Suspense&gt;</code>. Switch tabs below to explore each component in the unified architecture:
                 </p>
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/page.tsx
-"use client";
+                <TabbedCodeBlock
+                  containerClassName="w-full overflow-hidden rounded-lg my-4"
+                  tabs={[
+                    {
+                      id: "page",
+                      label: "src/page.tsx",
+                      language: "tsx",
+                      code: `"use client";
 import { useState, useEffect, Suspense, use, type ReactNode } from "react";
 import { addPatternTask, fetchPatternTasks } from "./server-functions/pattern-demo";
-import { useTasksListKey } from "./pattern-store";
+import { useTaskStore } from "./stores/task-store";
 
 function TasksStream({ promise }: { promise: Promise<ReactNode> }) {
   // Native React 19: unroll the Flight stream promise
@@ -364,19 +371,19 @@ function MutationStream({ promise }: { promise: Promise<ReactNode> }) {
 }
 
 export default function Page() {
-  const tasksListKey = useTasksListKey();
+  const tasksKey = useTaskStore((state) => state.tasksKey);
   const [text, setText] = useState("");
   const [isMutating, setIsMutating] = useState(false);
   const [mutationKey, setMutationKey] = useState(0);
   const [mutationPromise, setMutationPromise] = useState<Promise<ReactNode> | null>(null);
   const [tasksPromise, setTasksPromise] = useState<Promise<ReactNode>>(() => fetchPatternTasks());
 
-  // Invalidate and re-fetch only when the store increments tasksListKey
+  // Invalidate and re-fetch only when the store increments tasksKey
   useEffect(() => {
-    if (tasksListKey > 0) {
+    if (tasksKey > 0) {
       setTasksPromise(fetchPatternTasks());
     }
-  }, [tasksListKey]);
+  }, [tasksKey]);
 
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -419,19 +426,113 @@ export default function Page() {
 
       {/* 3. Surgical Reactive Tasks List */}
       <Suspense
-        key={\`pattern-tasks-\${tasksListKey}\`}
+        key={\`pattern-tasks-\${tasksKey}\`}
         fallback={<div>Streaming updated list from Node.js...</div>}
       >
         <TasksStream promise={tasksPromise} />
       </Suspense>
     </div>
   );
-}`}
-                </CodeBlock>
+}`,
+                    },
+                    {
+                      id: "store",
+                      label: "src/stores/task-store.ts",
+                      language: "typescript",
+                      code: `import { create } from "zustand";
+
+interface TaskStore {
+  tasksKey: number;
+  invalidateTasks: () => void;
+}
+
+export const useTaskStore = create<TaskStore>((set) => ({
+  tasksKey: 0,
+  invalidateTasks: () => set((state) => ({ tasksKey: state.tasksKey + 1 })),
+}));`,
+                    },
+                    {
+                      id: "updater",
+                      label: "src/components/pattern-updater.tsx",
+                      language: "tsx",
+                      code: `"use client";
+import { useEffect } from "react";
+import { useTaskStore } from "../stores/task-store";
+
+export default function PatternTaskUpdater({ id }: { id?: string }) {
+  useEffect(() => {
+    // Atomically signal the store outside the render cycle
+    useTaskStore.getState().invalidateTasks();
+  }, [id]);
+
+  return null; // Headless component: emits zero DOM nodes and 0 layout shifts
+}`,
+                    },
+                    {
+                      id: "server-fn",
+                      label: "src/server-functions/pattern-demo.tsx",
+                      language: "tsx",
+                      code: `"use server";
+import type { ReactNode } from "react";
+import PatternTaskUpdater from "../components/pattern-updater";
+import PatternTasksList from "../components/pattern-tasks-list";
+import { tasksDb } from "./db";
+
+export async function addPatternTask(text: string): Promise<ReactNode> {
+  const trimmed = text.trim();
+  const id = Math.random().toString(36).substring(2, 9);
+  
+  if (trimmed) {
+    tasksDb.unshift({
+      id,
+      text: trimmed,
+      createdAt: new Date().toLocaleTimeString(),
+    });
+  }
+
+  // The server orchestrates the client by returning the Headless Updater!
+  return <PatternTaskUpdater key={id} id={id} />;
+}
+
+export async function fetchPatternTasks(): Promise<ReactNode> {
+  return <PatternTasksList tasks={[...tasksDb]} />;
+}`,
+                    },
+                    {
+                      id: "display",
+                      label: "src/components/pattern-tasks-list.tsx",
+                      language: "tsx",
+                      code: `"use client";
+
+export interface PatternTaskItem {
+  id: string;
+  text: string;
+  createdAt: string;
+}
+
+export default function PatternTasksList({ tasks }: { tasks: PatternTaskItem[] }) {
+  if (!tasks || tasks.length === 0) {
+    return <p className="text-muted-foreground text-sm">No tasks yet.</p>;
+  }
+
+  return (
+    <ul className="space-y-2">
+      {tasks.map((task) => (
+        <li key={task.id} className="p-2.5 rounded-lg border bg-card flex justify-between">
+          <span>{task.text}</span>
+          <span className="text-xs text-muted-foreground">{task.createdAt}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}`,
+                    },
+                  ]}
+                />
               </div>
 
               <Alert className="not-prose mt-8">
-                <Zap className="h-4 w-4" />
+                <Zap className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 <AlertTitle>How It Works</AlertTitle>
                 <AlertDescription>
                   <ol className="list-decimal pl-4 space-y-1.5 mt-2 text-xs leading-relaxed">
@@ -445,7 +546,7 @@ export default function Page() {
                       Server mutates the database in Node.js and returns <code>&lt;PatternTaskUpdater /&gt;</code> over Flight RPC.
                     </li>
                     <li>
-                      <code>PatternTaskUpdater</code> mounts, executing its <code>useEffect</code> to increment <code>tasksListKey</code> in the native <code>useSyncExternalStore</code>.
+                      <code>PatternTaskUpdater</code> mounts, executing its <code>useEffect</code> to call <code>useTaskStore.getState().invalidateTasks()</code>.
                     </li>
                     <li>
                       The store notifies the page, calling <code>fetchPatternTasks()</code> to obtain the fresh stream.
@@ -456,37 +557,104 @@ export default function Page() {
                   </ol>
                 </AlertDescription>
               </Alert>
+
+              {/* Technical Notes & Error Handling Callout */}
+              <div className="rounded-xl border border-border/80 bg-muted/20 p-5 not-prose mt-6 space-y-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                  <span>Production Notes: Error Handling &amp; React Lifecycle</span>
+                </div>
+
+                <div className="space-y-4 text-xs">
+                  {/* Point 1: Server errors & atomic rollbacks */}
+                  <div className="rounded-lg border bg-card p-4 space-y-2">
+                    <div className="font-semibold text-foreground flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      Server-Side Mutation Errors &amp; Atomic Rollbacks
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Flight RPC streams server errors as rejected promises. If the Server Function throws in Node.js, the promise rejects on the client and the Headless Updater <strong>never mounts</strong>. This guarantees that your client-side store is never corrupted with failed mutation state.
+                    </p>
+                    <CodeBlock
+                      language="typescript"
+                      containerClassName="w-full overflow-hidden rounded-md mt-2"
+                    >
+{`try {
+  const p = addPatternTask(trimmed);
+  setMutationPromise(p);
+  await p; // If Node.js throws, execution jumps to catch
+} catch (error) {
+  // Headless updater never mounted; store was NOT modified!
+  console.error("Mutation failed on server:", error);
+  toast.error("Failed to add task");
+}`}
+                    </CodeBlock>
+                  </div>
+
+                  {/* Points 2 & 3 */}
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div className="rounded-lg border bg-card p-3.5 space-y-1.5">
+                      <div className="font-semibold text-foreground flex items-center gap-2">
+                        <RefreshCw className="h-3.5 w-3.5 text-amber-500" />
+                        Consecutive Mutation Keys
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        When triggering multiple rapid mutations, incrementing <code>setMutationKey((k) =&gt; k + 1)</code> on the <code>&lt;Suspense key=...&gt;</code> boundary forces React to cleanly unmount the previous updater and mount the new one fresh.
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg border bg-card p-3.5 space-y-1.5">
+                      <div className="font-semibold text-foreground flex items-center gap-2">
+                        <Code2 className="h-3.5 w-3.5 text-slate-500" />
+                        Lightweight Headless Footprint
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Keep Headless Updaters purely functional with zero DOM output (<code>return null</code>). They exist solely as the reactive bridge between the Server Function RPC response and the client-side store.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </section>
 
-            {/* External Store Integration */}
-            <section id="external-stores" className="mt-12">
-              <h2>Integration with External Stores (Zustand &amp; Jotai)</h2>
+            {/* Zero-Dependency Alternative */}
+            <section id="zero-dependency" className="mt-12">
+              <h2>Zero-Dependency Option: Native <code>useSyncExternalStore</code></h2>
               <p>
-                While the native <code>useSyncExternalStore</code> pattern provides surgical reactivity with <strong>zero external packages</strong> in your client bundle, the Dinou Pattern works just as seamlessly with popular state managers like Zustand, Jotai, or Redux.
-              </p>
-              <p>
-                To use an external state library, simply invoke your store&apos;s action inside the Headless Updater:
+                If you prefer not to include any third-party state libraries in your client bundle, you can achieve the exact same surgical reactivity using React 19&apos;s native <code>useSyncExternalStore</code> hook:
               </p>
               <CodeBlock
-                language="tsx"
+                language="typescript"
                 containerClassName="w-full overflow-hidden rounded-lg"
               >
-{`// src/components/zustand-task-updater.tsx
-"use client";
-import { useEffect } from "react";
-import { useTaskStore } from "../stores/task-store";
+{`// src/stores/native-store.ts
+import { useSyncExternalStore } from "react";
 
-export default function ZustandTaskUpdater({ newTask }: { newTask: { id: string; text: string } }) {
-  useEffect(() => {
-    // Directly update the Zustand store outside React render cycle
-    useTaskStore.getState().addTask(newTask);
-  }, [newTask]);
+let tasksKey = 0;
+const listeners = new Set<() => void>();
 
-  return null; // Headless component
+export const nativeTaskStore = {
+  getSnapshot: () => tasksKey,
+  invalidateTasks: () => {
+    tasksKey += 1;
+    listeners.forEach((listener) => listener());
+  },
+  subscribe: (listener: () => void) => {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  },
+};
+
+export function useNativeTasksKey(): number {
+  return useSyncExternalStore(
+    nativeTaskStore.subscribe,
+    nativeTaskStore.getSnapshot,
+    nativeTaskStore.getSnapshot // Server snapshot for SSR hydration safety
+  );
 }`}
               </CodeBlock>
               <p className="mt-3 text-sm text-muted-foreground">
-                This flexibility allows you to adopt the Dinou Pattern incrementally without abandoning your existing state management architecture.
+                In your Headless Updater, simply invoke <code>nativeTaskStore.invalidateTasks()</code> instead of <code>useTaskStore.getState().invalidateTasks()</code>. The lifecycle, Flight RPC streaming, and selective re-fetching behavior remain 100% identical.
               </p>
             </section>
 
@@ -494,7 +662,7 @@ export default function ZustandTaskUpdater({ newTask }: { newTask: { id: string;
             <section id="comparison" className="mt-12">
               <h2>Comparison &amp; Key Advantages</h2>
               <p>
-                Comparing the Dinou Pattern against traditional route revalidation and legacy client-only data fetching:
+                Comparing the Dinou Pattern against traditional client-side data fetching (REST / React Query):
               </p>
 
               <div className="not-prose my-6 overflow-x-auto">
@@ -502,40 +670,44 @@ export default function ZustandTaskUpdater({ newTask }: { newTask: { id: string;
                   <thead>
                     <tr className="bg-slate-100 dark:bg-slate-800 text-left">
                       <th className="p-3 font-semibold border-b">Feature</th>
-                      <th className="p-3 font-semibold border-b text-blue-600 dark:text-blue-400">Dinou Pattern</th>
-                      <th className="p-3 font-semibold border-b text-muted-foreground">revalidatePath (Route Level)</th>
-                      <th className="p-3 font-semibold border-b text-muted-foreground">REST / React Query</th>
+                      <th className="p-3 font-semibold border-b text-emerald-600 dark:text-emerald-400">The Dinou Pattern</th>
+                      <th className="p-3 font-semibold border-b text-muted-foreground">REST / React Query (SPA)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y text-xs">
                     <tr>
                       <td className="p-3 font-medium">Reactivity Scope</td>
                       <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">Surgical (targeted boundary only)</td>
-                      <td className="p-3 text-muted-foreground">Broad (entire route page tree)</td>
-                      <td className="p-3 text-muted-foreground">Surgical (query key invalidation)</td>
+                      <td className="p-3 text-emerald-600 dark:text-emerald-400">Surgical (query key invalidation)</td>
                     </tr>
                     <tr>
                       <td className="p-3 font-medium">Form / Input Focus</td>
                       <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">100% Preserved (zero blur or reset)</td>
-                      <td className="p-3 text-muted-foreground">Risk of reset if not isolated</td>
-                      <td className="p-3 text-muted-foreground">Preserved</td>
+                      <td className="p-3 text-emerald-600 dark:text-emerald-400">Preserved</td>
                     </tr>
                     <tr>
                       <td className="p-3 font-medium">Bundle Overhead</td>
-                      <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">0 KB (React 19 native primitives)</td>
-                      <td className="p-3 text-muted-foreground">0 KB</td>
-                      <td className="p-3 text-muted-foreground">~12&ndash;15 KB (client library)</td>
+                      <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">~1 KB (Zustand) or 0 KB (Native)</td>
+                      <td className="p-3 text-amber-600 dark:text-amber-400 font-medium">~12&ndash;15 KB (client query library)</td>
                     </tr>
                     <tr>
-                      <td className="p-3 font-medium">Backend Authority</td>
-                      <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">Direct Node.js Server Functions</td>
-                      <td className="p-3 text-muted-foreground">Direct Node.js Server Actions</td>
-                      <td className="p-3 text-muted-foreground">Requires dedicated API endpoint</td>
+                      <td className="p-3 font-medium">Backend Architecture</td>
+                      <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">Direct Node.js Server Functions (&quot;use server&quot;)</td>
+                      <td className="p-3 text-amber-600 dark:text-amber-400 font-medium">Requires dedicated HTTP API endpoints (/api/...)</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-medium">Data Transport</td>
+                      <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">React Flight RPC (typed component streaming)</td>
+                      <td className="p-3 text-amber-600 dark:text-amber-400 font-medium">JSON serialization + manual client fetch logic</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3 font-medium">Boilerplate</td>
+                      <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">Zero API routes, controllers, or fetch hooks</td>
+                      <td className="p-3 text-amber-600 dark:text-amber-400 font-medium">Manual endpoints, fetch hooks, error states, and types</td>
                     </tr>
                     <tr>
                       <td className="p-3 font-medium">DOM Impact</td>
-                      <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">0 DOM nodes emitted by updater</td>
-                      <td className="p-3 text-muted-foreground">Full route DOM diffing</td>
+                      <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">0 DOM nodes emitted by headless updater</td>
                       <td className="p-3 text-muted-foreground">N/A (data only)</td>
                     </tr>
                   </tbody>
@@ -543,9 +715,9 @@ export default function ZustandTaskUpdater({ newTask }: { newTask: { id: string;
               </div>
 
               <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                <Card className="border-green-500/20 bg-green-50/50 dark:bg-green-900/10">
+                <Card className="border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 shadow-xs">
                   <CardHeader>
-                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
+                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold">
                       <ArrowUpDown className="h-5 w-5" />
                       <span>Surgical Reactivity</span>
                     </div>
@@ -554,68 +726,17 @@ export default function ZustandTaskUpdater({ newTask }: { newTask: { id: string;
                     Only the targeted component re-fetches and re-renders. Inputs, local states, and other UI sections remain completely untouched.
                   </CardContent>
                 </Card>
-                <Card className="border-purple-500/20 bg-purple-50/50 dark:bg-purple-900/10">
+                <Card className="border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 shadow-xs">
                   <CardHeader>
-                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold">
+                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold">
                       <Sparkles className="h-5 w-5" />
-                      <span>Zero External Dependencies</span>
+                      <span>Zero Friction State Management</span>
                     </div>
                   </CardHeader>
                   <CardContent className="text-sm">
-                    Powered natively by React 19 primitives: <code>useSyncExternalStore</code>, <code>use()</code>, <code>&lt;Suspense&gt;</code>, and Flight RPC. If your project already uses an external state manager like Zustand or Jotai, it works seamlessly alongside it.
+                    Pairs seamlessly with your existing global store (Zustand, Jotai, or Redux) or native <code>useSyncExternalStore</code> alongside React 19&apos;s Flight RPC and <code>&lt;Suspense&gt;</code>.
                   </CardContent>
                 </Card>
-              </div>
-            </section>
-
-            {/* Best Practices Section */}
-            <section id="best-practices" className="mt-12">
-              <h2>Best Practices &amp; Error Handling</h2>
-
-              <div className="space-y-6 mt-4">
-                <div className="rounded-lg border p-4 bg-card not-prose space-y-2">
-                  <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
-                    <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                    <span>Server-Side Mutation Errors &amp; Atomic Rollbacks</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Because Flight RPC streams errors as rejected promises, if the server mutation throws an exception in Node.js, the promise rejects on the client and the Headless Updater <strong>never mounts</strong>. This guarantees that your client-side store is never corrupted with failed mutation state.
-                  </p>
-                  <CodeBlock
-                    language="typescript"
-                    containerClassName="w-full overflow-hidden rounded-lg mt-2"
-                  >
-{`try {
-  const p = addPatternTask(trimmedText);
-  setMutationPromise(p);
-  await p; // If Node.js throws, execution jumps to catch
-} catch (error) {
-  // Headless updater never mounted; store was NOT modified!
-  console.error("Mutation failed on server:", error);
-  toast.error("Failed to add task");
-}`}
-                  </CodeBlock>
-                </div>
-
-                <div className="rounded-lg border p-4 bg-card not-prose space-y-2">
-                  <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
-                    <RefreshCw className="h-4 w-4 text-blue-500" />
-                    <span>Unique Mutation Keys in Consecutive Calls</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    When invoking the mutation multiple times in rapid succession, increment a mutation key (e.g. <code>setMutationKey((k) =&gt; k + 1)</code>) on the mutation <code>&lt;Suspense key=...&gt;</code> boundary. This forces React to unmount the previous updater and mount the new one fresh.
-                  </p>
-                </div>
-
-                <div className="rounded-lg border p-4 bg-card not-prose space-y-2">
-                  <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
-                    <Code2 className="h-4 w-4 text-purple-500" />
-                    <span>Lightweight Headless Footprint</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Keep Headless Updaters purely functional. Do not include heavy logic or DOM markup inside them. They exist solely as the reactive bridge between the Server Function RPC response and the client-side state store.
-                  </p>
-                </div>
               </div>
             </section>
           </div>
