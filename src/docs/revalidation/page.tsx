@@ -382,7 +382,7 @@ export default function Page() {
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// src/blog/actions.ts
+{`// src/blog/server-functions.ts
 "use server";
 
 import { revalidatePage } from "dinou/server";
@@ -445,7 +445,7 @@ export async function updateArticle(slug: string, newContent: string) {
                 language="typescript"
                 containerClassName="w-full overflow-hidden rounded-lg my-4"
               >
-{`// src/dashboard/actions.ts
+{`// src/dashboard/server-functions.ts
 "use server";
 
 import { revalidatePath } from "dinou/server";
@@ -477,7 +477,7 @@ export async function refreshDashboard() {
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// src/dashboard/actions.ts
+{`// src/dashboard/server-functions.ts
 "use server";
 
 import { revalidatePath } from "dinou/server";
@@ -591,7 +591,7 @@ export async function updateDashboardNavigation() {
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// src/products/actions.ts
+{`// src/products/server-functions.ts
 "use server";
 
 import { revalidatePath, revalidatePage } from "dinou/server";
@@ -631,7 +631,7 @@ export async function updateCategory(categoryId: string, data: any) {
                 language="typescript"
                 containerClassName="w-full overflow-hidden rounded-lg"
               >
-{`// src/products/actions.ts
+{`// src/products/server-functions.ts
 "use server";
 
 import { revalidateTag } from "dinou/server";
