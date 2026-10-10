@@ -14,968 +14,976 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/docs/components/ui/alert";
-import {
-  Database,
-  Server,
-  RefreshCw,
-  Zap,
-  Info,
-  Globe,
-  Cpu,
-  Sparkles,
-  Layers,
-  Split,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  HelpCircle,
-  ArrowRight,
-  TrendingDown,
-  Boxes,
-  Lock,
-} from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/docs/components/ui/table";
+import { AlertTriangle, Info, Workflow } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
+import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 
 const tocItems = [
   {
     id: "overview",
-    title: "Overview: Multi-Dimensional Data Fetching",
+    title: "Overview: 13-Strategy Architecture",
     level: 2,
   },
   {
-    id: "server-components",
-    title: "1. Server Components (Direct Async Fetching)",
+    id: "strategy-1",
+    title: "1. RSC Direct await (SSG)",
     level: 2,
   },
   {
-    id: "timing-ssg-ssr",
-    title: "1.1. Static (SSG) vs Dynamic (SSR) Timing",
-    level: 3,
-  },
-  {
-    id: "parallel-fetching",
-    title: "1.2. Parallel Fetching (Avoiding Waterfalls)",
-    level: 3,
-  },
-  {
-    id: "streaming-suspense",
-    title: "1.3. Non-Blocking Streaming with <Suspense>",
-    level: 3,
-  },
-  {
-    id: "page-layout-functions",
-    title: "2. Page & Layout Functions (getProps)",
+    id: "strategy-2",
+    title: "2. RSC Direct await (Dynamic SSR)",
     level: 2,
   },
   {
-    id: "getprops-contract",
-    title: "2.1. Direct Props Return Contract",
-    level: 3,
-  },
-  {
-    id: "horizontal-data-split",
-    title: "2.2. Page vs Layout Segmentation",
-    level: 3,
-  },
-  {
-    id: "client-first-model",
-    title: "2.3. The Client-First Model (getProps + Client Page)",
-    level: 3,
-  },
-  {
-    id: "partial-prerendering",
-    title: "3. Partial Prerendering (PPR) Data Fetching",
+    id: "strategy-3",
+    title: "3. RSC with <Suspense> (SSG)",
     level: 2,
   },
   {
-    id: "ppr-how-it-works",
-    title: "3.1. Static Shell + Dynamic Holes",
-    level: 3,
-  },
-  {
-    id: "ppr-example",
-    title: "3.2. PPR Implementation Example",
-    level: 3,
-  },
-  {
-    id: "dinou-cache-slot",
-    title: "4. Vertical Segmentation: <DinouCacheSlot> (Micro-ISR)",
+    id: "strategy-4",
+    title: "4. RSC with <Suspense> (Dynamic Streaming)",
     level: 2,
   },
   {
-    id: "cache-slot-props",
-    title: "4.1. Granular Component Caching & Props",
-    level: 3,
-  },
-  {
-    id: "asymmetric-isr",
-    title: "4.2. Asymmetric ISR (Static Page + Fast Slot)",
-    level: 3,
-  },
-  {
-    id: "refresh-slot-client",
-    title: "4.3. Client-Side Targeted Invalidation (refreshSlot)",
-    level: 3,
-  },
-  {
-    id: "ppr-cache-slot-synergy",
-    title: "5. High-Traffic Synergy: PPR + <DinouCacheSlot>",
+    id: "strategy-5",
+    title: "5. RSC + <Suspense> + <DinouCacheSlot> (Static SSG / Asymmetric ISR)",
     level: 2,
   },
   {
-    id: "synergy-benchmarks",
-    title: "5.1. 0ms Edge TTFB + 2ms Cached Hole",
-    level: 3,
-  },
-  {
-    id: "synergy-implementation",
-    title: "5.2. Peak Performance Implementation",
-    level: 3,
-  },
-  {
-    id: "server-functions-streaming",
-    title: "6. Reactive Fetching with Server Functions & React 19",
+    id: "strategy-6",
+    title: "6. RSC + <Suspense> + <DinouCacheSlot> (Dynamic Micro-ISR)",
     level: 2,
   },
   {
-    id: "react-19-use-hook",
-    title: "6.1. Passing Promises to Client use()",
-    level: 3,
+    id: "strategy-7",
+    title: "7. RSC with <Suspense> (PPR Hybrid)",
+    level: 2,
   },
   {
-    id: "server-functions-mutations",
-    title: "6.2. User-Driven RPC Mutations vs Initial Mount",
-    level: 3,
+    id: "strategy-8",
+    title: "8. PPR + <DinouCacheSlot> (Peak Performance Synergy)",
+    level: 2,
   },
   {
-    id: "strategy-comparison",
-    title: "7. Data Fetching & Rendering Strategies Master Matrix",
+    id: "strategy-9",
+    title: "9. RSC Promise ➔ Client use() (React 19)",
+    level: 2,
+  },
+  {
+    id: "strategy-10",
+    title: "10. Client-First getProps (SSG)",
+    level: 2,
+  },
+  {
+    id: "strategy-11",
+    title: "11. Client-First getProps (Dynamic SSR)",
+    level: 2,
+  },
+  {
+    id: "strategy-12",
+    title: "12. Client Calling Server Function (Initial Mount - Dynamic RPC)",
+    level: 2,
+  },
+  {
+    id: "strategy-13",
+    title: "13. Client Server Functions (User Actions & Mutations)",
+    level: 2,
+  },
+  {
+    id: "decision-guide",
+    title: "Architectural Decision Guide",
     level: 2,
   },
 ];
 
-export default function Page() {
+function MetricCard({
+  label,
+  value,
+  variant = "emerald",
+  className = "",
+}: {
+  label: string;
+  value: string;
+  variant?: "emerald" | "rose" | "amber" | "slate";
+  className?: string;
+}) {
+  const colorMap = {
+    emerald: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/30",
+    rose: "border-rose-500/30 text-rose-700 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/30",
+    amber: "border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/30",
+    slate: "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/40",
+  };
+
+  return (
+    <div className={`p-2.5 rounded-lg border bg-card text-center flex flex-col items-center justify-between gap-1.5 shadow-2xs ${className}`}>
+      <span className="text-muted-foreground text-[10px] uppercase font-semibold tracking-wider">
+        {label}
+      </span>
+      <Badge variant="outline" className={`font-mono text-[10px] py-0 px-2 leading-5 ${colorMap[variant]}`}>
+        {value}
+      </Badge>
+    </div>
+  );
+}
+
+export default function DataFetchingPage() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
       <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Badge
                 variant="secondary"
-                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+                className="font-mono text-xs text-foreground bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
               >
-                React 19 Data Layer
+                13 Execution Strategies
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
-                Multi-Dimensional
+                Deep Dive Catalog
+              </Badge>
+              <Badge
+                variant="outline"
+                className="font-mono text-xs text-muted-foreground"
+              >
+                Strategy-by-Strategy
               </Badge>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Data Fetching
+              Data Fetching: The 13 Strategies
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Dinou features a unified, multi-dimensional data fetching architecture. Fetch data at build time (SSG),
-              directly in Server Components (async/await), horizontally via route functions (getProps),
-              progressively with Partial Prerendering (PPR), or vertically at the component subtree level with Micro-ISR (&lt;DinouCacheSlot&gt;).
+              A comprehensive case-by-case engineering guide covering each of the 13 data fetching and rendering patterns available in Dinou.
+              Every strategy is examined with concrete code snippets, runtime lifecycle behavior, TTFB metrics, server load characteristics, and production trade-offs.
             </p>
           </div>
 
-          <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words space-y-12">
+          <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words space-y-16">
             {/* Overview */}
             <section id="overview" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                Overview: Multi-Dimensional Data Fetching
+                Overview: The 13-Strategy Architecture
               </h2>
               <p>
-                In modern full-stack web applications, no single data fetching strategy fits all use cases.
-                Dinou provides five decoupled, complementary paradigms that let you tailor execution timing,
-                caching granularity, and latency to each component&apos;s exact requirements:
+                Dinou provides unprecedented flexibility by separating <strong>where code executes</strong> (Server Component vs Client Component),{" "}
+                <strong>when data is fetched</strong> (Build time vs Per-request vs On-demand), and{" "}
+                <strong>how it is delivered</strong> (Blocking TTFB vs Progressive HTTP Streaming vs Micro-ISR Caching).
               </p>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 not-prose my-6">
-                <Card className="border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20 shadow-sm">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400 text-sm">
-                      <Server className="h-4 w-4" />
-                      <span>1. Direct Async RSC</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
-                    Components are <code>async</code> by default. Query databases, ORMs, and private microservices directly with <strong>0kb client JavaScript</strong>.
-                  </CardContent>
-                </Card>
-
-                <Card className="border-indigo-500/20 bg-indigo-50/30 dark:bg-indigo-950/20 shadow-sm">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 font-semibold text-indigo-600 dark:text-indigo-400 text-sm">
-                      <Split className="h-4 w-4" />
-                      <span>2. Horizontal (getProps)</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
-                    <code>page_functions.ts</code> and <code>layout_functions.ts</code> pre-fetch data per route segment. Supports SSG, ISR, and the <strong>Client-First Model</strong>.
-                  </CardContent>
-                </Card>
-
-                <Card className="border-purple-500/20 bg-purple-50/30 dark:bg-purple-950/20 shadow-sm">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 font-semibold text-purple-600 dark:text-purple-400 text-sm">
-                      <Zap className="h-4 w-4" />
-                      <span>3. Partial Prerendering</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
-                    Combines an instant static shell (0ms TTFB from CDN Edge) with streaming dynamic Suspense holes over the exact same HTTP response.
-                  </CardContent>
-                </Card>
-
-                <Card className="border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/20 shadow-sm">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400 text-sm">
-                      <Layers className="h-4 w-4" />
-                      <span>4. Vertical (&lt;DinouCacheSlot&gt;)</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
-                    Component-level Micro-ISR. Caches rendered RSC subtrees in server storage with dedicated TTLs and tags without re-rendering parent pages.
-                  </CardContent>
-                </Card>
-
-                <Card className="border-cyan-500/20 bg-cyan-50/30 dark:bg-cyan-950/20 shadow-sm sm:col-span-2 lg:col-span-2">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 font-semibold text-cyan-600 dark:text-cyan-400 text-sm">
-                      <Sparkles className="h-4 w-4" />
-                      <span>5. Reactive Server Functions &amp; React 19 use()</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
-                    Pass un-awaited promises from Server Components to Client Components for non-blocking rendering, and invoke secure Server Functions (<code>&quot;use server&quot;</code>) for user-triggered RPC actions.
-                  </CardContent>
-                </Card>
+              {/* Quick Jump Grid */}
+              <div className="not-prose my-6 rounded-xl border border-slate-200 dark:border-slate-800/80 p-5 bg-card shadow-sm">
+                <div className="flex items-center justify-between flex-wrap gap-2 mb-3.5 pb-2 border-b border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-2 font-bold text-sm text-foreground">
+                    <Workflow className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>Interactive Strategy Index</span>
+                  </div>
+                  <span className="text-[11px] font-mono text-muted-foreground">
+                    13 Architecture Patterns
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
+                  {[
+                    {
+                      id: "strategy-1",
+                      num: 1,
+                      name: "RSC Direct await (SSG)",
+                      badge: "0ms TTFB",
+                      numBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30",
+                      hoverClass: "hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20",
+                    },
+                    {
+                      id: "strategy-2",
+                      num: 2,
+                      name: "RSC Direct await (Dynamic)",
+                      badge: "Blocked TTFB",
+                      numBg: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+                      badgeClass: "border-rose-500/30 text-rose-700 dark:text-rose-400 bg-rose-50/60 dark:bg-rose-950/30",
+                      hoverClass: "hover:border-rose-500/40 hover:bg-rose-50/30 dark:hover:bg-rose-950/20",
+                    },
+                    {
+                      id: "strategy-3",
+                      num: 3,
+                      name: "RSC with <Suspense> (SSG)",
+                      badge: "0ms Static",
+                      numBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30",
+                      hoverClass: "hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20",
+                    },
+                    {
+                      id: "strategy-4",
+                      num: 4,
+                      name: "RSC with <Suspense> (Dynamic)",
+                      badge: "Streaming",
+                      numBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                      badgeClass: "border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-950/30",
+                      hoverClass: "hover:border-amber-500/40 hover:bg-amber-50/30 dark:hover:bg-amber-950/20",
+                    },
+                    {
+                      id: "strategy-5",
+                      num: 5,
+                      name: "RSC + <DinouCacheSlot> (Static)",
+                      badge: "Micro-ISR",
+                      numBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30",
+                      hoverClass: "hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20",
+                    },
+                    {
+                      id: "strategy-6",
+                      num: 6,
+                      name: "RSC + <DinouCacheSlot> (Dynamic)",
+                      badge: "2ms Hit",
+                      numBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30",
+                      hoverClass: "hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20",
+                    },
+                    {
+                      id: "strategy-7",
+                      num: 7,
+                      name: "RSC with <Suspense> (PPR)",
+                      badge: "0ms Edge",
+                      numBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30",
+                      hoverClass: "hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20",
+                    },
+                    {
+                      id: "strategy-8",
+                      num: 8,
+                      name: "PPR + <DinouCacheSlot> (Synergy)",
+                      badge: "Peak Perf",
+                      numBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30 font-semibold",
+                      hoverClass: "hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20",
+                    },
+                    {
+                      id: "strategy-9",
+                      num: 9,
+                      name: "RSC Promise ➔ Client use()",
+                      badge: "React 19",
+                      numBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                      badgeClass: "border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-950/30",
+                      hoverClass: "hover:border-amber-500/40 hover:bg-amber-50/30 dark:hover:bg-amber-950/20",
+                    },
+                    {
+                      id: "strategy-10",
+                      num: 10,
+                      name: "Client-First getProps (SSG)",
+                      badge: "0ms Client",
+                      numBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30",
+                      hoverClass: "hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20",
+                    },
+                    {
+                      id: "strategy-11",
+                      num: 11,
+                      name: "Client-First getProps (Dynamic)",
+                      badge: "SSR Client",
+                      numBg: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+                      badgeClass: "border-rose-500/30 text-rose-700 dark:text-rose-400 bg-rose-50/60 dark:bg-rose-950/30",
+                      hoverClass: "hover:border-rose-500/40 hover:bg-rose-50/30 dark:hover:bg-rose-950/20",
+                    },
+                    {
+                      id: "strategy-12",
+                      num: 12,
+                      name: "Client Calling Server Function",
+                      badge: "Mount RPC",
+                      numBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                      badgeClass: "border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-950/30",
+                      hoverClass: "hover:border-amber-500/40 hover:bg-amber-50/30 dark:hover:bg-amber-950/20",
+                    },
+                    {
+                      id: "strategy-13",
+                      num: 13,
+                      name: "Client Server Functions (User)",
+                      badge: "RPC Actions",
+                      numBg: "bg-slate-500/10 text-slate-700 dark:text-slate-300",
+                      badgeClass: "border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 bg-slate-100/70 dark:bg-slate-800/40",
+                      hoverClass: "hover:border-slate-400 dark:hover:border-slate-600 hover:bg-slate-100/30 dark:hover:bg-slate-800/20",
+                    },
+                  ].map((s) => (
+                    <a
+                      key={s.id}
+                      href={`#${s.id}`}
+                      className={`group flex items-center justify-between gap-2 p-2 rounded-lg border border-slate-200/80 dark:border-slate-800/80 bg-card ${s.hoverClass} hover:shadow-xs transition-all duration-150`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-mono text-[10px] font-bold ${s.numBg}`}>
+                          {s.num}
+                        </span>
+                        <span className="font-medium text-slate-800 dark:text-slate-200 group-hover:text-foreground text-[11px] truncate">
+                          {s.name}
+                        </span>
+                      </div>
+                      <Badge variant="outline" className={`font-mono text-[9px] shrink-0 py-0 px-1.5 leading-4 rounded ${s.badgeClass}`}>
+                        {s.badge}
+                      </Badge>
+                    </a>
+                  ))}
+                </div>
               </div>
             </section>
 
-            {/* 1. Server Components */}
-            <section
-              id="server-components"
-              className="mt-12 pt-8 border-t scroll-mt-20"
-            >
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                1. Server Components (Direct Async Fetching)
-              </h2>
-              <p>
-                In Dinou, every component inside the <code>src/</code> directory is a <strong>Server Component</strong> by default.
-                You can define components as standard <code>async</code> functions and fetch data directly from databases, ORMs,
-                or private APIs without creating boilerplate REST/GraphQL layers:
+            {/* ============================================================ */}
+            {/* STRATEGY 1 */}
+            {/* ============================================================ */}
+            <section id="strategy-1" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-bold text-sm">
+                    1
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    RSC Direct await (SSG)
+                  </h2>
+                </div>
+                <Badge variant="outline" className="text-emerald-600 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
+                  Static Site Generation
+                </Badge>
+              </div>
+
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="0ms (CDN)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="Instant (0ms)" variant="emerald" />
+                <MetricCard label="Server/DB Load" value="Zero at Runtime" variant="emerald" />
+                <MetricCard label="Waterfall" value="None" variant="emerald" />
+                <MetricCard label="Data Freshness" value="Build Time" variant="slate" className="col-span-2 sm:col-span-1" />
+              </div>
+
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> The default behavior in Dinou. When a page has no dynamic parameters, headers, or cookies,
+                Dinou executes the top-level <code>await</code> query during <code>npm run build</code>. The compiler resolves the promise, generates
+                the static <code>index.html</code>, and bakes the pre-compiled binary RSC payload (<code>page.rsc</code>).
               </p>
 
-              <CodeBlock
-                language="tsx"
-                containerClassName="w-full overflow-hidden rounded-lg my-4"
-              >
-{`// src/blog/page.tsx (Server Component by default)
-import db from "@/lib/db"; // Never bundled to the client!
+              <CodeBlock language="tsx" containerClassName="my-3">
+{`// src/blog/page.tsx (Static Route by Default)
+import db from "@/lib/db"; // Stays 100% on the server
 
-export default async function BlogPage() {
-  // Direct ORM or database query executed exclusively on the server
+export default async function BlogIndexPage() {
+  // Executed ONCE during build time ('npm run build')
   const posts = await db.posts.findMany({
+    where: { published: true },
     orderBy: { createdAt: "desc" },
-    take: 10,
   });
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Latest Articles</h1>
-      <ul className="divide-y divide-border">
+    <main className="max-w-3xl mx-auto p-6 space-y-4">
+      <h1 className="text-3xl font-bold">Engineering Blog</h1>
+      <div className="divide-y">
         {posts.map((post) => (
-          <li key={post.id} className="py-3">
-            <h2 className="font-semibold">{post.title}</h2>
-            <p className="text-sm text-muted-foreground">{post.excerpt}</p>
-          </li>
+          <article key={post.id} className="py-4">
+            <h2 className="text-xl font-semibold">{post.title}</h2>
+            <p className="text-muted-foreground text-sm">{post.excerpt}</p>
+          </article>
         ))}
-      </ul>
-    </div>
+      </div>
+    </main>
   );
 }`}
               </CodeBlock>
 
-              {/* 1.1 Timing SSG vs SSR */}
-              <section id="timing-ssg-ssr" className="mt-8 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-blue-500" />
-                  1.1. Static (SSG) vs Dynamic (SSR) Timing
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  A common misconception is that an <code>async</code> Server Component always executes on every incoming HTTP request.
-                  In Dinou, <strong>routes are Static Site Generated (SSG) by default</strong>:
-                </p>
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
+                <p>• <strong>Zero Database Cost:</strong> Millions of visitors can hit the CDN without a single query reaching your database.</p>
+                <p>• <strong>0kb JavaScript:</strong> No React client runtime is shipped for this data layer; the browser receives pure semantic HTML.</p>
+                <p>• <strong>Ideal For:</strong> Documentation, corporate sites, blogs, release notes, and marketing pages.</p>
+              </div>
 
-                <div className="grid gap-4 md:grid-cols-2 not-prose my-4 text-xs">
-                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-50/20 dark:bg-emerald-950/15 p-4 space-y-2">
-                    <div className="flex items-center gap-2 font-bold text-emerald-700 dark:text-emerald-400 text-sm">
-                      <CheckCircle2 className="h-4 w-4" />
-                      <span>Static Routes (Default - Build Time)</span>
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed">
-                      During <code>npm run build</code>, Dinou awaits the async component, renders it to static HTML (<code>index.html</code>)
-                      and pre-compiles the binary RSC payload (<code>page.rsc</code>). At runtime, requests are served directly from local disk
-                      or Edge CDN with <strong>0ms TTFB</strong> and <strong>zero database queries</strong>.
-                    </p>
-                  </div>
+              {/* Architectural Equivalence Alert */}
+              <Alert className="not-prose my-4 border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40">
+                <Info className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <AlertTitle className="text-foreground font-bold text-xs uppercase tracking-wider">
+                  Server Component Equivalence: getProps vs Direct await
+                </AlertTitle>
+                <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1.5 space-y-1.5">
+                  <p>
+                    When a page is a <strong>Server Component</strong>, fetching data via <code>getProps</code> in <code>page_functions.ts</code> is <strong>functionally equivalent</strong> to executing queries directly with top-level <code>await</code> inside the component body (Strategies 1 &amp; 2).
+                  </p>
+                  <p>
+                    Both patterns run exclusively on the server prior to rendering, introduce zero client JavaScript bundle overhead, exhibit identical database latency, and produce the exact same static HTML and pre-compiled <code>.rsc</code> payload. The primary architectural purpose of <code>getProps</code> is when utilizing the <strong>Client-First Model</strong> (Strategies 10 &amp; 11), where it extracts data on the server to feed directly as initial props into interactive Client Component pages (<code>&quot;use client&quot;</code>).
+                  </p>
+                </AlertDescription>
+              </Alert>
+            </section>
 
-                  <div className="rounded-xl border border-amber-500/20 bg-amber-50/20 dark:bg-amber-950/15 p-4 space-y-2">
-                    <div className="flex items-center gap-2 font-bold text-amber-700 dark:text-amber-400 text-sm">
-                      <Clock className="h-4 w-4" />
-                      <span>Dynamic Routes (Per Request)</span>
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed">
-                      When a route accesses request headers, authentication cookies, or exports <code>export const revalidate = 0</code> in{" "}
-                      <code>page_functions.ts</code>, the component executes on every request. An un-Suspended top-level <code>await</code> blocks
-                      the entire response until the query completes.
-                    </p>
-                  </div>
+            {/* ============================================================ */}
+            {/* STRATEGY 2 */}
+            {/* ============================================================ */}
+            <section id="strategy-2" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-mono font-bold text-sm">
+                    2
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    RSC Direct await (Dynamic SSR)
+                  </h2>
                 </div>
-              </section>
+                <Badge variant="outline" className="text-rose-600 border-rose-500/30 bg-rose-50/40 dark:bg-rose-950/20 font-mono text-xs">
+                  Blocking Dynamic SSR
+                </Badge>
+              </div>
 
-              {/* 1.2 Parallel Fetching */}
-              <section id="parallel-fetching" className="mt-8 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Split className="h-5 w-5 text-indigo-500" />
-                  1.2. Parallel Fetching (Avoiding Waterfalls)
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Sequential <code>await</code> statements in a single component create unnecessary server waterfalls: Query B cannot start until Query A finishes.
-                  Always initiate independent queries concurrently using <code>Promise.all()</code>:
-                </p>
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="Slow (Blocked)" variant="rose" />
+                <MetricCard label="Stream Ready" value="N/A (All-or-Nothing)" variant="slate" />
+                <MetricCard label="Server/DB Load" value="Heavy (100% queries)" variant="rose" />
+                <MetricCard label="Waterfall" value="None" variant="emerald" />
+                <MetricCard label="Data Freshness" value="100% Live" variant="emerald" className="col-span-2 sm:col-span-1" />
+              </div>
 
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-{`// src/dashboard/page.tsx
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> The component performs an un-Suspended top-level <code>await</code> on a route that is dynamic
+                (e.g., due to reading request headers, cookies, or declaring <code>export const revalidate = 0</code> in <code>page_functions.ts</code>).
+                The Node.js server halts the HTTP response until the database returns the data.
+              </p>
+
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/account/billing/page_functions.ts",
+                    language: "tsx",
+                    code: `export const revalidate = 0; // Force dynamic SSR on every request`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/account/billing/page.tsx",
+                    language: "tsx",
+                    code: `import { cookies } from "dinou/server";
 import db from "@/lib/db";
 
-export default async function DashboardPage() {
-  // Initiates all independent queries concurrently across database connections:
-  const [stats, recentOrders, userProfile] = await Promise.all([
-    db.analytics.getStats(),
-    db.orders.getRecent({ limit: 5 }),
-    db.users.getProfile(),
-  ]);
+export default async function BillingPage() {
+  const sessionId = cookies().get("session_id");
+  if (!sessionId) throw new Error("Unauthorized");
+
+  // BLOCKS TTFB: The browser receives 0 bytes until this query resolves
+  const invoices = await db.invoices.findBySession(sessionId);
 
   return (
-    <div className="grid gap-6">
-      <StatsOverview data={stats} />
-      <OrdersTable orders={recentOrders} />
-      <ProfileSidebar user={userProfile} />
+    <div className="p-6">
+      <h1 className="text-2xl font-bold">Billing History</h1>
+      <table className="w-full mt-4">
+        {invoices.map((inv) => (
+          <tr key={inv.id}>
+            <td>{inv.date}</td>
+            <td>\${inv.amount}</td>
+          </tr>
+        ))}
+      </table>
     </div>
   );
-}`}
-                </CodeBlock>
-              </section>
+}`,
+                  },
+                ]}
+              />
 
-              {/* 1.3 Streaming with Suspense */}
-              <section id="streaming-suspense" className="mt-8 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-purple-500" />
-                  1.3. Non-Blocking Streaming with React &lt;Suspense&gt;
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  When a page has one fast query (e.g. user navigation) and one slow query (e.g. heavy analytics taking 2 seconds),
-                  doing a top-level <code>await</code> forces the visitor to stare at a blank screen.
-                  Delegate the slow query to a child async component wrapped in <code>&lt;Suspense&gt;</code>:
-                </p>
-
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-{`// src/reports/page.tsx
-import { Suspense } from "react";
-import db from "@/lib/db";
-import { ReportSkeleton } from "./skeleton";
-
-export default function ReportsPage() {
-  return (
-    <main className="p-8 max-w-4xl mx-auto space-y-6">
-      {/* 1. Delivered immediately to the browser (instant TTFB) */}
-      <header>
-        <h1 className="text-2xl font-bold">Annual Financial Reports</h1>
-        <p className="text-muted-foreground text-sm">Shell delivered in 0ms.</p>
-      </header>
-
-      {/* 2. Streams fallback skeleton while child query runs asynchronously */}
-      <Suspense fallback={<ReportSkeleton />}>
-        <HeavyReportList />
-      </Suspense>
-    </main>
-  );
-}
-
-// Child Server Component handles the slow async query independently
-async function HeavyReportList() {
-  const reports = await db.reports.aggregateAnnualStats(); // 2-second computation
-  return (
-    <div className="divide-y border rounded-lg p-4">
-      {reports.map((r) => (
-        <div key={r.id} className="py-2 flex justify-between">
-          <span>{r.title}</span>
-          <span className="font-mono">\${r.totalRevenue}</span>
-        </div>
-      ))}
-    </div>
-  );
-}`}
-                </CodeBlock>
-
-                <Alert className="not-prose my-4 border-blue-500/20 bg-blue-50/40 dark:bg-blue-950/20">
-                  <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  <AlertTitle className="text-blue-700 dark:text-blue-300 font-bold text-xs">
-                    How &lt;Suspense&gt; Behaves: SSG vs Dynamic SSR vs PPR
-                  </AlertTitle>
-                  <AlertDescription className="text-xs text-muted-foreground mt-1 space-y-1.5 leading-relaxed">
-                    <p>
-                      • <strong>Pure SSG:</strong> During <code>npm run build</code>, the compiler awaits all Suspense boundaries to settle and bakes the final resolved HTML. Visitors never see the skeleton.
-                    </p>
-                    <p>
-                      • <strong>Dynamic SSR:</strong> On every request, the server streams the layout shell and skeleton immediately, then replaces it with the resolved HTML chunk once the query finishes.
-                    </p>
-                    <p>
-                      • <strong>Partial Prerendering (PPR):</strong> The shell and skeleton are pre-rendered at build time (0ms TTFB from Edge CDN), while the dynamic hole executes and streams live data into the open connection.
-                    </p>
-                  </AlertDescription>
-                </Alert>
-              </section>
-
-              {/* Pros & Cons Grid */}
-              <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                <Card className="border-green-500/20 bg-green-50/30 dark:bg-green-950/20">
-                  <CardHeader>
-                    <div className="flex items-center gap-2 font-semibold text-green-600 dark:text-green-400">
-                      <CheckCircle2 className="h-5 w-5" />
-                      <span>RSC Advantages</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-xs space-y-1.5 text-muted-foreground">
-                    <p>• <strong>Zero Bundle Impact:</strong> DB drivers, Prisma, SQL libraries, and secret keys stay 100% on the server.</p>
-                    <p>• <strong>Colocated Execution:</strong> Runs directly next to your database with microsecond internal latency.</p>
-                    <p>• <strong>No Client Waterfalls:</strong> Eliminates client-side <code>useEffect</code> fetching cascades.</p>
-                    <p>• <strong>Full SEO by Default:</strong> HTML delivers pre-rendered content for crawlers.</p>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/20">
-                  <CardHeader>
-                    <div className="flex items-center gap-2 font-semibold text-amber-600 dark:text-amber-400">
-                      <XCircle className="h-5 w-5" />
-                      <span>Trade-offs to Manage</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-xs space-y-1.5 text-muted-foreground">
-                    <p>• <strong>TTFB Latency (Un-Suspended):</strong> Top-level <code>await</code> delays the first byte on dynamic routes unless wrapped in <code>&lt;Suspense&gt;</code>.</p>
-                    <p>• <strong>No Direct DOM Events:</strong> Server Components cannot handle <code>onClick</code> or hold <code>useState</code>. Delegate interactivity to Client Components.</p>
-                    <p>• <strong>Database Load:</strong> Dynamic SSR hits the database on every request unless protected by <code>&lt;DinouCacheSlot&gt;</code> or ISR.</p>
-                  </CardContent>
-                </Card>
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
+                <p>• <strong>Latency Penalty:</strong> If the database takes 800ms, the visitor stares at a blank screen for 800ms before First Contentful Paint (FCP).</p>
+                <p>• <strong>When Acceptable:</strong> Secure internal portals, critical authentication gates, or lightweight single-record lookups where streaming complexity is unnecessary.</p>
               </div>
             </section>
 
-            {/* 2. Page & Layout Functions */}
-            <section
-              id="page-layout-functions"
-              className="mt-12 pt-8 border-t scroll-mt-20"
-            >
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                2. Page &amp; Layout Functions (<code>getProps</code>)
-              </h2>
-              <p>
-                In addition to direct component fetching, Dinou provides route-level data contracts via{" "}
-                <code>page_functions.ts</code> and <code>layout_functions.ts</code>. This enables segment-level pre-fetching,
-                cache tagging, time-based ISR, and the <strong>Client-First Architecture</strong>.
-              </p>
-
-              {/* 2.1 Direct Props Return */}
-              <section id="getprops-contract" className="mt-6 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                  2.1. Direct Props Return Contract
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  In Dinou, <code>getProps</code> directly returns the object that is passed as props to the component.
-                  Route parameters are strictly typed using <code>RouteParams</code>:
-                </p>
-
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-{`// src/products/[id]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
-import db from "@/lib/db";
-
-// Strictly typed parameter contract
-export const getProps: PageFunctions<
-  RouteParams<"/products/[id]">
->["getProps"] = async (params) => {
-  const product = await db.products.findById(params.id);
-  // Directly returns props for page.tsx
-  return { product };
-};
-
-// Time-based ISR: regenerate in the background every 60 seconds (RFC max-age)
-export const revalidate = 60;
-
-// On-demand invalidation tags
-export function getCacheTags(params: RouteParams<"/products/[id]">) {
-  return ["products", \`product-\${params.id}\`];
-}`}
-                </CodeBlock>
-
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-{`// src/products/[id]/page.tsx
-export default function ProductPage({ product }: { product: Product }) {
-  return (
-    <article className="p-6">
-      <h1 className="text-2xl font-bold">{product.name}</h1>
-      <p className="text-lg text-emerald-600 font-mono">\${product.price}</p>
-    </article>
-  );
-}`}
-                </CodeBlock>
-              </section>
-
-              {/* 2.2 Horizontal Segmentation */}
-              <section id="horizontal-data-split" className="mt-8 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Split className="h-5 w-5 text-indigo-500" />
-                  2.2. Page vs Layout Segmentation
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Through <strong>2D Horizontal Layered Segmentation</strong>, layouts fetch their own data independently in{" "}
-                  <code>layout_functions.ts</code>. When a user navigates between sibling pages within the same layout,
-                  the layout data is <strong>never re-fetched</strong>:
-                </p>
-
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-{`// src/shop/layout_functions.ts
-import db from "@/lib/db";
-
-export async function getProps() {
-  const categories = await db.categories.findMany();
-  return { categories };
-}
-
-// src/shop/layout.tsx
-export default function ShopLayout({
-  children,
-  categories,
-}: {
-  children: React.ReactNode;
-  categories: Category[];
-}) {
-  return (
-    <div className="flex">
-      <aside className="w-64 p-4 border-r">
-        <CategoryNav categories={categories} />
-      </aside>
-      <main className="flex-1 p-6">{children}</main>
-    </div>
-  );
-}`}
-                </CodeBlock>
-              </section>
-
-              {/* 2.3 Client-First Model */}
-              <section id="client-first-model" className="mt-8 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Boxes className="h-5 w-5 text-purple-500" />
-                  2.3. The Client-First Model (getProps + Client Page)
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  If you are building an interactive application (such as an image editor, canvas, or complex analytical tool)
-                  where you want full access to React hooks (<code>useState</code>, <code>useEffect</code>, <code>onClick</code>) everywhere in the page,
-                  use Dinou&apos;s <strong>Client-First Model</strong>:
-                </p>
-
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-{`// 1. src/canvas/page_functions.ts - Runs securely on the server
-import db from "@/lib/db";
-
-export async function getProps(params: { id: string }) {
-  const project = await db.projects.findById(params.id);
-  return { project };
-}
-
-// 2. src/canvas/page.tsx - Entire page is a Client Component
-"use client";
-
-import { useState } from "react";
-
-export default function CanvasPage({ project }: { project: any }) {
-  // Full traditional React ergonomics with state, effects, and events!
-  const [layers, setLayers] = useState(project.initialLayers);
-
-  return (
-    <div className="canvas-wrapper">
-      <Toolbar onAddLayer={(l) => setLayers([...layers, l])} />
-      <Stage layers={layers} />
-    </div>
-  );
-}`}
-                </CodeBlock>
-
-                <div className="border border-purple-500/20 bg-purple-50/20 dark:bg-purple-950/15 rounded-lg p-4 not-prose my-3 text-xs leading-relaxed text-muted-foreground">
-                  <span className="font-bold text-purple-700 dark:text-purple-400 block mb-1">
-                    How Client-First Rendering Works:
+            {/* ============================================================ */}
+            {/* STRATEGY 3 */}
+            {/* ============================================================ */}
+            <section id="strategy-3" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-bold text-sm">
+                    3
                   </span>
-                  Data is fetched on the server by <code>getProps</code> and serialized into the initial HTML document.
-                  The browser renders the complete HTML immediately (FCP), and React hydrates the tree into a fully interactive client SPA without an extra round-trip.
-                  Supports both build-time static generation (Pattern 10) and on-demand SSR (Pattern 11).
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    RSC with &lt;Suspense&gt; (SSG)
+                  </h2>
                 </div>
-              </section>
-            </section>
+                <Badge variant="outline" className="text-emerald-600 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
+                  Static Compilation Settle
+                </Badge>
+              </div>
 
-            {/* 3. Partial Prerendering */}
-            <section
-              id="partial-prerendering"
-              className="mt-12 pt-8 border-t scroll-mt-20"
-            >
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                3. Partial Prerendering (PPR) Data Fetching
-              </h2>
-              <p>
-                Historically, data fetching forced a binary compromise: either fetch at build time (static SSG, blazing fast 0ms TTFB, but stale data)
-                or fetch on every request (dynamic SSR, 100% fresh data, but high latency and server load).
-                <strong> Partial Prerendering (PPR)</strong> unifies both in a single HTTP response.
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="0ms (CDN)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="Instant (0ms)" variant="emerald" />
+                <MetricCard label="Server/DB Load" value="Zero at Runtime" variant="emerald" />
+                <MetricCard label="Waterfall" value="None" variant="emerald" />
+                <MetricCard label="Data Freshness" value="Fixed at Build" variant="slate" className="col-span-2 sm:col-span-1" />
+              </div>
+
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> You wrap asynchronous child components inside React <code>&lt;Suspense&gt;</code> on a static route.
+                During <code>npm run build</code>, Dinou&apos;s compiler automatically waits for all Suspense boundaries to settle.
+                The final emitted HTML includes the resolved markup directly; visitors <strong>never see the fallback skeleton</strong>.
               </p>
 
-              {/* 3.1 Static Shell + Dynamic Holes */}
-              <section id="ppr-how-it-works" className="mt-6 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-amber-500" />
-                  3.1. Static Shell + Dynamic Holes
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  With PPR enabled, Dinou generates a static HTML shell for the navigation, outer headers, and component skeletons during the build.
-                  Static data is baked into immutable CDN artifacts. Dynamic data fetches wrapped in React <code>&lt;Suspense&gt;</code> remain
-                  as &quot;holes&quot; that stream live HTML over the exact same HTTP response stream as soon as their backend promises resolve:
-                </p>
-
-                <div className="border rounded-xl p-4 bg-card not-prose my-4 shadow-sm">
-                  <div className="flex items-center gap-2 font-semibold text-sm mb-2 text-foreground">
-                    <Zap className="h-4 w-4 text-purple-500" />
-                    <span>How the HTTP Stream Flows in PPR</span>
-                  </div>
-                  <ol className="text-xs text-muted-foreground space-y-2 list-decimal pl-4 leading-relaxed">
-                    <li>
-                      <strong>0ms (CDN Edge Delivery):</strong> The visitor instantly receives the pre-rendered static shell (layout, headers, sidebars, skeleton placeholders) with 0ms server compute delay.
-                    </li>
-                    <li>
-                      <strong>Concurrent Server Execution:</strong> The server executes the dynamic database queries inside <code>&lt;Suspense&gt;</code> concurrently in the background.
-                    </li>
-                    <li>
-                      <strong>Progressive HTML Flush:</strong> As each dynamic query resolves, React streams the replacement HTML chunk down the open connection, swapping the skeleton in-place without hydration flicker.
-                    </li>
-                  </ol>
-                </div>
-              </section>
-
-              {/* 3.2 PPR Example */}
-              <section id="ppr-example" className="mt-8 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-indigo-500" />
-                  3.2. PPR Implementation Example
-                </h3>
-
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-{`// src/store/page_functions.ts
-// Enable Partial Prerendering for this route
-export const ppr = true;`}
-                </CodeBlock>
-
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-{`// src/store/page.tsx
+              <CodeBlock language="tsx" containerClassName="my-3">
+{`// src/docs/page.tsx (Static Route with Suspense)
 import { Suspense } from "react";
 import db from "@/lib/db";
-import { StockSkeleton } from "./skeletons";
+import { DocSkeleton } from "./skeleton";
 
-// 1. Static fetch: pre-rendered at build time directly into the static shell
-async function StaticProductCatalog() {
-  const products = await db.products.findFeatured();
-  return <ProductGrid products={products} />;
-}
-
-// 2. Dynamic fetch: executed on every request and streamed over the connection
-async function LiveInventory({ productId }: { productId: string }) {
-  const stock = await db.inventory.getRealtimeStock(productId);
+export default function DocsPage() {
   return (
-    <span className={stock > 0 ? "text-emerald-600 font-bold" : "text-rose-600 font-bold"}>
-      {stock > 0 ? \`\${stock} in stock\` : "Out of stock"}
-    </span>
+    <div className="docs-layout">
+      <header><h1>API Reference</h1></header>
+      {/* Compiler settles this during 'npm run build': */}
+      <Suspense fallback={<DocSkeleton />}>
+        <AsyncChangelog />
+      </Suspense>
+    </div>
   );
 }
 
-export default function StorePage() {
+async function AsyncChangelog() {
+  const versions = await db.changelog.findLatest();
+  return <ChangelogList items={versions} />;
+}`}
+              </CodeBlock>
+
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
+                <p>• <strong>Architectural Cleanliness:</strong> Allows writing decoupled async components without worrying whether the page is static or dynamic.</p>
+                <p>• <strong>Zero Flash of Skeleton:</strong> Because it is pre-rendered at build time, the browser renders the fully populated UI instantly on load.</p>
+              </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* STRATEGY 4 */}
+            {/* ============================================================ */}
+            <section id="strategy-4" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-bold text-sm">
+                    4
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    RSC with &lt;Suspense&gt; (Dynamic Streaming SSR)
+                  </h2>
+                </div>
+                <Badge variant="outline" className="text-amber-600 border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20 font-mono text-xs">
+                  Streaming SSR
+                </Badge>
+              </div>
+
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="Fast (Early Layout)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="Waits for DB (1-3s)" variant="amber" />
+                <MetricCard label="Server/DB Load" value="Heavy (100% queries)" variant="rose" />
+                <MetricCard label="Waterfall" value="None" variant="emerald" />
+                <MetricCard label="Data Freshness" value="100% Live" variant="emerald" className="col-span-2 sm:col-span-1" />
+              </div>
+
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> The page layout and headers are flushed immediately to the browser (fast TTFB).
+                The slow child component executes its database query concurrently. Once resolved, the server sends an HTML chunk
+                through the open HTTP connection that swaps out the skeleton fallback without refreshing the page.
+              </p>
+
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/analytics/page_functions.ts",
+                    language: "tsx",
+                    code: `export const revalidate = 0; // Dynamic streaming SSR`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/analytics/page.tsx",
+                    language: "tsx",
+                    code: `import { Suspense } from "react";
+import db from "@/lib/db";
+import { AnalyticsSkeleton } from "./skeleton";
+
+export default function AnalyticsPage() {
   return (
-    <main className="p-8 max-w-5xl mx-auto space-y-6">
-      <header className="border-b pb-4">
-        <h1 className="text-3xl font-bold">Flagship Store</h1>
-        <p className="text-sm text-muted-foreground">Static shell delivered instantly from CDN Edge.</p>
+    <div className="space-y-6 p-6">
+      {/* Flushed immediately in chunk 1 (Early TTFB) */}
+      <header>
+        <h1 className="text-2xl font-bold">Revenue Analytics</h1>
+        <p className="text-muted-foreground text-sm">Real-time calculations</p>
       </header>
 
-      {/* Static catalog: instant 0ms render */}
-      <StaticProductCatalog />
-
-      {/* Dynamic hole: streams live inventory without blocking initial shell */}
-      <Suspense fallback={<StockSkeleton />}>
-        <LiveInventory productId="prod-99" />
-      </Suspense>
-    </main>
-  );
-}`}
-                </CodeBlock>
-              </section>
-            </section>
-
-            {/* 4. DinouCacheSlot */}
-            <section
-              id="dinou-cache-slot"
-              className="mt-12 pt-8 border-t scroll-mt-20"
-            >
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                4. Vertical Segmentation: <code>&lt;DinouCacheSlot&gt;</code> (Micro-ISR)
-              </h2>
-              <p>
-                While Page Functions handle route-level caching (Horizontal Segmentation), <strong><code>&lt;DinouCacheSlot&gt;</code></strong> introduces{" "}
-                <strong>Vertical Segmentation</strong>. It isolates and caches specific component subtrees inside a page with their own TTL and cache tags,
-                preventing heavy database queries from re-executing on every request.
-              </p>
-
-              {/* 4.1 Props & Usage */}
-              <section id="cache-slot-props" className="mt-6 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Layers className="h-5 w-5 text-emerald-500" />
-                  4.1. Granular Component Caching &amp; Props
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Import <code>DinouCacheSlot</code> from <code>&quot;dinou/server&quot;</code>:
-                </p>
-
-                <div className="border rounded-xl p-4 bg-card not-prose my-3 text-xs leading-relaxed space-y-1.5 shadow-sm">
-                  <div className="font-semibold text-sm text-foreground flex items-center gap-2">
-                    <Database className="h-4 w-4 text-emerald-500" />
-                    <span>DinouCacheSlot Props Contract</span>
-                  </div>
-                  <ul className="list-disc pl-4 text-muted-foreground space-y-1">
-                    <li><code>id</code> (string): Unique identifier for the slot across the application.</li>
-                    <li><code>revalidate</code> or <code>duration</code> (number): Cache expiration TTL in <strong>seconds</strong>.</li>
-                    <li><code>tag</code> or <code>tags</code> (string | string[]): Cache tags for targeted on-demand invalidation via <code>revalidateTag(tag)</code>.</li>
-                  </ul>
-                </div>
-
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-{`// src/dashboard/page.tsx
-import { Suspense } from "react";
-import { DinouCacheSlot } from "dinou/server";
-import { FastProfile, HeavyAnalytics, RealtimeAlerts } from "./components";
-import { AnalyticsSkeleton } from "./skeletons";
-
-export default function DashboardPage() {
-  return (
-    <div className="dashboard-grid space-y-6">
-      {/* 1. Fast profile: evaluated dynamically per request */}
-      <FastProfile />
-
-      {/* 2. Heavy analytics: cached for 300s in server memory/KV (Micro-ISR) */}
+      {/* Flushes skeleton in chunk 1, then streams resolved HTML in chunk 2 */}
       <Suspense fallback={<AnalyticsSkeleton />}>
-        <DinouCacheSlot id="analytics-slot" tag="analytics" revalidate={300}>
-          <HeavyAnalytics />
-        </DinouCacheSlot>
+        <SlowHeavyMetrics />
       </Suspense>
-
-      {/* 3. Realtime alerts: evaluated dynamically */}
-      <RealtimeAlerts />
     </div>
   );
-}`}
-                </CodeBlock>
+}
 
-                <Alert className="not-prose my-3 border-emerald-500/20 bg-emerald-50/20 dark:bg-emerald-950/15">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  <AlertTitle className="text-emerald-700 dark:text-emerald-300 font-bold text-xs">
-                    Can &lt;DinouCacheSlot&gt; Contain Client Components?
-                  </AlertTitle>
-                  <AlertDescription className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    <strong>Yes, absolutely.</strong> While <code>&lt;DinouCacheSlot&gt;</code> is a Server Component, its children can freely render interactive Client Components (e.g. charts with zoom buttons). Dinou caches the Client Component reference and its pre-computed props. The browser hydrates it normally with full client interactivity (state, animations, DOM events).
-                  </AlertDescription>
-                </Alert>
-              </section>
+async function SlowHeavyMetrics() {
+  // Heavy 1.5-second aggregation query:
+  const data = await db.analytics.aggregateMonthlyRevenue();
+  return <MetricsTable stats={data} />;
+}`,
+                  },
+                ]}
+              />
 
-              {/* 4.2 Asymmetric ISR */}
-              <section id="asymmetric-isr" className="mt-8 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Split className="h-5 w-5 text-blue-500" />
-                  4.2. Asymmetric ISR (Static Page + Fast Slot)
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  In traditional frameworks, cache invalidation is all-or-nothing: if one widget updates every minute, the entire page must be revalidated every minute.
-                  With Dinou, a product catalog page can have a <strong>24-hour page revalidation</strong> (<code>revalidate: 86400</code>) while an inner flash sale ticker
-                  uses <code>&lt;DinouCacheSlot revalidate=&#123;60&#125;&gt;</code>. The heavy layout remains cached at the Edge CDN, while the volatile widget updates independently.
-                </p>
-              </section>
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
+                <p>• <strong>UX Advantage:</strong> The visitor immediately sees navigation, title, and skeletons instead of an unresponsive blank screen.</p>
+                <p>• <strong>Caveat:</strong> Every single request still runs the full database query. For high traffic, protect this with Strategy 6.</p>
+              </div>
 
-              {/* 4.3 Client Invalidation */}
-              <section id="refresh-slot-client" className="mt-8 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <RefreshCw className="h-5 w-5 text-indigo-500" />
-                  4.3. Client-Side Targeted Invalidation (<code>refreshSlot</code>)
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  After a client mutation or user interaction, you can re-fetch <strong>only that specific cache slot</strong> without re-rendering the parent page or resetting sibling component state:
-                </p>
+              {/* Architectural Equivalence Alert: Server Component vs Server Function UI Return */}
+              <Alert className="not-prose my-4 border-amber-500/30 bg-amber-50/30 dark:bg-amber-950/20">
+                <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <AlertTitle className="text-amber-700 dark:text-amber-300 font-bold text-xs uppercase tracking-wider">
+                  Architectural Equivalence: Async Server Component vs Server Function UI Return
+                </AlertTitle>
+                <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1.5 space-y-2">
+                  <p>
+                    Instead of declaring an inline async Server Component (<code>SlowHeavyMetrics</code>), you can alternatively execute the query inside an isolated <strong>Server Function</strong> (tagged with <code>&quot;use server&quot;</code>) that directly renders and returns the JSX component tree, and invoke it inside <code>&lt;Suspense&gt;</code>:
+                  </p>
+                  <TabbedCodeBlock
+                    containerClassName="my-2"
+                    tabs={[
+                      {
+                        id: "server-fn",
+                        label: "src/analytics/server-functions.ts",
+                        language: "tsx",
+                        code: `"use server";
 
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-{`// src/dashboard/refresh-button.tsx
-"use client";
+import db from "@/lib/db";
+import { MetricsTable } from "./metrics-table";
 
-import { refreshSlot, useRouter } from "dinou";
+export async function getMetricsTable() {
+  const data = await db.analytics.aggregateMonthlyRevenue();
+  return <MetricsTable stats={data} />;
+}`,
+                      },
+                      {
+                        id: "page",
+                        label: "src/analytics/page.tsx",
+                        language: "tsx",
+                        code: `import { Suspense } from "react";
+import { AnalyticsSkeleton } from "./skeleton";
+import { getMetricsTable } from "./server-functions";
 
-export function RefreshAnalyticsButton() {
-  const router = useRouter();
-
-  const handleRefresh = () => {
-    // 1. Direct standalone function:
-    refreshSlot("analytics-slot", { fresh: true });
-
-    // 2. Or via router instance:
-    // router.refreshSlot("analytics-slot", { fresh: true });
-  };
-
+export default function AnalyticsPage() {
   return (
-    <button onClick={handleRefresh} className="btn-secondary">
-      Live Refresh Metrics
-    </button>
+    <div className="space-y-6 p-6">
+      <header>
+        <h1 className="text-2xl font-bold">Revenue Analytics</h1>
+      </header>
+
+      {/* Directly invoke getMetricsTable() inside Suspense (no wrapper component needed!) */}
+      <Suspense fallback={<AnalyticsSkeleton />}>
+        {getMetricsTable()}
+      </Suspense>
+    </div>
   );
-}`}
-                </CodeBlock>
-              </section>
+}`,
+                      },
+                    ]}
+                  />
+                  <p>
+                    Both patterns are <strong>functionally equivalent</strong> during dynamic streaming:
+                  </p>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li><strong>Direct Promise Children:</strong> In React Server Components, <code>&lt;Suspense&gt;</code> natively accepts a <code>Promise&lt;ReactNode&gt;</code> directly as children (<code>&#123;getMetricsTable()&#125;</code>), eliminating the need for boilerplate async wrapper components.</li>
+                    <li><strong>Identical HTTP Streaming Behavior:</strong> In both cases, the initial layout shell and <code>&lt;AnalyticsSkeleton /&gt;</code> are flushed immediately in chunk 1 (fast TTFB). When the query resolves, the server streams the rendered HTML/RSC payload into chunk 2.</li>
+                    <li><strong>Zero Client JavaScript:</strong> Database logic, ORM queries, and credentials remain 100% on the server in both solutions.</li>
+                    <li><strong>Versatility Bonus:</strong> Returning the JSX tree from a Server Function allows the exact same function to be triggered on-demand by Client Components later (e.g., a &quot;Refresh Metrics&quot; button or live filter) via Dinou&apos;s UI streaming RPC.</li>
+                  </ul>
+                </AlertDescription>
+              </Alert>
             </section>
 
-            {/* 5. High-Traffic Synergy: PPR + DinouCacheSlot */}
-            <section
-              id="ppr-cache-slot-synergy"
-              className="mt-12 pt-8 border-t scroll-mt-20"
-            >
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                5. High-Traffic Synergy: PPR + &lt;DinouCacheSlot&gt;
-              </h2>
-              <p>
-                Nesting <code>&lt;DinouCacheSlot&gt;</code> inside a React <code>&lt;Suspense&gt;</code> boundary on a page with{" "}
-                <strong>Partial Prerendering (PPR)</strong> unlocks the highest performance profile possible in full-stack web engineering:
-                <strong> zero-delay initial delivery paired with near-zero streaming delay and 99.9% database query offloading</strong>.
+            {/* ============================================================ */}
+            {/* STRATEGY 5 */}
+            {/* ============================================================ */}
+            <section id="strategy-5" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-bold text-sm">
+                    5
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    RSC + &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Static SSG / Asymmetric ISR)
+                  </h2>
+                </div>
+                <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
+                  Static (SSG) + Micro-ISR
+                </Badge>
+              </div>
+
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="0ms (CDN Edge)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="Instant (~0-2ms)" variant="emerald" />
+                <MetricCard label="Server/DB Load" value="Near-Zero" variant="emerald" />
+                <MetricCard label="Waterfall" value="None" variant="emerald" />
+                <MetricCard label="Data Freshness" value="Decoupled TTL" variant="amber" className="col-span-2 sm:col-span-1" />
+              </div>
+
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> Solves the &quot;all-or-nothing&quot; revalidation problem. The base outer page and layout are pre-rendered at build time (<strong>Static Site Generation - SSG</strong>) or configured with long-term ISR (e.g., 24 hours) delivered with <strong>0ms TTFB from Edge CDN</strong>. Meanwhile, an inner volatile component is wrapped in <code>&lt;DinouCacheSlot&gt;</code> with a fast TTL (e.g., 60 seconds). The heavy outer page remains immutable at the Edge CDN, while the slot revalidates independently in server memory/KV storage.
               </p>
 
-              {/* 5.1 Synergy Benchmarks */}
-              <section id="synergy-benchmarks" className="mt-6 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <TrendingDown className="h-5 w-5 text-indigo-500" />
-                  5.1. 0ms Edge TTFB + 2ms Cached Hole
-                </h3>
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/products/[slug]/page_functions.ts",
+                    language: "tsx",
+                    code: `export const revalidate = 86400; // Outer page revalidates once every 24 hours`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/products/[slug]/page.tsx",
+                    language: "tsx",
+                    code: `import { Suspense } from "react";
+import { DinouCacheSlot } from "dinou/server";
+import { LivePriceTicker, StaticDescription } from "./components";
 
-                <div className="grid gap-4 md:grid-cols-2 text-xs not-prose my-4">
-                  <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                          <Clock className="h-4 w-4 text-amber-500" />
-                          PPR Alone (Without Slot)
-                        </CardTitle>
-                        <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-500/30">
-                          Live Query Per Request
-                        </Badge>
-                      </div>
-                      <CardDescription className="text-[11px]">
-                        Static shell + on-demand dynamic execution
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-1.5 text-muted-foreground leading-relaxed">
-                      <p>• <strong>TTFB:</strong> 0ms from CDN Edge (instant outer layout).</p>
-                      <p>• <strong>Skeleton Duration:</strong> The user waits the full database query time (e.g. 1,200ms) on <em>every single request</em>.</p>
-                      <p>• <strong>Database Load:</strong> 10,000 visitors per minute = <strong>10,000 database queries</strong>.</p>
-                    </CardContent>
-                  </Card>
+export default function ProductDetailPage({ params }: { params: { slug: string } }) {
+  return (
+    <div className="product-view">
+      {/* Static product description: cached at Edge CDN for 24h */}
+      <StaticDescription slug={params.slug} />
 
-                  <Card className="border-indigo-500/30 bg-indigo-50/30 dark:bg-indigo-950/20 shadow-sm">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
-                          <Zap className="h-4 w-4 text-indigo-500" />
-                          PPR + &lt;DinouCacheSlot&gt; (Synergy)
-                        </CardTitle>
-                        <Badge variant="outline" className="text-[10px] text-indigo-600 dark:text-indigo-400 border-indigo-500/40">
-                          Cached Streamed Hole
-                        </Badge>
-                      </div>
-                      <CardDescription className="text-[11px]">
-                        Static shell + memory/KV cached stream
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-1.5 text-muted-foreground leading-relaxed">
-                      <p>• <strong>TTFB:</strong> 0ms from CDN Edge (instant outer layout).</p>
-                      <p>• <strong>Skeleton Duration:</strong> Near-zero (~2-5ms)! The server flushes the cached RSC flight chunk from memory/KV immediately.</p>
-                      <p>• <strong>Database Load:</strong> 10,000 visitors per minute = <strong>1 query per TTL window (99.9% offload)</strong>.</p>
-                    </CardContent>
-                  </Card>
+      {/* Asymmetric Micro-ISR: revalidates every 60s or via refreshSlot() */}
+      <Suspense fallback={<p>Checking live pricing...</p>}>
+        <DinouCacheSlot id={\`price-\${params.slug}\`} revalidate={60} tag="pricing">
+          <LivePriceTicker slug={params.slug} />
+        </DinouCacheSlot>
+      </Suspense>
+    </div>
+  );
+}`,
+                  },
+                ]}
+              />
+
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
+                <p>• <strong>Targeted Invalidation:</strong> Calling <code>refreshSlot(&quot;price-prod-1&quot;)</code> from a client button refreshes only the price widget without rebuilding the 24-hour page cache.</p>
+                <p>• <strong>Massive Cost Savings:</strong> Prevents volatile widgets from causing full-page rebuild cascades across thousands of static pages.</p>
+              </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* STRATEGY 6 */}
+            {/* ============================================================ */}
+            <section id="strategy-6" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-bold text-sm">
+                    6
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    RSC + &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Dynamic Micro-ISR)
+                  </h2>
                 </div>
-              </section>
+                <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
+                  Server Cache Stream
+                </Badge>
+              </div>
 
-              {/* 5.2 Synergy Implementation */}
-              <section id="synergy-implementation" className="mt-8 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-indigo-500" />
-                  5.2. Peak Performance Implementation
-                </h3>
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="Fast (Early Layout)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="~2ms (Cache Hit)" variant="emerald" />
+                <MetricCard label="Server/DB Load" value="Near-Zero (99% Offload)" variant="emerald" />
+                <MetricCard label="Waterfall" value="None" variant="emerald" />
+                <MetricCard label="Data Freshness" value="TTL / Tag Reval" variant="amber" className="col-span-2 sm:col-span-1" />
+              </div>
 
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-{`// src/trending/page_functions.ts
-export const ppr = true;
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> Used on dynamic routes that depend on user sessions, cookies, or headers.
+                The layout shell streams immediately. Inside the page, heavy components are protected by <code>&lt;DinouCacheSlot&gt;</code>.
+                On cache hit, the pre-computed RSC binary chunk is pulled from memory/KV in ~2ms and streamed down without querying PostgreSQL/MongoDB.
+              </p>
 
-// src/trending/page.tsx
-import { Suspense } from "react";
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/feed/page_functions.ts",
+                    language: "tsx",
+                    code: `export const revalidate = 0; // Dynamic route with per-request session`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/feed/page.tsx",
+                    language: "tsx",
+                    code: `import { Suspense } from "react";
+import { DinouCacheSlot } from "dinou/server";
+import { UserGreeting, GlobalTrendingWidget } from "./components";
+
+export default function FeedPage() {
+  return (
+    <div className="grid grid-cols-3 gap-6 p-6">
+      {/* 1. Dynamic per-user greeting (computed live on each request) */}
+      <div className="col-span-2">
+        <UserGreeting />
+      </div>
+
+      {/* 2. Global trending feed: cached for 300s in server memory (Micro-ISR) */}
+      <aside className="col-span-1">
+        <Suspense fallback={<p>Loading trends...</p>}>
+          <DinouCacheSlot id="global-trending" revalidate={300} tag="trends">
+            <GlobalTrendingWidget />
+          </DinouCacheSlot>
+        </Suspense>
+      </aside>
+    </div>
+  );
+}`,
+                  },
+                ]}
+              />
+
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
+                <p>• <strong>Stream Speed:</strong> Instead of waiting 1.5 seconds for the DB on every page visit, the slot resolves in ~2ms from RAM.</p>
+                <p>• <strong>Ideal For:</strong> Social feeds, dashboards, recommendations, and search suggestions in authenticated web apps.</p>
+              </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* STRATEGY 7 */}
+            {/* ============================================================ */}
+            <section id="strategy-7" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-bold text-sm">
+                    7
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    RSC with &lt;Suspense&gt; (PPR Hybrid)
+                  </h2>
+                </div>
+                <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
+                  Partial Prerendering
+                </Badge>
+              </div>
+
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="0ms (Shell from Edge)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="Slow (Waits for DB)" variant="rose" />
+                <MetricCard label="Server/DB Load" value="Heavy (100% queries)" variant="rose" />
+                <MetricCard label="Waterfall" value="None" variant="emerald" />
+                <MetricCard label="Data Freshness" value="100% Live" variant="emerald" className="col-span-2 sm:col-span-1" />
+              </div>
+
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> The page enables Partial Prerendering via <code>export const ppr = true</code>.
+                At build time, Dinou pre-renders the navigation bar, footer, and component skeletons into immutable CDN artifacts.
+                When a visitor arrives, the Edge CDN responds in <strong>0ms</strong> with the static shell. Simultaneously, the server
+                executes the dynamic hole and streams the live HTML into the open connection.
+              </p>
+
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/catalog/page_functions.ts",
+                    language: "tsx",
+                    code: `export const ppr = true; // Enables Partial Prerendering`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/catalog/page.tsx",
+                    language: "tsx",
+                    code: `import { Suspense } from "react";
+import db from "@/lib/db";
+import { StockSkeleton } from "./skeleton";
+
+export default function CatalogPage() {
+  return (
+    <div className="p-8 max-w-4xl mx-auto space-y-6">
+      {/* 0ms TTFB: Served directly from Edge CDN */}
+      <header>
+        <h1 className="text-3xl font-bold">Catalog & Inventory</h1>
+        <p className="text-muted-foreground">Shell painted in 0ms.</p>
+      </header>
+
+      {/* Dynamic Hole: Executed on request and streamed live */}
+      <Suspense fallback={<StockSkeleton />}>
+        <LiveStockBalance />
+      </Suspense>
+    </div>
+  );
+}
+
+async function LiveStockBalance() {
+  // Query executed on every request:
+  const stock = await db.warehouse.getLiveInventory();
+  return <p className="font-mono text-emerald-600">{stock} units remaining</p>;
+}`,
+                  },
+                ]}
+              />
+
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
+                <p>• <strong>Eliminates the SSR Bottleneck:</strong> The browser parses stylesheets and scripts in 0ms while the server computes data in the background.</p>
+                <p>• <strong>Notice:</strong> Because the dynamic hole is uncached, heavy traffic will still send 100% of queries to the database. See Strategy 8 for caching the hole.</p>
+              </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* STRATEGY 8 */}
+            {/* ============================================================ */}
+            <section id="strategy-8" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-bold text-sm">
+                    8
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    PPR + &lt;DinouCacheSlot&gt; (Peak Performance Synergy)
+                  </h2>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
+                    PPR Hybrid Synergy
+                  </Badge>
+                  <Badge className="bg-emerald-600 text-white font-mono text-xs hover:bg-emerald-700">
+                    Recommended
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="0ms (Edge CDN)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="~2-5ms (RAM Cache)" variant="emerald" />
+                <MetricCard label="Server/DB Load" value="99.9% Offload" variant="emerald" />
+                <MetricCard label="Waterfall" value="None" variant="emerald" />
+                <MetricCard label="Data Freshness" value="TTL / Tag Reval" variant="amber" className="col-span-2 sm:col-span-1" />
+              </div>
+
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> The gold standard for high-traffic web applications. Combines Partial Prerendering
+                with component-level Micro-ISR. The Edge CDN delivers the static shell in <strong>0ms TTFB</strong>.
+                The server streams the dynamic hole almost instantly (~2ms) because the sub-tree is cached in memory/KV storage.
+                Visitors see zero visible skeleton flicker, while database queries are reduced by 99.9%.
+              </p>
+
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/trending/page_functions.ts",
+                    language: "tsx",
+                    code: `export const ppr = true; // Static Edge Shell`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/trending/page.tsx",
+                    language: "tsx",
+                    code: `import { Suspense } from "react";
 import { DinouCacheSlot } from "dinou/server";
 import { TrendingGrid, TrendingSkeleton } from "./components";
 
@@ -996,537 +1004,516 @@ export default function TrendingPage() {
       </Suspense>
     </main>
   );
-}`}
-                </CodeBlock>
-              </section>
+}`,
+                  },
+                ]}
+              />
+
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-emerald-50/30 dark:bg-emerald-950/20 p-3 rounded-lg border border-emerald-500/20">
+                <p>• <strong>Benchmarked Throughput:</strong> Under a spike of 50,000 requests/minute, only 1 query hits the database every 120 seconds.</p>
+                <p>• <strong>User Experience:</strong> 0ms TTFB first paint + ~2ms content resolution = Feels like a static page with near-live freshness.</p>
+              </div>
             </section>
 
-            {/* 6. Reactive Fetching with Server Functions */}
-            <section
-              id="server-functions-streaming"
-              className="mt-12 pt-8 border-t scroll-mt-20"
-            >
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                6. Reactive Fetching with Server Functions &amp; React 19
-              </h2>
-              <p>
-                When data fetching requires client reactivity, live search filters, or user-triggered mutations,
-                pair Server Functions (<code>&quot;use server&quot;</code>) with React 19&apos;s native primitives.
+            {/* ============================================================ */}
+            {/* STRATEGY 9 */}
+            {/* ============================================================ */}
+            <section id="strategy-9" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-bold text-sm">
+                    9
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    RSC Promise ➔ Client use() (React 19)
+                  </h2>
+                </div>
+                <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20 font-mono text-xs">
+                  Promise Streaming
+                </Badge>
+              </div>
+
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="0ms (with PPR) / Fast" variant="emerald" />
+                <MetricCard label="Stream Ready" value="Waits for Promise" variant="amber" />
+                <MetricCard label="Server/DB Load" value="Heavy (Live query)" variant="rose" />
+                <MetricCard label="Waterfall" value="None" variant="emerald" />
+                <MetricCard label="Data Freshness" value="100% Live" variant="emerald" className="col-span-2 sm:col-span-1" />
+              </div>
+
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> In React 19, Server Components can start an asynchronous data fetch without <code>await</code>,
+                and pass the raw <code>Promise</code> across the flight serialization boundary to a Client Component.
+                The Client Component unwraps it synchronously using the native <code>use()</code> hook inside <code>&lt;Suspense&gt;</code>.
+                No <code>useEffect</code>, no client fetch cascades, and no duplicate network requests!
               </p>
 
-              {/* 6.1 Native use() */}
-              <section id="react-19-use-hook" className="mt-6 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-cyan-500" />
-                  6.1. Passing Promises to Client <code>use()</code>
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  React 19 allows Server Components to initiate a promise without <code>await</code> and pass it directly across the flight boundary to a Client Component.
-                  The Client Component unwraps it synchronously using React 19&apos;s native <code>use()</code> hook inside <code>&lt;Suspense&gt;</code>:
-                </p>
-
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-{`// 1. Server Component: src/search/page.tsx
-import { Suspense } from "react";
-import { searchCatalog } from "./server-functions";
-import { SearchResults } from "./search-results";
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "server",
+                    label: "src/search/page.tsx (Server Component)",
+                    language: "tsx",
+                    code: `import { Suspense } from "react";
+import db from "@/lib/db";
+import { SearchResultsClient } from "./search-results-client";
 
 export default function SearchPage({ searchParams }: { searchParams: { q?: string } }) {
   const query = searchParams.q || "";
 
-  // Start query on server WITHOUT awaiting! Returns an un-awaited Promise:
-  const searchPromise = searchCatalog(query);
+  // Start query WITHOUT awaiting! Passes un-awaited Promise to client:
+  const resultsPromise = db.products.search({ query });
 
   return (
-    <main className="p-8 max-w-4xl mx-auto space-y-4">
+    <main className="p-6 max-w-4xl mx-auto space-y-4">
       <h1 className="text-2xl font-bold">Search Catalog</h1>
       <Suspense key={query} fallback={<p className="text-muted-foreground">Searching catalog...</p>}>
-        <SearchResults promise={searchPromise} />
+        <SearchResultsClient promise={resultsPromise} />
       </Suspense>
     </main>
   );
-}
+}`,
+                  },
+                  {
+                    id: "client",
+                    label: "src/search/search-results-client.tsx (Client Component)",
+                    language: "tsx",
+                    code: `"use client";
 
-// 2. Client Component: src/search/search-results.tsx
-"use client";
+import { use, useState } from "react";
 
-import { use } from "react";
-
-export function SearchResults({ promise }: { promise: Promise<Product[]> }) {
-  // Unwraps the Flight RPC promise directly inside the client component
+export function SearchResultsClient({ promise }: { promise: Promise<Product[]> }) {
+  // Native React 19 hook: unwraps the Flight RPC promise directly
   const products = use(promise);
+  const [filterPrice, setFilterPrice] = useState(100);
 
   return (
-    <ul className="divide-y border rounded-lg p-4">
-      {products.map((p) => (
-        <li key={p.id} className="py-2 flex justify-between">
-          <span>{p.name}</span>
-          <span className="font-mono text-emerald-600">\${p.price}</span>
-        </li>
-      ))}
-    </ul>
+    <div>
+      <input type="range" max={500} value={filterPrice} onChange={(e) => setFilterPrice(+e.target.value)} />
+      <ul>
+        {products.filter(p => p.price <= filterPrice).map((p) => (
+          <li key={p.id}>{p.name} - \${p.price}</li>
+        ))}
+      </ul>
+    </div>
   );
-}`}
-                </CodeBlock>
-              </section>
+}`,
+                  },
+                ]}
+              />
 
-              {/* 6.2 RPC Mutations vs Initial Mount */}
-              <section id="server-functions-mutations" className="mt-8 scroll-mt-20">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <ArrowRight className="h-5 w-5 text-indigo-500" />
-                  6.2. User-Driven RPC Mutations vs Initial Mount
-                </h3>
-
-                <div className="grid gap-4 md:grid-cols-2 not-prose my-4 text-xs">
-                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-50/20 dark:bg-emerald-950/15 p-4 space-y-2">
-                    <span className="font-bold text-emerald-700 dark:text-emerald-400 text-sm block">
-                      Recommended: User-Triggered Actions (Pattern 13)
-                    </span>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Invoke Server Functions on button clicks, form submissions, and mutation events.
-                      They provide type-safe RPC endpoints, execute server mutations securely, and trigger on-demand cache revalidation via <code>revalidateTag</code>.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-rose-500/20 bg-rose-50/20 dark:bg-rose-950/15 p-4 space-y-2">
-                    <span className="font-bold text-rose-700 dark:text-rose-400 text-sm block">
-                      Anti-Pattern: Calling Server Functions on Initial Mount (Pattern 12)
-                    </span>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Calling a Server Function inside a Client Component&apos;s <code>useEffect</code> on mount creates an avoidable client-side network waterfall:
-                      the browser must download the JS bundle, parse it, and then send a second HTTP POST request to fetch data that could have been streamed during initial SSR.
-                    </p>
-                  </div>
-                </div>
-              </section>
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
+                <p>• <strong>Zero Waterfall:</strong> The server initiates the query before the client even finishes parsing JavaScript.</p>
+                <p>• <strong>Interactive State:</strong> The client component immediately has access to full client hooks (<code>useState</code>, <code>useMemo</code>) to filter or mutate UI state.</p>
+              </div>
             </section>
 
-            {/* 7. Master Comparison Matrix */}
-            <section
-              id="strategy-comparison"
-              className="mt-12 pt-8 border-t scroll-mt-20"
-            >
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                7. Data Fetching &amp; Rendering Strategies Master Matrix
-              </h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                To help you choose the ideal pattern for every route and component, the following matrix compares the 13 data fetching
-                and rendering strategies available in Dinou, their execution timing, TTFB, streaming resolution latency, database/server pressure,
-                and network round-trip characteristics:
-              </p>
-
-              <div className="not-prose my-6 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-card shadow-sm">
-                <div className="overflow-x-auto">
-                  <Table className="w-full text-xs">
-                    <TableHeader className="bg-slate-50 dark:bg-slate-900/60 border-b">
-                      <TableRow>
-                        <TableHead className="w-10 text-center font-bold">#</TableHead>
-                        <TableHead className="min-w-[190px] font-bold">Strategy / Pattern</TableHead>
-                        <TableHead className="min-w-[140px] font-bold">Execution Context</TableHead>
-                        <TableHead className="min-w-[115px] font-bold">TTFB (First Byte)</TableHead>
-                        <TableHead className="min-w-[125px] font-bold">Stream / Content Ready</TableHead>
-                        <TableHead className="min-w-[125px] font-bold">Server &amp; DB Load</TableHead>
-                        <TableHead className="min-w-[90px] font-bold text-center">Network Waterfall?</TableHead>
-                        <TableHead className="min-w-[105px] font-bold">Data Freshness</TableHead>
-                        <TableHead className="min-w-[200px] font-bold">Ideal Use Case</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-                      {/* Row 1 */}
-                      <TableRow className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
-                        <TableCell className="font-mono text-center text-muted-foreground font-bold">1</TableCell>
-                        <TableCell>
-                          <div className="font-bold text-slate-900 dark:text-slate-100">RSC Direct await (SSG)</div>
-                          <div className="text-[11px] text-muted-foreground">Top-level <code>await</code> or <code>getProps</code> in Server Component</div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">Build Time (<code>npm run build</code>)</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            0ms (CDN Edge)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Instant (0ms)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Zero (Build Time)
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
-                        <TableCell className="text-muted-foreground">Fixed at build</TableCell>
-                        <TableCell className="text-muted-foreground">Blogs, documentation, static marketing pages.</TableCell>
-                      </TableRow>
-
-                      {/* Row 2 */}
-                      <TableRow className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
-                        <TableCell className="font-mono text-center text-muted-foreground font-bold">2</TableCell>
-                        <TableCell>
-                          <div className="font-bold text-slate-900 dark:text-slate-100">RSC Direct await (Dynamic)</div>
-                          <div className="text-[11px] text-muted-foreground">Top-level <code>await</code> or <code>getProps</code> without <code>&lt;Suspense&gt;</code></div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">Per Request (Server)</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
-                            Slow (Blocked)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-muted-foreground font-mono text-[11px]">N/A (Blocks TTFB)</span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
-                            Heavy (100% queries)
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
-                        <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
-                        <TableCell className="text-muted-foreground">Private views where entire UI requires a single critical query and waiting is acceptable.</TableCell>
-                      </TableRow>
-
-                      {/* Row 3 */}
-                      <TableRow className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
-                        <TableCell className="font-mono text-center text-muted-foreground font-bold">3</TableCell>
-                        <TableCell>
-                          <div className="font-bold text-slate-900 dark:text-slate-100">RSC with &lt;Suspense&gt; (SSG)</div>
-                          <div className="text-[11px] text-muted-foreground">Static route with async component boundary</div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">Build Time (Compiler awaits)</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            0ms (CDN Edge)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Instant (0ms)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Zero (Build Time)
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
-                        <TableCell className="text-muted-foreground">Fixed at build</TableCell>
-                        <TableCell className="text-muted-foreground">Decoupled async components in static pages; outputs final HTML without showing fallback.</TableCell>
-                      </TableRow>
-
-                      {/* Row 4 */}
-                      <TableRow className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
-                        <TableCell className="font-mono text-center text-muted-foreground font-bold">4</TableCell>
-                        <TableCell>
-                          <div className="font-bold text-slate-900 dark:text-slate-100">RSC with &lt;Suspense&gt; (Dynamic)</div>
-                          <div className="text-[11px] text-muted-foreground">Streaming SSR on demand (without PPR)</div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">Per Request (Server streaming)</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
-                            Fast (Early Layout)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
-                            Slow (Waits 1-3s DB)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
-                            Heavy (100% queries)
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
-                        <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
-                        <TableCell className="text-muted-foreground">Dynamic routes on runtimes without edge caching or when PPR is disabled.</TableCell>
-                      </TableRow>
-
-                      {/* Row 5 */}
-                      <TableRow className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
-                        <TableCell className="font-mono text-center text-muted-foreground font-bold">5</TableCell>
-                        <TableCell>
-                          <div className="font-bold text-slate-900 dark:text-slate-100">RSC with &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Static / Asymmetric ISR)</div>
-                          <div className="text-[11px] text-muted-foreground">Pre-rendered static shell with decoupled slot TTL or <code>refreshSlot()</code></div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">Build Time (Pre-rendered) + On-Demand Slot Reval</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            0ms (CDN Edge)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Instant (~0-2ms)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Near-Zero (Decoupled)
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
-                        <TableCell className="text-amber-600 dark:text-amber-400 font-medium">Decoupled TTL / refreshSlot()</TableCell>
-                        <TableCell className="text-muted-foreground">Static/ISR pages (e.g. 24h page revalidate) containing a widget (stock, pricing) needing fast updates (60s) or surgical in-place client refreshes.</TableCell>
-                      </TableRow>
-
-                      {/* Row 6 */}
-                      <TableRow className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
-                        <TableCell className="font-mono text-center text-muted-foreground font-bold">6</TableCell>
-                        <TableCell>
-                          <div className="font-bold text-slate-900 dark:text-slate-100">RSC with &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Dynamic)</div>
-                          <div className="text-[11px] text-muted-foreground">Dynamic streaming with vertical Micro-ISR (TTL cache)</div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">Per Request (Cache hit: ~2ms / Miss: async query)</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
-                            Fast (Early Layout)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Instant (~2ms Cache)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Near-Zero (99% Offload)
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
-                        <TableCell className="text-amber-600 dark:text-amber-400 font-medium">TTL / Tag Reval</TableCell>
-                        <TableCell className="text-muted-foreground">Dynamic routes (with session/cookies) containing heavy widgets (analytics, feeds). Flushes layout instantly; slot streams from cache without DB load.</TableCell>
-                      </TableRow>
-
-                      {/* Row 7 */}
-                      <TableRow className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 bg-blue-50/20 dark:bg-blue-950/10">
-                        <TableCell className="font-mono text-center text-blue-600 dark:text-blue-400 font-bold">7</TableCell>
-                        <TableCell>
-                          <div className="font-bold text-blue-700 dark:text-blue-300">RSC with &lt;Suspense&gt; (PPR Hybrid)</div>
-                          <div className="text-[11px] text-muted-foreground">Partial Prerendering (Static Shell + Live Uncached Hole)</div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">Static Shell (Build) + Live Hole (Server on every request)</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            0ms (Shell from Edge)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
-                            Slow (Hole waits for DB)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
-                            Heavy (100% Hole queries)
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
-                        <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
-                        <TableCell className="text-muted-foreground font-medium text-slate-800 dark:text-slate-200">Instant static layout from Edge with zero-delay live streamed data for real-time personalization.</TableCell>
-                      </TableRow>
-
-                      {/* Row 8 */}
-                      <TableRow className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 bg-gradient-to-r from-indigo-50/40 via-purple-50/30 to-blue-50/20 dark:from-indigo-950/25 dark:via-purple-950/20 dark:to-blue-950/15 border-l-2 border-indigo-500">
-                        <TableCell className="font-mono text-center text-indigo-600 dark:text-indigo-400 font-bold">8</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1.5 font-bold text-indigo-700 dark:text-indigo-300">
-                            <span>PPR + &lt;DinouCacheSlot&gt; (PPR Hybrid Synergy)</span>
-                            <span className="text-[9px] uppercase px-1.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold tracking-wider">Synergy</span>
-                          </div>
-                          <div className="text-[11px] text-muted-foreground">Static Edge Shell + Cached Streamed Hole (Max Concurrency)</div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">Edge CDN (Shell) + Server Cache Storage (Slot)</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            0ms (Edge) + ~5ms (Slot)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Instant (~2-5ms Cache)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Near-Zero (99.9% Offload)
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
-                        <TableCell className="text-amber-600 dark:text-amber-400 font-medium">TTL / Tag Reval</TableCell>
-                        <TableCell className="text-muted-foreground font-medium text-slate-800 dark:text-slate-200">
-                          <strong className="text-indigo-600 dark:text-indigo-400">Peak Performance:</strong> Instant CDN paint (0ms TTFB) with 99.9% database query offload. Ideal for high-traffic stores, trending catalog pages, and viral portals.
-                        </TableCell>
-                      </TableRow>
-
-                      {/* Row 9 */}
-                      <TableRow className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 bg-purple-50/20 dark:bg-purple-950/10">
-                        <TableCell className="font-mono text-center text-purple-600 dark:text-purple-400 font-bold">9</TableCell>
-                        <TableCell>
-                          <div className="font-bold text-purple-700 dark:text-purple-300">RSC Promise ➔ Client use() (Dynamic / PPR)</div>
-                          <div className="text-[11px] text-muted-foreground">RSC initiates un-awaited Promise; Client unwraps via <code>use()</code></div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">Server starts query; Client suspends</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            0ms (with PPR)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
-                            Waits for Promise
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
-                            Heavy (Live query)
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
-                        <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
-                        <TableCell className="text-muted-foreground font-medium text-slate-800 dark:text-slate-200">Interactive stateful widgets (charts, canvas, filters) needing fresh streaming data.</TableCell>
-                      </TableRow>
-
-                      {/* Row 10 */}
-                      <TableRow className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
-                        <TableCell className="font-mono text-center text-muted-foreground font-bold">10</TableCell>
-                        <TableCell>
-                          <div className="font-bold text-slate-900 dark:text-slate-100">Client-First getProps (SSG)</div>
-                          <div className="text-[11px] text-muted-foreground"><code>page_functions.ts</code> + Client Component</div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">Build Time (<code>npm run build</code>)</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            0ms (CDN Edge)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Instant (0ms)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Zero (Build Time)
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
-                        <TableCell className="text-muted-foreground">Fixed at build</TableCell>
-                        <TableCell className="text-muted-foreground">Dinou Client-First model for highly interactive static web applications.</TableCell>
-                      </TableRow>
-
-                      {/* Row 11 */}
-                      <TableRow className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
-                        <TableCell className="font-mono text-center text-muted-foreground font-bold">11</TableCell>
-                        <TableCell>
-                          <div className="font-bold text-slate-900 dark:text-slate-100">Client-First getProps (Dynamic)</div>
-                          <div className="text-[11px] text-muted-foreground"><code>page_functions.ts</code> + Client Component in SSR</div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">Per Request (Server awaits <code>getProps</code>)</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
-                            Slow (Blocked)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-muted-foreground font-mono text-[11px]">N/A (Blocks TTFB)</span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
-                            Heavy (100% queries)
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
-                        <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
-                        <TableCell className="text-muted-foreground">Complex SPAs where developers prefer classic React hooks and tolerate TTFB wait.</TableCell>
-                      </TableRow>
-
-                      {/* Row 12 */}
-                      <TableRow className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
-                        <TableCell className="font-mono text-center text-muted-foreground font-bold">12</TableCell>
-                        <TableCell>
-                          <div className="font-bold text-slate-900 dark:text-slate-100">Client Calling Server Function (Initial Mount - Dynamic RPC)</div>
-                          <div className="text-[11px] text-muted-foreground">Client Component calls <code>&quot;use server&quot;</code> during initial mount</div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">Client RPC on mount</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
-                            Fast (Shell Only)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
-                            Delayed (Waterfall)
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
-                            Heavy (100% RPC queries)
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-semibold text-rose-600 dark:text-rose-400">Yes (Waterfall)</TableCell>
-                        <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
-                        <TableCell className="text-muted-foreground">Supported, but sub-optimal compared to pattern 9 (RSC Promise streaming) due to the second HTTP round trip.</TableCell>
-                      </TableRow>
-
-                      {/* Row 13 */}
-                      <TableRow className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
-                        <TableCell className="font-mono text-center text-muted-foreground font-bold">13</TableCell>
-                        <TableCell>
-                          <div className="font-bold text-slate-900 dark:text-slate-100">Client Calling Server Function (User Action - Dynamic RPC)</div>
-                          <div className="text-[11px] text-muted-foreground">Invoked on user button click, form submission, or mutation</div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">Client on user action (POST RPC)</TableCell>
-                        <TableCell>
-                          <span className="font-mono text-xs text-muted-foreground">N/A (Post-Load)</span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-muted-foreground font-mono text-[11px]">N/A (User Event)</span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-700 font-mono text-[10px]">
-                            On-Demand (Per Action)
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
-                        <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
-                        <TableCell className="text-muted-foreground">Form submissions, state persistence, on-demand data refreshes, and RPC actions.</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
+            {/* ============================================================ */}
+            {/* STRATEGY 10 */}
+            {/* ============================================================ */}
+            <section id="strategy-10" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-bold text-sm">
+                    10
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    Client-First getProps (SSG)
+                  </h2>
                 </div>
+                <Badge variant="outline" className="text-emerald-600 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
+                  Static Client Model
+                </Badge>
               </div>
 
-              <div className="not-prose grid gap-4 md:grid-cols-2 mt-4">
-                <Alert className="border-blue-500/20 bg-blue-50/40 dark:bg-blue-950/20">
-                  <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  <AlertTitle className="text-blue-700 dark:text-blue-300 font-bold text-xs">
-                    Server Components with getProps
-                  </AlertTitle>
-                  <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1">
-                    Using Dinou&apos;s <code>getProps</code> with a Server Component is functionally equivalent to doing top-level <code>await</code> in the component body (Patterns 1 &amp; 2): both run on the server before rendering the component and block TTFB on dynamic routes unless wrapped in <code>&lt;Suspense&gt;</code>.
-                  </AlertDescription>
-                </Alert>
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="0ms (CDN Edge)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="Instant (0ms)" variant="emerald" />
+                <MetricCard label="Server/DB Load" value="Zero at Runtime" variant="emerald" />
+                <MetricCard label="Waterfall" value="None" variant="emerald" />
+                <MetricCard label="Data Freshness" value="Fixed at Build" variant="slate" className="col-span-2 sm:col-span-1" />
+              </div>
 
-                <Alert className="border-amber-500/20 bg-amber-50/40 dark:bg-amber-950/20">
-                  <HelpCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                  <AlertTitle className="text-amber-700 dark:text-amber-300 font-bold text-xs">
-                    Legacy useEffect Fetching Omitted
-                  </AlertTitle>
-                  <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1">
-                    Traditional client-side data fetching via <code>useEffect</code> + <code>fetch()</code> is intentionally omitted from the primary strategies. In React 19 and modern RSC architectures, fetching on mount via <code>useEffect</code> is considered a legacy anti-pattern that creates network waterfalls, causes layout shifts, and misses server streaming.
-                  </AlertDescription>
-                </Alert>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> The page uses Dinou&apos;s Client-First Model. Data is retrieved on the server at build time
+                via <code>getProps</code> in <code>page_functions.ts</code>, while <code>page.tsx</code> is an interactive Client Component
+                marked with <code>&quot;use client&quot;</code>. The build generates static HTML with pre-serialized props, which hydrates into a full SPA on load.
+              </p>
+
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/whiteboard/page_functions.ts",
+                    language: "tsx",
+                    code: `import db from "@/lib/db";
+
+export async function getProps() {
+  const defaultTemplates = await db.templates.findDefaults();
+  return { defaultTemplates };
+}`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/whiteboard/page.tsx",
+                    language: "tsx",
+                    code: `"use client";
+
+import { useState } from "react";
+import { CanvasStage, ToolPalette } from "@/components/canvas";
+
+export default function WhiteboardPage({ defaultTemplates }: { defaultTemplates: any[] }) {
+  const [selectedTemplate, setSelectedTemplate] = useState(defaultTemplates[0]);
+
+  return (
+    <div className="h-screen flex flex-col">
+      <ToolPalette onSelect={setSelectedTemplate} />
+      <CanvasStage initialData={selectedTemplate} />
+    </div>
+  );
+}`,
+                  },
+                ]}
+              />
+
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
+                <p>• <strong>Ergonomics:</strong> Perfect for developers migrating from Vite/CRA who want classic React hooks everywhere without losing SSG SEO and 0ms TTFB.</p>
+              </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* STRATEGY 11 */}
+            {/* ============================================================ */}
+            <section id="strategy-11" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-mono font-bold text-sm">
+                    11
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    Client-First getProps (Dynamic SSR)
+                  </h2>
+                </div>
+                <Badge variant="outline" className="text-rose-600 border-rose-500/30 bg-rose-50/40 dark:bg-rose-950/20 font-mono text-xs">
+                  Dynamic Client SSR
+                </Badge>
+              </div>
+
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="Slow (Blocked)" variant="rose" />
+                <MetricCard label="Stream Ready" value="N/A (Blocks TTFB)" variant="slate" />
+                <MetricCard label="Server/DB Load" value="Heavy (100% queries)" variant="rose" />
+                <MetricCard label="Waterfall" value="None" variant="emerald" />
+                <MetricCard label="Data Freshness" value="100% Live" variant="emerald" className="col-span-2 sm:col-span-1" />
+              </div>
+
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> The same Client-First approach as Strategy 10, but configured for on-demand dynamic execution
+                (e.g., dynamic params or <code>revalidate = 0</code>). On every request, the server executes <code>getProps</code>, passes the data
+                into the client page component, and renders the initial HTML document.
+              </p>
+
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/editor/[docId]/page_functions.ts",
+                    language: "tsx",
+                    code: `import db from "@/lib/db";
+
+export const revalidate = 0; // Dynamic SSR
+
+export async function getProps(params: { docId: string }) {
+  const document = await db.documents.findById(params.docId);
+  return { document };
+}`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/editor/[docId]/page.tsx",
+                    language: "tsx",
+                    code: `"use client";
+
+import { useState } from "react";
+
+export default function DocumentEditor({ document }: { document: any }) {
+  const [content, setContent] = useState(document.initialBody);
+
+  return (
+    <div className="editor-container">
+      <textarea value={content} onChange={(e) => setContent(e.target.value)} />
+    </div>
+  );
+}`,
+                  },
+                ]}
+              />
+
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
+                <p>• <strong>Trade-off:</strong> Because the server waits for <code>getProps</code> before sending the first byte, TTFB is slower compared to streaming patterns.</p>
+                <p>• <strong>Advantage:</strong> Eliminates client-side spinner flashing upon initial navigation compared to classic Single Page Apps.</p>
+              </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* STRATEGY 12 */}
+            {/* ============================================================ */}
+            <section id="strategy-12" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-bold text-sm">
+                    12
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    Client Calling Server Function (Initial Mount - Dynamic RPC)
+                  </h2>
+                </div>
+                <Badge variant="outline" className="text-amber-600 border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20 font-mono text-xs">
+                  Initial Mount RPC
+                </Badge>
+              </div>
+
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="Fast (Shell Only)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="Delayed (Waterfall)" variant="rose" />
+                <MetricCard label="Server/DB Load" value="Heavy (100% RPC)" variant="rose" />
+                <MetricCard label="Waterfall" value="YES (Waterfall)" variant="rose" />
+                <MetricCard label="Data Freshness" value="100% Live" variant="emerald" className="col-span-2 sm:col-span-1" />
+              </div>
+
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> A Client Component triggers a Server Function on initial mount via RPC.
+                In Dinou and modern React 19, this is accomplished without legacy <code>useEffect</code> hooks; instead,
+                the initial Server Function promise is initialized in state or component instantiation and unwrapped synchronously
+                using React 19&apos;s native <code>use()</code> hook inside <code>&lt;Suspense&gt;</code>.
+              </p>
+
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "server-fn",
+                    label: "src/dashboard/server-functions.ts",
+                    language: "tsx",
+                    code: `"use server";
+
+import db from "@/lib/db";
+
+export async function fetchDashboardStats() {
+  const count = await db.users.count();
+  const active = await db.users.countActiveSessions();
+  return { count, active };
+}`,
+                  },
+                  {
+                    id: "widget",
+                    label: "src/dashboard/stats-widget.tsx",
+                    language: "tsx",
+                    code: `"use client";
+
+import { useState, use, Suspense } from "react";
+import { fetchDashboardStats } from "./server-functions";
+
+function StatsContent({ promise }: { promise: Promise<{ count: number; active: number }> }) {
+  // Pure React 19 use() unrolls the Flight RPC promise within Suspense (no useEffect!)
+  const data = use(promise);
+
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      <div className="p-3 border rounded-lg bg-card">
+        <span className="text-xs text-muted-foreground block">Total Users</span>
+        <strong className="text-xl">{data.count}</strong>
+      </div>
+      <div className="p-3 border rounded-lg bg-card">
+        <span className="text-xs text-muted-foreground block">Active Sessions</span>
+        <strong className="text-xl text-emerald-600">{data.active}</strong>
+      </div>
+    </div>
+  );
+}
+
+export function DashboardStatsWidget() {
+  // Initiates Server Function RPC on initial mount without useEffect:
+  const [statsPromise] = useState(() => fetchDashboardStats());
+
+  return (
+    <div className="p-4 border rounded-xl space-y-3">
+      <h3 className="font-semibold text-sm">System Overview</h3>
+      <Suspense fallback={<p className="text-xs text-muted-foreground">Loading metrics over RPC...</p>}>
+        <StatsContent promise={statsPromise} />
+      </Suspense>
+    </div>
+  );
+}`,
+                  },
+                ]}
+              />
+
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
+                <p>• <strong>Modern React 19 Ergonomics:</strong> Unrolls promises synchronously with <code>use()</code> inside <code>&lt;Suspense&gt;</code>. Eliminates legacy <code>useEffect</code> lifecycle hooks, manual loading flags (<code>isLoading</code>, <code>error</code>), and fetch boilerplate.</p>
+                <p>• <strong>Network Round Trip:</strong> Supported and idiomatic for client widgets, but incurs a second client-side HTTP round trip after hydration. When you control the parent route, prefer <strong>Strategy 9 (RSC Promise)</strong> to initiate the promise on the server and eliminate the extra round trip.</p>
+              </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* STRATEGY 13 */}
+            {/* ============================================================ */}
+            <section id="strategy-13" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-500/10 text-slate-700 dark:text-slate-300 font-mono font-bold text-sm">
+                    13
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    Client Server Functions (User Actions &amp; Mutations)
+                  </h2>
+                </div>
+                <Badge variant="outline" className="text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 font-mono text-xs">
+                  Type-Safe RPC Mutations
+                </Badge>
+              </div>
+
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="N/A (Post-Load)" variant="slate" />
+                <MetricCard label="Stream Ready" value="N/A (User Event)" variant="slate" />
+                <MetricCard label="Server/DB Load" value="On-Demand" variant="slate" />
+                <MetricCard label="Waterfall" value="None" variant="emerald" />
+                <MetricCard label="Data Freshness" value="100% Live" variant="emerald" className="col-span-2 sm:col-span-1" />
+              </div>
+
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> The official, idiomatic role for Server Functions. Invoked exclusively in response to
+                user-triggered events (button clicks, form submissions, drag-and-drop actions). Server Functions execute securely on the server,
+                mutate state, and trigger on-demand cache revalidation via <code>revalidateTag</code>.
+              </p>
+
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "server-fn",
+                    label: "src/cart/server-functions.ts",
+                    language: "tsx",
+                    code: `"use server";
+
+import db from "@/lib/db";
+import { revalidateTag } from "dinou/server";
+
+export async function addToCart(productId: string, quantity: number) {
+  // Direct server mutation with ORM
+  await db.cart.addItem({ productId, quantity });
+
+  // On-demand invalidation: purges cache tag across CDNs and Micro-ISR slots
+  await revalidateTag("cart");
+
+  return { success: true };
+}`,
+                  },
+                  {
+                    id: "button",
+                    label: "src/cart/add-to-cart-button.tsx",
+                    language: "tsx",
+                    code: `"use client";
+
+import { useTransition } from "react";
+import { addToCart } from "./server-functions";
+
+export function AddToCartButton({ productId }: { productId: string }) {
+  const [isPending, startTransition] = useTransition();
+
+  const handleClick = () => {
+    startTransition(async () => {
+      await addToCart(productId, 1);
+    });
+  };
+
+  return (
+    <button onClick={handleClick} disabled={isPending} className="btn-primary">
+      {isPending ? "Adding..." : "Add to Cart"}
+    </button>
+  );
+}`,
+                  },
+                ]}
+              />
+
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
+                <p>• <strong>Strict Rule:</strong> Only call Server Functions in mutative event contexts. Never invoke them during the render phase or inside components.</p>
+                <p>• <strong>Type Safety:</strong> Arguments and return types are inferred end-to-end between client and server without manual fetch boilerplate.</p>
+              </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* DECISION GUIDE */}
+            {/* ============================================================ */}
+            <section id="decision-guide" className="scroll-mt-20 pt-8 border-t">
+              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
+                Architectural Decision Guide
+              </h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                When deciding which strategy to apply to a new feature or page, follow this quick decision tree:
+              </p>
+
+              <div className="not-prose grid gap-4 sm:grid-cols-2 my-6 text-xs">
+                <Card className="border-emerald-500/30 bg-emerald-50/30 dark:bg-emerald-950/20 shadow-xs">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
+                      Is the content public or marketing?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-muted-foreground space-y-1">
+                    <p>➔ <strong>Strategy 1 (RSC SSG):</strong> 0ms TTFB, 0kb client JS, 100% CDN cached.</p>
+                    <p>➔ If parts change periodically: <strong>Strategy 5 (Static SSG / Asymmetric ISR)</strong>.</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-emerald-500/30 bg-emerald-50/30 dark:bg-emerald-950/20 shadow-xs">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
+                      High-traffic store or viral catalog?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-muted-foreground space-y-1">
+                    <p>➔ <strong>Strategy 8 (PPR + CacheSlot):</strong> Instant 0ms Edge layout + ~2ms cached hole. 99.9% database query offload.</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-amber-500/30 bg-amber-50/30 dark:bg-amber-950/20 shadow-xs">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-bold text-amber-700 dark:text-amber-400">
+                      Interactive tool, canvas, or complex editor?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-muted-foreground space-y-1">
+                    <p>➔ <strong>Strategy 10 / 11 (Client-First):</strong> Server gets data via <code>getProps</code>, page is 100% interactive client component.</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-amber-500/30 bg-amber-50/30 dark:bg-amber-950/20 shadow-xs">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-bold text-amber-700 dark:text-amber-400">
+                      Live search filter or client widget?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-muted-foreground space-y-1">
+                    <p>➔ <strong>Strategy 9 (React 19 use()):</strong> Start query on server, stream raw promise to client component without waterfalls.</p>
+                  </CardContent>
+                </Card>
               </div>
             </section>
           </div>
         </div>
       </main>
 
-      {/* Sidebar TOC - Hidden on Mobile */}
+      {/* Sidebar TOC - Visible on Desktop */}
       <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">
         <div className="sticky top-20">
           <TableOfContents items={tocItems} />

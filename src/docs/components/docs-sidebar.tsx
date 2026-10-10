@@ -48,7 +48,6 @@ import {
   ArrowLeft,
   ArrowRight,
   ShieldCheck,
-  Workflow,
 } from "lucide-react";
 
 const docsNavigation = [
@@ -119,11 +118,6 @@ const docsNavigation = [
         title: "Data Fetching",
         href: "/docs/data-fetching",
         icon: Database,
-      },
-      {
-        title: "Data Fetching (13 Strategies)",
-        href: "/docs/data-fetching-bis",
-        icon: Workflow,
       },
       {
         title: "Advanced Patterns",
