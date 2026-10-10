@@ -32,7 +32,7 @@ import { CodeBlock } from "@/docs/components/code-block";
 import { Link } from "dinou";
 
 const tocItems = [
-  { id: "overview", title: "Bundlers in Dinou v7", level: 2 },
+  { id: "overview", title: "Bundlers in Dinou", level: 2 },
   { id: "the-three-bundlers", title: "esbuild, Rollup, & Webpack Compared", level: 2 },
   { id: "esbuild", title: "1. esbuild (Default & Lightning Fast)", level: 3 },
   { id: "rollup", title: "2. Rollup (Optimized Tree-Shaking)", level: 3 },
@@ -56,13 +56,10 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Bundlers &amp; Build Tooling
               </h1>
-              <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
-                Dinou v7 CLI
-              </span>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
               Dinou features first-class multi-bundler architecture supporting <strong>esbuild</strong>, <strong>Rollup</strong>, and <strong>Webpack</strong> across Node.js, Cloudflare, Deno, Bun, and standalone compiled binaries.
@@ -72,9 +69,9 @@ export default function Page() {
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             {/* Overview */}
             <section id="overview">
-              <h2>Bundlers in Dinou v7</h2>
+              <h2>Bundlers in Dinou</h2>
               <p>
-                Unlike rigid meta-frameworks that lock you into a single proprietary bundler, Dinou is architected with a pluggable, agnostic build core. Dinou v7 provides native, pre-configured pipelines for three premier JavaScript bundlers:
+                Unlike rigid meta-frameworks that lock you into a single proprietary bundler, Dinou is architected with a pluggable, agnostic build core. Dinou provides native, pre-configured pipelines for three premier JavaScript bundlers:
               </p>
               <ul>
                 <li>
@@ -113,9 +110,9 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10">
+                <Card className="border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/10">
                   <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm">
+                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
                       <Boxes className="h-4 w-4" />
                       <span>Webpack</span>
                     </div>
@@ -177,13 +174,13 @@ export default function Page() {
 
               <div className="border rounded-xl p-5 bg-card not-prose my-4 space-y-4">
                 <div className="flex items-center gap-2 font-semibold text-sm">
-                  <Cpu className="h-4 w-4 text-purple-500" />
+                  <Cpu className="h-4 w-4 text-amber-500" />
                   <span>Dual Pipeline Flow</span>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2 text-xs">
                   <div className="p-3 rounded-lg border bg-muted/30 space-y-1.5">
                     <div className="font-semibold text-foreground flex items-center gap-1.5">
-                      <Server className="h-3.5 w-3.5 text-blue-500" />
+                      <Server className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
                       <span>1. Server Pipeline (RSC &amp; Node)</span>
                     </div>
                     <p className="text-muted-foreground leading-relaxed">
@@ -246,7 +243,7 @@ export default function Page() {
                       </tr>
                       <tr>
                         <td className="p-3.5 font-mono text-foreground font-semibold">dinou dev:webpack</td>
-                        <td className="p-3.5 font-semibold text-blue-600 dark:text-blue-400">Webpack</td>
+                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">Webpack</td>
                         <td className="p-3.5 text-muted-foreground">Webpack dev server with React Compiler active in dev.</td>
                       </tr>
                     </tbody>
@@ -288,7 +285,7 @@ export default function Page() {
                       <tr>
                         <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:webpack</td>
                         <td className="p-3.5">Compile for Node.js production server</td>
-                        <td className="p-3.5 font-semibold text-blue-600 dark:text-blue-400">Webpack</td>
+                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">Webpack</td>
                       </tr>
                       <tr>
                         <td className="p-3.5 font-mono text-foreground font-semibold">dinou start:node</td>
@@ -308,7 +305,7 @@ export default function Page() {
                       <tr>
                         <td className="p-3.5 font-mono text-foreground font-semibold">dinou start:node:webpack</td>
                         <td className="p-3.5">Run built Node.js server (Webpack bundle)</td>
-                        <td className="p-3.5 font-semibold text-blue-600 dark:text-blue-400">Webpack</td>
+                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">Webpack</td>
                       </tr>
                     </tbody>
                   </table>
@@ -348,7 +345,7 @@ export default function Page() {
                       </tr>
                       <tr>
                         <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:cloudflare:webpack</td>
-                        <td className="p-3.5 font-semibold text-blue-600 dark:text-blue-400">Webpack</td>
+                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">Webpack</td>
                         <td className="p-3.5 text-muted-foreground">.dinou/cloudflare/</td>
                       </tr>
                     </tbody>
@@ -461,7 +458,7 @@ export default function Page() {
               <div id="static-export-scripts" className="mt-8 space-y-3">
                 <h3 className="text-lg font-bold">Static HTML Export (dinou export-static)</h3>
                 <p>
-                  Crawls and generates a 100% static HTML/CSS/JS export in <code>.dinou/dist3</code> ready to host on GitHub Pages, S3, Netlify, or Apache/Nginx:
+                  Crawls and generates a 100% static HTML/CSS/JS export in <code>out/</code> ready to host on Surge.sh, GitHub Pages, Cloudflare Pages, AWS S3, Netlify, or Apache/Nginx:
                 </p>
                 <CodeBlock
                   language="bash"
@@ -482,30 +479,115 @@ dinou export-static:webpack`}
             <section id="package-json-setup" className="mt-12">
               <h2>Recommended package.json Setup</h2>
               <p>
-                In a typical project, map the high-level npm scripts to Dinou&apos;s CLI commands:
+                Copy and paste the complete <code>&quot;scripts&quot;</code> block directly into your project&apos;s <code>package.json</code>:
               </p>
               <CodeBlock
                 language="json"
                 containerClassName="w-full overflow-hidden rounded-lg"
+                className="max-h-80 !overflow-y-auto"
+                customStyle={{ maxHeight: "360px", overflowY: "auto" }}
               >
-{`{
-  "name": "my-dinou-app",
-  "version": "1.0.0",
-  "scripts": {
-    "dev": "dinou dev",
-    "build": "dinou build",
-    "start": "dinou start",
-    "dev:esbuild": "dinou dev:esbuild",
-    "dev:rollup": "dinou dev:rollup",
-    "dev:webpack": "dinou dev:webpack",
-    "build:node": "dinou build:node",
-    "start:node": "dinou start:node",
-    "build:cloudflare": "dinou build:cloudflare",
-    "build:deno:compile": "dinou build:deno:compile",
-    "build:bun:compile": "dinou build:bun:compile",
-    "export-static": "dinou export-static",
-    "eject": "dinou eject"
-  }
+{`"scripts": {
+  "dev": "dinou dev",
+  "build": "dinou build",
+  "start": "dinou start",
+  "dev:esbuild": "dinou dev:esbuild",
+  "dev:rollup": "dinou dev:rollup",
+  "dev:webpack": "dinou dev:webpack",
+  "build:node": "dinou build:node",
+  "build:node:esbuild": "dinou build:node:esbuild",
+  "build:node:rollup": "dinou build:node:rollup",
+  "build:node:webpack": "dinou build:node:webpack",
+  "start:node": "dinou start:node",
+  "start:node:esbuild": "dinou start:node:esbuild",
+  "start:node:rollup": "dinou start:node:rollup",
+  "start:node:webpack": "dinou start:node:webpack",
+  "build:cloudflare": "dinou build:cloudflare",
+  "build:cloudflare:esbuild": "dinou build:cloudflare:esbuild",
+  "build:cloudflare:rollup": "dinou build:cloudflare:rollup",
+  "build:cloudflare:webpack": "dinou build:cloudflare:webpack",
+  "build:deno": "dinou build:deno",
+  "build:deno:esbuild": "dinou build:deno:esbuild",
+  "build:deno:rollup": "dinou build:deno:rollup",
+  "build:deno:webpack": "dinou build:deno:webpack",
+  "build:deno:compile": "dinou build:deno:compile",
+  "build:deno:compile:esbuild": "dinou build:deno:compile:esbuild",
+  "build:deno:compile:rollup": "dinou build:deno:compile:rollup",
+  "build:deno:compile:webpack": "dinou build:deno:compile:webpack",
+  "build:deno:compile:linux": "dinou build:deno:compile:linux",
+  "build:deno:compile:linux:esbuild": "dinou build:deno:compile:linux:esbuild",
+  "build:deno:compile:linux:rollup": "dinou build:deno:compile:linux:rollup",
+  "build:deno:compile:linux:webpack": "dinou build:deno:compile:linux:webpack",
+  "build:deno:compile:linux_arm": "dinou build:deno:compile:linux_arm",
+  "build:deno:compile:linux_arm:esbuild": "dinou build:deno:compile:linux_arm:esbuild",
+  "build:deno:compile:linux_arm:rollup": "dinou build:deno:compile:linux_arm:rollup",
+  "build:deno:compile:linux_arm:webpack": "dinou build:deno:compile:linux_arm:webpack",
+  "build:deno:compile:mac": "dinou build:deno:compile:mac",
+  "build:deno:compile:mac:esbuild": "dinou build:deno:compile:mac:esbuild",
+  "build:deno:compile:mac:rollup": "dinou build:deno:compile:mac:rollup",
+  "build:deno:compile:mac:webpack": "dinou build:deno:compile:mac:webpack",
+  "build:deno:compile:win": "dinou build:deno:compile:win",
+  "build:deno:compile:win:esbuild": "dinou build:deno:compile:win:esbuild",
+  "build:deno:compile:win:rollup": "dinou build:deno:compile:win:rollup",
+  "build:deno:compile:win:webpack": "dinou build:deno:compile:win:webpack",
+  "start:deno": "dinou start:deno",
+  "build:bun": "dinou build:bun",
+  "build:bun:esbuild": "dinou build:bun:esbuild",
+  "build:bun:rollup": "dinou build:bun:rollup",
+  "build:bun:webpack": "dinou build:bun:webpack",
+  "build:bun:compile": "dinou build:bun:compile",
+  "build:bun:compile:esbuild": "dinou build:bun:compile:esbuild",
+  "build:bun:compile:rollup": "dinou build:bun:compile:rollup",
+  "build:bun:compile:webpack": "dinou build:bun:compile:webpack",
+  "build:bun:compile:linux": "dinou build:bun:compile:linux",
+  "build:bun:compile:linux:esbuild": "dinou build:bun:compile:linux:esbuild",
+  "build:bun:compile:linux:rollup": "dinou build:bun:compile:linux:rollup",
+  "build:bun:compile:linux:webpack": "dinou build:bun:compile:linux:webpack",
+  "build:bun:compile:linux_arm": "dinou build:bun:compile:linux_arm",
+  "build:bun:compile:linux_arm:esbuild": "dinou build:bun:compile:linux_arm:esbuild",
+  "build:bun:compile:linux_arm:rollup": "dinou build:bun:compile:linux_arm:rollup",
+  "build:bun:compile:linux_arm:webpack": "dinou build:bun:compile:linux_arm:webpack",
+  "build:bun:compile:mac": "dinou build:bun:compile:mac",
+  "build:bun:compile:mac:esbuild": "dinou build:bun:compile:mac:esbuild",
+  "build:bun:compile:mac:rollup": "dinou build:bun:compile:mac:rollup",
+  "build:bun:compile:mac:webpack": "dinou build:bun:compile:mac:webpack",
+  "build:bun:compile:win": "dinou build:bun:compile:win",
+  "build:bun:compile:win:esbuild": "dinou build:bun:compile:win:esbuild",
+  "build:bun:compile:win:rollup": "dinou build:bun:compile:win:rollup",
+  "build:bun:compile:win:webpack": "dinou build:bun:compile:win:webpack",
+  "build:bun:pure": "dinou build:bun:pure",
+  "build:bun:pure:esbuild": "dinou build:bun:pure:esbuild",
+  "build:bun:pure:rollup": "dinou build:bun:pure:rollup",
+  "build:bun:pure:webpack": "dinou build:bun:pure:webpack",
+  "build:bun:pure:compile": "dinou build:bun:pure:compile",
+  "build:bun:pure:compile:esbuild": "dinou build:bun:pure:compile:esbuild",
+  "build:bun:pure:compile:rollup": "dinou build:bun:pure:compile:rollup",
+  "build:bun:pure:compile:webpack": "dinou build:bun:pure:compile:webpack",
+  "build:bun:pure:compile:linux": "dinou build:bun:pure:compile:linux",
+  "build:bun:pure:compile:linux:esbuild": "dinou build:bun:pure:compile:linux:esbuild",
+  "build:bun:pure:compile:linux:rollup": "dinou build:bun:pure:compile:linux:rollup",
+  "build:bun:pure:compile:linux:webpack": "dinou build:bun:pure:compile:linux:webpack",
+  "build:bun:pure:compile:linux_arm": "dinou build:bun:pure:compile:linux_arm",
+  "build:bun:pure:compile:linux_arm:esbuild": "dinou build:bun:pure:compile:linux_arm:esbuild",
+  "build:bun:pure:compile:linux_arm:rollup": "dinou build:bun:pure:compile:linux_arm:rollup",
+  "build:bun:pure:compile:linux_arm:webpack": "dinou build:bun:pure:compile:linux_arm:webpack",
+  "build:bun:pure:compile:mac": "dinou build:bun:pure:compile:mac",
+  "build:bun:pure:compile:mac:esbuild": "dinou build:bun:pure:compile:mac:esbuild",
+  "build:bun:pure:compile:mac:rollup": "dinou build:bun:pure:compile:mac:rollup",
+  "build:bun:pure:compile:mac:webpack": "dinou build:bun:pure:compile:mac:webpack",
+  "build:bun:pure:compile:win": "dinou build:bun:pure:compile:win",
+  "build:bun:pure:compile:win:esbuild": "dinou build:bun:pure:compile:win:esbuild",
+  "build:bun:pure:compile:win:rollup": "dinou build:bun:pure:compile:win:rollup",
+  "build:bun:pure:compile:win:webpack": "dinou build:bun:pure:compile:win:webpack",
+  "start:bun": "dinou start:bun",
+  "start:bun:esbuild": "dinou start:bun:esbuild",
+  "start:bun:rollup": "dinou start:bun:rollup",
+  "start:bun:webpack": "dinou start:bun:webpack",
+  "export-static": "dinou export-static",
+  "export-static:esbuild": "dinou export-static:esbuild",
+  "export-static:rollup": "dinou export-static:rollup",
+  "export-static:webpack": "dinou export-static:webpack",
+  "eject": "dinou eject"
 }`}
               </CodeBlock>
             </section>
@@ -537,7 +619,7 @@ dinou export-static:webpack`}
 
                 <div className="p-4 rounded-lg border bg-card space-y-2">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
-                    <Boxes className="h-4 w-4 text-blue-500" />
+                    <Boxes className="h-4 w-4 text-emerald-500" />
                     <span>Enterprise &amp; React Compiler &rarr; Webpack</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
