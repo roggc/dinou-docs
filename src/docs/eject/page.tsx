@@ -2,20 +2,8 @@
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/docs/components/ui/alert";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/docs/components/ui/card";
-import {
   Download,
   Hammer,
-  AlertTriangle,
   Sparkles,
   Terminal,
   FolderTree,
@@ -33,7 +21,6 @@ import {
   Cloud,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
-import { Link } from "dinou";
 
 const tocItems = [
   { id: "eject-dinou", title: "Ejecting Dinou: Framework Sovereignty", level: 2 },
@@ -41,7 +28,7 @@ const tocItems = [
   { id: "what-happens", title: "What Happens When You Eject?", level: 2 },
   { id: "directory-anatomy", title: "Anatomy of the Ejected dinou/ Directory", level: 2 },
   { id: "when-to-eject", title: "When to Consider Ejecting", level: 2 },
-  { id: "ai-era", title: "Ejection in the AI Era (Vibe-Coding)", level: 2 },
+  { id: "agentic-era", title: "Ejection in the Agentic Era", level: 2 },
   { id: "customization-examples", title: "Practical Customization Examples", level: 2 },
   { id: "custom-middleware", title: "1. Adding Custom Server Middleware", level: 3 },
   { id: "custom-bundler", title: "2. Extending the Bundler Pipeline", level: 3 },
@@ -64,7 +51,7 @@ export default function Page() {
               </span>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Gain complete ownership over your technology stack. Eject Dinou to unpack the entire dual-engine React 19 compiler, runtime adapters, and server pipelines directly into your repository.
+              Gain complete ownership over your technology stack. Eject Dinou to unpack the entire dual-engine React 19 compiler, runtime adapters, and server runtime logic directly into your repository.
             </p>
           </div>
 
@@ -75,34 +62,14 @@ export default function Page() {
               <p>
                 In most modern web frameworks, the server runtime, bundling logic, and React Server Component compiler are hidden behind opaque <code>node_modules</code> dependencies. If you encounter an edge-case bug, need a bespoke compilation transform, or want to deploy to an unsupported infrastructure, you are forced to wait for upstream releases or battle monkey-patching hacks.
               </p>
-              <p>
-                <strong>Dinou is designed with Framework Sovereignty as a fundamental principle</strong>:
-              </p>
-
-              <div className="grid gap-4 sm:grid-cols-2 not-prose my-6">
-                <Card className="border-red-500/20 bg-red-50/30 dark:bg-red-950/10">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-semibold text-sm">
-                      <AlertTriangle className="h-4 w-4" />
-                      <span>Legacy Eject (e.g. Create React App)</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
-                    Dumps thousands of lines of unmaintainable, monolithic configuration scripts into your project root. Breaks future upgrade paths and saddles your team with technical debt.
-                  </CardContent>
-                </Card>
-
-                <Card className="border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/10">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
-                      <CheckCircle2 className="h-4 w-4" />
-                      <span>Dinou v7 Eject</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground leading-relaxed">
-                    Extracts a clean, modular, and elegant architecture into a local <code>dinou/</code> directory. Clean ES modules, readable Web Standards code, and zero black-box magic.
-                  </CardContent>
-                </Card>
+              <div className="rounded-xl border p-4 bg-card not-prose space-y-2 my-6">
+                <div className="flex items-center gap-2 font-semibold text-sm text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>100% Configurable &amp; Hackable</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Ejecting extracts the entire framework into a <code>dinou/</code> folder at the root of your project, making your tech stack 100% configurable and hackable—while continuing to work seamlessly out of the box.
+                </p>
               </div>
             </section>
 
@@ -148,7 +115,7 @@ npm run eject`}
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="h-7 w-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                  <div className="h-7 w-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                     2
                   </div>
                   <div>
@@ -160,7 +127,7 @@ npm run eject`}
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="h-7 w-7 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                  <div className="h-7 w-7 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                     3
                   </div>
                   <div>
@@ -229,13 +196,10 @@ npm run eject`}
     └── build.mjs                   # Production bundle compiler`}
               </CodeBlock>
 
-              <div className="mt-4 p-4 rounded-xl border bg-muted/30 not-prose flex items-start gap-3">
-                <FolderTree className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <div className="mt-4 p-4 rounded-xl border bg-card not-prose flex items-start gap-3">
+                <FolderTree className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
                 <div className="text-xs text-muted-foreground leading-relaxed">
-                  Looking for a detailed breakdown of every single internal module? Explore our comprehensive{" "}
-                  <Link href="/docs/internals" className="font-semibold text-primary underline hover:text-primary/80">
-                    Dinou Internals &amp; Architecture Reference
-                  </Link>.
+                  <strong className="text-foreground">Eject and explore with your AI agent:</strong> Every module inside the <code>dinou/</code> directory is clean, standard JavaScript written with native Web Standards. Have your AI coding assistant (like Gemini Antigravity, Cursor, or Claude) explore the architecture, explain execution flows, or implement custom runtime features directly in your repo.
                 </div>
               </div>
             </section>
@@ -250,77 +214,77 @@ npm run eject`}
               <div className="grid gap-4 sm:grid-cols-2 not-prose my-6">
                 <div className="p-4 rounded-lg border bg-card space-y-1.5">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
-                    <Layers className="h-4 w-4 text-blue-500" />
-                    <span>Custom Asset &amp; Build Tooling</span>
+                    <Layers className="h-4 w-4 text-emerald-500" />
+                    <span>Custom Compilers &amp; Assets</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Integrate proprietary Babel/SWC transforms, custom WebAssembly loaders, CSS-in-JS compilers, or specialized SVG optimization pipelines directly into <code>dinou/esbuild/</code>, <code>dinou/rollup/</code>, or <code>dinou/webpack/</code>.
+                    Add support for custom file types, specialized loaders (SVGs, WebAssembly, 3D models), or custom bundler plugins directly into <code>dinou/esbuild/</code>, <code>dinou/rollup/</code>, or <code>dinou/webpack/</code>.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-lg border bg-card space-y-1.5">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
-                    <Server className="h-4 w-4 text-purple-500" />
-                    <span>Custom Middleware &amp; Edge Protocols</span>
+                    <Server className="h-4 w-4 text-amber-500" />
+                    <span>Server Logic Control</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Inject enterprise authorization reverse-proxies, custom WebSockets, streaming analytics, or specialized CORS/rate-limiting headers directly into <code>dinou/core/handler.js</code>.
+                    Inspect and customize how HTTP requests are handled, add low-level metrics, or modify streaming responses directly in <code>dinou/core/handler.js</code>.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-lg border bg-card space-y-1.5">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
                     <Cloud className="h-4 w-4 text-emerald-500" />
-                    <span>Proprietary / Embedded Runtimes</span>
+                    <span>Run on Any Platform</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Deploy Dinou into unique target environments like Electron desktop apps, Tauri webviews, AWS Lambda custom microVMs, or private cloud environments by writing a custom adapter in <code>dinou/adapters/</code>.
+                    Deploy Dinou anywhere—from Electron and Tauri desktop apps to custom AWS Lambda microVMs—by creating a custom runtime adapter in <code>dinou/adapters/</code>.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-lg border bg-card space-y-1.5">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
                     <Hammer className="h-4 w-4 text-amber-500" />
-                    <span>Deep Debugging &amp; Performance Tuning</span>
+                    <span>Transparent Error Diagnosis</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Place breakpoints inside the React 19 RSC stream serializer, inspect raw wire-format payloads, or fine-tune HTTP/2 and chunked transfer encoding parameters with zero indirection.
+                    Stack traces point directly to readable source files in your repo instead of minified <code>node_modules</code>. You and your AI agent can inspect the exact code that failed and fix it immediately.
                   </p>
                 </div>
               </div>
             </section>
 
-            {/* AI Era & Vibe Coding */}
-            <section id="ai-era" className="mt-12">
-              <h2>Ejection in the AI Era (Vibe-Coding)</h2>
+            {/* Ejection in the Agentic Era */}
+            <section id="agentic-era" className="mt-12">
+              <h2>Ejection in the Agentic Era</h2>
               <p>
-                In the era of modern AI coding assistants (such as <strong>Cursor</strong>, <strong>Gemini Antigravity</strong>, <strong>Claude Code</strong>, and <strong>Copilot</strong>), framework ejection transitions from a rare edge-case to a <strong>superpower</strong>.
+                In the era of autonomous coding agents (such as <strong>Gemini Antigravity</strong>, <strong>Claude Code</strong>, <strong>Cursor</strong>, and <strong>Copilot</strong>), framework ejection transitions from a legacy last resort to a <strong>core architectural advantage</strong>.
               </p>
 
-              <div className="border border-purple-500/20 bg-purple-50/30 dark:bg-purple-950/10 rounded-xl p-5 bg-card not-prose space-y-4 my-6">
-                <div className="flex items-center gap-2 font-semibold text-sm text-purple-600 dark:text-purple-400">
+              <div className="border border-emerald-500/20 bg-emerald-500/5 rounded-xl p-5 bg-card not-prose space-y-4 my-6">
+                <div className="flex items-center gap-2 font-semibold text-sm text-emerald-600 dark:text-emerald-400">
                   <Sparkles className="h-5 w-5" />
-                  <span>Why Ejected Dinou Amplifies AI-Assisted Development</span>
+                  <span>Unlocking End-to-End Agent Autonomy</span>
                 </div>
                 <div className="text-xs leading-relaxed text-muted-foreground space-y-3">
                   <div className="flex items-start gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-purple-500 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-foreground">Full Context Window Visibility:</strong> Traditional frameworks are compiled blobs hidden in <code>node_modules/</code>. AI agents cannot inspect how they route requests or serialize components, leading to hallucinations. When ejected, the AI reads the clean source code directly and understands 100% of your architecture.
+                      <strong className="text-foreground">Breaking the node_modules Boundary:</strong> Autonomous agents only have read/write access within your repository boundaries. In closed frameworks, agents hit a hard wall whenever a requirement involves server internals, bundling pipelines, or runtime flags. Ejecting places your entire stack inside the agent&apos;s actionable workspace.
                     </div>
                   </div>
 
                   <div className="flex items-start gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-purple-500 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-foreground">Autonomous Bug Fixing &amp; Feature Creation:</strong> Want to support a new experimental React 19 hook, custom cache invalidation strategy, or an emerging edge runtime? Prompt your AI co-pilot, and it will implement the exact modifications directly in your <code>dinou/</code> folder.
+                      <strong className="text-foreground">Grounded Reasoning, Zero Hallucinations:</strong> Instead of guessing how a proprietary, black-box framework routes requests or serializes state under the hood, your agent reads clean, readable Web Standards source code. Transparent files eliminate LLM hallucinations and enable surgical, confident refactoring.
                     </div>
                   </div>
 
                   <div className="flex items-start gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-purple-500 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-foreground">Fluid Vibe-Coding:</strong> The artificial boundary between &quot;framework code&quot; and &quot;user application code&quot; disappears. You and your AI companion can sculpt your web platform from UI components down to the HTTP socket level with total freedom.
+                      <strong className="text-foreground">Autonomous End-to-End Problem Solving:</strong> Your AI partner can evolve the framework alongside your application—adapting streaming pipelines, crafting custom caching layers, or writing new runtime adapters on the fly without waiting for upstream releases.
                     </div>
                   </div>
                 </div>
@@ -336,32 +300,32 @@ npm run eject`}
 
               {/* Example 1 */}
               <section id="custom-middleware" className="my-6">
-                <h3>1. Adding Custom Server Middleware</h3>
+                <h3>1. Adding Custom Server Middleware &amp; Guards</h3>
                 <p>
-                  To inject a global response header (such as a <code>Server-Timing</code> metric) into every incoming request, simply open <code>dinou/core/handler.js</code> and update <code>handleRequest</code>:
+                  To intercept incoming traffic, inject custom healthchecks, or authenticate protected routes before waking up React, simply edit <code>handleRequest</code> in <code>dinou/core/handler.js</code>:
                 </p>
                 <CodeBlock
                   language="javascript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// dinou/core/handler.js
-export async function handleRequest(request) {
-  const startTime = performance.now();
+export async function handleRequest(request, platformContext = {}) {
+  const url = new URL(request.url);
 
-  // 1. Execute standard Dinou request processing
-  const response = await internalRequestHandler(request);
+  // 1. Instant zero-compute healthcheck without invoking React
+  if (url.pathname === "/healthz") {
+    return Response.json({ status: "ok", uptime: process.uptime() });
+  }
 
-  // 2. Clone or modify response headers
-  const duration = (performance.now() - startTime).toFixed(2);
-  const headers = new Headers(response.headers);
-  headers.set("Server-Timing", \`app;dur=\${duration}\`);
-  headers.set("X-Powered-By", "Dinou-Ejected");
+  // 2. Pre-flight authentication guard before React Server Components run
+  if (url.pathname.startsWith("/admin")) {
+    const token = request.headers.get("x-admin-token");
+    if (!token || token !== process.env.ADMIN_SECRET) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+  }
 
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
+  // ...continue standard Dinou routing, ISR caching, and RSC/SSR streaming
 }`}
                 </CodeBlock>
               </section>
@@ -370,27 +334,26 @@ export async function handleRequest(request) {
               <section id="custom-bundler" className="my-6">
                 <h3>2. Extending the Bundler Pipeline</h3>
                 <p>
-                  To add a custom esbuild plugin (for instance, an image inliner or environment replacer), edit <code>dinou/esbuild/build.mjs</code>:
+                  To add a custom esbuild plugin (such as a specialized SVG compiler or asset loader), edit <code>dinou/esbuild/build.mjs</code>:
                 </p>
                 <CodeBlock
                   language="javascript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// dinou/esbuild/build.mjs
-import esbuild from "esbuild";
 import { myCustomPlugin } from "./plugins/my-plugin.mjs";
 
-export async function buildClient(options) {
-  return await esbuild.build({
-    entryPoints: ["./src/entry-client.tsx"],
-    bundle: true,
-    plugins: [
-      myCustomPlugin(), // <- Your custom plugin running in the build pipeline!
-      ...defaultDinouPlugins,
-    ],
-    // ...other esbuild configuration
-  });
-}`}
+// ...after collecting entryPoints:
+const buildConfig = getConfigEsbuildProd({
+  entryPoints,
+  manifest,
+  outdir,
+});
+
+// Inject your custom plugin into the production build pipeline:
+buildConfig.plugins.push(myCustomPlugin());
+
+await esbuild.build(buildConfig);`}
                 </CodeBlock>
               </section>
             </section>
@@ -415,10 +378,6 @@ export async function buildClient(options) {
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                     <span><strong>Validate Across Bundlers:</strong> If your project uses multiple bundlers, test that your modifications work cleanly in your target bundler (e.g. <code>npm run build:node:esbuild</code>).</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span><strong>Explore the Internals Guide:</strong> Use the <Link href="/docs/internals" className="text-primary underline font-medium">Internals Reference</Link> whenever you want to understand the exact lifecycle of RSC, SSR, and dynamic parameters.</span>
                   </li>
                 </ul>
               </div>
