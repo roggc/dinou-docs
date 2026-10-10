@@ -104,15 +104,13 @@ function MetricCard({
 }: {
   label: string;
   value: string;
-  variant?: "emerald" | "rose" | "amber" | "blue" | "slate" | "indigo";
+  variant?: "emerald" | "rose" | "amber" | "slate";
   className?: string;
 }) {
   const colorMap = {
     emerald: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/30",
     rose: "border-rose-500/30 text-rose-700 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/30",
     amber: "border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/30",
-    blue: "border-blue-500/30 text-blue-700 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/30",
-    indigo: "border-indigo-500/30 text-indigo-700 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30",
     slate: "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/40",
   };
 
@@ -138,7 +136,7 @@ export default function DataFetchingBisPage() {
             <div className="flex items-center gap-2 flex-wrap">
               <Badge
                 variant="secondary"
-                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+                className="font-mono text-xs text-foreground bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
               >
                 13 Execution Strategies
               </Badge>
@@ -147,7 +145,7 @@ export default function DataFetchingBisPage() {
               </Badge>
               <Badge
                 variant="outline"
-                className="font-mono text-xs text-purple-600 dark:text-purple-400 border-purple-500/30"
+                className="font-mono text-xs text-muted-foreground"
               >
                 Strategy-by-Strategy
               </Badge>
@@ -174,39 +172,152 @@ export default function DataFetchingBisPage() {
               </p>
 
               {/* Quick Jump Grid */}
-              <div className="not-prose my-6 rounded-xl border border-slate-200 dark:border-slate-800 p-5 bg-card shadow-sm">
-                <div className="flex items-center gap-2 font-bold text-sm text-foreground mb-3">
-                  <Workflow className="h-4 w-4 text-blue-500" />
-                  <span>Interactive Strategy Index</span>
+              <div className="not-prose my-6 rounded-xl border border-slate-200 dark:border-slate-800/80 p-5 bg-card shadow-sm">
+                <div className="flex items-center justify-between flex-wrap gap-2 mb-3.5 pb-2 border-b border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-2 font-bold text-sm text-foreground">
+                    <Workflow className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>Interactive Strategy Index</span>
+                  </div>
+                  <span className="text-[11px] font-mono text-muted-foreground">
+                    13 Architecture Patterns
+                  </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
                   {[
-                    { id: "strategy-1", num: 1, name: "RSC Direct await (SSG)", badge: "0ms TTFB", color: "text-emerald-600 dark:text-emerald-400" },
-                    { id: "strategy-2", num: 2, name: "RSC Direct await (Dynamic)", badge: "Blocked TTFB", color: "text-rose-600 dark:text-rose-400" },
-                    { id: "strategy-3", num: 3, name: "RSC with <Suspense> (SSG)", badge: "0ms Static", color: "text-emerald-600 dark:text-emerald-400" },
-                    { id: "strategy-4", num: 4, name: "RSC with <Suspense> (Dynamic)", badge: "Streaming", color: "text-amber-600 dark:text-amber-400" },
-                    { id: "strategy-5", num: 5, name: "RSC + <DinouCacheSlot> (Static SSG)", badge: "Static SSG", color: "text-emerald-600 dark:text-emerald-400" },
-                    { id: "strategy-6", num: 6, name: "RSC + <DinouCacheSlot> (Dynamic)", badge: "2ms Hit", color: "text-emerald-600 dark:text-emerald-400" },
-                    { id: "strategy-7", num: 7, name: "RSC with <Suspense> (PPR)", badge: "0ms Edge", color: "text-blue-600 dark:text-blue-400" },
-                    { id: "strategy-8", num: 8, name: "PPR + <DinouCacheSlot> (Synergy)", badge: "Peak Perf", color: "text-indigo-600 dark:text-indigo-400 font-bold" },
-                    { id: "strategy-9", num: 9, name: "RSC Promise ➔ Client use()", badge: "React 19", color: "text-purple-600 dark:text-purple-400" },
-                    { id: "strategy-10", num: 10, name: "Client-First getProps (SSG)", badge: "0ms Client", color: "text-emerald-600 dark:text-emerald-400" },
-                    { id: "strategy-11", num: 11, name: "Client-First getProps (Dynamic)", badge: "SSR Client", color: "text-rose-600 dark:text-rose-400" },
-                    { id: "strategy-12", num: 12, name: "Client Calling Server Function (Mount)", badge: "Mount RPC", color: "text-amber-600 dark:text-amber-400" },
-                    { id: "strategy-13", num: 13, name: "Client Server Functions (User)", badge: "RPC Actions", color: "text-slate-600 dark:text-slate-400" },
+                    {
+                      id: "strategy-1",
+                      num: 1,
+                      name: "RSC Direct await (SSG)",
+                      badge: "0ms TTFB",
+                      numBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30",
+                      hoverClass: "hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20",
+                    },
+                    {
+                      id: "strategy-2",
+                      num: 2,
+                      name: "RSC Direct await (Dynamic)",
+                      badge: "Blocked TTFB",
+                      numBg: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+                      badgeClass: "border-rose-500/30 text-rose-700 dark:text-rose-400 bg-rose-50/60 dark:bg-rose-950/30",
+                      hoverClass: "hover:border-rose-500/40 hover:bg-rose-50/30 dark:hover:bg-rose-950/20",
+                    },
+                    {
+                      id: "strategy-3",
+                      num: 3,
+                      name: "RSC with <Suspense> (SSG)",
+                      badge: "0ms Static",
+                      numBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30",
+                      hoverClass: "hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20",
+                    },
+                    {
+                      id: "strategy-4",
+                      num: 4,
+                      name: "RSC with <Suspense> (Dynamic)",
+                      badge: "Streaming",
+                      numBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                      badgeClass: "border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-950/30",
+                      hoverClass: "hover:border-amber-500/40 hover:bg-amber-50/30 dark:hover:bg-amber-950/20",
+                    },
+                    {
+                      id: "strategy-5",
+                      num: 5,
+                      name: "RSC + <DinouCacheSlot> (Static)",
+                      badge: "Micro-ISR",
+                      numBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30",
+                      hoverClass: "hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20",
+                    },
+                    {
+                      id: "strategy-6",
+                      num: 6,
+                      name: "RSC + <DinouCacheSlot> (Dynamic)",
+                      badge: "2ms Hit",
+                      numBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30",
+                      hoverClass: "hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20",
+                    },
+                    {
+                      id: "strategy-7",
+                      num: 7,
+                      name: "RSC with <Suspense> (PPR)",
+                      badge: "0ms Edge",
+                      numBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30",
+                      hoverClass: "hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20",
+                    },
+                    {
+                      id: "strategy-8",
+                      num: 8,
+                      name: "PPR + <DinouCacheSlot> (Synergy)",
+                      badge: "Peak Perf",
+                      numBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30 font-semibold",
+                      hoverClass: "hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20",
+                    },
+                    {
+                      id: "strategy-9",
+                      num: 9,
+                      name: "RSC Promise ➔ Client use()",
+                      badge: "React 19",
+                      numBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                      badgeClass: "border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-950/30",
+                      hoverClass: "hover:border-amber-500/40 hover:bg-amber-50/30 dark:hover:bg-amber-950/20",
+                    },
+                    {
+                      id: "strategy-10",
+                      num: 10,
+                      name: "Client-First getProps (SSG)",
+                      badge: "0ms Client",
+                      numBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      badgeClass: "border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/30",
+                      hoverClass: "hover:border-emerald-500/40 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20",
+                    },
+                    {
+                      id: "strategy-11",
+                      num: 11,
+                      name: "Client-First getProps (Dynamic)",
+                      badge: "SSR Client",
+                      numBg: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+                      badgeClass: "border-rose-500/30 text-rose-700 dark:text-rose-400 bg-rose-50/60 dark:bg-rose-950/30",
+                      hoverClass: "hover:border-rose-500/40 hover:bg-rose-50/30 dark:hover:bg-rose-950/20",
+                    },
+                    {
+                      id: "strategy-12",
+                      num: 12,
+                      name: "Client Calling Server Function",
+                      badge: "Mount RPC",
+                      numBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                      badgeClass: "border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-950/30",
+                      hoverClass: "hover:border-amber-500/40 hover:bg-amber-50/30 dark:hover:bg-amber-950/20",
+                    },
+                    {
+                      id: "strategy-13",
+                      num: 13,
+                      name: "Client Server Functions (User)",
+                      badge: "RPC Actions",
+                      numBg: "bg-slate-500/10 text-slate-700 dark:text-slate-300",
+                      badgeClass: "border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 bg-slate-100/70 dark:bg-slate-800/40",
+                      hoverClass: "hover:border-slate-400 dark:hover:border-slate-600 hover:bg-slate-100/30 dark:hover:bg-slate-800/20",
+                    },
                   ].map((s) => (
                     <a
                       key={s.id}
                       href={`#${s.id}`}
-                      className="flex items-center justify-between p-2 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40 hover:bg-blue-50/60 dark:hover:bg-blue-950/30 transition-colors"
+                      className={`group flex items-center justify-between gap-2 p-2 rounded-lg border border-slate-200/80 dark:border-slate-800/80 bg-card ${s.hoverClass} hover:shadow-xs transition-all duration-150`}
                     >
-                      <span className="font-medium text-slate-800 dark:text-slate-200">
-                        <strong className="font-mono text-muted-foreground mr-1.5">{s.num}.</strong>
-                        {s.name}
-                      </span>
-                      <span className={`font-mono text-[10px] ${s.color}`}>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-mono text-[10px] font-bold ${s.numBg}`}>
+                          {s.num}
+                        </span>
+                        <span className="font-medium text-slate-800 dark:text-slate-200 group-hover:text-foreground text-[11px] truncate">
+                          {s.name}
+                        </span>
+                      </div>
+                      <Badge variant="outline" className={`font-mono text-[9px] shrink-0 py-0 px-1.5 leading-4 rounded ${s.badgeClass}`}>
                         {s.badge}
-                      </span>
+                      </Badge>
                     </a>
                   ))}
                 </div>
@@ -280,9 +391,9 @@ export default async function BlogIndexPage() {
               </div>
 
               {/* Architectural Equivalence Alert */}
-              <Alert className="not-prose my-4 border-blue-500/20 bg-blue-50/40 dark:bg-blue-950/20">
-                <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <AlertTitle className="text-blue-700 dark:text-blue-300 font-bold text-xs uppercase tracking-wider">
+              <Alert className="not-prose my-4 border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40">
+                <Info className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <AlertTitle className="text-foreground font-bold text-xs uppercase tracking-wider">
                   Server Component Equivalence: getProps vs Direct await
                 </AlertTitle>
                 <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1.5 space-y-1.5">
@@ -459,8 +570,8 @@ async function AsyncChangelog() {
 
               {/* Metrics Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
-                <MetricCard label="TTFB" value="Fast (Early Layout)" variant="amber" />
-                <MetricCard label="Stream Ready" value="Waits for DB (1-3s)" variant="rose" />
+                <MetricCard label="TTFB" value="Fast (Early Layout)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="Waits for DB (1-3s)" variant="amber" />
                 <MetricCard label="Server/DB Load" value="Heavy (100% queries)" variant="rose" />
                 <MetricCard label="Waterfall" value="None" variant="emerald" />
                 <MetricCard label="Data Freshness" value="100% Live" variant="emerald" className="col-span-2 sm:col-span-1" />
@@ -521,9 +632,9 @@ async function SlowHeavyMetrics() {
               </div>
 
               {/* Architectural Equivalence Alert: Server Component vs Server Function UI Return */}
-              <Alert className="not-prose my-4 border-blue-500/20 bg-blue-50/40 dark:bg-blue-950/20">
-                <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <AlertTitle className="text-blue-700 dark:text-blue-300 font-bold text-xs uppercase tracking-wider">
+              <Alert className="not-prose my-4 border-amber-500/30 bg-amber-50/30 dark:bg-amber-950/20">
+                <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <AlertTitle className="text-amber-700 dark:text-amber-300 font-bold text-xs uppercase tracking-wider">
                   Architectural Equivalence: Async Server Component vs Server Function UI Return
                 </AlertTitle>
                 <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1.5 space-y-2">
@@ -598,7 +709,7 @@ export default function AnalyticsPage() {
                     RSC + &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Static SSG / Asymmetric ISR)
                   </h2>
                 </div>
-                <Badge variant="outline" className="text-emerald-600 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
+                <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
                   Static (SSG) + Micro-ISR
                 </Badge>
               </div>
@@ -671,14 +782,14 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                     RSC + &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Dynamic Micro-ISR)
                   </h2>
                 </div>
-                <Badge variant="outline" className="text-emerald-600 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
+                <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
                   Server Cache Stream
                 </Badge>
               </div>
 
               {/* Metrics Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
-                <MetricCard label="TTFB" value="Fast (Early Layout)" variant="amber" />
+                <MetricCard label="TTFB" value="Fast (Early Layout)" variant="emerald" />
                 <MetricCard label="Stream Ready" value="~2ms (Cache Hit)" variant="emerald" />
                 <MetricCard label="Server/DB Load" value="Near-Zero (99% Offload)" variant="emerald" />
                 <MetricCard label="Waterfall" value="None" variant="emerald" />
@@ -743,14 +854,14 @@ export default function FeedPage() {
             <section id="strategy-7" className="scroll-mt-20 pt-6 border-t">
               <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-mono font-bold text-sm">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-bold text-sm">
                     7
                   </span>
                   <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
                     RSC with &lt;Suspense&gt; (PPR Hybrid)
                   </h2>
                 </div>
-                <Badge variant="outline" className="text-blue-600 border-blue-500/30 bg-blue-50/40 dark:bg-blue-950/20 font-mono text-xs">
+                <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
                   Partial Prerendering
                 </Badge>
               </div>
@@ -826,7 +937,7 @@ async function LiveStockBalance() {
             <section id="strategy-8" className="scroll-mt-20 pt-6 border-t">
               <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-sm">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono font-bold text-sm">
                     8
                   </span>
                   <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
@@ -834,10 +945,10 @@ async function LiveStockBalance() {
                   </h2>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Badge variant="outline" className="text-indigo-600 dark:text-indigo-400 border-indigo-500/30 bg-indigo-50/40 dark:bg-indigo-950/20 font-mono text-xs">
+                  <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
                     PPR Hybrid Synergy
                   </Badge>
-                  <Badge className="bg-indigo-600 text-white font-mono text-xs hover:bg-indigo-700">
+                  <Badge className="bg-emerald-600 text-white font-mono text-xs hover:bg-emerald-700">
                     Recommended
                   </Badge>
                 </div>
@@ -898,7 +1009,7 @@ export default function TrendingPage() {
                 ]}
               />
 
-              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-indigo-50/30 dark:bg-indigo-950/20 p-3 rounded-lg border border-indigo-500/20">
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-emerald-50/30 dark:bg-emerald-950/20 p-3 rounded-lg border border-emerald-500/20">
                 <p>• <strong>Benchmarked Throughput:</strong> Under a spike of 50,000 requests/minute, only 1 query hits the database every 120 seconds.</p>
                 <p>• <strong>User Experience:</strong> 0ms TTFB first paint + ~2ms content resolution = Feels like a static page with near-live freshness.</p>
               </div>
@@ -910,14 +1021,14 @@ export default function TrendingPage() {
             <section id="strategy-9" className="scroll-mt-20 pt-6 border-t">
               <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 font-mono font-bold text-sm">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-bold text-sm">
                     9
                   </span>
                   <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
                     RSC Promise ➔ Client use() (React 19)
                   </h2>
                 </div>
-                <Badge variant="outline" className="text-purple-600 border-purple-500/30 bg-purple-50/40 dark:bg-purple-950/20 font-mono text-xs">
+                <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20 font-mono text-xs">
                   Promise Streaming
                 </Badge>
               </div>
@@ -1170,7 +1281,7 @@ export default function DocumentEditor({ document }: { document: any }) {
 
               {/* Metrics Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
-                <MetricCard label="TTFB" value="Fast (Shell Only)" variant="amber" />
+                <MetricCard label="TTFB" value="Fast (Shell Only)" variant="emerald" />
                 <MetricCard label="Stream Ready" value="Delayed (Waterfall)" variant="rose" />
                 <MetricCard label="Server/DB Load" value="Heavy (100% RPC)" variant="rose" />
                 <MetricCard label="Waterfall" value="YES (Waterfall)" variant="rose" />
@@ -1273,7 +1384,7 @@ export function DashboardStatsWidget() {
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
                 <MetricCard label="TTFB" value="N/A (Post-Load)" variant="slate" />
                 <MetricCard label="Stream Ready" value="N/A (User Event)" variant="slate" />
-                <MetricCard label="Server/DB Load" value="On-Demand" variant="blue" />
+                <MetricCard label="Server/DB Load" value="On-Demand" variant="slate" />
                 <MetricCard label="Waterfall" value="None" variant="emerald" />
                 <MetricCard label="Data Freshness" value="100% Live" variant="emerald" className="col-span-2 sm:col-span-1" />
               </div>
@@ -1352,9 +1463,9 @@ export function AddToCartButton({ productId }: { productId: string }) {
               </p>
 
               <div className="not-prose grid gap-4 sm:grid-cols-2 my-6 text-xs">
-                <Card className="border-blue-500/20 bg-blue-50/20 dark:bg-blue-950/15">
+                <Card className="border-emerald-500/30 bg-emerald-50/30 dark:bg-emerald-950/20 shadow-xs">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-bold text-blue-700 dark:text-blue-300">
+                    <CardTitle className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
                       Is the content public or marketing?
                     </CardTitle>
                   </CardHeader>
@@ -1364,9 +1475,9 @@ export function AddToCartButton({ productId }: { productId: string }) {
                   </CardContent>
                 </Card>
 
-                <Card className="border-indigo-500/20 bg-indigo-50/20 dark:bg-indigo-950/15">
+                <Card className="border-emerald-500/30 bg-emerald-50/30 dark:bg-emerald-950/20 shadow-xs">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-bold text-indigo-700 dark:text-indigo-300">
+                    <CardTitle className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
                       High-traffic store or viral catalog?
                     </CardTitle>
                   </CardHeader>
@@ -1375,9 +1486,9 @@ export function AddToCartButton({ productId }: { productId: string }) {
                   </CardContent>
                 </Card>
 
-                <Card className="border-purple-500/20 bg-purple-50/20 dark:bg-purple-950/15">
+                <Card className="border-amber-500/30 bg-amber-50/30 dark:bg-amber-950/20 shadow-xs">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-bold text-purple-700 dark:text-purple-300">
+                    <CardTitle className="text-sm font-bold text-amber-700 dark:text-amber-400">
                       Interactive tool, canvas, or complex editor?
                     </CardTitle>
                   </CardHeader>
@@ -1386,9 +1497,9 @@ export function AddToCartButton({ productId }: { productId: string }) {
                   </CardContent>
                 </Card>
 
-                <Card className="border-emerald-500/20 bg-emerald-50/20 dark:bg-emerald-950/15">
+                <Card className="border-amber-500/30 bg-amber-50/30 dark:bg-amber-950/20 shadow-xs">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
+                    <CardTitle className="text-sm font-bold text-amber-700 dark:text-amber-400">
                       Live search filter or client widget?
                     </CardTitle>
                   </CardHeader>
