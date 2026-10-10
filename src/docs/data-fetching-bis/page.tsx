@@ -16,6 +16,7 @@ import {
 } from "@/docs/components/ui/alert";
 import { AlertTriangle, Info, Workflow } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
+import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 
 const tocItems = [
   {
@@ -328,12 +329,20 @@ export default async function BlogIndexPage() {
                 The Node.js server halts the HTTP response until the database returns the data.
               </p>
 
-              <CodeBlock language="tsx" containerClassName="my-3">
-{`// 1. src/account/billing/page_functions.ts
-export const revalidate = 0; // Force dynamic SSR on every request
-
-// 2. src/account/billing/page.tsx (Dynamic Route)
-import { cookies } from "dinou/server";
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/account/billing/page_functions.ts",
+                    language: "tsx",
+                    code: `export const revalidate = 0; // Force dynamic SSR on every request`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/account/billing/page.tsx",
+                    language: "tsx",
+                    code: `import { cookies } from "dinou/server";
 import db from "@/lib/db";
 
 export default async function BillingPage() {
@@ -356,8 +365,10 @@ export default async function BillingPage() {
       </table>
     </div>
   );
-}`}
-              </CodeBlock>
+}`,
+                  },
+                ]}
+              />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Latency Penalty:</strong> If the database takes 800ms, the visitor stares at a blank screen for 800ms before First Contentful Paint (FCP).</p>
@@ -461,12 +472,20 @@ async function AsyncChangelog() {
                 through the open HTTP connection that swaps out the skeleton fallback without refreshing the page.
               </p>
 
-              <CodeBlock language="tsx" containerClassName="my-3">
-{`// 1. src/analytics/page_functions.ts
-export const revalidate = 0; // Dynamic streaming SSR
-
-// 2. src/analytics/page.tsx (Dynamic Route with Suspense Streaming)
-import { Suspense } from "react";
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/analytics/page_functions.ts",
+                    language: "tsx",
+                    code: `export const revalidate = 0; // Dynamic streaming SSR`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/analytics/page.tsx",
+                    language: "tsx",
+                    code: `import { Suspense } from "react";
 import db from "@/lib/db";
 import { AnalyticsSkeleton } from "./skeleton";
 
@@ -491,8 +510,10 @@ async function SlowHeavyMetrics() {
   // Heavy 1.5-second aggregation query:
   const data = await db.analytics.aggregateMonthlyRevenue();
   return <MetricsTable stats={data} />;
-}`}
-              </CodeBlock>
+}`,
+                  },
+                ]}
+              />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>UX Advantage:</strong> The visitor immediately sees navigation, title, and skeletons instead of an unresponsive blank screen.</p>
@@ -509,9 +530,14 @@ async function SlowHeavyMetrics() {
                   <p>
                     Instead of declaring an inline async Server Component (<code>SlowHeavyMetrics</code>), you can alternatively execute the query inside an isolated <strong>Server Function</strong> (tagged with <code>&quot;use server&quot;</code>) that directly renders and returns the JSX component tree, and invoke it inside <code>&lt;Suspense&gt;</code>:
                   </p>
-                  <CodeBlock language="tsx" containerClassName="my-2">
-{`// 1. src/analytics/server-functions.ts
-"use server";
+                  <TabbedCodeBlock
+                    containerClassName="my-2"
+                    tabs={[
+                      {
+                        id: "server-fn",
+                        label: "src/analytics/server-functions.ts",
+                        language: "tsx",
+                        code: `"use server";
 
 import db from "@/lib/db";
 import { MetricsTable } from "./metrics-table";
@@ -519,10 +545,13 @@ import { MetricsTable } from "./metrics-table";
 export async function getMetricsTable() {
   const data = await db.analytics.aggregateMonthlyRevenue();
   return <MetricsTable stats={data} />;
-}
-
-// 2. src/analytics/page.tsx (Server Component)
-import { Suspense } from "react";
+}`,
+                      },
+                      {
+                        id: "page",
+                        label: "src/analytics/page.tsx",
+                        language: "tsx",
+                        code: `import { Suspense } from "react";
 import { AnalyticsSkeleton } from "./skeleton";
 import { getMetricsTable } from "./server-functions";
 
@@ -539,8 +568,10 @@ export default function AnalyticsPage() {
       </Suspense>
     </div>
   );
-}`}
-                  </CodeBlock>
+}`,
+                      },
+                    ]}
+                  />
                   <p>
                     Both patterns are <strong>functionally equivalent</strong> during dynamic streaming:
                   </p>
@@ -585,12 +616,20 @@ export default function AnalyticsPage() {
                 <strong>How it works:</strong> Solves the &quot;all-or-nothing&quot; revalidation problem. The base outer page and layout are pre-rendered at build time (<strong>Static Site Generation - SSG</strong>) or configured with long-term ISR (e.g., 24 hours) delivered with <strong>0ms TTFB from Edge CDN</strong>. Meanwhile, an inner volatile component is wrapped in <code>&lt;DinouCacheSlot&gt;</code> with a fast TTL (e.g., 60 seconds). The heavy outer page remains immutable at the Edge CDN, while the slot revalidates independently in server memory/KV storage.
               </p>
 
-              <CodeBlock language="tsx" containerClassName="my-3">
-{`// 1. src/products/[slug]/page_functions.ts
-export const revalidate = 86400; // Outer page revalidates once every 24 hours
-
-// 2. src/products/[slug]/page.tsx
-import { Suspense } from "react";
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/products/[slug]/page_functions.ts",
+                    language: "tsx",
+                    code: `export const revalidate = 86400; // Outer page revalidates once every 24 hours`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/products/[slug]/page.tsx",
+                    language: "tsx",
+                    code: `import { Suspense } from "react";
 import { DinouCacheSlot } from "dinou/server";
 import { LivePriceTicker, StaticDescription } from "./components";
 
@@ -608,8 +647,10 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
       </Suspense>
     </div>
   );
-}`}
-              </CodeBlock>
+}`,
+                  },
+                ]}
+              />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Targeted Invalidation:</strong> Calling <code>refreshSlot(&quot;price-prod-1&quot;)</code> from a client button refreshes only the price widget without rebuilding the 24-hour page cache.</p>
@@ -650,12 +691,20 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                 On cache hit, the pre-computed RSC binary chunk is pulled from memory/KV in ~2ms and streamed down without querying PostgreSQL/MongoDB.
               </p>
 
-              <CodeBlock language="tsx" containerClassName="my-3">
-{`// 1. src/feed/page_functions.ts
-export const revalidate = 0; // Dynamic route with per-request session
-
-// 2. src/feed/page.tsx (Dynamic Route with Session)
-import { Suspense } from "react";
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/feed/page_functions.ts",
+                    language: "tsx",
+                    code: `export const revalidate = 0; // Dynamic route with per-request session`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/feed/page.tsx",
+                    language: "tsx",
+                    code: `import { Suspense } from "react";
 import { DinouCacheSlot } from "dinou/server";
 import { UserGreeting, GlobalTrendingWidget } from "./components";
 
@@ -677,8 +726,10 @@ export default function FeedPage() {
       </aside>
     </div>
   );
-}`}
-              </CodeBlock>
+}`,
+                  },
+                ]}
+              />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Stream Speed:</strong> Instead of waiting 1.5 seconds for the DB on every page visit, the slot resolves in ~2ms from RAM.</p>
@@ -720,12 +771,20 @@ export default function FeedPage() {
                 executes the dynamic hole and streams the live HTML into the open connection.
               </p>
 
-              <CodeBlock language="tsx" containerClassName="my-3">
-{`// 1. src/catalog/page_functions.ts
-export const ppr = true; // Enables Partial Prerendering
-
-// 2. src/catalog/page.tsx
-import { Suspense } from "react";
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/catalog/page_functions.ts",
+                    language: "tsx",
+                    code: `export const ppr = true; // Enables Partial Prerendering`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/catalog/page.tsx",
+                    language: "tsx",
+                    code: `import { Suspense } from "react";
 import db from "@/lib/db";
 import { StockSkeleton } from "./skeleton";
 
@@ -750,8 +809,10 @@ async function LiveStockBalance() {
   // Query executed on every request:
   const stock = await db.warehouse.getLiveInventory();
   return <p className="font-mono text-emerald-600">{stock} units remaining</p>;
-}`}
-              </CodeBlock>
+}`,
+                  },
+                ]}
+              />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Eliminates the SSR Bottleneck:</strong> The browser parses stylesheets and scripts in 0ms while the server computes data in the background.</p>
@@ -798,12 +859,20 @@ async function LiveStockBalance() {
                 Visitors see zero visible skeleton flicker, while database queries are reduced by 99.9%.
               </p>
 
-              <CodeBlock language="tsx" containerClassName="my-3">
-{`// 1. src/trending/page_functions.ts
-export const ppr = true; // Static Edge Shell
-
-// 2. src/trending/page.tsx
-import { Suspense } from "react";
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/trending/page_functions.ts",
+                    language: "tsx",
+                    code: `export const ppr = true; // Static Edge Shell`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/trending/page.tsx",
+                    language: "tsx",
+                    code: `import { Suspense } from "react";
 import { DinouCacheSlot } from "dinou/server";
 import { TrendingGrid, TrendingSkeleton } from "./components";
 
@@ -824,8 +893,10 @@ export default function TrendingPage() {
       </Suspense>
     </main>
   );
-}`}
-              </CodeBlock>
+}`,
+                  },
+                ]}
+              />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-indigo-50/30 dark:bg-indigo-950/20 p-3 rounded-lg border border-indigo-500/20">
                 <p>• <strong>Benchmarked Throughput:</strong> Under a spike of 50,000 requests/minute, only 1 query hits the database every 120 seconds.</p>
@@ -867,9 +938,14 @@ export default function TrendingPage() {
                 No <code>useEffect</code>, no client fetch cascades, and no duplicate network requests!
               </p>
 
-              <CodeBlock language="tsx" containerClassName="my-3">
-{`// 1. Server Component: src/search/page.tsx
-import { Suspense } from "react";
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "server",
+                    label: "src/search/page.tsx (Server Component)",
+                    language: "tsx",
+                    code: `import { Suspense } from "react";
 import db from "@/lib/db";
 import { SearchResultsClient } from "./search-results-client";
 
@@ -887,10 +963,13 @@ export default function SearchPage({ searchParams }: { searchParams: { q?: strin
       </Suspense>
     </main>
   );
-}
-
-// 2. Client Component: src/search/search-results-client.tsx
-"use client";
+}`,
+                  },
+                  {
+                    id: "client",
+                    label: "src/search/search-results-client.tsx (Client Component)",
+                    language: "tsx",
+                    code: `"use client";
 
 import { use, useState } from "react";
 
@@ -909,8 +988,10 @@ export function SearchResultsClient({ promise }: { promise: Promise<Product[]> }
       </ul>
     </div>
   );
-}`}
-              </CodeBlock>
+}`,
+                  },
+                ]}
+              />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Zero Waterfall:</strong> The server initiates the query before the client even finishes parsing JavaScript.</p>
@@ -951,17 +1032,25 @@ export function SearchResultsClient({ promise }: { promise: Promise<Product[]> }
                 marked with <code>&quot;use client&quot;</code>. The build generates static HTML with pre-serialized props, which hydrates into a full SPA on load.
               </p>
 
-              <CodeBlock language="tsx" containerClassName="my-3">
-{`// 1. src/whiteboard/page_functions.ts (Runs at Build Time)
-import db from "@/lib/db";
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/whiteboard/page_functions.ts",
+                    language: "tsx",
+                    code: `import db from "@/lib/db";
 
 export async function getProps() {
   const defaultTemplates = await db.templates.findDefaults();
   return { defaultTemplates };
-}
-
-// 2. src/whiteboard/page.tsx (Entire page is a Client Component)
-"use client";
+}`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/whiteboard/page.tsx",
+                    language: "tsx",
+                    code: `"use client";
 
 import { useState } from "react";
 import { CanvasStage, ToolPalette } from "@/components/canvas";
@@ -975,8 +1064,10 @@ export default function WhiteboardPage({ defaultTemplates }: { defaultTemplates:
       <CanvasStage initialData={selectedTemplate} />
     </div>
   );
-}`}
-              </CodeBlock>
+}`,
+                  },
+                ]}
+              />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Ergonomics:</strong> Perfect for developers migrating from Vite/CRA who want classic React hooks everywhere without losing SSG SEO and 0ms TTFB.</p>
@@ -1016,19 +1107,27 @@ export default function WhiteboardPage({ defaultTemplates }: { defaultTemplates:
                 into the client page component, and renders the initial HTML document.
               </p>
 
-              <CodeBlock language="tsx" containerClassName="my-3">
-{`// 1. src/editor/[docId]/page_functions.ts (Runs on every request)
-import db from "@/lib/db";
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/editor/[docId]/page_functions.ts",
+                    language: "tsx",
+                    code: `import db from "@/lib/db";
 
 export const revalidate = 0; // Dynamic SSR
 
 export async function getProps(params: { docId: string }) {
   const document = await db.documents.findById(params.docId);
   return { document };
-}
-
-// 2. src/editor/[docId]/page.tsx (Client Component)
-"use client";
+}`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/editor/[docId]/page.tsx",
+                    language: "tsx",
+                    code: `"use client";
 
 import { useState } from "react";
 
@@ -1040,8 +1139,10 @@ export default function DocumentEditor({ document }: { document: any }) {
       <textarea value={content} onChange={(e) => setContent(e.target.value)} />
     </div>
   );
-}`}
-              </CodeBlock>
+}`,
+                  },
+                ]}
+              />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Trade-off:</strong> Because the server waits for <code>getProps</code> before sending the first byte, TTFB is slower compared to streaming patterns.</p>
@@ -1083,9 +1184,14 @@ export default function DocumentEditor({ document }: { document: any }) {
                 using React 19&apos;s native <code>use()</code> hook inside <code>&lt;Suspense&gt;</code>.
               </p>
 
-              <CodeBlock language="tsx" containerClassName="my-3">
-{`// 1. src/dashboard/server-functions.ts
-"use server";
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "server-fn",
+                    label: "src/dashboard/server-functions.ts",
+                    language: "tsx",
+                    code: `"use server";
 
 import db from "@/lib/db";
 
@@ -1093,10 +1199,13 @@ export async function fetchDashboardStats() {
   const count = await db.users.count();
   const active = await db.users.countActiveSessions();
   return { count, active };
-}
-
-// 2. src/dashboard/stats-widget.tsx (Client Component)
-"use client";
+}`,
+                  },
+                  {
+                    id: "widget",
+                    label: "src/dashboard/stats-widget.tsx",
+                    language: "tsx",
+                    code: `"use client";
 
 import { useState, use, Suspense } from "react";
 import { fetchDashboardStats } from "./server-functions";
@@ -1131,8 +1240,10 @@ export function DashboardStatsWidget() {
       </Suspense>
     </div>
   );
-}`}
-              </CodeBlock>
+}`,
+                  },
+                ]}
+              />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Modern React 19 Ergonomics:</strong> Unrolls promises synchronously with <code>use()</code> inside <code>&lt;Suspense&gt;</code>. Eliminates legacy <code>useEffect</code> lifecycle hooks, manual loading flags (<code>isLoading</code>, <code>error</code>), and fetch boilerplate.</p>
@@ -1173,9 +1284,14 @@ export function DashboardStatsWidget() {
                 mutate state, and trigger on-demand cache revalidation via <code>revalidateTag</code>.
               </p>
 
-              <CodeBlock language="tsx" containerClassName="my-3">
-{`// 1. src/cart/server-functions.ts
-"use server";
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "server-fn",
+                    label: "src/cart/server-functions.ts",
+                    language: "tsx",
+                    code: `"use server";
 
 import db from "@/lib/db";
 import { revalidateTag } from "dinou/server";
@@ -1188,10 +1304,13 @@ export async function addToCart(productId: string, quantity: number) {
   await revalidateTag("cart");
 
   return { success: true };
-}
-
-// 2. src/cart/add-to-cart-button.tsx
-"use client";
+}`,
+                  },
+                  {
+                    id: "button",
+                    label: "src/cart/add-to-cart-button.tsx",
+                    language: "tsx",
+                    code: `"use client";
 
 import { useTransition } from "react";
 import { addToCart } from "./server-functions";
@@ -1210,8 +1329,10 @@ export function AddToCartButton({ productId }: { productId: string }) {
       {isPending ? "Adding..." : "Add to Cart"}
     </button>
   );
-}`}
-              </CodeBlock>
+}`,
+                  },
+                ]}
+              />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Strict Rule:</strong> Only call Server Functions in mutative event contexts. Never invoke them during the render phase or inside components.</p>
