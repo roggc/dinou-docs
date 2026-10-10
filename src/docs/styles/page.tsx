@@ -2,30 +2,18 @@
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/docs/components/ui/alert";
-import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
 } from "@/docs/components/ui/card";
 import {
   Palette,
   FileCode,
-  Globe,
   Zap,
-  CheckCircle2,
-  Layers,
-  Sparkles,
   RefreshCw,
-  ShieldCheck,
-  Code2,
-  ArrowRight,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
+import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 
 const tocItems = [
   { id: "overview", title: "Styling in Dinou", level: 2 },
@@ -81,9 +69,9 @@ export default function Page() {
               </ul>
 
               <div className="grid gap-4 sm:grid-cols-3 not-prose my-6">
-                <Card className="border-blue-500/20 bg-blue-50/50 dark:bg-blue-900/10">
+                <Card className="border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/10">
                   <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm">
+                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
                       <Palette className="h-4 w-4" />
                       <span>Tailwind CSS v4</span>
                     </div>
@@ -93,9 +81,9 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-purple-500/20 bg-purple-50/50 dark:bg-purple-900/10">
+                <Card className="border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/10">
                   <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold text-sm">
+                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold text-sm">
                       <FileCode className="h-4 w-4" />
                       <span>CSS Modules</span>
                     </div>
@@ -105,10 +93,10 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-900/10">
+                <Card className="border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
                   <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
-                      <Zap className="h-4 w-4" />
+                    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-semibold text-sm">
+                      <Zap className="h-4 w-4 text-emerald-500" />
                       <span>Single-File Extraction</span>
                     </div>
                   </CardHeader>
@@ -155,7 +143,7 @@ export default function Page() {
             <section id="tailwind-v4" className="mt-12">
               <h2>Tailwind CSS (v4 Engine)</h2>
               <p>
-                Dinou v7 incorporates the official <strong>Tailwind CSS v4</strong> engine via <code>@tailwindcss/postcss</code>. Tailwind v4 is fundamentally CSS-native: there is no JavaScript config file (<code>tailwind.config.js</code>) required by default.
+                Dinou incorporates the official <strong>Tailwind CSS v4</strong> engine via <code>@tailwindcss/postcss</code>. Tailwind v4 is fundamentally CSS-native: there is no JavaScript config file (<code>tailwind.config.js</code>) required by default.
               </p>
               <p>
                 To enable Tailwind CSS across your application, simply import it at the top of your global CSS file (typically <code>src/globals.css</code>):
@@ -301,31 +289,14 @@ export function FeatureCard({ title, badge }: { title: string; badge: string }) 
             {/* CSS HMR */}
             <section id="css-hmr" className="mt-12">
               <h2>Instant CSS Hot Module Replacement</h2>
-              <p>
-                In development mode, Dinou provides dedicated, high-speed <strong>CSS Hot Module Replacement</strong>:
-              </p>
-              <div className="rounded-xl border p-4 bg-card not-prose space-y-3 my-4">
-                <div className="flex items-center gap-2 font-semibold text-sm">
-                  <RefreshCw className="h-4 w-4 text-blue-500" />
-                  <span>How Dinou CSS HMR Operates</span>
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/10 p-4 not-prose my-4 space-y-2">
+                <div className="flex items-center gap-2 font-semibold text-sm text-emerald-700 dark:text-emerald-400">
+                  <RefreshCw className="h-4 w-4 text-emerald-500" />
+                  <span>Sub-Millisecond HMR &amp; Zero State Loss</span>
                 </div>
-                <ol className="list-decimal pl-5 text-xs text-muted-foreground space-y-1.5 leading-relaxed">
-                  <li>
-                    When you edit any <code>.css</code> or <code>.module.css</code> file, Dinou&apos;s dev watcher triggers the PostCSS compiler.
-                  </li>
-                  <li>
-                    An incremental dev cache (<code>.dinou/cache/css-dev-cache.json</code>) checks file modification timestamps (<code>mtime</code>), ensuring only modified CSS files are reprocessed.
-                  </li>
-                  <li>
-                    Dinou&apos;s HMR engine broadcasts a <code>style-update</code> event across the active WebSocket connection.
-                  </li>
-                  <li>
-                    The browser client updates the <code>/styles.css</code> stylesheet in place with a cache-busting timestamp query (e.g. <code>/styles.css?t=1698765432</code>).
-                  </li>
-                  <li>
-                    <strong>Zero State Reset:</strong> React component state, active input values, dialog states, and scroll positions remain completely intact.
-                  </li>
-                </ol>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  During development, Dinou incrementally recompiles modified <code>.css</code> and <code>.module.css</code> files and updates <code>/styles.css</code> in place via WebSocket. Styles refresh instantly with <strong>zero full page reloads</strong>, keeping component state, form inputs, dialogs, and scroll positions intact.
+                </p>
               </div>
             </section>
 
@@ -333,7 +304,7 @@ export function FeatureCard({ title, badge }: { title: string; badge: string }) 
             <section id="typescript-types" className="mt-12">
               <h2>TypeScript Declarations (dinou/env)</h2>
               <p>
-                Starting with <strong>Dinou v6.1.0</strong> and <strong>v7</strong>, built-in ambient type declarations for CSS Modules and static media assets are provided directly via <code>dinou/env</code>.
+                Built-in ambient type declarations for CSS Modules and static media assets are provided directly via <code>dinou/env</code>.
               </p>
               <p>
                 Create or verify a <code>dinou-env.d.ts</code> file at the root of your project:
@@ -354,7 +325,6 @@ export function FeatureCard({ title, badge }: { title: string; badge: string }) 
               >
 {`{
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },
@@ -371,17 +341,6 @@ export function FeatureCard({ title, badge }: { title: string; badge: string }) 
   ]
 }`}
               </CodeBlock>
-
-              <Alert className="not-prose mt-4">
-                <Code2 className="h-4 w-4" />
-                <AlertTitle>Legacy Projects (v6.0.1 or earlier)</AlertTitle>
-                <AlertDescription className="text-xs">
-                  If working on an older Dinou project prior to <code>dinou/env</code>, you can declare module typings manually by creating <code>src/css.d.ts</code> containing:
-                  <code className="block mt-1 p-2 rounded bg-slate-100 dark:bg-slate-800 text-[11px]">
-                    declare module &quot;*.module.css&quot; &#123; const classes: &#123; [key: string]: string &#125;; export default classes; &#125;
-                  </code>
-                </AlertDescription>
-              </Alert>
             </section>
 
             {/* Complete Example */}
@@ -391,12 +350,14 @@ export function FeatureCard({ title, badge }: { title: string; badge: string }) 
                 The following cohesive example shows how the root layout, Tailwind v4 global CSS, CSS modules, and page components function together harmoniously:
               </p>
 
-              <h4>1. Root Layout (<code>src/layout.tsx</code>)</h4>
-              <CodeBlock
-                language="tsx"
-                containerClassName="w-full overflow-hidden rounded-lg"
-              >
-{`"use client";
+              <TabbedCodeBlock
+                containerClassName="w-full overflow-hidden rounded-lg my-6"
+                tabs={[
+                  {
+                    id: "layout",
+                    label: "src/layout.tsx",
+                    language: "tsx",
+                    code: `"use client";
 
 import type { ReactNode } from "react";
 import "./globals.css"; // Imports Tailwind v4 & global tokens
@@ -416,19 +377,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </body>
     </html>
   );
-}`}
-              </CodeBlock>
-
-              <h4>2. Global CSS (<code>src/globals.css</code>)</h4>
-              <CodeBlock
-                language="css"
-                containerClassName="w-full overflow-hidden rounded-lg"
-              >
-{`@import "tailwindcss";
+}`,
+                  },
+                  {
+                    id: "globals",
+                    label: "src/globals.css",
+                    language: "css",
+                    code: `@import "tailwindcss";
 
 @theme {
-  --color-brand: #6366f1;
-  --color-brand-hover: #4f46e5;
+  --color-brand: #10b981;
+  --color-brand-hover: #059669;
   --radius-panel: 1rem;
 }
 
@@ -445,16 +404,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }
 
 .custom-gradient {
-  background: linear-gradient(135deg, var(--color-brand) 0%, #a855f7 100%);
-}`}
-              </CodeBlock>
-
-              <h4>3. CSS Module (<code>src/card.module.css</code>)</h4>
-              <CodeBlock
-                language="css"
-                containerClassName="w-full overflow-hidden rounded-lg"
-              >
-{`.card {
+  background: linear-gradient(135deg, var(--color-brand) 0%, #f59e0b 100%);
+}`,
+                  },
+                  {
+                    id: "module",
+                    label: "src/card.module.css",
+                    language: "css",
+                    code: `.card {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-panel);
@@ -469,15 +426,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-brand);
-}`}
-              </CodeBlock>
-
-              <h4>4. Page Component (<code>src/page.tsx</code>)</h4>
-              <CodeBlock
-                language="tsx"
-                containerClassName="w-full overflow-hidden rounded-lg"
-              >
-{`"use client";
+}`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/page.tsx",
+                    language: "tsx",
+                    code: `"use client";
 
 import styles from "./card.module.css";
 
@@ -506,8 +461,10 @@ export default function HomePage() {
       </div>
     </main>
   );
-}`}
-              </CodeBlock>
+}`,
+                  },
+                ]}
+              />
             </section>
           </div>
         </div>
