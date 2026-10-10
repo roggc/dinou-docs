@@ -129,6 +129,14 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  [id] {
+    scroll-margin-top: 5rem;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
