@@ -54,7 +54,7 @@ const tocItems = [
   },
   {
     id: "revalidate-page-usage",
-    title: "1.1. Usage in Server Actions",
+    title: "1.1. Usage in Server Functions",
     level: 3,
   },
   {
@@ -134,7 +134,7 @@ const tocItems = [
   },
   {
     id: "storage-adapters",
-    title: "6. Pluggable Storage Adapters & Multi-Runtime Parity",
+    title: "6. Pluggable Storage Adapters",
     level: 2,
   },
   {
@@ -143,39 +143,29 @@ const tocItems = [
     level: 3,
   },
   {
-    id: "runtime-parity",
-    title: "6.2. Node/Bun Filesystem vs Edge KV Parity",
-    level: 3,
-  },
-  {
     id: "adapter-catalog",
-    title: "6.3. Supported Storage Adapters",
+    title: "6.2. Supported Storage Adapters & Configuration",
     level: 3,
   },
   {
     id: "security-and-webhooks",
-    title: "7. Security & Webhook Integrations",
+    title: "7. Webhook Integrations (Headless CMS)",
     level: 2,
-  },
-  {
-    id: "strict-rules",
-    title: "7.1. Strict Execution Rules",
-    level: 3,
-  },
-  {
-    id: "secure-webhooks",
-    title: "7.2. Securing Webhook Endpoints",
-    level: 3,
-  },
-  {
-    id: "standalone-scripts",
-    title: "7.3. Running in Standalone Scripts",
-    level: 3,
   },
   {
     id: "strategy-matrix",
     title: "8. Strategy Comparison Matrix",
     level: 2,
+  },
+  {
+    id: "server-matrix",
+    title: "8.1. Server-Side Invalidation",
+    level: 3,
+  },
+  {
+    id: "client-matrix",
+    title: "8.2. Client-Side Router Refresh",
+    level: 3,
   },
 ];
 
@@ -313,6 +303,24 @@ export default function Page() {
                 <code>&quot;dinou/server&quot;</code>, keeping browser client bundles clean, lightweight,
                 and secure.
               </p>
+
+              <Alert className="not-prose border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/20 my-6">
+                <AlertTriangle className="h-5 w-5 text-amber-500" />
+                <AlertTitle className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+                  Strict Execution Rules: Where to Call Revalidation APIs
+                </AlertTitle>
+                <AlertDescription className="text-xs text-muted-foreground mt-2 space-y-2 leading-relaxed">
+                  <p>
+                    <strong>Only in Mutative Event Contexts:</strong> Revalidation APIs (<code>revalidatePage</code>,{" "}
+                    <code>revalidatePath</code>, <code>revalidateTag</code>) are mutative side-effects. They must only be invoked
+                    inside <strong>Server Functions</strong> (<code>&quot;use server&quot;</code>) or <strong>HTTP Webhook endpoints</strong> (such as Headless CMS publishing events).
+                  </p>
+                  <p>
+                    <strong>Never Inside Components or <code>getProps</code>:</strong> Calling revalidation during the component render phase or within{" "}
+                    <code>getProps</code> creates an <strong>infinite regeneration loop</strong>, causing severe CPU exhaustion and server crashes.
+                  </p>
+                </AlertDescription>
+              </Alert>
             </section>
 
             {/* 1. revalidatePage */}
@@ -363,11 +371,11 @@ export default function Page() {
                 </div>
               </div>
 
-              {/* 1.1 Usage in Server Actions */}
+              {/* 1.1 Usage in Server Functions */}
               <section id="revalidate-page-usage" className="mt-6 scroll-mt-20">
-                <h4>1.1. Usage in Server Actions</h4>
+                <h4>1.1. Usage in Server Functions</h4>
                 <p>
-                  Call <code>revalidatePage</code> directly inside your Server Actions or route handlers:
+                  Call <code>revalidatePage</code> directly inside your Server Functions or route handlers:
                 </p>
 
                 <CodeBlock
@@ -595,7 +603,7 @@ export async function updateCategory(categoryId: string, data: any) {
   // 1. Absolute path: Revalidates /catalog (page.rsc, index.html, layout.rsc)
   await revalidatePath("/catalog");
 
-  // 2. Relative paths inside Server Actions (resolved via HTTP referer):
+  // 2. Relative paths inside Server Functions (resolved via HTTP referer):
   // Revalidate the current invoking leaf page surgically (e.g. /catalog/edit)
   await revalidatePage("./");
 
@@ -899,14 +907,18 @@ export const getCacheTags: PageFunctions<
                   language="tsx"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// Inside any page or layout component:
-import { DinouCacheSlot } from "dinou";
+{`// Inside any page or layout Server Component:
+import { Suspense } from "react";
+import { DinouCacheSlot } from "dinou/server";
+import { TrendingProducts, TrendingSkeleton } from "@/components/trending";
 
-<DinouCacheSlot id="trending-grid" tag="trending" revalidate={600}>
-  <TrendingProducts />
-</DinouCacheSlot>
+<Suspense fallback={<TrendingSkeleton />}>
+  <DinouCacheSlot id="trending-grid" tag="trending" revalidate={600}>
+    <TrendingProducts />
+  </DinouCacheSlot>
+</Suspense>
 
-// In your Server Action:
+// In your Server Function:
 "use server";
 
 import { revalidateTag } from "dinou/server";
@@ -1105,13 +1117,49 @@ export function LiveAnalyticsButton() {
     // 1. Direct standalone function:
     refreshSlot("analytics-summary", { fresh: true });
 
-    // 2. Or via router instance:
-    // router.refreshSlot("analytics-summary");
+    // 2. Or via router instance (identical signature and options):
+    // router.refreshSlot("analytics-summary", { fresh: true });
   };
 
   return <button onClick={handleUpdate}>Live Refresh Metrics</button>;
 }`}
                 </CodeBlock>
+
+                <div className="grid gap-4 md:grid-cols-2 not-prose my-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center gap-2 font-semibold text-sm">
+                        <RefreshCw className="h-4 w-4 text-blue-500" />
+                        <span>Default (Omitted or <code>fresh: false</code>)</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground space-y-1.5 leading-relaxed">
+                      <p>
+                        Respects the server storage cache. If the slot has not exceeded its <code>revalidate</code> TTL, the server returns the cached JSX directly without re-executing the component.
+                      </p>
+                      <p>
+                        <strong>Use Case:</strong> Bringing the client DOM in sync with existing server state (for instance, after a Server Function or background task has already executed <code>revalidateTag</code>).
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-indigo-500/20 bg-indigo-50/20 dark:bg-indigo-950/20">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center gap-2 font-semibold text-sm text-indigo-600 dark:text-indigo-400">
+                        <Zap className="h-4 w-4" />
+                        <span>With <code>fresh: true</code> (Forced Server Recomputation)</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground space-y-1.5 leading-relaxed">
+                      <p>
+                        Bypasses and ignores any unexpired server cache. Forces Dinou to immediately re-evaluate the Server Component, generate new JSX, overwrite the storage cache with the fresh timestamp, and stream it to the client.
+                      </p>
+                      <p>
+                        <strong>Use Case:</strong> Explicit user-initiated refresh triggers (such as clicking a &quot;Live Sync&quot; button) where the user explicitly demands live data regardless of remaining TTL.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
               </section>
             </section>
 
@@ -1121,108 +1169,130 @@ export function LiveAnalyticsButton() {
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <h3>
-                6. Pluggable Storage Adapters &amp; Multi-Runtime Parity
+                6. Pluggable Storage Adapters
               </h3>
 
               {/* 6.1 Distributed Problem */}
               <section id="distributed-problem" className="mt-6 scroll-mt-20">
                 <h4>6.1. Why Adapters Matter for Revalidation</h4>
 
-                <div className="border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20 rounded-lg p-4 not-prose my-4">
-                  <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400 mb-2">
-                    <Database className="h-5 w-5" />
-                    <span>The Distributed Multi-Instance Challenge</span>
-                  </div>
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <p>
-                      Revalidation (<code>revalidatePage</code>, <code>revalidatePath</code>, <code>revalidateTag</code>)
-                      is fundamentally the act of <strong>invalidating, purging, and updating static HTML and RSC payloads</strong>.
-                    </p>
-                    <p>
-                      By default, Dinou stores cached pages on the local filesystem (<code>FileSystemStorage</code>).
-                      If you deploy multiple Docker containers, Kubernetes pods, or serverless workers, each replica has its
-                      own isolated storage. Without a shared storage adapter, a revalidation request reaching Replica A would
-                      leave Replicas B and C serving stale cache.
-                    </p>
-                    <p>
-                      By plugging in a distributed adapter like <strong>RedisStorage</strong> or{" "}
-                      <strong>CloudflareKVStorage</strong>, any cache purge or revalidation call is instantly and
-                      atomically synchronized across all instances worldwide.
-                    </p>
-                  </div>
-                </div>
-              </section>
-
-              {/* 6.2 Runtime Parity */}
-              <section id="runtime-parity" className="mt-8 scroll-mt-20">
-                <div className="flex items-center gap-3">
-                  <h4 className="m-0">
-                    6.2. Node/Bun Filesystem vs Edge KV Parity
-                  </h4>
-                  <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                    100% Isomorphic
-                  </span>
-                </div>
-
-                <p className="mt-4">
-                  Dinou guarantees 100% feature and behavioral parity between filesystem environments (Node.js, Bun)
-                  and Edge key-value environments (Cloudflare Workers KV, Deno KV):
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  Revalidation (<code className="text-foreground">revalidatePage</code>, <code className="text-foreground">revalidatePath</code>,{" "}
+                  <code className="text-foreground">revalidateTag</code>) is fundamentally the process of{" "}
+                  <strong>purging and rebuilding static cache artifacts</strong>. To understand why storage adapters exist,
+                  it helps to see what Dinou actually stores and where those files live.
                 </p>
 
-                <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[180px]">Operation</TableHead>
-                        <TableHead>Node.js / Bun (Filesystem)</TableHead>
-                        <TableHead>Cloudflare Workers / Deno (Edge KV)</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="font-mono text-xs font-semibold">revalidatePage(path)</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          Re-evaluates page and safely renames <code>page.rsc</code> and <code>index.html</code>.
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          Updates KV entries for <code>page.rsc</code> and <code>index.html</code> with new timestamp.
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-mono text-xs font-semibold">revalidatePath(path)</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          Regenerates page, HTML, and checks for <code>layout.rsc</code> to recompile.
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          Updates page, HTML, and coordinates <code>revalidateLayout</code> if layout key exists.
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-mono text-xs font-semibold">revalidatePath(..., {`{ cascade: true }`})</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          Discovers child folders via filesystem walk and cascades <code>revalidatePage</code>.
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          Scans child KV prefixes and cascades <code>revalidatePage</code> to all matching routes.
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-mono text-xs font-semibold">revalidateTag(tag)</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          Inspects <code>metadata.json</code>, <code>layout.metadata.json</code>, and <code>slot.metadata.json</code>.
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          Inspects KV metadata tags to selectively trigger layout, page, or slot purges.
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
+                {/* What Dinou Stores Box */}
+                <div className="not-prose my-6 rounded-xl border border-border/70 bg-gradient-to-br from-card/80 via-card to-muted/20 p-5 shadow-sm">
+                  <div className="flex items-center gap-2.5 font-semibold text-sm text-foreground mb-3">
+                    <div className="p-1.5 rounded-md bg-primary/10 text-primary">
+                      <Layers className="h-4 w-4" />
+                    </div>
+                    <span>What Dinou Persists in the Cache Layer</span>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-3 text-xs">
+                    <div className="rounded-lg border border-border/50 bg-background/60 p-3 space-y-1">
+                      <div className="font-semibold font-mono text-primary text-[13px]">index.html</div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Pre-rendered static HTML delivered immediately to web crawlers and initial browser page loads.
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-border/50 bg-background/60 p-3 space-y-1">
+                      <div className="font-semibold font-mono text-primary text-[13px]">page.rsc / layout.rsc</div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Serialized React Server Components streams consumed by Dinou&apos;s client router during SPA transitions.
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-border/50 bg-background/60 p-3 space-y-1">
+                      <div className="font-semibold font-mono text-primary text-[13px]">Tag Metadata</div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Expiration timestamps, ISR time-to-live (TTL), and assigned cache tags for surgical resolution.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3 Real-World Challenges Grid */}
+                <div className="not-prose grid gap-4 sm:grid-cols-3 my-6">
+                  {/* Challenge 1: Single Node vs Clusters */}
+                  <div className="rounded-xl border border-blue-500/20 bg-blue-500/[0.03] dark:bg-blue-500/[0.06] p-4 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 font-semibold text-sm text-blue-600 dark:text-blue-400 mb-2">
+                        <Server className="h-4 w-4" />
+                        <span>Clustered Deployments</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        By default, Dinou writes to local disk (<code className="text-foreground">FileSystemStorage</code>).
+                        If you scale to 4 Kubernetes pods or Docker containers behind a load balancer, each pod has an isolated disk.
+                        Without a shared adapter, a purge on Pod A leaves Pods B, C, and D serving stale cache.
+                      </p>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-blue-500/15 text-[11px] font-medium text-blue-600 dark:text-blue-300 flex items-center gap-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span>Solved by RedisStorage (shared cluster state)</span>
+                    </div>
+                  </div>
+
+                  {/* Challenge 2: Edge Serverless */}
+                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.03] dark:bg-amber-500/[0.06] p-4 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 font-semibold text-sm text-amber-600 dark:text-amber-400 mb-2">
+                        <Globe className="h-4 w-4" />
+                        <span>Edge &amp; Serverless (Zero-Config)</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        In serverless runtimes like Cloudflare Workers, there is no writable filesystem. Dinou auto-binds to your{" "}
+                        <code className="text-foreground font-mono">DINOU_CACHE</code> KV namespace at runtime.
+                        You <strong>never configure dinou.config.mjs</strong>—simply add the KV binding to{" "}
+                        <code className="text-foreground font-mono">wrangler.toml</code>. Deno Deploy works identically with zero-config Deno KV.
+                      </p>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-amber-500/15 text-[11px] font-medium text-amber-600 dark:text-amber-300 flex items-center gap-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span>Zero-config auto-activation (Edge KV)</span>
+                    </div>
+                  </div>
+
+                  {/* Challenge 3: CI / Testing */}
+                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.03] dark:bg-emerald-500/[0.06] p-4 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 font-semibold text-sm text-emerald-600 dark:text-emerald-400 mb-2">
+                        <Cpu className="h-4 w-4" />
+                        <span>Fast Testing &amp; Mocking</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        Unit tests, CI pipelines, and ephemeral mock runs require ultra-fast execution without disk clutter
+                        or external database infrastructure dependencies.
+                      </p>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-emerald-500/15 text-[11px] font-medium text-emerald-600 dark:text-emerald-300 flex items-center gap-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span>Solved by MemoryStorage (ephemeral RAM Map)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Zero Code Modifications Takeaway */}
+                <div className="not-prose my-6 rounded-xl border border-border/80 bg-card p-4">
+                  <div className="flex items-center gap-2 font-semibold text-sm text-foreground mb-1.5">
+                    <Database className="h-4 w-4 text-primary" />
+                    <span>Zero Code Modifications Across Infrastructures</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Because your application code only interacts with high-level revalidation functions like{" "}
+                    <code className="text-foreground font-mono">revalidateTag(&quot;products&quot;)</code> or{" "}
+                    <code className="text-foreground font-mono">revalidatePath(&quot;/catalog&quot;)</code>, your UI and
+                    server components remain 100% identical whether you run on a single local Node.js VPS (<code className="text-foreground font-mono">FileSystemStorage</code>),
+                    scale to a multi-pod Kubernetes cluster (<code className="text-foreground font-mono">RedisStorage</code> in <code className="text-foreground font-mono">dinou.config.mjs</code>),
+                    or deploy to global Cloudflare Workers (automatic <code className="text-foreground font-mono">CloudflareKVStorage</code> via <code className="text-foreground font-mono">wrangler.toml</code>).
+                  </p>
                 </div>
               </section>
 
-              {/* 6.3 Supported Adapters */}
+              {/* 6.2 Supported Adapters */}
               <section id="adapter-catalog" className="mt-8 scroll-mt-20">
-                <h4>6.3. Supported Storage Adapters</h4>
+                <h4>6.2. Supported Storage Adapters &amp; Configuration</h4>
 
                 <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
                   <Table>
@@ -1247,12 +1317,12 @@ export function LiveAnalyticsButton() {
                       <TableRow>
                         <TableCell className="font-mono text-xs font-semibold">CloudflareKVStorage</TableCell>
                         <TableCell className="text-xs">Cloudflare Workers</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">Globally replicated edge key-value storage with zero cold starts.</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Globally replicated edge key-value storage. Auto-bound via DINOU_CACHE in wrangler.toml (zero config).</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell className="font-mono text-xs font-semibold">DenoKVStorage</TableCell>
                         <TableCell className="text-xs">Deno Deploy / Deno KV</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">Built-in distributed ACID key-value store for Deno runtimes.</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Built-in distributed ACID key-value store. Auto-bound via Deno.openKv() (zero config).</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell className="font-mono text-xs font-semibold">MemoryStorage</TableCell>
@@ -1263,132 +1333,208 @@ export function LiveAnalyticsButton() {
                   </Table>
                 </div>
 
+                <p className="mt-4 text-sm text-muted-foreground">
+                  In Node.js / Bun environments, override the default local disk storage by declaring a distributed adapter
+                  (such as <code className="text-foreground font-mono">RedisStorage</code>) in{" "}
+                  <code className="text-foreground font-semibold">dinou.config.mjs</code>. Dinou binds it
+                  automatically to the internal revalidation and ISR pipeline on startup (edge environments like Cloudflare Workers
+                  and Deno Deploy activate automatically without editing this file):
+                </p>
+
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// server.mjs or dinou.config.mjs
-import { setStorageAdapter, RedisStorage } from "dinou/server";
+{`// dinou.config.mjs
+import { defineConfig } from "dinou";
+import { RedisStorage } from "dinou/server";
 import { createClient } from "redis";
 
 const redis = createClient({ url: process.env.REDIS_URL });
 await redis.connect();
 
-// Configure Redis as the cluster-wide cache storage for Dinou
-setStorageAdapter(new RedisStorage(redis, "dinou-cache:"));`}
+export default defineConfig({
+  // Cluster-wide distributed cache storage for ISR and revalidation
+  storage: new RedisStorage(redis, "dinou-cache:"),
+});`}
                 </CodeBlock>
+
+                {/* MemoryStorage Deep Dive Box */}
+                <div className="not-prose my-6 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.02] dark:bg-emerald-500/[0.04] p-5 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
+                      <div className="p-1.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                        <Cpu className="h-4 w-4" />
+                      </div>
+                      <span>Why Use MemoryStorage? Key Benefits &amp; Use Cases</span>
+                    </div>
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold ring-1 ring-inset ring-emerald-500/20">
+                      RAM Map • Zero Disk I/O
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Unlike <code className="text-foreground font-mono">FileSystemStorage</code> (which writes physical files to disk)
+                    or <code className="text-foreground font-mono">RedisStorage</code> (which communicates over network TCP),{" "}
+                    <code className="text-foreground font-mono">MemoryStorage</code> keeps all cached HTML, RSC streams, and tag
+                    metadata exclusively inside a JavaScript <code className="text-foreground font-mono">Map</code> in process memory.
+                    When the process exits, memory is instantly freed with zero disk traces.
+                  </p>
+
+                  {/* 4 Practical Advantages Grid */}
+                  <div className="grid gap-3 sm:grid-cols-2 text-xs">
+                    <div className="rounded-lg border border-border/60 bg-card/60 p-3 space-y-1">
+                      <div className="flex items-center gap-1.5 font-semibold text-foreground text-[12px]">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                        <span>1. Instant, Pollution-Free Unit Tests</span>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed text-[11px]">
+                        Writing to disk in Vitest/Jest causes test cross-talk (Test 1 leaves cache files that break Test 2).
+                        Calling <code className="text-foreground font-mono">setStorageAdapter(new MemoryStorage())</code> gives every
+                        test a pristine, isolated store in 0 microseconds without cleaning temp folders.
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg border border-border/60 bg-card/60 p-3 space-y-1">
+                      <div className="flex items-center gap-1.5 font-semibold text-foreground text-[12px]">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                        <span>2. Zero-Infra CI Pipelines (GitHub Actions)</span>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed text-[11px]">
+                        Validate full ISR and revalidation lifecycles (<code className="text-foreground font-mono">revalidateTag</code>,{" "}
+                        <code className="text-foreground font-mono">revalidatePath</code>) in automated CI runners without provisioning
+                        or maintaining external Redis service containers.
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg border border-border/60 bg-card/60 p-3 space-y-1">
+                      <div className="flex items-center gap-1.5 font-semibold text-foreground text-[12px]">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                        <span>3. Hardened Read-Only Docker Containers</span>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed text-[11px]">
+                        In high-security enterprise environments running with <code className="text-foreground font-mono">docker --read-only</code>,
+                        local filesystem writes fail with <code className="text-foreground font-mono">EROFS</code>. MemoryStorage
+                        enables full caching and revalidation purely inside container RAM.
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg border border-border/60 bg-card/60 p-3 space-y-1">
+                      <div className="flex items-center gap-1.5 font-semibold text-foreground text-[12px]">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                        <span>4. Resilient Edge Worker Fallback</span>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed text-[11px]">
+                        In Cloudflare Workers deployments where a <code className="text-foreground font-mono">DINOU_CACHE</code> KV
+                        binding is omitted, Dinou automatically falls back to MemoryStorage inside the isolate RAM without crashing.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Code Example */}
+                  <div className="space-y-1.5 pt-1">
+                    <span className="text-[11px] font-semibold text-foreground">Implementation Examples:</span>
+                    <CodeBlock
+                      language="typescript"
+                      containerClassName="w-full overflow-hidden rounded-lg text-xs"
+                    >
+{`// 1. In dinou.config.mjs (conditional for CI / test environment)
+import { defineConfig } from "dinou";
+import { MemoryStorage, RedisStorage } from "dinou/server";
+
+export default defineConfig({
+  // Use in-memory cache during tests to avoid external database dependencies
+  storage: process.env.NODE_ENV === "test"
+    ? new MemoryStorage()
+    : new RedisStorage(redisClient, "dinou-cache:"),
+});
+
+// 2. Or directly in your test suite (Vitest / Jest) for total test isolation
+import { setStorageAdapter, MemoryStorage, revalidateTag } from "dinou/server";
+import { beforeEach, test, expect } from "vitest";
+
+beforeEach(() => {
+  // Reset cache state with a clean, isolated in-memory store before every test
+  setStorageAdapter(new MemoryStorage());
+});`}
+                    </CodeBlock>
+                  </div>
+                </div>
+
+                <p className="mt-4 text-xs text-muted-foreground leading-relaxed">
+                  <strong>Note for external worker scripts:</strong> If you run standalone background scripts or CLI tools outside
+                  the Dinou web server that need to perform cache purges, you can imperatively bind the storage adapter using{" "}
+                  <code className="text-foreground font-mono">setStorageAdapter(adapter)</code> from{" "}
+                  <code className="text-foreground font-mono">"dinou/server"</code>.
+                </p>
               </section>
             </section>
 
-            {/* 7. Security & Webhooks */}
+            {/* 7. Webhook Integrations */}
             <section
               id="security-and-webhooks"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <h3>
-                7. Security &amp; Webhook Integrations
+                7. Webhook Integrations (Headless CMS)
               </h3>
+              <p>
+                External events, such as a Headless CMS (Sanity, Strapi, Contentful) publishing content or an e-commerce inventory sync, can trigger on-demand revalidation in Dinou. Webhook endpoints are created via{" "}
+                <strong>Web Standards Plugins</strong> using the <code>onRequest</code> hook in <code className="text-foreground font-semibold">dinou.config.mjs</code>:
+              </p>
 
-              {/* 7.1 Strict Rules */}
-              <section id="strict-rules" className="mt-6 scroll-mt-20">
-                <h4>7.1. Strict Execution Rules</h4>
+              <CodeBlock
+                language="typescript"
+                containerClassName="w-full overflow-hidden rounded-lg my-4"
+              >
+{`// dinou.config.mjs
+import { defineConfig } from "dinou";
+import { revalidateTag, revalidatePage, revalidatePath } from "dinou/server";
 
-                <Alert className="not-prose border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/10 my-4">
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />
-                  <AlertTitle>Strict Execution Rules</AlertTitle>
-                  <AlertDescription>
-                    <div className="space-y-2 text-sm leading-relaxed">
-                      <p>
-                        <strong>Only Call in Mutative Event Contexts:</strong> Revalidation APIs are mutative
-                        side-effects. They must only be called inside <strong>Server Actions</strong>, HTTP webhook
-                        endpoints, or standalone synchronization scripts.
-                      </p>
-                      <p>
-                        <strong>Never Call Inside Components or getProps:</strong> Invoking <code>revalidatePage</code>,{" "}
-                        <code>revalidatePath</code>, or <code>revalidateTag</code> during the render phase or inside{" "}
-                        <code>getProps</code> creates an <strong>infinite regeneration loop</strong> that will exhaust
-                        server CPU and disk I/O.
-                      </p>
-                    </div>
-                  </AlertDescription>
-                </Alert>
-              </section>
+export default defineConfig({
+  plugins: [
+    {
+      name: "revalidation-webhook",
+      async onRequest(request) {
+        const url = new URL(request.url);
 
-              {/* 7.2 Secure Webhooks */}
-              <section id="secure-webhooks" className="mt-8 scroll-mt-20">
-                <h4>7.2. Securing Webhook Endpoints</h4>
-                <p>
-                  Over 90% of on-demand revalidations in production are triggered by external events, such as a Headless
-                  CMS (Sanity, Strapi, Contentful) publishing content. Always protect your webhook endpoints with a secret token:
-                </p>
+        // Intercept POST requests to /api/revalidate
+        if (url.pathname === "/api/revalidate" && request.method === "POST") {
+          try {
+            const { tag, page, path, cascade } = await request.json();
 
-                <CodeBlock
-                  language="javascript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// server.js (Express / Node.js)
-const { revalidateTag, revalidatePage, revalidatePath } = require("dinou/server");
+            if (tag) {
+              await revalidateTag(tag);
+            }
+            if (page) {
+              // Surgical page-only revalidation
+              await revalidatePage(page);
+            }
+            if (path) {
+              // Route revalidation with optional layout cascade
+              await revalidatePath(path, { cascade: Boolean(cascade) });
+            }
 
-app.post("/api/revalidate", express.json(), async (req, res) => {
-  // 1. Verify Authorization Secret Token (prevents DoS attacks)
-  const authHeader = req.headers.authorization;
-  if (authHeader !== \`Bearer \${process.env.REVALIDATION_SECRET}\`) {
-    return res.status(401).json({ error: "Unauthorized revalidation request" });
-  }
-
-  const { tag, page, path, cascade } = req.body;
-
-  try {
-    if (tag) {
-      await revalidateTag(tag);
-    }
-    if (page) {
-      // Surgical page-only revalidation
-      await revalidatePage(page);
-    }
-    if (path) {
-      // Route revalidation with optional layout cascade
-      await revalidatePath(path, { cascade: Boolean(cascade) });
-    }
-    return res.status(200).json({ revalidated: true, timestamp: Date.now() });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
+            return Response.json({ revalidated: true, timestamp: Date.now() });
+          } catch (err: any) {
+            return Response.json({ error: err.message }, { status: 500 });
+          }
+        }
+      },
+    },
+  ],
 });`}
-                </CodeBlock>
-              </section>
+              </CodeBlock>
 
-              {/* 7.3 Standalone Scripts */}
-              <section id="standalone-scripts" className="mt-8 scroll-mt-20">
-                <h4>7.3. Running in Standalone Scripts</h4>
-                <p>
-                  To run a background data sync or inventory update script that purges the Dinou cache outside
-                  the HTTP server lifecycle:
+              <div className="border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20 rounded-lg p-4 not-prose my-6">
+                <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400 mb-1">
+                  <Info className="h-5 w-5" />
+                  <span>Production Tip: Securing Public Webhook Endpoints</span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  In production, verify an authorization header (such as <code>request.headers.get(&quot;authorization&quot;) === `Bearer ...`</code>) or a cryptographic HMAC webhook signature from your CMS provider to ensure only authorized callers can trigger revalidation cycles.
                 </p>
-
-                <CodeBlock
-                  language="javascript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// scripts/sync-catalog.js
-const { revalidateTag, revalidatePage } = require("dinou/server");
-
-async function run() {
-  console.log("Synchronizing product catalog with warehouse ERP...");
-  await syncProductsFromWarehouse();
-
-  console.log("Invalidating catalog cache tags...");
-  await revalidateTag("catalog");
-
-  // Revalidate spotlight promo page surgically
-  await revalidatePage("/promotions/deal-of-the-day");
-
-  console.log("Revalidation completed successfully.");
-}
-
-run().catch(console.error);`}
-                </CodeBlock>
-              </section>
+              </div>
             </section>
 
             {/* 8. Strategy Comparison Matrix */}
@@ -1400,97 +1546,121 @@ run().catch(console.error);`}
                 8. Strategy Comparison Matrix
               </h3>
               <p>
-                Reference guide for choosing the optimal invalidation and refresh mechanism in Dinou v7:
+                Comprehensive reference guide for choosing the optimal invalidation and refresh mechanism in Dinou:
               </p>
 
-              <div className="not-prose overflow-x-auto rounded-lg border border-border my-6">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Mechanism</TableHead>
-                      <TableHead>Tier</TableHead>
-                      <TableHead>Invocation</TableHead>
-                      <TableHead>Invalidates Server?</TableHead>
-                      <TableHead>Invalidates Client?</TableHead>
-                      <TableHead>Preserves Client State?</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="font-mono text-xs font-semibold">revalidate = N</TableCell>
-                      <TableCell className="text-xs">Server</TableCell>
-                      <TableCell className="text-xs text-muted-foreground"><code>page_functions.ts</code></TableCell>
-                      <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Yes (Time-based SWR)</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">No</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">N/A</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-mono text-xs font-semibold">revalidatePage(path)</TableCell>
-                      <TableCell className="text-xs">Server</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">Server Action / Webhook</TableCell>
-                      <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Yes (page.rsc + HTML)</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">No</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">N/A</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-mono text-xs font-semibold">revalidatePath(path)</TableCell>
-                      <TableCell className="text-xs">Server</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">Server Action / Webhook</TableCell>
-                      <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Yes (page + layout segment)</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">No</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">N/A</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-mono text-xs font-semibold">revalidatePath(..., {`{ cascade: true }`})</TableCell>
-                      <TableCell className="text-xs">Server</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">Server Action / Webhook</TableCell>
-                      <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Yes (layout + child pages)</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">No</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">N/A</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-mono text-xs font-semibold">revalidateTag(tag)</TableCell>
-                      <TableCell className="text-xs">Server</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">Server Action / Webhook</TableCell>
-                      <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Yes (layout, page, or slot)</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">No</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">N/A</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-mono text-xs font-semibold">&lt;Link fresh&gt;</TableCell>
-                      <TableCell className="text-xs">Client</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">JSX Link</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">No</TableCell>
-                      <TableCell className="text-xs text-amber-600 dark:text-amber-400 font-semibold">Yes (pageCache.delete)</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">No (navigates)</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-mono text-xs font-semibold">router.refresh()</TableCell>
-                      <TableCell className="text-xs">Client</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">useRouter() hook</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">No</TableCell>
-                      <TableCell className="text-xs text-amber-600 dark:text-amber-400 font-semibold">Yes (pageCache only)</TableCell>
-                      <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Yes (inputs, scroll, layout)</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-mono text-xs font-semibold">router.refresh({`{ layout: true }`})</TableCell>
-                      <TableCell className="text-xs">Client</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">useRouter() hook</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">No</TableCell>
-                      <TableCell className="text-xs text-amber-600 dark:text-amber-400 font-semibold">Yes (pageCache + layoutCache)</TableCell>
-                      <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Yes (inputs, scroll)</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-mono text-xs font-semibold">refreshSlot(slotId)</TableCell>
-                      <TableCell className="text-xs">Client</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">useRouter() / function</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">No</TableCell>
-                      <TableCell className="text-xs text-amber-600 dark:text-amber-400 font-semibold">Yes (slot DOM only)</TableCell>
-                      <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Yes (entire page preserved)</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
+              {/* 8.1 Server Matrix */}
+              <section id="server-matrix" className="mt-8 scroll-mt-20">
+                <h4>8.1. Server-Side Invalidation Mechanisms</h4>
+                <p className="text-sm text-muted-foreground">
+                  Executed inside Server Functions, Webhook plugins, or route configurations to purge server-side HTML,
+                  React Server Component payloads, and storage caches:
+                </p>
+
+                <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[230px]">Mechanism</TableHead>
+                        <TableHead>Invocation Context</TableHead>
+                        <TableHead>Invalidation Scope (Server)</TableHead>
+                        <TableHead>Primary Use Case</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold">revalidate = N</TableCell>
+                        <TableCell className="text-xs text-muted-foreground"><code>page / layout_functions.ts</code></TableCell>
+                        <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Time-based SWR cache TTL</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Automatic background freshness for low-to-medium dynamic content.</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold">revalidatePage(path)</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Server Function / Webhook Plugin</TableCell>
+                        <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Target page only (HTML + RSC)</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Surgical route mutation; guarantees zero impact on parent layout shells.</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold">revalidatePath(path)</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Server Function / Webhook Plugin</TableCell>
+                        <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Target page + layout segment</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Standard route mutation when both page content and layout segment update.</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold">revalidatePath(path, {`{ cascade: true }`})</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Server Function / Webhook Plugin</TableCell>
+                        <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Layout shell + all descendant child pages</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Deep structural invalidation; recursively purges and rebuilds all children.</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold">revalidateTag(tag)</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Server Function / Webhook Plugin</TableCell>
+                        <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Matching layout, page, or &lt;DinouCacheSlot&gt;</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Surgical multi-route purge without touching parent layout shells.</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold">revalidateTag(tag, {`{ cascade: true }`})</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Server Function / Webhook Plugin</TableCell>
+                        <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Tagged layout shell + all child pages</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Full module invalidation when layout structural dependencies affect all children.</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </section>
+
+              {/* 8.2 Client Matrix */}
+              <section id="client-matrix" className="mt-10 scroll-mt-20">
+                <h4>8.2. Client-Side Router Refresh Mechanisms</h4>
+                <p className="text-sm text-muted-foreground">
+                  Executed inside Client Components and user interactions to invalidate browser router caches
+                  without triggering a full browser window reload (F5):
+                </p>
+
+                <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[230px]">Mechanism</TableHead>
+                        <TableHead>Invocation Context</TableHead>
+                        <TableHead>Client Cache Impact</TableHead>
+                        <TableHead>Preserves UI State?</TableHead>
+                        <TableHead>Bypasses Server Storage?</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold">&lt;Link fresh&gt;</TableCell>
+                        <TableCell className="text-xs text-muted-foreground"><code>&lt;Link&gt;</code> navigation</TableCell>
+                        <TableCell className="text-xs text-amber-600 dark:text-amber-400 font-semibold">Bypasses &amp; evicts <code>pageCache</code></TableCell>
+                        <TableCell className="text-xs text-muted-foreground">No (navigates to route)</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">No (serves server storage cache)</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold">router.refresh()</TableCell>
+                        <TableCell className="text-xs text-muted-foreground"><code>useRouter()</code> hook</TableCell>
+                        <TableCell className="text-xs text-amber-600 dark:text-amber-400 font-semibold">Evicts <code>pageCache</code> for current URL</TableCell>
+                        <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Yes (inputs, scroll, layout preserved)</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">No (serves server storage cache)</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold">router.refresh({`{ layout: true }`})</TableCell>
+                        <TableCell className="text-xs text-muted-foreground"><code>useRouter()</code> hook</TableCell>
+                        <TableCell className="text-xs text-amber-600 dark:text-amber-400 font-semibold">Evicts both <code>pageCache</code> &amp; <code>layoutCache</code></TableCell>
+                        <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Yes (inputs &amp; scroll preserved; layout re-renders)</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">No (serves server storage cache)</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold">refreshSlot(id, [options])</TableCell>
+                        <TableCell className="text-xs text-muted-foreground"><code>refreshSlot</code> / <code>useRouter()</code></TableCell>
+                        <TableCell className="text-xs text-amber-600 dark:text-amber-400 font-semibold">Re-fetches and replaces slot DOM only</TableCell>
+                        <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Yes (entire page, layout &amp; scroll preserved)</TableCell>
+                        <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Only with <code>{`{ fresh: true }`}</code></TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </section>
             </section>
           </div>
         </div>
