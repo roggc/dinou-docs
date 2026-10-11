@@ -1,4 +1,5 @@
 import { TableOfContents } from "@/docs/components/table-of-contents";
+import { DocsPager } from "@/docs/components/docs-pager";
 import {
   Alert,
   AlertDescription,
@@ -283,6 +284,9 @@ rm -rf dist2 dist3 public react_client_manifest server_functions_manifest`}
                 </div>
               </div>
             </section>
+
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

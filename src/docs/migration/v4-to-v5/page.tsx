@@ -1,4 +1,5 @@
 import { TableOfContents } from "@/docs/components/table-of-contents";
+import { DocsPager } from "@/docs/components/docs-pager";
 import {
   Alert,
   AlertDescription,
@@ -409,6 +410,9 @@ module.exports = {
                 For detailed configuration and hooks, check out the new <a href="/docs/plugins" className="underline font-semibold text-blue-600 dark:text-blue-400">Plugin System Guide</a>.
               </p>
             </section>
+
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

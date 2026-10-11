@@ -1,5 +1,5 @@
 import { TableOfContents } from "@/docs/components/table-of-contents";
-import { Card, CardContent, CardHeader, CardTitle } from "@/docs/components/ui/card";
+import { DocsPager } from "@/docs/components/docs-pager";
 import {
   Table,
   TableBody,
@@ -18,7 +18,6 @@ import {
   Globe,
   Terminal,
   Layers,
-  ArrowRight,
   Cloud,
   Server,
   FileCode2,
@@ -29,7 +28,6 @@ import {
   Sliders,
   XCircle,
 } from "lucide-react";
-import { Link } from "dinou";
 
 const tocItems = [
   { id: "overview", title: "1. Overview & Architectural Leap", level: 2 },
@@ -52,7 +50,6 @@ const tocItems = [
   { id: "cli-scripts", title: "6. CLI Standardization & Scripts", level: 2 },
   { id: "multi-runtime-binaries", title: "7. Multi-Runtime, Serverless & Static Deployments", level: 2 },
   { id: "gitignore-update", title: "8. Updating .gitignore", level: 2 },
-  { id: "verification", title: "9. Verification & Next Steps", level: 2 },
 ];
 
 export default function MigrationV6ToV7Page() {
@@ -1099,76 +1096,8 @@ dist
               </ul>
             </section>
 
-            {/* Section 9: Verification */}
-            <section id="verification" className="scroll-mt-20 mt-12 sm:mt-16">
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                9. Verification &amp; Next Steps
-              </h2>
-              <p>
-                Launch your development server to verify that your routes render with the new v7 engine:
-              </p>
-
-              <CodeBlock language="bash" containerClassName="w-full rounded-lg not-prose my-4">
-                {`npm run dev`}
-              </CodeBlock>
-
-              <p className="mt-4">
-                Your application should compile in memory and be available immediately at <code>http://localhost:3000</code>.
-              </p>
-
-              <div className="grid gap-4 sm:grid-cols-2 not-prose mt-8">
-                <Card className="hover:border-blue-500/40 transition-colors group">
-                  <Link href="/docs/why-dinou" className="block h-full p-5">
-                    <div className="flex items-start justify-between w-full mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
-                        <Sparkles className="h-5 w-5" />
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-                    </div>
-                    <CardTitle className="text-base group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-1">
-                      Why Dinou?
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Explore the core philosophy, architectural pillars, and complete feature catalog of Dinou v7.
-                    </p>
-                  </Link>
-                </Card>
-
-                <Card className="hover:border-purple-500/40 transition-colors group">
-                  <Link href="/docs/routing" className="block h-full p-5">
-                    <div className="flex items-start justify-between w-full mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
-                        <Layers className="h-5 w-5" />
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
-                    </div>
-                    <CardTitle className="text-base group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors mb-1">
-                      Routing &amp; Layouts
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Learn nested layouts, route groups, parallel slots, and private folder conventions.
-                    </p>
-                  </Link>
-                </Card>
-
-                <Card className="hover:border-emerald-500/40 transition-colors group sm:col-span-2">
-                  <Link href="/docs/type-safe-routing" className="block h-full p-5">
-                    <div className="flex items-start justify-between w-full mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
-                        <ShieldCheck className="h-5 w-5" />
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
-                    </div>
-                    <CardTitle className="text-base group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors mb-1">
-                      Type-Safe Routing (New in v7)
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Discover zero-runtime type safety with auto-generated route definitions, IDE autocomplete, and typed PageProps, LayoutProps &amp; RouteParams.
-                    </p>
-                  </Link>
-                </Card>
-              </div>
-            </section>
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

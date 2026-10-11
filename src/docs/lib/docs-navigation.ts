@@ -186,6 +186,16 @@ export const docsNavigation: NavSection[] = [
     ],
   },
   {
+    title: "Internals",
+    items: [
+      {
+        title: "Architecture",
+        href: "/docs/architecture",
+        icon: Cpu,
+      },
+    ],
+  },
+  {
     title: "Guides",
     items: [
       {
@@ -222,16 +232,6 @@ export const docsNavigation: NavSection[] = [
         title: "Migration from v4 to v5",
         href: "/docs/migration/v4-to-v5",
         icon: RefreshCw,
-      },
-    ],
-  },
-  {
-    title: "Internals",
-    items: [
-      {
-        title: "Architecture",
-        href: "/docs/architecture",
-        icon: Cpu,
       },
     ],
   },

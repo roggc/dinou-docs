@@ -7,15 +7,13 @@ import { docsNavigation } from "@/docs/lib/docs-navigation";
 export function DocsPager() {
   const pathname = usePathname();
 
-  // Exclude Upgrade Guides (e.g., /docs/migration/*) or missing routes
-  if (!pathname || pathname.startsWith("/docs/migration")) {
+  if (!pathname) {
     return null;
   }
 
-  // Flatten active navigation items (strictly excluding Upgrade Guides)
+  // Flatten active navigation items across all sections
   const flatItems: { title: string; href: string; sectionTitle: string }[] = [];
   for (const section of docsNavigation) {
-    if (section.title === "Upgrade Guides") continue;
     for (const item of section.items) {
       flatItems.push({
         title: item.title,

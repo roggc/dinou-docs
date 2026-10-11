@@ -1,4 +1,5 @@
 import { Link } from "dinou";
+import { DocsPager } from "@/docs/components/docs-pager";
 import { Card, CardContent, CardHeader, CardTitle } from "@/docs/components/ui/card";
 import { Badge } from "@/docs/components/ui/badge";
 import {
@@ -119,6 +120,8 @@ export default function MigrationIndexPage() {
           </Link>
         </div>
 
+        {/* Documentation Previous / Next Pager */}
+        <DocsPager />
       </div>
     </div>
   );
