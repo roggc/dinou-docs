@@ -25,8 +25,8 @@ const tocItems = [
   { id: "plugin-setup", title: "3. The Dinou v7 Clerk Plugin", level: 2 },
   { id: "rsc-usage", title: "4. Usage in RSC & Server Functions", level: 2 },
   { id: "clerk-server-actions", title: "4.1 Securing Server Functions", level: 3 },
-  { id: "clerk-page-functions", title: "4.2 Fetching User Data", level: 3 },
-  { id: "clerk-page-view", title: "4.3 Dashboard Page View", level: 3 },
+  { id: "clerk-page-functions", title: "4.2 Option A: Server Component (Direct await)", level: 3 },
+  { id: "clerk-page-view", title: "4.3 Option B: Client Component (getProps)", level: 3 },
   { id: "client-setup", title: "5. Client Setup (DinouClerkProvider)", level: 2 },
   { id: "clerk-root-layout", title: "5.1 Wrapping Root Layout", level: 3 },
   { id: "webhooks", title: "6. Webhooks & Database Sync", level: 2 },
@@ -226,13 +226,95 @@ export async function createPost(title: string, content: string) {
 }`}</CodeBlock>
               </div>
 
-              <h3 id="clerk-page-functions">4.2 Fetching User Data in Page Functions</h3>
+              <div className="not-prose my-6">
+                <Alert>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <AlertTitle>Server Component vs. Client Component Architecture</AlertTitle>
+                  <AlertDescription className="text-xs leading-relaxed text-muted-foreground mt-1">
+                    In Dinou, components are <strong>Server Components by default</strong>. They can execute queries with top-level <code>await</code> directly inside the component body and read <code>getContext()</code> with <strong>zero need for <code>getProps</code></strong>.
+                    <br /><br />
+                    <code>getProps</code> in <code>page_functions.ts</code> is specifically designed for the <strong>Client-First Model</strong>, where <code>page.tsx</code> is an interactive Client Component (<code>&quot;use client&quot;</code>) that cannot query databases or access server secrets directly.
+                  </AlertDescription>
+                </Alert>
+              </div>
+
+              <h3 id="clerk-page-functions">4.2 Option A: Server Component (Zero Boilerplate with Direct <code>await</code>)</h3>
               <p>
-                Load user-specific data from your database inside <code>page_functions.ts</code> before rendering the page. In Dinou v7, set <code>export const revalidate = 0;</code> to enforce request-time dynamic execution:
+                If your dashboard page does not require client-side React hooks (like <code>useState</code>), keep it as a Server Component. Declare <code>export const revalidate = 0;</code> inside <code>src/dashboard/page_functions.ts</code> to enforce dynamic execution at request-time, and query Prisma directly inside <code>src/dashboard/page.tsx</code> with native <code>async/await</code>:
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="typescript">{`// src/dashboard/page_functions.ts
+                <TabbedCodeBlock
+                  tabs={[
+                    {
+                      id: "clerk-server-page-functions-file",
+                      label: "src/dashboard/page_functions.ts",
+                      language: "typescript",
+                      code: `// src/dashboard/page_functions.ts
+
+// Force on-demand SSR at request-time to load dynamic session
+export const revalidate = 0;`,
+                    },
+                    {
+                      id: "clerk-server-page-file",
+                      label: "src/dashboard/page.tsx",
+                      language: "tsx",
+                      code: `// src/dashboard/page.tsx (Server Component)
 import { getContext, redirect } from "dinou";
+import { prisma } from "@/lib/prisma";
+
+export default async function DashboardPage() {
+  const context = getContext();
+  const userId = context?.userId;
+
+  // Protect route
+  if (!userId) {
+    return redirect("/login");
+  }
+
+  // Direct database query on Node.js / Edge without getProps
+  const posts = await prisma.post.findMany({
+    where: { authorClerkId: userId },
+  });
+
+  return (
+    <main className="max-w-4xl mx-auto p-8 space-y-6">
+      <h1 className="text-3xl font-bold">Dashboard</h1>
+      <p className="text-muted-foreground">Authenticated as: {userId}</p>
+
+      <div className="space-y-4">
+        {posts.map((post) => (
+          <article key={post.id} className="p-4 rounded-lg border bg-card">
+            <h2 className="text-xl font-semibold">{post.title}</h2>
+            <p className="text-sm text-muted-foreground mt-1">{post.content}</p>
+          </article>
+        ))}
+      </div>
+    </main>
+  );
+}`,
+                    },
+                  ]}
+                />
+              </div>
+
+              <h3 id="clerk-page-view">4.3 Option B: Client Component (<code>&quot;use client&quot;</code> with <code>getProps</code>)</h3>
+              <p>
+                When <code>page.tsx</code> is an interactive Client Component (e.g. managing UI state with <code>useState</code> or using Clerk client hooks like <code>useUser()</code>), it runs in the browser and cannot connect to your database directly.
+              </p>
+              <p>
+                In this case, use <code>getProps()</code> in <code>page_functions.ts</code> to fetch data on the server, which Dinou automatically passes into your Client Component as initial props:
+              </p>
+
+              <div className="not-prose my-4">
+                <TabbedCodeBlock
+                  tabs={[
+                    {
+                      id: "clerk-page-functions-file",
+                      label: "src/dashboard/page_functions.ts",
+                      language: "typescript",
+                      code: `// src/dashboard/page_functions.ts
+import { getContext, redirect } from "dinou";
+import { prisma } from "@/lib/prisma";
 
 // Force on-demand SSR at request-time to load dynamic session
 export const revalidate = 0;
@@ -253,26 +335,29 @@ export async function getProps() {
     posts,
     userId,
   };
-}`}</CodeBlock>
-              </div>
+}`,
+                    },
+                    {
+                      id: "clerk-client-page-file",
+                      label: "src/dashboard/page.tsx",
+                      language: "tsx",
+                      code: `// src/dashboard/page.tsx
+"use client";
 
-              <h3 id="clerk-page-view">4.3 Dashboard Page View (<code>page.tsx</code>)</h3>
-              <p>
-                The page component receives the returned props strictly typed via <code>PageProps&lt;&quot;/dashboard&quot;&gt;</code>:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="tsx">{`// src/dashboard/page.tsx
 import type { PageProps } from "dinou";
+import { useState } from "react";
 
 interface DashboardProps extends PageProps<"/dashboard"> {
   posts: Array<{ id: string; title: string; content: string }>;
   userId: string;
 }
 
-export default function DashboardPage({ posts, userId }: DashboardProps) {
+export default function DashboardPage({ posts: initialPosts, userId }: DashboardProps) {
+  const [posts, setPosts] = useState(initialPosts);
+
   return (
     <main className="max-w-4xl mx-auto p-8 space-y-6">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
+      <h1 className="text-3xl font-bold">Dashboard (Client Component)</h1>
       <p className="text-muted-foreground">Authenticated as: {userId}</p>
 
       <div className="space-y-4">
@@ -285,7 +370,10 @@ export default function DashboardPage({ posts, userId }: DashboardProps) {
       </div>
     </main>
   );
-}`}</CodeBlock>
+}`,
+                    },
+                  ]}
+                />
               </div>
             </section>
 
