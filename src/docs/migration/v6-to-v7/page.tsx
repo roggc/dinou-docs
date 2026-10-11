@@ -26,7 +26,6 @@ import {
   RefreshCw,
   ShieldCheck,
   Split,
-  Clock,
   Sliders,
   XCircle,
 } from "lucide-react";
@@ -45,18 +44,15 @@ const tocItems = [
   { id: "layered-segmentation", title: "3. Layered Segmentation Architecture", level: 2 },
   { id: "horizontal-segmentation", title: "3.1. Horizontal Segmentation & Layout Preservation", level: 3 },
   { id: "layout-functions", title: "3.2. layout_functions for Decoupled Layout ISR", level: 3 },
-  { id: "vertical-segmentation", title: "3.3. Vertical Segmentation (DinouCacheSlot)", level: 3 },
-  { id: "ppr-engine", title: "3.4. Partial Prerendering (PPR) Engine", level: 3 },
-  { id: "resilience-error-handling", title: "4. Resilience & React 19 Error Handling", level: 2 },
-  { id: "error-double-wrap", title: "4.1. Elimination of HTML Double-Wrapping", level: 3 },
-  { id: "suspense-exception", title: "4.2. Handling SuspenseException with use()", level: 3 },
-  { id: "two-level-boundaries", title: "4.3. Two-Level Error Boundaries", level: 3 },
-  { id: "dual-bundle-engine", title: "5. Dual-Bundle In-Memory Engine (0-Fork)", level: 2 },
-  { id: "updating-dependencies", title: "6. Updating Dependencies & StrictMode", level: 2 },
-  { id: "cli-scripts", title: "7. CLI Standardization & Scripts", level: 2 },
-  { id: "multi-runtime-binaries", title: "8. Multi-Runtime, Serverless & Static Deployments", level: 2 },
-  { id: "gitignore-update", title: "9. Updating .gitignore", level: 2 },
-  { id: "verification", title: "10. Verification & Next Steps", level: 2 },
+  { id: "revalidate-page-api", title: "3.3. Surgical Revalidation with revalidatePage (New in v7)", level: 3 },
+  { id: "vertical-segmentation", title: "3.4. Vertical Segmentation (DinouCacheSlot)", level: 3 },
+  { id: "ppr-engine", title: "3.5. Partial Prerendering (PPR) Engine", level: 3 },
+  { id: "dual-bundle-engine", title: "4. Dual-Bundle In-Memory Engine (0-Fork)", level: 2 },
+  { id: "updating-dependencies", title: "5. Updating Dependencies & StrictMode", level: 2 },
+  { id: "cli-scripts", title: "6. CLI Standardization & Scripts", level: 2 },
+  { id: "multi-runtime-binaries", title: "7. Multi-Runtime, Serverless & Static Deployments", level: 2 },
+  { id: "gitignore-update", title: "8. Updating .gitignore", level: 2 },
+  { id: "verification", title: "9. Verification & Next Steps", level: 2 },
 ];
 
 export default function MigrationV6ToV7Page() {
@@ -78,7 +74,7 @@ export default function MigrationV6ToV7Page() {
               Migration from v6 to v7
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Complete migration specification for upgrading to Dinou v7: breaking changes in data fetching contracts, horizontal and vertical layered segmentation (<code>layout_functions</code> and <code>DinouCacheSlot</code>), Partial Prerendering (PPR), React 19 resilience primitives, 0-Fork Dual-Bundle in-memory compilation, and multi-runtime edge deployments.
+              Complete migration specification for upgrading to Dinou v7: breaking changes in data fetching contracts, horizontal and vertical layered segmentation (<code>layout_functions</code> and <code>DinouCacheSlot</code>), Partial Prerendering (PPR), 0-Fork Dual-Bundle in-memory compilation, and multi-runtime edge deployments.
             </p>
           </div>
 
@@ -706,15 +702,59 @@ export async function validateParams(params) {
                 </CodeBlock>
 
                 <p className="text-xs text-muted-foreground">
-                  🚀 <strong>Granular Purging:</strong> Calling <code>revalidateTag(&quot;dashboard-shell&quot;)</code> purges only the layout shell without forcing the re-rendering of all nested sub-pages.
+                  🚀 <strong>Granular Purging:</strong> Calling <code>revalidateTag(&quot;dashboard-shell&quot;)</code> purges only the layout shell without forcing the re-rendering of all nested sub-pages. To cascade layout invalidation down to all child pages, pass <code>&#123; cascade: true &#125;</code>.
                 </p>
               </div>
 
-              {/* 3.3 Vertical Segmentation */}
+              {/* 3.3 revalidatePage API */}
+              <div id="revalidate-page-api" className="mt-10 scroll-mt-20">
+                <h3 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <FileCode2 className="h-5 w-5 text-teal-500" />
+                  <span>3.3. Surgical Page Revalidation: <code>revalidatePage</code> (New in v7 API)</span>
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  In Dinou v6, <code>revalidatePage</code> did not exist: on-demand revalidation was limited to <code>revalidatePath</code>, which re-rendered the entire monolithic route tree. Because Dinou v7 completely decouples layouts from child pages, it introduces the <strong><code>revalidatePage(path)</code></strong> API in <code>&quot;dinou/server&quot;</code>:
+                </p>
+
+                <CodeBlock language="typescript" containerClassName="w-full rounded-lg not-prose my-3">
+                  {`// Inside a Server Function ("use server") or CMS Webhook
+import { revalidatePage, revalidatePath } from "dinou/server";
+
+export async function updateArticle(slug: string) {
+  await db.articles.update({ where: { slug }, data: { ... } });
+
+  // ⚡ New in v7: Regenerates strictly page.rsc and index.html
+  // Leaves parent layout.rsc completely untouched, saving significant CPU and DB queries!
+  await revalidatePage(\`/blog/\${slug}\`);
+}`}
+                </CodeBlock>
+
+                <div className="grid gap-3 sm:grid-cols-2 not-prose my-3 text-xs">
+                  <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-card space-y-1">
+                    <span className="font-semibold text-teal-600 dark:text-teal-400 block">
+                      <code>revalidatePage(path)</code> (New in v7)
+                    </span>
+                    <p className="text-muted-foreground">
+                      Surgically revalidates only the leaf page (<code>page.rsc</code>) and its static HTML. Does not re-render or touch any layout shell.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-card space-y-1">
+                    <span className="font-semibold text-blue-600 dark:text-blue-400 block">
+                      <code>revalidatePath(path, &#123; cascade?: boolean &#125;)</code>
+                    </span>
+                    <p className="text-muted-foreground">
+                      Revalidates both the page and layout in that route. When <code>cascade: true</code> is passed, propagates downward to all nested child pages to guarantee 0 hydration mismatch.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3.4 Vertical Segmentation */}
               <div id="vertical-segmentation" className="mt-10 scroll-mt-20">
                 <h3 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <RefreshCw className="h-5 w-5 text-emerald-500" />
-                  <span>3.3. Vertical Segmentation: <code>&lt;DinouCacheSlot&gt;</code> &amp; <code>refreshSlot()</code></span>
+                  <span>3.4. Vertical Segmentation: <code>&lt;DinouCacheSlot&gt;</code> &amp; <code>refreshSlot()</code></span>
                 </h3>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Dinou v7 introduces component-level micro-caching inside pages with <code>&lt;DinouCacheSlot&gt;</code>:
@@ -769,11 +809,11 @@ export function LiveRefreshButton() {
                 </div>
               </div>
 
-              {/* 3.4 Partial Prerendering */}
+              {/* 3.5 Partial Prerendering */}
               <div id="ppr-engine" className="mt-10 scroll-mt-20">
                 <h3 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Zap className="h-5 w-5 text-amber-500" />
-                  <span>3.4. Partial Prerendering (PPR) Engine</span>
+                  <span>3.5. Partial Prerendering (PPR) Engine</span>
                 </h3>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Partial Prerendering combines the instant delivery of static sites (<strong>0ms TTFB</strong>) with the personalization of dynamic SSR in a single HTTP response:
@@ -833,63 +873,10 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            {/* Section 4: Resilience & React 19 Error Handling */}
-            <section id="resilience-error-handling" className="scroll-mt-20 mt-12 sm:mt-16">
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                4. Resilience &amp; React 19 Error Handling
-              </h2>
-              <p>
-                Dinou v7 incorporates three deep architectural resilience solutions for React 19 streaming SSR and client-side navigation:
-              </p>
-
-              <div id="error-double-wrap" className="mt-6 scroll-mt-20">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-blue-500" />
-                  <span>4.1. Elimination of HTML Double-Wrapping in Error SSR</span>
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-                  In earlier versions, when an unhandled server error occurred within a layout, the error handler injected a fallback <code>&lt;html&gt;&lt;body&gt;</code> envelope. Because the layout already produced an HTML shell, this resulted in an invalid nested <code>&lt;html&gt;</code> document, triggering fatal React 19 hydration mismatch crashes on the client.
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Dinou v7 tracks <code>layoutApplied</code> in <code>getErrorJSX</code>. When an application layout is present, error JSX is injected directly into the layout&apos;s active content area. The document structure remains 100% valid HTML, and interactive navigation elements (sidebars, headers) remain operational.
-                </p>
-              </div>
-
-              <div id="suspense-exception" className="mt-8 scroll-mt-20">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-amber-500" />
-                  <span>4.2. Handling <code>SuspenseException</code> in React 19 with <code>use()</code></span>
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-                  In React 19, reading pending promises inside component bodies with <code>use(errorPromise)</code> intentionally throws an internal suspension signal (<code>SuspenseException</code>). If executed inside an eager JavaScript <code>try / catch</code> block, the catch intercepted this signal as if it were a fatal crash, preventing custom <code>error.tsx</code> components from ever rendering.
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Dinou v7 decouples <code>SlotErrorRenderer</code> from eager <code>try / catch</code> blocks and wraps it in a native React <code>&lt;Suspense fallback=&#123;null&#125;&gt;</code> boundary. Once the error chunk resolves, React smoothly renders your custom <code>error.tsx</code> component with its <code>error</code> and <code>reset</code> props.
-                </p>
-              </div>
-
-              <div id="two-level-boundaries" className="mt-8 scroll-mt-20">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Layers className="h-5 w-5 text-emerald-500" />
-                  <span>4.3. Two-Level Error Boundaries with Clean Navigation Reset</span>
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-                  Earlier meta-frameworks reset error boundaries on navigation by mutating <code>&lt;ErrorBoundary key=&#123;pathname&#125;&gt;</code>. However, changing <code>key</code> indiscriminately destroys and remounts the DOM on <i>every</i> healthy navigation, wiping form inputs and scroll positions.
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Dinou v7 uses a <strong>Two-Level Error Boundary Architecture</strong>:
-                </p>
-                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-5 my-2">
-                  <li><strong>Level 1 (<code>SlotErrorBoundary</code>):</strong> Preserves DOM and state on healthy navigations. Only when <code>hasError === true</code> does <code>componentDidUpdate</code> check the compound navigation key (<code>resetKey: $&#123;route&#125;::$&#123;navCount&#125;</code>) to reset the error state cleanly.</li>
-                  <li><strong>Level 2 (<code>InnerErrorBoundary</code>):</strong> Fail-safe guard that catches bugs or unhandled exceptions inside the developer&apos;s custom <code>error.tsx</code> component, safely displaying <code>DefaultDevError</code> and preventing a white screen of death.</li>
-                </ul>
-              </div>
-            </section>
-
-            {/* Section 5: Dual-Bundle Engine */}
+            {/* Section 4: Dual-Bundle Engine */}
             <section id="dual-bundle-engine" className="scroll-mt-20 mt-12 sm:mt-16">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                5. Dual-Bundle In-Memory Engine (0-Fork) &amp; Pre-Rendering
+                4. Dual-Bundle In-Memory Engine (0-Fork) &amp; Pre-Rendering
               </h2>
               <p>
                 React 19 imposes a strict module-resolution constraint: Server Components must be imported under the <code>&quot;react-server&quot;</code> condition, while SSR rendering requires client conditions (<code>&quot;browser&quot;</code> / <code>react-dom/server.edge</code>). Importing both in the same module scope throws a fatal conflict.
@@ -926,10 +913,10 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            {/* Section 6: Updating Dependencies */}
+            {/* Section 5: Updating Dependencies */}
             <section id="updating-dependencies" className="scroll-mt-20 mt-12 sm:mt-16">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                6. Updating Dependencies, StrictMode &amp; Private Folders
+                5. Updating Dependencies, StrictMode &amp; Private Folders
               </h2>
               <p>
                 Dinou v7 requires a minimum of <strong>React 19.3.0</strong> (<code>react &gt;= 19.3.0</code> and <code>react-dom &gt;= 19.3.0</code>) as peer dependencies. Update your dependencies:
@@ -970,10 +957,10 @@ export default defineConfig({
               </div>
             </section>
 
-            {/* Section 7: CLI Standardization & Scripts */}
+            {/* Section 6: CLI Standardization & Scripts */}
             <section id="cli-scripts" className="scroll-mt-20 mt-12 sm:mt-16">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                7. CLI Standardization &amp; package.json Scripts
+                6. CLI Standardization &amp; package.json Scripts
               </h2>
               <p>
                 Dinou v7 introduces uniform CLI subcommands to select between <strong>esbuild</strong> (default), <strong>Rollup</strong>, and <strong>Webpack</strong> across all runtimes, native binaries, and export modes. Update your <code>package.json</code> scripts:
@@ -1012,10 +999,10 @@ export default defineConfig({
               </p>
             </section>
 
-            {/* Section 8: Multi-Runtime Deployments */}
+            {/* Section 7: Multi-Runtime Deployments */}
             <section id="multi-runtime-binaries" className="scroll-mt-20 mt-12 sm:mt-16">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                8. Multi-Runtime, Serverless &amp; Static Deployments
+                7. Multi-Runtime, Serverless &amp; Static Deployments
               </h2>
               <p>
                 Dinou v7 decouples cache storage and runtime operations via <code>StorageAdapter</code> (<code>FileSystemStorage</code>, <code>CloudflareKVStorage</code>, <code>DenoKVStorage</code>, <code>MemoryStorage</code>). Deploy to any infrastructure with zero platform lock-in:
@@ -1087,10 +1074,10 @@ export default defineConfig({
               </div>
             </section>
 
-            {/* Section 9: Updating .gitignore */}
+            {/* Section 8: Updating .gitignore */}
             <section id="gitignore-update" className="scroll-mt-20 mt-12 sm:mt-16">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                9. Updating .gitignore
+                8. Updating .gitignore
               </h2>
               <p>
                 Update your <code>.gitignore</code> to ignore the output directories of the multi-runtime engine:
@@ -1112,10 +1099,10 @@ dist
               </ul>
             </section>
 
-            {/* Section 10: Verification */}
+            {/* Section 9: Verification */}
             <section id="verification" className="scroll-mt-20 mt-12 sm:mt-16">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                10. Verification &amp; Next Steps
+                9. Verification &amp; Next Steps
               </h2>
               <p>
                 Launch your development server to verify that your routes render with the new v7 engine:

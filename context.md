@@ -22,8 +22,9 @@
 4. [Layered Segmentation Architecture](#4-layered-segmentation-architecture)
    - 4.1. [Horizontal Segmentation (Routes & Layouts)](#41-horizontal-segmentation-routes--layouts)
    - 4.2. [`layout_functions` for Decoupled Layout ISR](#42-layout_functions-for-decoupled-layout-isr)
-   - 4.3. [Vertical Segmentation (`DinouCacheSlot`)](#43-vertical-segmentation-dinoucacheslot)
-   - 4.4. [Partial Prerendering (PPR) Engine](#44-partial-prerendering-ppr-engine)
+   - 4.3. [Surgical Page Revalidation (`revalidatePage`)](#43-surgical-page-revalidation-revalidatepage)
+   - 4.4. [Vertical Segmentation (`DinouCacheSlot`)](#44-vertical-segmentation-dinoucacheslot)
+   - 4.5. [Partial Prerendering (PPR) Engine](#45-partial-prerendering-ppr-engine)
 5. [Resilience, Isolation & Error Handling in React 19](#5-resilience-isolation--error-handling-in-react-19)
    - 5.1. [Elimination of HTML Double-Wrapping in Error SSR (`getErrorJSX`)](#51-elimination-of-html-double-wrapping-in-error-ssr-geterrorjsx)
    - 5.2. [Handling `SuspenseException` in React 19 with `use()`](#52-handling-suspenseexception-in-react-19-with-use)
@@ -317,11 +318,35 @@ export async function validateParams(params) {
   return true;
 }
 ```
-* **Independent Invalidation**: Calling `revalidateTag("dashboard-shell")` purges the layout without forcing the re-rendering of all 50 underlying child pages.
+* **Independent Invalidation**: Calling `revalidateTag("dashboard-shell")` purges the layout without forcing the re-rendering of all 50 underlying child pages. To cascade layout invalidation down to all child pages, pass `{ cascade: true }`.
 
 ---
 
-### 4.3. Vertical Segmentation (`DinouCacheSlot`)
+### 4.3. Surgical Page Revalidation (`revalidatePage`)
+
+In Dinou v6, `revalidatePage` did not exist: all on-demand invalidations were handled through `revalidatePath`, which re-rendered the full monolithic route tree. 
+
+Because Dinou v7 completely decouples layouts from child pages, it introduces the **`revalidatePage(path)`** API in `"dinou/server"`:
+
+```typescript
+// Inside a Server Function ("use server") or CMS Webhook
+import { revalidatePage } from "dinou/server";
+
+export async function updateArticle(slug: string) {
+  await db.articles.update({ where: { slug }, data: { ... } });
+
+  // ⚡ New in v7: Regenerates strictly page.rsc and index.html
+  // Leaves parent layout.rsc completely untouched, saving significant CPU and DB queries!
+  await revalidatePage(`/blog/${slug}`);
+}
+```
+
+* **`revalidatePage(path)` (New in v7)**: Surgically revalidates only the leaf page (`page.rsc`) and its static HTML (`index.html`). Does not re-render or touch any layout shell.
+* **`revalidatePath(path, { cascade?: boolean })`**: Revalidates both the page and layout in that route. When `{ cascade: true }` is passed, propagates downward to all nested child pages to guarantee 0 hydration mismatch.
+
+---
+
+### 4.4. Vertical Segmentation (`DinouCacheSlot`)
 
 `DinouCacheSlot` provides micro-caching at the component level within a page:
 
@@ -350,7 +375,7 @@ export async function validateParams(params) {
 
 ---
 
-### 4.4. Partial Prerendering (PPR) Engine
+### 4.5. Partial Prerendering (PPR) Engine
 
 Partial Prerendering unifies static performance (0ms TTFB) with dynamic personalization in a single route:
 
