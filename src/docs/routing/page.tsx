@@ -864,12 +864,72 @@ export default function GlobalNotFound({ params }: PageProps<"/">) {
   );
 }`,
                     },
+                    {
+                      id: "server-props-404",
+                      label: "With Server Props (page_functions.ts)",
+                      language: "tsx",
+                      code: `// 1. Sibling server contract: src/blog/[slug]/page_functions.ts
+export async function getProps(params: { slug: string }) {
+  const suggestions = await db.posts.findMany({ take: 3 });
+  return { suggestions };
+}
+
+// 2. 404 Page: src/blog/[slug]/not_found.tsx
+import { Link, type PageProps } from "dinou";
+
+interface NotFoundProps extends PageProps<"/blog/[slug]"> {
+  suggestions: { id: string; title: string; slug: string }[];
+}
+
+export default function NotFound({ params, suggestions }: NotFoundProps) {
+  return (
+    <div className="flex flex-col items-center justify-center p-8 text-center">
+      <h2 className="text-3xl font-bold">404 - Article Not Found</h2>
+      <p className="mt-2 text-muted-foreground">
+        Could not find "{params.slug}". Here are some recommended articles:
+      </p>
+      {suggestions && (
+        <ul className="mt-4 space-y-1">
+          {suggestions.map((item) => (
+            <li key={item.id}>
+              <Link
+                href={\`/blog/\${item.slug}\`}
+                className="text-primary hover:underline text-sm font-medium"
+              >
+                &rarr; {item.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}`,
+                    },
                   ]}
                 />
 
                 <p className="text-xs text-muted-foreground">
                   When nested in a dynamic folder (such as <code>src/blog/[slug]/not_found.tsx</code>), pass the route pattern generic (<code>PageProps&lt;&quot;/blog/[slug]&quot;&gt;</code>) to strongly type <code>params</code>. For a root global 404 (<code>src/not_found.tsx</code>), pass <code>PageProps&lt;&quot;/&quot;&gt;</code> to ensure strict type safety without accidental parameters.
                 </p>
+
+                <Alert className="not-prose border-blue-500/20 bg-blue-50/40 dark:bg-blue-950/20">
+                  <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <AlertTitle className="text-blue-700 dark:text-blue-300 font-bold text-xs">
+                    Can 404 Pages Receive Server Props via getProps?
+                  </AlertTitle>
+                  <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-2 space-y-2">
+                    <p>
+                      <strong>Yes.</strong> If you define a <code>page_functions.{`{ts,js}`}</code> file in the same route directory as <code>not_found.tsx</code>, Dinou executes its <code>getProps(params)</code> server lifecycle and merges the returned data directly into the component&apos;s props alongside <code>params</code> (as demonstrated in the <em>With Server Props</em> tab above).
+                    </p>
+                    <p>
+                      This allows 404 views to dynamically query databases or external APIs (such as recommended articles, related categories, or search fallbacks) and combine them with <code>PageProps</code> via interface extension (<code>interface NotFoundProps extends PageProps&lt;&quot;/blog/[slug]&quot;&gt;</code>) or intersection types.
+                    </p>
+                    <p className="text-[11px] text-muted-foreground/80">
+                      <strong>Difference with <code>error.tsx</code>:</strong> While <code>not_found.tsx</code> can safely execute <code>getProps</code>, <code>error.tsx</code> pages never invoke server contracts (they receive strictly <code>ErrorProps</code>) to prevent compounding unhandled server exceptions.
+                    </p>
+                  </AlertDescription>
+                </Alert>
               </div>
             </section>
 

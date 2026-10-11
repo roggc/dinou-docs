@@ -124,14 +124,14 @@ export default function Page() {
                         <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">
                           page.{`{tsx,jsx,ts,js}`}
                         </td>
-                        <td className="py-2.5 px-3.5 font-medium">Page Leaf UI</td>
+                        <td className="py-2.5 px-3.5 font-medium">Route Page UI</td>
                         <td className="py-2.5 px-3.5">
                           <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
                             Universal
                           </span>
                         </td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Unique leaf UI component rendered for the route segment. Receives server props returned by <code>getProps</code>.
+                          Primary UI component rendered for the route segment. Receives server props returned by <code>getProps</code>.
                         </td>
                       </tr>
                       <tr>
@@ -146,6 +146,34 @@ export default function Page() {
                         </td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
                           Persistent UI wrapper wrapping child segments. Preserves client state across child navigations.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">
+                          error.{`{tsx,jsx,ts,js}`}
+                        </td>
+                        <td className="py-2.5 px-3.5 font-medium">500 Error Page</td>
+                        <td className="py-2.5 px-3.5">
+                          <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
+                            Universal
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3.5 text-muted-foreground">
+                          Error UI rendered when an unhandled server or client exception occurs within this route subtree.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">
+                          not_found.{`{tsx,jsx,ts,js}`}
+                        </td>
+                        <td className="py-2.5 px-3.5 font-medium">404 Page</td>
+                        <td className="py-2.5 px-3.5">
+                          <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
+                            Universal
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3.5 text-muted-foreground">
+                          Rendered when a segment does not exist or when <code>validateParams()</code> returns <code>false</code>. Receives <code>params</code> and any server props returned by <code>getProps</code> if <code>page_functions</code> is present.
                         </td>
                       </tr>
                       <tr>
@@ -174,34 +202,6 @@ export default function Page() {
                         </td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
                           Decoupled server contract for <code>layout.tsx</code>: independent <code>getProps</code> and <code>ppr</code> execution.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">
-                          error.{`{tsx,jsx,ts,js}`}
-                        </td>
-                        <td className="py-2.5 px-3.5 font-medium">500 Boundary</td>
-                        <td className="py-2.5 px-3.5">
-                          <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
-                            Universal
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Error boundary triggered when an unhandled server or client exception occurs within this subtree.
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">
-                          not_found.{`{tsx,jsx,ts,js}`}
-                        </td>
-                        <td className="py-2.5 px-3.5 font-medium">404 Handler</td>
-                        <td className="py-2.5 px-3.5">
-                          <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
-                            Universal
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Rendered when a segment does not exist or when <code>validateParams()</code> returns <code>false</code>.
                         </td>
                       </tr>
                     </tbody>
@@ -249,14 +249,14 @@ export default function Page() {
                         <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">no_layout_error</td>
                         <td className="py-2.5 px-3.5 font-mono">error.tsx</td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Renders the segment's 500 error boundary without any surrounding layout shells.
+                          Renders the segment's 500 error page without any surrounding layout shells.
                         </td>
                       </tr>
                       <tr>
                         <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">no_layout_not_found</td>
                         <td className="py-2.5 px-3.5 font-mono">not_found.tsx</td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Renders the segment's 404 not found handler without any surrounding layout shells.
+                          Renders the segment's 404 not found page without any surrounding layout shells.
                         </td>
                       </tr>
                     </tbody>
@@ -1141,7 +1141,7 @@ export default function Page() {
                           router.refresh()
                         </td>
                         <td className="py-2.5 px-3.5 font-medium">Client Component (Browser)</td>
-                        <td className="py-2.5 px-3.5">Entire active page leaf</td>
+                        <td className="py-2.5 px-3.5">Entire active page</td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
                           When a client action needs fresh server props for the whole page without losing client state or scrolling to top.
                         </td>
@@ -1231,7 +1231,7 @@ export default function Page() {
                         <td className="py-2.5 px-3.5 font-medium">Universal (Server or Client)</td>
                         <td className="py-2.5 px-3.5 font-mono text-muted-foreground">{`RouteParams<Pattern>`}</td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Directly rendering route tokens in the leaf view (e.g. <code>&lt;h1&gt;Product #{`{params.id}`}&lt;/h1&gt;</code>) with compile-time type validation.
+                          Directly rendering route tokens in the page view (e.g. <code>&lt;h1&gt;Product #{`{params.id}`}&lt;/h1&gt;</code>) with compile-time type validation.
                         </td>
                       </tr>
                       <tr>
@@ -1271,7 +1271,7 @@ export default function Page() {
                         <td className="py-2.5 px-3.5 font-medium">Universal (Server or Client)</td>
                         <td className="py-2.5 px-3.5 font-mono text-muted-foreground">{`RouteParams<Pattern>`}</td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Scoped 500 error boundaries showing diagnostic context or retry options for that specific resource.
+                          Scoped 500 error pages showing diagnostic context or retry options for that specific resource.
                         </td>
                       </tr>
                       <tr>
