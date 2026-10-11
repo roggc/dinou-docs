@@ -86,7 +86,8 @@ export default function MigrationV6ToV7Page() {
               </p>
 
               <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden not-prose my-6 shadow-sm">
-                <Table>
+                <div className="overflow-x-auto">
+                  <Table className="min-w-[640px]">
                   <TableHeader className="bg-slate-50 dark:bg-slate-900/60">
                     <TableRow>
                       <TableHead className="w-[24%] font-semibold text-slate-900 dark:text-slate-100 text-xs">
@@ -211,7 +212,8 @@ export default function MigrationV6ToV7Page() {
                   </TableBody>
                 </Table>
               </div>
-            </section>
+            </div>
+          </section>
 
             {/* Section 2: Breaking Changes */}
             <section id="breaking-changes" className="scroll-mt-20 mt-12 sm:mt-16">
@@ -234,9 +236,9 @@ export default function MigrationV6ToV7Page() {
                   In Dinou v6, <code>getProps</code> required wrapping the returned data under a <code>page</code> key. In Dinou v7, this artificial wrapper is completely eliminated. <code>getProps</code> directly returns the object that will be passed as props to your page component:
                 </p>
 
-                <div className="grid gap-4 md:grid-cols-2 not-prose my-4">
-                  <div>
-                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-4 min-w-0">
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5 break-words">
                       ❌ Dinou v6 (Deprecated)
                     </span>
                     <CodeBlock language="typescript" containerClassName="w-full rounded-lg">
@@ -252,8 +254,8 @@ export async function getProps(params) {
 }`}
                     </CodeBlock>
                   </div>
-                  <div>
-                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5">
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5 break-words">
                       ✅ Dinou v7 (Current)
                     </span>
                     <CodeBlock language="typescript" containerClassName="w-full rounded-lg">
@@ -297,9 +299,9 @@ export default function UserProfilePage({ user, title }: { user: User; title: st
                   In Dinou v6, cache revalidation intervals were specified in milliseconds (<code>ms</code>). In Dinou v7, <code>revalidate</code> is <strong>strictly defined in seconds (<code>s</code>)</strong>. This aligns with HTTP standards (RFC 7234 <code>Cache-Control: max-age=N</code>), edge CDN providers, and component-level cache slots:
                 </p>
 
-                <div className="grid gap-4 md:grid-cols-2 not-prose my-4">
-                  <div>
-                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-4 min-w-0">
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5 break-words">
                       ❌ Dinou v6 (Milliseconds)
                     </span>
                     <CodeBlock language="typescript" containerClassName="w-full rounded-lg">
@@ -312,8 +314,8 @@ export function revalidate() {
 }`}
                     </CodeBlock>
                   </div>
-                  <div>
-                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5">
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5 break-words">
                       ✅ Dinou v7 (Seconds)
                     </span>
                     <CodeBlock language="typescript" containerClassName="w-full rounded-lg">
@@ -345,38 +347,40 @@ export function revalidate() {
                   In Dinou v6, <code>dynamic</code> was the single source of truth for on-demand SSR (<code>dynamic = true</code>), and <code>revalidate === 0</code> (or omitted) meant static forever (SSG). In Dinou v7, the <code>dynamic</code> keyword is completely removed in favor of unifying route execution and caching under <code>revalidate</code> as the single source of truth:
                 </p>
 
-                <div className="overflow-x-auto not-prose my-4">
-                  <table className="w-full text-xs border border-slate-200 dark:border-slate-800 rounded-lg">
-                    <thead className="bg-slate-100 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300">
-                      <tr>
-                        <th className="p-3 text-left font-semibold border-b">Value of <code>revalidate</code></th>
-                        <th className="p-3 text-left font-semibold border-b">Rendering Strategy</th>
-                        <th className="p-3 text-left font-semibold border-b">Runtime Behavior</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-muted-foreground">
-                      <tr>
-                        <td className="p-3 font-mono font-semibold text-blue-600 dark:text-blue-400">0 (or &lt; 1)</td>
-                        <td className="p-3 font-medium text-slate-900 dark:text-slate-100">Dynamic (Live SSR)</td>
-                        <td className="p-3">Rendered on every incoming request. Bypasses static and ISR cache.</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3 font-mono font-semibold text-emerald-600 dark:text-emerald-400">&gt;= 1 (e.g. 60, 300)</td>
-                        <td className="p-3 font-medium text-slate-900 dark:text-slate-100">Incremental Static (ISR)</td>
-                        <td className="p-3">Cached with background stale-while-revalidate expiring after <i>N</i> seconds.</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3 font-mono font-semibold text-purple-600 dark:text-purple-400">false (or omitted)</td>
-                        <td className="p-3 font-medium text-slate-900 dark:text-slate-100">Static Forever (SSG)</td>
-                        <td className="p-3">Pre-rendered at build time. Cached indefinitely until on-demand revalidation.</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden not-prose my-4 shadow-xs">
+                  <div className="overflow-x-auto">
+                    <Table className="w-full text-xs">
+                      <TableHeader className="bg-slate-100 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300">
+                        <TableRow>
+                          <TableHead className="p-3 text-left font-semibold">Value of <code>revalidate</code></TableHead>
+                          <TableHead className="p-3 text-left font-semibold">Rendering Strategy</TableHead>
+                          <TableHead className="p-3 text-left font-semibold">Runtime Behavior</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody className="divide-y divide-slate-200 dark:divide-slate-800 text-muted-foreground">
+                        <TableRow>
+                          <TableCell className="p-3 font-mono font-semibold text-blue-600 dark:text-blue-400">0 (or &lt; 1)</TableCell>
+                          <TableCell className="p-3 font-medium text-slate-900 dark:text-slate-100">Dynamic (Live SSR)</TableCell>
+                          <TableCell className="p-3">Rendered on every incoming request. Bypasses static and ISR cache.</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="p-3 font-mono font-semibold text-emerald-600 dark:text-emerald-400">&gt;= 1 (e.g. 60, 300)</TableCell>
+                          <TableCell className="p-3 font-medium text-slate-900 dark:text-slate-100">Incremental Static (ISR)</TableCell>
+                          <TableCell className="p-3">Cached with background stale-while-revalidate expiring after <i>N</i> seconds.</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="p-3 font-mono font-semibold text-purple-600 dark:text-purple-400">false (or omitted)</TableCell>
+                          <TableCell className="p-3 font-medium text-slate-900 dark:text-slate-100">Static Forever (SSG)</TableCell>
+                          <TableCell className="p-3">Pre-rendered at build time. Cached indefinitely until on-demand revalidation.</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2 not-prose my-4">
-                  <div>
-                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-4 min-w-0">
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5 break-words">
                       ❌ Dinou v6 (dynamic was source of truth)
                     </span>
                     <CodeBlock language="typescript" containerClassName="w-full rounded-lg">
@@ -386,8 +390,8 @@ export function dynamic() {
 }`}
                     </CodeBlock>
                   </div>
-                  <div>
-                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5">
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5 break-words">
                       ✅ Dinou v7 (Unified revalidate)
                     </span>
                     <CodeBlock language="typescript" containerClassName="w-full rounded-lg">
@@ -410,9 +414,9 @@ export const revalidate = 0; // Live SSR on every request`}
                   In Dinou v6, static site generation (SSG) was deferred until the production server started (<code>dinou start</code>). The server crawled routes, generated static HTML and RSC payloads, and delayed server readiness. In Dinou v7, <strong>static generation occurs strictly Ahead-of-Time during compilation (<code>dinou build</code>)</strong>.
                 </p>
 
-                <div className="grid gap-4 md:grid-cols-2 not-prose my-4">
-                  <div>
-                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-4 min-w-0">
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5 break-words">
                       ❌ Dinou v6 (SSG on Server Startup)
                     </span>
                     <CodeBlock language="bash" containerClassName="w-full rounded-lg">
@@ -423,8 +427,8 @@ npm run build
 npm run start`}
                     </CodeBlock>
                   </div>
-                  <div>
-                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5">
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5 break-words">
                       ✅ Dinou v7 (AOT SSG on Compilation)
                     </span>
                     <CodeBlock language="bash" containerClassName="w-full rounded-lg">
@@ -462,9 +466,9 @@ npm run start`}
                   In Dinou v6, navigation was monolithic: navigating between sibling routes that shared a layout (e.g., from <code>/dashboard/analytics</code> to <code>/dashboard/settings</code>) caused the layout component tree to re-evaluate and re-mount. In Dinou v7, <strong>Horizontal Segmentation</strong> separates the layout shell from dynamic child pages: layouts <strong>never unmount or re-execute</strong> during client-side navigation between sibling routes.
                 </p>
 
-                <div className="grid gap-4 md:grid-cols-2 not-prose my-4">
-                  <div>
-                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-4 min-w-0">
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5 break-words">
                       ❌ Dinou v6 (Layout Re-mounts on Navigation)
                     </span>
                     <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
@@ -480,8 +484,8 @@ export default function DashboardLayout({ children }) {
 }`}
                     </CodeBlock>
                   </div>
-                  <div>
-                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5">
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5 break-words">
                       ✅ Dinou v7 (Layout State 100% Preserved)
                     </span>
                     <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
@@ -528,9 +532,9 @@ export default function DashboardLayout({ children }) {
                   In Dinou v5.2.0 and v6, plugins registered custom Express middlewares or webhook endpoints by receiving the Express application instance via <code>onServerInit(app)</code>. In Dinou v7, <strong>Express has been completely eliminated</strong> in favor of pure W3C Web Standards (<code>Request</code>, <code>Response</code>, <code>ReadableStream</code>). As a result, <code>onServerInit(app)</code> is <strong>no longer invoked or supported</strong>.
                 </p>
 
-                <div className="grid gap-4 md:grid-cols-2 not-prose my-4">
-                  <div>
-                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-4 min-w-0">
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5 break-words">
                       ❌ Dinou v6 (Express-based onServerInit)
                     </span>
                     <CodeBlock language="javascript" containerClassName="w-full rounded-lg">
@@ -550,8 +554,8 @@ module.exports = {
 };`}
                     </CodeBlock>
                   </div>
-                  <div>
-                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5">
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5 break-words">
                       ✅ Dinou v7 (Web Standards onRequest)
                     </span>
                     <CodeBlock language="javascript" containerClassName="w-full rounded-lg">
@@ -597,9 +601,9 @@ export default defineConfig({
                   In Dinou v6, <code>dinou dev</code> continuously wrote JavaScript chunks, CSS stylesheets, sourcemaps, and manifests to disk inside the <code>.dinou/public/</code> directory. In Dinou v7, the development engine operates <strong>100% in RAM</strong> via <code>globalThis.__DINOU_MEM_FILES__</code> to eliminate disk I/O bottlenecks and Windows antivirus penalties. The <code>.dinou/public/</code> directory is <strong>never created on disk</strong> during normal development.
                 </p>
 
-                <div className="grid gap-4 md:grid-cols-2 not-prose my-4">
-                  <div>
-                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-4 min-w-0">
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5 break-words">
                       ❌ Dinou v6 (Heavy Disk Writes in Dev)
                     </span>
                     <CodeBlock language="text" containerClassName="w-full rounded-lg">
@@ -612,8 +616,8 @@ my-app/
         └── manifest.json`}
                     </CodeBlock>
                   </div>
-                  <div>
-                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5">
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5 break-words">
                       ✅ Dinou v7 (100% In-Memory RAM Registry)
                     </span>
                     <CodeBlock language="text" containerClassName="w-full rounded-lg">
@@ -726,9 +730,9 @@ export async function updateArticle(slug: string) {
 }`}
                 </CodeBlock>
 
-                <div className="grid gap-3 sm:grid-cols-2 not-prose my-3 text-xs">
-                  <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-card space-y-1">
-                    <span className="font-semibold text-teal-600 dark:text-teal-400 block">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 not-prose my-3 text-xs min-w-0">
+                  <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-card space-y-1 min-w-0">
+                    <span className="font-semibold text-teal-600 dark:text-teal-400 block break-words">
                       <code>revalidatePage(path)</code> (New in v7)
                     </span>
                     <p className="text-muted-foreground">
@@ -736,8 +740,8 @@ export async function updateArticle(slug: string) {
                     </p>
                   </div>
 
-                  <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-card space-y-1">
-                    <span className="font-semibold text-blue-600 dark:text-blue-400 block">
+                  <div className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-card space-y-1 min-w-0">
+                    <span className="font-semibold text-blue-600 dark:text-blue-400 block break-words">
                       <code>revalidatePath(path, &#123; cascade?: boolean &#125;)</code>
                     </span>
                     <p className="text-muted-foreground">
@@ -823,21 +827,21 @@ export function LiveRefreshButton() {
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-4 mb-2">
                   Configuring PPR:
                 </p>
-                <div className="grid gap-3 sm:grid-cols-3 not-prose my-3">
-                  <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-card text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 not-prose my-3 min-w-0">
+                  <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-card text-xs min-w-0">
                     <p className="font-semibold text-blue-500 mb-1">1. Global</p>
                     <p className="text-muted-foreground">In <code>dinou.config.mjs</code>:</p>
-                    <code className="text-slate-800 dark:text-slate-200 block mt-1">defineConfig(&#123; ppr: true &#125;)</code>
+                    <code className="text-slate-800 dark:text-slate-200 block mt-1 break-words">defineConfig(&#123; ppr: true &#125;)</code>
                   </div>
-                  <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-card text-xs">
+                  <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-card text-xs min-w-0">
                     <p className="font-semibold text-purple-500 mb-1">2. Layout Scope</p>
                     <p className="text-muted-foreground">In <code>layout_functions.ts</code>:</p>
-                    <code className="text-slate-800 dark:text-slate-200 block mt-1">export const ppr = true;</code>
+                    <code className="text-slate-800 dark:text-slate-200 block mt-1 break-words">export const ppr = true;</code>
                   </div>
-                  <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-card text-xs">
+                  <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-card text-xs min-w-0">
                     <p className="font-semibold text-emerald-500 mb-1">3. Page Override</p>
                     <p className="text-muted-foreground">In <code>page_functions.ts</code>:</p>
-                    <code className="text-slate-800 dark:text-slate-200 block mt-1">export const ppr = false;</code>
+                    <code className="text-slate-800 dark:text-slate-200 block mt-1 break-words">export const ppr = false;</code>
                   </div>
                 </div>
 

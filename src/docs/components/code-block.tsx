@@ -39,7 +39,7 @@ export function CodeBlock({
 
   return (
     <div
-      className={`relative group w-full overflow-hidden flex flex-col ${
+      className={`relative group w-full min-w-0 overflow-hidden flex flex-col ${
         containerClassName ?? ""
       }`}
     >
