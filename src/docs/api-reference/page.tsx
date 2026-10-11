@@ -15,7 +15,7 @@ import {
   RefreshSlotSection,
   UseNavigationLoadingSection,
 } from "./hooks-navigation";
-// Type-Safe Routing components
+// Type-Safe Routing components (Dinou v7)
 import {
   PagePropsSection,
   LayoutPropsSection,
@@ -123,8 +123,11 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Explore all exports across <code className="font-mono text-foreground font-semibold bg-muted px-1.5 py-0.5 rounded text-lg">dinou</code> and{" "}
-              <code className="font-mono text-foreground font-semibold bg-muted px-1.5 py-0.5 rounded text-lg">dinou/server</code> with TypeScript signatures, runtime behavior, and practical usage patterns.
+              Explore all exports across{" "}
+              <code className="font-mono text-foreground font-semibold bg-muted px-1.5 py-0.5 rounded text-lg">dinou</code>,{" "}
+              <code className="font-mono text-foreground font-semibold bg-muted px-1.5 py-0.5 rounded text-lg">dinou/server</code>, and route lifecycle contracts (
+              <code className="font-mono text-foreground font-semibold bg-muted px-1.5 py-0.5 rounded text-base">page_functions.ts</code> &amp;{" "}
+              <code className="font-mono text-foreground font-semibold bg-muted px-1.5 py-0.5 rounded text-base">layout_functions.ts</code>) with TypeScript signatures, runtime behavior, and practical usage patterns.
             </p>
           </div>
 
