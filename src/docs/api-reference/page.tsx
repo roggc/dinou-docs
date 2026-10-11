@@ -4168,7 +4168,7 @@ console.log("Dinou active storage adapter:", activeStorage.constructor.name);`,
                           label: "products/[id]/page_functions.ts",
                           language: "typescript",
                           code: `// src/app/products/[id]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 import { getContext } from "dinou";
 import { db } from "@/lib/db";
 
@@ -4182,12 +4182,12 @@ export interface ProductPageProps {
   preferredCurrency: string;
 }
 
-// Strongly typed contract using PageFunctions and RouteParams
+// Pass the route pattern directly: PageFunctions automatically infers params
 export const getProps: PageFunctions<
-  RouteParams<"/products/[id]">,
+  "/products/[id]",
   ProductPageProps
 >["getProps"] = async (params) => {
-  // 1. Fetch data on the server using route parameters
+  // 1. Fetch data on the server using route parameters (params.id is typed as string)
   const product = await db.products.findById(params.id);
 
   // 2. Read cookies or headers from request context
@@ -4235,7 +4235,7 @@ export default function ProductPage({
                           label: "[organization]/layout_functions.ts",
                           language: "typescript",
                           code: `// src/app/[organization]/layout_functions.ts
-import type { LayoutFunctions, RouteParams } from "dinou";
+import type { LayoutFunctions } from "dinou";
 import { getContext, redirect } from "dinou";
 import { db } from "@/lib/db";
 
@@ -4250,7 +4250,7 @@ export interface OrgLayoutProps {
 
 // Layouts receive route parameters defined at or above this segment level
 export const getProps: LayoutFunctions<
-  RouteParams<"/[organization]">,
+  "/[organization]",
   OrgLayoutProps
 >["getProps"] = async (params) => {
   const org = await db.organizations.findBySlug(params.organization);
@@ -4420,29 +4420,23 @@ export const ppr: LayoutFunctions["ppr"] = true;`}
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg my-3"
                 >
-                  {`import type { PageFunctions, RouteParams } from "dinou";
+                  {`import type { PageFunctions } from "dinou";
 import { fetchAllArticles } from "@/lib/cms";
 
-// 1. Static array using RouteParams for /blog/[slug]
-export const getStaticPaths: PageFunctions<
-  RouteParams<"/blog/[slug]">
->["getStaticPaths"] = [
+// 1. Static array directly using the route string pattern
+export const getStaticPaths: PageFunctions<"/blog/[slug]">["getStaticPaths"] = [
   "announcing-v7",
   "migration-guide",
 ];
 
 // 2. Array of parameter objects for multi-segment route [category]/[id]
-export const getStaticPaths: PageFunctions<
-  RouteParams<"/shop/[category]/[id]">
->["getStaticPaths"] = [
+export const getStaticPaths: PageFunctions<"/shop/[category]/[id]">["getStaticPaths"] = [
   { category: "tech", id: "1" },
   { category: "design", id: "2" },
 ];
 
 // 3. Dynamic async loader fetching from CMS/Database
-export const getStaticPaths: PageFunctions<
-  RouteParams<"/blog/[slug]">
->["getStaticPaths"] = async () => {
+export const getStaticPaths: PageFunctions<"/blog/[slug]">["getStaticPaths"] = async () => {
   const articles = await fetchAllArticles();
   return articles.map((article) => ({ slug: article.slug }));
 };`}
@@ -4468,12 +4462,10 @@ export const getStaticPaths: PageFunctions<
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg my-3"
                 >
-                  {`import type { PageFunctions, RouteParams } from "dinou";
+                  {`import type { PageFunctions } from "dinou";
 
 // Type-safe cache tags associated with the route segment
-export const getCacheTags: PageFunctions<
-  RouteParams<"/blog/[slug]">
->["getCacheTags"] = (params) => {
+export const getCacheTags: PageFunctions<"/blog/[slug]">["getCacheTags"] = (params) => {
   return ["articles", \`article-\${params.slug}\`];
 };`}
                 </CodeBlock>
@@ -4527,12 +4519,10 @@ export const getCacheTags: PageFunctions<
                   containerClassName="w-full overflow-hidden rounded-lg my-3"
                 >
                   {`// src/app/users/[id]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 
 // Perimeter guard: returning false halts rendering and returns 404
-export const validateParams: PageFunctions<
-  RouteParams<"/users/[id]">
->["validateParams"] = (params) => {
+export const validateParams: PageFunctions<"/users/[id]">["validateParams"] = (params) => {
   // Only allow numeric user IDs
   return /^[0-9]+$/.test(params.id);
 };
@@ -4636,18 +4626,18 @@ export default function BlogLayout({ children, params }: LayoutProps<"/blog/[slu
                   </span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Canonical TypeScript interfaces for typing server lifecycle files (<code>page_functions.ts</code> and <code>layout_functions.ts</code>). Both interfaces alias the foundational <code>RouteSegmentConfig&lt;TParams, TProps&gt;</code> contract, providing complete compile-time type safety, IDE autocompletion, and index-access typing (e.g. <code>PageFunctions[&quot;revalidate&quot;]</code>).
+                  Canonical TypeScript interfaces for typing server lifecycle files (<code>page_functions.ts</code> and <code>layout_functions.ts</code>). Both interfaces accept either a route pattern string directly (e.g. <code>&quot;/blog/[slug]&quot;</code>) or a direct parameters dictionary, providing complete compile-time type safety, IDE autocompletion, and index-access typing (e.g. <code>PageFunctions[&quot;revalidate&quot;]</code>) without boilerplate.
                 </p>
 
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg my-3"
                 >
-                  {`import type { PageFunctions, LayoutFunctions, RouteParams } from "dinou";
+                  {`import type { PageFunctions, LayoutFunctions } from "dinou";
 
-// 1. Strict parameter & props typing for page_functions.ts
+// 1. Direct route string pattern (automatically infers route parameters)
 export const getProps: PageFunctions<
-  RouteParams<"/blog/[slug]">,
+  "/blog/[slug]",
   { postTitle: string }
 >["getProps"] = async (params) => {
   return { postTitle: \`Article: \${params.slug}\` };
@@ -4673,24 +4663,19 @@ export const revalidate: LayoutFunctions["revalidate"] = 3600;`}
                   </span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  A standalone utility type representing the inferred parameters dictionary of a given route pattern. Ideal for server functions, services, and error boundary components that do not receive standard React page props.
+                  A standalone utility type representing the inferred parameters dictionary of a given route pattern. While <code>PageProps</code> and <code>PageFunctions</code> resolve route strings directly, <code>RouteParams</code> is ideal for typing Server Actions, services, or error boundary components that do not inherit framework props automatically.
                 </p>
 
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg my-3"
                 >
-                  {`import type { PageFunctions, RouteParams } from "dinou";
+                  {`import type { RouteParams } from "dinou";
 
-// 1. In server-side page_functions.ts
-export const getProps: PageFunctions<
-  RouteParams<"/blog/[slug]">,
-  { postTitle: string }
->["getProps"] = async (params) => {
-  return {
-    postTitle: \`Title for \${params.slug}\`,
-  };
-};
+// 1. In Server Actions or external services
+export async function getAuthorBio(params: RouteParams<"/blog/[slug]">) {
+  return fetchBioBySlug(params.slug);
+}
 
 // 2. In error.tsx boundaries
 interface ErrorProps {
