@@ -111,8 +111,8 @@ export default function Page() {
                 the top of a dedicated action file (module-level directive).
               </p>
 
-              <div className="grid gap-6 md:grid-cols-3 not-prose my-6">
-                <Card className="border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 not-prose my-6 min-w-0">
+                <Card className="border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20 min-w-0">
                   <CardHeader>
                     <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400">
                       <Server className="h-5 w-5" />
@@ -126,7 +126,7 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-purple-500/20 bg-purple-50/30 dark:bg-purple-950/20">
+                <Card className="border-purple-500/20 bg-purple-50/30 dark:bg-purple-950/20 min-w-0">
                   <CardHeader>
                     <div className="flex items-center gap-2 font-semibold text-purple-600 dark:text-purple-400">
                       <Sparkles className="h-5 w-5" />
@@ -140,7 +140,7 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/20">
+                <Card className="border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/20 min-w-0">
                   <CardHeader>
                     <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400">
                       <ShieldCheck className="h-5 w-5" />
@@ -265,8 +265,8 @@ export default function BlogPage() {
                 />
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 not-prose mt-4 text-xs text-muted-foreground">
-                <div className="border rounded-lg p-3 bg-muted/20 border-border space-y-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose mt-4 text-xs text-muted-foreground min-w-0">
+                <div className="border rounded-lg p-3 bg-muted/20 border-border space-y-1 min-w-0">
                   <div className="font-semibold text-foreground flex items-center gap-1.5">
                     <Server className="h-4 w-4 text-blue-500" />
                     <span>In Server Components (Async / Await)</span>
@@ -276,7 +276,7 @@ export default function BlogPage() {
                   </p>
                 </div>
 
-                <div className="border rounded-lg p-3 bg-muted/20 border-border space-y-1">
+                <div className="border rounded-lg p-3 bg-muted/20 border-border space-y-1 min-w-0">
                   <div className="font-semibold text-foreground flex items-center gap-1.5">
                     <Sparkles className="h-4 w-4 text-amber-500" />
                     <span>In Client Components (with <code>use()</code>)</span>
@@ -386,8 +386,8 @@ export async function subscribeNewsletter(formData: FormData) {
                   spinners, use React 19&apos;s standard hooks:
                 </p>
 
-                <div className="grid gap-6 md:grid-cols-2 not-prose my-4">
-                  <Card>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-4 min-w-0">
+                  <Card className="min-w-0">
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400">
                         <Sliders className="h-5 w-5" />
@@ -400,7 +400,7 @@ export async function subscribeNewsletter(formData: FormData) {
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="min-w-0">
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold text-amber-600 dark:text-amber-400">
                         <Zap className="h-5 w-5" />
@@ -740,7 +740,7 @@ export async function completeOrder(orderId: string) {
               </CodeBlock>
 
               {/* Deep Dive Callout Box */}
-              <div className="border rounded-lg p-5 bg-muted/20 not-prose my-6 space-y-4">
+              <div className="border rounded-lg p-5 bg-muted/20 not-prose my-6 space-y-4 min-w-0">
                 <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
                   <Sparkles className="h-4 w-4 text-purple-500" />
                   <span>Deep Dive: When are HTTP Headers Sent vs. Unsent in Dinou?</span>
@@ -751,7 +751,7 @@ export async function completeOrder(orderId: string) {
                 </p>
 
                 {/* The Equivalence Principle */}
-                <div className="p-3.5 rounded-md bg-purple-500/10 border border-purple-500/20 space-y-1.5 text-xs">
+                <div className="p-3.5 rounded-md bg-purple-500/10 border border-purple-500/20 space-y-1.5 text-xs min-w-0">
                   <div className="font-semibold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
                     <ShieldCheck className="h-3.5 w-3.5" />
                     <span>The Equivalence Principle in Server Components</span>
@@ -762,11 +762,11 @@ export async function completeOrder(orderId: string) {
                 </div>
 
                 {/* 4 Execution Contexts */}
-                <div className="space-y-4 text-xs">
+                <div className="space-y-4 text-xs min-w-0">
                   {/* Case 1 */}
-                  <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/20 space-y-3">
-                    <div className="grid md:grid-cols-12 gap-4 items-start">
-                      <div className="md:col-span-5 space-y-2">
+                  <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/20 space-y-3 min-w-0">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start min-w-0">
+                      <div className="md:col-span-5 space-y-2 min-w-0">
                         <div className="flex items-center justify-between">
                           <div className="font-semibold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
                             <Globe className="h-4 w-4" />
@@ -783,7 +783,7 @@ export async function completeOrder(orderId: string) {
                           Because zero HTML bytes have reached the wire (<code>headersSent === false</code>), Dinou issues a clean <strong>HTTP 302</strong> with a <code>Location</code> header. <strong>Crucial for SEO crawlers and search indexers.</strong>
                         </p>
                       </div>
-                      <div className="md:col-span-7">
+                      <div className="md:col-span-7 min-w-0">
                         <TabbedCodeBlock
                           defaultTab="get-props"
                           tabs={[
@@ -850,9 +850,9 @@ export default defineConfig({
                   </div>
 
                   {/* Case 2 */}
-                  <div className="p-4 rounded-lg bg-amber-500/5 border border-amber-500/20 space-y-3">
-                    <div className="grid md:grid-cols-12 gap-4 items-start">
-                      <div className="md:col-span-5 space-y-2">
+                  <div className="p-4 rounded-lg bg-amber-500/5 border border-amber-500/20 space-y-3 min-w-0">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start min-w-0">
+                      <div className="md:col-span-5 space-y-2 min-w-0">
                         <div className="flex items-center justify-between">
                           <div className="font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
                             <Zap className="h-4 w-4" />
@@ -869,7 +869,7 @@ export default defineConfig({
                           At HTTP protocol level, an open <code>200 OK</code> stream cannot turn into a <code>302</code>. Dinou safely emits <code>&lt;ClientRedirect /&gt;</code>, completing the transition upon browser hydration without breaking the stream.
                         </p>
                       </div>
-                      <div className="md:col-span-7">
+                      <div className="md:col-span-7 min-w-0">
                         <CodeBlock
                           language="tsx"
                           containerClassName="w-full overflow-hidden rounded-md text-xs"
@@ -900,9 +900,9 @@ export default function Page() {
                   </div>
 
                   {/* Case 3 */}
-                  <div className="p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/20 space-y-3">
-                    <div className="grid md:grid-cols-12 gap-4 items-start">
-                      <div className="md:col-span-5 space-y-2">
+                  <div className="p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/20 space-y-3 min-w-0">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start min-w-0">
+                      <div className="md:col-span-5 space-y-2 min-w-0">
                         <div className="flex items-center justify-between">
                           <div className="font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
                             <ArrowRightLeft className="h-4 w-4" />
@@ -919,7 +919,7 @@ export default function Page() {
                           Dinou executes the server mutation and intercepts <code>redirect()</code> before streaming (headers unsent), returning redirect metadata. The client proxy navigates via the SPA router <strong>without a full page reload</strong>.
                         </p>
                       </div>
-                      <div className="md:col-span-7">
+                      <div className="md:col-span-7 min-w-0">
                         <CodeBlock
                           language="typescript"
                           containerClassName="w-full overflow-hidden rounded-md text-xs"
@@ -942,9 +942,9 @@ export async function checkoutAction(formData: FormData) {
                   </div>
 
                   {/* Case 4 */}
-                  <div className="p-4 rounded-lg bg-indigo-500/5 border border-indigo-500/20 space-y-3">
-                    <div className="grid md:grid-cols-12 gap-4 items-start">
-                      <div className="md:col-span-5 space-y-2">
+                  <div className="p-4 rounded-lg bg-indigo-500/5 border border-indigo-500/20 space-y-3 min-w-0">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start min-w-0">
+                      <div className="md:col-span-5 space-y-2 min-w-0">
                         <div className="flex items-center justify-between">
                           <div className="font-semibold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
                             <Sparkles className="h-4 w-4" />
@@ -961,7 +961,7 @@ export async function checkoutAction(formData: FormData) {
                           Dinou immediately delegates to <code>router.replace()</code> in the client SPA router, smoothly updating the URL and view in 0ms without a page reload.
                         </p>
                       </div>
-                      <div className="md:col-span-7">
+                      <div className="md:col-span-7 min-w-0">
                         <CodeBlock
                           language="tsx"
                           containerClassName="w-full overflow-hidden rounded-md text-xs"
@@ -986,7 +986,7 @@ export function ClientGuard({ isAllowed }: { isAllowed: boolean }) {
                 </div>
 
                 {/* Quick Reference Table */}
-                <div className="border rounded-md overflow-x-auto bg-background">
+                <div className="border rounded-md overflow-x-auto bg-background w-full min-w-0">
                   <table className="w-full text-left text-xs border-collapse min-w-[760px]">
                     <thead>
                       <tr className="border-b bg-muted/40 font-semibold text-foreground">

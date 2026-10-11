@@ -161,8 +161,8 @@ export default function Page() {
                 be pre-rendered or if it requires real-time request data:
               </p>
 
-              <div className="grid gap-6 md:grid-cols-3 not-prose my-6">
-                <Card className="border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 not-prose my-6 min-w-0">
+                <Card className="border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20 min-w-0">
                   <CardHeader>
                     <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400">
                       <Globe className="h-5 w-5" />
@@ -175,7 +175,7 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/20">
+                <Card className="border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/20 min-w-0">
                   <CardHeader>
                     <div className="flex items-center gap-2 font-semibold text-amber-600 dark:text-amber-400">
                       <Server className="h-5 w-5" />
@@ -187,7 +187,7 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-purple-500/20 bg-purple-50/30 dark:bg-purple-950/20">
+                <Card className="border-purple-500/20 bg-purple-50/30 dark:bg-purple-950/20 min-w-0">
                   <CardHeader>
                     <div className="flex items-center gap-2 font-semibold text-purple-600 dark:text-purple-400">
                       <Sparkles className="h-5 w-5" />
@@ -421,8 +421,8 @@ export const revalidate = 60;
 // export function revalidate() { return 60; }`}
                 </CodeBlock>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-6">
-                  <Card className="bg-muted/50 border-border">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-6 min-w-0">
+                  <Card className="bg-muted/50 border-border min-w-0">
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold">
                         <RefreshCw className="h-5 w-5 text-blue-500" />
@@ -437,7 +437,7 @@ export const revalidate = 60;
                     </CardContent>
                   </Card>
 
-                  <Card className="bg-muted/50 border-border">
+                  <Card className="bg-muted/50 border-border min-w-0">
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold">
                         <Timer className="h-5 w-5 text-emerald-500" />
@@ -520,8 +520,8 @@ export const revalidate = 60;
                     In standard Static Site Generation (without PPR), all server components and database queries execute <strong>exclusively at build time</strong>. The resulting HTML is immutable:
                   </p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="border rounded-lg p-4 bg-muted/20 space-y-2 border-border">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
+                    <div className="border rounded-lg p-4 bg-muted/20 space-y-2 border-border min-w-0">
                       <div className="flex items-center gap-2 font-semibold text-xs text-foreground">
                         <Timer className="h-4 w-4 text-amber-500" />
                         <span>Without PPR (Frozen Build Data)</span>
@@ -531,7 +531,7 @@ export const revalidate = 60;
                       </p>
                     </div>
 
-                    <div className="border rounded-lg p-4 bg-purple-500/5 space-y-2 border-purple-500/20">
+                    <div className="border rounded-lg p-4 bg-purple-500/5 space-y-2 border-purple-500/20 min-w-0">
                       <div className="flex items-center gap-2 font-semibold text-xs text-purple-600 dark:text-purple-400">
                         <Zap className="h-4 w-4 text-purple-500" />
                         <span>With PPR (Request-Time Fresh Data)</span>
@@ -596,8 +596,8 @@ export default function StorePage() {
 }`}
                   </CodeBlock>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                    <div className="p-3.5 rounded-md bg-amber-500/10 border border-amber-500/20 space-y-1.5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs min-w-0">
+                    <div className="p-3.5 rounded-md bg-amber-500/10 border border-amber-500/20 space-y-1.5 min-w-0">
                       <div className="font-semibold text-amber-700 dark:text-amber-300">
                         ❌ Without PPR: Full-Page Bailout
                       </div>
@@ -606,7 +606,7 @@ export default function StorePage() {
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 space-y-1.5">
+                    <div className="p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 space-y-1.5 min-w-0">
                       <div className="font-semibold text-emerald-700 dark:text-emerald-300">
                         ✅ With PPR: Isolated Hole Bailout
                       </div>
@@ -795,8 +795,8 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   A frequent question is: <em>Is <code>&lt;DinouCacheSlot&gt;</code> meant for dynamic or static pages?</em> The answer is that it functions as a <strong>universal caching primitive</strong> across three core patterns:
                 </p>
 
-                <div className="grid gap-4 md:grid-cols-2 not-prose my-6 text-xs">
-                  <div className="border rounded-lg p-4 bg-muted/20 space-y-2 border-border">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-6 text-xs min-w-0">
+                  <div className="border rounded-lg p-4 bg-muted/20 space-y-2 border-border min-w-0">
                     <div className="flex items-center gap-2 font-semibold text-foreground">
                       <Zap className="h-4 w-4 text-blue-500" />
                       <span>Pattern 1: In Dynamic SSR Pages (Dashboard)</span>
@@ -806,7 +806,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                     </p>
                   </div>
 
-                  <div className="border rounded-lg p-4 bg-muted/20 space-y-2 border-border">
+                  <div className="border rounded-lg p-4 bg-muted/20 space-y-2 border-border min-w-0">
                     <div className="flex items-center gap-2 font-semibold text-foreground">
                       <Clock className="h-4 w-4 text-emerald-500" />
                       <span>Pattern 2: In Static / ISR Pages (Asymmetric ISR)</span>
@@ -920,8 +920,8 @@ export default function ProductDetailPage({ params }: PageProps<"/products/[slug
                     A common architectural question is: <em>Can <code>&lt;Suspense&gt;</code> live inside the child component (e.g. inside <code>&lt;SlowAnalyticsWidget&gt;</code>) instead of wrapping <code>&lt;DinouCacheSlot&gt;</code>?</em>
                   </p>
 
-                  <div className="grid gap-3 sm:grid-cols-2 text-xs">
-                    <div className="p-3.5 rounded-md bg-amber-500/10 border border-amber-500/20 space-y-1.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs min-w-0">
+                    <div className="p-3.5 rounded-md bg-amber-500/10 border border-amber-500/20 space-y-1.5 min-w-0">
                       <div className="font-semibold text-amber-700 dark:text-amber-300">
                         ❌ Suspense Inside Child: TTFB is Blocked
                       </div>
@@ -930,7 +930,7 @@ export default function ProductDetailPage({ params }: PageProps<"/products/[slug
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 space-y-1.5">
+                    <div className="p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 space-y-1.5 min-w-0">
                       <div className="font-semibold text-emerald-700 dark:text-emerald-300">
                         ✅ Suspense Wrapping Slot: Instant Streaming
                       </div>
@@ -960,8 +960,8 @@ export default function ProductDetailPage({ params }: PageProps<"/products/[slug
                   Dinou provides two specialized mechanisms to refresh or purge <code>&lt;DinouCacheSlot&gt;</code> instances without re-rendering the surrounding page:
                 </p>
 
-                <div className="grid gap-4 md:grid-cols-2 not-prose my-6 text-xs">
-                  <div className="border rounded-lg p-4 bg-muted/20 space-y-2 border-border">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-6 text-xs min-w-0">
+                  <div className="border rounded-lg p-4 bg-muted/20 space-y-2 border-border min-w-0">
                     <div className="font-semibold text-foreground flex items-center gap-1.5">
                       <RefreshCw className="h-4 w-4 text-emerald-500" />
                       Client-Side In-Place Refresh (<code>refreshSlot</code>)
@@ -994,15 +994,15 @@ export function RefreshButton() {
   );
 }`}
                     </CodeBlock>
-                    <div className="text-[11px] text-muted-foreground bg-background/60 p-2.5 rounded border border-border/60 space-y-1.5 mt-2">
+                    <div className="text-[11px] text-muted-foreground bg-background/60 p-2.5 rounded border border-border/60 space-y-1.5 mt-2 break-words min-w-0">
                       <div className="font-semibold text-foreground">Why does <code>fresh: true</code> exist if it is already called <code>refreshSlot</code>?</div>
                       <div>• <strong><code>refreshSlot(id)</code> (Default)</strong>: Refreshes the client DOM with the server&apos;s current state. If the slot&apos;s server-side TTL (e.g. <code>revalidate={300}</code>) has not expired, it returns the cached server JSX without touching your database (protecting against button spam and traffic spikes).</div>
                       <div>• <strong><code>refreshSlot(id, &#123; fresh: true &#125;)</code> (Bypass)</strong>: Hard revalidation. Forces the server to ignore any unexpired TTL, immediately re-run the server component&apos;s queries/computations against your database, and update both the cache and client.</div>
                     </div>
                   </div>
 
-                  <div className="border rounded-lg p-4 bg-muted/20 space-y-2 border-border flex flex-col justify-between">
-                    <div>
+                  <div className="border rounded-lg p-4 bg-muted/20 space-y-2 border-border flex flex-col justify-between min-w-0">
+                    <div className="min-w-0">
                       <div className="font-semibold text-foreground flex items-center gap-1.5 mb-1">
                         <Database className="h-4 w-4 text-purple-500" />
                         Server-Side Tag Invalidation (<code>revalidateTag</code>)
@@ -1011,7 +1011,7 @@ export function RefreshButton() {
                         Mutations purge slots globally via <code>revalidateTag()</code> on the server, while the client immediately pulls the fresh result via <code>refreshSlot()</code>:
                       </p>
 
-                      <Tabs defaultValue="server" className="w-full not-prose">
+                      <Tabs defaultValue="server" className="w-full not-prose min-w-0">
                         <TabsList className="grid grid-cols-2 h-7 p-0.5 bg-muted/60 text-[11px] mb-2">
                           <TabsTrigger value="server" className="h-6 text-[11px]">
                             actions.ts (Server)
@@ -1021,7 +1021,7 @@ export function RefreshButton() {
                           </TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="server" className="mt-0">
+                        <TabsContent value="server" className="mt-0 min-w-0">
                           <CodeBlock
                             language="typescript"
                             containerClassName="w-full overflow-hidden rounded-lg text-xs"
@@ -1040,7 +1040,7 @@ export async function publishPost(formData: FormData) {
                           </CodeBlock>
                         </TabsContent>
 
-                        <TabsContent value="client" className="mt-0">
+                        <TabsContent value="client" className="mt-0 min-w-0">
                           <CodeBlock
                             language="tsx"
                             containerClassName="w-full overflow-hidden rounded-lg text-xs"
@@ -1071,7 +1071,7 @@ export function PostCreator() {
                       </Tabs>
                     </div>
 
-                    <div className="text-[11px] text-muted-foreground bg-background/60 p-2.5 rounded border border-border/60 space-y-1.5 mt-2">
+                    <div className="text-[11px] text-muted-foreground bg-background/60 p-2.5 rounded border border-border/60 space-y-1.5 mt-2 break-words min-w-0">
                       <div className="font-semibold text-foreground">The Synergy of <code>revalidateTag</code> + <code>refreshSlot</code>:</div>
                       <div>• <strong><code>revalidateTag(&quot;feed&quot;)</code></strong>: Evicts and purges the server cache globally for <em>all future users</em>.</div>
                       <div>• <strong><code>refreshSlot(&quot;feed-widget&quot;)</code></strong>: Pulls the fresh JSX immediately into the <em>current user&apos;s screen</em> without needing <code>&#123; fresh: true &#125;</code> (since the cache is already purged).</div>
@@ -1090,8 +1090,8 @@ export function PostCreator() {
                     A key architectural question when adopting Micro-ISR is: <em>When a slot&apos;s TTL expires, does <code>refreshSlot()</code> serve stale cache first and revalidate in the background (like traditional SWR)? And does the user see a jarring skeleton flash?</em>
                   </p>
 
-                  <div className="grid gap-4 sm:grid-cols-2 text-xs">
-                    <div className="p-3.5 rounded-md bg-blue-500/10 border border-blue-500/20 space-y-1.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs min-w-0">
+                    <div className="p-3.5 rounded-md bg-blue-500/10 border border-blue-500/20 space-y-1.5 min-w-0">
                       <div className="font-semibold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
                         <Globe className="h-3.5 w-3.5" />
                         <span>1. Page Navigation: Stale-While-Revalidate (SWR)</span>
@@ -1101,7 +1101,7 @@ export function PostCreator() {
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 space-y-1.5">
+                    <div className="p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 space-y-1.5 min-w-0">
                       <div className="font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
                         <RefreshCw className="h-3.5 w-3.5" />
                         <span>2. Interactive refreshSlot: Synchronous Fresh Delivery</span>
@@ -1162,8 +1162,8 @@ export function RefreshAnalyticsButton() {
               <section id="horizontal-vs-vertical" className="mt-8 scroll-mt-20">
                 <h4>4.3. Horizontal vs. Vertical Segmentation &amp; Anti-Patterns</h4>
                 
-                <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                  <Card>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-6 min-w-0">
+                  <Card className="min-w-0">
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400">
                         <Split className="h-5 w-5" />
@@ -1182,7 +1182,7 @@ export function RefreshAnalyticsButton() {
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="min-w-0">
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400">
                         <Layers className="h-5 w-5" />
@@ -1209,7 +1209,7 @@ export function RefreshAnalyticsButton() {
                     <span>When NOT to Use &lt;DinouCacheSlot&gt;</span>
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-3 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs min-w-0">
                     <div className="p-3 bg-background/80 rounded-lg border border-rose-500/20 space-y-1">
                       <span className="font-bold text-rose-600 dark:text-rose-400 block">
                         1. 100% Static Pages (SSG)
@@ -1261,8 +1261,8 @@ export function RefreshAnalyticsButton() {
               </p>
 
               {/* Before vs After Grid */}
-              <div className="grid gap-4 md:grid-cols-2 not-prose my-6 text-xs">
-                <div className="border rounded-lg p-4 bg-card border-border space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-6 text-xs min-w-0">
+                <div className="border rounded-lg p-4 bg-card border-border space-y-2 min-w-0">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-foreground flex items-center gap-1.5">
                       <Clock className="h-4 w-4 text-amber-500" />
@@ -1279,7 +1279,7 @@ export function RefreshAnalyticsButton() {
                   </ul>
                 </div>
 
-                <div className="border rounded-lg p-4 bg-indigo-500/5 border-indigo-500/20 space-y-2">
+                <div className="border rounded-lg p-4 bg-indigo-500/5 border-indigo-500/20 space-y-2 min-w-0">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
                       <Zap className="h-4 w-4 text-indigo-500" />
@@ -1345,7 +1345,7 @@ export default function TelemetryPage() {
                 </CodeBlock>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3 pt-2 text-xs not-prose">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs not-prose min-w-0">
                 <div className="p-3.5 rounded-lg border bg-card space-y-1">
                   <div className="font-bold flex items-center gap-1.5 text-foreground">
                     <Zap className="h-4 w-4 text-amber-500" />
@@ -1421,8 +1421,8 @@ export const getStaticPaths = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
                   dynamic generation against abuse:
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-4">
-                  <Card>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-4 min-w-0">
+                  <Card className="min-w-0">
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold">
                         <ShieldCheck className="h-5 w-5 text-green-500" />
@@ -1443,7 +1443,7 @@ export const getStaticPaths = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="min-w-0">
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold">
                         <ServerCog className="h-5 w-5 text-blue-500" />

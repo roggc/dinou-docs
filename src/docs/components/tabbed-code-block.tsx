@@ -38,7 +38,7 @@ export function TabbedCodeBlock({
 
   return (
     <div
-      className={`w-full rounded-lg border border-[#30363d] bg-[#1e2227] overflow-hidden shadow-sm ${containerClassName}`}
+      className={`w-full min-w-0 rounded-lg border border-[#30363d] bg-[#1e2227] overflow-hidden shadow-sm ${containerClassName}`}
     >
       {/* Integrated Terminal / Editor Tab Bar Header */}
       <div className="flex items-center justify-between border-b border-[#181a1f] bg-[#1e2227] px-2.5 py-1.5 gap-2">

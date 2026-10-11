@@ -294,8 +294,8 @@ export default function Page() {
                   Dinou enforces a strict <strong>No-Gap Rule</strong> when resolving nested optional segments such as <code>/inventory/[[warehouse]]/[[aisle]]</code>:
                 </p>
 
-                <div className="grid gap-4 md:grid-cols-2 not-prose my-4">
-                  <Card className="border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-4 min-w-0">
+                  <Card className="border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 min-w-0">
                     <CardHeader className="pb-2">
                       <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
                         <CheckCircle2 className="h-4 w-4" />
@@ -314,7 +314,7 @@ export default function Page() {
                     </CardContent>
                   </Card>
 
-                  <Card className="border-rose-500/30 bg-rose-50/40 dark:bg-rose-950/20">
+                  <Card className="border-rose-500/30 bg-rose-50/40 dark:bg-rose-950/20 min-w-0">
                     <CardHeader className="pb-2">
                       <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-semibold text-sm">
                         <XCircle className="h-4 w-4" />
@@ -440,8 +440,8 @@ export async function getProps(params: RouteParams<"/product/[id]">) {
                   Query parameters (e.g. <code>?search=react&amp;sort=asc</code>) are deliberately isolated from static route matching to preserve edge cache stability. In Dinou, <code>useSearchParams()</code> is a <strong>universal hook</strong> that works seamlessly in <strong>both Server Components and Client Components</strong>:
                 </p>
 
-                <div className="grid gap-4 md:grid-cols-2 not-prose mt-3">
-                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-card">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose mt-3 min-w-0">
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-card min-w-0">
                     <div className="text-xs font-mono font-semibold text-blue-600 dark:text-blue-400 mb-1">
                       Universal: Server &amp; Client Components
                     </div>
@@ -460,7 +460,7 @@ export default function SearchPage() {
                     </CodeBlock>
                   </div>
 
-                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-card">
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-card min-w-0">
                     <div className="text-xs font-mono font-semibold text-purple-600 dark:text-purple-400 mb-1">
                       page_functions.ts &amp; Server Functions
                     </div>
@@ -568,8 +568,8 @@ export default function DashboardLayout({
                   Dinou v7 introduces <strong>Horizontal Layered Segmentation</strong>. Layouts and pages travel on completely separate execution, streaming, and caching pathways:
                 </p>
 
-                <div className="grid md:grid-cols-2 gap-4 not-prose my-4">
-                  <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20 space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-4 min-w-0">
+                  <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20 space-y-2 min-w-0">
                     <div className="flex items-center gap-2 font-bold text-xs text-blue-600 dark:text-blue-400">
                       <Layers className="h-4 w-4" />
                       1. The Layout Plane
@@ -584,7 +584,7 @@ export default function DashboardLayout({
                     </ul>
                   </div>
 
-                  <div className="p-4 rounded-xl border border-purple-500/20 bg-purple-50/30 dark:bg-purple-950/20 space-y-2">
+                  <div className="p-4 rounded-xl border border-purple-500/20 bg-purple-50/30 dark:bg-purple-950/20 space-y-2 min-w-0">
                     <div className="flex items-center gap-2 font-bold text-xs text-purple-600 dark:text-purple-400">
                       <Split className="h-4 w-4" />
                       2. The Page Plane
@@ -1085,8 +1085,8 @@ export default function NotFound({ params, suggestions }: NotFoundProps) {
                   Parallel routes allow you to render multiple independent pages simultaneously inside the same parent layout (e.g., <code>@sidebar</code>, <code>@analytics</code>, <code>@modal</code>):
                 </p>
 
-                <div className="grid md:grid-cols-2 gap-4 not-prose mt-3">
-                  <div className="bg-card border rounded-xl p-4 text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose mt-3 min-w-0">
+                  <div className="bg-card border rounded-xl p-4 text-xs min-w-0">
                     <div className="font-bold mb-2 text-slate-900 dark:text-slate-100">Folder Structure</div>
                     <ul className="space-y-1.5 font-mono text-muted-foreground">
                       <li>src/dashboard/@sidebar/page.tsx</li>
@@ -1096,7 +1096,7 @@ export default function NotFound({ params, suggestions }: NotFoundProps) {
                     </ul>
                   </div>
 
-                  <div className="bg-card border rounded-xl p-4 text-xs">
+                  <div className="bg-card border rounded-xl p-4 text-xs min-w-0">
                     <div className="font-bold mb-2 text-slate-900 dark:text-slate-100">Layout Prop Injection</div>
                     <p className="text-muted-foreground mb-2">
                       Slots are passed as named props directly alongside <code>children</code>:
@@ -1137,8 +1137,8 @@ export default function Layout({
                   Dinou isolates errors within parallel slots to prevent a single widget failure from crashing the entire page:
                 </p>
 
-                <div className="grid gap-4 md:grid-cols-3 not-prose">
-                  <Card className="border-l-4 border-l-blue-500">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 not-prose min-w-0">
+                  <Card className="border-l-4 border-l-blue-500 min-w-0">
                     <CardHeader className="p-4 pb-2">
                       <div className="flex items-center gap-2 font-bold text-xs">
                         <ShieldAlert className="h-4 w-4 text-blue-500" />

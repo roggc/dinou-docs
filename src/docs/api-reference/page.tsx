@@ -137,9 +137,9 @@ export default function Page() {
             {/* SECTION 1: COMPONENTS */}
             {/* ================================================================= */}
             <section id="components" className="scroll-mt-20">
-              <h2 className="flex items-center gap-3">
-                1. Components (<code>dinou</code>)
-                <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+              <h2 className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                <span>1. Components <span className="whitespace-nowrap">(<code>dinou</code>)</span></span>
+                <span className="inline-flex items-center shrink-0 rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
                   Universal / Client
                 </span>
               </h2>
@@ -152,10 +152,10 @@ export default function Page() {
             {/* SECTION 2: HOOKS & NAVIGATION */}
             {/* ================================================================= */}
             <section id="hooks-navigation" className="scroll-mt-20 mt-12 pt-8 border-t">
-              <h2 className="flex items-center gap-3">
-                2. Hooks & Navigation (<code>dinou</code>)
-                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                  Universal & Client Hooks
+              <h2 className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                <span>2. Hooks &amp; Navigation <span className="whitespace-nowrap">(<code>dinou</code>)</span></span>
+                <span className="inline-flex items-center shrink-0 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                  Universal &amp; Client Hooks
                 </span>
               </h2>
 
@@ -171,9 +171,9 @@ export default function Page() {
             {/* SECTION 3: TYPE-SAFE ROUTING */}
             {/* ================================================================= */}
             <section id="type-safe-routing" className="scroll-mt-20 mt-12 pt-8 border-t">
-              <h2 className="flex items-center gap-3">
-                3. Type-Safe Routing (<code>dinou</code>)
-                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+              <h2 className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                <span>3. Type-Safe Routing <span className="whitespace-nowrap">(<code>dinou</code>)</span></span>
+                <span className="inline-flex items-center shrink-0 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
                   Zero-Runtime Type System
                 </span>
               </h2>
@@ -207,9 +207,9 @@ export default function Page() {
             {/* SECTION 4: SERVER CONTEXT & CONFIG */}
             {/* ================================================================= */}
             <section id="server-context-config" className="scroll-mt-20 mt-12 pt-8 border-t">
-              <h2 className="flex items-center gap-3">
-                4. Server Context &amp; Config (<code>dinou</code>)
-                <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+              <h2 className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                <span>4. Server Context &amp; Config <span className="whitespace-nowrap">(<code>dinou</code>)</span></span>
+                <span className="inline-flex items-center shrink-0 rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
                   Server-Side Execution
                 </span>
               </h2>
@@ -224,9 +224,9 @@ export default function Page() {
             {/* ================================================================= */}
             <section id="server-cache-revalidation" className="scroll-mt-20 mt-12 pt-8 border-t">
               <span id="server-primitives-storage" className="scroll-mt-20" />
-              <h2 className="flex items-center gap-3">
-                5. Server Cache &amp; Revalidation (<code>dinou/server</code>)
-                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+              <h2 className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                <span>5. Server Cache &amp; Revalidation <span className="whitespace-nowrap">(<code>dinou/server</code>)</span></span>
+                <span className="inline-flex items-center shrink-0 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
                   Micro-ISR &amp; Invalidation
                 </span>
               </h2>
@@ -241,9 +241,9 @@ export default function Page() {
             {/* SECTION 6: STORAGE ADAPTERS */}
             {/* ================================================================= */}
             <section id="storage-adapters" className="scroll-mt-20 mt-12 pt-8 border-t">
-              <h2 className="flex items-center gap-3">
-                6. Storage Adapters (<code>dinou/server</code>)
-                <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
+              <h2 className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                <span>6. Storage Adapters <span className="whitespace-nowrap">(<code>dinou/server</code>)</span></span>
+                <span className="inline-flex items-center shrink-0 rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
                   Storage Abstraction &amp; Persistence
                 </span>
               </h2>
@@ -256,9 +256,9 @@ export default function Page() {
             {/* ================================================================= */}
             <section id="route-segment-contracts" className="scroll-mt-20 mt-12 pt-8 border-t">
               <span id="route-lifecycles-config" className="scroll-mt-20" />
-              <h2 className="flex items-center gap-3">
-                7. Route Lifecycles &amp; Config
-                <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
+              <h2 className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                <span>7. Route Lifecycles &amp; Config</span>
+                <span className="inline-flex items-center shrink-0 rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
                   page_functions.ts &amp; layout_functions.ts
                 </span>
               </h2>

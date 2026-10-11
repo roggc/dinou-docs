@@ -155,8 +155,8 @@ export default function Page() {
                 validation without cluttering component UI code.
               </p>
 
-              <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                <Card className="border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-6 min-w-0">
+                <Card className="border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20 min-w-0">
                   <CardHeader>
                     <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400">
                       <FileCode className="h-5 w-5" />
@@ -175,7 +175,7 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-indigo-500/20 bg-indigo-50/30 dark:bg-indigo-950/20">
+                <Card className="border-indigo-500/20 bg-indigo-50/30 dark:bg-indigo-950/20 min-w-0">
                   <CardHeader>
                     <div className="flex items-center gap-2 font-semibold text-indigo-600 dark:text-indigo-400">
                       <Split className="h-5 w-5" />
@@ -298,8 +298,8 @@ export type LayoutFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TP
                 </div>
 
                 {/* 3 Architectural Reasons for Separation */}
-                <div className="pt-2 grid gap-4 md:grid-cols-3">
-                  <Card className="border-blue-500/20 bg-background/60">
+                <div className="pt-2 grid grid-cols-1 md:grid-cols-3 gap-4 min-w-0">
+                  <Card className="border-blue-500/20 bg-background/60 min-w-0">
                     <CardHeader className="pb-2">
                       <div className="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
                         <FileCode className="h-4 w-4 text-blue-500" />
@@ -311,7 +311,7 @@ export type LayoutFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TP
                     </CardContent>
                   </Card>
 
-                  <Card className="border-indigo-500/20 bg-background/60">
+                  <Card className="border-indigo-500/20 bg-background/60 min-w-0">
                     <CardHeader className="pb-2">
                       <div className="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
                         <Split className="h-4 w-4 text-indigo-500" />
@@ -323,7 +323,7 @@ export type LayoutFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TP
                     </CardContent>
                   </Card>
 
-                  <Card className="border-emerald-500/20 bg-background/60">
+                  <Card className="border-emerald-500/20 bg-background/60 min-w-0">
                     <CardHeader className="pb-2">
                       <div className="text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
                         <ShieldCheck className="h-4 w-4 text-emerald-500" />
@@ -736,7 +736,7 @@ export function SearchFilter() {
                   />
 
                   {/* Key Takeaways */}
-                  <div className="grid gap-2 sm:grid-cols-3 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 min-w-0">
                     <div className="rounded-lg border bg-muted/20 p-3 space-y-1">
                       <span className="text-xs font-bold text-foreground">1. Route Data (Params)</span>
                       <p className="text-[11px] text-muted-foreground leading-relaxed">
@@ -789,8 +789,8 @@ export function SearchFilter() {
                   (for dynamic data sources like databases or headless CMSs):
                 </p>
 
-                <div className="grid gap-6 md:grid-cols-2 not-prose my-4">
-                  <Card>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-4 min-w-0">
+                  <Card className="min-w-0">
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400">
                         <CheckCircle2 className="h-5 w-5" />
@@ -815,7 +815,7 @@ export const getStaticPaths: PageFunctions<RouteParams<"/blog/[slug]">]["getStat
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="min-w-0">
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400">
                         <Database className="h-5 w-5" />
@@ -1158,10 +1158,10 @@ export const getStaticPaths: PageFunctions<RouteParams<"/docs/[[...slug]]">>["ge
                   Because the parent folder contains a <code>page.tsx</code>, Dinou must generate valid parent pages first before it can traverse down to the child level. The parent acts as a <strong>mandatory gatekeeper</strong>:
                 </p>
 
-                <div className="flex flex-col md:grid md:grid-cols-2 md:gap-6 not-prose my-6">
+                <div className="flex flex-col md:grid md:grid-cols-2 md:gap-6 not-prose my-6 min-w-0">
                   {/* Broken Chain */}
-                  <div className="w-full mb-6 md:mb-0">
-                    <Card className="border-red-500/20 bg-red-50/50 dark:bg-red-900/10 h-full">
+                  <div className="w-full min-w-0 mb-6 md:mb-0">
+                    <Card className="border-red-500/20 bg-red-50/50 dark:bg-red-900/10 h-full min-w-0">
                       <CardHeader>
                         <div className="flex items-center gap-2 text-red-600 dark:text-red-400 font-semibold">
                           <XCircle className="h-5 w-5 flex-shrink-0" />
@@ -1188,8 +1188,8 @@ export const getStaticPaths: PageFunctions<RouteParams<"/docs/[[...slug]]">>["ge
                   </div>
 
                   {/* Functional Chain */}
-                  <div className="w-full">
-                    <Card className="border-green-500/20 bg-green-50/50 dark:bg-green-900/10 h-full">
+                  <div className="w-full min-w-0">
+                    <Card className="border-green-500/20 bg-green-50/50 dark:bg-green-900/10 h-full min-w-0">
                       <CardHeader>
                         <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
                           <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
@@ -1413,7 +1413,7 @@ export const validateParams: PageFunctions<
                   <code>validateParams</code> is the <strong>first line of defense</strong> executed by the Dinou server engine on every incoming request. It has ultimate veto power regardless of whether the route is pure static (SSG), on-demand (ISG), or dynamic (SSR):
                 </p>
 
-                <div className="grid gap-3 sm:grid-cols-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs min-w-0">
                   <div className="p-3 rounded-lg border bg-muted/40 space-y-1.5">
                     <span className="font-semibold text-blue-600 dark:text-blue-400 block">
                       1. With ISG (allowISG: true)
@@ -1477,8 +1477,8 @@ export const validateParams: PageFunctions<
                 </ul>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2 not-prose my-4">
-                <Card>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-4 min-w-0">
+                <Card className="min-w-0">
                   <CardHeader>
                     <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400">
                       <CheckCircle2 className="h-5 w-5" />
@@ -1499,7 +1499,7 @@ export const allowISG: PageFunctions["allowISG"] = false;`}
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="min-w-0">
                   <CardHeader>
                     <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400">
                       <Zap className="h-5 w-5" />
@@ -1739,7 +1739,7 @@ export const getCacheTags: PageFunctions<
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   PPR eliminates the traditional trade-off between static and dynamic rendering by dividing the page into two phases over a <strong>single HTTP connection</strong>:
                 </p>
-                <div className="grid gap-3 sm:grid-cols-2 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs min-w-0">
                   <div className="p-3 rounded-lg border bg-muted/40 space-y-1">
                     <span className="font-semibold text-emerald-600 dark:text-emerald-400 block">
                       1. Instant Static Shell (0ms TTFB)

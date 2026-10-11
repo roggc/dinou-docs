@@ -57,9 +57,9 @@ export default function Page() {
             {/* SECTION 1: OVERVIEW & ARCHITECTURE */}
             {/* ================================================================= */}
             <section id="overview" className="scroll-mt-20">
-              <h2 className="flex items-center gap-3">
-                1. Overview &amp; Architecture
-                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+              <h2 className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                <span>1. Overview &amp; Architecture</span>
+                <span className="inline-flex items-center shrink-0 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
                   Static Filesystem
                 </span>
               </h2>
@@ -76,8 +76,8 @@ export default function Page() {
                   Rollup, or Esbuild, files placed in <code>public/</code> <strong>completely bypass the bundler pipeline</strong>:
                 </p>
 
-                <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
-                  <Card className="border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-6 min-w-0">
+                  <Card className="border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 min-w-0">
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold text-slate-700 dark:text-slate-300">
                         <Zap className="h-5 w-5 text-slate-500" />
@@ -92,7 +92,7 @@ export default function Page() {
                     </CardContent>
                   </Card>
 
-                  <Card className="border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/10">
+                  <Card className="border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/10 min-w-0">
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400">
                         <FolderTree className="h-5 w-5 text-emerald-500" />
@@ -184,9 +184,9 @@ export default function Page() {
             {/* SECTION 2: URL MAPPING & SERVING */}
             {/* ================================================================= */}
             <section id="url-mapping" className="scroll-mt-20 mt-12 pt-8 border-t">
-              <h2 className="flex items-center gap-3">
-                2. URL Mapping &amp; Serving
-                <span className="inline-flex items-center rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-700 dark:text-slate-300 ring-1 ring-inset ring-slate-200 dark:ring-slate-700">
+              <h2 className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                <span>2. URL Mapping &amp; Serving</span>
+                <span className="inline-flex items-center shrink-0 rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-700 dark:text-slate-300 ring-1 ring-inset ring-slate-200 dark:ring-slate-700">
                   Routing
                 </span>
               </h2>
@@ -195,7 +195,7 @@ export default function Page() {
                 <strong>You must never include <code>/public/</code> in the URL path</strong>.
               </p>
 
-              <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
+              <div className="not-prose overflow-x-auto rounded-lg border border-border my-4 w-full min-w-0">
                 <table className="w-full text-sm text-left">
                   <thead className="bg-muted text-muted-foreground font-medium">
                     <tr>
@@ -234,9 +234,9 @@ export default function Page() {
             {/* SECTION 3: COMMON USE CASES */}
             {/* ================================================================= */}
             <section id="common-use-cases" className="scroll-mt-20 mt-12 pt-8 border-t">
-              <h2 className="flex items-center gap-3">
-                3. Common Use Cases
-                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+              <h2 className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                <span>3. Common Use Cases</span>
+                <span className="inline-flex items-center shrink-0 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
                   Guides
                 </span>
               </h2>
@@ -393,9 +393,9 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
             {/* SECTION 4: PUBLIC VS IMPORTED ASSETS */}
             {/* ================================================================= */}
             <section id="public-vs-assets" className="scroll-mt-20 mt-12 pt-8 border-t">
-              <h2 className="flex items-center gap-3">
-                4. <code>public/</code> vs. Imported Assets (<code>src/</code>)
-                <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
+              <h2 className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+                <span>4. <code>public/</code> vs. Imported Assets (<code>src/</code>)</span>
+                <span className="inline-flex items-center shrink-0 rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
                   Architecture Comparison
                 </span>
               </h2>
@@ -403,7 +403,7 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
                 Dinou provides two distinct mechanisms for handling assets. Choose the right pattern for your use case:
               </p>
 
-              <div className="not-prose overflow-x-auto rounded-lg border border-border my-6">
+              <div className="not-prose overflow-x-auto rounded-lg border border-border my-6 w-full min-w-0">
                 <table className="w-full text-sm text-left">
                   <thead className="bg-muted text-muted-foreground font-medium">
                     <tr>

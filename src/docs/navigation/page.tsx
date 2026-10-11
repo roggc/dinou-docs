@@ -107,8 +107,8 @@ export default function Page() {
                 In Dinou, navigating between routes does <strong>not</strong> trigger a full browser refresh. Instead, Dinou operates as a high-performance single-page application (SPA):
               </p>
 
-              <div className="grid sm:grid-cols-3 gap-4 not-prose my-6">
-                <Card>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 not-prose my-6 min-w-0">
+                <Card className="min-w-0">
                   <CardHeader className="p-4 pb-2">
                     <div className="flex items-center gap-2 font-bold text-xs">
                       <MousePointerClick className="h-4 w-4 text-blue-500" />
@@ -120,7 +120,7 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="min-w-0">
                   <CardHeader className="p-4 pb-2">
                     <div className="flex items-center gap-2 font-bold text-xs">
                       <Zap className="h-4 w-4 text-amber-500" />
@@ -132,7 +132,7 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="min-w-0">
                   <CardHeader className="p-4 pb-2">
                     <div className="flex items-center gap-2 font-bold text-xs">
                       <Clock className="h-4 w-4 text-emerald-500" />
@@ -299,8 +299,8 @@ export default function LoginButton() {
                   During client execution, Dinou maintains three dedicated in-memory caches in the browser tab:
                 </p>
 
-                <div className="grid sm:grid-cols-3 gap-4 not-prose">
-                  <Card className="border-l-4 border-l-blue-500">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 not-prose min-w-0">
+                  <Card className="border-l-4 border-l-blue-500 min-w-0">
                     <CardHeader className="p-4 pb-2">
                       <div className="font-mono font-bold text-xs text-blue-600 dark:text-blue-400">
                         pageCache
@@ -311,7 +311,7 @@ export default function LoginButton() {
                     </CardContent>
                   </Card>
 
-                  <Card className="border-l-4 border-l-purple-500">
+                  <Card className="border-l-4 border-l-purple-500 min-w-0">
                     <CardHeader className="p-4 pb-2">
                       <div className="font-mono font-bold text-xs text-purple-600 dark:text-purple-400">
                         layoutCache
@@ -322,7 +322,7 @@ export default function LoginButton() {
                     </CardContent>
                   </Card>
 
-                  <Card className="border-l-4 border-l-emerald-500">
+                  <Card className="border-l-4 border-l-emerald-500 min-w-0">
                     <CardHeader className="p-4 pb-2">
                       <div className="font-mono font-bold text-xs text-emerald-600 dark:text-emerald-400">
                         scrollCache
@@ -366,22 +366,22 @@ export default function LoginButton() {
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     What happens under the hood when fresh is true:
                   </h4>
-                  <div className="grid sm:grid-cols-3 gap-3 not-prose text-xs">
-                    <div className="p-3.5 rounded-lg border bg-card">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 not-prose text-xs min-w-0">
+                    <div className="p-3.5 rounded-lg border bg-card min-w-0">
                       <span className="font-bold text-rose-600 dark:text-rose-400 block mb-1">1. Bypasses Prefetch</span>
                       <p className="text-muted-foreground leading-relaxed">
                         Hovering over a <code>&lt;Link fresh&gt;</code> does <strong>not</strong> prefetch potentially stale data before the user actually clicks.
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-lg border bg-card">
+                    <div className="p-3.5 rounded-lg border bg-card min-w-0">
                       <span className="font-bold text-amber-600 dark:text-amber-400 block mb-1">2. Evicts Cache Entry</span>
                       <p className="text-muted-foreground leading-relaxed">
                         Upon navigation, the router explicitly runs <code>pageCache.delete(targetUrl)</code>, removing any prior cached RSC promise.
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-lg border bg-card">
+                    <div className="p-3.5 rounded-lg border bg-card min-w-0">
                       <span className="font-bold text-emerald-600 dark:text-emerald-400 block mb-1">3. Live Server Render</span>
                       <p className="text-muted-foreground leading-relaxed">
                         Issues a fresh HTTP request directly to the server, re-executing server components and page functions with latest data.
@@ -395,9 +395,9 @@ export default function LoginButton() {
                     Usage Examples:
                   </h4>
 
-                  <div className="grid sm:grid-cols-2 gap-4 not-prose">
-                    <div>
-                      <div className="text-xs font-mono text-blue-600 dark:text-blue-400 font-semibold mb-1.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose min-w-0">
+                    <div className="min-w-0">
+                      <div className="text-xs font-mono text-blue-600 dark:text-blue-400 font-semibold mb-1.5 break-words">
                         Declarative: &lt;Link fresh&gt;
                       </div>
                       <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
@@ -408,8 +408,8 @@ export default function LoginButton() {
                       </CodeBlock>
                     </div>
 
-                    <div>
-                      <div className="text-xs font-mono text-purple-600 dark:text-purple-400 font-semibold mb-1.5">
+                    <div className="min-w-0">
+                      <div className="text-xs font-mono text-purple-600 dark:text-purple-400 font-semibold mb-1.5 break-words">
                         Imperative: router.push(url, &#123; fresh: true &#125;)
                       </div>
                       <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
@@ -489,8 +489,8 @@ const handleUpdate = async () => {
                 To inform users that a transition is occurring behind the scenes, Dinou provides the <code>useNavigationLoading()</code> hook:
               </p>
 
-              <div className="grid sm:grid-cols-2 gap-4 not-prose my-6 text-xs">
-                <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20 space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 not-prose my-6 text-xs min-w-0">
+                <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20 space-y-2 min-w-0">
                   <div className="font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Reactive Transition State
@@ -500,7 +500,7 @@ const handleUpdate = async () => {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/20 space-y-2">
+                <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/20 space-y-2 min-w-0">
                   <div className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4" />
                     Hydration-Safe Default
