@@ -195,7 +195,7 @@ const docsNavigation = [
     title: "Guides",
     items: [
       {
-        title: "Internationalization",
+        title: "Internationalization (i18n)",
         href: "/docs/i18n",
         icon: Globe,
       },
