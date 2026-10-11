@@ -1,5 +1,3 @@
-"use client";
-
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
 import { Badge } from "@/docs/components/ui/badge";
@@ -136,15 +134,6 @@ function MetricCard({
 }
 
 export default function DataFetchingPage() {
-  const scrollToStrategy = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-      window.history.pushState(null, "", `#${id}`);
-    } else {
-      window.location.hash = id;
-    }
-  };
 
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
@@ -374,7 +363,6 @@ export default function DataFetchingPage() {
                       <TableBody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                         {/* Row 1 */}
                         <TableRow
-                          onClick={() => scrollToStrategy("strategy-1")}
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">1</TableCell>
@@ -407,7 +395,6 @@ export default function DataFetchingPage() {
 
                         {/* Row 2 */}
                         <TableRow
-                          onClick={() => scrollToStrategy("strategy-2")}
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-rose-600 dark:text-rose-400 font-bold">2</TableCell>
@@ -438,7 +425,6 @@ export default function DataFetchingPage() {
 
                         {/* Row 3 */}
                         <TableRow
-                          onClick={() => scrollToStrategy("strategy-3")}
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">3</TableCell>
@@ -471,7 +457,6 @@ export default function DataFetchingPage() {
 
                         {/* Row 4 */}
                         <TableRow
-                          onClick={() => scrollToStrategy("strategy-4")}
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-amber-600 dark:text-amber-400 font-bold">4</TableCell>
@@ -504,7 +489,6 @@ export default function DataFetchingPage() {
 
                         {/* Row 5 */}
                         <TableRow
-                          onClick={() => scrollToStrategy("strategy-5")}
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">5</TableCell>
@@ -537,7 +521,6 @@ export default function DataFetchingPage() {
 
                         {/* Row 6 */}
                         <TableRow
-                          onClick={() => scrollToStrategy("strategy-6")}
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">6</TableCell>
@@ -570,7 +553,6 @@ export default function DataFetchingPage() {
 
                         {/* Row 7 */}
                         <TableRow
-                          onClick={() => scrollToStrategy("strategy-7")}
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">7</TableCell>
@@ -603,7 +585,6 @@ export default function DataFetchingPage() {
 
                         {/* Row 8 */}
                         <TableRow
-                          onClick={() => scrollToStrategy("strategy-8")}
                           className="cursor-pointer hover:bg-emerald-100/60 dark:hover:bg-emerald-950/40 bg-emerald-50/30 dark:bg-emerald-950/20 border-l-2 border-emerald-500 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-emerald-600 dark:text-emerald-400 font-bold">8</TableCell>
@@ -641,7 +622,6 @@ export default function DataFetchingPage() {
 
                         {/* Row 9 */}
                         <TableRow
-                          onClick={() => scrollToStrategy("strategy-9")}
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-amber-600 dark:text-amber-400 font-bold">9</TableCell>
@@ -674,7 +654,6 @@ export default function DataFetchingPage() {
 
                         {/* Row 10 */}
                         <TableRow
-                          onClick={() => scrollToStrategy("strategy-10")}
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">10</TableCell>
@@ -707,7 +686,6 @@ export default function DataFetchingPage() {
 
                         {/* Row 11 */}
                         <TableRow
-                          onClick={() => scrollToStrategy("strategy-11")}
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-rose-600 dark:text-rose-400 font-bold">11</TableCell>
@@ -738,7 +716,6 @@ export default function DataFetchingPage() {
 
                         {/* Row 12 */}
                         <TableRow
-                          onClick={() => scrollToStrategy("strategy-12")}
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-amber-600 dark:text-amber-400 font-bold">12</TableCell>
@@ -771,7 +748,6 @@ export default function DataFetchingPage() {
 
                         {/* Row 13 */}
                         <TableRow
-                          onClick={() => scrollToStrategy("strategy-13")}
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-slate-600 dark:text-slate-400 font-bold">13</TableCell>

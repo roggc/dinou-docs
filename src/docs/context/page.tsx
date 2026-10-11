@@ -1,5 +1,3 @@
-"use client";
-
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
 import { CodeBlock } from "@/docs/components/code-block";

@@ -54,11 +54,6 @@ export const docsNavigation: NavSection[] = [
         icon: BookOpen,
       },
       {
-        title: "Why Dinou?",
-        href: "/docs/why-dinou",
-        icon: Sparkles,
-      },
-      {
         title: "Installation",
         href: "/docs/getting-started",
         icon: Package,

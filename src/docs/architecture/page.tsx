@@ -1,5 +1,3 @@
-"use client";
-
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { Card, CardContent, CardHeader, CardTitle } from "@/docs/components/ui/card";
 import {

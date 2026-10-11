@@ -1,5 +1,3 @@
-"use client";
-
 import { ClientRedirect } from "dinou";
 
 export default function Page() {

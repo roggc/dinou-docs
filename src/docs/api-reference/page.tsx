@@ -1,5 +1,3 @@
-"use client";
-
 import { Link } from "dinou";
 import { ShieldCheck } from "lucide-react";
 import { TableOfContents } from "@/docs/components/table-of-contents";
