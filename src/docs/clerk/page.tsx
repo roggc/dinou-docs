@@ -23,7 +23,7 @@ const tocItems = [
   { id: "concept", title: "1. Core Concept", level: 2 },
   { id: "installation", title: "2. Installation & Environment", level: 2 },
   { id: "plugin-setup", title: "3. The Dinou v7 Clerk Plugin", level: 2 },
-  { id: "rsc-usage", title: "4. Usage in RSC & Server Functions", level: 2 },
+  { id: "rsc-usage", title: "4. Usage in Pages & Server Functions", level: 2 },
   { id: "clerk-server-actions", title: "4.1 Securing Server Functions", level: 3 },
   { id: "clerk-page-functions", title: "4.2 Option A: Server Component (Direct await)", level: 3 },
   { id: "clerk-page-view", title: "4.3 Option B: Client Component (getProps)", level: 3 },
@@ -187,9 +187,9 @@ export default defineConfig({
               </div>
             </section>
 
-            {/* 4. USAGE IN RSC & SERVER FUNCTIONS */}
+            {/* 4. USAGE IN PAGES & SERVER FUNCTIONS */}
             <section id="rsc-usage">
-              <h2>4. Usage in RSC &amp; Server Functions</h2>
+              <h2>4. Usage in Pages &amp; Server Functions</h2>
               <p>
                 With the plugin registered, any Server Component, Page Function, or Server Action can read <code>userId</code> directly from <code>getContext()</code>:
               </p>
