@@ -102,7 +102,7 @@ export default function Page() {
 
               <h3 id="overview-how-it-works">1.1 How it Works</h3>
               <p>
-                When a request arrives for <code>/es/about</code>, Dinou matches the dynamic route <code>src/[lang]/about</code>. Your page component (<code>page.tsx</code>) automatically receives <code>{"{ params: { lang: 'es' } }"}</code> via standard React props (typed with <code>PageProps</code>). If defined, server contracts in <code>page_functions.ts</code> (such as <code>getProps(params)</code> or <code>getStaticPaths()</code>) also receive <code>params.lang</code> directly to load localized data or declare pre-rendered paths.
+                When a request arrives for <code>/es/about</code>, Dinou matches the dynamic route <code>src/[lang]/about</code>. Your page component (<code>page.tsx</code>) automatically receives <code>{"{ params: { lang: 'es' } }"}</code> via standard React props (typed with <code>PageProps</code>). If defined, server contracts like <code>getProps(params)</code> or <code>validateParams(params)</code> also receive <code>params.lang</code> directly to load localized data or validate the route. For pre-rendering at build time, <code>getStaticPaths</code> can be exported in <code>layout_functions.ts</code> (or <code>page_functions.ts</code>) to declare the supported locales.
               </p>
             </section>
 
@@ -569,11 +569,24 @@ export function LanguageSwitcher() {
                 <CodeBlock language="typescript">{`// src/[lang]/layout_functions.ts
 import type { LayoutFunctions } from "dinou";
 
-// Cascades down to all child routes (e.g. /[lang]/interactive, /[lang]/about, etc.)
+// 1. Cascades down to all child routes (e.g. /[lang]/interactive, /[lang]/about, etc.)
 export const getStaticPaths: LayoutFunctions<"/[lang]">["getStaticPaths"] = [
   { lang: "en" },
   { lang: "es" },
-];`}</CodeBlock>
+];
+
+// 2. Strict language enclave: immediately returns 404 for unlisted locales (e.g. /fr/about)
+export const allowISG: LayoutFunctions<"/[lang]">["allowISG"] = false;`}</CodeBlock>
+              </div>
+
+              <div className="not-prose my-4">
+                <Alert>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <AlertTitle>Strict Language Enclave (<code>allowISG: false</code>)</AlertTitle>
+                  <AlertDescription className="text-xs leading-relaxed text-muted-foreground mt-1">
+                    Setting <code>allowISG = false</code> ensures that only the declared languages (<code>en</code>, <code>es</code>) can be accessed. Any incoming request for an unsupported locale (like <code>/fr/...</code> or <code>/de/...</code>) will immediately return a <strong>404 Not Found</strong> at the layout perimeter without attempting on-demand generation or invoking downstream server renderers.
+                  </AlertDescription>
+                </Alert>
               </div>
 
               <h3 id="server-functions">2.9 Server Functions (Server Actions) with i18n</h3>
