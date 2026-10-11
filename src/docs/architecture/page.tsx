@@ -34,6 +34,7 @@ import {
   Flame,
 } from "lucide-react";
 import { Link } from "dinou";
+import { DocsPager } from "@/docs/components/docs-pager";
 
 const tocItems = [
   { id: "overview", title: "1. Architectural Paradigm & Blueprint", level: 2 },
@@ -765,42 +766,10 @@ export default defineConfig({
 });`}
               </CodeBlock>
 
-              <div className="grid gap-4 sm:grid-cols-2 not-prose mt-8">
-                <Card className="hover:border-blue-500/40 transition-colors group">
-                  <Link href="/docs/migration/v6-to-v7" className="block h-full p-5">
-                    <div className="flex items-start justify-between w-full mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
-                        <Sparkles className="h-5 w-5" />
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-                    </div>
-                    <CardTitle className="text-base group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-1">
-                      Migration Guide (v6 &rarr; v7)
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Review breaking changes, getProps contract upgrades, and step-by-step migration instructions.
-                    </p>
-                  </Link>
-                </Card>
-
-                <Card className="hover:border-purple-500/40 transition-colors group">
-                  <Link href="/docs/revalidation" className="block h-full p-5">
-                    <div className="flex items-start justify-between w-full mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
-                        <RefreshCw className="h-5 w-5" />
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
-                    </div>
-                    <CardTitle className="text-base group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors mb-1">
-                      Revalidation &amp; ISR
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Deep dive into revalidatePage, revalidatePath cascade, and tag-based on-demand invalidation.
-                    </p>
-                  </Link>
-                </Card>
-              </div>
             </section>
+
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

@@ -3,6 +3,7 @@
 import { Link } from "dinou";
 import { ShieldCheck } from "lucide-react";
 import { TableOfContents } from "@/docs/components/table-of-contents";
+import { DocsPager } from "@/docs/components/docs-pager";
 import {
   LinkSection,
   ClientRedirectSection,
@@ -276,6 +277,9 @@ export default function Page() {
               <ValidateParamsContract />
 
             </section>
+
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

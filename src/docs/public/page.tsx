@@ -1,6 +1,7 @@
 "use client";
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
+import { DocsPager } from "@/docs/components/docs-pager";
 import {
   Alert,
   AlertDescription,
@@ -463,6 +464,9 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
                 </table>
               </div>
             </section>
+
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

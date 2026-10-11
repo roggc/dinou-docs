@@ -1,6 +1,7 @@
 "use client";
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
+import { DocsPager } from "@/docs/components/docs-pager";
 import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
 import { CodeBlock } from "@/docs/components/code-block";
 import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
@@ -562,6 +563,9 @@ export function clerkWebhookPlugin(): DinouPlugin {
                 </Alert>
               </div>
             </section>
+
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

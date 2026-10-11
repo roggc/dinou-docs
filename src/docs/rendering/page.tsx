@@ -1,6 +1,7 @@
 "use client";
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
+import { DocsPager } from "@/docs/components/docs-pager";
 import {
   Alert,
   AlertDescription,
@@ -1559,6 +1560,9 @@ export const getStaticPaths = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
                 </table>
               </div>
             </section>
+
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

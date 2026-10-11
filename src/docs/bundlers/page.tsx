@@ -1,6 +1,7 @@
 "use client";
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
+import { DocsPager } from "@/docs/components/docs-pager";
 import {
   Alert,
   AlertDescription,
@@ -638,6 +639,9 @@ dinou export-static:webpack`}
                 </div>
               </div>
             </section>
+
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

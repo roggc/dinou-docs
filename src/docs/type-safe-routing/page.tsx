@@ -1,4 +1,5 @@
 import { Link } from "dinou";
+import { DocsPager } from "@/docs/components/docs-pager";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { Badge } from "@/docs/components/ui/badge";
 import {
@@ -775,6 +776,9 @@ export function ProductCard({ product }: { product: Product }) {
                 </Card>
               </div>
             </section>
+
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

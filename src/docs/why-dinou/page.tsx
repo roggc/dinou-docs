@@ -24,6 +24,7 @@ import {
   Cloud,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
+import { DocsPager } from "@/docs/components/docs-pager";
 
 // Pure React Server Component (no 'use client')
 const tocItems = [
@@ -46,7 +47,6 @@ const tocItems = [
   { id: "ai-ejected-customization", title: "4.3. Autonomous Ejected Customization", level: 3 },
   { id: "feature-catalog", title: "5. Feature Catalog", level: 2 },
   { id: "comparison-table", title: "6. Dinou v7 vs Traditional Frameworks", level: 2 },
-  { id: "next-steps", title: "7. Next Steps & Architecture Guides", level: 2 },
 ];
 
 export default function WhyDinouPage() {
@@ -521,85 +521,8 @@ export default function WhyDinouPage() {
               </div>
             </section>
 
-            {/* Section 7: Next Steps */}
-            <section id="next-steps" className="scroll-mt-20">
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                7. Next Steps &amp; Architecture Guides
-              </h2>
-              <p>
-                Ready to experience the freedom and performance of Dinou v7? Jump into these essential guides:
-              </p>
-
-              <div className="grid gap-4 sm:grid-cols-2 not-prose mt-6">
-                <Card className="hover:border-blue-500/40 transition-colors group">
-                  <Link href="/docs/getting-started" className="block h-full p-5">
-                    <div className="flex items-start justify-between w-full mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
-                        <Terminal className="h-5 w-5" />
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-                    </div>
-                    <CardTitle className="text-base group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-1">
-                      Getting Started
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Create your first Dinou v7 app with <code>create-dinou-app</code> or configure it manually.
-                    </p>
-                  </Link>
-                </Card>
-
-                <Card className="hover:border-purple-500/40 transition-colors group">
-                  <Link href="/docs/routing" className="block h-full p-5">
-                    <div className="flex items-start justify-between w-full mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
-                        <FolderPlus className="h-5 w-5" />
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
-                    </div>
-                    <CardTitle className="text-base group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors mb-1">
-                      Routing &amp; Layouts
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Explore nested layouts, parallel slots, route groups, and private folders.
-                    </p>
-                  </Link>
-                </Card>
-
-                <Card className="hover:border-cyan-500/40 transition-colors group">
-                  <Link href="/docs/bundlers" className="block h-full p-5">
-                    <div className="flex items-start justify-between w-full mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-100 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400">
-                        <Boxes className="h-5 w-5" />
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors" />
-                    </div>
-                    <CardTitle className="text-base group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-1">
-                      Triple-Bundler Freedom
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Discover how esbuild, Rollup, and Webpack achieve complete feature parity in Dinou.
-                    </p>
-                  </Link>
-                </Card>
-
-                <Card className="hover:border-emerald-500/40 transition-colors group">
-                  <Link href="/docs/server-client-components" className="block h-full p-5">
-                    <div className="flex items-start justify-between w-full mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
-                        <Cpu className="h-5 w-5" />
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
-                    </div>
-                    <CardTitle className="text-base group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors mb-1">
-                      Component Architecture
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Master React Server Components (RSC), flight boundaries, and granular caching patterns.
-                    </p>
-                  </Link>
-                </Card>
-              </div>
-            </section>
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

@@ -23,6 +23,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { Link } from "dinou";
+import { DocsPager } from "@/docs/components/docs-pager";
 
 const tocItems = [
   { id: "quick-start", title: "1. Quick Start in 30 Seconds", level: 2 },
@@ -30,7 +31,6 @@ const tocItems = [
   { id: "why-dinou-preview", title: "3. Why Dinou? Origin & Evolution", level: 2 },
   { id: "ai-friendly", title: "4. AI-Friendly by Design", level: 2 },
   { id: "project-structure", title: "5. Project Anatomy & Conventions", level: 2 },
-  { id: "next-steps", title: "6. Next Steps & Guides", level: 2 },
 ];
 
 export default function Page() {
@@ -398,125 +398,8 @@ npm run dev`}
               </div>
             </section>
 
-            {/* Section 6: Next Steps */}
-            <section id="next-steps" className="scroll-mt-20">
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                6. Next Steps &amp; Guides
-              </h2>
-              <p>
-                Ready to build with Dinou? Explore the dedicated guides below to master each part of the framework:
-              </p>
-
-              <div className="grid gap-4 sm:grid-cols-2 not-prose my-6">
-                <Link
-                  href="/docs/getting-started"
-                  className="group flex flex-col justify-between p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-card hover:border-blue-500/40 hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-all shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2 font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 shrink-0">
-                        <Package className="w-4 h-4" />
-                      </div>
-                      <span>Installation &amp; Setup</span>
-                    </div>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all mt-1" />
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    CLI scaffolding, manual setup, package scripts, and prerequisites.
-                  </p>
-                </Link>
-
-                <Link
-                  href="/docs/server-client-components"
-                  className="group flex flex-col justify-between p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-card hover:border-purple-500/40 hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-all shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2 font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-500/10 text-purple-500 shrink-0">
-                        <Cpu className="w-4 h-4" />
-                      </div>
-                      <span>Component Architecture</span>
-                    </div>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all mt-1" />
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Master the React 19 dual-component model, serializable flight boundaries, and granular cache slots.
-                  </p>
-                </Link>
-
-                <Link
-                  href="/docs/routing"
-                  className="group flex flex-col justify-between p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-card hover:border-emerald-500/40 hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-all shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2 font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 shrink-0">
-                        <Route className="w-4 h-4" />
-                      </div>
-                      <span>Routing &amp; Layouts</span>
-                    </div>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all mt-1" />
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    File-system routing, dynamic parameters, and nested layouts.
-                  </p>
-                </Link>
-
-                <Link
-                  href="/docs/data-fetching"
-                  className="group flex flex-col justify-between p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-card hover:border-cyan-500/40 hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-all shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2 font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-500 shrink-0">
-                        <Database className="w-4 h-4" />
-                      </div>
-                      <span>Data Fetching &amp; ISR</span>
-                    </div>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-cyan-600 dark:group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all mt-1" />
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Mastering <code>getProps</code>, <code>revalidate</code> in seconds, and cache tags.
-                  </p>
-                </Link>
-
-                <Link
-                  href="/docs/rendering"
-                  className="group flex flex-col justify-between p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-card hover:border-amber-500/40 hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-all shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2 font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 shrink-0">
-                        <Zap className="w-4 h-4" />
-                      </div>
-                      <span>Static &amp; Dynamic Rendering</span>
-                    </div>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all mt-1" />
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    PPR, static bailout, micro-caching with <code>&lt;DinouCacheSlot&gt;</code>.
-                  </p>
-                </Link>
-
-                <Link
-                  href="/docs/deployment"
-                  className="group flex flex-col justify-between p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-card hover:border-rose-500/40 hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-all shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2 font-semibold text-sm text-slate-900 dark:text-slate-100 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-500/10 text-rose-500 shrink-0">
-                        <Globe className="w-4 h-4" />
-                      </div>
-                      <span>Universal Deployment</span>
-                    </div>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-rose-600 dark:group-hover:text-rose-400 group-hover:translate-x-0.5 transition-all mt-1" />
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Targeting Node.js, Bun standalone, Deno, and Cloudflare Workers.
-                  </p>
-                </Link>
-              </div>
-            </section>
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

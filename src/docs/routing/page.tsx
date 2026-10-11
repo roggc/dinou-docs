@@ -1,4 +1,5 @@
 import { Link } from "dinou";
+import { DocsPager } from "@/docs/components/docs-pager";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { Badge } from "@/docs/components/ui/badge";
 import {
@@ -1176,44 +1177,8 @@ export default function Layout({
               </div>
             </section>
 
-            {/* Next Steps: Navigation & Type Safety */}
-            <div className="not-prose pt-8 border-t grid sm:grid-cols-2 gap-4">
-              <Link
-                href="/docs/navigation"
-                className="group p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-card hover:border-blue-500/50 hover:shadow-md transition-all flex flex-col justify-between"
-              >
-                <div>
-                  <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-1.5">
-                    <span>Next Guide</span>
-                    <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                  <h4 className="text-base font-bold text-slate-900 dark:text-white">
-                    Client Navigation &amp; Transitions
-                  </h4>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Learn how &lt;Link&gt;, hover prefetching, cache busting (fresh), useRouter, navigation hooks, and directory-first relative routing work.
-                  </p>
-                </div>
-              </Link>
-
-              <Link
-                href="/docs/type-safe-routing"
-                className="group p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-card hover:border-blue-500/50 hover:shadow-md transition-all flex flex-col justify-between"
-              >
-                <div>
-                  <div className="text-xs font-semibold text-purple-600 dark:text-purple-400 mb-1 flex items-center gap-1.5">
-                    <span>Advanced</span>
-                    <ShieldCheck className="h-3.5 w-3.5" />
-                  </div>
-                  <h4 className="text-base font-bold text-slate-900 dark:text-white">
-                    Type-Safe Routing
-                  </h4>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Explore Dinou&apos;s zero-runtime type safety with auto-generated route definitions, autocomplete, and compile-time validation.
-                  </p>
-                </div>
-              </Link>
-            </div>
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

@@ -2,6 +2,7 @@
 
 import { Link } from "dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
+import { DocsPager } from "@/docs/components/docs-pager";
 import {
   Alert,
   AlertDescription,
@@ -1299,6 +1300,9 @@ export default function Page() {
                 </div>
               </section>
             </section>
+
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

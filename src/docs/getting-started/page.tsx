@@ -1,5 +1,6 @@
 import { Link } from "dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
+import { DocsPager } from "@/docs/components/docs-pager";
 import {
   Alert,
   AlertDescription,
@@ -50,7 +51,6 @@ const tocItems = [
   { id: "production-runtimes", title: "4. Building for Production & Runtimes", level: 2 },
   { id: "bundler-selection", title: "4.1. Bundler Flexibility (esbuild, Rollup, Webpack)", level: 3 },
   { id: "production-targets", title: "4.2. First-Class Multi-Runtime Targets", level: 3 },
-  { id: "next-steps", title: "5. Next Steps & Architecture", level: 2 },
 ];
 
 export default function Page() {
@@ -614,85 +614,8 @@ npm run dev:webpack   # Dedicated Webpack engine`}
               </div>
             </section>
 
-            {/* Section 5: Next Steps */}
-            <section id="next-steps" className="scroll-mt-20">
-              <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                5. Next Steps &amp; Architecture
-              </h2>
-              <p>
-                Now that your project is running, explore these core guides to master the Dinou architecture:
-              </p>
-
-              <div className="grid gap-4 sm:grid-cols-2 not-prose mt-6">
-                <Card className="hover:border-blue-500/40 transition-colors group">
-                  <Link href="/docs/routing" className="block h-full p-5">
-                    <div className="flex items-start justify-between w-full mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
-                        <FolderPlus className="h-5 w-5" />
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-                    </div>
-                    <CardTitle className="text-base group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-1">
-                      Routing &amp; Layouts
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Learn file-system routing, nested layouts, route groups, and private folders.
-                    </p>
-                  </Link>
-                </Card>
-
-                <Card className="hover:border-purple-500/40 transition-colors group">
-                  <Link href="/docs/server-client-components" className="block h-full p-5">
-                    <div className="flex items-start justify-between w-full mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
-                        <Cpu className="h-5 w-5" />
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
-                    </div>
-                    <CardTitle className="text-base group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors mb-1">
-                      Component Architecture
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Master React Server Components (RSC), flight boundaries, and granular cache slots.
-                    </p>
-                  </Link>
-                </Card>
-
-                <Card className="hover:border-cyan-500/40 transition-colors group">
-                  <Link href="/docs/bundlers" className="block h-full p-5">
-                    <div className="flex items-start justify-between w-full mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-100 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400">
-                        <Boxes className="h-5 w-5" />
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors" />
-                    </div>
-                    <CardTitle className="text-base group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors mb-1">
-                      Triple-Bundler Freedom
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Switch between esbuild, Rollup, and Webpack with complete feature parity.
-                    </p>
-                  </Link>
-                </Card>
-
-                <Card className="hover:border-emerald-500/40 transition-colors group">
-                  <Link href="/docs/architecture" className="block h-full p-5">
-                    <div className="flex items-start justify-between w-full mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
-                        <Layers className="h-5 w-5" />
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" />
-                    </div>
-                    <CardTitle className="text-base group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors mb-1">
-                      Architecture &amp; Internals
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground">
-                      Explore the Dual-Bundle engine, SSR streaming pipeline, and multi-runtime compilation.
-                    </p>
-                  </Link>
-                </Card>
-              </div>
-            </section>
+            {/* Page Navigation Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>

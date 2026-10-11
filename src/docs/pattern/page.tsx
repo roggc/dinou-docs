@@ -1,6 +1,7 @@
 "use client";
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
+import { DocsPager } from "@/docs/components/docs-pager";
 import { Badge } from "@/docs/components/ui/badge";
 import {
   Alert,
@@ -739,6 +740,9 @@ export function useNativeTasksKey(): number {
                 </Card>
               </div>
             </section>
+
+            {/* Documentation Previous / Next Pager */}
+            <DocsPager />
           </div>
         </div>
       </main>
