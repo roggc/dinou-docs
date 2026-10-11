@@ -711,10 +711,70 @@ export const getCacheTags = ["team-shell"];`}
                   Create an <code>error.tsx</code> file in any route directory to catch and isolate runtime errors locally. If an exception occurs in a child component, Dinou bubbles up to the closest <code>error.tsx</code>, rendering it while keeping all parent layouts interactive:
                 </p>
 
-                <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                  {`// src/dashboard/[teamId]/error.tsx
+                <TabbedCodeBlock
+                  tabs={[
+                    {
+                      id: "error-props",
+                      label: "ErrorProps (Recommended)",
+                      language: "tsx",
+                      code: `// src/dashboard/[teamId]/error.tsx
+import type { ErrorProps } from "dinou";
+
+// Native: ErrorProps infers params and types the captured error
+export default function DashboardError({
+  error,
+  params,
+}: ErrorProps<"/dashboard/[teamId]">) {
+  return (
+    <div className="p-6 rounded-xl border border-rose-500/20 bg-rose-50/20">
+      <h3 className="text-rose-600 font-bold">Failed to load team {params.teamId}</h3>
+      <p className="text-xs text-muted-foreground mt-1">{error.message}</p>
+      {error.stack && (
+        <pre className="mt-3 p-3 bg-slate-900 text-slate-100 rounded text-xs overflow-auto">
+          {error.stack}
+        </pre>
+      )}
+    </div>
+  );
+}`,
+                    },
+                    {
+                      id: "interface-extension",
+                      label: "Interface Extension (PageProps)",
+                      language: "tsx",
+                      code: `// src/dashboard/[teamId]/error.tsx
+import type { PageProps } from "dinou";
+
+// Alternative: extend PageProps if you declare an interface
+interface DashboardErrorProps extends PageProps<"/dashboard/[teamId]"> {
+  error: Error;
+}
+
+export default function DashboardError({
+  error,
+  params,
+}: DashboardErrorProps) {
+  return (
+    <div className="p-6 rounded-xl border border-rose-500/20 bg-rose-50/20">
+      <h3 className="text-rose-600 font-bold">Failed to load team {params.teamId}</h3>
+      <p className="text-xs text-muted-foreground mt-1">{error.message}</p>
+      {error.stack && (
+        <pre className="mt-3 p-3 bg-slate-900 text-slate-100 rounded text-xs overflow-auto">
+          {error.stack}
+        </pre>
+      )}
+    </div>
+  );
+}`,
+                    },
+                    {
+                      id: "inline-routeparams",
+                      label: "Inline RouteParams",
+                      language: "tsx",
+                      code: `// src/dashboard/[teamId]/error.tsx
 import type { RouteParams } from "dinou";
 
+// Alternative: inline typing using the RouteParams utility
 export default function DashboardError({
   error,
   params,
@@ -733,8 +793,10 @@ export default function DashboardError({
       )}
     </div>
   );
-}`}
-                </CodeBlock>
+}`,
+                    },
+                  ]}
+                />
 
                 <p className="text-xs text-muted-foreground">
                   <strong>Security Note:</strong> For production deployments, <code>error.stack</code> is automatically stripped by Dinou to prevent internal file paths and system details from leaking. In development mode, the full cleaned stack trace is provided.
@@ -750,16 +812,22 @@ export default function DashboardError({
                   Define custom 404 views by placing <code>not_found.tsx</code> in any route directory. When an unmatched URL segment is requested, Dinou bubbles up to render the closest <code>not_found.tsx</code> template inside its enclosing layout.
                 </p>
 
-                <CodeBlock language="tsx" containerClassName="w-full rounded-lg mt-3">
-                  {`// src/not_found.tsx (Global) or src/blog/[slug]/not_found.tsx (Scoped)
+                <TabbedCodeBlock
+                  tabs={[
+                    {
+                      id: "scoped-404",
+                      label: "Scoped 404 (Dynamic Route)",
+                      language: "tsx",
+                      code: `// src/blog/[slug]/not_found.tsx (Scoped to /blog/[slug])
 import { Link, type PageProps } from "dinou";
 
-export default function NotFound({ params }: PageProps) {
+// Strongly types params.slug as string
+export default function NotFound({ params }: PageProps<"/blog/[slug]">) {
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center">
-      <h2 className="text-3xl font-bold">404 - Not Found</h2>
+      <h2 className="text-3xl font-bold">404 - Article Not Found</h2>
       <p className="mt-2 text-muted-foreground">
-        The requested page could not be located.
+        The article "{params.slug}" could not be located.
       </p>
       <Link
         href="/"
@@ -769,11 +837,38 @@ export default function NotFound({ params }: PageProps) {
       </Link>
     </div>
   );
-}`}
-                </CodeBlock>
+}`,
+                    },
+                    {
+                      id: "global-404",
+                      label: "Global Root 404 (src/not_found.tsx)",
+                      language: "tsx",
+                      code: `// src/not_found.tsx (Global Root Fallback)
+import { Link, type PageProps } from "dinou";
+
+// PageProps<"/"> strictly ensures no dynamic params are accidentally accessed
+export default function GlobalNotFound({ params }: PageProps<"/">) {
+  return (
+    <div className="flex flex-col items-center justify-center p-8 text-center">
+      <h2 className="text-3xl font-bold">404 - Page Not Found</h2>
+      <p className="mt-2 text-muted-foreground">
+        The requested page does not exist on this server.
+      </p>
+      <Link
+        href="/"
+        className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium text-sm"
+      >
+        Back to Home
+      </Link>
+    </div>
+  );
+}`,
+                    },
+                  ]}
+                />
 
                 <p className="text-xs text-muted-foreground">
-                  When nested in a dynamic folder (such as <code>src/blog/[slug]/not_found.tsx</code>), it automatically receives route <code>params</code> via <code>PageProps</code>.
+                  When nested in a dynamic folder (such as <code>src/blog/[slug]/not_found.tsx</code>), pass the route pattern generic (<code>PageProps&lt;&quot;/blog/[slug]&quot;&gt;</code>) to strongly type <code>params</code>. For a root global 404 (<code>src/not_found.tsx</code>), pass <code>PageProps&lt;&quot;/&quot;&gt;</code> to ensure strict type safety without accidental parameters.
                 </p>
               </div>
             </section>
