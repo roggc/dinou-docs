@@ -195,11 +195,6 @@ const docsNavigation = [
     title: "Guides",
     items: [
       {
-        title: "Context Propagation",
-        href: "/docs/context",
-        icon: RefreshCw,
-      },
-      {
         title: "Internationalization",
         href: "/docs/i18n",
         icon: Globe,
@@ -208,11 +203,6 @@ const docsNavigation = [
         title: "Clerk Authentication",
         href: "/docs/clerk",
         icon: Fingerprint,
-      },
-      {
-        title: "Architecture & Internals",
-        href: "/docs/internals",
-        icon: Cpu,
       },
     ],
   },

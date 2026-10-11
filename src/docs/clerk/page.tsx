@@ -3,6 +3,7 @@
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
 import { CodeBlock } from "@/docs/components/code-block";
+import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 import {
   Alert,
   AlertDescription,
@@ -13,15 +14,22 @@ import {
   Key,
   Database,
   Fingerprint,
+  Zap,
+  CheckCircle2,
+  Lock,
 } from "lucide-react";
 
 const tocItems = [
-  { id: "concept", title: "💡 Core Concept", level: 2 },
-  { id: "installation", title: "📦 1. Installation & Env", level: 2 },
-  { id: "server-setup", title: "🌐 2. Express Server Setup", level: 2 },
-  { id: "rsc-usage", title: "🔑 3. Usage in RSC & Server Functions", level: 2 },
-  { id: "client-setup", title: "⚛️ 4. Client Setup (DinouClerkProvider)", level: 2 },
-  { id: "webhooks", title: "🔄 5. Handling Clerk Webhooks", level: 2 },
+  { id: "concept", title: "1. Core Concept", level: 2 },
+  { id: "installation", title: "2. Installation & Environment", level: 2 },
+  { id: "plugin-setup", title: "3. The Dinou v7 Clerk Plugin", level: 2 },
+  { id: "rsc-usage", title: "4. Usage in RSC & Server Functions", level: 2 },
+  { id: "clerk-server-actions", title: "4.1 Securing Server Functions", level: 3 },
+  { id: "clerk-page-functions", title: "4.2 Fetching User Data", level: 3 },
+  { id: "clerk-page-view", title: "4.3 Dashboard Page View", level: 3 },
+  { id: "client-setup", title: "5. Client Setup (DinouClerkProvider)", level: 2 },
+  { id: "clerk-root-layout", title: "5.1 Wrapping Root Layout", level: 3 },
+  { id: "webhooks", title: "6. Webhooks & Database Sync", level: 2 },
 ];
 
 export default function Page() {
@@ -37,33 +45,33 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Integrate Clerk into your ejected Dinou application to handle user authentication, route protection, and database synchronization.
+              Integrate Clerk into your Dinou v7 application to handle user authentication, route protection, and database synchronization via the Web Standards plugin system.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <blockquote>
-              <strong>Since Dinou is fully ejectable, you have complete control over the Express server. You can integrate Clerk's official Express middleware directly, propagate session context, and sync events via webhooks.</strong>
+              <strong>In Dinou v7, Clerk integrates seamlessly via the Web Standards Plugin System (<code>dinou.config.mjs</code>). There is no need to eject the framework: the plugin intercepts incoming requests, verifies session tokens cryptographically, exposes auth state to <code>getContext()</code>, and handles webhooks directly.</strong>
             </blockquote>
 
             <hr className="my-8" />
 
             {/* CONCEPT */}
             <section id="concept">
-              <h2>💡 Core Concept</h2>
+              <h2>1. Core Concept</h2>
               <p>
-                Clerk integration in Dinou is structured around three main components:
+                Clerk integration in Dinou v7 is structured around three main pillars:
               </p>
               <div className="grid gap-6 md:grid-cols-3 not-prose my-6">
                 <Card>
                   <CardHeader>
                     <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-semibold">
                       <Fingerprint className="h-5 w-5" />
-                      <span>Middleware Authentication</span>
+                      <span>Web Standards Middleware</span>
                     </div>
                   </CardHeader>
                   <CardContent className="text-sm text-muted-foreground">
-                    Clerk's official middleware verifies session JWT tokens. A smart decryption fallback reading the <code>__session</code> cookie manually ensures the user ID is reliably extracted even in dynamic compiling child processes.
+                    Clerk's backend SDK verifies incoming session JWTs on standard Web <code>Request</code> objects inside Dinou's <code>onRequest</code> plugin hook.
                   </CardContent>
                 </Card>
 
@@ -71,11 +79,11 @@ export default function Page() {
                   <CardHeader>
                     <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
                       <Shield className="h-5 w-5" />
-                      <span>Server-Side Context</span>
+                      <span>Server Context (getContext)</span>
                     </div>
                   </CardHeader>
                   <CardContent className="text-sm text-muted-foreground">
-                    The extracted Clerk User ID is passed into the Dinou request context (AsyncLocalStorage). Both Server Components and Server Functions can check it via <code>getContext().req.userId</code> to secure actions.
+                    The authenticated <code>userId</code> and auth claims are attached to Dinou's <code>RequestContextStore</code>, directly accessible in Server Components and Server Functions via <code>getContext()</code>.
                   </CardContent>
                 </Card>
 
@@ -83,11 +91,11 @@ export default function Page() {
                   <CardHeader>
                     <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
                       <Database className="h-5 w-5" />
-                      <span>Database Synchronization</span>
+                      <span>Database Sync (Webhooks)</span>
                     </div>
                   </CardHeader>
                   <CardContent className="text-sm text-muted-foreground">
-                    Secure Webhook endpoints verify Clerk signatures using <code>svix</code> and synchronize Clerk user profile events (like creation and deletion) to your local database.
+                    Secure webhook endpoints verify Clerk signatures using <code>svix</code> and synchronize user profile events to your database by short-circuiting in the plugin.
                   </CardContent>
                 </Card>
               </div>
@@ -95,16 +103,16 @@ export default function Page() {
 
             {/* 1. INSTALLATION */}
             <section id="installation">
-              <h2>📦 1. Installation & Env</h2>
+              <h2>2. Installation &amp; Environment</h2>
               <p>
-                First, install Clerk's Express SDK, React SDK, localization assets, and the Svix package (necessary to verify signature headers of incoming Clerk webhooks):
+                First, install Clerk's backend SDK, React client SDK, localization packages, and Svix (for webhook signature verification):
               </p>
               <div className="not-prose my-4">
-                <CodeBlock language="bash">{`npm install @clerk/express @clerk/react @clerk/localizations svix`}</CodeBlock>
+                <CodeBlock language="bash">{`npm install @clerk/backend @clerk/react @clerk/localizations svix`}</CodeBlock>
               </div>
 
               <p>
-                Add your Clerk credentials to your local <code>.env</code> file:
+                Add your Clerk API credentials to your local <code>.env</code> file:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="env">{`CLERK_PUBLISHABLE_KEY=pk_test_...
@@ -113,137 +121,80 @@ CLERK_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
               </div>
             </section>
 
-            {/* 2. EXPRESS SERVER SETUP */}
-            <section id="server-setup">
-              <h2>🌐 2. Express Server Setup</h2>
+            {/* 2. PLUGIN SETUP */}
+            <section id="plugin-setup">
+              <h2>3. The Dinou v7 Clerk Plugin (<code>dinou.config.mjs</code>)</h2>
               <p>
-                You can integrate Clerk's authentication hooks and middleware either via the <strong>Plugin System</strong> (recommended, does not require ejecting) or manually (requires ejecting the server).
+                In <strong>Dinou v7</strong>, plugins hook directly into the request lifecycle using the <code>onRequest(request, context)</code> hook. Create a reusable Clerk plugin to authenticate incoming requests and propagate session claims to <code>context</code>:
               </p>
 
-              <h3>
-                🟢 Option 2.A: Using the Plugin (Recommended - No Eject)
-                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20 ml-2 select-none">
-                  v5.2.0+
-                </span>
-              </h3>
-              <p>
-                Create a <code>dinou.config.js</code> file in the root of your project and register the Clerk Authentication plugin. This registers the middleware and handles context propagation automatically across layouts, pages, and server actions:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`// dinou.config.js
-const { clerkMiddleware, getAuth } = require("@clerk/express");
+              <TabbedCodeBlock
+                tabs={[
+                  {
+                    id: "plugin-file",
+                    label: "plugins/clerk.ts",
+                    language: "typescript",
+                    code: `// plugins/clerk.ts
+import type { DinouPlugin } from "dinou";
+import { createClerkClient } from "@clerk/backend";
 
-const clerkPlugin = {
-  name: "clerk-auth",
-  onServerInit(app) {
-    // Register middleware globally on Express
-    app.use(clerkMiddleware());
-  },
-  onRequestContext(req, res, context) {
-    // Propagate the cryptographically verified userId to RSC context
-    context.req.userId = req.auth?.userId || getAuth(req)?.userId || null;
-  }
-};
+const clerk = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY,
+  publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+});
 
-module.exports = {
-  plugins: [clerkPlugin]
-};`}</CodeBlock>
-              </div>
+export function clerkPlugin(): DinouPlugin {
+  return {
+    name: "clerk-auth",
+    async onRequest(request, context) {
+      // Cryptographically verify session token using standard Web Request
+      const requestState = await clerk.authenticateRequest(request);
+      const auth = requestState.toAuth();
 
-              <h3>🔵 Option 2.B: Manual Integration (Ejected Setup)</h3>
-              <p>
-                If you have ejected the framework using <code>npm run eject</code> and want full control of the Express middleware pipeline, open <code className="text-amber-500">dinou/core/server.js</code> and configure Clerk manually:
-              </p>
+      // Attach verified credentials to context (AsyncLocalStorage)
+      context.userId = auth?.userId ?? null;
+      context.auth = auth;
+    },
+  };
+}`,
+                  },
+                  {
+                    id: "config-file",
+                    label: "dinou.config.mjs",
+                    language: "javascript",
+                    code: `// dinou.config.mjs
+import { defineConfig } from "dinou";
+import { clerkPlugin } from "./plugins/clerk";
 
-              <h4>1. Import Clerk</h4>
-              <p>
-                Import the SDK packages using CommonJS at the top of the file:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`const { clerkMiddleware, getAuth } = require("@clerk/express");`}</CodeBlock>
-              </div>
-
-              <h4>2. Add the User ID Helper and Middleware</h4>
-              <p>
-                Add the verified user ID extraction helper and register the middleware:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`app.use(clerkMiddleware());
-
-// 🛡️ Helper: Extracts userId only if verified cryptographically by Clerk
-function getUserIdFallback(req) {
-  return req.auth?.userId || getAuth(req)?.userId || null;
-}`}</CodeBlock>
-              </div>
+export default defineConfig({
+  ppr: true,
+  plugins: [
+    clerkPlugin(),
+  ],
+});`,
+                  },
+                ]}
+              />
 
               <div className="my-4">
                 <Alert>
-                  <AlertTitle>🔒 Security Notice: Cryptographic Verification</AlertTitle>
+                  <Lock className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <AlertTitle>Security Notice: Cryptographic Verification</AlertTitle>
                   <AlertDescription className="text-xs text-muted-foreground mt-1">
-                    Never manually decode the <code>__session</code> cookie using raw Base64 decoders for authorization decisions. An attacker can easily forge a cookie with any User ID. Always rely on Clerk's official verified bindings (<code>req.auth</code> or <code>getAuth</code>), which cryptographically validate the token signature using your <code>CLERK_SECRET_KEY</code>.
+                    Never manually decode the <code>__session</code> cookie using raw Base64 decoders for authorization decisions. Always rely on Clerk's official verified bindings (<code>authenticateRequest</code>), which cryptographically validate the JWT token signature using your <code>CLERK_SECRET_KEY</code>.
                   </AlertDescription>
                 </Alert>
               </div>
-
-              <h4>3. Context Propagation</h4>
-              <p>
-                Expose the active <code>userId</code> inside the request context. In <code className="text-amber-500">server.js</code>, update <code>getContext</code> and <code>getContextForServerFunctionEndpoint</code>:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`function getContext(req, res) {
-  return {
-    req: {
-      cookies: { ...req.cookies },
-      headers: { ... },
-      query: { ...req.query },
-      path: req.path,
-      method: req.method,
-      userId: getUserIdFallback(req), // 👈 Expose Clerk user ID
-    },
-    res: { ... }
-  };
-}
-
-function getContextForServerFunctionEndpoint(req, res) {
-  return {
-    req: {
-      cookies: { ...req.cookies },
-      headers: { ... },
-      query: { ...req.query },
-      path: req.path,
-      method: req.method,
-      userId: getUserIdFallback(req), // 👈 Expose Clerk user ID
-    },
-    res: { ... }
-  };
-}`}</CodeBlock>
-              </div>
-
-              <p>
-                Finally, propagate this ID in the Express wildcard GET handler (<code>app.get(/^\/.*\/?$/)</code>) inside <code>contextForChild</code> for Server Component rendering:
-              </p>
-              <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`const contextForChild = {
-  req: {
-    query: { ...req.query },
-    cookies: { ...req.cookies },
-    headers: { ... },
-    path: req.path,
-    method: req.method,
-    userId: getUserIdFallback(req), // 👈 Propagate userId here
-  },
-};`}</CodeBlock>
-              </div>
             </section>
 
-            {/* 3. USAGE IN RSC & SERVER FUNCTIONS */}
+            {/* 4. USAGE IN RSC & SERVER FUNCTIONS */}
             <section id="rsc-usage">
-              <h2>🔑 3. Usage in RSC & Server Functions</h2>
+              <h2>4. Usage in RSC &amp; Server Functions</h2>
               <p>
-                Now, you can check the session from any Server Component, Page Function, or Server Function:
+                With the plugin registered, any Server Component, Page Function, or Server Action can read <code>userId</code> directly from <code>getContext()</code>:
               </p>
 
-              <h3>Securing Server Functions</h3>
+              <h3 id="clerk-server-actions">4.1 Securing Server Functions (Server Actions)</h3>
               <p>
                 Server Functions run mutations on the server. You can protect them by fetching <code>userId</code> directly from the context:
               </p>
@@ -255,9 +206,9 @@ import { getContext } from "dinou";
 
 export async function createPost(title: string, content: string) {
   const context = getContext();
-  const userId = context?.req?.userId;
+  const userId = context?.userId;
 
-  // 🚨 Security Check
+  // Security Check
   if (!userId) {
     throw new Error("Unauthorized access. Invalid session.");
   }
@@ -267,53 +218,82 @@ export async function createPost(title: string, content: string) {
     data: {
       title,
       content,
-      authorClerkId: userId
-    }
+      authorClerkId: userId,
+    },
   });
 
   return post;
 }`}</CodeBlock>
               </div>
 
-              <h3>Fetching User Data in Page Functions</h3>
+              <h3 id="clerk-page-functions">4.2 Fetching User Data in Page Functions</h3>
               <p>
-                Load user-specific data from your database inside <code>page_functions.ts</code> before compiling the page:
+                Load user-specific data from your database inside <code>page_functions.ts</code> before rendering the page. In Dinou v7, set <code>export const revalidate = 0;</code> to enforce request-time dynamic execution:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="typescript">{`// src/dashboard/page_functions.ts
 import { getContext, redirect } from "dinou";
 
-export function dynamic() {
-  return true; // Force SSR at request-time to load dynamic session
-}
+// Force on-demand SSR at request-time to load dynamic session
+export const revalidate = 0;
 
 export async function getProps() {
   const context = getContext();
-  const userId = context?.req?.userId;
+  const userId = context?.userId;
 
   if (!userId) {
     return redirect("/login");
   }
 
   const posts = await prisma.post.findMany({
-    where: { authorClerkId: userId }
+    where: { authorClerkId: userId },
   });
 
   return {
-    page: {
-      posts,
-      userId
-    }
+    posts,
+    userId,
   };
+}`}</CodeBlock>
+              </div>
+
+              <h3 id="clerk-page-view">4.3 Dashboard Page View (<code>page.tsx</code>)</h3>
+              <p>
+                The page component receives the returned props strictly typed via <code>PageProps&lt;&quot;/dashboard&quot;&gt;</code>:
+              </p>
+              <div className="not-prose my-4">
+                <CodeBlock language="tsx">{`// src/dashboard/page.tsx
+import type { PageProps } from "dinou";
+
+interface DashboardProps extends PageProps<"/dashboard"> {
+  posts: Array<{ id: string; title: string; content: string }>;
+  userId: string;
+}
+
+export default function DashboardPage({ posts, userId }: DashboardProps) {
+  return (
+    <main className="max-w-4xl mx-auto p-8 space-y-6">
+      <h1 className="text-3xl font-bold">Dashboard</h1>
+      <p className="text-muted-foreground">Authenticated as: {userId}</p>
+
+      <div className="space-y-4">
+        {posts.map((post) => (
+          <article key={post.id} className="p-4 rounded-lg border bg-card">
+            <h2 className="text-xl font-semibold">{post.title}</h2>
+            <p className="text-sm text-muted-foreground mt-1">{post.content}</p>
+          </article>
+        ))}
+      </div>
+    </main>
+  );
 }`}</CodeBlock>
               </div>
             </section>
 
-            {/* 4. CLIENT SETUP */}
+            {/* 5. CLIENT SETUP */}
             <section id="client-setup">
-              <h2>⚛️ 4. Client Setup (DinouClerkProvider)</h2>
+              <h2>5. Client Setup (DinouClerkProvider)</h2>
               <p>
-                To enable smooth Client-side SPA navigation and dynamic language changes in Clerk's built-in login forms, create a custom wrapper around <code>ClerkProvider</code>:
+                To enable smooth Client-side SPA navigation and dynamic language changes in Clerk's built-in login forms, create a custom wrapper around <code>ClerkProvider</code> using Dinou's <code>useRouter()</code> hook:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="tsx">{`// src/components/DinouClerkProvider.tsx
@@ -386,25 +366,24 @@ export function DinouClerkProvider({
 }`}</CodeBlock>
               </div>
 
-              <h3>Wrapping the Root Layout</h3>
+              <h3 id="clerk-root-layout">5.1 Wrapping the Root Layout</h3>
               <p>
-                In your root <code>layout.tsx</code>, retrieve the locale from context and wrap the tree with your custom provider:
+                In your root <code>src/layout.tsx</code>, wrap the children tree with your custom provider:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="tsx">{`// src/layout.tsx
-import { getContext } from "dinou";
 import { DinouClerkProvider } from "@/components/DinouClerkProvider";
 
-export default function Layout({ children }) {
-  const context = getContext();
-  const locale = context?.req?.locale || "en";
-
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang={locale}>
+    <html lang="en">
       <body>
         <DinouClerkProvider
           publishableKey={process.env.CLERK_PUBLISHABLE_KEY || ""}
-          locale={locale}
         >
           {children}
         </DinouClerkProvider>
@@ -415,59 +394,48 @@ export default function Layout({ children }) {
               </div>
             </section>
 
-            {/* 5. WEBHOOKS */}
+            {/* 6. WEBHOOKS */}
             <section id="webhooks">
-              <h2>🔄 5. Handling Clerk Webhooks</h2>
+              <h2>6. Webhooks &amp; Database Sync (Plugin Pattern)</h2>
               <p>
-                To synchronize Clerk user profiles with your local database (e.g. Prisma), you can declare a POST webhook endpoint either within the <strong>Plugin System</strong> (recommended) or manually inside `server.js` (ejected).
+                In <strong>Dinou v7</strong>, webhook endpoints are handled directly inside plugins using the <strong>Short-Circuit Pattern</strong>. When a plugin returns a Web <code>Response</code>, Dinou returns that response immediately and bypasses React Server Component rendering entirely:
               </p>
 
-              <h3>
-                🟢 Option 5.A: Using the Plugin (Recommended - No Eject)
-                <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20 ml-2 select-none">
-                  v5.2.0+
-                </span>
-              </h3>
-              <p>
-                Register the raw webhook POST endpoint directly inside your plugin's <code>onServerInit(app)</code> hook. This keeps your Clerk integration fully contained in a single file:
-              </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`// dinou.config.js
-const { clerkMiddleware, getAuth } = require("@clerk/express");
-const express = require("express");
-const { Webhook } = require("svix");
+                <CodeBlock language="typescript">{`// plugins/clerk-webhook.ts
+import type { DinouPlugin } from "dinou";
+import { Webhook } from "svix";
 
-const clerkPlugin = {
-  name: "clerk-auth",
-  onServerInit(app) {
-    app.use(clerkMiddleware());
+export function clerkWebhookPlugin(): DinouPlugin {
+  return {
+    name: "clerk-webhook",
+    async onRequest(request) {
+      const url = new URL(request.url);
 
-    // Register Clerk webhook endpoint directly from the plugin
-    app.post(
-      "/api/webhooks/clerk",
-      express.raw({ type: "application/json" }), // Parse body as raw buffer for signature check
-      async (req, res) => {
+      // Intercept incoming Clerk webhook requests
+      if (url.pathname === "/api/webhooks/clerk" && request.method === "POST") {
         const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
-        const svix_id = req.headers["svix-id"];
-        const svix_timestamp = req.headers["svix-timestamp"];
-        const svix_signature = req.headers["svix-signature"];
+        const svix_id = request.headers.get("svix-id");
+        const svix_timestamp = request.headers.get("svix-timestamp");
+        const svix_signature = request.headers.get("svix-signature");
 
         if (!WEBHOOK_SECRET || !svix_id || !svix_timestamp || !svix_signature) {
-          return res.status(400).send("Missing credentials or signatures");
+          return new Response("Missing svix signature headers", { status: 400 });
         }
 
-        const payloadString = req.body.toString("utf8");
+        // Web Standards: request.text() reads the unparsed raw UTF-8 body
+        const payload = await request.text();
         const wh = new Webhook(WEBHOOK_SECRET);
-        let evt;
+        let evt: any;
 
         try {
-          evt = wh.verify(payloadString, {
+          evt = wh.verify(payload, {
             "svix-id": svix_id,
             "svix-timestamp": svix_timestamp,
             "svix-signature": svix_signature,
           });
         } catch (err) {
-          return res.status(400).json({ error: "Invalid signature" });
+          return Response.json({ error: "Invalid signature" }, { status: 400 });
         }
 
         const { id } = evt.data;
@@ -486,42 +454,25 @@ const clerkPlugin = {
           await prisma.user.delete({ where: { clerkId: id } }).catch(() => {});
         }
 
-        res.status(200).json({ received: true });
+        // Short-circuit: return HTTP 200 JSON directly to Clerk
+        return Response.json({ received: true });
       }
-    );
-  },
-  onRequestContext(req, res, context) {
-    context.req.userId = req.auth?.userId || getAuth(req)?.userId || null;
-  }
-};`}</CodeBlock>
+    },
+  };
+}`}</CodeBlock>
               </div>
 
-              <h3>🔵 Option 5.B: Manual Integration (Ejected Setup)</h3>
-              <p>
-                If you have ejected the framework, you can register the POST webhook endpoint in <code className="text-amber-500">dinou/core/server.js</code>. Use the <code>svix</code> SDK to verify the authenticity of Clerk's payload signature:
-              </p>
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`// dinou/core/server.js
-const { Webhook } = require("svix");
-const express = require("express");
-
-// Endpoint to receive webhook events from Clerk
-app.post(
-  "/api/webhooks/clerk",
-  express.raw({ type: "application/json" }),
-  async (req, res) => {
-    // ... Verify signatures using Svix and synchronize database ...
-    // ... (The verification and DB sync logic is identical to Option 5.A) ...
-    res.status(200).json({ received: true });
-  }
-);`}</CodeBlock>
+                <Alert className="border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-950/20">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <AlertTitle className="text-emerald-700 dark:text-emerald-300 font-bold text-xs">
+                    Web Standards Advantage: No Body-Parser Issues
+                  </AlertTitle>
+                  <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1">
+                    Because standard Web <code>Request.text()</code> yields the pristine, untouched body string, cryptographic signature verification with <code>svix</code> succeeds reliably out of the box. You no longer need to worry about Express raw buffer middleware order or server ejection.
+                  </AlertDescription>
+                </Alert>
               </div>
-              <Alert className="my-4">
-                <AlertTitle>⚠️ Raw Request Body Notice</AlertTitle>
-                <AlertDescription className="text-xs text-muted-foreground mt-1">
-                  Ensure the webhook endpoint is declared <strong>before</strong> any global body parsers (like <code>app.use(express.json())</code>) or uses local middleware like <code>express.raw()</code>. This keeps the raw request buffer untouched for cryptographic Svix signature verification.
-                </AlertDescription>
-              </Alert>
             </section>
           </div>
         </div>
