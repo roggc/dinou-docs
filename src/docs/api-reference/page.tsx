@@ -78,8 +78,9 @@ const tocItems = [
   { id: "revalidatetag", title: "revalidateTag()", level: 3 },
   { id: "storage-adapters", title: "Storage Adapters", level: 3 },
   { id: "storage-adapters-list", title: "Built-In Adapters", level: 4 },
+  { id: "storage-adapters-interface", title: "StorageAdapter Interface", level: 4 },
   { id: "storage-adapters-custom", title: "Custom StorageAdapter", level: 4 },
-  { id: "route-segment-contracts", title: "5. Route Contracts (page_functions)", level: 2 },
+  { id: "route-segment-contracts", title: "5. Route Segment Contracts", level: 2 },
   { id: "getprops", title: "getProps()", level: 3 },
   { id: "revalidate-config", title: "revalidate", level: 3 },
   { id: "ppr-config", title: "ppr", level: 3 },
@@ -89,6 +90,7 @@ const tocItems = [
   { id: "type-safe-routing", title: "6. Type-Safe Routing (dinou)", level: 2 },
   { id: "pageprops", title: "PageProps<T>", level: 3 },
   { id: "layoutprops", title: "LayoutProps<T>", level: 3 },
+  { id: "pagefunctions", title: "PageFunctions & LayoutFunctions", level: 3 },
   { id: "routeparams", title: "RouteParams<T>", level: 3 },
   { id: "dinouroute", title: "DinouRoute", level: 3 },
 ];
@@ -2977,7 +2979,7 @@ export const telemetryPlugin: DinouPlugin = {
                     Server Primitive
                   </span>
                   <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
-                    Returns: ReactNode
+                    Returns: Promise&lt;ReactNode&gt;
                   </span>
                 </div>
 
@@ -3013,7 +3015,7 @@ export const telemetryPlugin: DinouPlugin = {
                           <td className="p-3 font-mono text-[11px] text-foreground align-top">string</td>
                           <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Optional</td>
                           <td className="p-3 align-top leading-relaxed">
-                            Unique identifier for targeted client-side slot refreshing via <code>refreshSlot(id)</code> or <code>router.refreshSlot(id)</code>.
+                            Unique identifier for targeted client-side slot refreshing via <code>refreshSlot(id)</code> or <code>router.refreshSlot(id)</code>. If omitted, Dinou automatically falls back to using the first provided <code>tag</code> as the slot identifier.
                           </td>
                         </tr>
                         <tr>
@@ -3034,10 +3036,10 @@ export const telemetryPlugin: DinouPlugin = {
                         </tr>
                         <tr>
                           <td className="p-3 font-mono font-semibold text-primary align-top">children</td>
-                          <td className="p-3 font-mono text-[11px] text-foreground align-top">ReactNode</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">ReactNode | (() =&gt; Promise&lt;ReactNode&gt; | ReactNode)</td>
                           <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Required</td>
                           <td className="p-3 align-top leading-relaxed">
-                            The Server Component subtree to isolate, render, and cache independently.
+                            The Server Component subtree to isolate, render, and cache independently. Accepts standard JSX elements or a deferred asynchronous render function (<code>() =&gt; Promise&lt;ReactNode&gt;</code>).
                           </td>
                         </tr>
                       </tbody>
@@ -3052,7 +3054,7 @@ export const telemetryPlugin: DinouPlugin = {
                         <span>Independent Storage Persistence</span>
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
-                        Dinou resolves the slot&apos;s Server Component subtree and serializes it directly to your configured storage adapter. Child components only re-execute when their individual TTL expires or an invalidation command is received.
+                        Dinou executes the slot&apos;s child components once, caches their rendered output in your storage backend (Redis, Memory, or FileSystem), and serves that cached payload to subsequent visitors. Database queries and server logic inside the slot never re-run until its TTL expires or an invalidation is triggered.
                       </p>
                     </div>
 
@@ -3209,7 +3211,7 @@ export default function DashboardPage() {
                 </div>
 
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Asynchronously invalidates and regenerates **only the targeted page component** (its <code>page.rsc</code> payload and static HTML), while leaving parent and ancestor layouts (<code>layout.rsc</code>) completely untouched.
+                  Asynchronously invalidates and regenerates <strong>only the targeted page component</strong> (its <code>page.rsc</code> payload and static HTML), while leaving parent and ancestor layouts (<code>layout.rsc</code>) completely untouched.
                 </p>
 
                 {/* Sub-section 1: Scope & Behavior */}
@@ -3252,16 +3254,85 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
+                  {/* Parameters Table */}
+                  <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
+                    <table className="w-full text-xs text-left border-collapse min-w-[650px]">
+                      <thead className="bg-muted/50 border-b border-border text-muted-foreground font-semibold">
+                        <tr>
+                          <th className="p-3">Parameter</th>
+                          <th className="p-3">Type</th>
+                          <th className="p-3">Default</th>
+                          <th className="p-3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border bg-card text-muted-foreground">
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">path</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">string</td>
+                          <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Required</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            The target route path to revalidate (e.g. <code>&quot;/blog/post-1&quot;</code>, <code>&quot;/products/123&quot;</code>, or <code>&quot;./&quot;</code> for the active URL). Trailing slashes are automatically normalized.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
                   <div className="not-prose my-4">
-                    <CodeBlock language="typescript" containerClassName="rounded-lg">
-                      {`import { revalidatePage } from "dinou/server";
+                    <TabbedCodeBlock
+                      defaultTab="server-action"
+                      tabs={[
+                        {
+                          id: "server-action",
+                          label: "update-article.ts (Server Action)",
+                          language: "typescript",
+                          code: `// src/actions/update-article.ts
+"use server";
 
-// Revalidates strictly the page component for this route
-await revalidatePage("/blog/announcing-v7");
+import { revalidatePage } from "dinou/server";
+import { db } from "@/lib/db";
 
-// Revalidates the page for the current active route
-await revalidatePage("./");`}
-                    </CodeBlock>
+export async function updateArticle(slug: string, content: string) {
+  // 1. Update database record
+  await db.articles.update({ where: { slug }, data: { content } });
+
+  // 2. Purge only the article's page.rsc and index.html
+  // Leaves the parent /blog layout and global navigation cache untouched
+  await revalidatePage(\`/blog/\${slug}\`);
+
+  return { success: true };
+}`,
+                        },
+                        {
+                          id: "cms-webhook",
+                          label: "cms-webhook.ts (Headless CMS Webhook)",
+                          language: "typescript",
+                          code: `// src/plugins/cms-webhook.ts
+import type { DinouPlugin } from "dinou";
+import { revalidatePage } from "dinou/server";
+
+export const cmsWebhookPlugin: DinouPlugin = {
+  name: "cms-webhook",
+  async onRequest(request) {
+    const url = new URL(request.url);
+
+    if (url.pathname === "/api/webhooks/cms" && request.method === "POST") {
+      const payload = await request.json();
+      const slug = payload?.entry?.slug;
+
+      if (slug) {
+        // Invalidate strictly the updated page without rebuilding shared layouts
+        await revalidatePage(\`/posts/\${slug}\`);
+        return Response.json({ revalidated: true, path: \`/posts/\${slug}\` });
+      }
+
+      return Response.json({ error: "Missing slug" }, { status: 400 });
+    }
+  },
+};`,
+                        },
+                      ]}
+                    />
                   </div>
                 </div>
               </section>
@@ -3283,7 +3354,7 @@ await revalidatePage("./");`}
                 </div>
 
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Asynchronously invalidates and regenerates the targeted page **and its segment layout** (<code>layout.rsc</code>). When invoked with <code>&#123; cascade: true &#125;</code>, it recursively invalidates all child subroutes beneath that route segment.
+                  Asynchronously invalidates and regenerates the targeted page <strong>and its segment layout</strong> (<code>layout.rsc</code>). When invoked with <code>&#123; cascade: true &#125;</code> on a route that defines a layout, it recursively invalidates all child subroutes beneath that route segment.
                 </p>
 
                 {/* Sub-section 1: Options & Cascade Behavior */}
@@ -3322,12 +3393,20 @@ await revalidatePage("./");`}
                           <td className="p-3 font-mono text-[11px] text-foreground align-top">boolean</td>
                           <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">false</td>
                           <td className="p-3 align-top leading-relaxed">
-                            When <code>true</code>, automatically invalidates all nested subroutes inheriting this segment&apos;s layout (e.g. revalidating <code>/docs</code> with cascade also purges <code>/docs/routing</code>, <code>/docs/rendering</code>, etc.).
+                            When <code>true</code> and the targeted route defines a layout (<code>layout.tsx</code>), Dinou revalidates that layout and automatically cascades down to all child subroutes inheriting it (e.g. revalidating <code>/docs</code> with cascade also purges <code>/docs/routing</code>, <code>/docs/rendering</code>, etc.). If no layout exists at that segment, it revalidates only the page and skips cascading.
                           </td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
+
+                  <Alert className="not-prose mt-4">
+                    <Layers className="h-4 w-4 text-purple-500" />
+                    <AlertTitle>Cascade Invalidation Requires a Segment Layout</AlertTitle>
+                    <AlertDescription>
+                      The <code>cascade: true</code> option only activates if the specified route segment defines an active <code>layout.tsx</code>. Cascading in Dinou is fundamentally tied to invalidating a shared ancestor layout payload. If a targeted path does not contain a layout, Dinou revalidates only that single page and skips traversing child subroutes.
+                    </AlertDescription>
+                  </Alert>
 
                   <div className="not-prose my-4">
                     <TabbedCodeBlock
@@ -3335,22 +3414,46 @@ await revalidatePage("./");`}
                       tabs={[
                         {
                           id: "single-route",
-                          label: "segment.ts (Standard Revalidation)",
+                          label: "store-actions.ts (Segment & Layout)",
                           language: "typescript",
-                          code: `import { revalidatePath } from "dinou/server";
+                          code: `// src/actions/store-actions.ts
+"use server";
 
-// Revalidates both the /store page and the /store layout
-await revalidatePath("/store");`,
+import { revalidatePath } from "dinou/server";
+import { db } from "@/lib/db";
+
+export async function updateStoreBanner(bannerText: string) {
+  // 1. Update promotional banner in database
+  await db.settings.set("store_banner", bannerText);
+
+  // 2. Revalidate /store page AND /store layout (layout.rsc)
+  // Essential because the promotional banner lives in src/app/store/layout.tsx
+  await revalidatePath("/store");
+
+  return { success: true };
+}`,
                         },
                         {
                           id: "cascade-route",
-                          label: "cascade.ts (Cascade Invalidation)",
+                          label: "docs-actions.ts (Cascade Invalidation)",
                           language: "typescript",
-                          code: `import { revalidatePath } from "dinou/server";
+                          code: `// src/actions/docs-actions.ts
+"use server";
 
-// Updating global docs sidebar:
-// Invalidates /docs layout and cascades to all nested child pages (/docs/*)
-await revalidatePath("/docs", { cascade: true });`,
+import { revalidatePath } from "dinou/server";
+import { cms } from "@/lib/cms";
+
+export async function publishDocSection(sectionId: string) {
+  // 1. Publish new section in CMS
+  await cms.navigation.publish(sectionId);
+
+  // 2. Invalidate /docs layout AND cascade down to all child routes
+  // Purges /docs/routing, /docs/rendering, /docs/api-reference, etc.
+  // Guarantees all nested pages display the updated sidebar with zero hydration mismatch
+  await revalidatePath("/docs", { cascade: true });
+
+  return { success: true };
+}`,
                         },
                       ]}
                     />
@@ -3372,44 +3475,156 @@ await revalidatePath("/docs", { cascade: true });`,
                   <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
                     Multi-Target Global Revalidation
                   </span>
+                  <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
+                    Returns: Promise&lt;void&gt;
+                  </span>
                 </div>
 
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Purges and marks for background regeneration all route pages, layouts, and independent <code>&lt;DinouCacheSlot&gt;</code> instances that match the specified cache tag.
+                  Purges and marks for on-demand background regeneration all route pages, segment layouts, and independent <code>&lt;DinouCacheSlot&gt;</code> fragments matching the specified cache tag across the application.
                 </p>
 
-                {/* Sub-section 1: Scope & Multi-Tenant Invalidation */}
-                <div id="revalidatetag-behavior" className="scroll-mt-20 mt-6 pt-4 border-t border-border/60">
+                {/* Sub-section 1: Parameters Table */}
+                <div id="revalidatetag-params" className="scroll-mt-20 mt-6 pt-4 border-t border-border/60">
                   <div className="flex items-center gap-2">
                     <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
-                      <Flame className="h-4 w-4 text-emerald-500" />
-                      <span>Multi-Target &amp; Tagged Invalidation</span>
+                      <Sliders className="h-4 w-4 text-emerald-500" />
+                      <span>Parameters &amp; Tagged Cascade</span>
                     </h4>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                    How tag-based invalidation synchronizes diverse route segments and micro-ISR cache slots simultaneously.
+                    Options accepted by <code>revalidateTag(tag, options?)</code>.
                   </p>
 
-                  <div className="not-prose my-4">
-                    <CodeBlock language="typescript" containerClassName="rounded-lg">
-                      {`// src/actions/product-actions.ts
+                  <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
+                    <table className="w-full text-xs text-left border-collapse min-w-[650px]">
+                      <thead className="bg-muted/50 border-b border-border text-muted-foreground font-semibold">
+                        <tr>
+                          <th className="p-3">Parameter</th>
+                          <th className="p-3">Type</th>
+                          <th className="p-3">Default</th>
+                          <th className="p-3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border bg-card text-muted-foreground">
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">tag</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">string</td>
+                          <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Required</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            The cache tag identifier to invalidate (e.g. <code>&quot;products&quot;</code>, <code>&quot;site-nav&quot;</code>, or dynamic entity tags like <code>&quot;product-42&quot;</code>). Matches against tags declared on pages, layouts, and slot fragments.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">options.cascade</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">boolean</td>
+                          <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">false</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            When <code>true</code>, if any matched artifact is a route layout (<code>layout.tsx</code>), Dinou initiates a cascading revalidation across all downstream child subroutes inheriting that layout. If <code>false</code>, matched layouts are revalidated individually without traversing child routes.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Multi-Target Mechanics Alert */}
+                  <Alert className="not-prose mt-4">
+                    <Flame className="h-4 w-4 text-emerald-500" />
+                    <AlertTitle>Unified Cross-Tier Invalidation</AlertTitle>
+                    <AlertDescription>
+                      Unlike URL-bound invalidators, <code>revalidateTag()</code> traverses storage artifacts regardless of where they reside in the route tree:
+                      <ul className="list-disc pl-4 mt-2 space-y-1">
+                        <li>
+                          <strong>Micro-ISR Slots:</strong> Direct cache slot records matching the tag are immediately purged from storage so the next incoming request resolves fresh server JSX.
+                        </li>
+                        <li>
+                          <strong>Route Pages:</strong> HTML and RSC page payloads declaring the tag in <code>page_functions = &#123; tags: [...] &#125;</code> (including parameterized routes such as <code>/products/[id]</code>) are marked stale and regenerated.
+                        </li>
+                        <li>
+                          <strong>Layouts:</strong> Layouts declaring the tag in <code>layout_functions = &#123; tags: [...] &#125;</code> are updated, with optional downward cascade when <code>cascade: true</code> is passed.
+                        </li>
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+
+                  {/* Tabbed Code Block */}
+                  <div className="not-prose my-6 space-y-2">
+                    <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
+                      <Code2 className="h-4 w-4 text-emerald-500" />
+                      <span>Tagged Architecture Pattern</span>
+                    </div>
+                    <TabbedCodeBlock
+                      defaultTab="catalog-view"
+                      tabs={[
+                        {
+                          id: "catalog-view",
+                          label: "catalog/page.tsx (Tagged Page & Slot)",
+                          language: "typescript",
+                          code: `// src/app/catalog/page.tsx
+import { DinouCacheSlot } from "dinou/server";
+import { ProductGrid } from "@/components/product-grid";
+import { RealtimeStock } from "@/components/realtime-stock";
+
+// 1. Tag the entire route page
+export const page_functions = {
+  tags: ["catalog", "products"],
+  revalidate: 3600, // Background fallback
+};
+
+export default async function CatalogPage() {
+  return (
+    <main className="container mx-auto py-8">
+      <h1>Product Catalog</h1>
+
+      {/* Static product listings */}
+      <ProductGrid />
+
+      {/* 2. Micro-ISR cache slot with granular tags */}
+      <DinouCacheSlot
+        id="inventory-feed"
+        tags={["inventory", "products"]}
+        revalidate={60}
+      >
+        <RealtimeStock />
+      </DinouCacheSlot>
+    </main>
+  );
+}`,
+                        },
+                        {
+                          id: "inventory-action",
+                          label: "inventory-actions.ts (Granular Purging)",
+                          language: "typescript",
+                          code: `// src/actions/inventory-actions.ts
 "use server";
 
 import { revalidateTag } from "dinou/server";
-import db from "@/lib/db";
+import { db } from "@/lib/db";
 
-export async function updateProduct(productId: string, data: any) {
-  await db.products.update(productId, data);
+export async function restockItem(productId: string, quantity: number) {
+  // 1. Mutate database records
+  await db.stock.increment(productId, quantity);
 
-  // 1. Purge all views displaying this specific product
-  await revalidateTag(\`product-\${productId}\`);
+  // 2. Targeted Invalidation:
+  // Purges only <DinouCacheSlot> components tagged with "inventory",
+  // keeping the heavy parent catalog page cached and untouched.
+  await revalidateTag("inventory");
 
-  // 2. Purge global product collection pages and catalog slots
+  return { success: true };
+}
+
+export async function bulkPriceUpdate(categoryId: string) {
+  await db.pricing.applyDiscount(categoryId, 0.15);
+
+  // Broad Invalidation:
+  // Purges all catalog pages, search feeds, and inventory slots tagged with "products".
   await revalidateTag("products");
 
   return { success: true };
-}`}
-                    </CodeBlock>
+}`,
+                        },
+                      ]}
+                    />
                   </div>
                 </div>
 
@@ -3444,41 +3659,41 @@ export async function updateProduct(productId: string, data: any) {
                             No
                           </td>
                           <td className="p-3 align-top leading-relaxed">
-                            Individual article updates, price adjustments, single-record mutations.
+                            Specific page mutations, content edits, single-record updates where shared layouts remain untouched.
                           </td>
                         </tr>
                         <tr>
                           <td className="p-3 font-mono font-semibold text-primary align-top">
-                            revalidatePath(path)
+                            revalidatePath(path, options?)
                           </td>
                           <td className="p-3 align-top">
-                            Page component and route segment layout (<code>layout.rsc</code>)
+                            Page component and its segment layout (<code>layout.rsc</code>)
                           </td>
                           <td className="p-3 align-top font-semibold text-emerald-600 dark:text-emerald-400">
                             Yes
                           </td>
                           <td className="p-3 align-top">
-                            Optional (<code>&#123; cascade: true &#125;</code>)
+                            Optional (<code>&#123; cascade: true &#125;</code>, requires layout)
                           </td>
                           <td className="p-3 align-top leading-relaxed">
-                            Sidebar updates, section navigation changes, category-wide layout updates.
+                            Segment-level updates, navigation breadcrumbs, sidebar menus, and branch-wide refreshes.
                           </td>
                         </tr>
                         <tr>
                           <td className="p-3 font-mono font-semibold text-primary align-top">
-                            revalidateTag(tag)
+                            revalidateTag(tag, options?)
                           </td>
                           <td className="p-3 align-top">
-                            All pages, layouts, and <code>&lt;DinouCacheSlot&gt;</code> elements with matching tag
+                            All pages, layouts, and <code>&lt;DinouCacheSlot&gt;</code> fragments tagged with matching key
                           </td>
                           <td className="p-3 align-top font-semibold text-emerald-600 dark:text-emerald-400">
                             If tagged
                           </td>
                           <td className="p-3 align-top">
-                            Optional (<code>&#123; cascade: true &#125;</code>)
+                            Optional (<code>&#123; cascade: true &#125;</code> for matched layouts)
                           </td>
                           <td className="p-3 align-top leading-relaxed">
-                            Global entity mutations (e.g. updating product affects shop, carts, and sidebars).
+                            Cross-cutting domain entity mutations (e.g. inventory stock, product catalog, global banners) affecting multiple disjoint routes and slots simultaneously.
                           </td>
                         </tr>
                       </tbody>
@@ -3498,14 +3713,45 @@ export async function updateProduct(productId: string, data: any) {
                   <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
                     Storage Abstraction
                   </span>
-                  <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
-                    dinou/server
+                  <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                    Pluggable Engine
                   </span>
                 </div>
 
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Dinou completely decouples ISR and Micro-ISR caching logic from physical storage media. All static pre-rendered pages, ISR payloads, and slot fragments are read and written through a unified <code>StorageAdapter</code> interface.
+                  Dinou completely decouples ISR and Micro-ISR caching logic from physical storage media. All pre-rendered HTML, RSC route payloads, segment layouts, and slot fragments are read and written through a unified <code>StorageAdapter</code> interface.
                 </p>
+
+                {/* Architecture Feature Cards */}
+                <div className="grid md:grid-cols-3 gap-4 my-4 not-prose text-xs">
+                  <div className="p-4 rounded-lg bg-card border border-border space-y-2">
+                    <div className="font-semibold text-foreground flex items-center gap-1.5">
+                      <Layers className="h-4 w-4 text-amber-500" />
+                      <span>Physical Decoupling</span>
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Switch between local disk, distributed memory caches, edge KV stores, or custom object storage without modifying application components or data loaders.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-card border border-border space-y-2">
+                    <div className="font-semibold text-foreground flex items-center gap-1.5">
+                      <Sliders className="h-4 w-4 text-purple-500" />
+                      <span>Companion Metadata</span>
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Every cached entry preserves associated metadata, including generation timestamps (<code>generatedAt</code>), assigned cache tags, and ISR revalidation windows.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-card border border-border space-y-2">
+                    <div className="font-semibold text-foreground flex items-center gap-1.5">
+                      <Globe className="h-4 w-4 text-blue-500" />
+                      <span>Cluster Sharing</span>
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed">
+                      In multi-instance setups (Kubernetes, Cloud Run, Edge workers), adapters like <code>RedisStorage</code> or <code>CloudflareKVStorage</code> share generated artifacts globally across all nodes.
+                    </p>
+                  </div>
+                </div>
 
                 {/* Sub-section 1: Built-in Adapters */}
                 <div id="storage-adapters-list" className="scroll-mt-20 mt-6 pt-4 border-t border-border/60">
@@ -3516,15 +3762,16 @@ export async function updateProduct(productId: string, data: any) {
                     </h4>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                    Production storage engines available out of the box.
+                    Production storage engines available directly from <code>dinou/server</code>.
                   </p>
 
                   <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
-                    <table className="w-full text-xs text-left border-collapse min-w-[650px]">
+                    <table className="w-full text-xs text-left border-collapse min-w-[700px]">
                       <thead className="bg-muted/50 border-b border-border text-muted-foreground font-semibold">
                         <tr>
                           <th className="p-3">Adapter Class</th>
                           <th className="p-3">Constructor Signature</th>
+                          <th className="p-3">Metadata Strategy</th>
                           <th className="p-3">Target Environment</th>
                         </tr>
                       </thead>
@@ -3532,77 +3779,297 @@ export async function updateProduct(productId: string, data: any) {
                         <tr>
                           <td className="p-3 font-mono font-semibold text-primary align-top">FileSystemStorage</td>
                           <td className="p-3 font-mono text-[11px] text-foreground align-top">new FileSystemStorage(baseDir?: string)</td>
-                          <td className="p-3 align-top leading-relaxed">Local development, single-node Docker, VPS servers (default).</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Writes companion <code>metadata.json</code>, <code>layout.metadata.json</code>, and <code>slot.metadata.json</code> files alongside cached payloads.
+                          </td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Local development, single-node Docker containers, VPS servers (default: <code>.dinou/dist2</code>).
+                          </td>
                         </tr>
                         <tr>
                           <td className="p-3 font-mono font-semibold text-primary align-top">RedisStorage</td>
                           <td className="p-3 font-mono text-[11px] text-foreground align-top">new RedisStorage(redisClient: any, prefix?: string)</td>
-                          <td className="p-3 align-top leading-relaxed">Multi-container Kubernetes clusters, AWS ECS, Google Cloud Run.</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Serializes content and metadata together as JSON strings under configurable key prefix (default: <code>&quot;dinou:cache:&quot;</code>).
+                          </td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Multi-container Kubernetes clusters, AWS ECS, Google Cloud Run, distributed Node.js servers.
+                          </td>
                         </tr>
                         <tr>
                           <td className="p-3 font-mono font-semibold text-primary align-top">CloudflareKVStorage</td>
                           <td className="p-3 font-mono text-[11px] text-foreground align-top">new CloudflareKVStorage(kvNamespace: any)</td>
-                          <td className="p-3 align-top leading-relaxed">Cloudflare Workers &amp; Pages at edge scale.</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Leverages Cloudflare KV native metadata attributes via <code>getWithMetadata()</code> and <code>put(..., &#123; metadata &#125;)</code>.
+                          </td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Cloudflare Workers &amp; Pages at global edge scale.
+                          </td>
                         </tr>
                         <tr>
                           <td className="p-3 font-mono font-semibold text-primary align-top">DenoKVStorage</td>
                           <td className="p-3 font-mono text-[11px] text-foreground align-top">new DenoKVStorage(kvInstance?: any)</td>
-                          <td className="p-3 align-top leading-relaxed">Deno Deploy &amp; distributed edge runtimes.</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Stores atomic key-value records with automatic 16KB payload chunking for large HTML/RSC artifacts.
+                          </td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Deno Deploy &amp; distributed edge runtimes.
+                          </td>
                         </tr>
                         <tr>
                           <td className="p-3 font-mono font-semibold text-primary align-top">MemoryStorage</td>
                           <td className="p-3 font-mono text-[11px] text-foreground align-top">new MemoryStorage()</td>
-                          <td className="p-3 align-top leading-relaxed">Unit testing, ephemeral CI/CD environments.</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Maintains an in-memory JavaScript <code>Map</code> storing <code>&#123; content, metadata &#125;</code> tuples in memory.
+                          </td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Unit testing, ephemeral CI/CD runners, preview sandboxes.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Adapter Helpers Note */}
+                  <div className="p-4 rounded-lg bg-muted/40 border border-border text-xs space-y-1">
+                    <div className="font-semibold text-foreground flex items-center gap-1.5">
+                      <Code2 className="h-4 w-4 text-emerald-500" />
+                      <span>Global Storage Utilities</span>
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Dinou exports <code>getStorageAdapter()</code> to access the active storage instance anywhere on the server, and <code>setStorageAdapter(adapter)</code> to dynamically swap the storage engine during initialization or test suites.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Sub-section 2: StorageAdapter Interface Contract */}
+                <div id="storage-adapters-interface" className="scroll-mt-20 mt-6 pt-4 border-t border-border/60">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
+                      <Settings className="h-4 w-4 text-amber-500" />
+                      <span>StorageAdapter Contract &amp; Methods</span>
+                    </h4>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    Abstract class methods required when implementing or interacting with storage engines.
+                  </p>
+
+                  <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
+                    <table className="w-full text-xs text-left border-collapse min-w-[700px]">
+                      <thead className="bg-muted/50 border-b border-border text-muted-foreground font-semibold">
+                        <tr>
+                          <th className="p-3">Method</th>
+                          <th className="p-3">Signature</th>
+                          <th className="p-3">Required?</th>
+                          <th className="p-3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border bg-card text-muted-foreground">
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">get(key)</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                            (key: string) =&gt; Promise&lt;&#123; content: string; metadata?: any &#125; | null&gt;
+                          </td>
+                          <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Yes</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Retrieves the cached content string and companion metadata. Returns <code>null</code> on cache miss.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">set(key, content, metadata?)</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                            (key: string, content: string, metadata?: any) =&gt; Promise&lt;void&gt;
+                          </td>
+                          <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Yes</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Persists the rendered HTML, RSC stream, or slot JSON alongside its companion metadata object.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">has(key)</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                            (key: string) =&gt; Promise&lt;boolean&gt;
+                          </td>
+                          <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Yes</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Fast existence check to verify if a valid cache artifact exists without deserializing full content.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">delete(key)</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                            (key: string) =&gt; Promise&lt;void&gt;
+                          </td>
+                          <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Yes</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Removes the targeted cached artifact and associated metadata files or keys.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">keys(prefix?)</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                            (prefix?: string) =&gt; Promise&lt;string[]&gt; | string[]
+                          </td>
+                          <td className="p-3 font-mono text-[11px] text-amber-600 dark:text-amber-400 align-top">Optional</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Enumerates stored artifact keys. Required for <code>revalidateTag()</code> scanning and <code>revalidatePath(&#123; cascade: true &#125;)</code> child discovery in Edge runtime environments.
+                          </td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
                 </div>
 
-                {/* Sub-section 2: Custom StorageAdapter Implementation */}
+                {/* Sub-section 3: Storage Configuration & Custom Adapters */}
                 <div id="storage-adapters-custom" className="scroll-mt-20 mt-6 pt-4 border-t border-border/60">
                   <div className="flex items-center gap-2">
                     <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
                       <Code2 className="h-4 w-4 text-amber-500" />
-                      <span>Custom StorageAdapter Implementation</span>
+                      <span>Production Configuration &amp; Custom Implementation</span>
                     </h4>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                    Implement your own storage backend (e.g. AWS S3, Google Cloud Storage, or SQLite) by extending <code>StorageAdapter</code>.
+                    Configure distributed caching with built-in adapters like <code>RedisStorage</code> or extend <code>StorageAdapter</code> to implement a custom engine.
                   </p>
 
                   <div className="not-prose my-4">
-                    <CodeBlock language="typescript" containerClassName="rounded-lg">
-                      {`import { StorageAdapter, setStorageAdapter } from "dinou/server";
+                    <TabbedCodeBlock
+                      defaultTab="redis-storage"
+                      tabs={[
+                        {
+                          id: "redis-storage",
+                          label: "dinou.config.mjs (Redis Cluster)",
+                          language: "javascript",
+                          code: `// dinou.config.mjs
+import { defineConfig } from "dinou/config";
+import { RedisStorage } from "dinou/server";
+import Redis from "ioredis";
 
-export class CustomS3Storage extends StorageAdapter {
-  constructor(private s3Client: any, private bucket: string) {
+// Connect to shared Redis cache (AWS ElastiCache, Upstash, or Redis cluster)
+const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
+
+export default defineConfig({
+  // Share ISR pages and <DinouCacheSlot> fragments across all Docker / K8s replicas
+  storage: new RedisStorage(redis, "dinou:cache:"),
+});`,
+                        },
+                        {
+                          id: "custom-adapter",
+                          label: "sqlite-storage.ts (Custom Engine)",
+                          language: "typescript",
+                          code: `// src/lib/storage/sqlite-storage.ts
+import { StorageAdapter } from "dinou/server";
+import Database from "better-sqlite3";
+
+export class SQLiteStorage extends StorageAdapter {
+  private db: Database.Database;
+
+  constructor(dbPath: string = ".dinou/cache.db") {
     super();
+    this.db = new Database(dbPath);
+    this.db.exec(\`
+      CREATE TABLE IF NOT EXISTS dinou_cache (
+        key TEXT PRIMARY KEY,
+        content TEXT NOT NULL,
+        metadata TEXT
+      );
+    \`);
   }
 
   async get(key: string) {
-    // Return { content: string, metadata?: any } or null
-    return this.s3Client.getObject(this.bucket, key);
+    const row = this.db
+      .prepare("SELECT content, metadata FROM dinou_cache WHERE key = ?")
+      .get(key) as { content: string; metadata: string | null } | undefined;
+
+    if (!row) return null;
+
+    return {
+      content: row.content,
+      metadata: row.metadata ? JSON.parse(row.metadata) : null,
+    };
   }
 
-  async set(key: string, content: string, metadata: any = null) {
-    // Persist content and metadata
-    await this.s3Client.putObject(this.bucket, key, content, metadata);
+  async set(key: string, content: string, metadata: any = null): Promise<void> {
+    const metaStr = metadata ? JSON.stringify(metadata) : null;
+    this.db
+      .prepare(
+        "INSERT INTO dinou_cache (key, content, metadata) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET content = excluded.content, metadata = excluded.metadata"
+      )
+      .run(key, content, metaStr);
   }
 
   async has(key: string): Promise<boolean> {
-    return this.s3Client.headObject(this.bucket, key);
+    const row = this.db
+      .prepare("SELECT 1 FROM dinou_cache WHERE key = ?")
+      .get(key);
+    return Boolean(row);
   }
 
   async delete(key: string): Promise<void> {
-    await this.s3Client.deleteObject(this.bucket, key);
+    this.db.prepare("DELETE FROM dinou_cache WHERE key = ?").run(key);
   }
-}
 
-// Register the custom adapter globally
-setStorageAdapter(new CustomS3Storage(myS3Client, "my-app-cache"));`}
-                    </CodeBlock>
+  async keys(prefix: string = ""): Promise<string[]> {
+    const rows = this.db
+      .prepare("SELECT key FROM dinou_cache WHERE key LIKE ?")
+      .all(\`\${prefix}%\`) as { key: string }[];
+    return rows.map((r) => r.key);
+  }
+}`,
+                        },
+                        {
+                          id: "config-wiring",
+                          label: "dinou.config.mjs (Custom Wiring)",
+                          language: "javascript",
+                          code: `// dinou.config.mjs
+import { defineConfig } from "dinou/config";
+import { SQLiteStorage } from "./src/lib/storage/sqlite-storage.js";
+
+export default defineConfig({
+  // Register custom storage engine declaratively
+  storage: new SQLiteStorage(".dinou/production-cache.db"),
+});`,
+                        },
+                        {
+                          id: "programmatic-setup",
+                          label: "server-bootstrap.ts (Programmatic)",
+                          language: "typescript",
+                          code: `// server-bootstrap.ts
+import { setStorageAdapter, getStorageAdapter } from "dinou/server";
+import { SQLiteStorage } from "./src/lib/storage/sqlite-storage";
+
+// Dynamically override or configure storage during server boot
+const customStorage = new SQLiteStorage(".dinou/production-cache.db");
+setStorageAdapter(customStorage);
+
+// Inspect active storage adapter
+const activeStorage = getStorageAdapter();
+console.log("Dinou active storage adapter:", activeStorage.constructor.name);`,
+                        },
+                      ]}
+                    />
                   </div>
+
+                  <Alert className="not-prose mt-4">
+                    <Database className="h-4 w-4 text-amber-500" />
+                    <AlertTitle>What is the Redis Key Prefix?</AlertTitle>
+                    <AlertDescription className="space-y-2 text-xs leading-relaxed">
+                      <p>
+                        The <code>prefix</code> parameter in <code>new RedisStorage(redis, prefix)</code> defines the namespace added to the front of every key stored in Redis:
+                      </p>
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li>
+                          <strong>Concrete Example:</strong> When Dinou caches the page <code>/catalog</code>, the actual key stored in your Redis database is <code>dinou:cache:catalog/index.html</code>.
+                        </li>
+                        <li>
+                          <strong>Avoid Collisions:</strong> If your Redis server is shared with user sessions, BullMQ queues, or database caches, this prefix guarantees that Dinou will never overwrite other application data.
+                        </li>
+                        <li>
+                          <strong>It is Optional:</strong> It defaults to <code>&quot;dinou:cache:&quot;</code>, so writing <code>new RedisStorage(redis)</code> is usually sufficient. You only need to change it if you share Redis across environments (e.g. <code>&quot;dinou:prod:&quot;</code> vs <code>&quot;dinou:staging:&quot;</code>).
+                        </li>
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
                 </div>
               </section>
             </section>
@@ -3612,7 +4079,7 @@ setStorageAdapter(new CustomS3Storage(myS3Client, "my-app-cache"));`}
             {/* ================================================================= */}
             <section id="route-segment-contracts" className="scroll-mt-20 mt-12 pt-8 border-t">
               <h2 className="flex items-center gap-3">
-                5. Route Segment Contracts (<code>page_functions</code>)
+                5. Route Segment Contracts
                 <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
                   page_functions.ts &amp; layout_functions.ts
                 </span>
@@ -3632,33 +4099,209 @@ setStorageAdapter(new CustomS3Storage(myS3Client, "my-app-cache"));`}
                   <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
                     Server Data Loader
                   </span>
+                  <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                    Returns: Promise&lt;TProps&gt; | TProps
+                  </span>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  The server-side data loader. Returns an object of props passed directly to the corresponding <code>Page</code> or <code>Layout</code> component.
-                </p>
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-                  {`// src/app/products/[id]/page_functions.ts
-import { redirect } from "dinou";
-import type { PageFunctions } from "dinou";
 
-interface ProductProps {
-  product: { id: string; title: string; price: number };
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  The primary server-side data loading contract for routes and layouts. Executes exclusively on the server during SSG build, on-demand ISG generation, or runtime request handling. The object returned by <code>getProps</code> is automatically injected as props into the companion <code>Page</code> or <code>Layout</code> component.
+                </p>
+
+                {/* Sub-section 1: Parameters */}
+                <div id="getprops-params" className="scroll-mt-20 mt-6 pt-4 border-t border-border/60">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
+                      <Sliders className="h-4 w-4 text-amber-500" />
+                      <span>Parameters</span>
+                    </h4>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    Arguments supplied to <code>getProps(params)</code>.
+                  </p>
+
+                  <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
+                    <table className="w-full text-xs text-left border-collapse min-w-[650px]">
+                      <thead className="bg-muted/50 border-b border-border text-muted-foreground font-semibold">
+                        <tr>
+                          <th className="p-3">Parameter</th>
+                          <th className="p-3">Type</th>
+                          <th className="p-3">Default</th>
+                          <th className="p-3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border bg-card text-muted-foreground">
+                        <tr>
+                          <td className="p-3 font-mono font-semibold text-primary align-top">params</td>
+                          <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                            Record&lt;string, string | string[]&gt;
+                          </td>
+                          <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">&#123;&#125;</td>
+                          <td className="p-3 align-top leading-relaxed">
+                            Parsed dynamic URL parameters defined by route folder naming (e.g. <code>&#123; id: &quot;42&quot; &#125;</code> for <code>[id]</code> or <code>&#123; slug: [&quot;a&quot;, &quot;b&quot;] &#125;</code> for catch-all <code>[...slug]</code>). In layouts, receives all segment parameters up to that layout level. Empty on static routes.
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Context Access Alert */}
+                  <Alert className="not-prose mt-4">
+                    <Server className="h-4 w-4 text-amber-500" />
+                    <AlertTitle>Accessing Request Headers, Cookies &amp; Query</AlertTitle>
+                    <AlertDescription>
+                      While <code>getProps</code> receives route parameters as its first argument, you can access incoming HTTP request headers, cookies, query parameters, or platform environment variables by calling <code>getContext()</code> directly inside the function.
+                    </AlertDescription>
+                  </Alert>
+
+                  {/* Companion Pattern Tabbed Code Block */}
+                  <div className="not-prose my-6 space-y-2">
+                    <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
+                      <Code2 className="h-4 w-4 text-amber-500" />
+                      <span>Companion Contract Pattern</span>
+                    </div>
+                    <TabbedCodeBlock
+                      defaultTab="page-functions"
+                      tabs={[
+                        {
+                          id: "page-functions",
+                          label: "products/[id]/page_functions.ts",
+                          language: "typescript",
+                          code: `// src/app/products/[id]/page_functions.ts
+import type { PageFunctions, RouteParams } from "dinou";
+import { getContext } from "dinou";
+import { db } from "@/lib/db";
+
+export interface ProductPageProps {
+  product: {
+    id: string;
+    title: string;
+    price: number;
+    description: string;
+  };
+  preferredCurrency: string;
 }
 
-export const getProps: PageFunctions<{ id: string }, ProductProps>["getProps"] = async (params) => {
-  const product = await fetchProductById(params.id);
-  
-  if (!product) {
-    return redirect("/404");
+// Strongly typed contract using PageFunctions and RouteParams
+export const getProps: PageFunctions<
+  RouteParams<"/products/[id]">,
+  ProductPageProps
+>["getProps"] = async (params) => {
+  // 1. Fetch data on the server using route parameters
+  const product = await db.products.findById(params.id);
+
+  // 2. Read cookies or headers from request context
+  const ctx = getContext();
+  const preferredCurrency = ctx.req.cookies["user_currency"] || "USD";
+
+  // 3. Return props passed directly to the companion Page component
+  return {
+    product,
+    preferredCurrency,
+  };
+};`,
+                        },
+                        {
+                          id: "page-view",
+                          label: "products/[id]/page.tsx",
+                          language: "tsx",
+                          code: `// src/app/products/[id]/page.tsx
+import type { PageProps } from "dinou";
+import type { ProductPageProps } from "./page_functions";
+
+// In Dinou, Page components receive route params plus props returned by getProps()
+type Props = PageProps<"/products/[id]"> & ProductPageProps;
+
+export default function ProductPage({
+  params,
+  product,
+  preferredCurrency,
+}: Props) {
+  return (
+    <main className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold">{product.title}</h1>
+      <p className="text-2xl font-semibold mt-2 text-primary">
+        {preferredCurrency} {product.price.toFixed(2)}
+      </p>
+      <p className="mt-4 text-muted-foreground leading-relaxed">
+        {product.description}
+      </p>
+    </main>
+  );
+}`,
+                        },
+                        {
+                          id: "layout-functions",
+                          label: "[organization]/layout_functions.ts",
+                          language: "typescript",
+                          code: `// src/app/[organization]/layout_functions.ts
+import type { LayoutFunctions, RouteParams } from "dinou";
+import { getContext, redirect } from "dinou";
+import { db } from "@/lib/db";
+
+export interface OrgLayoutProps {
+  organization: {
+    id: string;
+    name: string;
+    tier: string;
+  };
+  unreadCount: number;
+}
+
+// Layouts receive route parameters defined at or above this segment level
+export const getProps: LayoutFunctions<
+  RouteParams<"/[organization]">,
+  OrgLayoutProps
+>["getProps"] = async (params) => {
+  const org = await db.organizations.findBySlug(params.organization);
+  if (!org) {
+    redirect("/select-organization");
   }
 
-  // Directly returned object becomes the Page component's props
-  return { product };
-};`}
-                </CodeBlock>
+  const ctx = getContext();
+  const unreadCount = await db.notifications.countUnread(org.id, ctx.req.cookies["user_id"]);
+
+  // Props are injected directly into src/app/[organization]/layout.tsx
+  return {
+    organization: org,
+    unreadCount,
+  };
+};`,
+                        },
+                        {
+                          id: "layout-view",
+                          label: "[organization]/layout.tsx",
+                          language: "tsx",
+                          code: `// src/app/[organization]/layout.tsx
+import type { LayoutProps } from "dinou";
+import type { OrgLayoutProps } from "./layout_functions";
+
+// Layout components receive children, segment params, and props returned by getProps()
+type Props = LayoutProps<"/[organization]"> & OrgLayoutProps;
+
+export default function OrgLayout({
+  children,
+  params,
+  organization,
+  unreadCount,
+}: Props) {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <header className="border-b px-6 py-4 flex items-center justify-between">
+        <span className="font-bold">{organization.name}</span>
+        <span className="text-xs bg-muted px-2 py-1 rounded">
+          {unreadCount} unread
+        </span>
+      </header>
+      <main className="flex-1 p-6">{children}</main>
+    </div>
+  );
+}`,
+                        },
+                      ]}
+                    />
+                  </div>
+                </div>
               </section>
 
               <section id="revalidate-config" className="scroll-mt-20 mt-8">
@@ -3710,6 +4353,25 @@ export const getProps: PageFunctions<{ id: string }, ProductProps>["getProps"] =
                     </tbody>
                   </table>
                 </div>
+
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg my-3"
+                >
+                  {`// src/app/products/page_functions.ts
+import type { PageFunctions } from "dinou";
+
+// 1. Time-based ISR: Regenerate background cache every 60 seconds
+export const revalidate: PageFunctions["revalidate"] = 60;
+
+// 2. Dynamic SSR: Always render live on every request (bypass cache)
+// export const revalidate: PageFunctions["revalidate"] = 0;
+
+// 3. Dynamic evaluation: Conditional revalidation function
+// export const revalidate: PageFunctions["revalidate"] = async () => {
+//   return process.env.NODE_ENV === "production" ? 300 : 0;
+// };`}
+                </CodeBlock>
               </section>
 
               <section id="ppr-config" className="scroll-mt-20 mt-8">
@@ -3732,7 +4394,10 @@ export const getProps: PageFunctions<{ id: string }, ProductProps>["getProps"] =
                   containerClassName="w-full overflow-hidden rounded-lg my-3"
                 >
                   {`// src/app/dashboard/layout_functions.ts
-export const ppr = true; // Enables PPR for /dashboard and all child routes`}
+import type { LayoutFunctions } from "dinou";
+
+// Enable PPR for /dashboard and all nested route segments
+export const ppr: LayoutFunctions["ppr"] = true;`}
                 </CodeBlock>
               </section>
 
@@ -3755,20 +4420,32 @@ export const ppr = true; // Enables PPR for /dashboard and all child routes`}
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg my-3"
                 >
-                  {`// 1. Array of primitives (for single param [slug])
-export const getStaticPaths = ["announcing-v7", "migration-guide"];
+                  {`import type { PageFunctions, RouteParams } from "dinou";
+import { fetchAllArticles } from "@/lib/cms";
 
-// 2. Array of objects (for multiple params [category]/[id])
-export const getStaticPaths = [
+// 1. Static array using RouteParams for /blog/[slug]
+export const getStaticPaths: PageFunctions<
+  RouteParams<"/blog/[slug]">
+>["getStaticPaths"] = [
+  "announcing-v7",
+  "migration-guide",
+];
+
+// 2. Array of parameter objects for multi-segment route [category]/[id]
+export const getStaticPaths: PageFunctions<
+  RouteParams<"/shop/[category]/[id]">
+>["getStaticPaths"] = [
   { category: "tech", id: "1" },
   { category: "design", id: "2" },
 ];
 
-// 3. Async function (fetching from CMS/Database)
-export async function getStaticPaths() {
+// 3. Dynamic async loader fetching from CMS/Database
+export const getStaticPaths: PageFunctions<
+  RouteParams<"/blog/[slug]">
+>["getStaticPaths"] = async () => {
   const articles = await fetchAllArticles();
   return articles.map((article) => ({ slug: article.slug }));
-}`}
+};`}
                 </CodeBlock>
               </section>
 
@@ -3791,9 +4468,14 @@ export async function getStaticPaths() {
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg my-3"
                 >
-                  {`export function getCacheTags(params) {
+                  {`import type { PageFunctions, RouteParams } from "dinou";
+
+// Type-safe cache tags associated with the route segment
+export const getCacheTags: PageFunctions<
+  RouteParams<"/blog/[slug]">
+>["getCacheTags"] = (params) => {
   return ["articles", \`article-\${params.slug}\`];
-}`}
+};`}
                 </CodeBlock>
               </section>
 
@@ -3845,13 +4527,18 @@ export async function getStaticPaths() {
                   containerClassName="w-full overflow-hidden rounded-lg my-3"
                 >
                   {`// src/app/users/[id]/page_functions.ts
-export function validateParams(params) {
+import type { PageFunctions, RouteParams } from "dinou";
+
+// Perimeter guard: returning false halts rendering and returns 404
+export const validateParams: PageFunctions<
+  RouteParams<"/users/[id]">
+>["validateParams"] = (params) => {
   // Only allow numeric user IDs
   return /^[0-9]+$/.test(params.id);
-}
+};
 
 // Disallow on-demand generation; only paths defined in getStaticPaths exist
-export const allowISG = false;`}
+export const allowISG: PageFunctions["allowISG"] = false;`}
                 </CodeBlock>
               </section>
             </section>
@@ -3935,6 +4622,43 @@ export default function BlogLayout({ children, params }: LayoutProps<"/blog/[slu
                 </CodeBlock>
               </section>
 
+              {/* PageFunctions & LayoutFunctions */}
+              <section id="pagefunctions" className="scroll-mt-20 mt-8">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="m-0">
+                    <code>PageFunctions&lt;TParams, TProps&gt;</code> &amp; <code>LayoutFunctions&lt;TParams, TProps&gt;</code>
+                  </h3>
+                  <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                    TypeScript Generics
+                  </span>
+                  <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
+                    Server Lifecycle Contracts
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  Canonical TypeScript interfaces for typing server lifecycle files (<code>page_functions.ts</code> and <code>layout_functions.ts</code>). Both interfaces alias the foundational <code>RouteSegmentConfig&lt;TParams, TProps&gt;</code> contract, providing complete compile-time type safety, IDE autocompletion, and index-access typing (e.g. <code>PageFunctions[&quot;revalidate&quot;]</code>).
+                </p>
+
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg my-3"
+                >
+                  {`import type { PageFunctions, LayoutFunctions, RouteParams } from "dinou";
+
+// 1. Strict parameter & props typing for page_functions.ts
+export const getProps: PageFunctions<
+  RouteParams<"/blog/[slug]">,
+  { postTitle: string }
+>["getProps"] = async (params) => {
+  return { postTitle: \`Article: \${params.slug}\` };
+};
+
+// 2. Strict index-access typing for layout_functions.ts
+export const ppr: LayoutFunctions["ppr"] = true;
+export const revalidate: LayoutFunctions["revalidate"] = 3600;`}
+                </CodeBlock>
+              </section>
+
               {/* RouteParams */}
               <section id="routeparams" className="scroll-mt-20 mt-8">
                 <div className="flex flex-wrap items-center gap-2">
@@ -3956,14 +4680,17 @@ export default function BlogLayout({ children, params }: LayoutProps<"/blog/[slu
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg my-3"
                 >
-                  {`import type { RouteParams } from "dinou";
+                  {`import type { PageFunctions, RouteParams } from "dinou";
 
 // 1. In server-side page_functions.ts
-export async function getProps(params: RouteParams<"/blog/[slug]">) {
+export const getProps: PageFunctions<
+  RouteParams<"/blog/[slug]">,
+  { postTitle: string }
+>["getProps"] = async (params) => {
   return {
     postTitle: \`Title for \${params.slug}\`,
   };
-}
+};
 
 // 2. In error.tsx boundaries
 interface ErrorProps {
