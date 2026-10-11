@@ -594,7 +594,7 @@ export function DocsSidebar() {
 
   return (
     <Sidebar className="border-r fixed left-0 top-0 h-full z-30">
-      <SidebarContent className="scrollbar-thin md:pt-14">
+      <SidebarContent className="scrollbar-thin md:pt-16">
         {/* Ejected mode back button */}
         {isEjected && (
           <div className="px-3 pt-3 pb-1">
