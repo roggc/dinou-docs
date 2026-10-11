@@ -13,11 +13,11 @@ export function DinouRouteSection() {
           Union Type
         </span>
         <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
-          Zero-Runtime
+          Outward Navigation
         </span>
       </div>
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        A union type representing all valid destinations in the application. Powers <code>&lt;Link href&gt;</code> and <code>router.push(href)</code>, and can be imported to type custom navigation components.
+        A union type representing all valid destinations in the application. It powers <code>&lt;Link href&gt;</code> and <code>router.push(href)</code>, automatically validating internal application routes, queries (<code>?key=val</code>), hashes (<code>#section</code>), relative paths (<code>./</code>, <code>../</code>), and external URLs (<code>https://...</code>).
       </p>
 
       <CodeBlock
@@ -25,9 +25,9 @@ export function DinouRouteSection() {
         containerClassName="w-full overflow-hidden rounded-lg my-3"
       >
         {`import type { DinouRoute } from "dinou";
-import { Link } from "dinou";
+import { Link, useRouter } from "dinou";
 
-// Typing reusable navigation buttons with project-wide autocompletion
+// 1. Typing custom navigation components
 interface NavButtonProps {
   href: DinouRoute;
   label: string;
@@ -35,6 +35,17 @@ interface NavButtonProps {
 
 export function NavButton({ href, label }: NavButtonProps) {
   return <Link href={href}>{label}</Link>;
+}
+
+// 2. Programmatic navigation with useRouter
+export function ActionPanel() {
+  const router = useRouter();
+
+  const handleNavigate = (destination: DinouRoute) => {
+    router.push(destination);
+  };
+
+  return <button onClick={() => handleNavigate("/docs/api-reference")}>API</button>;
 }`}
       </CodeBlock>
     </section>

@@ -20,18 +20,58 @@ export function RouteParamsSection() {
         A standalone utility type representing the inferred parameters dictionary of a given route pattern. While <code>PageProps</code> and <code>PageFunctions</code> resolve route strings directly, <code>RouteParams</code> is ideal for typing Server Actions, services, or error boundary components that do not inherit framework props automatically.
       </p>
 
+      {/* Parameter Mapping Table */}
+      <div className="my-4 not-prose overflow-x-auto rounded-lg border border-border">
+        <table className="w-full text-xs text-left">
+          <thead className="bg-muted text-muted-foreground font-semibold">
+            <tr>
+              <th className="p-2.5">Pattern Segment</th>
+              <th className="p-2.5">Route Example</th>
+              <th className="p-2.5">Inferred <code>RouteParams&lt;T&gt;</code></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border bg-card">
+            <tr>
+              <td className="p-2.5 font-mono text-blue-600 dark:text-blue-400">[id]</td>
+              <td className="p-2.5 font-mono text-muted-foreground">/products/[id]</td>
+              <td className="p-2.5 font-mono">&#123; id: string &#125;</td>
+            </tr>
+            <tr>
+              <td className="p-2.5 font-mono text-purple-600 dark:text-purple-400">[...slug]</td>
+              <td className="p-2.5 font-mono text-muted-foreground">/docs/[...slug]</td>
+              <td className="p-2.5 font-mono">&#123; slug: string[] &#125;</td>
+            </tr>
+            <tr>
+              <td className="p-2.5 font-mono text-amber-600 dark:text-amber-400">[[...slug]]</td>
+              <td className="p-2.5 font-mono text-muted-foreground">/shop/[[...slug]]</td>
+              <td className="p-2.5 font-mono">&#123; slug?: string[] &#125;</td>
+            </tr>
+            <tr>
+              <td className="p-2.5 font-mono text-emerald-600 dark:text-emerald-400">[[tab]]</td>
+              <td className="p-2.5 font-mono text-muted-foreground">/settings/[[tab]]</td>
+              <td className="p-2.5 font-mono">&#123; tab?: string &#125;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <CodeBlock
         language="typescript"
         containerClassName="w-full overflow-hidden rounded-lg my-3"
       >
         {`import type { RouteParams } from "dinou";
 
-// 1. In Server Actions or external services
+// 1. Single dynamic parameter
 export async function getAuthorBio(params: RouteParams<"/blog/[slug]">) {
-  return fetchBioBySlug(params.slug);
+  return fetchBioBySlug(params.slug); // params.slug is string
 }
 
-// 2. In error.tsx boundaries
+// 2. Catch-all dynamic parameter
+export async function getDocsContent(params: RouteParams<"/docs/[...slug]">) {
+  return fetchDocsByPath(params.slug.join("/")); // params.slug is string[]
+}
+
+// 3. In error.tsx boundaries
 interface ErrorProps {
   error: Error;
   params: RouteParams<"/blog/[slug]">;

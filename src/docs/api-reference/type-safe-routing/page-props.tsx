@@ -17,7 +17,7 @@ export function PagePropsSection() {
         </span>
       </div>
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        Official TypeScript interface for typing React Page components (<code>page.tsx</code>). Takes the route pattern string as a generic parameter and automatically infers the strongly typed <code>params</code> object.
+        Official TypeScript interface for typing React Page components (<code>page.tsx</code>). Takes the route pattern string (constrained by <code>DinouRoutePattern</code>) as a generic parameter and automatically infers the strongly typed <code>params</code> object.
       </p>
 
       <CodeBlock
@@ -26,10 +26,16 @@ export function PagePropsSection() {
       >
         {`import type { PageProps } from "dinou";
 
-// Trigger Ctrl + Space inside "" to pick from all registered routes
+// 1. Single dynamic route: trigger Ctrl + Space inside "" to pick from registered routes
 export default function BlogPost({ params }: PageProps<"/blog/[slug]">) {
   // ✅ params.slug is strongly typed as string
   return <h1>Post: {params.slug}</h1>;
+}
+
+// 2. Catch-all dynamic route
+export function DocsPage({ params }: PageProps<"/docs/[...slug]">) {
+  // ✅ params.slug is strongly typed as string[]
+  return <h1>Document: {params.slug.join("/")}</h1>;
 }`}
       </CodeBlock>
     </section>

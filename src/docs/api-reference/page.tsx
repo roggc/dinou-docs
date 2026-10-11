@@ -1,5 +1,7 @@
 "use client";
 
+import { Link } from "dinou";
+import { ShieldCheck } from "lucide-react";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import {
   LinkSection,
@@ -13,12 +15,14 @@ import {
   RefreshSlotSection,
   UseNavigationLoadingSection,
 } from "./hooks-navigation";
+// Type-Safe Routing components
 import {
   PagePropsSection,
   LayoutPropsSection,
   PageFunctionsSection,
   RouteParamsSection,
   DinouRouteSection,
+  DinouRoutePatternSection,
 } from "./type-safe-routing";
 import {
   GetContextSection,
@@ -74,6 +78,7 @@ const tocItems = [
   { id: "pagefunctions", title: "PageFunctions & LayoutFunctions", level: 3 },
   { id: "routeparams", title: "RouteParams<T>", level: 3 },
   { id: "dinouroute", title: "DinouRoute", level: 3 },
+  { id: "dinouroutepattern", title: "DinouRoutePattern", level: 3 },
   { id: "server-context-config", title: "4. Server Context & Config (dinou)", level: 2 },
   { id: "getcontext", title: "getContext()", level: 3 },
   { id: "getcontext-store", title: "Request & Response Store", level: 4 },
@@ -95,7 +100,7 @@ const tocItems = [
   { id: "storage-adapters-list", title: "Built-In Adapters", level: 3 },
   { id: "storage-adapters-interface", title: "StorageAdapter Interface", level: 3 },
   { id: "storage-adapters-custom", title: "Custom Storage Engine", level: 3 },
-  { id: "route-segment-contracts", title: "7. Route Segment Contracts", level: 2 },
+  { id: "route-segment-contracts", title: "7. Route Lifecycles & Config", level: 2 },
   { id: "getprops", title: "getProps()", level: 3 },
   { id: "revalidate-config", title: "revalidate", level: 3 },
   { id: "ppr-config", title: "ppr", level: 3 },
@@ -172,11 +177,25 @@ export default function Page() {
                 Dinou v7 introduces zero-runtime type safety with auto-generated declaration files and seamless IDE autocompletion for routes and parameters.
               </p>
 
+              <div className="not-prose rounded-lg border border-blue-500/20 bg-blue-500/5 p-3.5 my-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <ShieldCheck className="h-4 w-4 text-blue-500 shrink-0" />
+                  <span>Looking for architectural deep-dives, module augmentation details, and zero-runtime benchmarks?</span>
+                </div>
+                <Link
+                  href="/docs/type-safe-routing"
+                  className="inline-flex items-center gap-1 font-semibold text-blue-600 dark:text-blue-400 hover:underline shrink-0"
+                >
+                  Type-Safe Routing Guide &rarr;
+                </Link>
+              </div>
+
               <PagePropsSection />
               <LayoutPropsSection />
               <PageFunctionsSection />
               <RouteParamsSection />
               <DinouRouteSection />
+              <DinouRoutePatternSection />
             </section>
 
             {/* ================================================================= */}
@@ -228,11 +247,12 @@ export default function Page() {
             </section>
 
             {/* ================================================================= */}
-            {/* SECTION 7: ROUTE SEGMENT CONTRACTS */}
+            {/* SECTION 7: ROUTE LIFECYCLES & CONFIG */}
             {/* ================================================================= */}
             <section id="route-segment-contracts" className="scroll-mt-20 mt-12 pt-8 border-t">
+              <span id="route-lifecycles-config" className="scroll-mt-20" />
               <h2 className="flex items-center gap-3">
-                7. Route Segment Contracts
+                7. Route Lifecycles &amp; Config
                 <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
                   page_functions.ts &amp; layout_functions.ts
                 </span>
