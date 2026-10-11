@@ -43,11 +43,13 @@ export default function Page() {
 
             {/* Main Headline */}
             <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-slate-900 dark:text-white leading-[1.08] sm:leading-[1.1]">
-              <span className="block text-blue-600 dark:text-blue-500">Dinou</span>
-              <span className="block text-slate-900 dark:text-white">
-                Build with React 19
+              <span className="block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent pb-1">
+                Dinou
               </span>
-              <span className="block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent pb-3 -mb-2">
+              <span className="block text-slate-900 dark:text-white">
+                Build with <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">React 19</span>
+              </span>
+              <span className="block bg-gradient-to-r from-amber-600 via-orange-500 to-yellow-500 dark:from-amber-400 dark:via-orange-400 dark:to-yellow-400 bg-clip-text text-transparent pb-3 -mb-2">
                 Deploy Everywhere
               </span>
             </h1>
