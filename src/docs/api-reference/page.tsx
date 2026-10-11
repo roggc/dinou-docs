@@ -2,39 +2,6 @@
 
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/docs/components/ui/alert";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/docs/components/ui/card";
-import {
-  Link as LinkIcon,
-  Server,
-  Shield,
-  ShieldCheck,
-  AlertTriangle,
-  FileText,
-  Replace,
-  Zap,
-  Database,
-  Layers,
-  Settings,
-  CheckCircle2,
-  Code2,
-  Boxes,
-  Flame,
-  Globe,
-  Sliders,
-  ArrowRightLeft,
-} from "lucide-react";
-import { CodeBlock } from "@/docs/components/code-block";
-import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
-import {
   LinkSection,
   ClientRedirectSection,
 } from "./components";
@@ -67,6 +34,13 @@ import {
   AllowIsgContract,
   ValidateParamsContract,
 } from "./contracts";
+import {
+  PagePropsSection,
+  LayoutPropsSection,
+  PageFunctionsSection,
+  RouteParamsSection,
+  DinouRouteSection,
+} from "./type-safe-routing";
 
 const tocItems = [
   { id: "components", title: "1. Components (dinou)", level: 2 },
@@ -255,178 +229,11 @@ export default function Page() {
               </p>
 
               {/* PageProps */}
-              <section id="pageprops" className="scroll-mt-20 mt-8">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="m-0">
-                    <code>PageProps&lt;T&gt;</code>
-                  </h3>
-                  <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
-                    TypeScript Generic
-                  </span>
-                  <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
-                    page.tsx
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Official TypeScript interface for typing React Page components (<code>page.tsx</code>). Takes the route pattern string as a generic parameter and automatically infers the strongly typed <code>params</code> object.
-                </p>
-
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-                  {`import type { PageProps } from "dinou";
-
-// Trigger Ctrl + Space inside "" to pick from all registered routes
-export default function BlogPost({ params }: PageProps<"/blog/[slug]">) {
-  // ✅ params.slug is strongly typed as string
-  return <h1>Post: {params.slug}</h1>;
-}`}
-                </CodeBlock>
-              </section>
-
-              {/* LayoutProps */}
-              <section id="layoutprops" className="scroll-mt-20 mt-8">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="m-0">
-                    <code>LayoutProps&lt;T&gt;</code>
-                  </h3>
-                  <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
-                    TypeScript Generic
-                  </span>
-                  <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
-                    layout.tsx
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Official TypeScript interface for typing React Layout components (<code>layout.tsx</code>). In addition to inferred <code>params</code>, it strictly types <code>children: React.ReactNode</code>.
-                </p>
-
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-                  {`import type { LayoutProps } from "dinou";
-
-export default function BlogLayout({ children, params }: LayoutProps<"/blog/[slug]">) {
-  return (
-    <section>
-      <header>Category: {params.slug}</header>
-      <main>{children}</main>
-    </section>
-  );
-}`}
-                </CodeBlock>
-              </section>
-
-              {/* PageFunctions & LayoutFunctions */}
-              <section id="pagefunctions" className="scroll-mt-20 mt-8">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="m-0">
-                    <code>PageFunctions&lt;TParams, TProps&gt;</code> &amp; <code>LayoutFunctions&lt;TParams, TProps&gt;</code>
-                  </h3>
-                  <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
-                    TypeScript Generics
-                  </span>
-                  <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
-                    Server Lifecycle Contracts
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  Canonical TypeScript interfaces for typing server lifecycle files (<code>page_functions.ts</code> and <code>layout_functions.ts</code>). Both interfaces accept either a route pattern string directly (e.g. <code>&quot;/blog/[slug]&quot;</code>) or a direct parameters dictionary, providing complete compile-time type safety, IDE autocompletion, and index-access typing (e.g. <code>PageFunctions[&quot;revalidate&quot;]</code>) without boilerplate.
-                </p>
-
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-                  {`import type { PageFunctions, LayoutFunctions } from "dinou";
-
-// 1. Direct route string pattern (automatically infers route parameters)
-export const getProps: PageFunctions<
-  "/blog/[slug]",
-  { postTitle: string }
->["getProps"] = async (params) => {
-  return { postTitle: \`Article: \${params.slug}\` };
-};
-
-// 2. Strict index-access typing for layout_functions.ts
-export const ppr: LayoutFunctions["ppr"] = true;
-export const revalidate: LayoutFunctions["revalidate"] = 3600;`}
-                </CodeBlock>
-              </section>
-
-              {/* RouteParams */}
-              <section id="routeparams" className="scroll-mt-20 mt-8">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="m-0">
-                    <code>RouteParams&lt;T&gt;</code>
-                  </h3>
-                  <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
-                    TypeScript Utility
-                  </span>
-                  <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
-                    Params Inference
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  A standalone utility type representing the inferred parameters dictionary of a given route pattern. While <code>PageProps</code> and <code>PageFunctions</code> resolve route strings directly, <code>RouteParams</code> is ideal for typing Server Actions, services, or error boundary components that do not inherit framework props automatically.
-                </p>
-
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-                  {`import type { RouteParams } from "dinou";
-
-// 1. In Server Actions or external services
-export async function getAuthorBio(params: RouteParams<"/blog/[slug]">) {
-  return fetchBioBySlug(params.slug);
-}
-
-// 2. In error.tsx boundaries
-interface ErrorProps {
-  error: Error;
-  params: RouteParams<"/blog/[slug]">;
-}`}
-                </CodeBlock>
-              </section>
-
-              {/* DinouRoute */}
-              <section id="dinouroute" className="scroll-mt-20 mt-8">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="m-0">
-                    <code>DinouRoute</code>
-                  </h3>
-                  <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                    Union Type
-                  </span>
-                  <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
-                    Zero-Runtime
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  A union type representing all valid destinations in the application. Powers <code>&lt;Link href&gt;</code> and <code>router.push(href)</code>, and can be imported to type custom navigation components.
-                </p>
-
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg my-3"
-                >
-                  {`import type { DinouRoute } from "dinou";
-import { Link } from "dinou";
-
-// Typing reusable navigation buttons with project-wide autocompletion
-interface NavButtonProps {
-  href: DinouRoute;
-  label: string;
-}
-
-export function NavButton({ href, label }: NavButtonProps) {
-  return <Link href={href}>{label}</Link>;
-}`}
-                </CodeBlock>
-              </section>
+              <PagePropsSection />
+              <LayoutPropsSection />
+              <PageFunctionsSection />
+              <RouteParamsSection />
+              <DinouRouteSection />
             </section>
           </div>
         </div>
