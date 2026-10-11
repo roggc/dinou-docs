@@ -1,5 +1,6 @@
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
+import { ClickableTableRow } from "@/docs/components/clickable-table-row";
 import { Badge } from "@/docs/components/ui/badge";
 import {
   Card,
@@ -362,7 +363,8 @@ export default function DataFetchingPage() {
                       </TableHeader>
                       <TableBody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                         {/* Row 1 */}
-                        <TableRow
+                        <ClickableTableRow
+                          targetId="strategy-1"
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">1</TableCell>
@@ -391,10 +393,11 @@ export default function DataFetchingPage() {
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-muted-foreground">Fixed at build</TableCell>
                           <TableCell className="text-muted-foreground">Blogs, documentation, static marketing pages.</TableCell>
-                        </TableRow>
+                        </ClickableTableRow>
 
                         {/* Row 2 */}
-                        <TableRow
+                        <ClickableTableRow
+                          targetId="strategy-2"
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-rose-600 dark:text-rose-400 font-bold">2</TableCell>
@@ -421,10 +424,11 @@ export default function DataFetchingPage() {
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
                           <TableCell className="text-muted-foreground">Private views where entire UI requires a single critical query and waiting is acceptable.</TableCell>
-                        </TableRow>
+                        </ClickableTableRow>
 
                         {/* Row 3 */}
-                        <TableRow
+                        <ClickableTableRow
+                          targetId="strategy-3"
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">3</TableCell>
@@ -453,10 +457,11 @@ export default function DataFetchingPage() {
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-muted-foreground">Fixed at build</TableCell>
                           <TableCell className="text-muted-foreground">Decoupled async components in static pages; outputs final HTML without showing fallback.</TableCell>
-                        </TableRow>
+                        </ClickableTableRow>
 
                         {/* Row 4 */}
-                        <TableRow
+                        <ClickableTableRow
+                          targetId="strategy-4"
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-amber-600 dark:text-amber-400 font-bold">4</TableCell>
@@ -485,10 +490,11 @@ export default function DataFetchingPage() {
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
                           <TableCell className="text-muted-foreground">Dynamic routes on runtimes without edge caching or when PPR is disabled.</TableCell>
-                        </TableRow>
+                        </ClickableTableRow>
 
                         {/* Row 5 */}
-                        <TableRow
+                        <ClickableTableRow
+                          targetId="strategy-5"
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">5</TableCell>
@@ -517,10 +523,11 @@ export default function DataFetchingPage() {
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-amber-600 dark:text-amber-400 font-medium">Decoupled TTL / refreshSlot()</TableCell>
                           <TableCell className="text-muted-foreground">Static/ISR pages (e.g. 24h page revalidate) containing a widget (stock, pricing) needing fast updates (60s) or surgical in-place client refreshes.</TableCell>
-                        </TableRow>
+                        </ClickableTableRow>
 
                         {/* Row 6 */}
-                        <TableRow
+                        <ClickableTableRow
+                          targetId="strategy-6"
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">6</TableCell>
@@ -549,10 +556,11 @@ export default function DataFetchingPage() {
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-amber-600 dark:text-amber-400 font-medium">TTL / Tag Reval</TableCell>
                           <TableCell className="text-muted-foreground">Dynamic routes (with session/cookies) containing heavy widgets (analytics, feeds). Flushes layout instantly; slot streams from cache without DB load.</TableCell>
-                        </TableRow>
+                        </ClickableTableRow>
 
                         {/* Row 7 */}
-                        <TableRow
+                        <ClickableTableRow
+                          targetId="strategy-7"
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">7</TableCell>
@@ -581,10 +589,11 @@ export default function DataFetchingPage() {
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
                           <TableCell className="text-muted-foreground">Instant static layout from Edge with zero-delay live streamed data for real-time personalization.</TableCell>
-                        </TableRow>
+                        </ClickableTableRow>
 
                         {/* Row 8 */}
-                        <TableRow
+                        <ClickableTableRow
+                          targetId="strategy-8"
                           className="cursor-pointer hover:bg-emerald-100/60 dark:hover:bg-emerald-950/40 bg-emerald-50/30 dark:bg-emerald-950/20 border-l-2 border-emerald-500 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-emerald-600 dark:text-emerald-400 font-bold">8</TableCell>
@@ -618,10 +627,11 @@ export default function DataFetchingPage() {
                           <TableCell className="text-muted-foreground">
                             <strong className="text-emerald-600 dark:text-emerald-400">Peak Performance:</strong> Instant CDN paint (0ms TTFB) with 99.9% database query offload. Ideal for high-traffic stores, trending catalog pages, and viral portals.
                           </TableCell>
-                        </TableRow>
+                        </ClickableTableRow>
 
                         {/* Row 9 */}
-                        <TableRow
+                        <ClickableTableRow
+                          targetId="strategy-9"
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-amber-600 dark:text-amber-400 font-bold">9</TableCell>
@@ -650,10 +660,11 @@ export default function DataFetchingPage() {
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
                           <TableCell className="text-muted-foreground">Interactive stateful widgets (charts, canvas, filters) needing fresh streaming data.</TableCell>
-                        </TableRow>
+                        </ClickableTableRow>
 
                         {/* Row 10 */}
-                        <TableRow
+                        <ClickableTableRow
+                          targetId="strategy-10"
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">10</TableCell>
@@ -682,10 +693,11 @@ export default function DataFetchingPage() {
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-muted-foreground">Fixed at build</TableCell>
                           <TableCell className="text-muted-foreground">Dinou Client-First model for highly interactive static web applications.</TableCell>
-                        </TableRow>
+                        </ClickableTableRow>
 
                         {/* Row 11 */}
-                        <TableRow
+                        <ClickableTableRow
+                          targetId="strategy-11"
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-rose-600 dark:text-rose-400 font-bold">11</TableCell>
@@ -712,10 +724,11 @@ export default function DataFetchingPage() {
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
                           <TableCell className="text-muted-foreground">Complex SPAs where developers prefer classic React hooks and tolerate TTFB wait.</TableCell>
-                        </TableRow>
+                        </ClickableTableRow>
 
                         {/* Row 12 */}
-                        <TableRow
+                        <ClickableTableRow
+                          targetId="strategy-12"
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-amber-600 dark:text-amber-400 font-bold">12</TableCell>
@@ -744,10 +757,11 @@ export default function DataFetchingPage() {
                           <TableCell className="text-center font-semibold text-rose-600 dark:text-rose-400">Yes (Waterfall)</TableCell>
                           <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
                           <TableCell className="text-muted-foreground">Supported, but sub-optimal compared to pattern 9 (RSC Promise streaming) due to the second HTTP round trip.</TableCell>
-                        </TableRow>
+                        </ClickableTableRow>
 
                         {/* Row 13 */}
-                        <TableRow
+                        <ClickableTableRow
+                          targetId="strategy-13"
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
                           <TableCell className="font-mono text-center text-slate-600 dark:text-slate-400 font-bold">13</TableCell>
@@ -772,7 +786,7 @@ export default function DataFetchingPage() {
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
                           <TableCell className="text-muted-foreground">Form submissions, state persistence, on-demand data refreshes, and RPC actions.</TableCell>
-                        </TableRow>
+                        </ClickableTableRow>
                       </TableBody>
                     </Table>
                   </div>
