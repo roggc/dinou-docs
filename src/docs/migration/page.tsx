@@ -57,7 +57,7 @@ export default function MigrationIndexPage() {
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground space-y-3 flex-1 flex flex-col justify-between">
                 <p className="leading-relaxed">
-                  Full React 19 primitives, in-memory Dual-Bundle dev engine, Triple-Bundler CLI parity (esbuild, Rollup, Webpack), Netlify and multi-runtime deployment, React StrictMode by default, and private folder routing.
+                  Breaking changes in data fetching contracts (<code>getProps</code> direct return, <code>revalidate</code> in seconds, and removal of <code>dynamic</code>), Layered Segmentation (<code>layout_functions</code> &amp; <code>DinouCacheSlot</code>), Partial Prerendering (PPR), 0-Fork Dual-Bundle in-memory engine, and universal multi-runtime deployments.
                 </p>
                 <div className="text-xs font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1 pt-2">
                   Read v6 to v7 migration guide &rarr;
@@ -119,26 +119,6 @@ export default function MigrationIndexPage() {
           </Link>
         </div>
 
-        {/* Highlight Banner */}
-        <div className="mt-12 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-blue-500" />
-                Upgrading to Dinou v7?
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Dinou v7 introduces zero breaking changes to your application code. Simply update dependencies and use the streamlined CLI commands.
-              </p>
-            </div>
-            <Link
-              href="/docs/migration/v6-to-v7"
-              className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700 transition-colors shrink-0"
-            >
-              Start v7 Guide &rarr;
-            </Link>
-          </div>
-        </div>
       </div>
     </div>
   );

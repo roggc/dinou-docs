@@ -10,6 +10,13 @@
 ## Table of Contents
 
 1. [Breaking Changes (Dinou v7 vs Dinou v6)](#1-breaking-changes-dinou-v7-vs-dinou-v6)
+   - 1.1. [`getProps` Contract: Direct Props Object Return](#11-getprops-contract-direct-props-object-return)
+   - 1.2. [`revalidate` Time Unit: Strictly Seconds (`s`)](#12-revalidate-time-unit-strictly-seconds-s-not-milliseconds-ms)
+   - 1.3. [Elimination of `dynamic`: Single Source of Truth via `revalidate`](#13-elimination-of-dynamic-single-source-of-truth-via-revalidate)
+   - 1.4. [SSG Lifecycle: Build-Time Generation (`dinou build`) vs Server Startup](#14-ssg-lifecycle-build-time-generation-vs-server-startup)
+   - 1.5. [Layout Lifecycle: 100% State Preservation (Zero Remounts)](#15-layout-lifecycle-100-state-preservation-zero-remounts)
+   - 1.6. [Elimination of Express `onServerInit(app)` in Plugins](#16-elimination-of-express-onserverinitapp-in-plugins)
+   - 1.7. [Development Mode Assets: 100% In-Memory by Default](#17-development-mode-assets-100-in-memory-by-default)
 2. [The Core Breakthrough: "Deploy Everywhere"](#2-the-core-breakthrough-deploy-everywhere)
 3. [The Architectural Leap: 0-Fork Dual-Bundle Pipeline](#3-the-architectural-leap-0-fork-dual-bundle-pipeline)
 4. [Layered Segmentation Architecture](#4-layered-segmentation-architecture)
@@ -42,7 +49,7 @@ Upgrading from Dinou v6 to Dinou v7 introduces three foundational breaking chang
 In Dinou v6, `getProps` in `page_functions.ts` required returning an object nested under the `page` key:
 ```typescript
 // ❌ Dinou v6 (Deprecated)
-export async function getProps({ params }) {
+export async function getProps(params) {
   const user = await fetchUser(params.id);
   return {
     page: {
@@ -56,7 +63,7 @@ export async function getProps({ params }) {
 In **Dinou v7**, `getProps` directly returns the component props object. The wrapping `{ page: ... }` is completely removed:
 ```typescript
 // ✅ Dinou v7 (Current)
-export async function getProps({ params }) {
+export async function getProps(params) {
   const user = await fetchUser(params.id);
   return {
     user,
@@ -91,7 +98,7 @@ export const revalidate = 60;
 
 ### 1.3. Elimination of `dynamic`: Single Source of Truth via `revalidate`
 
-In Dinou v6, routes could declare both `dynamic = true / false` and `revalidate = N`, creating conflicting states (e.g. `dynamic = true` with `revalidate = 60`).
+In Dinou v6, `dynamic` was the single source of truth for on-demand SSR (`dynamic = true`), while `revalidate === 0` (or omitted) meant static forever (SSG).
 
 In **Dinou v7**, the `dynamic` keyword is **completely removed from the framework**. `revalidate` is the **single source of truth** for route caching and rendering behavior:
 
@@ -111,6 +118,77 @@ export const revalidate = 300;
 // Static route (Cached permanently)
 export const revalidate = false; // or omit the export
 ```
+
+---
+
+### 1.4. SSG Lifecycle: Build-Time Generation (`dinou build`) vs Server Startup
+
+In Dinou v6, static site generation (SSG) was deferred until the production server started (`dinou start`). The server crawled routes, generated static HTML and RSC payloads, and delayed server readiness.
+
+In **Dinou v7**, **static generation occurs strictly Ahead-of-Time during compilation (`dinou build`)**:
+* **Instant Server Boot**: Running `dinou start` boots in **0ms** because all static HTML and RSC payloads are already baked into the `StorageAdapter` (`.dinou/dist2/` or Edge KV).
+* **Breaking Consequence for CI/CD**: Build pipelines must execute `npm run build` in an environment that has network and credential access to the databases/APIs required by `getStaticPaths` and static `getProps`. Relying on `npm start` in the production container to generate static pages will result in missing static content.
+
+---
+
+### 1.5. Layout Lifecycle: 100% State Preservation (Zero Remounts)
+
+In Dinou v6, navigation was monolithic: navigating between sibling routes sharing a layout caused the entire layout component to re-evaluate and re-mount.
+
+In **Dinou v7**, **Horizontal Segmentation** cleanly decouples the Layout Plane (`____rsc_layout____`) from the Page Plane (`____rsc_page____`):
+* **State Preservation**: Layouts **never unmount or re-execute** during client-side navigation between sibling routes sharing that layout. Video playback, input fields, open dropdowns, and sidebar scroll positions are 100% preserved.
+* **Breaking Behavioral Change**: Any `useEffect` or lifecycle logic inside `layout.tsx` that assumed it would re-run on every page navigation will no longer fire. Per-page analytics tracking or resets must reside inside `page.tsx` or explicitly listen to URL transitions via `usePathname()`.
+
+---
+
+### 1.6. Elimination of Express `onServerInit(app)` in Plugins
+
+In Dinou v5.2.0 and v6, plugins registered custom Express middlewares or webhook routes via `onServerInit(app)`:
+```javascript
+// ❌ Dinou v6 (Express-based plugin hook)
+module.exports = {
+  plugins: [
+    {
+      name: "custom-api",
+      onServerInit(app) {
+        app.get("/api/health", (req, res) => res.json({ ok: true }));
+      },
+    },
+  ],
+};
+```
+
+In **Dinou v7**, **Express has been completely eliminated** in favor of native W3C Web Standards (`Request`, `Response`, `ReadableStream`). As a result, `onServerInit(app)` is **no longer invoked or supported**:
+* **Migration Action**: Migrate custom endpoints, route guards, and middlewares to the `onRequest(request, context)` hook in `dinou.config.mjs`. Returning a standard `Response` (e.g. `Response.json(...)` or `new Response(...)`) short-circuits the pipeline and immediately responds to the client:
+```javascript
+// ✅ Dinou v7 (Web Standards onRequest hook)
+import { defineConfig } from "dinou/config";
+
+export default defineConfig({
+  plugins: [
+    {
+      name: "custom-api",
+      async onRequest(request, context) {
+        const url = new URL(request.url);
+        if (url.pathname === "/api/health") {
+          return Response.json({ ok: true });
+        }
+      },
+    },
+  ],
+});
+```
+
+---
+
+### 1.7. Development Mode Assets: 100% In-Memory by Default
+
+In Dinou v6, `dinou dev` continuously compiled JavaScript chunks, stylesheets, sourcemaps, and manifests to disk inside the `.dinou/public/` directory.
+
+In **Dinou v7**, the dev server operates **100% in RAM** via `globalThis.__DINOU_MEM_FILES__` to eliminate disk I/O bottlenecks and Windows real-time file-scanning penalties:
+* **No Disk Output in Dev**: The `.dinou/public/` directory is **never created on disk** during normal development.
+* **Breaking Consequence**: External scripts, reverse proxies (e.g. Nginx), or automated inspection tools expecting physical files in `.dinou/public/` during development will find that the folder is missing.
+* **Action Required**: Run `DINOU_WRITE_TO_DISK=true npm run dev` whenever physical files on disk are required in development. (Production builds via `npm run build` always emit optimized assets to disk in `.dinou/dist3/` and `.dinou/dist2/`).
 
 ---
 
@@ -587,7 +665,8 @@ export default defineConfig({
 | **Layout State Preservation** | Lost on navigation (re-evaluates layout) | 100% Preserved via `DinouPageSlot` (0 re-evaluations) |
 | **`getProps` Return** | `{ page: { ... } }` | Direct `{ ... }` props |
 | **`revalidate` Unit** | Milliseconds (`ms`) | Seconds (`s`) |
-| **Dynamic Configuration** | Redundant `dynamic` + `revalidate` | `revalidate: 0` (or `< 1`) is single source of truth |
+| **Dynamic / Route Mode** | `dynamic` was source of truth (`revalidate: 0` = SSG) | `revalidate` is single source of truth (`revalidate: 0` = SSR) |
+| **SSG Lifecycle & Startup** | Generated at server startup (delayed boot) | Pre-rendered at build time (`npm run build`); **instant server boot** |
 | **Layout ISR** | Not supported (tied to page) | Independent `layout_functions` (`revalidate`, `tags`, `allowISG`) |
 | **Component Micro-ISR** | Not supported | `<DinouCacheSlot>` (Level 1 SWR + Level 2 In-Place Live Refresh) |
 | **TTFB on Dynamic Routes** | Blocked until slowest DB query completes | **0ms TTFB** with PPR (Static Shell Prelude + Suspense Streaming) |

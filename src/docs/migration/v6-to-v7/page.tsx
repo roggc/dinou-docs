@@ -1,16 +1,18 @@
 import { TableOfContents } from "@/docs/components/table-of-contents";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/docs/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/docs/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/docs/components/ui/table";
 import { Badge } from "@/docs/components/ui/badge";
 import { CodeBlock } from "@/docs/components/code-block";
 import {
   Sparkles,
   CheckCircle2,
-  AlertTriangle,
   Cpu,
   Boxes,
   Globe,
@@ -36,6 +38,10 @@ const tocItems = [
   { id: "breaking-getprops", title: "2.1. getProps Direct Props Return", level: 3 },
   { id: "breaking-revalidate", title: "2.2. revalidate in Seconds (s)", level: 3 },
   { id: "breaking-dynamic", title: "2.3. Elimination of dynamic Keyword", level: 3 },
+  { id: "breaking-ssg-lifecycle", title: "2.4. SSG Build-Time vs Startup", level: 3 },
+  { id: "breaking-layout-lifecycle", title: "2.5. Layout State Preservation", level: 3 },
+  { id: "breaking-onserverinit", title: "2.6. Elimination of onServerInit(app)", level: 3 },
+  { id: "breaking-in-memory-dev", title: "2.7. In-Memory Dev Server", level: 3 },
   { id: "layered-segmentation", title: "3. Layered Segmentation Architecture", level: 2 },
   { id: "horizontal-segmentation", title: "3.1. Horizontal Segmentation & Layout Preservation", level: 3 },
   { id: "layout-functions", title: "3.2. layout_functions for Decoupled Layout ISR", level: 3 },
@@ -86,52 +92,131 @@ export default function MigrationV6ToV7Page() {
                 Dinou v7 represents a quantum leap in the framework&apos;s lifecycle. It shifts from a Node-centric development server reliant on subprocess forking and disk manifests to a <strong>universal, 0-fork in-memory Dual-Bundle engine</strong> that runs identically across Node.js, Bun, Deno, Cloudflare Workers, and Netlify Functions.
               </p>
 
-              <Alert className="not-prose my-6 border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10">
-                <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                <AlertTitle className="text-amber-700 dark:text-amber-300 font-semibold">
-                  Action Required: 3 Contract Breaking Changes
-                </AlertTitle>
-                <AlertDescription className="text-sm text-muted-foreground mt-1">
-                  While standard React component trees, layouts, and Server Functions (<code>&quot;use server&quot;</code>) remain fully compatible, Dinou v7 introduces <strong>three breaking changes</strong> in data-fetching and route caching signatures: the <code>getProps</code> return format, the <code>revalidate</code> time unit (now strictly in seconds), and the elimination of the <code>dynamic</code> keyword in favor of <code>revalidate</code> as the single source of truth.
-                </AlertDescription>
-              </Alert>
+              <div className="rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden not-prose my-6 shadow-sm">
+                <Table>
+                  <TableHeader className="bg-slate-50 dark:bg-slate-900/60">
+                    <TableRow>
+                      <TableHead className="w-[24%] font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                        Dimension
+                      </TableHead>
+                      <TableHead className="w-[38%] font-semibold text-slate-500 text-xs">
+                        Dinou v6 (Legacy)
+                      </TableHead>
+                      <TableHead className="w-[38%] font-semibold text-blue-600 dark:text-blue-400 text-xs">
+                        Dinou v7 (Current)
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                        <code>getProps</code> Contract
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        Required nested wrapper: <code>&#123; page: &#123; ... &#125; &#125;</code>
+                      </TableCell>
+                      <TableCell className="text-xs text-foreground font-medium bg-blue-50/20 dark:bg-blue-950/10">
+                        Direct top-level props: <code>&#123; user, title &#125;</code>
+                      </TableCell>
+                    </TableRow>
 
-              <div className="grid gap-4 sm:grid-cols-2 not-prose my-6">
-                <Card className="border-slate-200 dark:border-slate-800">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      In Dinou v6
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground space-y-2">
-                    <p>• <code>getProps</code> required returning <code>&#123; page: &#123; ... &#125; &#125;</code>.</p>
-                    <p>• <code>revalidate</code> was declared in <strong>milliseconds</strong> (e.g. <code>60000</code>).</p>
-                    <p>• Ambiguous route flags: <code>dynamic = true</code> vs <code>revalidate</code>.</p>
-                    <p>• Subprocess <code>child_process.fork()</code> with IPC overhead and double memory.</p>
-                    <p>• Layouts re-evaluated and re-rendered on route transitions.</p>
-                    <p>• No component-level caching or live in-place refresh.</p>
-                    <p>• TTFB blocked on dynamic routes until the slowest database query completes (no PPR).</p>
-                    <p>• Restricted to Node.js environments due to process spawning.</p>
-                  </CardContent>
-                </Card>
+                    <TableRow>
+                      <TableCell className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                        <code>revalidate</code> Unit
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        Declared in <strong>milliseconds</strong> (e.g. <code>60000</code> ms)
+                      </TableCell>
+                      <TableCell className="text-xs text-foreground font-medium bg-blue-50/20 dark:bg-blue-950/10">
+                        Strictly in <strong>seconds</strong> (e.g. <code>60</code> s)
+                      </TableCell>
+                    </TableRow>
 
-                <Card className="border-blue-500/30 bg-blue-50/20 dark:bg-blue-950/10">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                      In Dinou v7
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground space-y-2">
-                    <p>• <code>getProps</code> directly returns top-level props <code>&#123; user, title &#125;</code>.</p>
-                    <p>• <code>revalidate</code> is strictly in <strong>seconds</strong> (e.g. <code>60</code>).</p>
-                    <p>• Single source of truth: <code>revalidate = 0</code> (SSR), <code>&gt;= 1</code> (ISR), <code>false</code> (SSG).</p>
-                    <p>• 0-Fork Dual-Bundle in-memory pipeline connecting RSC and SSR via W3C Web Streams.</p>
-                    <p>• Horizontal segmentation: 100% layout state preservation across sibling routes (zero layout remounting).</p>
-                    <p>• Vertical segmentation: <code>&lt;DinouCacheSlot&gt;</code> Micro-ISR and client <code>refreshSlot()</code>.</p>
-                    <p>• <strong>0ms TTFB with PPR (Partial Prerendering):</strong> Static shell prelude + React 19 <code>&lt;Suspense&gt;</code> dynamic streaming.</p>
-                    <p>• True &quot;Deploy Everywhere&quot;: Node, Bun, Deno, Cloudflare Workers, Netlify v2, and Static.</p>
-                  </CardContent>
-                </Card>
+                    <TableRow>
+                      <TableCell className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                        Route Mode &amp; Source of Truth
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        <code>dynamic</code> was the source of truth (<code>dynamic = true</code> for SSR). <code>revalidate === 0</code> meant static forever.
+                      </TableCell>
+                      <TableCell className="text-xs text-foreground font-medium bg-blue-50/20 dark:bg-blue-950/10">
+                        <code>revalidate</code> is the single source of truth: <code>revalidate = 0</code> (SSR), <code>&gt;= 1</code> (ISR), <code>false</code> (SSG). <code>dynamic</code> is removed.
+                      </TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                        SSG Generation &amp; Startup
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        Generated at <strong>server startup</strong> (crawled on <code>npm start</code>, delaying server boot)
+                      </TableCell>
+                      <TableCell className="text-xs text-foreground font-medium bg-blue-50/20 dark:bg-blue-950/10">
+                        Generated at <strong>compilation</strong> (<code>npm run build</code>); production server boot is <strong>instantaneous (0ms)</strong>
+                      </TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                        Engine Architecture
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        Subprocess <code>child_process.fork()</code> with IPC serialization &amp; double RAM
+                      </TableCell>
+                      <TableCell className="text-xs text-foreground font-medium bg-blue-50/20 dark:bg-blue-950/10">
+                        <strong>0-Fork Dual-Bundle</strong> in-memory engine via native React 19 W3C Web Streams
+                      </TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                        Layouts &amp; Navigation
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        Monolithic tree: layouts re-evaluated &amp; re-mounted on navigation
+                      </TableCell>
+                      <TableCell className="text-xs text-foreground font-medium bg-blue-50/20 dark:bg-blue-950/10">
+                        <strong>Horizontal Segmentation:</strong> 100% layout state preservation (zero remounts)
+                      </TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                        Component Micro-Cache
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        Not supported (caching strictly tied to full page)
+                      </TableCell>
+                      <TableCell className="text-xs text-foreground font-medium bg-blue-50/20 dark:bg-blue-950/10">
+                        <strong>Vertical Segmentation:</strong> <code>&lt;DinouCacheSlot&gt;</code> Micro-ISR &amp; client <code>refreshSlot()</code>
+                      </TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                        TTFB &amp; Dynamic Routes
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        Blocked until slowest database query settles (no streaming shell)
+                      </TableCell>
+                      <TableCell className="text-xs text-foreground font-medium bg-blue-50/20 dark:bg-blue-950/10">
+                        <strong>0ms TTFB with PPR:</strong> Instant static shell prelude + streaming dynamic <code>&lt;Suspense&gt;</code>
+                      </TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell className="font-semibold text-slate-900 dark:text-slate-100 text-xs">
+                        Deployment Targets
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        Restricted to Node.js environments (due to <code>fork()</code> and Express)
+                      </TableCell>
+                      <TableCell className="text-xs text-foreground font-medium bg-blue-50/20 dark:bg-blue-950/10">
+                        <strong>Universal "Deploy Everywhere":</strong> Node, Bun, Deno, Cloudflare Workers, Netlify v2 &amp; Static SSG
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
               </div>
             </section>
 
@@ -141,7 +226,7 @@ export default function MigrationV6ToV7Page() {
                 2. Breaking Changes (v6 vs v7)
               </h2>
               <p>
-                Before launching your migrated application, audit your <code>page_functions.ts</code> (or <code>.js</code>) files and route segment exports against these three contract adjustments:
+                Before launching your migrated application, audit your <code>page_functions.ts</code> (or <code>.js</code>) files, build pipelines, plugins, and development workflows against these seven breaking changes and architectural shifts:
               </p>
 
               {/* 2.1 getProps */}
@@ -163,7 +248,7 @@ export default function MigrationV6ToV7Page() {
                     </span>
                     <CodeBlock language="typescript" containerClassName="w-full rounded-lg">
                       {`// src/users/[id]/page_functions.ts
-export async function getProps({ params }) {
+export async function getProps(params) {
   const user = await fetchUser(params.id);
   return {
     page: {
@@ -180,7 +265,7 @@ export async function getProps({ params }) {
                     </span>
                     <CodeBlock language="typescript" containerClassName="w-full rounded-lg">
                       {`// src/users/[id]/page_functions.ts
-export async function getProps({ params }) {
+export async function getProps(params) {
   const user = await fetchUser(params.id);
   return {
     user,
@@ -264,7 +349,7 @@ export function revalidate() {
                   <span>Elimination of <code>dynamic</code>: Single Source of Truth via <code>revalidate</code></span>
                 </h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  In Dinou v6, routes could declare both <code>dynamic = true / false</code> and <code>revalidate = N</code>, which introduced conflicting semantics. Dinou v7 completely removes the <code>dynamic</code> export. <code>revalidate</code> is the <strong>single source of truth</strong> for route caching:
+                  In Dinou v6, <code>dynamic</code> was the single source of truth for on-demand SSR (<code>dynamic = true</code>), and <code>revalidate === 0</code> (or omitted) meant static forever (SSG). In Dinou v7, the <code>dynamic</code> keyword is completely removed in favor of unifying route execution and caching under <code>revalidate</code> as the single source of truth:
                 </p>
 
                 <div className="overflow-x-auto not-prose my-4">
@@ -299,7 +384,7 @@ export function revalidate() {
                 <div className="grid gap-4 md:grid-cols-2 not-prose my-4">
                   <div>
                     <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5">
-                      ❌ Dinou v6 (Conflicting Flags)
+                      ❌ Dinou v6 (dynamic was source of truth)
                     </span>
                     <CodeBlock language="typescript" containerClassName="w-full rounded-lg">
                       {`// src/random/page_functions.ts
@@ -317,6 +402,254 @@ export function dynamic() {
 export const revalidate = 0; // Live SSR on every request`}
                     </CodeBlock>
                   </div>
+                </div>
+              </div>
+
+              {/* 2.4 SSG Lifecycle */}
+              <div id="breaking-ssg-lifecycle" className="mt-10 scroll-mt-20">
+                <h3 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-xs font-mono font-bold">
+                    2.4
+                  </span>
+                  <span>SSG Lifecycle: Build-Time Generation (<code>dinou build</code>) vs Server Startup</span>
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  In Dinou v6, static site generation (SSG) was deferred until the production server started (<code>dinou start</code>). The server crawled routes, generated static HTML and RSC payloads, and delayed server readiness. In Dinou v7, <strong>static generation occurs strictly Ahead-of-Time during compilation (<code>dinou build</code>)</strong>.
+                </p>
+
+                <div className="grid gap-4 md:grid-cols-2 not-prose my-4">
+                  <div>
+                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5">
+                      ❌ Dinou v6 (SSG on Server Startup)
+                    </span>
+                    <CodeBlock language="bash" containerClassName="w-full rounded-lg">
+                      {`# v6: Build only packaged client assets
+npm run build
+
+# v6: Server crawl & SSG ran at startup (delayed boot)
+npm run start`}
+                    </CodeBlock>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5">
+                      ✅ Dinou v7 (AOT SSG on Compilation)
+                    </span>
+                    <CodeBlock language="bash" containerClassName="w-full rounded-lg">
+                      {`# v7: All static HTML & RSC payloads pre-rendered here
+npm run build
+
+# v7: Instant boot (0ms) from pre-compiled storage
+npm run start`}
+                    </CodeBlock>
+                  </div>
+                </div>
+
+                <div className="border border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/10 rounded-lg p-4 not-prose my-3 text-xs text-muted-foreground space-y-1.5">
+                  <div className="font-semibold text-amber-700 dark:text-amber-300 text-sm">
+                    ⚠️ Breaking Consequence for CI/CD Pipelines
+                  </div>
+                  <p>
+                    If your deployment pipeline (e.g. Dockerfile or GitHub Actions) executed <code>npm run build</code> without backend database or CMS environment variables, expecting <code>npm start</code> to generate static pages inside the production container, your static pages will be missing.
+                  </p>
+                  <p>
+                    <strong>Action Required:</strong> Ensure that your build environment (<code>npm run build</code>) has full network and credential access to any data sources required by <code>getStaticPaths</code> and static <code>getProps</code>.
+                  </p>
+                </div>
+              </div>
+
+              {/* 2.5 Layout Lifecycle */}
+              <div id="breaking-layout-lifecycle" className="mt-10 scroll-mt-20">
+                <h3 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-xs font-mono font-bold">
+                    2.5
+                  </span>
+                  <span>Layout Lifecycle: 100% State Preservation (Zero Remounts on Navigation)</span>
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  In Dinou v6, navigation was monolithic: navigating between sibling routes that shared a layout (e.g., from <code>/dashboard/analytics</code> to <code>/dashboard/settings</code>) caused the layout component tree to re-evaluate and re-mount. In Dinou v7, <strong>Horizontal Segmentation</strong> separates the layout shell from dynamic child pages: layouts <strong>never unmount or re-execute</strong> during client-side navigation between sibling routes.
+                </p>
+
+                <div className="grid gap-4 md:grid-cols-2 not-prose my-4">
+                  <div>
+                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5">
+                      ❌ Dinou v6 (Layout Re-mounts on Navigation)
+                    </span>
+                    <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
+                      {`// src/dashboard/layout.tsx
+export default function DashboardLayout({ children }) {
+  // In v6: Re-fired on every sibling page navigation
+  // because the entire layout re-mounted!
+  useEffect(() => {
+    trackPageView();
+  }, []);
+
+  return <section>{children}</section>;
+}`}
+                    </CodeBlock>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5">
+                      ✅ Dinou v7 (Layout State 100% Preserved)
+                    </span>
+                    <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
+                      {`// src/dashboard/layout.tsx
+import { usePathname } from "dinou";
+
+export default function DashboardLayout({ children }) {
+  const pathname = usePathname();
+
+  // In v7: Layout never unmounts. Listen to pathname
+  // or place page-level tracking directly in page.tsx!
+  useEffect(() => {
+    trackPageView(pathname);
+  }, [pathname]);
+
+  return <section>{children}</section>;
+}`}
+                    </CodeBlock>
+                  </div>
+                </div>
+
+                <div className="border border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/10 rounded-lg p-4 not-prose my-3 text-xs text-muted-foreground space-y-1.5">
+                  <div className="font-semibold text-amber-700 dark:text-amber-300 text-sm">
+                    ⚠️ Breaking Behavioral Change for Layout Logic
+                  </div>
+                  <p>
+                    Any logic inside <code>layout.tsx</code> (such as <code>useEffect</code> without dependencies, search input states, or video players) will <strong>not</strong> re-initialize or reset when navigating across pages sharing that layout.
+                  </p>
+                  <p>
+                    <strong>Action Required:</strong> If you relied on layout re-mounting to reset local UI state or trigger analytics, move that logic into the companion <code>page.tsx</code> or subscribe to route changes via <code>usePathname()</code>.
+                  </p>
+                </div>
+              </div>
+
+              {/* 2.6 Elimination of Express onServerInit(app) in Plugins */}
+              <div id="breaking-onserverinit" className="mt-10 scroll-mt-20">
+                <h3 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-xs font-mono font-bold">
+                    2.6
+                  </span>
+                  <span>Elimination of Express <code>onServerInit(app)</code> in Plugins</span>
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  In Dinou v5.2.0 and v6, plugins registered custom Express middlewares or webhook endpoints by receiving the Express application instance via <code>onServerInit(app)</code>. In Dinou v7, <strong>Express has been completely eliminated</strong> in favor of pure W3C Web Standards (<code>Request</code>, <code>Response</code>, <code>ReadableStream</code>). As a result, <code>onServerInit(app)</code> is <strong>no longer invoked or supported</strong>.
+                </p>
+
+                <div className="grid gap-4 md:grid-cols-2 not-prose my-4">
+                  <div>
+                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5">
+                      ❌ Dinou v6 (Express-based onServerInit)
+                    </span>
+                    <CodeBlock language="javascript" containerClassName="w-full rounded-lg">
+                      {`// dinou.config.js (v6)
+module.exports = {
+  plugins: [
+    {
+      name: "custom-api",
+      onServerInit(app) {
+        // Deprecated! Express app no longer exists in v7
+        app.get("/api/health", (req, res) => {
+          res.json({ ok: true });
+        });
+      },
+    },
+  ],
+};`}
+                    </CodeBlock>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5">
+                      ✅ Dinou v7 (Web Standards onRequest)
+                    </span>
+                    <CodeBlock language="javascript" containerClassName="w-full rounded-lg">
+                      {`// dinou.config.mjs (v7)
+import { defineConfig } from "dinou/config";
+
+export default defineConfig({
+  plugins: [
+    {
+      name: "custom-api",
+      async onRequest(request, context) {
+        const url = new URL(request.url);
+        if (url.pathname === "/api/health") {
+          return Response.json({ ok: true });
+        }
+      },
+    },
+  ],
+});`}
+                    </CodeBlock>
+                  </div>
+                </div>
+
+                <div className="border border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/10 rounded-lg p-4 not-prose my-3 text-xs text-muted-foreground space-y-1.5">
+                  <div className="font-semibold text-amber-700 dark:text-amber-300 text-sm">
+                    ⚠️ Required Migration for Custom Middleware & Endpoints
+                  </div>
+                  <p>
+                    Any custom routes, webhooks, or route guards registered through Express must be rewritten using the <code>onRequest(request, context)</code> hook. Returning a standard <code>Response</code> short-circuits the pipeline and immediately responds to the client with zero overhead.
+                  </p>
+                </div>
+              </div>
+
+              {/* 2.7 In-Memory Dev Server */}
+              <div id="breaking-in-memory-dev" className="mt-10 scroll-mt-20">
+                <h3 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-xs font-mono font-bold">
+                    2.7
+                  </span>
+                  <span>Development Mode Assets: 100% In-Memory by Default (No <code>.dinou/public</code> on Disk)</span>
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  In Dinou v6, <code>dinou dev</code> continuously wrote JavaScript chunks, CSS stylesheets, sourcemaps, and manifests to disk inside the <code>.dinou/public/</code> directory. In Dinou v7, the development engine operates <strong>100% in RAM</strong> via <code>globalThis.__DINOU_MEM_FILES__</code> to eliminate disk I/O bottlenecks and Windows antivirus penalties. The <code>.dinou/public/</code> directory is <strong>never created on disk</strong> during normal development.
+                </p>
+
+                <div className="grid gap-4 md:grid-cols-2 not-prose my-4">
+                  <div>
+                    <span className="text-xs font-semibold text-rose-500 uppercase tracking-wider block mb-1.5">
+                      ❌ Dinou v6 (Heavy Disk Writes in Dev)
+                    </span>
+                    <CodeBlock language="text" containerClassName="w-full rounded-lg">
+                      {`# In v6, dev server continuously writes to disk:
+my-app/
+└── .dinou/
+    └── public/             # Created on disk
+        ├── client.js
+        ├── styles.css
+        └── manifest.json`}
+                    </CodeBlock>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold text-emerald-500 uppercase tracking-wider block mb-1.5">
+                      ✅ Dinou v7 (100% In-Memory RAM Registry)
+                    </span>
+                    <CodeBlock language="text" containerClassName="w-full rounded-lg">
+                      {`# In v7, served instantly from memory (<0.5ms):
+globalThis.__DINOU_MEM_FILES__
+├── /client.js       (in-memory Buffer)
+├── /styles.css      (in-memory Buffer)
+└── manifest.json    (in-memory Buffer)
+# (.dinou/public is NOT created on disk)`}
+                    </CodeBlock>
+                  </div>
+                </div>
+
+                <div className="border border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/10 rounded-lg p-4 not-prose my-3 text-xs text-muted-foreground space-y-1.5">
+                  <div className="font-semibold text-amber-700 dark:text-amber-300 text-sm">
+                    ⚠️ Breaking Consequence for External Tools & Inspection Scripts
+                  </div>
+                  <p>
+                    If your local development scripts, reverse proxies (e.g. Nginx), or automated test runners expected physical files inside <code>.dinou/public/</code> while <code>npm run dev</code> is running, they will find that the folder does not exist.
+                  </p>
+                  <p>
+                    <strong>Action Required:</strong> If you need physical assets written to disk during development, set the <code>DINOU_WRITE_TO_DISK=true</code> environment variable:
+                  </p>
+                  <CodeBlock language="bash" containerClassName="w-full rounded-lg mt-2">
+                    {`DINOU_WRITE_TO_DISK=true npm run dev`}
+                  </CodeBlock>
+                  <p className="mt-1">
+                    <em>Note: In production builds (<code>npm run build</code>), optimized assets are always written to disk inside <code>.dinou/dist3/</code> and <code>.dinou/dist2/</code>.</em>
+                  </p>
                 </div>
               </div>
             </section>
