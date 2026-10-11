@@ -5,7 +5,7 @@ import { FileText, CheckCircle2, ArrowRightLeft } from "lucide-react";
 
 export function RevalidatePageSection() {
   return (
-    <section id="revalidatepage" className="scroll-mt-20 mt-12 pt-8 border-t">
+    <section id="revalidatepage" className="scroll-mt-20">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="m-0">
           <code>revalidatePage()</code>

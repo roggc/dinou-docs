@@ -5,7 +5,7 @@ import { Layers, Zap, ArrowRightLeft, Code2 } from "lucide-react";
 
 export function DinouCacheSlotSection() {
   return (
-    <section id="dinoucacheslot" className="scroll-mt-20">
+    <section id="dinoucacheslot" className="scroll-mt-20 mt-12 pt-8 border-t">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="m-0">
           <code>&lt;DinouCacheSlot&gt;</code>

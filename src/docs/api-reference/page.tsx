@@ -86,12 +86,12 @@ const tocItems = [
   { id: "dinouplugin-lifecycle", title: "Lifecycle & Early Exit", level: 4 },
   { id: "dinouplugin-examples", title: "Production Plugins", level: 4 },
   { id: "server-primitives-storage", title: "4. Server & Storage (dinou/server)", level: 2 },
-  { id: "dinoucacheslot", title: "<DinouCacheSlot>", level: 3 },
-  { id: "dinoucacheslot-props", title: "Props & Micro-ISR", level: 4 },
-  { id: "dinoucacheslot-examples", title: "Production Slot Patterns", level: 4 },
   { id: "revalidatepage", title: "revalidatePage()", level: 3 },
   { id: "revalidatepath", title: "revalidatePath()", level: 3 },
   { id: "revalidatetag", title: "revalidateTag()", level: 3 },
+  { id: "dinoucacheslot", title: "<DinouCacheSlot>", level: 3 },
+  { id: "dinoucacheslot-props", title: "Props & Micro-ISR", level: 4 },
+  { id: "dinoucacheslot-examples", title: "Production Slot Patterns", level: 4 },
   { id: "storage-adapters", title: "Storage Adapters", level: 3 },
   { id: "storage-adapters-list", title: "Built-In Adapters", level: 4 },
   { id: "storage-adapters-interface", title: "StorageAdapter Interface", level: 4 },
@@ -2984,10 +2984,10 @@ export const telemetryPlugin: DinouPlugin = {
                 </span>
               </h2>
 
-              <DinouCacheSlotSection />
               <RevalidatePageSection />
               <RevalidatePathSection />
               <RevalidateTagSection />
+              <DinouCacheSlotSection />
               <StorageAdaptersSection />
             </section>
 
