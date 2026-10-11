@@ -676,7 +676,7 @@ npm run dev:webpack   # Dedicated Webpack engine`}
                 </Card>
 
                 <Card className="hover:border-emerald-500/40 transition-colors group">
-                  <Link href="/docs/internals" className="block h-full p-5">
+                  <Link href="/docs/architecture" className="block h-full p-5">
                     <div className="flex items-start justify-between w-full mb-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
                         <Layers className="h-5 w-5" />

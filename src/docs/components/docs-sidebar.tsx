@@ -231,6 +231,16 @@ const docsNavigation = [
       },
     ],
   },
+  {
+    title: "Internals",
+    items: [
+      {
+        title: "Architecture",
+        href: "/docs/architecture",
+        icon: Cpu,
+      },
+    ],
+  },
 ];
 
 const ejectedNavigation = [
@@ -585,32 +595,6 @@ export function DocsSidebar() {
   return (
     <Sidebar className="border-r fixed left-0 top-0 h-full z-30">
       <SidebarContent className="scrollbar-thin md:pt-14">
-        {/* Mobile segmented switcher */}
-        <div className="px-3 pt-3 pb-1 sm:hidden">
-          <div className="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-            <Link
-              href="/docs"
-              className={`flex-1 text-center py-1.5 text-xs font-medium rounded-md transition-colors ${
-                !isEjected
-                  ? "bg-white dark:bg-slate-800 text-foreground font-semibold shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Docs
-            </Link>
-            <Link
-              href="/docs/ejected-reference"
-              className={`flex-1 text-center py-1.5 text-xs font-medium rounded-md transition-colors ${
-                isEjected
-                  ? "bg-white dark:bg-slate-800 text-foreground font-semibold shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Ejected Ref
-            </Link>
-          </div>
-        </div>
-
         {/* Ejected mode back button */}
         {isEjected && (
           <div className="px-3 pt-3 pb-1">
@@ -674,28 +658,6 @@ export function DocsSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
-
-        {/* In Docs mode: Card inviting to Architecture */}
-        {!isEjected && (
-          <div className="p-3 mt-4 mb-2">
-            <div className="rounded-xl border border-blue-500/20 bg-blue-50/40 dark:bg-blue-950/10 p-3 space-y-2">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400">
-                <Cpu className="h-3.5 w-3.5" />
-                <span>Architecture</span>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Explore the complete reference of architecture, Dual-Bundle engine, and runtime pipeline of Dinou.
-              </p>
-              <Link
-                href="/docs/internals"
-                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline pt-1"
-              >
-                <span>Architecture &amp; Internals</span>
-                <ArrowRight className="h-3 w-3" />
-              </Link>
-            </div>
-          </div>
-        )}
       </SidebarContent>
     </Sidebar>
   );
