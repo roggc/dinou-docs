@@ -349,12 +349,12 @@ export default function Page() {
                   3.1. Dynamic Params Prop Injection
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  In Dinou v7, parameters are strictly typed using <code>PageProps</code>, <code>LayoutProps</code>, and <code>RouteParams</code>:
+                  In Dinou v7, parameters are strictly typed using <code>PageProps</code>, <code>LayoutProps</code>, <code>ErrorProps</code>, and <code>RouteParams</code>:
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-1.5 list-disc pl-5">
                   <li><code>page.tsx</code> components: <code>Page(&#123; params &#125;: PageProps&lt;&quot;/blog/[slug]&quot;&gt;)</code></li>
                   <li><code>layout.tsx</code> components: <code>Layout(&#123; params, children &#125;: LayoutProps&lt;&quot;/blog/[slug]&quot;&gt;)</code></li>
-                  <li><code>error.tsx</code> boundaries: <code>Error(&#123; error, params &#125;: &#123; error: Error; params: RouteParams&lt;&quot;/blog/[slug]&quot;&gt; &#125;)</code></li>
+                  <li><code>error.tsx</code> pages: <code>Error(&#123; error, params &#125;: ErrorProps&lt;&quot;/blog/[slug]&quot;&gt;)</code></li>
                   <li><code>not_found.tsx</code> 404 pages: <code>NotFound(&#123; params &#125;: PageProps&lt;&quot;/blog/[slug]&quot;&gt;)</code></li>
                   <li>Parallel slot pages (<code>@slot/page.tsx</code>): <code>SlotPage(&#123; params &#125;: PageProps&lt;&quot;/dashboard/[teamId]&quot;&gt;)</code></li>
                   <li>Server data fetching: <code>getProps(params: RouteParams&lt;&quot;/blog/[slug]&quot;&gt;)</code> in <code>page_functions.ts</code></li>

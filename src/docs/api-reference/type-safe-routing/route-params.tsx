@@ -17,7 +17,7 @@ export function RouteParamsSection() {
         </span>
       </div>
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        A standalone utility type representing the inferred parameters dictionary of a given route pattern. While <code>PageProps</code> and <code>PageFunctions</code> resolve route strings directly, <code>RouteParams</code> is ideal for typing Server Actions, services, or error boundary components that do not inherit framework props automatically.
+        A standalone utility type representing the inferred parameters dictionary of a given route pattern. While <code>PageProps</code> and <code>PageFunctions</code> resolve route strings directly, <code>RouteParams</code> is ideal for typing Server Actions, services, or custom helper functions that do not inherit framework props automatically.
       </p>
 
       {/* Parameter Mapping Table */}
@@ -71,8 +71,8 @@ export async function getDocsContent(params: RouteParams<"/docs/[...slug]">) {
   return fetchDocsByPath(params.slug.join("/")); // params.slug is string[]
 }
 
-// 3. In error.tsx boundaries
-interface ErrorProps {
+// 3. In custom helper types (note: for error.tsx, prefer native ErrorProps<T>)
+interface CustomErrorWrapper {
   error: Error;
   params: RouteParams<"/blog/[slug]">;
 }`}

@@ -402,10 +402,10 @@ export default function Page() {
                           {`{ error: Error, params: RouteParams<T> }`}
                         </td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Type signature for <code>error.tsx</code> boundary export component.
+                          Type signature for <code>error.tsx</code> page component.
                         </td>
                         <td className="py-2.5 px-3.5 text-right">
-                          <Link href="/docs/routing#error-handling" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
+                          <Link href="/docs/api-reference#errorprops" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
                             Docs <ExternalLink className="h-3 w-3" />
                           </Link>
                         </td>

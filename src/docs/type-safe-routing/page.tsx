@@ -41,11 +41,11 @@ const tocItems = [
   { id: "quick-start", title: "2. Quick Start for Developers", level: 2 },
   { id: "level-1-navigation", title: "2.1. Level 1: Links & Navigation", level: 3 },
   { id: "level-2-components", title: "2.2. Level 2: Typed Pages, Layouts & Server Functions", level: 3 },
-  { id: "core-types-table", title: "2.3. Quick Reference: The 4 Core Types", level: 3 },
+  { id: "core-types-table", title: "2.3. Quick Reference: Core Types", level: 3 },
   { id: "param-mapping", title: "3. Parameter Mapping Reference Table", level: 2 },
   { id: "advanced-recipes", title: "4. Advanced Usage & Real-World Recipes", level: 2 },
   { id: "route-pattern-picking", title: "4.1. IDE Autocomplete Workflow (Ctrl + Space)", level: 3 },
-  { id: "typed-error-pages", title: "4.2. Typed Error Pages with RouteParams", level: 3 },
+  { id: "typed-error-pages", title: "4.2. Typed Error Pages with ErrorProps", level: 3 },
   { id: "custom-components", title: "4.3. Custom Navigation Components with DinouRoute", level: 3 },
   { id: "dynamic-interpolation", title: "4.4. Dynamic Navigation with Typed Interpolation", level: 3 },
   { id: "architecture", title: "5. Technical Architecture: Under the Hood", level: 2 },
@@ -262,10 +262,10 @@ export async function getProps(params: RouteParams<"/blog/[slug]">) {
               <div id="core-types-table" className="scroll-mt-20 mt-8 space-y-4">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-blue-500" />
-                  2.3. Quick Reference: The 4 Core Types
+                  2.3. Quick Reference: Core Types
                 </h3>
                 <p>
-                  To keep application code clean and expressive, Dinou distills routing type-safety down to 4 primary types exported directly from <code>&quot;dinou&quot;</code>:
+                  To keep application code clean and expressive, Dinou distills routing type-safety down to primary types exported directly from <code>&quot;dinou&quot;</code>:
                 </p>
 
                 <div className="not-prose overflow-x-auto rounded-xl border border-border my-4">
@@ -289,8 +289,13 @@ export async function getProps(params: RouteParams<"/blog/[slug]">) {
                         <td className="p-3 font-mono">Layout(&#123; children, params &#125;: LayoutProps&lt;&quot;/blog/[slug]&quot;&gt;)</td>
                       </tr>
                       <tr>
+                        <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">ErrorProps&lt;T&gt;</td>
+                        <td className="p-3 text-muted-foreground">React Error Page components (<code>error.tsx</code>)</td>
+                        <td className="p-3 font-mono">Error(&#123; error, params &#125;: ErrorProps&lt;&quot;/blog/[slug]&quot;&gt;)</td>
+                      </tr>
+                      <tr>
                         <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">RouteParams&lt;T&gt;</td>
-                        <td className="p-3 text-muted-foreground">Pure functions, services &amp; error pages (<code>getProps</code>, <code>error.tsx</code>)</td>
+                        <td className="p-3 text-muted-foreground">Pure functions, data loaders &amp; services (<code>getProps</code>, API helpers)</td>
                         <td className="p-3 font-mono">getProps(params: RouteParams&lt;&quot;/blog/[slug]&quot;&gt;)</td>
                       </tr>
                       <tr>
@@ -439,23 +444,18 @@ export default function BlogPost({ params }: PageProps<"/blog/[slug]">) {
               <div id="typed-error-pages" className="scroll-mt-20 mt-8 space-y-3">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-amber-500" />
-                  4.2. Typed Error Pages with RouteParams
+                  4.2. Typed Error Pages with ErrorProps
                 </h3>
                 <p>
-                  In Dinou, error pages (<code>error.tsx</code> and parallel slot errors <code>@slot/error.tsx</code>) receive two props: <code>error: Error</code> and <code>params</code>. You can strictly type them using <code>RouteParams&lt;T&gt;</code>:
+                  In Dinou, error pages (<code>error.tsx</code> and parallel slot errors <code>@slot/error.tsx</code>) receive two props: <code>error: Error</code> and <code>params</code>. You can strictly type them directly using <code>ErrorProps&lt;T&gt;</code>:
                 </p>
 
                 <CodeBlock language="tsx" containerClassName="rounded-xl overflow-hidden my-4">
                   {`"use client";
 
-import { useRouter, type RouteParams } from "dinou";
+import { useRouter, type ErrorProps } from "dinou";
 
-interface BlogPostErrorProps {
-  error: Error;
-  params: RouteParams<"/blog/[slug]">;
-}
-
-export default function BlogPostError({ params, error }: BlogPostErrorProps) {
+export default function BlogPostError({ params, error }: ErrorProps<"/blog/[slug]">) {
   const router = useRouter();
 
   return (

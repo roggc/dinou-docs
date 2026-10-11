@@ -222,24 +222,19 @@ export default function BlogPost({ params }: PageProps<"/blog/[slug]">) {
 }
 ```
 
-### Typing Error Boundaries (`error.tsx`) without `any`
-In Dinou, error boundary components (`error.tsx`, including parallel slot errors `@slot/error.tsx`) receive exactly two props:
+### Typing Error Pages (`error.tsx`) with `ErrorProps`
+In Dinou, error page components (`error.tsx`, including parallel slot errors `@slot/error.tsx`) receive exactly two props:
 - `error`: The caught error object, which structurally satisfies the standard TypeScript `Error` interface (`{ message: string; name: string; stack?: string }`).
-- `params`: The route segment's dynamic parameters, typed using `RouteParams<T>`.
+- `params`: The route segment's dynamic parameters, typed using `ErrorProps<T>`.
 
-You can type error pages cleanly with `RouteParams`:
+You can type error pages cleanly with `ErrorProps`:
 
 ```tsx
 "use client";
 
-import { useRouter, type RouteParams } from "dinou";
+import { useRouter, type ErrorProps } from "dinou";
 
-interface BlogPostErrorProps {
-  error: Error;
-  params: RouteParams<"/blog/[slug]">;
-}
-
-export default function BlogPostError({ params, error }: BlogPostErrorProps) {
+export default function BlogPostError({ params, error }: ErrorProps<"/blog/[slug]">) {
   const router = useRouter();
 
   return (

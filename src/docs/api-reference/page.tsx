@@ -19,6 +19,7 @@ import {
 import {
   PagePropsSection,
   LayoutPropsSection,
+  ErrorPropsSection,
   PageFunctionsSection,
   RouteParamsSection,
   DinouRouteSection,
@@ -75,6 +76,7 @@ const tocItems = [
   { id: "type-safe-routing", title: "3. Type-Safe Routing (dinou)", level: 2 },
   { id: "pageprops", title: "PageProps<T>", level: 3 },
   { id: "layoutprops", title: "LayoutProps<T>", level: 3 },
+  { id: "errorprops", title: "ErrorProps<T>", level: 3 },
   { id: "pagefunctions", title: "PageFunctions & LayoutFunctions", level: 3 },
   { id: "routeparams", title: "RouteParams<T>", level: 3 },
   { id: "dinouroute", title: "DinouRoute", level: 3 },
@@ -195,6 +197,7 @@ export default function Page() {
 
               <PagePropsSection />
               <LayoutPropsSection />
+              <ErrorPropsSection />
               <PageFunctionsSection />
               <RouteParamsSection />
               <DinouRouteSection />
