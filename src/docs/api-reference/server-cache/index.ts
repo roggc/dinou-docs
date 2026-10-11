@@ -1,5 +1,4 @@
-export { DinouCacheSlotSection } from "./dinou-cache-slot";
 export { RevalidatePageSection } from "./revalidate-page";
 export { RevalidatePathSection } from "./revalidate-path";
 export { RevalidateTagSection } from "./revalidate-tag";
-export { StorageAdaptersSection } from "./storage-adapters";
+export { DinouCacheSlotSection } from "./dinou-cache-slot";

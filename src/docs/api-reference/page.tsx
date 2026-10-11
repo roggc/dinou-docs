@@ -14,6 +14,13 @@ import {
   UseNavigationLoadingSection,
 } from "./hooks-navigation";
 import {
+  PagePropsSection,
+  LayoutPropsSection,
+  PageFunctionsSection,
+  RouteParamsSection,
+  DinouRouteSection,
+} from "./type-safe-routing";
+import {
   GetContextSection,
   DefineConfigSection,
   DinouPluginSection,
@@ -23,8 +30,10 @@ import {
   RevalidatePageSection,
   RevalidatePathSection,
   RevalidateTagSection,
+} from "./server-cache";
+import {
   StorageAdaptersSection,
-} from "./server-storage";
+} from "./storage-adapters";
 import {
   GetPropsContract,
   RevalidateContract,
@@ -34,13 +43,6 @@ import {
   AllowIsgContract,
   ValidateParamsContract,
 } from "./contracts";
-import {
-  PagePropsSection,
-  LayoutPropsSection,
-  PageFunctionsSection,
-  RouteParamsSection,
-  DinouRouteSection,
-} from "./type-safe-routing";
 
 const tocItems = [
   { id: "components", title: "1. Components (dinou)", level: 2 },
@@ -66,7 +68,13 @@ const tocItems = [
   { id: "usenavigationloading-behavior", title: "Trigger Events & SSR", level: 4 },
   { id: "usenavigationloading-architecture", title: "Non-Blocking Transitions", level: 4 },
   { id: "usenavigationloading-examples", title: "Production Indicators", level: 4 },
-  { id: "server-context-config", title: "3. Server Context & Config (dinou)", level: 2 },
+  { id: "type-safe-routing", title: "3. Type-Safe Routing (dinou)", level: 2 },
+  { id: "pageprops", title: "PageProps<T>", level: 3 },
+  { id: "layoutprops", title: "LayoutProps<T>", level: 3 },
+  { id: "pagefunctions", title: "PageFunctions & LayoutFunctions", level: 3 },
+  { id: "routeparams", title: "RouteParams<T>", level: 3 },
+  { id: "dinouroute", title: "DinouRoute", level: 3 },
+  { id: "server-context-config", title: "4. Server Context & Config (dinou)", level: 2 },
   { id: "getcontext", title: "getContext()", level: 3 },
   { id: "getcontext-store", title: "Request & Response Store", level: 4 },
   { id: "getcontext-examples", title: "Production Patterns", level: 4 },
@@ -76,18 +84,18 @@ const tocItems = [
   { id: "dinouplugin", title: "DinouPlugin", level: 3 },
   { id: "dinouplugin-lifecycle", title: "Lifecycle & Early Exit", level: 4 },
   { id: "dinouplugin-examples", title: "Production Plugins", level: 4 },
-  { id: "server-primitives-storage", title: "4. Server & Storage (dinou/server)", level: 2 },
+  { id: "server-cache-revalidation", title: "5. Server Cache & Revalidation (dinou/server)", level: 2 },
   { id: "revalidatepage", title: "revalidatePage()", level: 3 },
   { id: "revalidatepath", title: "revalidatePath()", level: 3 },
   { id: "revalidatetag", title: "revalidateTag()", level: 3 },
   { id: "dinoucacheslot", title: "<DinouCacheSlot>", level: 3 },
   { id: "dinoucacheslot-props", title: "Props & Micro-ISR", level: 4 },
   { id: "dinoucacheslot-examples", title: "Production Slot Patterns", level: 4 },
-  { id: "storage-adapters", title: "Storage Adapters", level: 3 },
-  { id: "storage-adapters-list", title: "Built-In Adapters", level: 4 },
-  { id: "storage-adapters-interface", title: "StorageAdapter Interface", level: 4 },
-  { id: "storage-adapters-custom", title: "Custom StorageAdapter", level: 4 },
-  { id: "route-segment-contracts", title: "5. Route Segment Contracts", level: 2 },
+  { id: "storage-adapters", title: "6. Storage Adapters (dinou/server)", level: 2 },
+  { id: "storage-adapters-list", title: "Built-In Adapters", level: 3 },
+  { id: "storage-adapters-interface", title: "StorageAdapter Interface", level: 3 },
+  { id: "storage-adapters-custom", title: "Custom Storage Engine", level: 3 },
+  { id: "route-segment-contracts", title: "7. Route Segment Contracts", level: 2 },
   { id: "getprops", title: "getProps()", level: 3 },
   { id: "revalidate-config", title: "revalidate", level: 3 },
   { id: "ppr-config", title: "ppr", level: 3 },
@@ -95,12 +103,6 @@ const tocItems = [
   { id: "getstaticpaths", title: "getStaticPaths", level: 3 },
   { id: "allowisg", title: "allowISG", level: 3 },
   { id: "validateparams", title: "validateParams()", level: 3 },
-  { id: "type-safe-routing", title: "6. Type-Safe Routing (dinou)", level: 2 },
-  { id: "pageprops", title: "PageProps<T>", level: 3 },
-  { id: "layoutprops", title: "LayoutProps<T>", level: 3 },
-  { id: "pagefunctions", title: "PageFunctions & LayoutFunctions", level: 3 },
-  { id: "routeparams", title: "RouteParams<T>", level: 3 },
-  { id: "dinouroute", title: "DinouRoute", level: 3 },
 ];
 
 export default function Page() {
@@ -157,11 +159,32 @@ export default function Page() {
             </section>
 
             {/* ================================================================= */}
-            {/* SECTION 3: SERVER CONTEXT & CONFIG */}
+            {/* SECTION 3: TYPE-SAFE ROUTING */}
+            {/* ================================================================= */}
+            <section id="type-safe-routing" className="scroll-mt-20 mt-12 pt-8 border-t">
+              <h2 className="flex items-center gap-3">
+                3. Type-Safe Routing (<code>dinou</code>)
+                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                  Zero-Runtime Type System
+                </span>
+              </h2>
+              <p>
+                Dinou v7 introduces zero-runtime type safety with auto-generated declaration files and seamless IDE autocompletion for routes and parameters.
+              </p>
+
+              <PagePropsSection />
+              <LayoutPropsSection />
+              <PageFunctionsSection />
+              <RouteParamsSection />
+              <DinouRouteSection />
+            </section>
+
+            {/* ================================================================= */}
+            {/* SECTION 4: SERVER CONTEXT & CONFIG */}
             {/* ================================================================= */}
             <section id="server-context-config" className="scroll-mt-20 mt-12 pt-8 border-t">
               <h2 className="flex items-center gap-3">
-                3. Server Context &amp; Config (<code>dinou</code>)
+                4. Server Context &amp; Config (<code>dinou</code>)
                 <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
                   Server-Side Execution
                 </span>
@@ -173,11 +196,12 @@ export default function Page() {
             </section>
 
             {/* ================================================================= */}
-            {/* SECTION 4: SERVER PRIMITIVES & STORAGE */}
+            {/* SECTION 5: SERVER CACHE & REVALIDATION */}
             {/* ================================================================= */}
-            <section id="server-primitives-storage" className="scroll-mt-20 mt-12 pt-8 border-t">
+            <section id="server-cache-revalidation" className="scroll-mt-20 mt-12 pt-8 border-t">
+              <span id="server-primitives-storage" className="scroll-mt-20" />
               <h2 className="flex items-center gap-3">
-                4. Server Primitives &amp; Storage (<code>dinou/server</code>)
+                5. Server Cache &amp; Revalidation (<code>dinou/server</code>)
                 <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
                   Micro-ISR &amp; Invalidation
                 </span>
@@ -187,15 +211,28 @@ export default function Page() {
               <RevalidatePathSection />
               <RevalidateTagSection />
               <DinouCacheSlotSection />
+            </section>
+
+            {/* ================================================================= */}
+            {/* SECTION 6: STORAGE ADAPTERS */}
+            {/* ================================================================= */}
+            <section id="storage-adapters" className="scroll-mt-20 mt-12 pt-8 border-t">
+              <h2 className="flex items-center gap-3">
+                6. Storage Adapters (<code>dinou/server</code>)
+                <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
+                  Storage Abstraction &amp; Persistence
+                </span>
+              </h2>
+
               <StorageAdaptersSection />
             </section>
 
             {/* ================================================================= */}
-            {/* SECTION 5: ROUTE SEGMENT CONTRACTS */}
+            {/* SECTION 7: ROUTE SEGMENT CONTRACTS */}
             {/* ================================================================= */}
             <section id="route-segment-contracts" className="scroll-mt-20 mt-12 pt-8 border-t">
               <h2 className="flex items-center gap-3">
-                5. Route Segment Contracts
+                7. Route Segment Contracts
                 <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
                   page_functions.ts &amp; layout_functions.ts
                 </span>
@@ -212,28 +249,6 @@ export default function Page() {
               <AllowIsgContract />
               <ValidateParamsContract />
 
-            </section>
-
-            {/* ================================================================= */}
-            {/* SECTION 6: TYPE-SAFE ROUTING */}
-            {/* ================================================================= */}
-            <section id="type-safe-routing" className="scroll-mt-20 mt-12 pt-8 border-t">
-              <h2 className="flex items-center gap-3">
-                6. Type-Safe Routing (<code>dinou</code>)
-                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                  Zero-Runtime Type System
-                </span>
-              </h2>
-              <p>
-                Dinou v7 introduces zero-runtime type safety with auto-generated declaration files and seamless IDE autocompletion for routes and parameters.
-              </p>
-
-              {/* PageProps */}
-              <PagePropsSection />
-              <LayoutPropsSection />
-              <PageFunctionsSection />
-              <RouteParamsSection />
-              <DinouRouteSection />
             </section>
           </div>
         </div>

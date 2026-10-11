@@ -13,11 +13,8 @@ import {
 
 export function StorageAdaptersSection() {
   return (
-    <section id="storage-adapters" className="scroll-mt-20 mt-12 pt-8 border-t">
+    <>
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="m-0">
-          <code>Storage Adapters</code>
-        </h3>
         <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
           Storage Abstraction
         </span>
@@ -64,10 +61,10 @@ export function StorageAdaptersSection() {
       {/* Sub-section 1: Built-in Adapters */}
       <div id="storage-adapters-list" className="scroll-mt-20 mt-6 pt-4 border-t border-border/60">
         <div className="flex items-center gap-2">
-          <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
+          <h3 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
             <Database className="h-4 w-4 text-amber-500" />
             <span>Built-In Adapters Reference</span>
-          </h4>
+          </h3>
         </div>
         <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
           Production storage engines available directly from <code>dinou/server</code>.
@@ -153,10 +150,10 @@ export function StorageAdaptersSection() {
       {/* Sub-section 2: StorageAdapter Interface Contract */}
       <div id="storage-adapters-interface" className="scroll-mt-20 mt-6 pt-4 border-t border-border/60">
         <div className="flex items-center gap-2">
-          <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
+          <h3 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
             <Settings className="h-4 w-4 text-amber-500" />
             <span>StorageAdapter Contract &amp; Methods</span>
-          </h4>
+          </h3>
         </div>
         <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
           Abstract class methods required when implementing or interacting with storage engines.
@@ -231,10 +228,10 @@ export function StorageAdaptersSection() {
       {/* Sub-section 3: Storage Configuration & Custom Adapters */}
       <div id="storage-adapters-custom" className="scroll-mt-20 mt-6 pt-4 border-t border-border/60">
         <div className="flex items-center gap-2">
-          <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
+          <h3 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
             <Code2 className="h-4 w-4 text-amber-500" />
             <span>Production Configuration &amp; Custom Implementation</span>
-          </h4>
+          </h3>
         </div>
         <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
           Configure distributed caching with built-in adapters like <code>RedisStorage</code> or extend <code>StorageAdapter</code> to implement a custom engine.
@@ -379,6 +376,6 @@ console.log("Dinou active storage adapter:", activeStorage.constructor.name);`,
           </AlertDescription>
         </Alert>
       </div>
-    </section>
+    </>
   );
 }
