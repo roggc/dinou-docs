@@ -228,85 +228,101 @@ export function TypeSafeShowcase() {
           </p>
 
           {/* Interactive Navigation Tabs */}
-          <div className="flex flex-wrap justify-center gap-2 p-1.5 bg-slate-200/60 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/60 backdrop-blur-sm max-w-xl">
-            {(["navigation", "params", "architecture"] as TypeSafeTab[]).map((tab) => {
-              const cfg = tabConfigs[tab];
-              const isActive = activeTab === tab;
-              return (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
-                    isActive
-                      ? "bg-white dark:bg-slate-950 text-blue-600 dark:text-blue-400 shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                  }`}
-                >
-                  {cfg.title}
-                </button>
-              );
-            })}
+          <div className="flex justify-center mt-4">
+            <div className="inline-flex items-center gap-1.5 p-1.5 bg-slate-200/60 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/60 backdrop-blur-sm max-w-full overflow-x-auto">
+              {(["navigation", "params", "architecture"] as TypeSafeTab[]).map((tab) => {
+                const cfg = tabConfigs[tab];
+                const isActive = activeTab === tab;
+                return (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                      isActive
+                        ? "bg-white dark:bg-slate-950 text-blue-600 dark:text-blue-400 shadow-sm"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    {cfg.title}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
         {/* Tab Content Display */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-6xl mx-auto">
-          {/* Left Column: Context, Features & Stat */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="space-y-3">
-              <Badge
-                variant="outline"
-                className={`text-xs px-3 py-1 font-mono ${activeConfig.badgeColor}`}
-              >
-                {activeConfig.badge}
-              </Badge>
-              <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-                {activeConfig.headline}
-              </h3>
-              <p className="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-                {activeConfig.description}
-              </p>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-6xl mx-auto">
+          {/* Left Column: Card with Context, Features & Stat */}
+          <div className="lg:col-span-5 flex flex-col justify-between p-6 sm:p-7 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm lg:h-[630px] overflow-hidden">
+            <div className="flex-1 overflow-y-auto pr-1 sm:pr-2 space-y-5">
+              <div className="space-y-3">
+                <Badge
+                  variant="outline"
+                  className={`text-xs px-3 py-1 font-mono ${activeConfig.badgeColor}`}
+                >
+                  {activeConfig.badge}
+                </Badge>
+                <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                  {activeConfig.headline}
+                </h3>
+                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {activeConfig.description}
+                </p>
+              </div>
 
-            {/* Key Stat & Promise Card */}
-            <div className="p-5 rounded-2xl border border-blue-500/20 bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-purple-500/10 flex items-center justify-between">
-              <div>
-                <div className="text-3xl font-black text-blue-600 dark:text-blue-400 font-mono">
-                  {activeConfig.stat}
+              {/* Key Stat & Promise Card */}
+              <div className="p-4 rounded-xl border border-blue-500/20 bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-purple-500/10 flex items-center justify-between">
+                <div>
+                  <div className="text-3xl font-black text-blue-600 dark:text-blue-400 font-mono">
+                    {activeConfig.stat}
+                  </div>
+                  <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-medium mt-0.5">
+                    {activeConfig.statLabel}
+                  </div>
                 </div>
-                <div className="text-sm text-slate-700 dark:text-slate-300 font-medium mt-0.5">
-                  {activeConfig.statLabel}
+                <Badge variant="outline" className="border-blue-500/30 text-blue-600 dark:text-blue-400 font-mono text-[10px] px-2 py-0.5">
+                  Zero-Cost
+                </Badge>
+              </div>
+
+              {/* Clear, readable benefits */}
+              <div className="space-y-2.5 pt-1">
+                <div className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 shrink-0" />
+                  <span>Instant autocompletion on all project routes and dynamic paths</span>
+                </div>
+                <div className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-500 shrink-0" />
+                  <span>Zero client bundle weight — resolved entirely by TypeScript compiler</span>
                 </div>
               </div>
-              <Button size="sm" variant="outline" className="border-blue-500/30 text-xs sm:text-sm" asChild>
+            </div>
+
+            {/* Card Footer */}
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 mt-4 flex items-center justify-between shrink-0">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                TypeScript 5.x Engine
+              </span>
+              <Button size="sm" variant="outline" className="text-xs sm:text-sm border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10" asChild>
                 <Link href="/docs/type-safe-routing">
-                  <span>Routing Guide</span>
-                  <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                  <span>Type-Safe Guide</span>
+                  <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                 </Link>
               </Button>
-            </div>
-
-            {/* Clear, readable benefits */}
-            <div className="space-y-3 pt-1">
-              <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/60 dark:bg-slate-900/40 flex items-center gap-3 text-sm text-slate-700 dark:text-slate-200">
-                <CheckCircle2 className="w-5 h-5 text-blue-500 shrink-0" />
-                <span>Instant autocompletion on all project routes and dynamic paths</span>
-              </div>
-              <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/60 dark:bg-slate-900/40 flex items-center gap-3 text-sm text-slate-700 dark:text-slate-200">
-                <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                <span>Zero client bundle weight — resolved entirely by TypeScript compiler</span>
-              </div>
             </div>
           </div>
 
           {/* Right Column: Code Showcase with simulated IDE chrome */}
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7 flex flex-col justify-between lg:h-[630px]">
             <CodeWindow
               filename={activeConfig.codeFile}
               code={activeConfig.codeSnippet}
               language="tsx"
               statusLeft="Dinou Route Scanner (<2ms)"
               statusRight="TypeScript 5.x"
+              className="h-[500px] sm:h-[540px] lg:h-full"
             />
           </div>
         </div>

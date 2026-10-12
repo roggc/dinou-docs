@@ -332,7 +332,7 @@ export function DeployMatrix() {
         </div>
 
         {/* Target Buttons Pill Nav */}
-        <div className="flex flex-wrap justify-center gap-2.5 mb-8 sm:mb-10 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 mb-8 sm:mb-10 max-w-5xl mx-auto">
           {targets.map((target) => {
             const TargetIcon = target.icon;
             const isSelected = selectedTarget.id === target.id;
@@ -341,16 +341,18 @@ export function DeployMatrix() {
                 key={target.id}
                 type="button"
                 onClick={() => setSelectedTarget(target)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 border ${
+                className={`flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 border text-left cursor-pointer ${
                   isSelected
                     ? "bg-slate-900 text-white border-blue-500/50 shadow-md dark:bg-white dark:text-slate-950"
                     : "bg-white/70 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800/60"
                 }`}
               >
-                <TargetIcon className={`w-4 h-4 ${isSelected ? "text-blue-400 dark:text-blue-600" : "text-slate-400"}`} />
-                <span>{target.name}</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  <TargetIcon className={`w-4 h-4 shrink-0 ${isSelected ? "text-blue-400 dark:text-blue-600" : "text-slate-400"}`} />
+                  <span className="truncate">{target.name}</span>
+                </div>
                 <span
-                  className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
+                  className={`text-[10px] px-1.5 py-0.5 rounded font-mono shrink-0 ml-1.5 ${
                     isSelected
                       ? "bg-blue-500/20 text-blue-200 dark:text-blue-900"
                       : "bg-slate-100 dark:bg-slate-800 text-slate-500"

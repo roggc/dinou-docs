@@ -99,20 +99,18 @@ export function Counter() {
     headline: "In-Memory Dual-Bundle Architecture",
     description:
       "Eliminate the memory bloat of multi-process dev servers. Dinou compiles client components and server Flight streams in the same process memory space, cutting startup latency to under 150ms.",
-    codeFile: "terminal / dinou dev",
+    codeFile: "terminal / npm run dev",
     language: "bash",
-    codeSnippet: `$ dinou dev
+    codeSnippet: `$ npm run dev
 
-  [dinou v7.0.0] Ready in 142ms
-  ▲ Local:   http://localhost:3000
-  ▲ Network: http://192.168.1.45:3000
+✓ Build completed
 
-  ✓ Route scanner registered 34 routes (< 2ms)
-  ✓ Dual-Bundle AOT compiler initialized in memory
-  ✓ WebSocket HMR engine active on :3001
-  ✓ React 19 Flight runtime listening for connections
+  🦖 Dinou v7 (Dual-Bundle, 0-fork) in 5964ms
 
-  [HMR] Updated /src/components/counter.tsx in 3.4ms`,
+  ➜  Local:   http://localhost:3000/
+  ➜  Bundler: esbuild
+
+  ⠋ watching for file changes...`,
     features: [
       {
         icon: Terminal,
@@ -239,63 +237,95 @@ export function DxShowcase() {
         </div>
 
         {/* Showcase Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-6xl mx-auto">
-          {/* Left Column: Feature Narrative & Highlights */}
-          <div className="lg:col-span-5 flex flex-col space-y-6">
-            <div className="space-y-3">
-              <Badge variant="outline" className={`px-3 py-1 font-medium ${activeConfig.badgeColor}`}>
-                {activeConfig.badge}
-              </Badge>
-              <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                {activeConfig.headline}
-              </h3>
-              <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-base">
-                {activeConfig.description}
-              </p>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-6xl mx-auto">
+          {/* Left Column: Feature Narrative & Highlights (No outer card, scrollable if overflowing) */}
+          <div className="lg:col-span-5 flex flex-col justify-between space-y-6 lg:h-[630px] overflow-hidden">
+            <div className="flex-1 overflow-y-auto pr-1 sm:pr-2 space-y-6">
+              <div className="space-y-3">
+                <Badge variant="outline" className={`px-3 py-1 font-medium ${activeConfig.badgeColor}`}>
+                  {activeConfig.badge}
+                </Badge>
+                <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  {activeConfig.headline}
+                </h3>
+                <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-base">
+                  {activeConfig.description}
+                </p>
+              </div>
 
-            {/* Metric Card */}
-            <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800 shadow-sm relative overflow-hidden">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80 mb-4">
-                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  Developer Benchmark
-                </span>
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold">
-                  Verified v7
-                </span>
-              </div>
-              <div className="flex items-baseline gap-2.5">
-                <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-amber-600 dark:text-amber-400">
-                  {activeConfig.stat}
-                </span>
-                <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">
-                  {activeConfig.statLabel}
-                </span>
-              </div>
-              <div className="mt-4 space-y-3">
-                {activeConfig.features.map((feat, i) => {
-                  const Icon = feat.icon;
-                  return (
-                    <div key={i} className="flex items-start gap-3">
-                      <div className="p-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0">
-                        <Icon className="w-3.5 h-3.5" />
+              {/* Metric Card */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800 shadow-sm relative overflow-hidden">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80 mb-4">
+                  <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Developer Benchmark
+                  </span>
+                  <span
+                    className={`text-xs font-mono px-2 py-0.5 rounded font-bold ${
+                      activeTab === "hmr"
+                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                        : activeTab === "compiler"
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                    }`}
+                  >
+                    Verified v7
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-2.5">
+                  <span
+                    className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${
+                      activeTab === "hmr"
+                        ? "text-amber-600 dark:text-amber-400"
+                        : activeTab === "compiler"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-rose-600 dark:text-rose-400"
+                    }`}
+                  >
+                    {activeConfig.stat}
+                  </span>
+                  <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">
+                    {activeConfig.statLabel}
+                  </span>
+                </div>
+                <div className="mt-4 space-y-3">
+                  {activeConfig.features.map((feat, i) => {
+                    const Icon = feat.icon;
+                    return (
+                      <div key={i} className="flex items-start gap-3">
+                        <div
+                          className={`p-1 rounded-md mt-0.5 shrink-0 ${
+                            activeTab === "hmr"
+                              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                              : activeTab === "compiler"
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                              : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                          }`}
+                        >
+                          <Icon className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="text-xs sm:text-sm">
+                          <strong className="text-slate-900 dark:text-white">{feat.title}:</strong>{" "}
+                          <span className="text-slate-600 dark:text-slate-300">{feat.desc}</span>
+                        </div>
                       </div>
-                      <div className="text-xs sm:text-sm">
-                        <strong className="text-slate-900 dark:text-white">{feat.title}:</strong>{" "}
-                        <span className="text-slate-600 dark:text-slate-300">{feat.desc}</span>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
             {/* Link to Docs */}
-            <div>
+            <div className="pt-2 shrink-0">
               <Button
                 variant="link"
                 size="sm"
-                className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 p-0 h-auto font-medium"
+                className={`p-0 h-auto font-medium ${
+                  activeTab === "hmr"
+                    ? "text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300"
+                    : activeTab === "compiler"
+                    ? "text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
+                    : "text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300"
+                }`}
                 asChild
               >
                 <Link href="/docs/getting-started" className="inline-flex items-center gap-1.5">
@@ -307,13 +337,14 @@ export function DxShowcase() {
           </div>
 
           {/* Right Column: Code Window with Syntax Highlighting */}
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7 flex flex-col justify-between lg:h-[630px]">
             <CodeWindow
               filename={activeConfig.codeFile}
               code={activeConfig.codeSnippet}
               language={activeConfig.language}
               statusLeft="Dinou In-Process Dev Server"
               statusRight="WebSocket HMR Active"
+              className="h-[500px] sm:h-[540px] lg:h-full"
             />
           </div>
         </div>

@@ -32,7 +32,7 @@ const bundlerCards = [
     name: "Rollup",
     badge: "Optimized Tree-Shaking",
     badgeColor: "border-red-500/30 text-red-600 dark:text-red-400 bg-red-500/10",
-    engineBadge: "Rust / TypeScript",
+    engineBadge: "Pure ESM Engine",
     headline: "Pristine ES Module Output",
     description: "Surgical code-splitting and dead-code elimination. The optimal choice for Cloudflare Workers and Edge Isolates.",
     speedMetric: "0% Unused",

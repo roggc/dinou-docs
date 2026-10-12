@@ -29,6 +29,8 @@ interface TabConfig {
   description: string;
   codeFile: string;
   codeSnippet: string;
+  docHref: string;
+  docLabel: string;
   features: {
     icon: typeof Zap;
     title: string;
@@ -53,6 +55,8 @@ const tabConfigs: Record<SegmentationTab, TabConfig> = {
     headline: "Instant Static Shell Delivery with Live Dynamic Streaming",
     description:
       "Dinou v7 unifies static delivery and dynamic personalization in a single request. The static shell is served in under 20ms while personalized Suspense holes stream live in the background.",
+    docHref: "/docs/rendering#partial-prerendering",
+    docLabel: "PPR Guide",
     codeFile: "src/dashboard/page_functions.ts",
     codeSnippet: `// 1. Enable Partial Prerendering on the route
 export const ppr = true;
@@ -110,6 +114,8 @@ export default function DashboardPage() {
     headline: "Component-Level Micro-Caching & In-Place Client Refresh",
     description:
       "Stop invalidating entire pages when only one widget changes. Wrap expensive Server Components in <DinouCacheSlot> for independent TTL caching and in-place client refreshes without page reloads.",
+    docHref: "/docs/rendering#micro-isr",
+    docLabel: "Micro-ISR Guide",
     codeFile: "src/dashboard/page.tsx",
     codeSnippet: `import { DinouCacheSlot } from "dinou";
 import LiveStockTicker from "./stock-ticker";
@@ -166,6 +172,8 @@ export default function Dashboard() {
     headline: "Decoupled Layout ISR with Persistent Navigation State",
     description:
       "Layouts can declare their own data fetching and revalidation rules via layout_functions.ts. Changing routes never re-renders cached parent layouts, keeping media playback and search inputs alive.",
+    docHref: "/docs/routing#layout-functions",
+    docLabel: "Layout Functions Guide",
     codeFile: "src/dashboard/layout_functions.ts",
     codeSnippet: `// Independent layout caching: Shell cached for 1 hour
 export const revalidate = 3600;
@@ -277,98 +285,134 @@ export function SegmentationShowcase() {
         </div>
 
         {/* Showcase Grid: Info & Visual Left, Code Right */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-6xl mx-auto">
-          {/* Left Column: Feature Narrative & Highlights (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col space-y-6">
-            <div className="space-y-3">
-              <Badge variant="outline" className={`px-3 py-1 font-medium ${activeConfig.badgeColor}`}>
-                {activeConfig.badge}
-              </Badge>
-              <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                {activeConfig.headline}
-              </h3>
-              <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-base">
-                {activeConfig.description}
-              </p>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-6xl mx-auto">
+          {/* Left Column: Card with Context, Visual Benchmark & Features */}
+          <div className="lg:col-span-5 flex flex-col justify-between p-6 sm:p-7 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm lg:h-[630px] overflow-hidden">
+            <div className="flex-1 overflow-y-auto pr-1 sm:pr-2 space-y-5">
+              <div className="space-y-3">
+                <Badge variant="outline" className={`text-xs px-3 py-1 font-mono ${activeConfig.badgeColor}`}>
+                  {activeConfig.badge}
+                </Badge>
+                <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  {activeConfig.headline}
+                </h3>
+                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                  {activeConfig.description}
+                </p>
+              </div>
 
-            {/* Visual Metric Card */}
-            <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80 mb-4">
-                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  Real-World Benchmark
-                </span>
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
-                  Verified v7
-                </span>
-              </div>
-              <div className="flex items-baseline gap-2.5">
-                <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-blue-600 dark:text-blue-400">
-                  {activeConfig.visualPreview.stat}
-                </span>
-                <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">
-                  {activeConfig.visualPreview.statLabel}
-                </span>
-              </div>
-              <div className="mt-4 space-y-2.5 text-sm text-slate-700 dark:text-slate-200">
-                <div className="flex items-start gap-2.5">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
-                  <div>
-                    <strong className="text-slate-900 dark:text-white">
-                      {activeConfig.visualPreview.shellTitle}:
-                    </strong>{" "}
-                    {activeConfig.visualPreview.shellDesc}
+              {/* Real-World Benchmark Card */}
+              <div className="p-4 rounded-xl border border-blue-500/20 bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-purple-500/10 relative overflow-hidden">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200/50 dark:border-slate-800/60 mb-3">
+                  <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Real-World Benchmark
+                  </span>
+                  <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] px-2 py-0.5">
+                    Verified v7
+                  </Badge>
+                </div>
+                <div className="flex items-baseline gap-2.5">
+                  <span
+                    className={`text-3xl font-black font-mono ${
+                      activeTab === "ppr"
+                        ? "text-cyan-600 dark:text-cyan-400"
+                        : activeTab === "vertical"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-purple-600 dark:text-purple-400"
+                    }`}
+                  >
+                    {activeConfig.visualPreview.stat}
+                  </span>
+                  <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-medium">
+                    {activeConfig.visualPreview.statLabel}
+                  </span>
+                </div>
+                <div className="mt-3 space-y-2 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                    <div>
+                      <strong className="text-slate-900 dark:text-white">
+                        {activeConfig.visualPreview.shellTitle}:
+                      </strong>{" "}
+                      {activeConfig.visualPreview.shellDesc}
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 shrink-0" />
+                    <div>
+                      <strong className="text-slate-900 dark:text-white">
+                        {activeConfig.visualPreview.streamTitle}:
+                      </strong>{" "}
+                      {activeConfig.visualPreview.streamDesc}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-start gap-2.5">
-                  <div className="w-2 h-2 rounded-full bg-purple-500 mt-1.5 shrink-0" />
-                  <div>
-                    <strong className="text-slate-900 dark:text-white">
-                      {activeConfig.visualPreview.streamTitle}:
-                    </strong>{" "}
-                    {activeConfig.visualPreview.streamDesc}
-                  </div>
-                </div>
+              </div>
+
+              {/* Dynamic Feature Highlights */}
+              <div className="space-y-2.5 pt-1">
+                {activeConfig.features.map((feat, i) => {
+                  const Icon = feat.icon;
+                  return (
+                    <div
+                      key={i}
+                      className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-start gap-3"
+                    >
+                      <div
+                        className={`p-1 rounded-md mt-0.5 shrink-0 ${
+                          activeTab === "ppr"
+                            ? "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400"
+                            : activeTab === "vertical"
+                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                            : "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="text-xs sm:text-sm">
+                        <strong className="text-slate-900 dark:text-white">{feat.title}:</strong>{" "}
+                        <span className="text-slate-600 dark:text-slate-300">{feat.desc}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Quick Benefits */}
-            <div className="grid grid-cols-2 gap-3 pt-1">
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2">
-                <Zap className="w-4 h-4 text-blue-500 shrink-0" />
-                <span>Zero Database Blocking</span>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 flex items-center gap-2">
-                <RefreshCw className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>Atomic UI Replacement</span>
-              </div>
-            </div>
-
-            {/* Link to docs */}
-            <div className="pt-2">
+            {/* Card Footer */}
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 mt-4 flex items-center justify-between shrink-0">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                React 19 Segment Engine
+              </span>
               <Button
-                variant="ghost"
                 size="sm"
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 p-0 h-auto font-medium"
+                variant="outline"
+                className={`text-xs sm:text-sm ${
+                  activeTab === "ppr"
+                    ? "border-cyan-500/30 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/10"
+                    : activeTab === "vertical"
+                    ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                    : "border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10"
+                }`}
                 asChild
               >
-                <Link href="/docs/rendering" className="inline-flex items-center gap-1.5">
-                  <span>Explore full segmentation specifications</span>
-                  <ArrowRight className="w-4 h-4" />
+                <Link href={activeConfig.docHref}>
+                  <span>{activeConfig.docLabel}</span>
+                  <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                 </Link>
               </Button>
             </div>
           </div>
 
           {/* Right Column: Code Editor Preview (7 cols) */}
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-7 flex flex-col justify-between lg:h-[630px]">
             <CodeWindow
               filename={activeConfig.codeFile}
               code={activeConfig.codeSnippet}
               language="tsx"
               statusLeft="Native React 19 RSC Pipeline"
               statusRight="TypeScript 5+ Ready"
+              className="h-[500px] sm:h-[540px] lg:h-full"
             />
           </div>
         </div>
