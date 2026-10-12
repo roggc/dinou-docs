@@ -140,7 +140,7 @@ export function CodeWindow({
       </div>
 
       {/* Syntax Highlighted Code Body */}
-      <div className="overflow-x-auto flex-1 text-xs sm:text-[13px] leading-relaxed bg-[#0d1117]">
+      <div className="overflow-x-auto overflow-y-auto flex-1 text-xs sm:text-[13px] leading-relaxed bg-[#0d1117]">
         <SyntaxHighlighter
           language={activeLang}
           style={cleanOneDark}
