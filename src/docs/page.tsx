@@ -34,7 +34,6 @@ const tocItems = [
 ];
 
 export default function Page() {
-  X;
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
       <main className="flex-1 py-8 lg:py-10 w-full min-w-0">
