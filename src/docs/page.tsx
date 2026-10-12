@@ -83,7 +83,9 @@ export default function Page() {
               <div className="not-prose my-4 space-y-3">
                 <CodeBlock language="bash">
                   {`# Create a new project with the interactive wizard
-npx create-dinou-app@latest my-app
+npx create-dinou@latest my-app
+# or
+npm create dinou@latest my-app
 
 # Navigate to project and launch dev server
 cd my-app

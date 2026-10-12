@@ -141,7 +141,9 @@ export default function Page() {
                   containerClassName="w-full overflow-hidden rounded-lg mt-2"
                 >
                   {`# 1. Initialize a new Dinou application
-npx create-dinou-app@latest my-app
+npx create-dinou@latest my-app
+# or
+npm create dinou@latest my-app
 
 # 2. Enter project directory
 cd my-app
