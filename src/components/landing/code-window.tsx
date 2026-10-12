@@ -17,6 +17,7 @@ const cleanOneDark = {
     ...oneDark['pre[class*="language-"]'],
     background: "transparent",
     textShadow: "none",
+    overflow: "visible",
   },
   table: {
     display: "inline",
@@ -140,7 +141,7 @@ export function CodeWindow({
       </div>
 
       {/* Syntax Highlighted Code Body */}
-      <div className="overflow-x-auto overflow-y-auto flex-1 text-xs sm:text-[13px] leading-relaxed bg-[#0d1117]">
+      <div className="overflow-auto flex-1 text-xs sm:text-[13px] leading-relaxed bg-[#0d1117]">
         <SyntaxHighlighter
           language={activeLang}
           style={cleanOneDark}
@@ -151,6 +152,11 @@ export function CodeWindow({
             fontSize: "inherit",
             lineHeight: "1.65",
             fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+            minHeight: "100%",
+            minWidth: "100%",
+            width: "max-content",
+            boxSizing: "border-box",
+            overflow: "visible",
           }}
           codeTagProps={{
             style: {
