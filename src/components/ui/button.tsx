@@ -42,6 +42,7 @@ function Button({
   variant,
   size,
   asChild = false,
+  children,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
@@ -49,12 +50,33 @@ function Button({
   }) {
   const Comp = asChild ? Slot : "button";
 
+  let resolvedChildren = children;
+  while (
+    asChild &&
+    resolvedChildren &&
+    typeof resolvedChildren === "object" &&
+    (resolvedChildren as any).$$typeof === Symbol.for("react.lazy")
+  ) {
+    resolvedChildren = (resolvedChildren as any)._init(
+      (resolvedChildren as any)._payload
+    );
+  }
+  if (
+    asChild &&
+    resolvedChildren &&
+    typeof (resolvedChildren as any).then === "function"
+  ) {
+    resolvedChildren = React.use(resolvedChildren as any);
+  }
+
   return (
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {resolvedChildren}
+    </Comp>
   );
 }
 
