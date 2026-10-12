@@ -286,9 +286,9 @@ export function SegmentationShowcase() {
 
         {/* Showcase Grid: Info & Visual Left, Code Right */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-6xl mx-auto">
-          {/* Left Column: Card with Context, Visual Benchmark & Features */}
-          <div className="lg:col-span-5 flex flex-col justify-between p-6 sm:p-7 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm lg:h-[630px] overflow-hidden">
-            <div className="flex-1 overflow-y-auto pr-1 sm:pr-2 space-y-5">
+          {/* Left Column: Context, Visual Benchmark & Features (No outer card, scrollable if overflowing) */}
+          <div className="lg:col-span-5 flex flex-col justify-between space-y-6 lg:h-[630px] overflow-hidden">
+            <div className="flex-1 overflow-y-auto pr-1 sm:pr-2 space-y-6">
               <div className="space-y-3">
                 <Badge variant="outline" className={`text-xs px-3 py-1 font-mono ${activeConfig.badgeColor}`}>
                   {activeConfig.badge}
@@ -379,26 +379,23 @@ export function SegmentationShowcase() {
               </div>
             </div>
 
-            {/* Card Footer */}
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 mt-4 flex items-center justify-between shrink-0">
-              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                React 19 Segment Engine
-              </span>
+            {/* Link to Docs */}
+            <div className="pt-2 shrink-0">
               <Button
+                variant="link"
                 size="sm"
-                variant="outline"
-                className={`text-xs sm:text-sm ${
+                className={`p-0 h-auto font-medium ${
                   activeTab === "ppr"
-                    ? "border-cyan-500/30 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/10"
+                    ? "text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300"
                     : activeTab === "vertical"
-                    ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
-                    : "border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10"
+                    ? "text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
+                    : "text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
                 }`}
                 asChild
               >
-                <Link href={activeConfig.docHref}>
+                <Link href={activeConfig.docHref} className="inline-flex items-center gap-1.5">
                   <span>{activeConfig.docLabel}</span>
-                  <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
             </div>

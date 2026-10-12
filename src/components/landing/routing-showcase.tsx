@@ -262,7 +262,7 @@ export function RoutingShowcase() {
         {/* Showcase Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-6xl mx-auto">
           {/* Left Column: Feature Narrative & Highlights */}
-          <div className="lg:col-span-5 flex flex-col justify-between space-y-6 lg:h-[580px] overflow-hidden">
+          <div className="lg:col-span-5 flex flex-col justify-between space-y-6 lg:h-[630px] overflow-hidden">
             <div className="flex-1 overflow-y-auto pr-1 sm:pr-2 space-y-6">
               <div className="space-y-3">
                 <Badge variant="outline" className={`px-3 py-1 font-medium ${activeConfig.badgeColor}`}>
@@ -330,14 +330,14 @@ export function RoutingShowcase() {
           </div>
 
           {/* Right Column: Code Window with Syntax Highlighting */}
-          <div className="lg:col-span-7 flex flex-col justify-between lg:h-[580px]">
+          <div className="lg:col-span-7 flex flex-col justify-between lg:h-[630px]">
             <CodeWindow
               filename={activeConfig.codeFile}
               code={activeConfig.codeSnippet}
               language="tsx"
               statusLeft="Dinou File-System Router"
               statusRight="Zero Runtime Overhead"
-              className="h-[480px] sm:h-[520px] lg:h-full"
+              className="h-[500px] sm:h-[540px] lg:h-full"
             />
           </div>
         </div>

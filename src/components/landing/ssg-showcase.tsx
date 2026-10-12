@@ -233,67 +233,99 @@ export function SsgShowcase() {
 
         {/* Showcase Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-6xl mx-auto">
-          {/* Left Column: Card with Context, Stat & Features */}
-          <div className="lg:col-span-5 flex flex-col justify-between p-6 sm:p-7 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm lg:h-[630px] overflow-hidden">
-            <div className="flex-1 overflow-y-auto pr-1 sm:pr-2 space-y-5">
+          {/* Left Column: Feature Narrative & Highlights (No outer card, scrollable if overflowing) */}
+          <div className="lg:col-span-5 flex flex-col justify-between space-y-6 lg:h-[630px] overflow-hidden">
+            <div className="flex-1 overflow-y-auto pr-1 sm:pr-2 space-y-6">
               <div className="space-y-3">
-                <Badge variant="outline" className={`text-xs px-3 py-1 font-mono ${activeConfig.badgeColor}`}>
+                <Badge variant="outline" className={`px-3 py-1 font-medium ${activeConfig.badgeColor}`}>
                   {activeConfig.badge}
                 </Badge>
                 <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                   {activeConfig.headline}
                 </h3>
-                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-base">
                   {activeConfig.description}
                 </p>
               </div>
 
-              {/* Key Stat & Cache Metric Card */}
-              <div className="p-4 rounded-xl border border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-cyan-500/10 flex items-center justify-between">
-                <div>
-                  <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
-                    {activeConfig.stat}
-                  </div>
-                  <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-medium mt-0.5">
-                    {activeConfig.statLabel}
-                  </div>
+              {/* Metric Card */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200/90 dark:border-slate-800 shadow-sm relative overflow-hidden">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800/80 mb-4">
+                  <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Cache Metric
+                  </span>
+                  <span
+                    className={`text-xs font-mono px-2 py-0.5 rounded font-bold ${
+                      activeTab === "ssg"
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        : activeTab === "isr"
+                        ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                        : "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                    }`}
+                  >
+                    Verified v7
+                  </span>
                 </div>
-                <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] px-2 py-0.5">
-                  Verified v7
-                </Badge>
-              </div>
-
-              {/* Feature Highlights */}
-              <div className="space-y-2.5 pt-1">
-                {activeConfig.features.map((feat, i) => {
-                  const Icon = feat.icon;
-                  return (
-                    <div
-                      key={i}
-                      className="p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-start gap-3"
-                    >
-                      <div className="p-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0">
-                        <Icon className="w-3.5 h-3.5" />
+                <div className="flex items-baseline gap-2.5">
+                  <span
+                    className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${
+                      activeTab === "ssg"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : activeTab === "isr"
+                        ? "text-blue-600 dark:text-blue-400"
+                        : "text-purple-600 dark:text-purple-400"
+                    }`}
+                  >
+                    {activeConfig.stat}
+                  </span>
+                  <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">
+                    {activeConfig.statLabel}
+                  </span>
+                </div>
+                <div className="mt-4 space-y-3">
+                  {activeConfig.features.map((feat, i) => {
+                    const Icon = feat.icon;
+                    return (
+                      <div key={i} className="flex items-start gap-3">
+                        <div
+                          className={`p-1 rounded-md mt-0.5 shrink-0 ${
+                            activeTab === "ssg"
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                              : activeTab === "isr"
+                              ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                              : "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+                          }`}
+                        >
+                          <Icon className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="text-xs sm:text-sm">
+                          <strong className="text-slate-900 dark:text-white">{feat.title}:</strong>{" "}
+                          <span className="text-slate-600 dark:text-slate-300">{feat.desc}</span>
+                        </div>
                       </div>
-                      <div className="text-xs sm:text-sm">
-                        <strong className="text-slate-900 dark:text-white">{feat.title}:</strong>{" "}
-                        <span className="text-slate-600 dark:text-slate-300">{feat.desc}</span>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
-            {/* Card Footer */}
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 mt-4 flex items-center justify-between shrink-0">
-              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                Incremental Static Engine
-              </span>
-              <Button size="sm" variant="outline" className="text-xs sm:text-sm border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10" asChild>
-                <Link href="/docs/rendering">
-                  <span>SSG &amp; ISR Guide</span>
-                  <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+            {/* Link to Docs */}
+            <div className="pt-2 shrink-0">
+              <Button
+                variant="link"
+                size="sm"
+                className={`p-0 h-auto font-medium ${
+                  activeTab === "ssg"
+                    ? "text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
+                    : activeTab === "isr"
+                    ? "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                    : "text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+                }`}
+                asChild
+              >
+                <Link href="/docs/rendering" className="inline-flex items-center gap-1.5">
+                  <span>Explore rendering &amp; revalidation specifications</span>
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
             </div>

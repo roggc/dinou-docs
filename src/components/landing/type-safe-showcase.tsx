@@ -254,9 +254,9 @@ export function TypeSafeShowcase() {
 
         {/* Tab Content Display */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-6xl mx-auto">
-          {/* Left Column: Card with Context, Features & Stat */}
-          <div className="lg:col-span-5 flex flex-col justify-between p-6 sm:p-7 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm lg:h-[630px] overflow-hidden">
-            <div className="flex-1 overflow-y-auto pr-1 sm:pr-2 space-y-5">
+          {/* Left Column: Context, Features & Stat (No outer card, scrollable if overflowing) */}
+          <div className="lg:col-span-5 flex flex-col justify-between space-y-6 lg:h-[630px] overflow-hidden">
+            <div className="flex-1 overflow-y-auto pr-1 sm:pr-2 space-y-6">
               <div className="space-y-3">
                 <Badge
                   variant="outline"
@@ -300,15 +300,17 @@ export function TypeSafeShowcase() {
               </div>
             </div>
 
-            {/* Card Footer */}
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 mt-4 flex items-center justify-between shrink-0">
-              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                TypeScript 5.x Engine
-              </span>
-              <Button size="sm" variant="outline" className="text-xs sm:text-sm border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10" asChild>
-                <Link href="/docs/type-safe-routing">
-                  <span>Type-Safe Guide</span>
-                  <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+            {/* Link to Docs */}
+            <div className="pt-2 shrink-0">
+              <Button
+                variant="link"
+                size="sm"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 p-0 h-auto font-medium"
+                asChild
+              >
+                <Link href="/docs/type-safe-routing" className="inline-flex items-center gap-1.5">
+                  <span>Explore type-safe routing specifications</span>
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
             </div>
