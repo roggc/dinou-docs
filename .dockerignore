@@ -1,0 +1,19 @@
+# Dependencias locales (se instalarán dentro de Linux con bun install)
+node_modules
+
+# Control de versiones (evita subir cientos de MB de historial)
+.git
+.gitignore
+
+# Compilaciones locales previas de Windows
+.dinou
+dist
+out
+.wrangler
+
+# Variables de entorno y secretos
+.env
+.env.*
+
+# Logs y documentación interna
+*.log
