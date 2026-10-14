@@ -2,8 +2,11 @@
 FROM oven/bun:latest AS builder
 WORKDIR /app
 
-# Instalar dependencias
-COPY package.json ./
+# Symlink para que #!/usr/bin/env node (usado por el bin de dinou y cross-env) ejecute bun
+RUN ln -s /usr/local/bin/bun /usr/local/bin/node
+
+# Instalar dependencias respetando las versiones de package-lock.json
+COPY package.json package-lock.json* ./
 RUN bun install
 
 # Copiar proyecto y compilar binario
