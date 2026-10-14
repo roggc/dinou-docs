@@ -12,6 +12,8 @@ interface CodeBlockProps {
   className?: string;
   containerClassName?: string;
   minWidth?: string;
+  hideCopyButton?: boolean;
+  customStyle?: React.CSSProperties;
 }
 
 export function CodeBlock({
@@ -20,6 +22,8 @@ export function CodeBlock({
   className,
   containerClassName,
   minWidth,
+  hideCopyButton = false,
+  customStyle,
 }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
@@ -35,17 +39,19 @@ export function CodeBlock({
 
   return (
     <div
-      className={`relative group w-full overflow-hidden ${
+      className={`relative group w-full min-w-0 overflow-hidden flex flex-col ${
         containerClassName ?? ""
       }`}
     >
-      <button
-        onClick={copyToClipboard}
-        className="absolute top-2 right-2 p-2 rounded-md bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-colors opacity-0 group-hover:opacity-100 z-10"
-        aria-label="Copy code"
-      >
-        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-      </button>
+      {!hideCopyButton && (
+        <button
+          onClick={copyToClipboard}
+          className="absolute top-2 right-2 p-2 rounded-md bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-colors opacity-0 group-hover:opacity-100 z-10"
+          aria-label="Copy code"
+        >
+          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+        </button>
+      )}
       <SyntaxHighlighter
         language={language}
         style={oneDark}
@@ -56,6 +62,9 @@ export function CodeBlock({
           lineHeight: "1.5",
           maxWidth: "100%",
           overflow: "auto",
+          minHeight: "100%",
+          flex: 1,
+          ...customStyle,
         }}
         className={className}
         wrapLines={false}

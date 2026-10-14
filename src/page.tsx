@@ -1,81 +1,80 @@
-"use client";
-
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Rocket,
   Github,
-  BookOpen,
   Sparkles,
-  Check,
-  Copy,
-  Terminal,
+  ArrowRight,
 } from "lucide-react";
-import { FeaturesSection } from "@/components/features-section";
 import { Link } from "dinou";
+import { React19Showcase } from "@/components/landing/react-19-showcase";
+import { DeployMatrix } from "@/components/landing/deploy-matrix";
+import { RoutingShowcase } from "@/components/landing/routing-showcase";
+import { TypeSafeShowcase } from "@/components/landing/type-safe-showcase";
+import { SsgShowcase } from "@/components/landing/ssg-showcase";
+import { SegmentationShowcase } from "@/components/landing/segmentation-showcase";
+import { MiddlewareShowcase } from "@/components/landing/middleware-showcase";
+import { DxShowcase } from "@/components/landing/dx-showcase";
+import { TriBundlerShowcase } from "@/components/landing/tri-bundler-showcase";
+import { EjectShowcase } from "@/components/landing/eject-showcase";
+import { EngineComparison } from "@/components/landing/engine-comparison";
+import { QuickStartBadge } from "@/components/landing/quick-start-badge";
 
 export default function Page() {
-  const [copied, setCopied] = useState(false);
-  const installCommand = "npx create-dinou@latest my-app";
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(installCommand);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   return (
     <main className="flex-1 overflow-hidden">
-      {/* Background Gradients */}
-      <div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-slate-950 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)]"></div>
+      {/* Background Gradients & Grid */}
+      <div className="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-slate-950 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)]" />
 
       {/* Hero Section */}
-      {/* CAMBIO: Reducido el padding vertical (py) para subir el contenido */}
-      <section id="main" className="w-full py-12 md:py-20 lg:py-24 relative">
+      <section id="main" className="w-full pt-8 pb-12 sm:pt-10 sm:pb-16 md:pt-12 md:pb-16 lg:pt-14 lg:pb-20 scroll-mt-16 relative">
         <div className="container px-4 md:px-6 mx-auto">
-          <div className="flex flex-col items-center space-y-8 text-center">
-            <div className="space-y-4 max-w-4xl">
-              <div className="flex justify-center">
-                <Badge
-                  variant="secondary"
-                  className="px-4 py-1.5 text-sm border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm"
-                >
-                  <Sparkles className="mr-2 h-3.5 w-3.5 text-blue-500" />
-                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-semibold">
-                    Dinou v6
-                  </span>
-                </Badge>
-              </div>
-
-              <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-slate-900 dark:text-white">
-                Dinou
-                <span className="block mt-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight pb-2 text-3xl sm:text-4xl md:text-5xl lg:text-6xl">
-                  Lightweight-Ejectable Full-Stack React 19 Framework
-                </span>
-              </h1>
-
-              <p className="mx-auto max-w-[750px] text-lg text-slate-600 dark:text-slate-400 md:text-xl leading-relaxed">
-                Choose your build engine with esbuild, Rollup, or Webpack. Extract the entire core with a single command when you need complete customization. No lock-in, just pure React 19 power.
-              </p>
+          <div className="flex flex-col items-center space-y-4 sm:space-y-6 text-center max-w-4xl mx-auto">
+            {/* Version Badge */}
+            <div className="flex justify-center">
+              <Badge
+                variant="secondary"
+                className="px-4 py-1.5 text-xs sm:text-sm border border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400 backdrop-blur-md font-medium rounded-full shadow-sm"
+              >
+                <Sparkles className="mr-2 h-3.5 w-3.5 text-blue-500" />
+                <span>Dinou v7 — React 19 Framework</span>
+              </Badge>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center pt-4">
+            {/* Main Headline */}
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl text-slate-900 dark:text-white leading-[1.08] sm:leading-[1.1]">
+              <span className="block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent pb-1">
+                Dinou
+              </span>
+              <span className="block text-slate-900 dark:text-white">
+                Build with <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">React 19</span>
+              </span>
+              <span className="block bg-gradient-to-r from-amber-600 via-orange-500 to-yellow-500 dark:from-amber-400 dark:via-orange-400 dark:to-yellow-400 bg-clip-text text-transparent pb-3 -mb-2">
+                Deploy Everywhere
+              </span>
+            </h1>
+
+            {/* Subheading */}
+            <p className="max-w-[780px] text-slate-600 dark:text-slate-300 text-lg md:text-xl leading-relaxed">
+              The ejectable React 19 framework built on web standards. Build full-stack apps and deploy anywhere with zero vendor lock-in.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center pt-1 sm:pt-2">
               <Button
                 size="lg"
-                className="text-base h-12 px-8 rounded-full"
+                className="text-base h-12 px-8 rounded-full shadow-lg shadow-blue-500/20 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                 asChild
               >
                 <Link href="/docs">
                   <Rocket className="mr-2 h-5 w-5" />
-                  Get Started
+                  Explore Documentation
                 </Link>
               </Button>
               <Button
                 variant="outline"
                 size="lg"
-                className="text-base h-12 px-8 rounded-full bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm"
+                className="text-base h-12 px-8 rounded-full bg-white/70 dark:bg-slate-950/60 border-slate-300 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/60 backdrop-blur-sm"
                 asChild
               >
                 <a
@@ -88,137 +87,76 @@ export default function Page() {
                 </a>
               </Button>
             </div>
+
+            {/* Quick Start Command Badge */}
+            <div className="pt-1 sm:pt-2 flex justify-center">
+              <QuickStartBadge />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <FeaturesSection />
+      {/* Pure React 19 Native Engine (RSC & Server Functions) Showcase */}
+      <React19Showcase />
 
-      {/* Quick Start / Code Section */}
-      <section
-        id="development"
-        className="w-full py-20 md:py-32 bg-slate-50/50 dark:bg-slate-900/20 border-y border-slate-200 dark:border-slate-800"
-      >
-        <div className="container px-4 md:px-6 mx-auto">
-          <div className="grid gap-12 lg:grid-cols-2 items-center">
-            {/* Text Content */}
-            <div className="space-y-6">
-              <div className="inline-flex items-center rounded-lg bg-blue-100 dark:bg-blue-900/30 px-3 py-1 text-sm font-medium text-blue-800 dark:text-blue-300">
-                <Terminal className="mr-2 h-4 w-4" />
-                Zero Configuration
-              </div>
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-slate-900 dark:text-white">
-                Start coding in seconds
+      {/* Deploy Everywhere Interactive Showcase */}
+      <DeployMatrix />
+
+      {/* Intuitive File-Based Routing Showcase */}
+      <RoutingShowcase />
+
+      {/* Zero-Runtime Type-Safe Routing Showcase */}
+      <TypeSafeShowcase />
+
+      {/* Static by Default (SSG, ISR, ISG) Showcase */}
+      <SsgShowcase />
+
+      {/* Layered Segmentation & PPR Showcase */}
+      <SegmentationShowcase />
+
+      {/* Universal Middleware & Webhooks Showcase */}
+      <MiddlewareShowcase />
+
+      {/* Fast Developer Experience (DX) Showcase */}
+      <DxShowcase />
+
+      {/* Tri-Bundler Engine (esbuild, Rollup, Webpack) Showcase */}
+      <TriBundlerShowcase />
+
+      {/* Framework Sovereignty & Zero Lock-in (Eject) Showcase */}
+      <EjectShowcase />
+
+      {/* From Heavy Truck to Formula 1 Engine Comparison */}
+      <EngineComparison />
+
+      {/* Final Call to Action */}
+      <section id="ready" className="w-full pt-8 pb-16 sm:pt-10 sm:pb-20 md:pt-12 md:pb-24 lg:pt-14 lg:pb-28 scroll-mt-16 relative overflow-hidden">
+        <div className="container px-4 md:px-6 mx-auto text-center">
+          <div className="relative rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-b from-slate-50/90 via-white/80 to-slate-50/90 dark:from-slate-900/70 dark:via-slate-950/60 dark:to-slate-900/70 p-8 sm:p-12 md:p-14 max-w-4xl mx-auto shadow-2xl backdrop-blur-md overflow-hidden">
+            {/* Subtle glow effect behind CTA */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/10 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none -z-10" />
+
+            <div className="flex flex-col items-center space-y-6 max-w-2xl mx-auto">
+              <Badge
+                variant="outline"
+                className="px-3.5 py-1 border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10 backdrop-blur-sm font-medium"
+              >
+                Start Building Today
+              </Badge>
+              <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl text-slate-900 dark:text-white">
+                Ready to build without boundaries?
               </h2>
-              <p className="text-slate-600 dark:text-slate-400 md:text-lg leading-relaxed">
-                Start with a zero-config setup using esbuild, or seamlessly switch to Rollup or Webpack using standard npm scripts. If you ever need to customize the internals, just run the eject command to take full ownership.
+              <p className="text-slate-600 dark:text-slate-300 md:text-lg max-w-xl">
+                Experience the power of React 19 Server Components, Streaming SSR, and Server Functions with total freedom of infrastructure.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                <Button variant="default" asChild>
+              <div className="flex justify-center pt-2">
+                <Button size="lg" className="text-base rounded-full px-8 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20" asChild>
                   <Link href="/docs">
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    Read the Guide
+                    <span>Get Started Now</span>
+                    <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </Button>
               </div>
-            </div>
-
-            {/* Terminal Card */}
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-              <Card className="relative overflow-hidden bg-[#1e1e1e] text-slate-50 border-slate-800 shadow-2xl rounded-xl">
-                {/* Mac-like header */}
-                <div className="flex items-center justify-between px-4 py-3 bg-[#252526] border-b border-white/10">
-                  <div className="flex space-x-2">
-                    <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-                    <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-                    <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
-                  </div>
-                  <div className="text-xs text-slate-400 font-mono">bash</div>
-                </div>
-
-                {/* Code Content */}
-                <div className="p-6 font-mono text-sm relative">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="absolute top-4 right-4 h-8 w-8 text-slate-400 hover:text-white hover:bg-white/10"
-                    onClick={handleCopy}
-                  >
-                    {copied ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                    <span className="sr-only">Copy command</span>
-                  </Button>
-
-                  <div className="space-y-4">
-                    <div className="flex items-start">
-                      <span className="text-green-500 mr-2">$</span>
-                      <span className="text-slate-300">{installCommand}</span>
-                    </div>
-                    <div className="text-slate-500">
-                      Creating a new Dinou app in{" "}
-                      <span className="text-blue-400">./my-app</span>...
-                    </div>
-                    <div className="text-slate-500">
-                      <span className="text-green-500">✔</span> Project
-                      initialized
-                    </div>
-                    <div className="flex items-start">
-                      <span className="text-green-500 mr-2">$</span>
-                      <span className="text-slate-300">
-                        cd my-app && npm run dev
-                      </span>
-                    </div>
-                    <div className="text-blue-400">
-                      🚀 Dinou Server is ready and listening on http://localhost:3000
-                    </div>
-                    <div className="text-slate-500">
-                      &nbsp;&nbsp;&nbsp;Environment: Development
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA Section */}
-      <section
-        id="ready"
-        className="w-full py-20 md:py-32 relative overflow-hidden"
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-100/50 dark:to-slate-900/50 -z-10" />
-        <div className="container px-4 md:px-6 mx-auto text-center">
-          <div className="flex flex-col items-center space-y-6 max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-              Ready to ship?
-            </h2>
-            <p className="text-slate-600 dark:text-slate-400 md:text-xl">
-              Build lightweight, robust React 19 apps with zero constraints and absolute builder flexibility.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 w-full justify-center pt-4">
-              <Button size="lg" className="text-base rounded-full px-8" asChild>
-                <Link href="/docs">Get Started Now</Link>
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="text-base rounded-full px-8"
-                asChild
-              >
-                <a
-                  href="https://github.com/roggc/dinou"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  View Source
-                </a>
-              </Button>
             </div>
           </div>
         </div>

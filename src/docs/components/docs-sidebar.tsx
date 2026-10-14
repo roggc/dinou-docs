@@ -19,7 +19,6 @@ import {
   Server,
   Database,
   Settings,
-  FileText,
   Zap,
   Code,
   ImageIcon,
@@ -32,6 +31,7 @@ import {
   Plug,
   Hexagon,
   Star,
+  Sparkles,
   Rocket,
   DraftingCompass,
   Package,
@@ -47,210 +47,10 @@ import {
   Compass,
   ArrowLeft,
   ArrowRight,
+  ShieldCheck,
 } from "lucide-react";
+import { docsNavigation } from "@/docs/lib/docs-navigation";
 
-const docsNavigation = [
-  {
-    title: "Getting Started",
-    items: [
-      {
-        title: "Introduction",
-        href: "/docs",
-        icon: BookOpen,
-      },
-      {
-        title: "Installation",
-        href: "/docs/getting-started",
-        icon: Package,
-      },
-      {
-        title: "Why Dinou",
-        href: "/docs/why-dinou",
-        icon: Rocket,
-      },
-      {
-        title: "About",
-        href: "/docs/about",
-        icon: Copyright,
-      },
-    ],
-  },
-  {
-    title: "Upgrade Guides",
-    items: [
-      {
-        title: "Overview",
-        href: "/docs/migration",
-        icon: Compass,
-      },
-      {
-        title: "Migration from v5 to v6",
-        href: "/docs/migration/v5-to-v6",
-        icon: RefreshCw,
-      },
-      {
-        title: "Migration from v4 to v5",
-        href: "/docs/migration/v4-to-v5",
-        icon: RefreshCw,
-      },
-    ],
-  },
-  {
-    title: "Core Concepts",
-    items: [
-      {
-        title: "Routing",
-        href: "/docs/routing",
-        icon: Route,
-      },
-      {
-        title: "Layouts",
-        href: "/docs/layouts",
-        icon: FileText,
-      },
-      {
-        title: "Route Parameters",
-        href: "/docs/route-parameters",
-        icon: Fingerprint,
-      },
-      {
-        title: "Server & Client Components",
-        href: "/docs/server-client-components",
-        icon: Server,
-      },
-      {
-        title: "Navigation",
-        href: "/docs/navigation",
-        icon: Globe,
-      },
-      {
-        title: "Page Functions",
-        href: "/docs/page-functions",
-        icon: DraftingCompass,
-      },
-      {
-        title: "Server Functions",
-        href: "/docs/server-functions",
-        icon: Zap,
-      },
-      {
-        title: "Data Fetching",
-        href: "/docs/data-fetching",
-        icon: Database,
-      },
-      {
-        title: "Advanced Patterns",
-        href: "/docs/pattern",
-        icon: Brain,
-      },
-      {
-        title: "Rendering",
-        href: "/docs/rendering",
-        icon: Shredder,
-      },
-      {
-        title: "On-Demand Revalidation",
-        href: "/docs/revalidation",
-        icon: RefreshCw,
-      },
-      {
-        title: "React Compiler",
-        href: "/docs/compiler",
-        icon: Atom,
-      },
-      {
-        title: "API Reference",
-        href: "/docs/api-reference",
-        icon: BookMarked,
-      },
-      {
-        title: "Cheatsheet",
-        href: "/docs/cheatsheet",
-        icon: ClipboardList,
-      },
-    ],
-  },
-  {
-    title: "Features",
-    items: [
-      {
-        title: "Favicons",
-        href: "/docs/favicons",
-        icon: Code,
-      },
-      {
-        title: "Styles",
-        href: "/docs/styles",
-        icon: Palette,
-      },
-      {
-        title: "Assets",
-        href: "/docs/assets",
-        icon: ImageIcon,
-      },
-    ],
-  },
-  {
-    title: "Configuration",
-    items: [
-      {
-        title: "Env Vars",
-        href: "/docs/env-vars",
-        icon: Hexagon,
-      },
-      {
-        title: "Alias",
-        href: "/docs/alias",
-        icon: AtSign,
-      },
-      {
-        title: "Plugins",
-        href: "/docs/plugins",
-        icon: Settings,
-      },
-      {
-        title: "Eject",
-        href: "/docs/eject",
-        icon: Plug,
-      },
-      {
-        title: "Bundlers",
-        href: "/docs/bundlers",
-        icon: Boxes,
-      },
-      {
-        title: "Deployment",
-        href: "/docs/deployment",
-        icon: Rocket,
-      },
-    ],
-  },
-  {
-    title: "Guides",
-    items: [
-      {
-        title: "Context Propagation",
-        href: "/docs/context",
-        icon: RefreshCw,
-      },
-      {
-        title: "Internationalization",
-        href: "/docs/i18n",
-        icon: Globe,
-      },
-      {
-        title: "Clerk Authentication",
-        href: "/docs/clerk",
-        icon: Fingerprint,
-      },
-      {
-        title: "Architecture & Internals",
-        href: "/docs/internals",
-        icon: Cpu,
-      },
-    ],
-  },
-];
 
 const ejectedNavigation = [
   {
@@ -603,33 +403,7 @@ export function DocsSidebar() {
 
   return (
     <Sidebar className="border-r fixed left-0 top-0 h-full z-30">
-      <SidebarContent className="scrollbar-thin md:pt-14">
-        {/* Mobile segmented switcher */}
-        <div className="px-3 pt-3 pb-1 sm:hidden">
-          <div className="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-            <Link
-              href="/docs"
-              className={`flex-1 text-center py-1.5 text-xs font-medium rounded-md transition-colors ${
-                !isEjected
-                  ? "bg-white dark:bg-slate-800 text-foreground font-semibold shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Docs
-            </Link>
-            <Link
-              href="/docs/ejected-reference"
-              className={`flex-1 text-center py-1.5 text-xs font-medium rounded-md transition-colors ${
-                isEjected
-                  ? "bg-white dark:bg-slate-800 text-foreground font-semibold shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Ejected Ref
-            </Link>
-          </div>
-        </div>
-
+      <SidebarContent className="scrollbar-thin md:pt-16">
         {/* Ejected mode back button */}
         {isEjected && (
           <div className="px-3 pt-3 pb-1">
@@ -693,28 +467,6 @@ export function DocsSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
-
-        {/* In Docs mode: Card inviting to Ejected Reference */}
-        {!isEjected && (
-          <div className="p-3 mt-4 mb-2">
-            <div className="rounded-xl border border-amber-500/20 bg-amber-50/40 dark:bg-amber-950/10 p-3 space-y-2">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                <Plug className="h-3.5 w-3.5" />
-                <span>Ejected Code?</span>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Explore the complete reference of architecture and plugins generated after running <code>npm run eject</code>.
-              </p>
-              <Link
-                href="/docs/ejected-reference"
-                className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline pt-1"
-              >
-                <span>Ejected Reference</span>
-                <ArrowRight className="h-3 w-3" />
-              </Link>
-            </div>
-          </div>
-        )}
       </SidebarContent>
     </Sidebar>
   );

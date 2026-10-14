@@ -115,11 +115,42 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  [id] {
+    scroll-margin-top: 5rem;
+  }
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Universal pointer cursor for all interactive elements */
+  button,
+  [role="button"],
+  [role="tab"],
+  [role="menuitem"],
+  [role="option"],
+  [role="switch"],
+  [role="checkbox"],
+  [role="radio"],
+  [type="button"],
+  [type="reset"],
+  [type="submit"],
+  summary,
+  a,
+  label[for],
+  select {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [disabled],
+  [aria-disabled="true"] {
+    cursor: not-allowed;
   }
 
   :root {
@@ -195,3 +226,43 @@
   white-space: nowrap !important;
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3) !important;
 }
+
+/* ==================================================================== */
+/* View Transitions API (React 19 SPA Navigation)                       */
+/* ==================================================================== */
+::view-transition-old(page-content),
+::view-transition-old(docs-content) {
+  animation: 160ms cubic-bezier(0.4, 0, 1, 1) both dinou-fade-out;
+}
+
+::view-transition-new(page-content),
+::view-transition-new(docs-content) {
+  animation: 200ms cubic-bezier(0, 0, 0.2, 1) both dinou-fade-in;
+}
+
+@keyframes dinou-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes dinou-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Prevent Tailwind CSS .table utility class from turning Prism TOML table tokens into block-level tables */
+code .token.table {
+  display: inline !important;
+}

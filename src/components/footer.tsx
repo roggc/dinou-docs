@@ -87,18 +87,18 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/docs/favicons"
+                  href="/docs/api-reference"
                   className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                 >
-                  Features
+                  Reference
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/docs/env-vars"
+                  href="/docs/i18n"
                   className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                 >
-                  Configuration
+                  Guides
                 </Link>
               </li>
             </ul>

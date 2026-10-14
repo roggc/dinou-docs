@@ -40,14 +40,36 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
+
+    let resolvedChildren = children;
+    while (
+      asChild &&
+      resolvedChildren &&
+      typeof resolvedChildren === "object" &&
+      (resolvedChildren as any).$$typeof === Symbol.for("react.lazy")
+    ) {
+      resolvedChildren = (resolvedChildren as any)._init(
+        (resolvedChildren as any)._payload
+      );
+    }
+    if (
+      asChild &&
+      resolvedChildren &&
+      typeof (resolvedChildren as any).then === "function"
+    ) {
+      resolvedChildren = React.use(resolvedChildren as any);
+    }
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
-      />
+      >
+        {resolvedChildren}
+      </Comp>
     );
   }
 );

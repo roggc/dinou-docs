@@ -1,3 +1,7 @@
 node_modules
 .dinou
+out
+dist
+.wrangler
 .env
+
