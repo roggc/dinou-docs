@@ -86,9 +86,9 @@ export function RevalidateContract() {
       {/* Hierarchical Segment Reconciliation Alert */}
       <Alert className="not-prose my-4">
         <Layers className="h-4 w-4 text-amber-500" />
-        <AlertTitle>Hierarchical Segment Reconciliation (Math.min)</AlertTitle>
+        <AlertTitle>Initial HTML Document Reconciliation (Math.min)</AlertTitle>
         <AlertDescription>
-          When multiple segments along the active route hierarchy (e.g. a parent <code>layout_functions.ts</code> and a nested <code>page_functions.ts</code>) export <code>revalidate</code>, Dinou reconciles the values using <code>Math.min()</code>. The segment specifying the shortest revalidation interval takes precedence. If any layout or page in the active branch sets <code>revalidate: 0</code>, the entire route becomes Dynamic SSR.
+          When serving the initial unified HTML document (<code>index.html</code> on first load or hard refresh), Dinou reconciles multiple <code>revalidate</code> exports along the route hierarchy using <code>Math.min()</code>. The segment specifying the shortest interval takes precedence so the composite HTML shell never serves stale page content. In contrast, during client-side SPA navigation, <strong>Horizontal Layered Segmentation</strong> keeps <code>layout.rsc</code> and <code>page.rsc</code> on completely decoupled, independent caching planes. If any segment sets <code>revalidate: 0</code>, the initial HTML response is served via Dynamic SSR.
         </AlertDescription>
       </Alert>
 
