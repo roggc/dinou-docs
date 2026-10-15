@@ -887,7 +887,7 @@ export default function DashboardPage() {
                 4. Dual-Bundle In-Memory Engine (0-Fork) &amp; Pre-Rendering
               </h2>
               <p>
-                React 19 imposes a strict module-resolution constraint: Server Components must be imported under the <code>&quot;react-server&quot;</code> condition, while SSR rendering requires client conditions (<code>&quot;browser&quot;</code> / <code>react-dom/server.edge</code>). Importing both in the same module scope throws a fatal conflict.
+                React 19 imposes a strict module-resolution constraint: Server Components must be imported under the <code>&quot;react-server&quot;</code> package export condition, while SSR rendering requires client export conditions (such as <code>&quot;browser&quot;</code> / <code>react-dom/server.edge</code>). Importing both in the same module scope throws a fatal conflict.
               </p>
               <p>
                 Earlier meta-frameworks circumvented this in Node.js via <code>child_process.fork()</code>. However, this introduced IPC serialization latency, doubled memory usage, and made deployment to edge runtimes (Cloudflare Workers, Deno Deploy) impossible.
@@ -903,8 +903,8 @@ export default function DashboardPage() {
                     <span>3-Pass In-Memory Compilation (0 Disk I/O)</span>
                   </div>
                   <ul className="text-sm text-muted-foreground space-y-2 list-disc pl-4">
-                    <li><strong>Pass A (RSC Engine):</strong> Bundled with <code>[&quot;react-server&quot;]</code> conditions. Binds Server Functions and generates client reference descriptors.</li>
-                    <li><strong>Pass B (SSR Engine):</strong> Bundled with <code>[&quot;browser&quot;]</code> conditions. Packages <code>react-dom/server.edge</code> and client manifests.</li>
+                    <li><strong>Pass A (RSC Engine):</strong> Bundled via bundler with <code>[&quot;react-server&quot;]</code> package export conditions. Binds Server Functions and generates client reference descriptors.</li>
+                    <li><strong>Pass B (SSR Engine):</strong> Bundled via bundler with <code>[&quot;browser&quot;]</code> package export conditions. Packages <code>react-dom/server.edge</code>, resolves Client Component hooks (<code>useState</code>, <code>useEffect</code>), and client manifests.</li>
                     <li><strong>Pass C (Orchestrator):</strong> Interconnects Pass A and Pass B via standard W3C <code>ReadableStream</code> and handles static assets. In development, files exist purely in <code>globalThis.__DINOU_MEM_FILES__</code> with &lt;0.5ms response times.</li>
                   </ul>
                 </div>

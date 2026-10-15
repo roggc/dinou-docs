@@ -262,7 +262,7 @@ export default function ArchitecturePage() {
                       <span>Pass A: RSC Engine</span>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      Bundled with <code>[&quot;react-server&quot;]</code> conditions. Replaces Client Components (<code>&quot;use client&quot;</code>) with client reference descriptors via <code>createClientModuleProxy</code>. Binds Server Functions (<code>&quot;use server&quot;</code>) and generates the RSC Flight stream.
+                      Bundled via bundler with <code>[&quot;react-server&quot;]</code> package export conditions. Replaces Client Components (<code>&quot;use client&quot;</code>) with client reference descriptors via <code>createClientModuleProxy</code>. Binds Server Functions (<code>&quot;use server&quot;</code>) and generates the RSC Flight stream.
                     </p>
                   </div>
 
@@ -272,7 +272,7 @@ export default function ArchitecturePage() {
                       <span>Pass B: SSR Engine</span>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      Bundled with <code>[&quot;browser&quot;]</code> client conditions. Packages <code>react-dom/server.edge</code> (<code>renderToReadableStream</code>) and client manifests containing the physical component implementations needed to produce static HTML and client hydration.
+                      Bundled via bundler with <code>[&quot;browser&quot;]</code> package export conditions. Packages <code>react-dom/server.edge</code> (<code>renderToReadableStream</code>) and client manifests containing the physical component implementations needed to produce static HTML and client hydration.
                     </p>
                   </div>
 
