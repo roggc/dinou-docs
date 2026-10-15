@@ -36,6 +36,13 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
+      <title>Introduction | Dinou v7 Docs</title>
+      <meta
+        name="description"
+        content="Official introduction to Dinou v7: the lightweight, ejectable React 19 full-stack framework with React Server Components and zero vendor lock-in."
+      />
+      <link rel="canonical" href="https://dinou.dev/docs" />
+
       <main className="flex-1 py-8 lg:py-10 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Hero Header */}

@@ -62,6 +62,13 @@ const tocItems = [
 export default function ArchitecturePage() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
+      <title>Architecture & Runtime Engine | Dinou v7 Docs</title>
+      <meta
+        name="description"
+        content="Comprehensive architectural specification of Dinou v7: the 0-Fork Ahead-of-Time Dual-Bundle Pipeline, Layered Segmentation, and Virtual Filesystem."
+      />
+      <link rel="canonical" href="https://dinou.dev/docs/architecture" />
+
       <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}

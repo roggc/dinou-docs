@@ -55,6 +55,13 @@ const tocItems = [
 export default function MigrationV6ToV7Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
+      <title>Migration from v6 to v7 | Dinou v7 Docs</title>
+      <meta
+        name="description"
+        content="Complete migration specification for upgrading to Dinou v7: breaking changes in data fetching contracts, horizontal segmentation, and layout functions."
+      />
+      <link rel="canonical" href="https://dinou.dev/docs/migration/v6-to-v7" />
+
       <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
