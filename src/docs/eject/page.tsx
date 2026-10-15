@@ -18,6 +18,7 @@ import {
   Settings,
   Server,
   Cloud,
+  RotateCcw,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -31,6 +32,7 @@ const tocItems = [
   { id: "customization-examples", title: "Practical Customization Examples", level: 2 },
   { id: "custom-middleware", title: "1. Adding Custom Server Middleware", level: 3 },
   { id: "custom-bundler", title: "2. Extending the Bundler Pipeline", level: 3 },
+  { id: "reverting-eject", title: "Reverting an Eject (100% Reversible)", level: 2 },
   { id: "best-practices", title: "Best Practices for Ejected Projects", level: 2 },
 ];
 
@@ -362,6 +364,92 @@ buildConfig.plugins.push(myCustomPlugin());
 await esbuild.build(buildConfig);`}
                 </CodeBlock>
               </section>
+            </section>
+
+            {/* Reverting an Eject */}
+            <section id="reverting-eject" className="mt-12">
+              <h2>Reverting an Eject (100% Reversible)</h2>
+              <p>
+                In many traditional frameworks, ejecting is an irreversible one-way door. In Dinou, <strong>reverting an eject is completely possible at any time</strong>.
+              </p>
+              <p>
+                Because Dinou keeps your application code (pages, components, layouts, and server functions) strictly isolated inside <code>src/</code>, returning to the upstream managed package takes only three quick steps:
+              </p>
+
+              <div className="border rounded-xl p-5 bg-card not-prose space-y-4 my-6">
+                <div className="flex items-start gap-3">
+                  <div className="h-7 w-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                    1
+                  </div>
+                  <div className="space-y-2 flex-1">
+                    <h4 className="text-sm font-semibold text-foreground">Restore package.json Scripts</h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Change the scripts in your <code>package.json</code> back to the original Dinou scripts:
+                    </p>
+                    <CodeBlock
+                      language="json"
+                      containerClassName="w-full overflow-hidden rounded-lg"
+                    >
+{`"scripts": {
+  "dev": "dinou dev",
+  "build": "dinou build",
+  "start": "dinou start"
+}`}
+                    </CodeBlock>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="h-7 w-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                    2
+                  </div>
+                  <div className="space-y-2 flex-1">
+                    <h4 className="text-sm font-semibold text-foreground">Reinstall the Dinou Package</h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Ensure <code>dinou</code> is installed as a regular dependency:
+                    </p>
+                    <CodeBlock
+                      language="bash"
+                      containerClassName="w-full overflow-hidden rounded-lg"
+                    >
+{`npm install dinou@latest`}
+                    </CodeBlock>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="h-7 w-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                    3
+                  </div>
+                  <div className="space-y-2 flex-1">
+                    <h4 className="text-sm font-semibold text-foreground">Remove the Local dinou/ Folder</h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Delete or archive the local <code>dinou/</code> folder from your project root:
+                    </p>
+                    <CodeBlock
+                      language="bash"
+                      containerClassName="w-full overflow-hidden rounded-lg"
+                    >
+{`rm -rf dinou`}
+                    </CodeBlock>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Once the <code>dinou/</code> folder is removed, the bundler automatically disables <code>isEjected</code> mode and resolves all <code>dinou</code> imports directly from <code>node_modules/dinou</code>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-950/20 p-4 not-prose flex items-start gap-3 my-6">
+                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+                <div className="space-y-1 text-xs leading-relaxed text-muted-foreground">
+                  <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
+                    True Zero Lock-In &amp; Framework Sovereignty
+                  </p>
+                  <p>
+                    You can eject at will to inspect an internal flow, benchmark custom compiler tweaks, or explore the runtime with your AI coding agent, and then revert back to the upstream release whenever you choose. You never risk getting trapped in a dead-end fork.
+                  </p>
+                </div>
+              </div>
             </section>
 
             {/* Best Practices */}
