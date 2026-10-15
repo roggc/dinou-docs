@@ -34,6 +34,13 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
+      <title>Clerk Authentication | Dinou v7 Docs</title>
+      <meta
+        name="description"
+        content="Integrate Clerk into your Dinou v7 application to handle user authentication, route protection, and database synchronization via web standards middleware."
+      />
+      <link rel="canonical" href="https://dinou.dev/docs/clerk" />
+
       <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}

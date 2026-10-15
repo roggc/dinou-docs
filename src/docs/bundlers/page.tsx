@@ -51,6 +51,13 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
+      <title>Bundlers & Build Tooling | Dinou v7 Docs</title>
+      <meta
+        name="description"
+        content="Dinou features first-class multi-bundler architecture supporting esbuild, Rollup, and Webpack across Node.js, Cloudflare, Deno, Bun, and binaries."
+      />
+      <link rel="canonical" href="https://dinou.dev/docs/bundlers" />
+
       <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}

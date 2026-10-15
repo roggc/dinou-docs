@@ -17,11 +17,6 @@ export default function Layout({
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Dinou Docs | React 19 Full-Stack Framework</title>
-        <meta
-          name="description"
-          content="Official documentation for Dinou v7 — the lightweight, ejectable React 19 framework featuring React Server Components, multi-runtime deployment, and private folders."
-        />
         <link key="favicon" rel="icon" type="image/png" href="/favicon.ico" />
         <link
           key="apple-touch-icon"

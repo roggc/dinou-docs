@@ -28,6 +28,13 @@ const tocItems = [
 export default function MigrationV5ToV6Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
+      <title>Migration from v5 to v6 | Dinou v7 Docs</title>
+      <meta
+        name="description"
+        content="Dinou v6 encapsulates all internal build artifacts, manifests, and runtime caches into a single, clean .dinou directory at the root of your project."
+      />
+      <link rel="canonical" href="https://dinou.dev/docs/migration/v5-to-v6" />
+
       <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}

@@ -16,11 +16,12 @@ export default function Layout({
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Dinou</title>
+        <title>Dinou — Full-Stack React 19 Framework (RSC, PPR, Zero Lock-In)</title>
         <meta
           name="description"
-          content="The lightweight, ejectable React 19 full-stack framework."
+          content="The ejectable React 19 framework built on web standards. Build full-stack apps and deploy anywhere with zero vendor lock-in."
         />
+        <link key="canonical" rel="canonical" href="https://dinou.dev/" />
         <link key="favicon" rel="icon" type="image/png" href="/favicon.ico" />
         <link
           key="apple-touch-icon"

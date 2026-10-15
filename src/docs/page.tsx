@@ -36,6 +36,13 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
+      <title>Introduction | Dinou v7 Docs</title>
+      <meta
+        name="description"
+        content="Official introduction to Dinou v7: the lightweight, ejectable React 19 full-stack framework with React Server Components and zero vendor lock-in."
+      />
+      <link rel="canonical" href="https://dinou.dev/docs" />
+
       <main className="flex-1 py-8 lg:py-10 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Hero Header */}
@@ -219,8 +226,8 @@ npm run dev`}
                     React 19 requires conflicting module conditions: <code>&quot;react-server&quot;</code> for Server Components vs. <code>&quot;browser&quot;</code> for SSR. Instead of spawning separate Node.js subprocesses via <code>child_process.fork()</code>, Dinou compiles both in a <strong>single in-memory process</strong> through a 3-pass pipeline:
                   </p>
                   <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5 leading-relaxed">
-                    <li><strong>Pass A (RSC Engine):</strong> Bundles with <code>[&quot;react-server&quot;]</code> conditions, binding Server Functions and generating client reference descriptors.</li>
-                    <li><strong>Pass B (SSR Engine):</strong> Bundles with <code>[&quot;browser&quot;]</code> conditions, packaging <code>react-dom/server.edge</code> and client hydration manifests.</li>
+                    <li><strong>Pass A (RSC Engine):</strong> Bundles via bundler with <code>[&quot;react-server&quot;]</code> package export conditions, binding Server Functions and generating client reference descriptors.</li>
+                    <li><strong>Pass B (SSR Engine):</strong> Bundles via bundler with <code>[&quot;browser&quot;]</code> package export conditions, packaging <code>react-dom/server.edge</code> and client hydration manifests.</li>
                     <li><strong>Pass C (Orchestration):</strong> Bridges RSC and SSR via standard W3C <code>ReadableStream</code> with zero disk I/O and zero IPC serialization latency.</li>
                     <li><strong>Deploy Anywhere:</strong> Halves memory consumption and enables native execution on edge runtimes (Cloudflare Workers, Deno, Bun) where process spawning is strictly prohibited. <Link href="/docs/migration/v6-to-v7#dual-bundle-engine" className="text-blue-500 hover:underline font-medium">Read architectural specification &rarr;</Link></li>
                   </ul>

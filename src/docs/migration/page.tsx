@@ -17,6 +17,13 @@ import {
 export default function MigrationIndexPage() {
   return (
     <div className="flex-1 w-full max-w-[100vw] py-8 lg:py-12">
+      <title>Upgrade Guides | Dinou v7 Docs</title>
+      <meta
+        name="description"
+        content="Step-by-step migration guides and breaking change summaries to help you upgrade your Dinou applications between major versions."
+      />
+      <link rel="canonical" href="https://dinou.dev/docs/migration" />
+
       <div className="container max-w-5xl px-4 md:px-6 mx-auto">
         {/* Header */}
         <div className="mb-8 space-y-4">

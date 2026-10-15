@@ -186,16 +186,6 @@ export const docsNavigation: NavSection[] = [
     ],
   },
   {
-    title: "Internals",
-    items: [
-      {
-        title: "Architecture",
-        href: "/docs/architecture",
-        icon: Cpu,
-      },
-    ],
-  },
-  {
     title: "Guides",
     items: [
       {

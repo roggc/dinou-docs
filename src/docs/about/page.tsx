@@ -46,6 +46,13 @@ const tocItems = [
 export default function AboutPage() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
+      <title>About Dinou | Dinou v7 Docs</title>
+      <meta
+        name="description"
+        content="About Dinou: MIT open source license terms, release versioning lifecycle, creator philosophy, human-agent co-creation, and community."
+      />
+      <link rel="canonical" href="https://dinou.dev/docs/about" />
+
       <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}

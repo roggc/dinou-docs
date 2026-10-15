@@ -138,6 +138,13 @@ export default function DataFetchingPage() {
 
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
+      <title>Data Fetching Strategies | Dinou v7 Docs</title>
+      <meta
+        name="description"
+        content="A comprehensive case-by-case engineering guide covering each of the 13 data fetching and rendering patterns available in Dinou."
+      />
+      <link rel="canonical" href="https://dinou.dev/docs/data-fetching" />
+
       <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}

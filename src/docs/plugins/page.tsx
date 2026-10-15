@@ -51,6 +51,13 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
+      <title>Configuration & Plugins | Dinou v7 Docs</title>
+      <meta
+        name="description"
+        content="Customize your Dinou application with dinou.config.mjs, enable global Partial Prerendering (PPR), and hook into request lifecycle events."
+      />
+      <link rel="canonical" href="https://dinou.dev/docs/plugins" />
+
       <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
