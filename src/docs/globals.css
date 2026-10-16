@@ -223,7 +223,7 @@
 @media (min-width: 768px) {
   .sidebar-content .container {
     margin-left: 1rem !important;
-    max-width: 1000px !important;
+    max-width: 1200px !important;
   }
 }
 
@@ -377,6 +377,8 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
   color: var(--foreground);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .prose pre {
