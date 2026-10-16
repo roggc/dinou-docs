@@ -47,7 +47,7 @@ const tabConfigs: Record<RoutingTab, TabConfig> = {
     badgeColor: "border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-500/10",
     headline: "Nested Layouts with Zero Remounting",
     description:
-      "Every folder in src/ maps directly to a clean route. Nested layout.tsx files wrap child pages without remounting during navigation, preserving client state, audio playback, and scroll positions.",
+      "Every folder with a page.tsx in src/ maps directly to a public route. Nested layout.tsx files wrap child pages without remounting during navigation, preserving client state, audio playback, and scroll positions.",
     codeFile: "src/dashboard/layout.tsx",
     codeSnippet: `import { Link, type LayoutProps } from "dinou";
 
@@ -224,7 +224,7 @@ export function RoutingShowcase() {
             </span>
           </h2>
           <p className="text-slate-600 dark:text-slate-300 md:text-lg leading-relaxed">
-            Every folder in <code className="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-indigo-600 dark:text-indigo-400">src/</code> maps directly to a clean route. Nested persistent layouts, dynamic params, route groups, and parallel slots work right out of the box.
+            Every folder with a <code className="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-indigo-600 dark:text-indigo-400">page.tsx</code> in <code className="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-indigo-600 dark:text-indigo-400">src/</code> maps directly to a public route. Nested persistent layouts, dynamic params, route groups, and parallel slots work right out of the box.
           </p>
         </div>
 
