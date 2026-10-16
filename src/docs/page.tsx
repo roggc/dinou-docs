@@ -187,7 +187,7 @@ npm run dev`}
                   <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5 leading-relaxed">
                     <li>Clean file structure inside <code>src/</code> where folders directly map to URLs.</li>
                     <li>Support for nested layouts (<code>layout.tsx</code>), dynamic parameter segments (<code>[slug]</code>), and route groups.</li>
-                    <li>Routing-ignored folders prefixed with <code>_</code> (e.g. <code>_draft</code>, <code>_legacy</code>) allow you to collocate scratch work or private modules without exposing them as endpoints.</li>
+                    <li>Routing-ignored folders prefixed with <code>_</code> (e.g. <code>_draft</code>, <code>_legacy</code>) allow you to stage draft pages or experimental routes without exposing them as public routes.</li>
                   </ul>
                 </div>
 
@@ -402,7 +402,7 @@ npm run dev`}
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   Any folder prefixed with an underscore <code>_</code> (such as <code>_draft</code> or <code>_legacy</code>) completely{" "}
-                  <strong>escapes the Dinou routing system</strong>. Even if these folders contain <code>page.tsx</code> files, they are never exposed as public endpoints. This makes them ideal for staging work-in-progress code or keeping internal helper components collocated near your routes.
+                  <strong>escapes the Dinou routing system</strong>. Even if these folders contain <code>page.tsx</code> files, they are never exposed as public routes. This makes them ideal for staging work-in-progress pages, draft routes, or temporary templates.
                 </p>
               </div>
             </section>
