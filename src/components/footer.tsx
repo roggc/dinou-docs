@@ -13,7 +13,7 @@ import { Link } from "dinou";
 export default function Footer() {
   return (
     <footer className="w-full border-t bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800">
-      <div className="container flex flex-col gap-4 py-10 px-4 md:px-6 lg:flex-row lg:gap-8">
+      <div className="container mx-auto flex flex-col gap-4 py-10 px-4 md:px-6 lg:flex-row lg:gap-8">
         <div className="flex flex-col gap-4 lg:flex-1">
           <div className="flex items-center space-x-2">
             {/* <div className="flex h-6 w-6 items-center justify-center rounded bg-gradient-to-br from-blue-600 to-purple-600">
