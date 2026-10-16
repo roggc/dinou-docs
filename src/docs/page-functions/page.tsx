@@ -119,34 +119,34 @@ const tocItems = [
     level: 2,
   },
   {
-    id: "type-safe-example",
-    title: "8. End-to-End Type-Safe Example",
-    level: 2,
-  },
-  {
     id: "consolidated-config",
-    title: "9. Consolidated Config Object (export default)",
+    title: "8. Consolidated Config Object (export default)",
     level: 2,
   },
   {
     id: "config-advantages",
-    title: "9.1. Developer Experience & Advantages",
+    title: "8.1. Developer Experience & Advantages",
     level: 3,
   },
   {
     id: "config-precedence",
-    title: "9.2. Hybrid Model & Precedence Rules",
+    title: "8.2. Hybrid Model & Precedence Rules",
     level: 3,
   },
   {
     id: "config-generics",
-    title: "9.3. Flexible Generics Typing",
+    title: "8.3. Flexible Generics Typing",
     level: 3,
   },
   {
     id: "config-layout",
-    title: "9.4. Applicability to layout_functions",
+    title: "8.4. Applicability to layout_functions",
     level: 3,
+  },
+  {
+    id: "type-safe-example",
+    title: "9. End-to-End Type-Safe Example",
+    level: 2,
   },
 ];
 
@@ -410,15 +410,18 @@ export type LayoutFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TP
                 </ul>
               </div>
 
-              <div className="space-y-4">
-                <p className="font-semibold text-sm text-muted-foreground">
-                  Example: Type-Safe Page Component Loader
-                </p>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/blog/[slug]/page_functions.ts
+              <div className="space-y-6">
+                <div>
+                  <p className="font-semibold text-sm text-muted-foreground mb-2">
+                    Example: Type-Safe Page Component &amp; Props
+                  </p>
+                  <TabbedCodeBlock
+                    tabs={[
+                      {
+                        id: "page_functions",
+                        label: "page_functions.ts",
+                        language: "typescript",
+                        code: `// src/blog/[slug]/page_functions.ts
 import type { PageFunctions, RouteParams } from "dinou";
 import { db, type Post } from "@/lib/db";
 
@@ -431,13 +434,17 @@ export const getProps: PageFunctions<RouteParams<"/blog/[slug]">, BlogPostData>[
   const post = await db.getPost(params?.slug);
   // Directly returns BlogPostData for page.tsx
   return { post };
-};
-
-// src/blog/[slug]/page.tsx
+};`,
+                      },
+                      {
+                        id: "page",
+                        label: "page.tsx",
+                        language: "tsx",
+                        code: `// src/blog/[slug]/page.tsx
 import type { PageProps } from "dinou";
 import type { BlogPostData } from "./page_functions";
 
-// Best Practice: Extend PageProps with the loader's returned BlogPostData
+// Best Practice: Extend PageProps with the server-returned BlogPostData
 interface BlogPostProps extends PageProps<"/blog/[slug]">, BlogPostData {}
 
 export default function BlogPost({ params, post }: BlogPostProps) {
@@ -448,17 +455,23 @@ export default function BlogPost({ params, post }: BlogPostProps) {
       <div>{post.content}</div>
     </article>
   );
-}`}
-                </CodeBlock>
+}`,
+                      },
+                    ]}
+                  />
+                </div>
 
-                <p className="font-semibold text-sm text-muted-foreground mt-6">
-                  Example: Type-Safe Layout Component Loader
-                </p>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/blog/layout_functions.ts
+                <div>
+                  <p className="font-semibold text-sm text-muted-foreground mb-2">
+                    Example: Type-Safe Layout Component &amp; Props
+                  </p>
+                  <TabbedCodeBlock
+                    tabs={[
+                      {
+                        id: "layout_functions",
+                        label: "layout_functions.ts",
+                        language: "typescript",
+                        code: `// src/blog/layout_functions.ts
 import type { LayoutFunctions } from "dinou";
 import { db } from "@/lib/db";
 
@@ -471,9 +484,13 @@ export const getProps: LayoutFunctions<any, BlogLayoutData>["getProps"] = async 
   const categories = await db.getCategories();
   // Directly returns props for layout.tsx
   return { categories };
-};
-
-// src/blog/layout.tsx
+};`,
+                      },
+                      {
+                        id: "layout",
+                        label: "layout.tsx",
+                        language: "tsx",
+                        code: `// src/blog/layout.tsx
 import type { LayoutProps } from "dinou";
 import type { BlogLayoutData } from "./layout_functions";
 
@@ -490,8 +507,11 @@ export default function BlogLayout({
       <main>{children}</main>
     </div>
   );
-}`}
-                </CodeBlock>
+}`,
+                      },
+                    ]}
+                  />
+                </div>
               </div>
 
               <div className="not-prose my-8 rounded-xl border border-blue-500/20 bg-gradient-to-b from-blue-50/40 via-background to-muted/20 dark:from-blue-950/20 dark:via-background dark:to-muted/10 p-5 sm:p-6 space-y-6">
@@ -1813,11 +1833,14 @@ export const getCacheTags: PageFunctions<
                 </ul>
               </div>
 
-              <CodeBlock
-                language="typescript"
-                containerClassName="w-full overflow-hidden rounded-lg mt-4"
-              >
-{`// src/dashboard/page_functions.ts
+              <TabbedCodeBlock
+                containerClassName="mt-4"
+                tabs={[
+                  {
+                    id: "page_functions",
+                    label: "page_functions.ts",
+                    language: "typescript",
+                    code: `// src/dashboard/page_functions.ts
 import type { PageFunctions } from "dinou";
 import { getFeatureFlag } from "@/lib/flags";
 
@@ -1828,14 +1851,13 @@ export const ppr: PageFunctions["ppr"] = true;
 // export const ppr: PageFunctions["ppr"] = async () => {
 //   const isPPREnabled = await getFeatureFlag("enable_ppr_dashboard");
 //   return isPPREnabled;
-// };`}
-              </CodeBlock>
-
-              <CodeBlock
-                language="tsx"
-                containerClassName="w-full overflow-hidden rounded-lg mt-4"
-              >
-{`// src/dashboard/page.tsx
+// };`,
+                  },
+                  {
+                    id: "page",
+                    label: "page.tsx",
+                    language: "tsx",
+                    code: `// src/dashboard/page.tsx
 import { Suspense } from "react";
 import { UserStatsSkeleton, UserStats } from "./components";
 
@@ -1853,234 +1875,20 @@ export default function DashboardPage() {
       </Suspense>
     </div>
   );
-}`}
-              </CodeBlock>
+}`,
+                  },
+                ]}
+              />
             </section>
 
-            {/* 8. End-to-End Type-Safe Example */}
-            <section
-              id="type-safe-example"
-              className="mt-12 pt-8 border-t scroll-mt-20"
-            >
-              <div className="flex items-center gap-3">
-                <h3 className="m-0">
-                  8. End-to-End Type-Safe Example (<code>page_functions.ts</code>)
-                </h3>
-              </div>
-              <p className="mt-4">
-                To achieve complete type safety, autocompletion, and compile-time
-                validation in your routes, import <code>PageFunctions</code> (or{" "}
-                <code>LayoutFunctions</code>) from <code>&quot;dinou&quot;</code>{" "}
-                and pass your parameter and props types:
-              </p>
-
-              <div className="border rounded-lg p-4 bg-card not-prose my-6">
-                <div className="flex items-center gap-2 font-semibold mb-2">
-                  <ShieldCheck className="h-5 w-5 text-emerald-500" />
-                  <span>How TypeScript Inference Works</span>
-                </div>
-                <ul className="text-sm text-muted-foreground space-y-2 list-disc pl-4">
-                  <li>
-                    <strong><code>PageFunctions&lt;TParams, TProps&gt;</code></strong>:
-                    Defines the contract for all functions in <code>page_functions.ts</code>.
-                  </li>
-                  <li>
-                    <strong>Indexed Access Typing:</strong> Annotating exports with{" "}
-                    <code>PageFunctions&lt;TParams, TProps&gt;[&quot;getProps&quot;]</code> ensures{" "}
-                    <code>params</code> is typed automatically as <code>TParams</code> and the returned
-                    object is validated against <code>TProps</code>.
-                  </li>
-                  <li>
-                    <strong>Unified Interface:</strong> Both <code>page_functions.ts</code> and{" "}
-                    <code>layout_functions.ts</code> share the exact same structural types.
-                  </li>
-                </ul>
-              </div>
-
-              <div className="space-y-4">
-                <p className="font-semibold text-sm text-muted-foreground">
-                  1. Defining <code>src/blog/[slug]/page_functions.ts</code>
-                </p>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/blog/[slug]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
-
-// 1. Route parameters automatically inferred from the route string pattern
-type BlogParams = RouteParams<"/blog/[slug]">; // Inferred as: { slug: string }
-
-// 2. Define page props types
-export interface BlogPost {
-  title: string;
-  slug: string;
-  content: string;
-  author: string;
-  publishedAt: string;
-}
-
-export interface BlogPageProps {
-  post: BlogPost;
-}
-
-// 3. Static Paths (constant array or function)
-export const getStaticPaths: PageFunctions<BlogParams>["getStaticPaths"] = [
-  "getting-started",
-  "building-with-dinou-v7",
-];
-
-// 4. Props loader: loads static article content for the 0ms shell
-export const getProps: PageFunctions<BlogParams, BlogPageProps>["getProps"] = async (params) => {
-  // params?.slug is strongly typed as string | undefined
-  const post = await db.posts.findUnique({ where: { slug: params?.slug } });
-  if (!post) throw new Error("Post not found");
-
-  // Directly returns BlogPageProps (type error if shape doesn't match!)
-  return { post };
-};
-
-// 5. Caching Strategy & PPR configuration
-export const revalidate: PageFunctions["revalidate"] = 60; // ISR 60s
-export const ppr: PageFunctions["ppr"] = true;             // PPR: Static shell + Suspense streaming
-
-// 6. Parameter validation hook (returns false to abort with 404)
-export const validateParams: PageFunctions<BlogParams>["validateParams"] = (params) => {
-  return typeof params?.slug === "string" && params.slug.length >= 3;
-};
-
-// 7. Cache tags for on-demand revalidation via revalidateTag("blog")
-export const getCacheTags: PageFunctions<BlogParams>["getCacheTags"] = (params) => {
-  return ["blog", \`post-\${params?.slug}\`];
-};`}
-                </CodeBlock>
-
-                <p className="font-semibold text-sm text-muted-foreground mt-6">
-                  2. Consuming Props in <code>src/blog/[slug]/page.tsx</code>
-                </p>
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/blog/[slug]/page.tsx
-import { Suspense } from "react";
-import type { PageProps } from "dinou";
-import type { BlogPageProps } from "./page_functions";
-import { RealtimeViews, ViewsSkeleton } from "./components";
-
-// Extend PageProps to receive both route params and loader data with full type safety
-interface BlogPostPageProps extends PageProps<"/blog/[slug]">, BlogPageProps {}
-
-export default function BlogPostPage({ params, post }: BlogPostPageProps) {
-  return (
-    <article className="max-w-2xl mx-auto py-8">
-      {/* 1. Static shell (pre-rendered at build time, delivered with 0ms TTFB) */}
-      <span className="text-xs text-muted-foreground font-mono">/blog/{params.slug}</span>
-      <h1 className="text-3xl font-bold">{post.title}</h1>
-      <div className="text-sm text-muted-foreground my-2">
-        By {post.author} • published {post.publishedAt}
-      </div>
-      <div className="prose mt-6">{post.content}</div>
-
-      {/* 2. PPR Dynamic Stream: Real-time analytics streamed in via Suspense */}
-      <Suspense fallback={<ViewsSkeleton />}>
-        <RealtimeViews slug={params.slug} />
-      </Suspense>
-    </article>
-  );
-}`}
-                </CodeBlock>
-
-                <p className="font-semibold text-sm text-muted-foreground mt-8">
-                  3. Defining <code>src/blog/layout_functions.ts</code>
-                </p>
-                <CodeBlock
-                  language="typescript"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/blog/layout_functions.ts
-import type { LayoutFunctions, RouteParams } from "dinou";
-import { db } from "@/lib/db";
-
-// 1. Layout parameters for /blog (static route segment without dynamic params = {})
-type BlogLayoutParams = RouteParams<"/blog">;
-
-// 2. Define layout data contract
-export interface BlogCategory {
-  id: string;
-  name: string;
-  count: number;
-}
-
-export interface BlogLayoutData {
-  categories: BlogCategory[];
-  featuredSlug: string;
-}
-
-// 3. Dedicated layout loader typed via LayoutFunctions
-export const getProps: LayoutFunctions<BlogLayoutParams, BlogLayoutData>["getProps"] = async () => {
-  const categories = await db.categories.findMany();
-  const featured = await db.posts.findFirst({ where: { featured: true } });
-
-  // Injected directly as props into layout.tsx
-  return {
-    categories,
-    featuredSlug: featured?.slug ?? "welcome",
-  };
-};
-
-// 4. Segment-level caching strategy for the layout shell
-export const revalidate: LayoutFunctions["revalidate"] = 300; // Layout revalidates every 5 mins
-export const ppr: LayoutFunctions["ppr"] = true;`}
-                </CodeBlock>
-
-                <p className="font-semibold text-sm text-muted-foreground mt-6">
-                  4. Consuming Props in <code>src/blog/layout.tsx</code>
-                </p>
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg"
-                >
-{`// src/blog/layout.tsx
-import type { LayoutProps } from "dinou";
-import type { BlogLayoutData } from "./layout_functions";
-
-// Extend LayoutProps to receive children, segment params, and layout loader data
-interface BlogLayoutComponentProps extends LayoutProps<"/blog">, BlogLayoutData {}
-
-export default function BlogLayout({
-  children,
-  categories,
-  featuredSlug,
-}: BlogLayoutComponentProps) {
-  return (
-    <div className="blog-container">
-      <aside className="blog-sidebar">
-        <h3>Categories</h3>
-        <ul>
-          {categories.map((c) => (
-            <li key={c.id}>{c.name} ({c.count})</li>
-          ))}
-        </ul>
-      </aside>
-      <main className="blog-content">
-        {children}
-      </main>
-    </div>
-  );
-}`}
-                </CodeBlock>
-              </div>
-            </section>
-
-            {/* 9. Consolidated Config Object (export default) */}
+            {/* 8. Consolidated Config Object (export default) */}
             <section
               id="consolidated-config"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <div className="flex items-center gap-3">
                 <h3 className="m-0">
-                  9. Consolidated Config Object (<code>export default</code>)
+                  8. Consolidated Config Object (<code>export default</code>)
                 </h3>
                 <Badge
                   variant="secondary"
@@ -2134,10 +1942,10 @@ export default pageConfig;`}
                 </CodeBlock>
               </div>
 
-              {/* 9.1 Developer Experience & Advantages */}
+              {/* 8.1 Developer Experience & Advantages */}
               <div id="config-advantages" className="mt-10 scroll-mt-20">
                 <h4 className="text-xl font-bold">
-                  9.1. Developer Experience &amp; Key Advantages
+                  8.1. Developer Experience &amp; Key Advantages
                 </h4>
                 <p className="mt-2 text-muted-foreground leading-relaxed">
                   Consolidating route lifecycles into a single typed object offers major ergonomics
@@ -2233,10 +2041,10 @@ export default withProtectedCache<"/dashboard", DashboardProps>({
                 </div>
               </div>
 
-              {/* 9.2 Hybrid Model & Precedence Rules */}
+              {/* 8.2 Hybrid Model & Precedence Rules */}
               <div id="config-precedence" className="mt-10 scroll-mt-20">
                 <h4 className="text-xl font-bold">
-                  9.2. Hybrid Model &amp; Precedence Rules
+                  8.2. Hybrid Model &amp; Precedence Rules
                 </h4>
                 <p className="mt-2 text-muted-foreground leading-relaxed">
                   You do not need to choose exclusively between named exports and <code>export default</code>.
@@ -2281,10 +2089,10 @@ export const revalidate = 0;`}
                 </CodeBlock>
               </div>
 
-              {/* 9.3 Flexible Generics Typing */}
+              {/* 8.3 Flexible Generics Typing */}
               <div id="config-generics" className="mt-10 scroll-mt-20">
                 <h4 className="text-xl font-bold">
-                  9.3. Flexible Generics Typing
+                  8.3. Flexible Generics Typing
                 </h4>
                 <p className="mt-2 text-muted-foreground leading-relaxed">
                   The type definition is <code>PageFunctions&lt;TRouteOrParams = any, TProps = any&gt;</code>.
@@ -2364,10 +2172,10 @@ export default pageConfig;`}
                 </div>
               </div>
 
-              {/* 9.4 Applicability to layout_functions */}
+              {/* 8.4 Applicability to layout_functions */}
               <div id="config-layout" className="mt-10 scroll-mt-20">
                 <h4 className="text-xl font-bold">
-                  9.4. Applicability to <code>layout_functions.ts</code>
+                  8.4. Applicability to <code>layout_functions.ts</code>
                 </h4>
                 <p className="mt-2 text-muted-foreground leading-relaxed">
                   All features, type inference rules, composition patterns, and precedence behaviors apply
@@ -2399,6 +2207,190 @@ const layoutConfig: LayoutFunctions<"/admin/[...rest]", AdminLayoutProps> = {
 export default layoutConfig;`}
                   </CodeBlock>
                 </div>
+              </div>
+            </section>
+
+            {/* 9. End-to-End Type-Safe Example */}
+            <section
+              id="type-safe-example"
+              className="mt-12 pt-8 border-t scroll-mt-20"
+            >
+              <div className="flex items-center gap-3">
+                <h3 className="m-0">
+                  9. End-to-End Type-Safe Example
+                </h3>
+              </div>
+              <p className="mt-4 text-muted-foreground leading-relaxed">
+                A complete, end-to-end example demonstrating how page and layout configurations seamlessly connect server lifecycles with their corresponding React components with full type safety:
+              </p>
+
+              <div className="mt-6">
+                <TabbedCodeBlock
+                  tabs={[
+                    {
+                      id: "page_functions",
+                      label: "page_functions.ts",
+                      language: "typescript",
+                      code: `// src/blog/[slug]/page_functions.ts
+import type { PageFunctions } from "dinou";
+import { db } from "@/lib/db";
+
+// 1. Define page props types
+export interface BlogPost {
+  title: string;
+  slug: string;
+  content: string;
+  author: string;
+  publishedAt: string;
+}
+
+export interface BlogPageProps {
+  post: BlogPost;
+}
+
+// 2. Consolidated, strongly-typed page configuration
+const pageConfig: PageFunctions<"/blog/[slug]", BlogPageProps> = {
+  // Caching Strategy & PPR configuration
+  revalidate: 60, // ISR 60s
+  ppr: true,      // PPR: Static shell + Suspense streaming
+
+  // Static Paths for pre-rendering at build time
+  getStaticPaths: [
+    "getting-started",
+    "building-with-dinou-v7",
+  ],
+
+  // Parameter validation hook (returns false to abort with 404)
+  validateParams: (params) => {
+    return typeof params?.slug === "string" && params.slug.length >= 3;
+  },
+
+  // Cache tags for on-demand revalidation via revalidateTag("blog")
+  getCacheTags: (params) => {
+    return ["blog", \`post-\${params?.slug}\`];
+  },
+
+  // Props loader: loads article data for the 0ms static shell
+  getProps: async (params) => {
+    // params?.slug is automatically inferred as string from "/blog/[slug]"
+    const post = await db.posts.findUnique({ where: { slug: params?.slug } });
+    if (!post) throw new Error("Post not found");
+
+    // Strictly validated against BlogPageProps
+    return { post };
+  },
+};
+
+export default pageConfig;`,
+                    },
+                    {
+                      id: "page",
+                      label: "page.tsx",
+                      language: "tsx",
+                      code: `// src/blog/[slug]/page.tsx
+import { Suspense } from "react";
+import type { PageProps } from "dinou";
+import type { BlogPageProps } from "./page_functions";
+import { RealtimeViews, ViewsSkeleton } from "./components";
+
+// Extend PageProps to receive both route params and loader data with full type safety
+interface BlogPostPageProps extends PageProps<"/blog/[slug]">, BlogPageProps {}
+
+export default function BlogPostPage({ params, post }: BlogPostPageProps) {
+  return (
+    <article className="max-w-2xl mx-auto py-8">
+      {/* 1. Static shell (pre-rendered at build time, delivered with 0ms TTFB) */}
+      <span className="text-xs text-muted-foreground font-mono">/blog/{params.slug}</span>
+      <h1 className="text-3xl font-bold">{post.title}</h1>
+      <div className="text-sm text-muted-foreground my-2">
+        By {post.author} • published {post.publishedAt}
+      </div>
+      <div className="prose mt-6">{post.content}</div>
+
+      {/* 2. PPR Dynamic Stream: Real-time analytics streamed in via Suspense */}
+      <Suspense fallback={<ViewsSkeleton />}>
+        <RealtimeViews slug={params.slug} />
+      </Suspense>
+    </article>
+  );
+}`,
+                    },
+                    {
+                      id: "layout_functions",
+                      label: "layout_functions.ts",
+                      language: "typescript",
+                      code: `// src/blog/layout_functions.ts
+import type { LayoutFunctions } from "dinou";
+import { db } from "@/lib/db";
+
+// 1. Define layout data contract
+export interface BlogCategory {
+  id: string;
+  name: string;
+  count: number;
+}
+
+export interface BlogLayoutData {
+  categories: BlogCategory[];
+  featuredSlug: string;
+}
+
+// 2. Consolidated, strongly-typed layout configuration
+const layoutConfig: LayoutFunctions<"/blog", BlogLayoutData> = {
+  // Segment-level caching strategy for the layout shell
+  revalidate: 300, // Layout revalidates every 5 mins
+  ppr: true,
+
+  // Dedicated layout loader typed via LayoutFunctions
+  getProps: async () => {
+    const categories = await db.categories.findMany();
+    const featured = await db.posts.findFirst({ where: { featured: true } });
+
+    // Injected directly as props into layout.tsx
+    return {
+      categories,
+      featuredSlug: featured?.slug ?? "welcome",
+    };
+  },
+};
+
+export default layoutConfig;`,
+                    },
+                    {
+                      id: "layout",
+                      label: "layout.tsx",
+                      language: "tsx",
+                      code: `// src/blog/layout.tsx
+import type { LayoutProps } from "dinou";
+import type { BlogLayoutData } from "./layout_functions";
+
+// Extend LayoutProps to receive children, segment params, and layout loader data
+interface BlogLayoutComponentProps extends LayoutProps<"/blog">, BlogLayoutData {}
+
+export default function BlogLayout({
+  children,
+  categories,
+  featuredSlug,
+}: BlogLayoutComponentProps) {
+  return (
+    <div className="blog-container">
+      <aside className="blog-sidebar">
+        <h3>Categories</h3>
+        <ul>
+          {categories.map((c) => (
+            <li key={c.id}>{c.name} ({c.count})</li>
+          ))}
+        </ul>
+      </aside>
+      <main className="blog-content">
+        {children}
+      </main>
+    </div>
+  );
+}`,
+                    },
+                  ]}
+                />
               </div>
             </section>
 
