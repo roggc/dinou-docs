@@ -18,7 +18,7 @@ export function DocsHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* CAMBIA EL CONTENEDOR PRINCIPAL - QUITA px-4 Y USA UN CONTENEDOR FLEX MÁS AMPLIO */}
-      <div className="flex h-16 items-center justify-between w-full">
+      <div className="flex h-16 items-center justify-between w-full max-w-[1728px]">
         <div className="flex items-center gap-2 pl-4 md:pl-6">
           <SidebarTrigger className="md:hidden" />
           <div className="flex items-center space-x-2.5">

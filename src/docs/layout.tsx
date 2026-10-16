@@ -52,7 +52,7 @@ export default function Layout({
           <SidebarProvider>
             <div className="flex flex-col min-h-screen w-full">
               <DocsHeader />
-              <div className="sidebar-layout w-full flex-1">
+              <div className="sidebar-layout w-full max-w-[1728px] flex-1">
                 <DocsSidebar />
                 <div className="sidebar-content flex-1">
                   <main className="flex-1 w-full">
