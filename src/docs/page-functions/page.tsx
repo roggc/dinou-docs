@@ -1,5 +1,6 @@
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
+import { Badge } from "@/docs/components/ui/badge";
 import {
   Alert,
   AlertDescription,
@@ -121,6 +122,31 @@ const tocItems = [
     id: "type-safe-example",
     title: "8. End-to-End Type-Safe Example",
     level: 2,
+  },
+  {
+    id: "consolidated-config",
+    title: "9. Consolidated Config Object (export default)",
+    level: 2,
+  },
+  {
+    id: "config-advantages",
+    title: "9.1. Developer Experience & Advantages",
+    level: 3,
+  },
+  {
+    id: "config-precedence",
+    title: "9.2. Hybrid Model & Precedence Rules",
+    level: 3,
+  },
+  {
+    id: "config-generics",
+    title: "9.3. Flexible Generics Typing",
+    level: 3,
+  },
+  {
+    id: "config-layout",
+    title: "9.4. Applicability to layout_functions",
+    level: 3,
   },
 ];
 
@@ -2045,48 +2071,334 @@ export default function BlogLayout({
 }`}
                 </CodeBlock>
               </div>
+            </section>
 
-              <div className="mt-6">
-                <Alert className="not-prose">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  <AlertTitle>Alternative Object Destructuring Pattern</AlertTitle>
-                  <AlertDescription>
-                    You can also declare a single config object typed with{" "}
-                    <code>PageFunctions&lt;BlogParams, BlogPageProps&gt;</code> (for pages) or{" "}
-                    <code>LayoutFunctions&lt;any, BlogLayoutData&gt;</code> (for layouts) and
-                    export its properties directly:
-                    <div className="mt-2 space-y-3">
-                      <CodeBlock language="typescript" hideHeader>
-{`// 1. Page Config Object in src/blog/[slug]/page_functions.ts
-const pageConfig: PageFunctions<BlogParams, BlogPageProps> = {
+            {/* 9. Consolidated Config Object (export default) */}
+            <section
+              id="consolidated-config"
+              className="mt-12 pt-8 border-t scroll-mt-20"
+            >
+              <div className="flex items-center gap-3">
+                <h3 className="m-0">
+                  9. Consolidated Config Object (<code>export default</code>)
+                </h3>
+                <Badge
+                  variant="secondary"
+                  className="font-mono text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-900"
+                >
+                  +v7.1.0
+                </Badge>
+              </div>
+
+              <p className="mt-4 leading-relaxed">
+                Starting in <strong>Dinou v7.1.0</strong>, you can declare and export a single
+                consolidated configuration object via <code>export default pageConfig</code> in{" "}
+                <code>page_functions.ts</code> (or <code>export default layoutConfig</code> in{" "}
+                <code>layout_functions.ts</code>).
+              </p>
+              <p className="mt-2 text-muted-foreground leading-relaxed">
+                Both models&mdash;traditional named exports (<code>export const revalidate = ...</code>)
+                and the consolidated default export&mdash;are fully interchangeable, can be mixed
+                across routes, and even combined in the same file.
+              </p>
+
+              <div className="mt-6 space-y-4">
+                <p className="font-semibold text-sm text-muted-foreground">
+                  Modern Pattern: Consolidated <code>page_functions.ts</code>
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`// src/blog/[slug]/page_functions.ts
+import type { PageFunctions } from "dinou";
+
+interface BlogProps {
+  post: { title: string; content: string };
+}
+
+const pageConfig: PageFunctions<"/blog/[slug]", BlogProps> = {
   ppr: true,
   revalidate: 60,
-  getStaticPaths: ["welcome", "announcement"],
-  getProps: async (params) => {
-    const post = await fetchPost(params?.slug);
-    return { post, views: 100 };
-  },
+  allowISG: true,
+  getStaticPaths: ["getting-started", "whats-new-in-v7"],
   validateParams: (params) => Boolean(params?.slug),
   getCacheTags: (params) => ["blog", \`post-\${params?.slug}\`],
+  getProps: async (params) => {
+    const post = await fetchPost(params.slug);
+    return { post };
+  },
 };
 
-export const { ppr, revalidate, getStaticPaths, getProps, validateParams, getCacheTags } = pageConfig;
+export default pageConfig;`}
+                </CodeBlock>
+              </div>
 
-// 2. Layout Config Object in src/blog/layout_functions.ts
-const layoutConfig: LayoutFunctions<any, BlogLayoutData> = {
-  revalidate: 300,
-  ppr: true,
-  getProps: async () => ({
-    categories: await fetchCategories(),
-    featuredSlug: "welcome",
-  }),
-};
+              {/* 9.1 Developer Experience & Advantages */}
+              <div id="config-advantages" className="mt-10 scroll-mt-20">
+                <h4 className="text-xl font-bold">
+                  9.1. Developer Experience &amp; Key Advantages
+                </h4>
+                <p className="mt-2 text-muted-foreground leading-relaxed">
+                  Consolidating route lifecycles into a single typed object offers major ergonomics
+                  improvements over declaring multiple separate exports:
+                </p>
 
-export const { revalidate: layoutRevalidate, ppr: layoutPpr, getProps: layoutGetProps } = layoutConfig;`}
-                      </CodeBlock>
+                <div className="grid gap-4 mt-6">
+                  <div className="border rounded-lg p-5 bg-card/50">
+                    <div className="flex items-center gap-2 font-semibold text-base mb-1">
+                      <Sparkles className="h-4 w-4 text-emerald-500 shrink-0" />
+                      <span>1. Cascading Type Inference (Single Point of Truth)</span>
                     </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Typing the object once with <code>PageFunctions&lt;&quot;/blog/[slug]&quot;, BlogProps&gt;</code>{" "}
+                      automatically propagates parameter types to <code>getProps(params)</code>,{" "}
+                      <code>validateParams(params)</code>, and <code>getCacheTags(params)</code>, while
+                      validating that <code>getProps</code> returns <code>BlogProps</code>. There is zero need
+                      to import <code>RouteParams</code> or repeat signatures across separate functions.
+                    </p>
+                  </div>
+
+                  <div className="border rounded-lg p-5 bg-card/50">
+                    <div className="flex items-center gap-2 font-semibold text-base mb-1">
+                      <Zap className="h-4 w-4 text-amber-500 shrink-0" />
+                      <span>2. Full IDE Autocomplete &amp; Discoverability</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Pressing <kbd className="px-1.5 py-0.5 text-xs bg-muted border rounded">Ctrl + Space</kbd>{" "}
+                      inside the config object instantly reveals every supported Dinou contract (<code>ppr</code>,{" "}
+                      <code>revalidate</code>, <code>allowISG</code>, <code>getStaticPaths</code>,{" "}
+                      <code>validateParams</code>, <code>getCacheTags</code>, <code>getProps</code>). This prevents typos
+                      and catches unrecognized options at compile-time.
+                    </p>
+                  </div>
+
+                  <div className="border rounded-lg p-5 bg-card/50">
+                    <div className="flex items-center gap-2 font-semibold text-base mb-1">
+                      <ShieldCheck className="h-4 w-4 text-violet-500 shrink-0" />
+                      <span>3. Higher-Order Wrappers &amp; Composition</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                      Because <code>pageConfig</code> is a plain JavaScript object, you can compose reusable
+                      higher-order functions to apply shared caching, security, or telemetry policies across
+                      multiple routes:
+                    </p>
+                    <TabbedCodeBlock
+                      tabs={[
+                        {
+                          id: "wrapper",
+                          label: "route-helpers.ts",
+                          language: "typescript",
+                          code: `// src/utils/route-helpers.ts
+import type { PageFunctions } from "dinou";
+
+// Reusable higher-order wrapper with optional default generics
+export function withProtectedCache<TParams = any, TProps = any>(
+  config: PageFunctions<TParams, TProps>
+): PageFunctions<TParams, TProps> {
+  return {
+    ...config,
+    revalidate: 120,
+    getCacheTags: (params) => [
+      "tenant-global",
+      ...(typeof config.getCacheTags === "function"
+        ? config.getCacheTags(params)
+        : config.getCacheTags || []),
+    ],
+  };
+}`,
+                        },
+                        {
+                          id: "page",
+                          label: "page_functions.ts",
+                          language: "typescript",
+                          code: `// src/dashboard/page_functions.ts
+import { withProtectedCache } from "@/utils/route-helpers";
+
+interface DashboardProps {
+  stats: { usersCount: number; activeSessions: number };
+}
+
+// Pass explicit generics for strict validation, or omit them for auto-inference
+export default withProtectedCache<"/dashboard", DashboardProps>({
+  getProps: async () => {
+    const stats = await fetchStats();
+    return { stats }; // Validated strictly against DashboardProps
+  },
+});`,
+                        },
+                      ]}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 9.2 Hybrid Model & Precedence Rules */}
+              <div id="config-precedence" className="mt-10 scroll-mt-20">
+                <h4 className="text-xl font-bold">
+                  9.2. Hybrid Model &amp; Precedence Rules
+                </h4>
+                <p className="mt-2 text-muted-foreground leading-relaxed">
+                  You do not need to choose exclusively between named exports and <code>export default</code>.
+                  Both can coexist seamlessly in the same file.
+                </p>
+
+                <Alert className="not-prose my-4 border-amber-500/30 bg-amber-500/5">
+                  <AlertCircle className="h-4 w-4 text-amber-500" />
+                  <AlertTitle className="text-amber-600 dark:text-amber-400 font-semibold">
+                    Dinou Resolution Precedence
+                  </AlertTitle>
+                  <AlertDescription className="text-sm text-muted-foreground mt-1">
+                    <strong>Named exports take absolute precedence over the default export.</strong> When
+                    resolving each contract (<code>revalidate</code>, <code>ppr</code>, <code>getProps</code>,{" "}
+                    <code>validateParams</code>, <code>allowISG</code>, <code>getStaticPaths</code>,{" "}
+                    <code>getCacheTags</code>), Dinou first looks for an explicit named export on the module.
+                    If absent, it falls back to the corresponding property on <code>export default</code>.
                   </AlertDescription>
                 </Alert>
+
+                <p className="font-semibold text-sm text-muted-foreground mt-6">
+                  Pattern: Shared Base Preset with Granular Override
+                </p>
+                <p className="text-sm text-muted-foreground mt-1 mb-3 leading-relaxed">
+                  This resolution rule enables a powerful architectural pattern: you can export a shared
+                  base preset across multiple routes, and use a named export only when a specific page needs
+                  to deviate from the default policy (such as opting out of caching for real-time SSR):
+                </p>
+                <CodeBlock
+                  language="typescript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`// src/blog/[slug]/page_functions.ts
+import baseBlogConfig from "@/config/base-blog.config";
+
+// 1. Export the shared preset (getProps, validateParams, getStaticPaths, cache tags)
+export default baseBlogConfig;
+
+// 2. Granular override: While baseBlogConfig specifies revalidate = 3600 (ISR),
+// this specific breaking-news page requires real-time SSR:
+export const revalidate = 0;`}
+                </CodeBlock>
+              </div>
+
+              {/* 9.3 Flexible Generics Typing */}
+              <div id="config-generics" className="mt-10 scroll-mt-20">
+                <h4 className="text-xl font-bold">
+                  9.3. Flexible Generics Typing
+                </h4>
+                <p className="mt-2 text-muted-foreground leading-relaxed">
+                  The type definition is <code>PageFunctions&lt;TRouteOrParams = any, TProps = any&gt;</code>.
+                  Both type arguments are completely optional, adapting smoothly to your route&apos;s requirements:
+                </p>
+
+                <div className="grid gap-4 mt-6">
+                  <div className="border rounded-lg p-4 bg-card">
+                    <p className="font-semibold text-sm mb-1">
+                      1. Zero Generics: <code>PageFunctions</code>
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      When the route only defines segment-level directives without dynamic parameter validation or <code>getProps</code>:
+                    </p>
+                    <CodeBlock language="typescript">
+{`import type { PageFunctions } from "dinou";
+
+// No generics required
+const pageConfig: PageFunctions = {
+  ppr: true,
+  revalidate: 86400, // 24h ISR cache
+};
+
+export default pageConfig;`}
+                    </CodeBlock>
+                  </div>
+
+                  <div className="border rounded-lg p-4 bg-card">
+                    <p className="font-semibold text-sm mb-1">
+                      2. Route Pattern Only: <code>PageFunctions&lt;TRoute&gt;</code>
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      When you have dynamic parameters used in <code>validateParams</code>, <code>getCacheTags</code>, or <code>getStaticPaths</code>, but data fetching is handled directly inside the <code>page.tsx</code> Server Component:
+                    </p>
+                    <CodeBlock language="typescript">
+{`import type { PageFunctions } from "dinou";
+
+// Route string infers { section: string; slug: string }
+const pageConfig: PageFunctions<"/docs/[section]/[slug]"> = {
+  revalidate: 3600,
+  validateParams: (params) => params.section === "guides",
+  getCacheTags: (params) => ["docs", params.section],
+  getStaticPaths: [
+    { section: "guides", slug: "get-started" },
+    { section: "guides", slug: "installation" },
+  ],
+};
+
+export default pageConfig;`}
+                    </CodeBlock>
+                  </div>
+
+                  <div className="border rounded-lg p-4 bg-card">
+                    <p className="font-semibold text-sm mb-1">
+                      3. Route &amp; Props Generics: <code>PageFunctions&lt;TRoute, TProps&gt;</code>
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      When implementing <code>getProps</code> and TypeScript must validate both parameters and returned props:
+                    </p>
+                    <CodeBlock language="typescript">
+{`import type { PageFunctions } from "dinou";
+
+interface ShopProps {
+  item: { id: string; name: string; price: number };
+}
+
+const pageConfig: PageFunctions<"/shop/[id]", ShopProps> = {
+  getProps: async (params) => {
+    const item = await fetchItem(params.id);
+    return { item }; // Strictly validated against ShopProps
+  },
+};
+
+export default pageConfig;`}
+                    </CodeBlock>
+                  </div>
+                </div>
+              </div>
+
+              {/* 9.4 Applicability to layout_functions */}
+              <div id="config-layout" className="mt-10 scroll-mt-20">
+                <h4 className="text-xl font-bold">
+                  9.4. Applicability to <code>layout_functions.ts</code>
+                </h4>
+                <p className="mt-2 text-muted-foreground leading-relaxed">
+                  All features, type inference rules, composition patterns, and precedence behaviors apply
+                  identically to layouts using <code>LayoutFunctions</code> and <code>export default layoutConfig</code>:
+                </p>
+
+                <div className="mt-4">
+                  <CodeBlock
+                    language="typescript"
+                    containerClassName="w-full overflow-hidden rounded-lg"
+                  >
+{`// src/admin/layout_functions.ts
+import type { LayoutFunctions } from "dinou";
+import { getAdminSession } from "@/lib/auth";
+
+interface AdminLayoutProps {
+  userSession: { role: string; email: string };
+}
+
+const layoutConfig: LayoutFunctions<"/admin/[...rest]", AdminLayoutProps> = {
+  ppr: true,
+  revalidate: 0, // Admin shell is dynamic
+  getProps: async () => {
+    const session = await getAdminSession();
+    return { userSession: session };
+  },
+};
+
+export default layoutConfig;`}
+                  </CodeBlock>
+                </div>
               </div>
             </section>
 
