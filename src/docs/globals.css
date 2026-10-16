@@ -377,6 +377,8 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
   color: var(--foreground);
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .prose pre {

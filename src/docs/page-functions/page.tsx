@@ -1952,14 +1952,14 @@ export default pageConfig;`}
                   improvements over declaring multiple separate exports:
                 </p>
 
-                <div className="grid gap-4 mt-6">
-                  <div className="border rounded-lg p-5 bg-card/50">
-                    <div className="flex items-center gap-2 font-semibold text-base mb-1">
+                <div className="flex flex-col gap-4 mt-6 w-full min-w-0">
+                  <div className="border rounded-lg p-4 sm:p-5 bg-card/50 w-full min-w-0 overflow-hidden">
+                    <div className="flex items-center gap-2 font-semibold text-base mb-1 min-w-0">
                       <Sparkles className="h-4 w-4 text-emerald-500 shrink-0" />
-                      <span>1. Cascading Type Inference (Single Point of Truth)</span>
+                      <span className="break-words">1. Cascading Type Inference (Single Point of Truth)</span>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Typing the object once with <code>PageFunctions&lt;&quot;/blog/[slug]&quot;, BlogProps&gt;</code>{" "}
+                    <p className="text-sm text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
+                      Typing the object once with <code className="break-all sm:break-normal">PageFunctions&lt;&quot;/blog/[slug]&quot;, BlogProps&gt;</code>{" "}
                       automatically propagates parameter types to <code>getProps(params)</code>,{" "}
                       <code>validateParams(params)</code>, and <code>getCacheTags(params)</code>, while
                       validating that <code>getProps</code> returns <code>BlogProps</code>. There is zero need
@@ -1967,12 +1967,12 @@ export default pageConfig;`}
                     </p>
                   </div>
 
-                  <div className="border rounded-lg p-5 bg-card/50">
-                    <div className="flex items-center gap-2 font-semibold text-base mb-1">
+                  <div className="border rounded-lg p-4 sm:p-5 bg-card/50 w-full min-w-0 overflow-hidden">
+                    <div className="flex items-center gap-2 font-semibold text-base mb-1 min-w-0">
                       <Zap className="h-4 w-4 text-amber-500 shrink-0" />
-                      <span>2. Full IDE Autocomplete &amp; Discoverability</span>
+                      <span className="break-words">2. Full IDE Autocomplete &amp; Discoverability</span>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                    <p className="text-sm text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
                       Pressing <kbd className="px-1.5 py-0.5 text-xs bg-muted border rounded">Ctrl + Space</kbd>{" "}
                       inside the config object instantly reveals every supported Dinou contract (<code>ppr</code>,{" "}
                       <code>revalidate</code>, <code>allowISG</code>, <code>getStaticPaths</code>,{" "}
@@ -1981,17 +1981,18 @@ export default pageConfig;`}
                     </p>
                   </div>
 
-                  <div className="border rounded-lg p-5 bg-card/50">
-                    <div className="flex items-center gap-2 font-semibold text-base mb-1">
+                  <div className="border rounded-lg p-4 sm:p-5 bg-card/50 w-full min-w-0 overflow-hidden">
+                    <div className="flex items-center gap-2 font-semibold text-base mb-1 min-w-0">
                       <ShieldCheck className="h-4 w-4 text-violet-500 shrink-0" />
-                      <span>3. Higher-Order Wrappers &amp; Composition</span>
+                      <span className="break-words">3. Higher-Order Wrappers &amp; Composition</span>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-3 break-words [overflow-wrap:anywhere]">
                       Because <code>pageConfig</code> is a plain JavaScript object, you can compose reusable
                       higher-order functions to apply shared caching, security, or telemetry policies across
                       multiple routes:
                     </p>
-                    <TabbedCodeBlock
+                    <div className="w-full min-w-0 overflow-hidden">
+                      <TabbedCodeBlock
                       tabs={[
                         {
                           id: "wrapper",
@@ -2037,6 +2038,7 @@ export default withProtectedCache<"/dashboard", DashboardProps>({
                         },
                       ]}
                     />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2094,20 +2096,21 @@ export const revalidate = 0;`}
                 <h4 className="text-xl font-bold">
                   8.3. Flexible Generics Typing
                 </h4>
-                <p className="mt-2 text-muted-foreground leading-relaxed">
-                  The type definition is <code>PageFunctions&lt;TRouteOrParams = any, TProps = any&gt;</code>.
+                <p className="mt-2 text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
+                  The type definition is <code className="break-all sm:break-normal">PageFunctions&lt;TRouteOrParams = any, TProps = any&gt;</code>.
                   Both type arguments are completely optional, adapting smoothly to your route&apos;s requirements:
                 </p>
 
-                <div className="grid gap-4 mt-6">
-                  <div className="border rounded-lg p-4 bg-card">
-                    <p className="font-semibold text-sm mb-1">
+                <div className="flex flex-col gap-4 mt-6 w-full min-w-0">
+                  <div className="border rounded-lg p-4 bg-card w-full min-w-0 overflow-hidden">
+                    <p className="font-semibold text-sm mb-1 break-words">
                       1. Zero Generics: <code>PageFunctions</code>
                     </p>
-                    <p className="text-xs text-muted-foreground mb-3">
+                    <p className="text-xs text-muted-foreground mb-3 break-words">
                       When the route only defines segment-level directives without dynamic parameter validation or <code>getProps</code>:
                     </p>
-                    <CodeBlock language="typescript">
+                    <div className="w-full min-w-0 overflow-hidden">
+                      <CodeBlock language="typescript" containerClassName="w-full min-w-0 overflow-hidden">
 {`import type { PageFunctions } from "dinou";
 
 // No generics required
@@ -2117,17 +2120,19 @@ const pageConfig: PageFunctions = {
 };
 
 export default pageConfig;`}
-                    </CodeBlock>
+                      </CodeBlock>
+                    </div>
                   </div>
 
-                  <div className="border rounded-lg p-4 bg-card">
-                    <p className="font-semibold text-sm mb-1">
-                      2. Route Pattern Only: <code>PageFunctions&lt;TRoute&gt;</code>
+                  <div className="border rounded-lg p-4 bg-card w-full min-w-0 overflow-hidden">
+                    <p className="font-semibold text-sm mb-1 break-words">
+                      2. Route Pattern Only: <code className="break-all sm:break-normal">PageFunctions&lt;TRoute&gt;</code>
                     </p>
-                    <p className="text-xs text-muted-foreground mb-3">
+                    <p className="text-xs text-muted-foreground mb-3 break-words">
                       When you have dynamic parameters used in <code>validateParams</code>, <code>getCacheTags</code>, or <code>getStaticPaths</code>, but data fetching is handled directly inside the <code>page.tsx</code> Server Component:
                     </p>
-                    <CodeBlock language="typescript">
+                    <div className="w-full min-w-0 overflow-hidden">
+                      <CodeBlock language="typescript" containerClassName="w-full min-w-0 overflow-hidden">
 {`import type { PageFunctions } from "dinou";
 
 // Route string infers { section: string; slug: string }
@@ -2142,17 +2147,19 @@ const pageConfig: PageFunctions<"/docs/[section]/[slug]"> = {
 };
 
 export default pageConfig;`}
-                    </CodeBlock>
+                      </CodeBlock>
+                    </div>
                   </div>
 
-                  <div className="border rounded-lg p-4 bg-card">
-                    <p className="font-semibold text-sm mb-1">
-                      3. Route &amp; Props Generics: <code>PageFunctions&lt;TRoute, TProps&gt;</code>
+                  <div className="border rounded-lg p-4 bg-card w-full min-w-0 overflow-hidden">
+                    <p className="font-semibold text-sm mb-1 break-words">
+                      3. Route &amp; Props Generics: <code className="break-all sm:break-normal">PageFunctions&lt;TRoute, TProps&gt;</code>
                     </p>
-                    <p className="text-xs text-muted-foreground mb-3">
+                    <p className="text-xs text-muted-foreground mb-3 break-words">
                       When implementing <code>getProps</code> and TypeScript must validate both parameters and returned props:
                     </p>
-                    <CodeBlock language="typescript">
+                    <div className="w-full min-w-0 overflow-hidden">
+                      <CodeBlock language="typescript" containerClassName="w-full min-w-0 overflow-hidden">
 {`import type { PageFunctions } from "dinou";
 
 interface ShopProps {
@@ -2167,7 +2174,8 @@ const pageConfig: PageFunctions<"/shop/[id]", ShopProps> = {
 };
 
 export default pageConfig;`}
-                    </CodeBlock>
+                      </CodeBlock>
+                    </div>
                   </div>
                 </div>
               </div>
