@@ -215,7 +215,7 @@ export function TypeSafeShowcase() {
             className="px-3.5 py-1 border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10 backdrop-blur-sm font-medium"
           >
             <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
-            Dinou v7 Developer Experience
+            Dinou Developer Experience
           </Badge>
           <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl text-slate-900 dark:text-white">
             Zero-Runtime{" "}

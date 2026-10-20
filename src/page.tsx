@@ -37,7 +37,7 @@ export default function Page() {
                 className="px-4 py-1.5 text-xs sm:text-sm border border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400 backdrop-blur-md font-medium rounded-full shadow-sm"
               >
                 <Sparkles className="mr-2 h-3.5 w-3.5 text-blue-500" />
-                <span>Dinou v7 — React 19 Framework</span>
+                <span>Dinou — React 19 Framework</span>
               </Badge>
             </div>
 

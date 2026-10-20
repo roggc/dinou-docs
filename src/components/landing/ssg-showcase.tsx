@@ -263,7 +263,7 @@ export function SsgShowcase() {
                         : "bg-purple-500/10 text-purple-600 dark:text-purple-400"
                     }`}
                   >
-                    Verified v7
+                    Verified Standard
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2.5">

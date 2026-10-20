@@ -105,7 +105,7 @@ export function Counter() {
 
 ✓ Build completed
 
-  🦖 Dinou v7 (Dual-Bundle, 0-fork) in 5964ms
+  🦖 Dinou (Dual-Bundle, 0-fork) in 5964ms
 
   ➜  Local:   http://localhost:3000/
   ➜  Bundler: esbuild
@@ -268,7 +268,7 @@ export function DxShowcase() {
                         : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
                     }`}
                   >
-                    Verified v7
+                    Verified Standard
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2.5">

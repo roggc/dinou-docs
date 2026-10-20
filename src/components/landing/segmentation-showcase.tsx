@@ -54,7 +54,7 @@ const tabConfigs: Record<SegmentationTab, TabConfig> = {
     badgeColor: "border-cyan-500/30 text-cyan-600 dark:text-cyan-400 bg-cyan-500/10",
     headline: "Instant Static Shell Delivery with Live Dynamic Streaming",
     description:
-      "Dinou v7 unifies static delivery and dynamic personalization in a single request. The static shell is served in under 20ms while personalized Suspense holes stream live in the background.",
+      "Dinou unifies static delivery and dynamic personalization in a single request. The static shell is served in under 20ms while personalized Suspense holes stream live in the background.",
     docHref: "/docs/rendering#partial-prerendering",
     docLabel: "PPR Guide",
     codeFile: "src/dashboard/page_functions.ts",
@@ -94,7 +94,7 @@ export default function DashboardPage() {
       {
         icon: ShieldCheck,
         title: "Inheritable or Granular",
-        desc: "Toggle globally in dinou.config.mjs, inherit across layouts, or override per page.",
+        desc: "Toggle globally in dinou.config.js, inherit across layouts, or override per page.",
       },
     ],
     visualPreview: {
@@ -240,7 +240,7 @@ export function SegmentationShowcase() {
             className="px-3.5 py-1 border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10 backdrop-blur-sm font-medium"
           >
             <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-            Dinou v7 Breakthrough
+            Dinou Breakthrough
           </Badge>
           <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl text-slate-900 dark:text-white">
             Two-Dimensional{" "}
@@ -249,7 +249,7 @@ export function SegmentationShowcase() {
             </span>
           </h2>
           <p className="text-slate-600 dark:text-slate-300 md:text-lg leading-relaxed">
-            Eliminate all-or-nothing caching. Dinou v7 breaks rendering and caching into independent horizontal and vertical dimensions for ultra-fast, granular web applications.
+            Eliminate all-or-nothing caching. Dinou breaks rendering and caching into independent horizontal and vertical dimensions for ultra-fast, granular web applications.
           </p>
         </div>
 
@@ -308,7 +308,7 @@ export function SegmentationShowcase() {
                     Real-World Benchmark
                   </span>
                   <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] px-2 py-0.5">
-                    Verified v7
+                    Verified Standard
                   </Badge>
                 </div>
                 <div className="flex items-baseline gap-2.5">
