@@ -36,10 +36,10 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Introduction | Dinou v7 Docs</title>
+      <title>Introduction | Dinou Docs</title>
       <meta
         name="description"
-        content="Official introduction to Dinou v7: the lightweight, ejectable React 19 full-stack framework with React Server Components and zero vendor lock-in."
+        content="Official introduction to Dinou: the lightweight, ejectable React 19 full-stack framework with React Server Components and zero vendor lock-in."
       />
       <link rel="canonical" href="https://dinou.dev/docs" />
 
@@ -53,7 +53,7 @@ export default function Page() {
                 className="px-2.5 py-0.5 text-xs font-mono font-medium border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/5 rounded-full"
               >
                 <Sparkles className="w-3 h-3 mr-1 text-blue-500" />
-                Dinou v7
+                Dinou
               </Badge>
               <span className="text-xs text-muted-foreground font-medium">
                 React 19 Framework
@@ -330,7 +330,7 @@ npm run dev`}
                   <span>Effortless Context Ingestion &amp; Full Ejectability</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  While common needs like custom middlewares, request lifecycle hooks, and plugins are handled cleanly through <code>dinou.config.mjs</code>, Dinou offers an unmatched advantage for AI-assisted workflows:
+                  While common needs like custom middlewares, request lifecycle hooks, and plugins are handled cleanly through <code>dinou.config.js</code>, Dinou offers an unmatched advantage for AI-assisted workflows:
                 </p>
                 <ul className="text-xs text-muted-foreground space-y-2 list-disc pl-5 leading-relaxed">
                   <li>
