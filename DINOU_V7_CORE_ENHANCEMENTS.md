@@ -12,8 +12,11 @@ Use this reference when updating the official documentation in `dinou-docs`.
 3. [Client-Side Server Function Hooks: Auth & Custom Headers](#3-client-side-server-function-hooks-auth--custom-headers)
 4. [Request Context Sharing with Server Functions](#4-request-context-sharing-with-server-functions)
 5. [Esbuild-Powered Config Bundling & Removal of Legacy Babel Loader](#5-esbuild-powered-config-bundling--removal-of-legacy-babel-loader)
-6. [Complete Dinou CLI Scripts Reference (`package.json`)](#6-complete-dinou-cli-scripts-reference-packagejson)
-7. [Documentation Checklist for `dinou-docs`](#7-documentation-checklist-for-dinou-docs)
+6. [Universal Setup Files & Environment Polyfills (`v7.3.0`)](#6-universal-setup-files--environment-polyfills-v730)
+7. [Bun Standalone Compilation & Node Orchestrator Conflict Resolution (`v7.3.0`)](#7-bun-standalone-compilation--node-orchestrator-conflict-resolution-v730)
+8. [Complete Dinou CLI Scripts Reference (`package.json`)](#8-complete-dinou-cli-scripts-reference-packagejson)
+9. [Documentation Checklist for `dinou-docs`](#9-documentation-checklist-for-dinou-docs)
+
 
 ---
 
@@ -451,7 +454,244 @@ In previous versions, importing application source files (e.g. `src/helpers.js`)
 
 ---
 
-## 6. Complete Dinou CLI Scripts Reference (`package.json`)
+## 6. Universal Setup Files & Environment Polyfills (`v7.3.0`)
+
+### 6.1. Motivation & Background
+Fullstack React frameworks with Server Components (RSC) and Streaming SSR frequently rely on packages originally built for browser runtimes, or libraries that expect browser/canvas geometry APIs on `globalThis` (such as `pdfjs-dist`, `pdf-parse`, `three.js`, or telemetry/tracing agents like Datadog, Sentry, and OpenTelemetry).
+
+In standard ECMAScript Modules (ESM), all static `import` declarations are evaluated and executed **before** any module body statements run. Consequently, defining polyfills or mock globals inside `dinou.config.mjs`, server functions, or layout components is evaluated too late—the external package triggers `ReferenceError: DOMMatrix is not defined` (or similar missing global errors) at bundle import time.
+
+Prior to Dinou v7.3.0, developers encountering these missing globals were forced to **eject** to modify entrypoints manually. Dinou v7.3.0 introduces an enterprise-grade, universal **Setup Files** architecture that guarantees setup scripts are executed at the absolute beginning (Line 1) of every engine bundle across all environments.
+
+---
+
+### 6.2. Configuration & Precedence Hierarchy
+
+Dinou implements a clean, unambiguous hierarchy with a single source of truth for user configuration:
+
+```
+┌────────────────────────────────────────────────────────┐
+│ 1. Plugin Setup Files (plugin.setupFiles: string[])    │
+│    -> Infrastructure prerequisites (APM, Tracing)      │
+└──────────────────────────┬─────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│ 2. Explicit User Config (config.setupFiles: string[])  │
+│    -> Defined in dinou.config.mjs                      │
+│    -> PREVAILS: Completely replaces convention         │
+└──────────────────────────┬─────────────────────────────┘
+                           │ (Only if config.setupFiles is undefined)
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│ 3. Zero-Config Convention: Project Root Only           │
+│    -> ./dinou.setup.mjs                                │
+│    -> ./dinou.setup.js                                 │
+│    -> ./dinou.setup.ts                                 │
+│    (Strictly in project root; never scans src/)        │
+└────────────────────────────────────────────────────────┘
+```
+
+#### Hierarchy Rules:
+1. **Plugins First (`plugin.setupFiles`)**:
+   - Plugins can declare `setupFiles: ["./path/to/setup.js"]`. These run before user setup files so infrastructure tools can initialize first.
+2. **Explicit Config Precedence (`config.setupFiles` in `dinou.config.mjs`)**:
+   - When a developer specifies `setupFiles: [...]` in `dinou.config.mjs`, this is the **sole source of truth**.
+   - Dinou will **not** load any convention file from root if `config.setupFiles` is specified, eliminating conflicting sources of truth.
+3. **Zero-Config Root Convention (`./dinou.setup.(mjs|js|ts)`)**:
+   - If `config.setupFiles` is not defined in `dinou.config.mjs`, Dinou automatically looks for `./dinou.setup.mjs`, `./dinou.setup.js`, or `./dinou.setup.ts` strictly in the project root directory.
+   - Subdirectories (such as `src/dinou.setup.*`) are intentionally **not** scanned by convention; developers who prefer placing setup files in `src/` can declare them explicitly in `dinou.config.mjs`.
+
+---
+
+### 6.3. Resolution Architecture (`dinou/core/resolve-setup-files.js`)
+
+Resolution is centralized in a shared, pure utility function:
+
+```javascript
+// dinou/core/resolve-setup-files.js
+const fs = require("node:fs");
+const path = require("node:path");
+
+function resolveSetupFiles(projectRoot, config = {}) {
+  const pluginSetupFiles = [];
+  if (config.plugins && Array.isArray(config.plugins)) {
+    for (const plugin of config.plugins) {
+      if (plugin && Array.isArray(plugin.setupFiles)) {
+        for (const file of plugin.setupFiles) {
+          const resolved = path.isAbsolute(file) ? file : path.resolve(projectRoot, file);
+          if (fs.existsSync(resolved)) pluginSetupFiles.push(resolved);
+          else console.warn(`⚠️ [Dinou] Plugin "${plugin.name}" setup file not found: ${file}`);
+        }
+      }
+    }
+  }
+
+  let userSetupFiles = [];
+  if (Array.isArray(config.setupFiles)) {
+    for (const file of config.setupFiles) {
+      const resolved = path.isAbsolute(file) ? file : path.resolve(projectRoot, file);
+      if (fs.existsSync(resolved)) userSetupFiles.push(resolved);
+      else console.warn(`⚠️ [Dinou] Configured setupFile not found: ${file}`);
+    }
+  } else {
+    const rootCandidates = ["dinou.setup.mjs", "dinou.setup.js", "dinou.setup.ts"];
+    for (const name of rootCandidates) {
+      const fullPath = path.resolve(projectRoot, name);
+      if (fs.existsSync(fullPath)) {
+        userSetupFiles.push(fullPath);
+        break; // Highest extension priority
+      }
+    }
+  }
+
+  return [...new Set([...pluginSetupFiles, ...userSetupFiles])];
+}
+
+module.exports = { resolveSetupFiles };
+```
+
+---
+
+### 6.4. Compile-Time Bundle Injection across All Platforms
+
+Dinou guarantees that setup files execute before any application code by leveraging Esbuild's native `inject` option (`esbuild.build({ inject: setupFiles, ... })`).
+
+Setup files are injected at **Line 1** of every compilation stage across all target runtimes:
+
+| Target Runtime | Compilation Passes Injected | Build Script |
+| :--- | :--- | :--- |
+| **Node.js** | Pass A (RSC), Pass B (SSR), Pass C (`server.mjs`) | `dinou/node/bundle-dual-engine.mjs`, `dinou/node/build.mjs` |
+| **Bun AOT** | Pass A (RSC), Pass B (SSR), Pass C (`server.js`) | `dinou/bun/build.mjs` |
+| **Cloudflare Workers** | Pass A (RSC), Pass B (SSR), Pass C (`worker.js`) | `dinou/cloudflare/build.mjs` |
+| **Deno / Deno Deploy** | Pass A (RSC), Pass B (SSR), Pass C (`main.js`) | `dinou/deno/build.mjs` |
+| **Dev Server (Hot Reload)** | Dynamic pre-import before Pass A / B compilation | `dinou/node/dev.mjs` |
+| **Static Generation (SSG)** | Dual-Engine static pre-rendering passes | `dinou/core/generate-static.js` |
+
+> [!NOTE]
+> Dinou runtime adapters (`dinou/adapters/node.mjs`, `bun.js`, `cloudflare.js`, `deno.js`) require **zero modifications**. Because setup files are injected at compile time, the resulting bundles are completely self-contained.
+
+---
+
+### 6.5. Pure JavaScript Polyfill Recipe (`@napi-rs/canvas/geometry`)
+
+When packaging applications into standalone compiled binaries with Bun (`bun build --compile`) or edge runtimes, native C++ bindings (`.node` dynamic libraries) cannot be loaded via `dlopen` from in-memory virtual filesystems (`Error: Failed to load native binding`).
+
+To polyfill `DOMMatrix`, `DOMPoint`, and `DOMRect` for `pdfjs-dist` without native C++ compilation dependencies, create `dinou.setup.mjs` in the project root:
+
+```javascript
+// dinou.setup.mjs
+import { DOMMatrix, DOMPoint, DOMRect } from "@napi-rs/canvas/geometry";
+
+// 1. W3C Geometry Interfaces (Pure JavaScript, 0 native C++ bindings)
+if (typeof globalThis.DOMMatrix === "undefined") {
+  globalThis.DOMMatrix = DOMMatrix;
+  globalThis.DOMPoint = DOMPoint;
+  globalThis.DOMRect = DOMRect;
+}
+
+// 2. Minimal stubs for headless server environments
+if (typeof globalThis.ImageData === "undefined") {
+  globalThis.ImageData = class ImageData {
+    constructor(width, height) {
+      this.width = width;
+      this.height = height;
+      this.data = new Uint8ClampedArray(width * height * 4);
+    }
+  };
+}
+
+if (typeof globalThis.Path2D === "undefined") {
+  globalThis.Path2D = class Path2D {
+    addPath() {}
+  };
+}
+
+// 3. Silence harmless pdfjs-dist warning regarding optional native canvas
+const _warn = console.warn;
+console.warn = (...args) => {
+  if (typeof args[0] === "string" && args[0].includes('Cannot load "@napi-rs/canvas" package')) {
+    return;
+  }
+  _warn.apply(console, args);
+};
+```
+
+---
+
+## 7. Bun Standalone Compilation & Node Orchestrator Conflict Resolution (`v7.3.0`)
+
+### 7.1. The Bug: Dual-Server Port Collision (`EADDRINUSE`) in Compiled Binaries
+
+When compiling Dinou's Node.js orchestrator into a standalone single-binary executable using Bun (`dinou build:node:pure:compile`):
+
+```json
+"build:node:pure:compile:esbuild": "cross-env NODE_ENV=production bun dinou/esbuild/build.mjs && bun ./dinou/node/build.mjs && bun build --compile .dinou/node/server.mjs --outfile dist/server"
+```
+
+Running `./dist/server.exe` triggered the following immediate failure:
+
+```text
+Started development server: http://localhost:8999
+error: Failed to start server. Is port 8999 in use? code: "EADDRINUSE"
+```
+
+#### Root Cause Analysis:
+1. **Bun's Implicit Auto-Serve Feature**:
+   When Bun executes a script or standalone compiled binary whose entrypoint has a default export containing a `fetch` function (`export default { port, fetch }`), Bun automatically invokes `Bun.serve(entryNamespace.default)` before executing top-level code.
+2. **Node Orchestrator Lifecycle**:
+   Dinou's Node.js orchestrator (`.dinou/node/server.mjs`) is designed for Node.js (`http.createServer()`) in order to bind WebSockets (Socket.IO) and register Connect/Express middlewares. It explicitly calls `startServer(PORT)` upon execution.
+3. **The Collision**:
+   Bun's automatic background server bound port `8999` first (without Socket.IO attached). Milliseconds later, `startServer()` attempted to bind `8999` with `http.createServer().listen(port)`, crashing with `EADDRINUSE`.
+
+---
+
+### 7.2. The Fix: Clean Export Separation in `dinou/node/build.mjs`
+
+To resolve this conflict without breaking any programmatic use cases:
+
+1. **`fetch` is Kept Exclusively as a Named Export**:
+   `export async function fetch(req) { ... }` remains available for programmatic consumers who import the bundle.
+2. **`export default` Excludes `fetch`**:
+   The default export in `node-entry.mjs` is adjusted to only expose `port` and `startServer`:
+   ```javascript
+   export default {
+     port: PORT,
+     startServer,
+   };
+   ```
+   Because `export default` no longer contains a `fetch` function, Bun **never** triggers its automatic background server.
+3. **Robust `isMain` Detection**:
+   The entrypoint detects whether it is running as the main process in both Node.js and Bun:
+   ```javascript
+   const isMain = Boolean(
+     (typeof import.meta !== "undefined" && import.meta.main) ||
+     (typeof process !== "undefined" &&
+       process.argv[1] &&
+       (path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))))
+   );
+
+   if (isMain) {
+     startServer(PORT);
+   }
+   ```
+
+---
+
+### 7.3. Platform Safety & Export Matrix
+
+This change was made strictly to the **Node.js orchestrator** (`dinou/node/build.mjs`). Other platform targets are unaffected and continue to adhere to their respective platform standards:
+
+| Runtime Build | Output File | Default Export | Behavior |
+| :--- | :--- | :--- | :--- |
+| **Node.js Orchestrator** | `.dinou/node/server.mjs` | `{ port, startServer }` | Prevents Bun auto-serve conflict; lets `http.createServer()` and Socket.IO control the port exclusively. |
+| **Bun Native AOT** | `.dinou/bun/server.js` | `{ port, fetch, idleTimeout }` | Retains `{ fetch }`. Bun natively runs `Bun.serve` directly from this export without `http.createServer()`. |
+| **Deno Edge** | `.dinou/deno/main.js` | `{ fetch }` | Retains `{ fetch }`. Deno CLI requires explicit `Deno.serve()` and Deno Deploy routes directly to `default.fetch`. |
+| **Cloudflare Workers** | `.dinou/cloudflare/worker.js` | `{ fetch }` | Retains `{ fetch }`. WinterCG / Cloudflare Workers standard. |
+
+---
+
+## 8. Complete Dinou CLI Scripts Reference (`package.json`)
 
 The following is the complete, canonical list of scripts available in Dinou v7 for application `package.json` manifests, covering all supported bundlers (Esbuild, Rollup, Webpack), runtime targets (Node, Bun, Deno, Cloudflare), and standalone binary cross-compilation targets (`:linux`, `:linux_arm`, `:mac`, `:win`):
 
@@ -608,7 +848,7 @@ The following is the complete, canonical list of scripts available in Dinou v7 f
 
 ---
 
-## 7. Documentation Checklist for `dinou-docs`
+## 9. Documentation Checklist for `dinou-docs`
 
 When updating `dinou-docs`, ensure the following guides reflect these features:
 
@@ -616,14 +856,22 @@ When updating `dinou-docs`, ensure the following guides reflect these features:
   - Document the `configureServer({ server, isDev, use })` hook.
   - Provide recipes for WebSockets (`Socket.IO` and `ws`) and Node-level middlewares.
   - Explain the difference between `onRequest` (Universal Web Standard `Request` -> `Response`) and `configureServer` (Node.js HTTP Server lifecycle).
-- [ ] **Configuration File (`/docs/configuration`)**:
+  - Document `plugin.setupFiles: string[]` allowing plugins to inject early runtime polyfills and APM agents.
+- [ ] **Configuration & Setup Files (`/docs/configuration`)**:
+  - Document the `setupFiles: [...]` property in `dinou.config.mjs` / `.ts` as the explicit source of truth.
+  - Document the zero-config root convention: `./dinou.setup.mjs`, `./dinou.setup.js`, and `./dinou.setup.ts`.
   - Document that `dinou.config.ts` / `.mjs` is automatically pre-bundled with Esbuild.
   - Note that path aliases defined in `tsconfig.json` (`@/*`) can be used directly inside `dinou.config`.
-- [ ] **CLI Reference (`/docs/cli`)**:
+- [ ] **CLI & Standalone Compilation Reference (`/docs/cli`)**:
   - Add `dinou build:node:compile` and `dinou build:node:pure:compile`.
   - Add the cross-compilation matrix (`:linux`, `:linux_arm`, `:mac`, `:win`).
   - Add a Docker deployment guide showcasing the standalone compiled binary.
+  - Clarify the export separation between Node standalone compilation (orchestrated via `startServer()`) and Bun native AOT (served via `default.fetch`).
 - [ ] **Server Functions & Security (`/docs/server-functions`)**:
   - Document `window.__DINOU_GET_AUTH_TOKEN__` and `window.__DINOU_SERVER_FUNCTION_HEADERS__`.
   - Show how to attach JWT/Bearer authentication headers to Server Functions from client state without ejecting.
   - Document how `getContext()` in Server Functions accesses `req.headers["authorization"]` and custom context properties populated by plugins.
+- [ ] **Environment Polyfills & Headless Recipes (`/docs/recipes/polyfills`)**:
+  - Document how to polyfill browser APIs for headless server environments using `dinou.setup.mjs`.
+  - Provide the pure JavaScript recipe using `@napi-rs/canvas/geometry` for `DOMMatrix`, `DOMPoint`, and `DOMRect` when deploying standalone binaries without native C++ compilation dependencies.
+
