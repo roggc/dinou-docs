@@ -50,7 +50,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Client Navigation & Transitions | Dinou v7 Docs</title>
+      <title>Client Navigation & Transitions | Dinou Docs</title>
       <meta
         name="description"
         content="Master Dinou's client-side SPA navigation: smooth soft transitions, automatic hover prefetching, and the Client Router Cache lifecycle."
@@ -69,7 +69,7 @@ export default function Page() {
                 Client Runtime
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
-                Dinou v7 Complete Guide
+                Dinou Complete Guide
               </Badge>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
