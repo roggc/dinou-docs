@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/docs/components/ui/card";
+import { Badge } from "@/docs/components/ui/badge";
 import {
   Rocket,
   CheckCircle2,
@@ -31,7 +32,7 @@ import { CodeBlock } from "@/docs/components/code-block";
 import { Link } from "dinou";
 
 const tocItems = [
-  { id: "overview", title: "Deploy Everywhere with Dinou v7", level: 2 },
+  { id: "overview", title: "Deploy Everywhere with Dinou", level: 2 },
   { id: "targets-summary", title: "Supported Deployment Targets", level: 2 },
   { id: "node-vps-docker", title: "1. Node.js (Docker, Fly.io, Railway, Render)", level: 3 },
   { id: "netlify-serverless", title: "2. Netlify (Serverless Functions v2)", level: 3 },
@@ -47,7 +48,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Deployment Guide | Dinou v7 Docs</title>
+      <title>Deployment Guide | Dinou Docs</title>
       <meta
         name="description"
         content="Universal deployment flexibility: deploy as standalone Node.js server, Docker container, Cloudflare Workers, Netlify v2, Deno, Bun, or single binary."
@@ -58,28 +59,36 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                Multi-Target Architecture
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
+            <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Deployment Guide
               </h1>
-              <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                Deploy Everywhere
-              </span>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Dinou v7 features universal deployment flexibility: deploy as a standalone Node.js server, on Netlify Serverless Functions v2, at the edge with Cloudflare Workers, on Deno or Bun, or compiled into single native binaries.
+              Dinou features universal deployment flexibility: deploy as a standalone Node.js server, on Netlify Serverless Functions v2, at the edge with Cloudflare Workers, on Deno or Bun, or compiled into single native binaries.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             {/* Overview */}
             <section id="overview">
-              <h2>Deploy Everywhere with Dinou v7</h2>
+              <h2>Deploy Everywhere with Dinou</h2>
               <p>
-                Before Dinou v7, deploying React Server Components to serverless platforms (like Netlify) was impossible due to the need to pass the <code>--conditions react-server</code> flag. While on a VPS or custom server (like DigitalOcean) you could configure Node runtime flags, serverless and edge environments offered no control over them.
+                Historically, deploying React Server Components to serverless platforms (like Netlify) was impossible due to the need to pass the <code>--conditions react-server</code> flag. While on a VPS or custom server (like DigitalOcean) you could configure Node runtime flags, serverless and edge environments offered no control over them.
               </p>
               <p>
-                <strong>Dinou v7 solves this completely</strong>: through its pre-bundled dual-engine architecture, server bundles are compiled with all React Server conditions pre-resolved at build time. You can now deploy Dinou to virtually any infrastructure:
+                <strong>Dinou solves this completely</strong>: through its pre-bundled dual-engine architecture, server bundles are compiled with all React Server conditions pre-resolved at build time. You can now deploy Dinou to virtually any infrastructure:
               </p>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 not-prose my-6">
@@ -229,7 +238,7 @@ dinou start:node`}
             <section id="netlify-serverless" className="mt-12">
               <h2>2. Netlify (Serverless Functions v2)</h2>
               <p>
-                In <strong>Dinou v7</strong>, Netlify is a first-class supported serverless target. During <code>npm run build</code>, Dinou automatically pre-bundles a specialized <strong>Netlify Functions v2 Adapter</strong> directly into <code>.dinou/dist3/server/netlify.js</code>.
+                In <strong>Dinou</strong>, Netlify is a first-class supported serverless target. During <code>npm run build</code>, Dinou automatically pre-bundles a specialized <strong>Netlify Functions v2 Adapter</strong> directly into <code>.dinou/dist3/server/netlify.js</code>.
               </p>
               
               <div className="space-y-4 my-4">
@@ -361,7 +370,7 @@ npx wrangler deploy`}
               <div className="rounded-xl border p-4 bg-card not-prose space-y-2 my-4">
                 <div className="flex items-center gap-2 font-semibold text-sm text-rose-600 dark:text-rose-400">
                   <Zap className="h-4 w-4" />
-                  <span>How Cloudflare Workers Works in Dinou v7</span>
+                  <span>How Cloudflare Workers Works in Dinou</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   Dinou generates a self-contained Dual-Bundle orchestrator at <code>.dinou/cloudflare/worker.js</code>. Static assets and pre-rendered pages are served instantly by Cloudflare&apos;s global CDN through <code>env.ASSETS</code>. When bound to <code>env.DINOU_CACHE</code>, Dinou automatically activates <code>CloudflareKVStorage</code> to persist Incremental Static Regeneration (ISR) route caches across the edge. Secrets, D1 databases, and R2 buckets are injected seamlessly into Server Components via <code>getContext().env</code>.
