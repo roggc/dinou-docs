@@ -6,6 +6,7 @@ import {
   AlertTitle,
 } from "@/docs/components/ui/alert";
 import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
+import { Badge } from "@/docs/components/ui/badge";
 import {
   RefreshCw,
   Tag,
@@ -171,7 +172,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>On-Demand Revalidation | Dinou v7 Docs</title>
+      <title>On-Demand Revalidation | Dinou Docs</title>
       <meta
         name="description"
         content="Purge, regenerate, and promote static page caches, layout shells, and component subtrees on-demand in production when mutative events occur."
@@ -182,13 +183,21 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                Cache Invalidation
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
+            <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 On-Demand Revalidation
               </h1>
-              <span className="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-600 dark:text-green-400 ring-1 ring-inset ring-green-500/20">
-                Dinou v7
-              </span>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
               Purge, regenerate, and promote static page caches, layout shells, and
@@ -338,9 +347,6 @@ export default function Page() {
                 <h3 className="m-0">
                   1. <code>revalidatePage</code> (Surgical Page Invalidation)
                 </h3>
-                <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
-                  New in Dinou v7
-                </span>
               </div>
 
               <p className="mt-4">
@@ -1250,7 +1256,7 @@ export function LiveAnalyticsButton() {
                       <p className="text-xs text-muted-foreground leading-relaxed">
                         In serverless runtimes like Cloudflare Workers, there is no writable filesystem. Dinou auto-binds to your{" "}
                         <code className="text-foreground font-mono">DINOU_CACHE</code> KV namespace at runtime.
-                        You <strong>never configure dinou.config.mjs</strong>—simply add the KV binding to{" "}
+                        You <strong>never configure dinou.config.js</strong>—simply add the KV binding to{" "}
                         <code className="text-foreground font-mono">wrangler.toml</code>. Deno Deploy works identically with zero-config Deno KV.
                       </p>
                     </div>
@@ -1290,7 +1296,7 @@ export function LiveAnalyticsButton() {
                     <code className="text-foreground font-mono">revalidateTag(&quot;products&quot;)</code> or{" "}
                     <code className="text-foreground font-mono">revalidatePath(&quot;/catalog&quot;)</code>, your UI and
                     server components remain 100% identical whether you run on a single local Node.js VPS (<code className="text-foreground font-mono">FileSystemStorage</code>),
-                    scale to a multi-pod Kubernetes cluster (<code className="text-foreground font-mono">RedisStorage</code> in <code className="text-foreground font-mono">dinou.config.mjs</code>),
+                    scale to a multi-pod Kubernetes cluster (<code className="text-foreground font-mono">RedisStorage</code> in <code className="text-foreground font-mono">dinou.config.js</code>),
                     or deploy to global Cloudflare Workers (automatic <code className="text-foreground font-mono">CloudflareKVStorage</code> via <code className="text-foreground font-mono">wrangler.toml</code>).
                   </p>
                 </div>
@@ -1342,7 +1348,7 @@ export function LiveAnalyticsButton() {
                 <p className="mt-4 text-sm text-muted-foreground">
                   In Node.js / Bun environments, override the default local disk storage by declaring a distributed adapter
                   (such as <code className="text-foreground font-mono">RedisStorage</code>) in{" "}
-                  <code className="text-foreground font-semibold">dinou.config.mjs</code>. Dinou binds it
+                  <code className="text-foreground font-semibold">dinou.config.js</code>. Dinou binds it
                   automatically to the internal revalidation and ISR pipeline on startup (edge environments like Cloudflare Workers
                   and Deno Deploy activate automatically without editing this file):
                 </p>
@@ -1351,7 +1357,7 @@ export function LiveAnalyticsButton() {
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// dinou.config.mjs
+{`// dinou.config.js
 import { defineConfig } from "dinou";
 import { RedisStorage } from "dinou/server";
 import { createClient } from "redis";
@@ -1444,7 +1450,7 @@ export default defineConfig({
                       language="typescript"
                       containerClassName="w-full overflow-hidden rounded-lg text-xs"
                     >
-{`// 1. In dinou.config.mjs (conditional for CI / test environment)
+{`// 1. In dinou.config.js (conditional for CI / test environment)
 import { defineConfig } from "dinou";
 import { MemoryStorage, RedisStorage } from "dinou/server";
 
@@ -1486,14 +1492,14 @@ beforeEach(() => {
               </h3>
               <p>
                 External events, such as a Headless CMS (Sanity, Strapi, Contentful) publishing content or an e-commerce inventory sync, can trigger on-demand revalidation in Dinou. Webhook endpoints are created via{" "}
-                <strong>Web Standards Plugins</strong> using the <code>onRequest</code> hook in <code className="text-foreground font-semibold">dinou.config.mjs</code>:
+                <strong>Web Standards Plugins</strong> using the <code>onRequest</code> hook in <code className="text-foreground font-semibold">dinou.config.js</code>:
               </p>
 
               <CodeBlock
                 language="typescript"
                 containerClassName="w-full overflow-hidden rounded-lg my-4"
               >
-{`// dinou.config.mjs
+{`// dinou.config.js
 import { defineConfig } from "dinou";
 import { revalidateTag, revalidatePage, revalidatePath } from "dinou/server";
 
