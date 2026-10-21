@@ -252,7 +252,7 @@ export async function getProps() {
                 id: "plugin-state",
                 label: "plugin-state.tsx (Plugin Injected State)",
                 language: "tsx",
-                code: `// 1. Plugin attaches authenticated user to context (dinou.config.mjs)
+                code: `// 1. Plugin attaches authenticated user to context (dinou.config.js)
 export const authPlugin = {
   name: "auth-guard",
   async onRequest(request, context) {

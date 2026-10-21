@@ -1,5 +1,6 @@
 import { Link } from "dinou";
 import { ShieldCheck } from "lucide-react";
+import { Badge } from "@/docs/components/ui/badge";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
 import {
@@ -14,7 +15,7 @@ import {
   RefreshSlotSection,
   UseNavigationLoadingSection,
 } from "./hooks-navigation";
-// Type-Safe Routing components (Dinou v7)
+// Type-Safe Routing components
 import {
   PagePropsSection,
   LayoutPropsSection,
@@ -114,7 +115,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Complete API Reference | Dinou v7 Docs</title>
+      <title>Complete API Reference | Dinou Docs</title>
       <meta
         name="description"
         content="Explore all exports across dinou, dinou/server, and route lifecycle contracts (page_functions.ts and layout_functions.ts) with TypeScript signatures."
@@ -125,6 +126,17 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                Core Specification
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 📚 Complete API Reference
@@ -185,7 +197,7 @@ export default function Page() {
                 </span>
               </h2>
               <p>
-                Dinou v7 introduces zero-runtime type safety with auto-generated declaration files and seamless IDE autocompletion for routes and parameters.
+                Dinou introduces zero-runtime type safety with auto-generated declaration files and seamless IDE autocompletion for routes and parameters.
               </p>
 
               <div className="not-prose rounded-lg border border-blue-500/20 bg-blue-500/5 p-3.5 my-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">

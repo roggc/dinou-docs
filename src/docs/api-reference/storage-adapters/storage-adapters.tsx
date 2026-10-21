@@ -243,9 +243,9 @@ export function StorageAdaptersSection() {
             tabs={[
               {
                 id: "redis-storage",
-                label: "dinou.config.mjs (Redis Cluster)",
+                label: "dinou.config.js (Redis Cluster)",
                 language: "javascript",
-                code: `// dinou.config.mjs
+                code: `// dinou.config.js
 import { defineConfig } from "dinou/config";
 import { RedisStorage } from "dinou/server";
 import Redis from "ioredis";
@@ -324,9 +324,9 @@ export class SQLiteStorage extends StorageAdapter {
               },
               {
                 id: "config-wiring",
-                label: "dinou.config.mjs (Custom Wiring)",
+                label: "dinou.config.js (Custom Wiring)",
                 language: "javascript",
-                code: `// dinou.config.mjs
+                code: `// dinou.config.js
 import { defineConfig } from "dinou/config";
 import { SQLiteStorage } from "./src/lib/storage/sqlite-storage.js";
 

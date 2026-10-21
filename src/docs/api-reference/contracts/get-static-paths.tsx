@@ -63,7 +63,7 @@ export function GetStaticPathsContract() {
                 <code>string[]</code>, <code>number[]</code>, or <code>Record&lt;string, string&gt;[]</code>
               </td>
               <td className="p-3 font-mono text-muted-foreground align-top">
-                <code>[&quot;v7-release&quot;, &quot;migration&quot;]</code> or <code>[&#123; slug: &quot;v7-release&quot; &#125;]</code>
+                <code>[&quot;getting-started&quot;, &quot;migration&quot;]</code> or <code>[&#123; slug: &quot;getting-started&quot; &#125;]</code>
               </td>
             </tr>
             <tr>

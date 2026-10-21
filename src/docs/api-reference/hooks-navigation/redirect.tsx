@@ -430,9 +430,9 @@ export function ClientAuthGuard({ isAuthenticated, children }: GuardProps) {
             },
             {
               id: "custom-status",
-              label: "dinou.config.mjs (Custom 301 / Plugin)",
+              label: "dinou.config.js (Custom 301 / Plugin)",
               language: "javascript",
-              code: `// dinou.config.mjs (Global Plugin / Middleware)
+              code: `// dinou.config.js (Global Plugin / Middleware)
 import { defineConfig } from "dinou/config";
 
 export default defineConfig({
@@ -469,7 +469,7 @@ export default defineConfig({
         </div>
         <div className="text-muted-foreground space-y-1.5 leading-relaxed">
           <p>
-            <strong>In Plugins &amp; Middlewares (<code>onRequest</code> in <code>dinou.config.mjs</code>):</strong> Return a native Web Standards <code>Response.redirect(url, status)</code>. Dinou detects <code>result instanceof Response</code> and terminates the request immediately (&lt;1ms) before route matching, file I/O, or React rendering starts.
+            <strong>In Plugins &amp; Middlewares (<code>onRequest</code> in <code>dinou.config.js</code>):</strong> Return a native Web Standards <code>Response.redirect(url, status)</code>. Dinou detects <code>result instanceof Response</code> and terminates the request immediately (&lt;1ms) before route matching, file I/O, or React rendering starts.
           </p>
           <p>
             <strong>In Server Components &amp; <code>page_functions.ts</code>:</strong> Use the universal <code>return redirect(&quot;/path&quot;)</code> helper (which automatically defaults to HTTP 302 on unsent headers). If you require an explicit status code (such as a permanent <code>301 Moved Permanently</code> for SEO canonical URLs), obtain the context via <code>const &#123; res &#125; = getContext();</code> and invoke <code>res.redirect(301, &quot;/path&quot;)</code>.
