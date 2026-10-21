@@ -6,6 +6,7 @@ import {
   AlertTitle,
 } from "@/docs/components/ui/alert";
 import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
+import { Badge } from "@/docs/components/ui/badge";
 import {
   Zap,
   Code,
@@ -56,7 +57,7 @@ const tocItems = [
   },
   {
     id: "configuring-strict-mode",
-    title: "3.2. Configuring reactStrictMode in dinou.config.mjs",
+    title: "3.2. Configuring reactStrictMode in dinou.config.js",
     level: 3,
   },
   {
@@ -69,7 +70,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>React Compiler | Dinou v7 Docs</title>
+      <title>React Compiler | Dinou Docs</title>
       <meta
         name="description"
         content="Forget about manual useMemo and useCallback. Dinou integrates the React Compiler to automatically optimize component renders at build time."
@@ -80,13 +81,21 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                Zero-Config Optimization
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
+            <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 React Compiler &amp; StrictMode
               </h1>
-              <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                Dinou v7
-              </span>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
               Forget about manual <code>useMemo</code> and <code>useCallback</code>.
@@ -380,7 +389,7 @@ function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
 
               {/* 3.2 Configuring StrictMode */}
               <section id="configuring-strict-mode" className="mt-8 scroll-mt-20">
-                <h4>3.2. Configuring <code>reactStrictMode</code> in <code>dinou.config.mjs</code></h4>
+                <h4>3.2. Configuring <code>reactStrictMode</code> in <code>dinou.config.js</code></h4>
                 <p>
                   <code>reactStrictMode</code> is enabled by default in Dinou.
                   You can configure it explicitly in your configuration file:
@@ -390,7 +399,7 @@ function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
                   language="javascript"
                   containerClassName="w-full overflow-hidden rounded-lg my-4"
                 >
-{`// dinou.config.mjs
+{`// dinou.config.js
 import { defineConfig } from "dinou";
 
 export default defineConfig({
