@@ -32,37 +32,39 @@ import {
   ArrowRightLeft,
   Sliders,
   Terminal,
+  Clock,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 import { Link } from "dinou";
 
 const tocItems = [
-  { id: "overview", title: "Configuration & Plugin System", level: 2 },
-  { id: "config-file", title: "The dinou.config.js File", level: 2 },
-  { id: "config-bundling", title: "Esbuild Pre-Bundling & Path Aliases", level: 3 },
-  { id: "config-options", title: "Top-Level Configuration Options", level: 2 },
-  { id: "ppr-option", title: "Global Partial Prerendering (ppr)", level: 3 },
-  { id: "strict-mode-option", title: "React StrictMode (reactStrictMode)", level: 3 },
-  { id: "storage-option", title: "Storage Adapter (storage)", level: 3 },
-  { id: "setup-files-option", title: "Universal Setup Files (setupFiles)", level: 3 },
-  { id: "plugins-option", title: "Plugins Array (plugins)", level: 3 },
-  { id: "plugin-architecture", title: "Dinou Plugin Architecture", level: 2 },
-  { id: "configure-server", title: "Low-Level Node Hook: configureServer", level: 2 },
-  { id: "configure-server-context", title: "Context Parameters: server, isDev, use", level: 3 },
-  { id: "configure-server-pipeline", title: "The Node Middleware Pipeline (use)", level: 3 },
-  { id: "configure-server-comparison", title: "configureServer vs onRequest Matrix", level: 3 },
-  { id: "on-request-lifecycle", title: "Web Standards Hook: onRequest", level: 2 },
-  { id: "context-reference", title: "The context Object (RequestContextStore)", level: 3 },
-  { id: "pattern-intercept", title: "Pattern 1: Short-Circuit & Webhooks", level: 3 },
-  { id: "pattern-context", title: "Pattern 2: Middleware & Context Mutation", level: 3 },
-  { id: "context-server-functions", title: "Context Sharing with Server Functions", level: 3 },
-  { id: "universal-setup-files", title: "Compile-Time Setup Files (setupFiles)", level: 2 },
-  { id: "setup-hierarchy", title: "Resolution & Precedence Hierarchy", level: 3 },
-  { id: "setup-polyfills", title: "Environment Polyfills Recipe (DOMMatrix / Canvas)", level: 3 },
-  { id: "real-world-examples", title: "Real-World Plugin Examples (Socket.IO & Redis)", level: 2 },
-  { id: "plugin-registration-order", title: "Registration & Execution Pipeline Order", level: 2 },
-  { id: "fault-isolation", title: "Fault Isolation & Error Handling", level: 2 },
+  { id: "overview", title: "1. Configuration & Plugin System", level: 2 },
+  { id: "config-file", title: "2. The dinou.config.js File", level: 2 },
+  { id: "config-bundling", title: "2.1 Esbuild Pre-Bundling & Native Path Aliases", level: 3 },
+  { id: "config-options", title: "3. Top-Level Configuration Options", level: 2 },
+  { id: "ppr-option", title: "3.1 Global Partial Prerendering (ppr)", level: 3 },
+  { id: "strict-mode-option", title: "3.2 React StrictMode (reactStrictMode)", level: 3 },
+  { id: "storage-option", title: "3.3 Storage Adapter (storage)", level: 3 },
+  { id: "setup-files-option", title: "3.4 Universal Setup Files (setupFiles)", level: 3 },
+  { id: "plugins-option", title: "3.5 Plugins Array (plugins)", level: 3 },
+  { id: "plugin-architecture", title: "4. Dinou Plugin Architecture", level: 2 },
+  { id: "configure-server", title: "5. Low-Level Node Hook: configureServer", level: 2 },
+  { id: "configure-server-context", title: "5.1 Context Parameters: server, isDev, use", level: 3 },
+  { id: "configure-server-pipeline", title: "5.2 The Node Middleware Pipeline (use)", level: 3 },
+  { id: "configure-server-comparison", title: "5.3 configureServer vs. onRequest Decision Matrix", level: 3 },
+  { id: "on-request-lifecycle", title: "6. Web Standards Hook: onRequest", level: 2 },
+  { id: "context-reference", title: "6.1 The context Object (RequestContextStore)", level: 3 },
+  { id: "pattern-intercept", title: "6.2 Pattern 1: Short-Circuit & Webhooks", level: 3 },
+  { id: "pattern-context", title: "6.3 Pattern 2: Middleware & Context Mutation", level: 3 },
+  { id: "context-server-functions", title: "6.4 Context Sharing with Server Functions", level: 3 },
+  { id: "execution-timeline", title: "7. Deep Dive: Execution Points (configureServer vs. onRequest)", level: 2 },
+  { id: "universal-setup-files", title: "8. Compile-Time Setup Files (setupFiles)", level: 2 },
+  { id: "setup-hierarchy", title: "8.1 Resolution & Precedence Hierarchy", level: 3 },
+  { id: "setup-polyfills", title: "8.2 Environment Polyfills Recipe (DOMMatrix / Geometry)", level: 3 },
+  { id: "real-world-examples", title: "9. Real-World Plugin Examples (Socket.IO & Redis)", level: 2 },
+  { id: "plugin-registration-order", title: "10. Registration & Execution Pipeline Order", level: 2 },
+  { id: "fault-isolation", title: "11. Fault Isolation & Error Handling", level: 2 },
 ];
 
 export default function Page() {
@@ -103,7 +105,7 @@ export default function Page() {
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             {/* Overview */}
             <section id="overview">
-              <h2>Configuration &amp; Plugin System</h2>
+              <h2>1. Configuration &amp; Plugin System</h2>
               <p>
                 In <strong>Dinou</strong>, the configuration and extensibility architecture is designed around two complementary layers:
               </p>
@@ -157,7 +159,7 @@ export default function Page() {
 
             {/* Config File */}
             <section id="config-file" className="mt-12">
-              <h2>The dinou.config.js File</h2>
+              <h2>2. The dinou.config.js File</h2>
               <p>
                 Dinou automatically discovers your configuration file at the root of your project. The canonical format is ES Modules (<code>dinou.config.js</code> or <code>dinou.config.ts</code>) using the <code>defineConfig</code> helper:
               </p>
@@ -192,7 +194,7 @@ export default defineConfig({
               <div id="config-bundling" className="mt-6 space-y-3">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   <Sliders className="h-5 w-5 text-blue-500" />
-                  <span>Esbuild Pre-Bundling &amp; Native Path Aliases</span>
+                  <span>2.1 Esbuild Pre-Bundling &amp; Native Path Aliases</span>
                 </h3>
                 <p>
                   When Dinou loads <code>dinou.config.js</code> or <code>dinou.config.ts</code>, it automatically bundles the configuration file on the fly using <strong>Esbuild</strong> (&lt;20ms) before execution:
@@ -213,14 +215,14 @@ export default defineConfig({
 
             {/* Top-Level Config Options */}
             <section id="config-options" className="mt-12">
-              <h2>Top-Level Configuration Options</h2>
+              <h2>3. Top-Level Configuration Options</h2>
               <p>
                 The <code>DinouConfig</code> schema provides top-level controls for runtime behavior and compilation:
               </p>
 
               {/* PPR Option */}
               <div id="ppr-option" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">1. Global Partial Prerendering (<code>ppr</code>)</h3>
+                <h3 className="text-lg font-bold">3.1 Global Partial Prerendering (<code>ppr</code>)</h3>
                 <p>
                   Dinou introduces first-class <strong>Partial Prerendering (PPR)</strong>. When <code>ppr: true</code> is configured globally in <code>dinou.config.js</code>:
                 </p>
@@ -248,7 +250,7 @@ export default defineConfig({
 
               {/* Strict Mode Option */}
               <div id="strict-mode-option" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">2. React StrictMode (<code>reactStrictMode</code>)</h3>
+                <h3 className="text-lg font-bold">3.2 React StrictMode (<code>reactStrictMode</code>)</h3>
                 <p>
                   In Dinou, <code>reactStrictMode</code> defaults to <code>true</code>. When active in development mode, React intentionally invokes components and effects twice to identify unintended side effects and ensure strict compliance with the React Compiler.
                 </p>
@@ -266,7 +268,7 @@ export default defineConfig({
 
               {/* Storage Option */}
               <div id="storage-option" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">3. Storage Adapter (<code>storage</code>)</h3>
+                <h3 className="text-lg font-bold">3.3 Storage Adapter (<code>storage</code>)</h3>
                 <p>
                   Dinou&apos;s ISR and ISG caching engine uses a pluggable storage adapter. By default, Dinou uses the local filesystem (in Node.js/Bun) or Deno KV (in Deno). You can supply a custom storage adapter (such as Redis or Cloudflare KV) in <code>dinou.config.js</code>:
                 </p>
@@ -286,7 +288,7 @@ export default defineConfig({
 
               {/* Setup Files Option */}
               <div id="setup-files-option" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">4. Universal Setup Files (<code>setupFiles</code>)</h3>
+                <h3 className="text-lg font-bold">3.4 Universal Setup Files (<code>setupFiles</code>)</h3>
                 <p>
                   An array of file paths to execute before any application code runs. Injected at <strong>Line 1</strong> of every compilation stage across all target runtimes via Esbuild&apos;s native <code>inject</code> mechanism.
                 </p>
@@ -304,7 +306,7 @@ export default defineConfig({
 
               {/* Plugins Option */}
               <div id="plugins-option" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">5. Plugins Array (<code>plugins</code>)</h3>
+                <h3 className="text-lg font-bold">3.5 Plugins Array (<code>plugins</code>)</h3>
                 <p>
                   An array of plugin objects conforming to the <code>DinouPlugin</code> interface, executed sequentially on every incoming request.
                 </p>
@@ -313,7 +315,7 @@ export default defineConfig({
 
             {/* Plugin Architecture */}
             <section id="plugin-architecture" className="mt-12">
-              <h2>Dinou Plugin Architecture</h2>
+              <h2>4. Dinou Plugin Architecture</h2>
               <p>
                 In Dinou, a plugin is an object containing an optional <code>name</code> and hooks for both low-level Node server configuration and universal Web Standards request interception:
               </p>
@@ -348,7 +350,7 @@ export default defineConfig({
 
             {/* configureServer */}
             <section id="configure-server" className="mt-12">
-              <h2>Low-Level Node Hook: <code>configureServer</code></h2>
+              <h2>5. Low-Level Node Hook: <code>configureServer</code></h2>
               <p>
                 Prior to this hook, applications requiring raw access to Node.js HTTP primitives (attaching WebSockets, integrating standard <code>(req, res, next)</code> middlewares like <code>cors</code> or <code>helmet</code>, or handling sub-millisecond health probes) were forced to <strong>eject</strong> the framework.
               </p>
@@ -357,7 +359,7 @@ export default defineConfig({
               </p>
 
               <div id="configure-server-context" className="mt-8 space-y-4">
-                <h3 className="text-lg font-bold">Context Parameters: <code>&#123; server, isDev, use &#125;</code></h3>
+                <h3 className="text-lg font-bold">5.1 Context Parameters: <code>&#123; server, isDev, use &#125;</code></h3>
                 <p>
                   The hook receives a single context object:
                 </p>
@@ -400,7 +402,7 @@ export default defineConfig({
               </div>
 
               <div id="configure-server-pipeline" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">The Node Middleware Pipeline (<code>use</code>)</h3>
+                <h3 className="text-lg font-bold">5.2 The Node Middleware Pipeline (<code>use</code>)</h3>
                 <p>
                   Middlewares registered via <code>use</code> adopt the standard Node.js middleware signature <code>(req, res, next)</code> (compatible with utilities like <code>cors</code> or <code>helmet</code>):
                 </p>
@@ -436,7 +438,7 @@ export default defineConfig({
               <div id="configure-server-comparison" className="mt-8 space-y-4">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   <ArrowRightLeft className="h-5 w-5 text-emerald-500" />
-                  <span>configureServer vs. onRequest Decision Matrix</span>
+                  <span>5.3 configureServer vs. onRequest Decision Matrix</span>
                 </h3>
                 <p className="text-xs text-muted-foreground">
                   Choose the appropriate plugin hook based on the runtime requirements of your task:
@@ -490,14 +492,14 @@ export default defineConfig({
 
             {/* onRequest Lifecycle */}
             <section id="on-request-lifecycle" className="mt-12">
-              <h2>Web Standards Hook: <code>onRequest</code></h2>
+              <h2>6. Web Standards Hook: <code>onRequest</code></h2>
               <p>
                 The <code>onRequest</code> hook receives the standard Web <code>Request</code> object and Dinou&apos;s mutable <code>RequestContextStore</code>.
               </p>
 
               {/* The context Object */}
               <div id="context-reference" className="mt-8 space-y-4">
-                <h3 className="text-lg font-bold">The context Object (RequestContextStore)</h3>
+                <h3 className="text-lg font-bold">6.1 The context Object (RequestContextStore)</h3>
                 <p>
                   The <code>context</code> parameter provides access to parsed request metadata, response mutation helpers, platform edge bindings, and custom shared state:
                 </p>
@@ -591,7 +593,7 @@ export default defineConfig({
 
               {/* Pattern 1 */}
               <div id="pattern-intercept" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">Pattern 1: Short-Circuit &amp; Webhooks (Returning Response)</h3>
+                <h3 className="text-lg font-bold">6.2 Pattern 1: Short-Circuit &amp; Webhooks (Returning Response)</h3>
                 <p>
                   If <code>onRequest</code> returns a Web <code>Response</code> instance, Dinou <strong>immediately returns that response to the client</strong> and aborts further processing. React Server Component rendering is completely bypassed:
                 </p>
@@ -613,7 +615,7 @@ export default defineConfig({
 
               {/* Pattern 2 */}
               <div id="pattern-context" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">Pattern 2: Middleware &amp; Context Mutation (getContext)</h3>
+                <h3 className="text-lg font-bold">6.3 Pattern 2: Middleware &amp; Context Mutation (getContext)</h3>
                 <p>
                   If <code>onRequest</code> returns <code>void</code> (or <code>undefined</code>), request processing continues normally. Any property attached to <code>context</code> is preserved in <code>AsyncLocalStorage</code> and becomes accessible in any server-side module:
                 </p>
@@ -639,7 +641,7 @@ export default defineConfig({
               <div id="context-server-functions" className="mt-8 space-y-3">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   <ShieldCheck className="h-5 w-5 text-emerald-500" />
-                  <span>Context Sharing with Server Functions</span>
+                  <span>6.4 Context Sharing with Server Functions</span>
                 </h3>
                 <p>
                   When a client invokes a Server Function, Dinou:
@@ -675,9 +677,142 @@ export async function updateProfile(formData: FormData) {
               </div>
             </section>
 
+            {/* Deep Dive: Execution Points & Lifecycle Timeline */}
+            <section id="execution-timeline" className="mt-12">
+              <div className="rounded-xl border border-blue-500/25 bg-blue-50/30 dark:bg-blue-950/20 p-6 not-prose space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                    <Clock className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground m-0">
+                      7. Deep Dive: Execution Points (configureServer vs. onRequest)
+                    </h2>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Understanding the fundamental distinction between one-time server startup and per-request lifecycles.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Comparison Table */}
+                <div className="overflow-x-auto rounded-lg border border-border bg-card">
+                  <table className="w-full text-xs text-left">
+                    <thead className="bg-muted text-muted-foreground font-semibold">
+                      <tr>
+                        <th className="p-3">Plugin Hook</th>
+                        <th className="p-3">Execution Phase</th>
+                        <th className="p-3">Frequency</th>
+                        <th className="p-3">Scope &amp; Inputs</th>
+                        <th className="p-3">Primary Purpose</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border text-muted-foreground">
+                      <tr>
+                        <td className="p-3 font-mono font-semibold text-blue-600 dark:text-blue-400">configureServer</td>
+                        <td className="p-3 font-semibold text-foreground">Server Startup / Bootstrap</td>
+                        <td className="p-3">
+                          <span className="inline-flex items-center rounded bg-blue-500/10 px-2 py-0.5 font-medium text-blue-600 dark:text-blue-400">
+                            1 time (on boot)
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          <code>http.Server</code>, <code>isDev</code>, <code>use(fn)</code>
+                        </td>
+                        <td className="p-3">
+                          Configure server infrastructure (WebSockets, socket listeners, timeouts, Node middleware queue).
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 font-mono font-semibold text-emerald-600 dark:text-emerald-400">onRequest</td>
+                        <td className="p-3 font-semibold text-foreground">Per-Request Runtime</td>
+                        <td className="p-3">
+                          <span className="inline-flex items-center rounded bg-emerald-500/10 px-2 py-0.5 font-medium text-emerald-600 dark:text-emerald-400">
+                            N times (every request)
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          Web Standards <code>Request</code>, <code>RequestContextStore</code>
+                        </td>
+                        <td className="p-3">
+                          Handle incoming user traffic (cookies, auth checks, 302/401 short-circuit redirects, <code>context</code> mutation).
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Chronological Flow */}
+                <div className="space-y-4 pt-2">
+                  <h4 className="text-sm font-semibold text-foreground m-0 flex items-center gap-2">
+                    <ArrowRight className="h-4 w-4 text-blue-500" />
+                    <span>Chronological Execution Flow: From Startup to Page Render</span>
+                  </h4>
+
+                  <div className="grid gap-4 md:grid-cols-2 text-xs">
+                    {/* Phase 1 */}
+                    <div className="p-4 rounded-lg border bg-background/80 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider text-[11px]">
+                          Phase 1: Server Startup
+                        </span>
+                        <span className="text-[10px] rounded bg-muted px-1.5 py-0.5 font-mono text-muted-foreground">
+                          Runs 1 time
+                        </span>
+                      </div>
+                      <ol className="list-decimal pl-4 space-y-1.5 text-muted-foreground leading-relaxed">
+                        <li>
+                          <strong>Process Boot:</strong> Command <code>dinou start</code> or <code>dinou dev</code> initializes Node&apos;s native <code>http.createServer()</code>.
+                        </li>
+                        <li>
+                          <strong>configureServer Hook Invoked:</strong> Dinou executes all plugin <code>configureServer</code> hooks before <code>server.listen()</code>.
+                          <ul className="list-disc pl-4 mt-1 space-y-0.5">
+                            <li>WebSocket engines (Socket.IO, <code>ws</code>) bind to <code>server</code>.</li>
+                            <li>Redis/Valkey pub/sub adapters establish connection.</li>
+                            <li>Node middlewares register in the internal pipeline queue via <code>use((req, res, next) =&gt; ...)</code>.</li>
+                          </ul>
+                        </li>
+                        <li>
+                          <strong>Port Listening:</strong> The server starts accepting connections via <code>server.listen(port)</code>.
+                        </li>
+                      </ol>
+                    </div>
+
+                    {/* Phase 2 */}
+                    <div className="p-4 rounded-lg border bg-background/80 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider text-[11px]">
+                          Phase 2: Incoming Client Request
+                        </span>
+                        <span className="text-[10px] rounded bg-muted px-1.5 py-0.5 font-mono text-muted-foreground">
+                          Runs on every HTTP request
+                        </span>
+                      </div>
+                      <ol className="list-decimal pl-4 space-y-1.5 text-muted-foreground leading-relaxed" start={4}>
+                        <li>
+                          <strong>HTTP Hit:</strong> A client makes a request (e.g. <code>GET /dashboard</code>).
+                        </li>
+                        <li>
+                          <strong>Node Middlewares Execute:</strong> Registered <code>use</code> functions run. If handling <code>/healthz</code> or <code>/socket.io</code>, they respond via <code>res.end()</code> and bypass Dinou completely. Otherwise, they invoke <code>next()</code>.
+                        </li>
+                        <li>
+                          <strong>Web Standards Conversion:</strong> Dinou constructs standard <code>Request</code> and <code>context</code> objects.
+                        </li>
+                        <li>
+                          <strong>onRequest Hooks Execute:</strong> Plugins run sequentially. If returning a <code>Response</code>, Dinou terminates early. If mutating <code>context</code>, data is preserved for <code>getContext()</code>.
+                        </li>
+                        <li>
+                          <strong>Page &amp; RSC Rendering:</strong> Dinou resolves route contracts and renders React Server Components.
+                        </li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
             {/* Universal Setup Files */}
             <section id="universal-setup-files" className="mt-12">
-              <h2>Compile-Time Setup Files (<code>setupFiles</code>)</h2>
+              <h2>8. Compile-Time Setup Files (<code>setupFiles</code>)</h2>
               <p>
                 In standard ECMAScript Modules (ESM), all static <code>import</code> statements are resolved and executed <strong>before</strong> module bodies evaluate. When third-party packages (such as <code>pdfjs-dist</code> or telemetry agents like Sentry and Datadog) expect globals on <code>globalThis</code>, attempting to assign polyfills inside application components or <code>dinou.config.js</code> runs too late and results in runtime <code>ReferenceError</code> exceptions.
               </p>
@@ -686,7 +821,7 @@ export async function updateProfile(formData: FormData) {
               </p>
 
               <div id="setup-hierarchy" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">Resolution &amp; Precedence Hierarchy</h3>
+                <h3 className="text-lg font-bold">8.1 Resolution &amp; Precedence Hierarchy</h3>
                 <p>
                   Dinou resolves setup files using an unambiguous hierarchy:
                 </p>
@@ -704,7 +839,7 @@ export async function updateProfile(formData: FormData) {
               </div>
 
               <div id="setup-polyfills" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">Environment Polyfills Recipe (DOMMatrix / Geometry)</h3>
+                <h3 className="text-lg font-bold">8.2 Environment Polyfills Recipe (DOMMatrix / Geometry)</h3>
                 <p>
                   To polyfill W3C geometry interfaces (required by <code>pdfjs-dist</code>) in headless Node, Bun, and standalone compiled binaries without native C++ compilation:
                 </p>
@@ -738,7 +873,7 @@ if (typeof globalThis.ImageData === "undefined") {
 
             {/* Real-World Examples */}
             <section id="real-world-examples" className="mt-12">
-              <h2>Real-World Plugin Examples (Socket.IO &amp; Redis)</h2>
+              <h2>9. Real-World Plugin Examples (Socket.IO &amp; Redis)</h2>
               <p>
                 The following complete production example demonstrates combining <code>configureServer</code> for real-time WebSockets and Redis clustering with <code>onRequest</code> for authentication guards and webhooks:
               </p>
@@ -900,7 +1035,7 @@ export function authGuardPlugin() {
 
             {/* Registration & Execution Pipeline Order */}
             <section id="plugin-registration-order" className="mt-12">
-              <h2>Registration &amp; Execution Pipeline Order</h2>
+              <h2>10. Registration &amp; Execution Pipeline Order</h2>
               <p>
                 Plugins declared in the <code>plugins</code> array of <code>defineConfig</code> execute sequentially according to their order:
               </p>
@@ -936,7 +1071,7 @@ export function authGuardPlugin() {
 
             {/* Fault Isolation */}
             <section id="fault-isolation" className="mt-12">
-              <h2>Fault Isolation &amp; Error Handling</h2>
+              <h2>11. Fault Isolation &amp; Error Handling</h2>
               <p>
                 Dinou provides built-in try-catch fault isolation for all active plugins:
               </p>
