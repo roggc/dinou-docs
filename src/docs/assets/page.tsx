@@ -5,6 +5,7 @@ import {
   CardContent,
   CardHeader,
 } from "@/docs/components/ui/card";
+import { Badge } from "@/docs/components/ui/badge";
 import {
   Image as ImageIcon,
   Video,
@@ -33,7 +34,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Assets & Media | Dinou v7 Docs</title>
+      <title>Assets & Media | Dinou Docs</title>
       <meta
         name="description"
         content="Import images, videos, and audio files directly into your components with deterministic path-based hashing and ambient TypeScript support."
@@ -44,6 +45,17 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                Static Media Pipeline
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Assets &amp; Media

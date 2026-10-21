@@ -26,7 +26,7 @@ export function DocsHeader() {
               <img src={dinou} alt="Dinou" className="w-8 h-8 sm:w-9 sm:h-9" width={36} height={36} />
             </Link>
             <Badge variant="outline" className="inline-flex text-[11px] font-mono px-2 py-0.5 border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/5">
-              v7
+              v8
             </Badge>
           </div>
         </div>

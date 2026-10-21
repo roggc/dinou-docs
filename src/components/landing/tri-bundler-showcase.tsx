@@ -80,7 +80,7 @@ export function TriBundlerShowcase() {
           </h2>
 
           <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg max-w-2xl leading-relaxed">
-            Never be locked into a single proprietary compiler. Dinou v7 supports pre-configured,
+            Never be locked into a single proprietary compiler. Dinou supports pre-configured,
             zero-config pipelines for the three premier JavaScript bundlers.
           </p>
         </div>

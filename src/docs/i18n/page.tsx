@@ -1,5 +1,6 @@
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
+import { Badge } from "@/docs/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
 import { CodeBlock } from "@/docs/components/code-block";
 import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
@@ -34,7 +35,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Internationalization (i18n) | Dinou v7 Docs</title>
+      <title>Internationalization (i18n) | Dinou Docs</title>
       <meta
         name="description"
         content="Build search-engine-friendly, localized applications using native dynamic folder route parameters (src/[lang]/...) and server-side dictionaries."
@@ -45,6 +46,17 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                Global Applications
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
             <div className="flex items-center space-x-2">
               <Globe className="h-6 w-6 text-primary text-blue-600 dark:text-blue-400" />
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
@@ -192,13 +204,13 @@ export function getServerT() {
 }`}</CodeBlock>
               </div>
 
-              <h3 id="i18next-plugin">2.3 Plugin Configuration: Root Redirection &amp; Context Extension (<code>dinou.config.mjs</code>)</h3>
+              <h3 id="i18next-plugin">2.3 Plugin Configuration: Root Redirection &amp; Context Extension (<code>dinou.config.js</code>)</h3>
               <p>
-                In <strong>Dinou v7</strong>, you can configure both <strong>Root URL Redirection</strong> (<code>/</code> ➔ <code>/[lang]</code>) and <strong>Context Extension</strong> (attaching <code>context.lang</code> for <code>getContext()</code>) using a single Web Standards plugin:
+                In <strong>Dinou</strong>, you can configure both <strong>Root URL Redirection</strong> (<code>/</code> ➔ <code>/[lang]</code>) and <strong>Context Extension</strong> (attaching <code>context.lang</code> for <code>getContext()</code>) using a single Web Standards plugin:
               </p>
 
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`// dinou.config.mjs
+                <CodeBlock language="javascript">{`// dinou.config.js
 import { defineConfig } from "dinou";
 
 export default defineConfig({
@@ -505,7 +517,7 @@ export function FeedbackBox() {
 
               <h3 id="language-switcher">2.7 Language Switcher Component</h3>
               <p>
-                Below is a reusable language switcher component for your app. It uses Dinou&apos;s <code>usePathname()</code> to swap the leading language prefix while preserving the user&apos;s active sub-path (e.g. switching from <code>/en/interactive</code> to <code>/es/interactive</code>). It also updates the <code>locale</code> cookie on click so that future visits to the root URL (<code>/</code>) seamlessly remember the user&apos;s preferred language via our plugin in <code>dinou.config.mjs</code>:
+                Below is a reusable language switcher component for your app. It uses Dinou&apos;s <code>usePathname()</code> to swap the leading language prefix while preserving the user&apos;s active sub-path (e.g. switching from <code>/en/interactive</code> to <code>/es/interactive</code>). It also updates the <code>locale</code> cookie on click so that future visits to the root URL (<code>/</code>) seamlessly remember the user&apos;s preferred language via our plugin in <code>dinou.config.js</code>:
               </p>
 
               <div className="not-prose my-4">
@@ -546,7 +558,7 @@ export function LanguageSwitcher() {
           key={code}
           href={getLocalizedPath(code)}
           onClick={() => {
-            // 3. Persist locale cookie so dinou.config.mjs remembers it on root "/" visits
+            // 3. Persist locale cookie so dinou.config.js remembers it on root "/" visits
             document.cookie = \`locale=\${code}; path=/; max-age=31536000; SameSite=Lax\`;
           }}
           className={\`px-2.5 py-1 rounded-md transition-colors \${
@@ -618,7 +630,7 @@ export const allowISG: LayoutFunctions<"/[lang]">["allowISG"] = false;`}</CodeBl
                   <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   <AlertTitle>Zero-Boilerplate Access via <code>getContext()</code></AlertTitle>
                   <AlertDescription className="text-xs text-muted-foreground mt-1 space-y-1">
-                    <p>Because our plugin in <code>dinou.config.mjs</code> attaches <code>context.lang</code>, any Server Function can read it directly from <code>AsyncLocalStorage</code> via <code>const &#123; lang &#125; = getContext()</code>. You don&apos;t need to pass <code>lang</code> through form inputs or client function parameters!</p>
+                    <p>Because our plugin in <code>dinou.config.js</code> attaches <code>context.lang</code>, any Server Function can read it directly from <code>AsyncLocalStorage</code> via <code>const &#123; lang &#125; = getContext()</code>. You don&apos;t need to pass <code>lang</code> through form inputs or client function parameters!</p>
                   </AlertDescription>
                 </Alert>
               </div>

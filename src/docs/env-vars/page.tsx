@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/docs/components/ui/card";
+import { Badge } from "@/docs/components/ui/badge";
 import {
   Lock,
   Globe,
@@ -48,7 +49,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Environment Variables | Dinou v7 Docs</title>
+      <title>Environment Variables | Dinou Docs</title>
       <meta
         name="description"
         content="Manage database credentials, API tokens, and runtime secrets securely with Dinou's server-only isolation model across Node.js, Bun, Deno, and Cloudflare."
@@ -59,6 +60,17 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                Zero-Leak Secrets
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Environment Variables &amp; Secrets
@@ -166,7 +178,7 @@ export default function Page() {
                       <span>Plugins &amp; Server Config</span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Read environment variables (such as <code>PORT</code> or service keys) in <code>dinou.config.mjs</code> and plugins.
+                      Read environment variables (such as <code>PORT</code> or service keys) in <code>dinou.config.js</code> and plugins.
                     </p>
                   </div>
                 </div>

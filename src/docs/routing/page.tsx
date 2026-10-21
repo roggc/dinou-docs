@@ -66,7 +66,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Routing & Layouts | Dinou v7 Docs</title>
+      <title>Routing & Layouts | Dinou Docs</title>
       <meta
         name="description"
         content="Master Dinou's file-system router: nested layouts with independent Horizontal ISR, parallel slots with error isolation, and route parameters."
@@ -85,7 +85,7 @@ export default function Page() {
                 File-System Architecture
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
-                Dinou v7 Complete Guide
+                Dinou Complete Guide
               </Badge>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
@@ -106,7 +106,7 @@ export default function Page() {
                     Looking for Type-Safe Routing?
                   </h4>
                   <p className="text-xs text-muted-foreground">
-                    Dinou v7 introduces zero-runtime type safety with auto-generated route definitions, IDE autocomplete, and typed <code>PageProps</code> &amp; <code>&lt;Link&gt;</code>.
+                    Dinou introduces zero-runtime type safety with auto-generated route definitions, IDE autocomplete, and typed <code>PageProps</code> &amp; <code>&lt;Link&gt;</code>.
                   </p>
                 </div>
               </div>
@@ -357,7 +357,7 @@ export default function Page() {
                   3.1. Dynamic Params Prop Injection
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  In Dinou v7, parameters are strictly typed using <code>PageProps</code>, <code>LayoutProps</code>, <code>ErrorProps</code>, and <code>RouteParams</code>:
+                  In Dinou, parameters are strictly typed using <code>PageProps</code>, <code>LayoutProps</code>, <code>ErrorProps</code>, and <code>RouteParams</code>:
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-1.5 list-disc pl-5">
                   <li><code>page.tsx</code> components: <code>Page(&#123; params &#125;: PageProps&lt;&quot;/blog/[slug]&quot;&gt;)</code></li>
@@ -572,7 +572,7 @@ export default function DashboardLayout({
                 </p>
 
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Dinou v7 introduces <strong>Horizontal Layered Segmentation</strong>. Layouts and pages travel on completely separate execution, streaming, and caching pathways:
+                  Dinou introduces <strong>Horizontal Layered Segmentation</strong>. Layouts and pages travel on completely separate execution, streaming, and caching pathways:
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-4 min-w-0">

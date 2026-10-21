@@ -21,6 +21,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
+import { Badge } from "@/docs/components/ui/badge";
 
 const tocItems = [
   { id: "eject-dinou", title: "Ejecting Dinou: Framework Sovereignty", level: 2 },
@@ -39,7 +40,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Eject Dinou | Dinou v7 Docs</title>
+      <title>Eject Dinou | Dinou Docs</title>
       <meta
         name="description"
         content="Gain complete ownership over your technology stack. Eject Dinou to unpack the entire dual-engine React 19 compiler and server runtime logic."
@@ -50,13 +51,21 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                Framework Sovereignty
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
+            <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Eject Dinou
               </h1>
-              <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
-                100% Hackable
-              </span>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
               Gain complete ownership over your technology stack. Eject Dinou to unpack the entire dual-engine React 19 compiler, runtime adapters, and server runtime logic directly into your repository.
@@ -129,7 +138,7 @@ npm run eject`}
                   <div>
                     <h4 className="text-sm font-semibold text-foreground">Direct Script Re-routing</h4>
                     <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-                      Updates your <code>package.json</code> scripts so they point directly to your local files (e.g. <code>node dinou/node/dev.mjs</code> and <code>node dinou/node/build.mjs</code>) instead of opaque global CLI binary shims.
+                      Updates your <code>package.json</code> scripts so they point directly to your local files (e.g. <code>node dinou/node/dev.js</code> and <code>node dinou/node/build.js</code>) instead of opaque global CLI binary shims.
                     </p>
                   </div>
                 </div>
@@ -183,15 +192,15 @@ npm run eject`}
 │   └── revalidating.js             # Background ISR revalidator & cache purger
 │
 ├── adapters/                       # Deployment Runtime Adapters
-│   ├── node.mjs                    # Standalone Node.js HTTP server (Docker, VPS)
+│   ├── node.js                     # Standalone Node.js HTTP server (Docker, VPS)
 │   ├── bun.js                      # High-speed Bun runtime adapter
 │   ├── deno.js                     # Multi-region Deno & Deno Deploy (deno-edge) adapter
 │   ├── cloudflare.js               # Cloudflare Workers & Pages edge worker
 │   └── netlify.js                  # Netlify Functions v2 serverless adapter
 │
 ├── esbuild/                        # esbuild compilation & dev configurations
-│   ├── build.mjs                   # Dual-bundle production build pipeline
-│   └── build-client.mjs            # Client-side bundle orchestrator
+│   ├── build.js                    # Dual-bundle production build pipeline
+│   └── dev.js                      # Client-side bundle orchestrator
 │
 ├── rollup/                         # Rollup production bundler setup
 │   └── rollup.config.js            # Dual-bundle Tree-shaking pipeline
@@ -200,8 +209,8 @@ npm run eject`}
 │   └── webpack.config.js           # Enterprise-grade Webpack 5 pipeline
 │
 └── node/                           # Node.js development & build scripts
-    ├── dev.mjs                     # Multi-engine development server & HMR
-    └── build.mjs                   # Production bundle compiler`}
+    ├── dev.js                      # Multi-engine development server & HMR
+    └── build.js                    # Production bundle compiler`}
               </CodeBlock>
 
               <div className="mt-4 p-4 rounded-xl border bg-card not-prose flex items-start gap-3">
@@ -216,7 +225,7 @@ npm run eject`}
             <section id="when-to-eject" className="mt-12">
               <h2>When to Consider Ejecting</h2>
               <p>
-                Ejection is not required for typical applications; Dinou v7 out of the box provides multi-bundler compilation, edge adapters, and plugin support. However, ejecting is invaluable when you need:
+                Ejection is not required for typical applications; Dinou out of the box provides multi-bundler compilation, edge adapters, and plugin support. However, ejecting is invaluable when you need:
               </p>
 
               <div className="grid gap-4 sm:grid-cols-2 not-prose my-6">
@@ -342,14 +351,14 @@ export async function handleRequest(request, platformContext = {}) {
               <section id="custom-bundler" className="my-6">
                 <h3>2. Extending the Bundler Pipeline</h3>
                 <p>
-                  To add a custom esbuild plugin (such as a specialized SVG compiler or asset loader), edit <code>dinou/esbuild/build.mjs</code>:
+                  To add a custom esbuild plugin (such as a specialized SVG compiler or asset loader), edit <code>dinou/esbuild/build.js</code>:
                 </p>
                 <CodeBlock
                   language="javascript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// dinou/esbuild/build.mjs
-import { myCustomPlugin } from "./plugins/my-plugin.mjs";
+{`// dinou/esbuild/build.js
+import { myCustomPlugin } from "./plugins/my-plugin.js";
 
 // ...after collecting entryPoints:
 const buildConfig = getConfigEsbuildProd({

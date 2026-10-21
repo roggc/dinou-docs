@@ -75,7 +75,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Component Architecture | Dinou v7 Docs</title>
+      <title>Component Architecture | Dinou Docs</title>
       <meta
         name="description"
         content="Master the React 19 dual-component model, serializable flight boundaries, component micro-caching with DinouCacheSlot, and Partial Prerendering."

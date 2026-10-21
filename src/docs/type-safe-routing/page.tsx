@@ -63,7 +63,7 @@ const tocItems = [
 export default function TypeSafeRoutingPage() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Type-Safe Routing | Dinou v7 Docs</title>
+      <title>Type-Safe Routing | Dinou Docs</title>
       <meta
         name="description"
         content="Experience end-to-end compile-time type safety across your entire application with automatic TypeScript route generation and typed Link components."
@@ -83,7 +83,7 @@ export default function TypeSafeRoutingPage() {
                 Type Safety
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
-                Dinou v7 Native
+                Dinou Native
               </Badge>
               <Badge
                 variant="secondary"
@@ -107,7 +107,7 @@ export default function TypeSafeRoutingPage() {
                 1. Overview &amp; Zero-Runtime Guarantee
               </h2>
               <p>
-                Dinou v7 introduces a built-in, two-level <strong>Type-Safe Routing</strong> system designed from the ground up to give developers full confidence when building and refactoring applications. Unlike traditional routing setups that require external schema validators or proprietary bundler plugins, Dinou generates strict TypeScript declaration files directly from your <code>src/</code> filesystem conventions.
+                Dinou introduces a built-in, two-level <strong>Type-Safe Routing</strong> system designed from the ground up to give developers full confidence when building and refactoring applications. Unlike traditional routing setups that require external schema validators or proprietary bundler plugins, Dinou generates strict TypeScript declaration files directly from your <code>src/</code> filesystem conventions.
               </p>
 
               <div id="core-pillars" className="scroll-mt-20 space-y-4 mt-6">

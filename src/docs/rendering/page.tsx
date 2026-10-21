@@ -132,7 +132,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Rendering Strategies | Dinou v7 Docs</title>
+      <title>Rendering Strategies | Dinou Docs</title>
       <meta
         name="description"
         content="Dinou is Static by Default. Explore build-time SSG, background ISR, on-demand ISG, dynamic SSR streaming, and Partial Prerendering (PPR)."
@@ -143,6 +143,17 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                Static by Default
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Static &amp; Dynamic Rendering Strategies
@@ -362,7 +373,7 @@ export function SearchFilter() {
                 2. The Unified <code>revalidate</code> Strategy (Seconds)
               </h3>
               <p>
-                In Dinou v7, the <code>revalidate</code> export in{" "}
+                In Dinou, the <code>revalidate</code> export in{" "}
                 <code>page_functions.ts</code> (or <code>layout_functions.ts</code>)
                 serves as the <strong>single source of truth</strong> for the
                 route segment&apos;s rendering mode. It is measured strictly in{" "}
@@ -395,7 +406,7 @@ export const revalidate = 0;`}
                   <AlertTitle>Migration from Legacy dynamic Export</AlertTitle>
                   <AlertDescription>
                     In older versions of Dinou, dynamic rendering was toggled
-                    via <code>export function dynamic()</code>. In Dinou v7, the{" "}
+                    via <code>export function dynamic()</code>. In Dinou, the{" "}
                     <code>dynamic</code> export has been removed. Setting{" "}
                     <code>export const revalidate = 0;</code> is the official
                     unified mechanism to escape static generation.
@@ -470,9 +481,6 @@ export const revalidate = 60;
                 <h3 className="m-0">
                   3. Partial Prerendering (PPR)
                 </h3>
-                <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400 ring-1 ring-inset ring-purple-500/20">
-                  Breakthrough in v7
-                </span>
               </div>
               <p className="mt-4">
                 <strong>Partial Prerendering (PPR)</strong> resolves the decades-old
@@ -659,7 +667,7 @@ export default function StorePage() {
                         <span className="text-xs uppercase tracking-wider font-semibold text-blue-600 dark:text-blue-400">Section Default</span>
                       </div>
                       <div className="p-2 rounded bg-muted/80 flex items-center justify-between border-l-4 border-slate-500">
-                        <span>4. <strong>dinou.config.mjs</strong> (Global Application)</span>
+                        <span>4. <strong>dinou.config.js</strong> (Global Application)</span>
                         <span className="text-xs uppercase tracking-wider font-semibold text-slate-500">Global Fallback</span>
                       </div>
                     </div>
@@ -671,7 +679,7 @@ export default function StorePage() {
                   <div>
                     <h5 className="font-semibold text-sm text-foreground flex items-center gap-2">
                       <Globe className="h-4 w-4 text-blue-500" />
-                      1. Global Configuration (dinou.config.js / .mjs)
+                      1. Global Configuration (dinou.config.js / .ts)
                     </h5>
                     <p className="text-sm text-muted-foreground my-2">
                       When enabled globally, all static-eligible routes in your application
@@ -682,7 +690,7 @@ export default function StorePage() {
                       language="javascript"
                       containerClassName="w-full overflow-hidden rounded-lg"
                     >
-{`// dinou.config.mjs
+{`// dinou.config.js
 import { defineConfig } from "dinou";
 
 export default defineConfig({
@@ -791,7 +799,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                 (caching an entire URL route or layout shell). When a dynamic page contains an expensive database widget, developers are often forced into an architectural trap: converting the widget to a Client Component with client-side cache libraries (SWR, TanStack Query), introducing bundle bloat, waterfall requests, and layout shifts.
               </p>
               <p>
-                Dinou v7 introduces <strong>Vertical Segmentation</strong> with{" "}
+                Dinou introduces <strong>Vertical Segmentation</strong> with{" "}
                 <code>&lt;DinouCacheSlot&gt;</code> from <code>&quot;dinou/server&quot;</code>. It keeps components securely on the server as React Server Components (RSC) while caching their rendered serialized Flight payload in server storage with dedicated TTLs and invalidation tags.
               </p>
 
@@ -1481,7 +1489,7 @@ export const getStaticPaths = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
                 7. Complete Rendering Strategies Matrix
               </h3>
               <p>
-                Summary of all rendering strategies supported natively by Dinou v7:
+                Summary of all rendering strategies supported natively by Dinou:
               </p>
 
               <div className="not-prose overflow-x-auto rounded-lg border border-border my-6">

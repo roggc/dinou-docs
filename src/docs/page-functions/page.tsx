@@ -153,10 +153,10 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Page & Layout Functions | Dinou v7 Docs</title>
+      <title>Page & Layout Functions | Dinou Docs</title>
       <meta
         name="description"
-        content="Dinou v7 introduces 2D Horizontal Layered Segmentation. Route configuration and server lifecycles are decoupled into page_functions.ts and layout_functions.ts."
+        content="Dinou features 2D Horizontal Layered Segmentation. Route configuration and server lifecycles are decoupled into page_functions.ts and layout_functions.ts."
       />
       <link rel="canonical" href="https://dinou.dev/docs/page-functions" />
 
@@ -164,13 +164,24 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                2D Horizontal Segmentation
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Page & Layout Functions
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Dinou v7 introduces{" "}
+              Dinou features{" "}
               <strong>2D Horizontal Layered Segmentation</strong>. Route
               configuration and server lifecycle functions are cleanly decoupled
               into <code>page_functions.ts</code> (for <code>page.tsx</code>) and{" "}
@@ -383,9 +394,9 @@ export type LayoutFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TP
 
               <Alert className="not-prose my-4">
                 <Sparkles className="h-4 w-4 text-primary" />
-                <AlertTitle>v7 Direct Return Contract</AlertTitle>
+                <AlertTitle>Direct Return Contract</AlertTitle>
                 <AlertDescription>
-                  In Dinou v7, <code>getProps</code> directly returns the props
+                  In Dinou, <code>getProps</code> directly returns the props
                   object (<code>{`{ ... }`}</code>). The legacy wrapper{" "}
                   <code>{`{ page: { ... }, layout: { ... } }`}</code> has been
                   deprecated because pages and layouts now have their own
@@ -836,7 +847,7 @@ export function SearchFilter() {
               >
                 <h4>2.1. Constant Array vs Function Export</h4>
                 <p>
-                  In Dinou v7, <code>getStaticPaths</code> supports both a{" "}
+                  In Dinou, <code>getStaticPaths</code> supports both a{" "}
                   <strong>constant array export</strong> (for known, fixed paths)
                   and a <strong>synchronous or asynchronous function export</strong>{" "}
                   (for dynamic data sources like databases or headless CMSs):
@@ -1505,7 +1516,7 @@ export const validateParams: PageFunctions<
               <p>
                 Controls whether dynamic paths that were not pre-rendered at
                 build time (via <code>getStaticPaths</code> during <code>dinou build</code>) are allowed to be
-                generated on-demand on the first incoming user request. In Dinou v7, pre-rendering happens strictly during the build phase, ensuring production server startup is instantaneous.
+                generated on-demand on the first incoming user request. In Dinou, pre-rendering happens strictly during the build phase, ensuring production server startup is instantaneous.
               </p>
 
               <div className="border rounded-lg p-4 bg-card not-prose my-4">
@@ -1669,7 +1680,7 @@ export const revalidate: PageFunctions["revalidate"] = 0;
                 <AlertTitle>Migration from Legacy dynamic Export</AlertTitle>
                 <AlertDescription>
                   In previous versions of Dinou, dynamic rendering was toggled
-                  using <code>export function dynamic()</code>. In Dinou v7,{" "}
+                  using <code>export function dynamic()</code>. In Dinou,{" "}
                   <code>dynamic</code> has been completely removed. Setting{" "}
                   <code>export const revalidate: PageFunctions[&quot;revalidate&quot;] = 0;</code> (or any value &lt; 1)
                   is the official, unified way to escape static generation.
@@ -1774,9 +1785,6 @@ export const getCacheTags: PageFunctions<
                 <h3 className="m-0">
                   7. <code>ppr</code> (Partial Prerendering)
                 </h3>
-                <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400 ring-1 ring-inset ring-purple-500/20">
-                  New in v7
-                </span>
               </div>
               <p className="mt-4">
                 Partial Prerendering (PPR) combines the instant TTFB (Time to
@@ -1890,16 +1898,10 @@ export default function DashboardPage() {
                 <h3 className="m-0">
                   8. Consolidated Config Object (<code>export default</code>)
                 </h3>
-                <Badge
-                  variant="secondary"
-                  className="font-mono text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-900"
-                >
-                  +v7.1.0
-                </Badge>
               </div>
 
               <p className="mt-4 leading-relaxed">
-                Starting in <strong>Dinou v7.1.0</strong>, you can declare and export a single
+                You can declare and export a single
                 consolidated configuration object via <code>export default pageConfig</code> in{" "}
                 <code>page_functions.ts</code> (or <code>export default layoutConfig</code> in{" "}
                 <code>layout_functions.ts</code>).
@@ -1929,7 +1931,7 @@ const pageConfig: PageFunctions<"/blog/[slug]", BlogProps> = {
   ppr: true,
   revalidate: 60,
   allowISG: true,
-  getStaticPaths: ["getting-started", "whats-new-in-v7"],
+  getStaticPaths: ["getting-started", "page-functions"],
   validateParams: (params) => Boolean(params?.slug),
   getCacheTags: (params) => ["blog", \`post-\${params?.slug}\`],
   getProps: async (params) => {
@@ -2265,7 +2267,7 @@ const pageConfig: PageFunctions<"/blog/[slug]", BlogPageProps> = {
   // Static Paths for pre-rendering at build time
   getStaticPaths: [
     "getting-started",
-    "building-with-dinou-v7",
+    "building-with-dinou",
   ],
 
   // Parameter validation hook (returns false to abort with 404)

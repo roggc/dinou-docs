@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/docs/components/ui/card";
+import { Badge } from "@/docs/components/ui/badge";
 import {
   FolderTree,
   Zap,
@@ -36,7 +37,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Public Directory | Dinou v7 Docs</title>
+      <title>Public Directory | Dinou Docs</title>
       <meta
         name="description"
         content="Static asset delivery in Dinou. Learn how the public/ directory serves favicons, robots.txt, sitemaps, and domain verification files."
@@ -47,6 +48,17 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                Static Assets
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 📂 Public Directory (<code>public/</code>)
@@ -181,7 +193,7 @@ export default function Page() {
 │   └── app/
 │       ├── layout.tsx              # Root HTML shell linking public assets
 │       └── page.tsx
-├── dinou.config.mjs
+├── dinou.config.js
 └── package.json`}
                 </CodeBlock>
               </section>

@@ -79,7 +79,7 @@ export function PprContract() {
                 1. Global Config
               </td>
               <td className="p-3 font-mono text-primary align-top">
-                <code>dinou.config.mjs</code>
+                <code>dinou.config.js</code>
               </td>
               <td className="p-3 align-top leading-relaxed text-muted-foreground">
                 Sets application-wide default via <code>defineConfig(&#123; ppr: true &#125;)</code>. Serves as the fallback baseline for all routes when no segment defines an override.

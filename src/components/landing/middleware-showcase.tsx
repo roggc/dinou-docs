@@ -50,7 +50,7 @@ const tabConfigs: Record<MiddlewareTab, TabConfig> = {
     headline: "Short-Circuit Webhooks with Zero SSR Overhead",
     description:
       "Handle high-frequency webhooks (Stripe, Clerk, GitHub) directly at the HTTP layer. Returning a standard Web Response short-circuits the request pipeline and completely bypasses React component rendering.",
-    codeFile: "dinou.config.mjs",
+    codeFile: "dinou.config.js",
     language: "javascript",
     codeSnippet: `import { defineConfig } from "dinou";
 
@@ -146,19 +146,19 @@ export const authPlugin: DinouPlugin = {
   config: {
     id: "config",
     title: "3. Framework Extensibility",
-    badge: "dinou.config.mjs",
+    badge: "dinou.config.js",
     badgeColor: "border-purple-500/30 text-purple-600 dark:text-purple-400 bg-purple-500/10",
     headline: "Centralized Runtime & Compiler Control",
     description:
       "A single type-safe configuration file controls global Partial Prerendering (PPR), React StrictMode development parity, pluggable ISR cache backends, and sequential plugin chains.",
-    codeFile: "dinou.config.mjs",
+    codeFile: "dinou.config.js",
     language: "javascript",
     codeSnippet: `import { defineConfig } from "dinou";
 import { redisStorage } from "./src/lib/redis-storage";
 import { authPlugin } from "./plugins/auth-guard";
 
 export default defineConfig({
-  // 1. Global Partial Prerendering (v7)
+  // 1. Global Partial Prerendering
   ppr: true,
 
   // 2. StrictMode development enforcement for React Compiler
@@ -218,7 +218,7 @@ export function MiddlewareShowcase() {
             </span>
           </h2>
           <p className="text-slate-600 dark:text-slate-300 md:text-lg leading-relaxed">
-            Configure global runtime behavior, intercept webhooks, inject request contexts, and enforce security policies with standard Web APIs in <code className="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-cyan-600 dark:text-cyan-400">dinou.config.mjs</code>.
+            Configure global runtime behavior, intercept webhooks, inject request contexts, and enforce security policies with standard Web APIs in <code className="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-cyan-600 dark:text-cyan-400">dinou.config.js</code>.
           </p>
         </div>
 
@@ -229,7 +229,7 @@ export function MiddlewareShowcase() {
               [
                 { id: "webhooks", label: "1. Fast-Path Webhooks", icon: Zap },
                 { id: "auth", label: "2. Auth Guards & Context", icon: Lock },
-                { id: "config", label: "3. dinou.config.mjs", icon: Sliders },
+                { id: "config", label: "3. dinou.config.js", icon: Sliders },
               ] as const
             ).map((tab) => {
               const Icon = tab.icon;
@@ -285,7 +285,7 @@ export function MiddlewareShowcase() {
                         : "bg-purple-500/10 text-purple-600 dark:text-purple-400"
                     }`}
                   >
-                    Verified v7
+                    Verified Standard
                   </span>
                 </div>
                 <div className="flex items-baseline gap-2.5">

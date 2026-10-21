@@ -19,7 +19,7 @@ export function DefineConfigSection() {
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        Type-safe configuration helper providing autocomplete, IntelliSense, and schema validation for your application&apos;s root configuration file (<code>dinou.config.mjs</code>, <code>dinou.config.js</code>, or <code>dinou.config.ts</code>).
+        Type-safe configuration helper providing autocomplete, IntelliSense, and schema validation for your application&apos;s root configuration file (<code>dinou.config.js</code>, <code>dinou.config.ts</code>, or <code>dinou.config.mjs</code>).
       </p>
 
       {/* Sub-section 1: Schema Reference */}
@@ -100,9 +100,9 @@ export function DefineConfigSection() {
             tabs={[
               {
                 id: "esm-config",
-                label: "dinou.config.mjs (Production ESM)",
+                label: "dinou.config.js (Production ESM)",
                 language: "javascript",
-                code: `// dinou.config.mjs
+                code: `// dinou.config.js
 import { defineConfig } from "dinou";
 import { RedisStorage } from "dinou/server";
 import Redis from "ioredis";

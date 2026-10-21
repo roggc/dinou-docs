@@ -1,5 +1,6 @@
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
+import { Badge } from "@/docs/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
 import { CodeBlock } from "@/docs/components/code-block";
 import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
@@ -21,7 +22,7 @@ import {
 const tocItems = [
   { id: "concept", title: "1. Core Concept", level: 2 },
   { id: "installation", title: "2. Installation & Environment", level: 2 },
-  { id: "plugin-setup", title: "3. The Dinou v7 Clerk Plugin", level: 2 },
+  { id: "plugin-setup", title: "3. The Dinou Clerk Plugin", level: 2 },
   { id: "rsc-usage", title: "4. Usage in Pages & Server Functions", level: 2 },
   { id: "clerk-server-actions", title: "4.1 Securing Server Functions", level: 3 },
   { id: "clerk-page-functions", title: "4.2 Option A: Server Component (Direct await)", level: 3 },
@@ -34,10 +35,10 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Clerk Authentication | Dinou v7 Docs</title>
+      <title>Clerk Authentication | Dinou Docs</title>
       <meta
         name="description"
-        content="Integrate Clerk into your Dinou v7 application to handle user authentication, route protection, and database synchronization via web standards middleware."
+        content="Integrate Clerk into your Dinou application to handle user authentication, route protection, and database synchronization via web standards middleware."
       />
       <link rel="canonical" href="https://dinou.dev/docs/clerk" />
 
@@ -45,19 +46,30 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                Authentication
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Clerk Authentication
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Integrate Clerk into your Dinou v7 application to handle user authentication, route protection, and database synchronization via the Web Standards plugin system.
+              Integrate Clerk into your Dinou application to handle user authentication, route protection, and database synchronization via the Web Standards plugin system.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <blockquote>
-              <strong>In Dinou v7, Clerk integrates seamlessly via the Web Standards Plugin System (<code>dinou.config.mjs</code>). There is no need to eject the framework: the plugin intercepts incoming requests, verifies session tokens cryptographically, exposes auth state to <code>getContext()</code>, and handles webhooks directly.</strong>
+              <strong>In Dinou, Clerk integrates seamlessly via the Web Standards Plugin System (<code>dinou.config.js</code>). There is no need to eject the framework: the plugin intercepts incoming requests, verifies session tokens cryptographically, exposes auth state to <code>getContext()</code>, and handles webhooks directly.</strong>
             </blockquote>
 
             <hr className="my-8" />
@@ -66,7 +78,7 @@ export default function Page() {
             <section id="concept">
               <h2>1. Core Concept</h2>
               <p>
-                Clerk integration in Dinou v7 is structured around three main pillars:
+                Clerk integration in Dinou is structured around three main pillars:
               </p>
               <div className="grid gap-6 md:grid-cols-3 not-prose my-6">
                 <Card>
@@ -129,9 +141,9 @@ CLERK_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
 
             {/* 2. PLUGIN SETUP */}
             <section id="plugin-setup">
-              <h2>3. The Dinou v7 Clerk Plugin (<code>dinou.config.mjs</code>)</h2>
+              <h2>3. The Dinou Clerk Plugin (<code>dinou.config.js</code>)</h2>
               <p>
-                In <strong>Dinou v7</strong>, plugins hook directly into the request lifecycle using the <code>onRequest(request, context)</code> hook. Create a reusable Clerk plugin to authenticate incoming requests and propagate session claims to <code>context</code>:
+                In <strong>Dinou</strong>, plugins hook directly into the request lifecycle using the <code>onRequest(request, context)</code> hook. Create a reusable Clerk plugin to authenticate incoming requests and propagate session claims to <code>context</code>:
               </p>
 
               <TabbedCodeBlock
@@ -166,9 +178,9 @@ export function clerkPlugin(): DinouPlugin {
                   },
                   {
                     id: "config-file",
-                    label: "dinou.config.mjs",
+                    label: "dinou.config.js",
                     language: "javascript",
-                    code: `// dinou.config.mjs
+                    code: `// dinou.config.js
 import { defineConfig } from "dinou";
 import { clerkPlugin } from "./plugins/clerk";
 
@@ -492,7 +504,7 @@ export default function RootLayout({
             <section id="webhooks">
               <h2>6. Webhooks &amp; Database Sync (Plugin Pattern)</h2>
               <p>
-                In <strong>Dinou v7</strong>, webhook endpoints are handled directly inside plugins using the <strong>Short-Circuit Pattern</strong>. When a plugin returns a Web <code>Response</code>, Dinou returns that response immediately and bypasses React Server Component rendering entirely:
+                In <strong>Dinou</strong>, webhook endpoints are handled directly inside plugins using the <strong>Short-Circuit Pattern</strong>. When a plugin returns a Web <code>Response</code>, Dinou returns that response immediately and bypasses React Server Component rendering entirely:
               </p>
 
               <div className="not-prose my-4">

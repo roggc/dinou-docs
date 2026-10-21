@@ -22,11 +22,11 @@ const navItems = [
   { href: "#type-safe", label: "Type-Safe", title: "Zero-Runtime Type-Safe Routing" },
   { href: "#ssg", label: "SSG", title: "Static by Default: SSG, ISR & ISG" },
   { href: "#segmentation", label: "Segmentation", title: "Two-Dimensional Layered Segmentation" },
-  { href: "#middleware", label: "Middleware", title: "Universal Middleware & Webhooks (dinou.config.mjs)" },
+  { href: "#middleware", label: "Middleware", title: "Universal Middleware & Webhooks (dinou.config.js)" },
   { href: "#dx", label: "DX", title: "Fast Developer Experience: Sub-5ms HMR" },
   { href: "#bundlers", label: "Bundlers", title: "Tri-Bundler Engine: esbuild, Rollup & Webpack" },
   { href: "#eject", label: "Eject", title: "Framework Sovereignty & Zero Lock-in" },
-  { href: "#engine-comparison", label: "Evolution", title: "Not Just a Version Bump: Architectural Metamorphosis" },
+  { href: "#architecture", label: "Architecture", title: "Engine Architecture: Engineered for Pure Web Standards" },
   { href: "#ready", label: "Start" },
 ];
 
@@ -215,7 +215,7 @@ export default function Header() {
             <img src={dinou} className="w-8 h-8 sm:w-9 sm:h-9" alt="Dinou" width={36} height={36} />
           </Link>
           <Badge variant="outline" className="inline-flex text-[11px] font-mono px-2 py-0.5 border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/5">
-            v7
+            v8
           </Badge>
         </div>
 

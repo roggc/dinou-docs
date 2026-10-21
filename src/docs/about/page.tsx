@@ -46,7 +46,7 @@ const tocItems = [
 export default function AboutPage() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>About Dinou | Dinou v7 Docs</title>
+      <title>About Dinou | Dinou Docs</title>
       <meta
         name="description"
         content="About Dinou: MIT open source license terms, release versioning lifecycle, creator philosophy, human-agent co-creation, and community."
@@ -65,7 +65,7 @@ export default function AboutPage() {
                 Community &amp; Open Source
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
-                Dinou v7
+                Dinou
               </Badge>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
@@ -274,7 +274,7 @@ export default function AboutPage() {
                     </CardHeader>
                     <CardContent className="text-sm space-y-3">
                       <p className="text-muted-foreground text-xs leading-relaxed">
-                        Dinou v7 has been crafted through intensive <strong>human-agent interaction</strong> between <strong>@roggc</strong> and <strong>Antigravity-Gemini 3.8 Flash high</strong> (by Google / Google DeepMind).
+                        Dinou has been crafted through intensive <strong>human-agent interaction</strong> between <strong>@roggc</strong> and <strong>Antigravity-Gemini 3.8 Flash high</strong> (by Google / Google DeepMind).
                       </p>
                       <p className="text-muted-foreground text-xs leading-relaxed">
                         This pairing exemplifies the modern paradigm of agentic software engineering: human architectural intuition, design criteria, and production-tested standards directing an advanced autonomous agent capable of deep codebase analysis, high-speed refactoring, cross-bundler alignment, and zero-compromise precision.
@@ -396,7 +396,7 @@ export default function AboutPage() {
                       <li className="flex items-start gap-2.5">
                         <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
                         <span>
-                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">Google &amp; Google DeepMind:</strong> For pioneering next-generation agentic programming with <strong className="text-slate-800 dark:text-slate-200">Antigravity</strong> and <strong className="text-slate-800 dark:text-slate-200">Gemini</strong>, empowering the rapid, high-precision human-agent co-creation of Dinou v7.
+                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">Google &amp; Google DeepMind:</strong> For pioneering next-generation agentic programming with <strong className="text-slate-800 dark:text-slate-200">Antigravity</strong> and <strong className="text-slate-800 dark:text-slate-200">Gemini</strong>, empowering the rapid, high-precision human-agent co-creation of Dinou.
                         </span>
                       </li>
                       <li className="flex items-start gap-2.5">

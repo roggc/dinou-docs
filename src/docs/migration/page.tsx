@@ -17,7 +17,7 @@ import {
 export default function MigrationIndexPage() {
   return (
     <div className="flex-1 w-full max-w-[100vw] py-8 lg:py-12">
-      <title>Upgrade Guides | Dinou v7 Docs</title>
+      <title>Upgrade Guides | Dinou Docs</title>
       <meta
         name="description"
         content="Step-by-step migration guides and breaking change summaries to help you upgrade your Dinou applications between major versions."
@@ -32,7 +32,7 @@ export default function MigrationIndexPage() {
               Upgrade Guides
             </Badge>
             <Badge variant="outline" className="font-mono text-xs">
-              Dinou v7
+              Dinou
             </Badge>
           </div>
           <div className="flex items-center space-x-3">
@@ -47,19 +47,45 @@ export default function MigrationIndexPage() {
         </div>
 
         {/* Guides Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-8 not-prose">
+        <div className="grid gap-6 md:grid-cols-2 mt-8 not-prose">
+          {/* v7 to v8 */}
+          <Link href="/docs/migration/v7-to-v8" className="group">
+            <Card className="h-full border-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-950/10 hover:border-emerald-500 hover:shadow-lg transition-all duration-200 flex flex-col justify-between">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
+                    Latest Major • v8
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+                </div>
+                <CardTitle className="text-xl font-bold mt-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-emerald-500 shrink-0" />
+                  Migration from v7 to v8
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground space-y-3 flex-1 flex flex-col justify-between">
+                <p className="leading-relaxed">
+                  <strong className="text-foreground font-semibold">100% transparent upgrade with zero code changes required.</strong> Dinou v8 is an internal architectural evolution from hybrid CommonJS to pure ECMAScript Modules (<code>&quot;type&quot;: &quot;module&quot;</code>), unifying source extensions (<code>.js</code>), modernizing package exports, and fixing layout routing stability with <code>allowISG: false</code>.
+                </p>
+                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1 pt-2">
+                  Read v7 to v8 migration guide &rarr;
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
           {/* v6 to v7 */}
           <Link href="/docs/migration/v6-to-v7" className="group">
             <Card className="h-full border-blue-500/30 bg-blue-50/20 dark:bg-blue-950/10 hover:border-blue-500 hover:shadow-lg transition-all duration-200 flex flex-col justify-between">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                    Latest Major • v7
+                  <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                    v7.0.0
                   </span>
                   <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
                 </div>
                 <CardTitle className="text-xl font-bold mt-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-blue-500 shrink-0" />
+                  <RefreshCw className="h-5 w-5 text-blue-500 shrink-0" />
                   Migration from v6 to v7
                 </CardTitle>
               </CardHeader>
