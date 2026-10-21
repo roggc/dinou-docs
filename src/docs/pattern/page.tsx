@@ -50,7 +50,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>The Dinou Pattern | Dinou v7 Docs</title>
+      <title>The Dinou Pattern | Dinou Docs</title>
       <meta
         name="description"
         content="Combine Server Functions, Headless Client Updaters, and React 19 primitives with your global store for surgical, optimistic UI state updates."
