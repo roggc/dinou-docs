@@ -848,7 +848,7 @@ export async function updateProfile(formData: FormData) {
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// dinou.setup.js (Project Root)
-import { DOMMatrix, DOMPoint, DOMRect } from "@napi-rs/canvas/geometry";
+import { DOMMatrix, DOMPoint, DOMRect } from "@napi-rs/canvas/geometry.js";
 
 // 1. W3C Geometry Interfaces (Pure JS, zero C++ native compilation bindings)
 if (typeof globalThis.DOMMatrix === "undefined") {
