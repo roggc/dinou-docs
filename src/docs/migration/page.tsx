@@ -65,7 +65,7 @@ export default function MigrationIndexPage() {
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground space-y-3 flex-1 flex flex-col justify-between">
                 <p className="leading-relaxed">
-                  Full migration to pure ECMAScript Modules (<code>&quot;type&quot;: &quot;module&quot;</code>), source extensions unification (<code>.mjs</code> &rarr; <code>.js</code>), modernized package exports, universal Edge Renderer singleton, and critical routing handler fixes for static layouts with <code>allowISG: false</code>.
+                  <strong className="text-foreground font-semibold">100% transparent upgrade with zero code changes required.</strong> Dinou v8 is an internal architectural evolution from hybrid CommonJS to pure ECMAScript Modules (<code>&quot;type&quot;: &quot;module&quot;</code>), unifying source extensions (<code>.js</code>), modernizing package exports, and fixing layout routing stability with <code>allowISG: false</code>.
                 </p>
                 <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1 pt-2">
                   Read v7 to v8 migration guide &rarr;
