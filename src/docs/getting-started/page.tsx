@@ -56,7 +56,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Getting Started | Dinou v7 Docs</title>
+      <title>Getting Started | Dinou Docs</title>
       <meta
         name="description"
         content="Start building modern, full-stack React 19 applications in seconds. Choose between the automated CLI generator or manual configuration."
@@ -73,7 +73,7 @@ export default function Page() {
                 className="px-2.5 py-0.5 text-xs font-mono font-medium border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/5 rounded-full"
               >
                 <Sparkles className="w-3 h-3 mr-1 text-blue-500" />
-                Dinou v7 Setup
+                Dinou Setup
               </Badge>
               <span className="text-xs text-muted-foreground font-medium">
                 Installation &amp; Project Guide
@@ -395,6 +395,50 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   "build:node:esbuild": "dinou build:node:esbuild",
   "build:node:rollup": "dinou build:node:rollup",
   "build:node:webpack": "dinou build:node:webpack",
+  "build:node:compile": "dinou build:node:compile",
+  "build:node:compile:esbuild": "dinou build:node:compile:esbuild",
+  "build:node:compile:rollup": "dinou build:node:compile:rollup",
+  "build:node:compile:webpack": "dinou build:node:compile:webpack",
+  "build:node:compile:linux": "dinou build:node:compile:linux",
+  "build:node:compile:linux:esbuild": "dinou build:node:compile:linux:esbuild",
+  "build:node:compile:linux:rollup": "dinou build:node:compile:linux:rollup",
+  "build:node:compile:linux:webpack": "dinou build:node:compile:linux:webpack",
+  "build:node:compile:linux_arm": "dinou build:node:compile:linux_arm",
+  "build:node:compile:linux_arm:esbuild": "dinou build:node:compile:linux_arm:esbuild",
+  "build:node:compile:linux_arm:rollup": "dinou build:node:compile:linux_arm:rollup",
+  "build:node:compile:linux_arm:webpack": "dinou build:node:compile:linux_arm:webpack",
+  "build:node:compile:mac": "dinou build:node:compile:mac",
+  "build:node:compile:mac:esbuild": "dinou build:node:compile:mac:esbuild",
+  "build:node:compile:mac:rollup": "dinou build:node:compile:mac:rollup",
+  "build:node:compile:mac:webpack": "dinou build:node:compile:mac:webpack",
+  "build:node:compile:win": "dinou build:node:compile:win",
+  "build:node:compile:win:esbuild": "dinou build:node:compile:win:esbuild",
+  "build:node:compile:win:rollup": "dinou build:node:compile:win:rollup",
+  "build:node:compile:win:webpack": "dinou build:node:compile:win:webpack",
+  "build:node:pure": "dinou build:node:pure",
+  "build:node:pure:esbuild": "dinou build:node:pure:esbuild",
+  "build:node:pure:rollup": "dinou build:node:pure:rollup",
+  "build:node:pure:webpack": "dinou build:node:pure:webpack",
+  "build:node:pure:compile": "dinou build:node:pure:compile",
+  "build:node:pure:compile:esbuild": "dinou build:node:pure:compile:esbuild",
+  "build:node:pure:compile:rollup": "dinou build:node:pure:compile:rollup",
+  "build:node:pure:compile:webpack": "dinou build:node:pure:compile:webpack",
+  "build:node:pure:compile:linux": "dinou build:node:pure:compile:linux",
+  "build:node:pure:compile:linux:esbuild": "dinou build:node:pure:compile:linux:esbuild",
+  "build:node:pure:compile:linux:rollup": "dinou build:node:pure:compile:linux:rollup",
+  "build:node:pure:compile:linux:webpack": "dinou build:node:pure:compile:linux:webpack",
+  "build:node:pure:compile:linux_arm": "dinou build:node:pure:compile:linux_arm",
+  "build:node:pure:compile:linux_arm:esbuild": "dinou build:node:pure:compile:linux_arm:esbuild",
+  "build:node:pure:compile:linux_arm:rollup": "dinou build:node:pure:compile:linux_arm:rollup",
+  "build:node:pure:compile:linux_arm:webpack": "dinou build:node:pure:compile:linux_arm:webpack",
+  "build:node:pure:compile:mac": "dinou build:node:pure:compile:mac",
+  "build:node:pure:compile:mac:esbuild": "dinou build:node:pure:compile:mac:esbuild",
+  "build:node:pure:compile:mac:rollup": "dinou build:node:pure:compile:mac:rollup",
+  "build:node:pure:compile:mac:webpack": "dinou build:node:pure:compile:mac:webpack",
+  "build:node:pure:compile:win": "dinou build:node:pure:compile:win",
+  "build:node:pure:compile:win:esbuild": "dinou build:node:pure:compile:win:esbuild",
+  "build:node:pure:compile:win:rollup": "dinou build:node:pure:compile:win:rollup",
+  "build:node:pure:compile:win:webpack": "dinou build:node:pure:compile:win:webpack",
   "start:node": "dinou start:node",
   "start:node:esbuild": "dinou start:node:esbuild",
   "start:node:rollup": "dinou start:node:rollup",
@@ -548,13 +592,14 @@ npm run dev:webpack`}
                   4.1. Bundler Selection (esbuild, Rollup, Webpack)
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  By default, Dinou uses <strong>esbuild</strong> for sub-second cold starts and in-memory compilation. When enterprise plugins or custom loaders are required, you can switch seamlessly to <strong>Rollup</strong> or <strong>Webpack</strong> with 100% feature parity:
+                  By default, Dinou uses <strong>esbuild</strong> for lightning-fast production bundling. When enterprise plugins or custom loaders are required, you can compile with <strong>Rollup</strong> or <strong>Webpack</strong> with 100% feature parity:
                 </p>
                 <CodeBlock language="bash" containerClassName="w-full rounded-lg">
-                  {`# Start development with your preferred bundler
-npm run dev           # Default: esbuild
-npm run dev:rollup    # Dedicated Rollup in-memory engine
-npm run dev:webpack   # Dedicated Webpack engine`}
+                  {`# Build for production with your preferred bundler
+npm run build                 # Default production build (esbuild)
+npm run build:node:esbuild    # Explicit esbuild production build
+npm run build:node:rollup     # Dedicated Rollup production build
+npm run build:node:webpack    # Dedicated Webpack production build`}
                 </CodeBlock>
                 <p className="text-xs text-muted-foreground">
                   For advanced compiler tuning, custom plugins, and SWC options, visit the <Link href="/docs/bundlers" className="text-blue-500 hover:underline font-medium">Bundlers Guide &rarr;</Link>
