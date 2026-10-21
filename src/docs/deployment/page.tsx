@@ -493,20 +493,29 @@ npm run build:cloudflare`}
                   language="toml"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`# wrangler.toml
-name = "my-dinou-app"
+{`#:schema node_modules/wrangler/config-schema.json
+name = "dinou-cloudflare-app"
 main = ".dinou/cloudflare/worker.js"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-# Serve client bundles, CSS, and static assets directly via Cloudflare CDN
+# ====================================================================
+# Cloudflare Workers Static Assets
+# ====================================================================
+# Serves client JS/CSS bundles and pre-rendered SSG pages directly from
+# Cloudflare's global edge network before requests hit the worker.
 [assets]
 directory = ".dinou/dist3"
+binding = "ASSETS"
+run_worker_first = true
 
-# Optional: Bind KV namespace for persistent ISR route caching
+# ====================================================================
+# Incremental Static Regeneration (ISR / ISG) Cache
+# ====================================================================
+# Un-comment to enable edge-cached pages across all Cloudflare POPs
 # [[kv_namespaces]]
 # binding = "DINOU_CACHE"
-# id = "<your-kv-namespace-id>"`}
+# id = "<YOUR_KV_NAMESPACE_ID>"`}
                 </CodeBlock>
 
                 <p>
