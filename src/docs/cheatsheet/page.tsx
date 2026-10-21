@@ -1,6 +1,7 @@
 import { Link } from "dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
+import { Badge } from "@/docs/components/ui/badge";
 import {
   Alert,
   AlertDescription,
@@ -51,7 +52,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Cheatsheet | Dinou v7 Docs</title>
+      <title>Cheatsheet | Dinou Docs</title>
       <meta
         name="description"
         content="At-a-glance high-density desktop reference for file conventions, dynamic route syntax, server lifecycle contracts, and client navigation hooks."
@@ -63,16 +64,21 @@ export default function Page() {
           {/* Header */}
           <div className="mb-8 space-y-4">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center rounded-md bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary ring-1 ring-inset ring-primary/20">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
                 Executive Reference
-              </span>
-              <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                Dinou v7
-              </span>
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              ⚡ Dinou Complete Cheatsheet
-            </h1>
+            <div className="flex items-center space-x-2">
+              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                ⚡ Dinou Complete Cheatsheet
+              </h1>
+            </div>
             <p className="text-lg text-muted-foreground leading-relaxed">
               At-a-glance high-density desktop reference for file conventions, dynamic route syntax, server lifecycle contracts, client navigation hooks, and architectural decision matrices.
             </p>
@@ -983,7 +989,7 @@ export default function Page() {
                           (config: DinouConfig) =&gt; DinouConfig
                         </td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Type helper for <code>dinou.config.mjs</code> (reactStrictMode, ppr, storage, plugins).
+                          Type helper for <code>dinou.config.js</code> (reactStrictMode, ppr, storage, plugins).
                         </td>
                         <td className="py-2.5 px-3.5 text-right">
                           <Link href="/docs/api-reference#defineconfig" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
