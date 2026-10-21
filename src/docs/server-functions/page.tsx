@@ -6,6 +6,7 @@ import {
   AlertTitle,
 } from "@/docs/components/ui/alert";
 import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
+import { Badge } from "@/docs/components/ui/badge";
 import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 import {
   Zap,
@@ -83,7 +84,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Server Functions & Actions | Dinou v7 Docs</title>
+      <title>Server Functions & Actions | Dinou Docs</title>
       <meta
         name="description"
         content="Execute asynchronous server logic directly with Flight RPC. Dinou uniquely allows Server Functions to return live, rendered React component trees."
@@ -94,6 +95,17 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                Flight RPC
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Server Functions &amp; Actions
@@ -784,7 +796,7 @@ export async function completeOrder(orderId: string) {
                           </span>
                         </div>
                         <p className="text-muted-foreground leading-relaxed">
-                          Occurs inside <code>getProps()</code> in <code>page_functions.ts</code>, at the top level of the root <code>page.tsx</code> Server Component (outside any <code>&lt;Suspense&gt;</code> boundary), or in a global plugin hook (<code>onRequest</code>) in <code>dinou.config.mjs</code>.
+                          Occurs inside <code>getProps()</code> in <code>page_functions.ts</code>, at the top level of the root <code>page.tsx</code> Server Component (outside any <code>&lt;Suspense&gt;</code> boundary), or in a global plugin hook (<code>onRequest</code>) in <code>dinou.config.js</code>.
                         </p>
                         <p className="text-muted-foreground leading-relaxed">
                           Because zero HTML bytes have reached the wire (<code>headersSent === false</code>), Dinou issues a clean <strong>HTTP 302</strong> with a <code>Location</code> header. <strong>Crucial for SEO crawlers and search indexers.</strong>
@@ -829,9 +841,9 @@ export default async function DashboardPage() {
                             },
                             {
                               id: "plugin",
-                              label: "dinou.config.mjs (Plugin)",
+                              label: "dinou.config.js (Plugin)",
                               language: "javascript",
-                              code: `// dinou.config.mjs (Global Plugin Hook)
+                              code: `// dinou.config.js (Global Plugin Hook)
 import { defineConfig } from "dinou/config";
 
 export default defineConfig({
