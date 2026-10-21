@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/docs/components/ui/card";
+import { Badge } from "@/docs/components/ui/badge";
 import {
   Puzzle,
   Server,
@@ -33,7 +34,7 @@ import { Link } from "dinou";
 
 const tocItems = [
   { id: "overview", title: "Configuration & Plugin System", level: 2 },
-  { id: "config-file", title: "The dinou.config.mjs File", level: 2 },
+  { id: "config-file", title: "The dinou.config.js File", level: 2 },
   { id: "config-options", title: "Top-Level Configuration Options", level: 2 },
   { id: "ppr-option", title: "Global Partial Prerendering (ppr)", level: 3 },
   { id: "strict-mode-option", title: "React StrictMode (reactStrictMode)", level: 3 },
@@ -51,10 +52,10 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Configuration & Plugins | Dinou v7 Docs</title>
+      <title>Configuration & Plugins | Dinou Docs</title>
       <meta
         name="description"
-        content="Customize your Dinou application with dinou.config.mjs, enable global Partial Prerendering (PPR), and hook into request lifecycle events."
+        content="Customize your Dinou application with dinou.config.js, enable global Partial Prerendering (PPR), and hook into request lifecycle events."
       />
       <link rel="canonical" href="https://dinou.dev/docs/plugins" />
 
@@ -62,13 +63,24 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                Web Standards Pipeline
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Configuration &amp; Plugins
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Customize your Dinou application with <code>dinou.config.mjs</code>, enable global Partial Prerendering (PPR), configure React StrictMode, and hook into the request lifecycle using Web Standards plugins.
+              Customize your Dinou application with <code>dinou.config.js</code>, enable global Partial Prerendering (PPR), configure React StrictMode, and hook into the request lifecycle using Web Standards plugins.
             </p>
           </div>
 
@@ -77,10 +89,10 @@ export default function Page() {
             <section id="overview">
               <h2>Configuration &amp; Plugin System</h2>
               <p>
-                In <strong>Dinou v7</strong>, the configuration and plugin architecture is built entirely on modern <strong>Web Standards</strong> (the standard <code>Request</code> and <code>Response</code> interfaces).
+                In <strong>Dinou</strong>, the configuration and plugin architecture is built entirely on modern <strong>Web Standards</strong> (the standard <code>Request</code> and <code>Response</code> interfaces).
               </p>
               <p>
-                Through <code>dinou.config.mjs</code>, you can:
+                Through <code>dinou.config.js</code>, you can:
               </p>
               <ul>
                 <li>
@@ -138,16 +150,16 @@ export default function Page() {
 
             {/* Config File */}
             <section id="config-file" className="mt-12">
-              <h2>The dinou.config.mjs File</h2>
+              <h2>The dinou.config.js File</h2>
               <p>
-                Dinou automatically discovers your configuration file at the root of your project. The recommended format is ES Modules (<code>dinou.config.mjs</code> or <code>dinou.config.ts</code>) using the <code>defineConfig</code> helper:
+                Dinou automatically discovers your configuration file at the root of your project. The recommended format is ES Modules (<code>dinou.config.js</code> or <code>dinou.config.ts</code>) using the <code>defineConfig</code> helper:
               </p>
 
               <CodeBlock
                 language="typescript"
                 containerClassName="w-full overflow-hidden rounded-lg"
               >
-{`// dinou.config.mjs
+{`// dinou.config.js
 import { defineConfig } from "dinou";
 // Optional: import storage adapters if running custom ISR persistence
 // import { CloudflareKVStorage } from "dinou/server";
@@ -156,7 +168,7 @@ export default defineConfig({
   // Global Partial Prerendering default (can be overridden per route)
   ppr: false,
 
-  // React StrictMode in development (defaults to true in v7)
+  // React StrictMode in development (defaults to true)
   reactStrictMode: true,
 
   // Custom storage adapter for ISR / route caching (defaults to FileSystemStorage in Node / KV in Deno)
@@ -167,7 +179,7 @@ export default defineConfig({
 });`}
               </CodeBlock>
               <p className="text-xs text-muted-foreground mt-2">
-                Dinou also supports <code>dinou.config.js</code>, <code>dinou.config.cjs</code>, and <code>dinou.config.ts</code>.
+                Dinou also supports <code>dinou.config.mjs</code>, <code>dinou.config.cjs</code>, and <code>dinou.config.ts</code>.
               </p>
             </section>
 
@@ -182,7 +194,7 @@ export default defineConfig({
               <div id="ppr-option" className="mt-8 space-y-3">
                 <h3 className="text-lg font-bold">1. Global Partial Prerendering (<code>ppr</code>)</h3>
                 <p>
-                  <strong>Dinou v7</strong> introduces first-class <strong>Partial Prerendering (PPR)</strong>. When <code>ppr: true</code> is configured globally in <code>dinou.config.mjs</code>:
+                  Dinou introduces first-class <strong>Partial Prerendering (PPR)</strong>. When <code>ppr: true</code> is configured globally in <code>dinou.config.js</code>:
                 </p>
                 <ul>
                   <li>
@@ -196,7 +208,7 @@ export default defineConfig({
                   language="javascript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// dinou.config.mjs
+{`// dinou.config.js
 export default defineConfig({
   ppr: true, // Enables Partial Prerendering across all eligible routes
 });`}
@@ -210,13 +222,13 @@ export default defineConfig({
               <div id="strict-mode-option" className="mt-8 space-y-3">
                 <h3 className="text-lg font-bold">2. React StrictMode (<code>reactStrictMode</code>)</h3>
                 <p>
-                  In Dinou v7, <code>reactStrictMode</code> defaults to <code>true</code>. When active in development mode, React intentionally invokes components and effects twice to identify unintended side effects and ensure strict compliance with the React Compiler.
+                  In Dinou, <code>reactStrictMode</code> defaults to <code>true</code>. When active in development mode, React intentionally invokes components and effects twice to identify unintended side effects and ensure strict compliance with the React Compiler.
                 </p>
                 <CodeBlock
                   language="javascript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// dinou.config.mjs
+{`// dinou.config.js
 export default defineConfig({
   // Enabled by default (recommended). Set to false to disable:
   reactStrictMode: false,
@@ -228,13 +240,13 @@ export default defineConfig({
               <div id="storage-option" className="mt-8 space-y-3">
                 <h3 className="text-lg font-bold">3. Storage Adapter (<code>storage</code>)</h3>
                 <p>
-                  Dinou&apos;s ISR and ISG caching engine uses a pluggable storage adapter. By default, Dinou uses the local filesystem (in Node.js/Bun) or Deno KV (in Deno). You can supply a custom storage adapter (such as Redis or Cloudflare KV) in <code>dinou.config.mjs</code>:
+                  Dinou&apos;s ISR and ISG caching engine uses a pluggable storage adapter. By default, Dinou uses the local filesystem (in Node.js/Bun) or Deno KV (in Deno). You can supply a custom storage adapter (such as Redis or Cloudflare KV) in <code>dinou.config.js</code>:
                 </p>
                 <CodeBlock
                   language="javascript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// dinou.config.mjs
+{`// dinou.config.js
 import { myCustomRedisStorage } from "./src/lib/storage-redis";
 
 export default defineConfig({
@@ -256,7 +268,7 @@ export default defineConfig({
             <section id="plugin-architecture" className="mt-12">
               <h2>Dinou Plugin Architecture (onRequest)</h2>
               <p>
-                In Dinou v7, a plugin is an object containing an optional <code>name</code> and the <code>onRequest</code> lifecycle hook:
+                In Dinou, a plugin is an object containing an optional <code>name</code> and the <code>onRequest</code> lifecycle hook:
               </p>
               <CodeBlock
                 language="typescript"
@@ -526,9 +538,9 @@ export function stripeWebhookPlugin(): DinouPlugin {
                   },
                   {
                     id: "dinou-config",
-                    label: "dinou.config.mjs",
+                    label: "dinou.config.js",
                     language: "typescript",
-                    code: `// dinou.config.mjs
+                    code: `// dinou.config.js
 import { defineConfig } from "dinou";
 import { requestLoggerPlugin } from "./plugins/logger";
 import { stripeWebhookPlugin } from "./plugins/stripe-webhook";
@@ -557,7 +569,7 @@ export default defineConfig({
             <section id="plugin-registration-order" className="mt-12">
               <h2>Registration &amp; Execution Pipeline Order</h2>
               <p>
-                To register your plugins, pass them into the <code>plugins</code> array of <code>defineConfig</code> in <code>dinou.config.mjs</code> (as shown in the configuration tab above). Dinou executes plugins sequentially according to their position in the array:
+                To register your plugins, pass them into the <code>plugins</code> array of <code>defineConfig</code> in <code>dinou.config.js</code> (as shown in the configuration tab above). Dinou executes plugins sequentially according to their position in the array:
               </p>
 
               <div className="border rounded-xl p-5 bg-card not-prose my-6 space-y-3">
