@@ -234,7 +234,7 @@ if (!isDevelopment && lConfig.allowISG === false) {
               <div id="handler-code-fix" className="space-y-4 mt-8">
                 <h3 className="text-lg font-bold">2.2 The Fix in handler.js (Exact Code Replacement)</h3>
                 <p>
-                  If you maintain an ejected project, open <code>./dinou/core/handler.js</code>. Locate the <code>if (isLayoutReq)</code> block (around line 340) and replace the legacy 404 check with the comprehensive verification logic below:
+                  If you maintain an ejected project, open <code>./dinou/core/handler.js</code>. Locate the <code>if (isLayoutReq)</code> block (around line 1383) and replace the legacy 404 check with the comprehensive verification logic below:
                 </p>
 
                 <div className="space-y-2">
