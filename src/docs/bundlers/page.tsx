@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/docs/components/ui/card";
+import { Badge } from "@/docs/components/ui/badge";
 import {
   Boxes,
   Zap,
@@ -37,7 +38,7 @@ const tocItems = [
   { id: "rollup", title: "2. Rollup (Optimized Tree-Shaking)", level: 3 },
   { id: "webpack", title: "3. Webpack (Enterprise & React Compiler)", level: 3 },
   { id: "dual-bundle-engine", title: "The Dual-Bundle Engine Architecture", level: 2 },
-  { id: "cli-commands", title: "Complete Dinou v7 Scripts Matrix", level: 2 },
+  { id: "cli-commands", title: "Complete Dinou Scripts Matrix", level: 2 },
   { id: "dev-scripts", title: "Development Scripts (dinou dev)", level: 3 },
   { id: "node-scripts", title: "Node.js Build & Start", level: 3 },
   { id: "cloudflare-scripts", title: "Cloudflare Workers & Pages", level: 3 },
@@ -51,7 +52,7 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Bundlers & Build Tooling | Dinou v7 Docs</title>
+      <title>Bundlers & Build Tooling | Dinou Docs</title>
       <meta
         name="description"
         content="Dinou features first-class multi-bundler architecture supporting esbuild, Rollup, and Webpack across Node.js, Cloudflare, Deno, Bun, and binaries."
@@ -62,6 +63,17 @@ export default function Page() {
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
+              >
+                Tri-Bundler Engine
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                Dinou Complete Guide
+              </Badge>
+            </div>
             <div className="flex items-center space-x-2">
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Bundlers &amp; Build Tooling
@@ -141,7 +153,7 @@ export default function Page() {
                 </p>
                 <ul>
                   <li><strong>Strengths:</strong> Near-instant cold start, sub-second incremental rebuilds, and low memory usage.</li>
-                  <li><strong>React Compiler Behavior:</strong> In Dinou v7, esbuild skips the React Compiler in development for speed, but runs it during production builds.</li>
+                  <li><strong>React Compiler Behavior:</strong> In Dinou, esbuild skips the React Compiler in development for speed, but runs it during production builds.</li>
                   <li><strong>Best Used For:</strong> Daily local development and rapid feature building.</li>
                 </ul>
               </div>
@@ -209,11 +221,11 @@ export default function Page() {
               </div>
             </section>
 
-            {/* Complete Dinou v7 Scripts Matrix */}
+            {/* Complete Dinou Scripts Matrix */}
             <section id="cli-commands" className="mt-12">
-              <h2>Complete Dinou v7 Scripts Matrix</h2>
+              <h2>Complete Dinou Scripts Matrix</h2>
               <p>
-                Dinou v7 exposes a complete set of CLI commands. Every command supports specifying your bundler (<code>:esbuild</code>, <code>:rollup</code>, <code>:webpack</code>) or omitting it to use the default:
+                Dinou exposes a complete set of CLI commands. Every command supports specifying your bundler (<code>:esbuild</code>, <code>:rollup</code>, <code>:webpack</code>) or omitting it to use the default:
               </p>
 
               {/* Dev Scripts */}
