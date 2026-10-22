@@ -131,7 +131,9 @@ export default function Page() {
 {`{
   "compilerOptions": {
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
     "allowJs": true,
     "noEmit": true,
@@ -142,7 +144,8 @@ export default function Page() {
   },
   "include": [
     "src",
-    "dinou-env.d.ts"
+    "dinou-env.d.ts",
+    ".dinou/types/**/*.d.ts"
   ]
 }`}
               </CodeBlock>

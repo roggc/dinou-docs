@@ -351,7 +351,9 @@ import heroBanner from "@/assets/images/banner.webp";`}
 {`{
   "compilerOptions": {
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
     "allowJs": true,
     "noEmit": true,
@@ -362,7 +364,8 @@ import heroBanner from "@/assets/images/banner.webp";`}
   },
   "include": [
     "src",
-    "dinou-env.d.ts"
+    "dinou-env.d.ts",
+    ".dinou/types/**/*.d.ts"
   ]
 }`}
               </CodeBlock>
