@@ -53,7 +53,7 @@ const tocItems = [
   { id: "route-scanner", title: "5.1. Ultra-Fast Route Scanner", level: 3 },
   { id: "generated-definitions", title: "5.2. Module Augmentation", level: 3 },
   { id: "compiler-plumbing", title: "5.3. Internal Compiler Plumbing", level: 3 },
-  { id: "dinou-env", title: "5.4. Automatic Project Wiring", level: 3 },
+  { id: "tsconfig-wiring", title: "5.4. tsconfig.json Integration", level: 3 },
   { id: "lifecycle", title: "6. Lifecycle: Dev Server & Production Builds", level: 2 },
   { id: "dev-watcher", title: "6.1. Local Dev: Hot Watcher", level: 3 },
   { id: "prod-builds", title: "6.2. Production: Deterministic CI/CD", level: 3 },
@@ -581,8 +581,8 @@ export function ProductCard({ product }: { product: Product }) {
                   </div>
                   <div className="bg-card border border-border/80 rounded-lg p-3 space-y-1">
                     <span className="text-[11px] font-mono text-purple-500 font-semibold">04. IDE &amp; CI</span>
-                    <p className="font-semibold text-foreground">dinou-env.d.ts</p>
-                    <p className="text-[11px] text-muted-foreground leading-normal">Zero-config TypeScript autocompletion.</p>
+                    <p className="font-semibold text-foreground">tsconfig.json</p>
+                    <p className="text-[11px] text-muted-foreground leading-normal">Includes <code>.dinou/types/**/*.d.ts</code> for autocompletion.</p>
                   </div>
                 </div>
               </div>
@@ -652,25 +652,25 @@ export function ProductCard({ product }: { product: Product }) {
                   </CardContent>
                 </Card>
 
-                <Card id="dinou-env" className="scroll-mt-20 border-slate-200 dark:border-slate-800">
+                <Card id="tsconfig-wiring" className="scroll-mt-20 border-slate-200 dark:border-slate-800">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <ShieldCheck className="h-5 w-5 text-blue-500" />
-                        <CardTitle className="text-base">5.4. Automatic Project Wiring</CardTitle>
+                        <CardTitle className="text-base">5.4. tsconfig.json Integration</CardTitle>
                       </div>
-                      <Badge variant="outline" className="font-mono text-[10px]">Zero Config</Badge>
+                      <Badge variant="outline" className="font-mono text-[10px]">tsconfig.json</Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground space-y-2">
                     <p>
-                      At boot, Dinou ensures the root <code>dinou-env.d.ts</code> contains:
+                      Generated definitions under <code>.dinou/types/routes.d.ts</code> are discovered by TypeScript via the <code>include</code> array in your root <code>tsconfig.json</code>:
                     </p>
                     <div className="font-mono text-[11px] bg-muted/80 p-2 rounded border border-border/60">
-                      /// &lt;reference path=&quot;./.dinou/types/routes.d.ts&quot; /&gt;
+                      {`"include": ["src", "dinou-env.d.ts", ".dinou/types/**/*.d.ts"]`}
                     </div>
                     <p>
-                      Ensures IDEs and CI discover route typings immediately without custom <code>tsconfig.json</code> path aliases.
+                      Ensures IDEs and CI discover route typings immediately without manual triple-slash references in <code>dinou-env.d.ts</code>.
                     </p>
                   </CardContent>
                 </Card>
