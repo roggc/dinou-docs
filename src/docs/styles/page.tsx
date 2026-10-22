@@ -344,7 +344,9 @@ export function FeatureCard({ title, badge }: { title: string; badge: string }) 
 {`{
   "compilerOptions": {
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
     "allowJs": true,
     "noEmit": true,
@@ -355,7 +357,8 @@ export function FeatureCard({ title, badge }: { title: string; badge: string }) 
   },
   "include": [
     "src",
-    "dinou-env.d.ts"
+    "dinou-env.d.ts",
+    ".dinou/types/**/*.d.ts"
   ]
 }`}
               </CodeBlock>

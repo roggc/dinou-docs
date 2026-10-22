@@ -14,6 +14,7 @@
   },
   "include": [
     "src",
-    "dinou-env.d.ts"
+    "dinou-env.d.ts",
+    ".dinou/types/**/*.d.ts"
   ]
 }
