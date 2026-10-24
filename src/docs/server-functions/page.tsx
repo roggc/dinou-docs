@@ -14,6 +14,7 @@ import {
   Sparkles,
   ArrowRightLeft,
   ShieldCheck,
+  ShieldAlert,
   Lock,
   Cookie,
   RefreshCw,
@@ -25,6 +26,9 @@ import {
   Layers,
   Info,
   Globe,
+  Check,
+  X,
+  AlertTriangle,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -35,48 +39,63 @@ const tocItems = [
     level: 2,
   },
   {
+    id: "declaration-modalities",
+    title: "1. Declaration Modalities (Module vs. Function Level)",
+    level: 2,
+  },
+  {
+    id: "manifest-deep-dive",
+    title: "2. Deep Dive: Manifest Inclusion & Security Rules",
+    level: 2,
+  },
+  {
+    id: "passing-as-props",
+    title: "3. Passing Server Functions as Props & Closures",
+    level: 2,
+  },
+  {
     id: "ui-component-streaming",
-    title: "1. Returning Live React Components (UI Streaming)",
+    title: "4. Returning Live React Components (UI Streaming)",
     level: 2,
   },
   {
     id: "server-actions",
-    title: "2. Server Actions & Form Mutations",
+    title: "5. Server Actions & Form Mutations",
     level: 2,
   },
   {
     id: "server-form-actions",
-    title: "2.1. Server Actions in Forms",
+    title: "5.1. Server Actions in Forms",
     level: 3,
   },
   {
     id: "react-19-form-hooks",
-    title: "2.2. React 19 Hooks: useActionState & useFormStatus",
+    title: "5.2. React 19 Hooks: useActionState & useFormStatus",
     level: 3,
   },
   {
     id: "optimistic-updates",
-    title: "2.3. Optimistic Updates with useOptimistic",
+    title: "5.3. Optimistic Updates with useOptimistic",
     level: 3,
   },
   {
     id: "request-context",
-    title: "3. Request Context, Cookies & Headers (getContext)",
+    title: "6. Request Context, Cookies & Headers (getContext)",
     level: 2,
   },
   {
     id: "reading-request",
-    title: "3.1. Reading Query, Headers & Cookies",
+    title: "6.1. Reading Query, Headers & Cookies",
     level: 3,
   },
   {
     id: "mutating-cookies",
-    title: "3.2. Setting & Clearing Cookies",
+    title: "6.2. Setting & Clearing Cookies",
     level: 3,
   },
   {
     id: "redirects",
-    title: "4. Redirections (redirect)",
+    title: "7. Redirections (redirect)",
     level: 2,
   },
 ];
@@ -124,11 +143,19 @@ export default function Page() {
             <section id="overview" className="scroll-mt-20">
               <h2>Overview &amp; &quot;use server&quot; Directive</h2>
               <p>
-                Server Functions are asynchronous JavaScript/TypeScript functions
-                that run exclusively in the server runtime. In Dinou, you declare
-                them by adding the <code>&quot;use server&quot;</code> directive at
-                the top of a dedicated action file (module-level directive).
+                Server Functions (also known as Server Actions in the React Server Components ecosystem) are asynchronous JavaScript/TypeScript functions that run exclusively in the server runtime. They establish a type-safe, seamless Remote Procedure Call (RPC) bridge between client and server over an internal endpoint (<code>POST /____server_function____</code>).
               </p>
+              <p>
+                In Dinou, you can author Server Functions using two standard modalities:
+              </p>
+              <ul>
+                <li>
+                  <strong>Module-Level Directive:</strong> Placing <code>&quot;use server&quot;</code> at the very top of a dedicated action file.
+                </li>
+                <li>
+                  <strong>Function-Level Directive:</strong> Placing <code>&quot;use server&quot;</code> inside individual function bodies—including top-level functions in mixed utility files and inline closures inside Server Components.
+                </li>
+              </ul>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 not-prose my-6 min-w-0">
                 <Card className="border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20 min-w-0">
@@ -168,13 +195,608 @@ export default function Page() {
                   </CardHeader>
                   <CardContent className="text-sm text-muted-foreground">
                     Secret keys, database connections, and ORM calls are never
-                    bundled into the client-side JavaScript chunk.
+                    bundled into the client-side JavaScript chunk. Every call is strictly validated against the server manifest.
                   </CardContent>
                 </Card>
               </div>
             </section>
 
-            {/* 1. Returning Live React Components (UI Streaming) */}
+            {/* 1. Declaration Modalities */}
+            <section
+              id="declaration-modalities"
+              className="mt-12 pt-8 border-t scroll-mt-20"
+            >
+              <h3>1. Declaration Modalities (Module vs. Function Level)</h3>
+              <p>
+                Dinou provides native compiler support for both declaration modalities across <strong>esbuild</strong>, <strong>Rollup</strong>, and <strong>Webpack</strong>:
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-6 min-w-0">
+                <Card className="border-blue-500/20 bg-blue-50/10 dark:bg-blue-950/10 min-w-0">
+                  <CardHeader>
+                    <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400">
+                      <FileCode className="h-5 w-5" />
+                      <span>Modality 1: Module-Level (&quot;use server&quot; at Top)</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-xs text-muted-foreground space-y-2">
+                    <p>
+                      Placed at the very first line of a file. Every exported function automatically becomes a public Server Action reference.
+                    </p>
+                    <ul className="list-disc pl-4 space-y-1">
+                      <li><strong>Client Bundler:</strong> Replaces the entire module with client RPC stubs (no database or server imports leak into the browser).</li>
+                      <li><strong>Direct Import:</strong> Can be imported directly by Client Components: <code>import &#123; updateUser &#125; from &quot;@/actions/users&quot;</code>.</li>
+                      <li><strong>Scope:</strong> Module-level scope only (cannot capture component closure state).</li>
+                      <li><strong>Best for:</strong> Dedicated action modules (e.g. <code>src/actions/auth.ts</code>, <code>src/actions/billing.ts</code>).</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-purple-500/20 bg-purple-50/10 dark:bg-purple-950/10 min-w-0">
+                  <CardHeader>
+                    <div className="flex items-center gap-2 font-semibold text-purple-600 dark:text-purple-400">
+                      <Layers className="h-5 w-5" />
+                      <span>Modality 2: Function-Level (&quot;use server&quot; in Body)</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-xs text-muted-foreground space-y-2">
+                    <p>
+                      Placed as the first statement inside a function body in a mixed file or Server Component.
+                    </p>
+                    <ul className="list-disc pl-4 space-y-1">
+                      <li><strong>Granular Shielding:</strong> Co-exists with regular server utilities. Only functions containing the directive are exposed via RPC.</li>
+                      <li><strong>Auto-Exporting:</strong> Unexported functions with <code>&quot;use server&quot;</code> are automatically exported by Dinou&apos;s AST compiler.</li>
+                      <li><strong>Lexical Closures:</strong> Inside Server Components, functions capture props, local state, and secrets (hoisted with <code>.bind()</code>).</li>
+                      <li><strong>Best for:</strong> Component-specific handlers, form submissions, and mixed utility modules.</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="not-prose my-6">
+                <TabbedCodeBlock
+                  defaultTab="module"
+                  tabs={[
+                    {
+                      id: "module",
+                      label: "actions/users.ts (Module-Level)",
+                      language: "typescript",
+                      code: `// src/actions/users.ts
+"use server"; // 👈 Line 1: entire module is dedicated to Server Functions
+
+import { db } from "@/server/db";
+
+// Exported: registered in manifest and callable from client
+export async function updateUserEmail(userId: string, email: string) {
+  await db.users.update(userId, { email });
+  return { success: true };
+}
+
+// Exported: also registered in manifest
+export async function deleteUserAccount(userId: string) {
+  await db.users.delete(userId);
+  return { success: true };
+}
+
+// Unexported: strictly private helper, NEVER exposed over HTTP
+function hashKey(key: string) {
+  return crypto.createHash("sha256").update(key).digest("hex");
+}`,
+                    },
+                    {
+                      id: "mixed",
+                      label: "utils/billing.ts (Mixed Module)",
+                      language: "typescript",
+                      code: `// src/utils/billing.ts
+// Note: NO "use server" at module top!
+
+import { db } from "@/server/db";
+
+// Normal server helper: NEVER in manifest, cannot be called via HTTP
+export function calculateTax(amount: number) {
+  return amount * 0.21;
+}
+
+// Explicit Server Function: callable remotely via RPC
+export async function submitPayment(cartId: string, amount: number) {
+  "use server"; // 👈 Function body directive
+  return await db.charges.create({ cartId, amount });
+}
+
+// Unexported action: auto-exported by Dinou AST compiler for dynamic ESM dispatch
+async function internalAuditLog(event: string) {
+  "use server";
+  return await db.audit.insert({ event });
+}`,
+                    },
+                    {
+                      id: "closure",
+                      label: "routes/profile/page.tsx (Inline Closure)",
+                      language: "tsx",
+                      code: `// src/routes/profile/page.tsx (Server Component)
+import { db } from "@/server/db";
+import { ProfileForm } from "./profile-form"; // Client Component
+
+export default async function ProfilePage({ params }: { params: { userId: string } }) {
+  const user = await db.users.find(params.userId);
+  const tenantSecret = await getTenantSecret();
+
+  // Inline Server Function capturing \`params.userId\` and \`tenantSecret\`
+  async function updateBio(formData: FormData) {
+    "use server";
+    const bio = formData.get("bio") as string;
+    // Captures outer scope variables transparently:
+    await db.users.update(params.userId, { bio, verifiedWith: tenantSecret });
+    return { ok: true };
+  }
+
+  // Passed directly as a prop to a Client Component!
+  return <ProfileForm user={user} onUpdateBio={updateBio} />;
+}`,
+                    },
+                  ]}
+                />
+              </div>
+            </section>
+
+            {/* 2. Deep Dive: Manifest Inclusion & Security Isolation */}
+            <section
+              id="manifest-deep-dive"
+              className="mt-12 pt-8 border-t scroll-mt-20"
+            >
+              <h3>2. Deep Dive: Manifest Inclusion &amp; Security Rules</h3>
+              <p>
+                Every client-invoked Server Function in Dinou routes through an internal, optimized HTTP endpoint:
+              </p>
+              <div className="not-prose my-3">
+                <code className="text-xs sm:text-sm font-mono px-3 py-1.5 rounded-md bg-muted border border-border text-foreground inline-block">
+                  POST /____server_function____
+                </code>
+              </div>
+              <p>
+                To prevent arbitrary code execution and protect private backend utilities, Dinou strictly validates every incoming request against a compiled <strong><code>server-functions-manifest.json</code></strong>.
+              </p>
+
+              {/* The Deep Dive Container */}
+              <div className="border-2 border-blue-500/30 rounded-xl p-5 md:p-6 bg-blue-50/10 dark:bg-blue-950/20 not-prose my-6 space-y-6 min-w-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                    <ShieldCheck className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-base sm:text-lg font-bold text-foreground">
+                      Deep Dive: When Does a Function End Up in the Manifest?
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      Reachability, tree-shaking, and the boundary rules governing <code>server-functions-manifest.json</code>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Rule 0: The Orphan Pruning Rule */}
+                <div className="p-4 rounded-lg bg-background border border-border space-y-2 text-xs">
+                  <div className="font-semibold text-foreground flex items-center gap-1.5 text-sm">
+                    <ShieldAlert className="h-4 w-4 text-amber-500" />
+                    <span>Rule 0: The Orphan Module Pruning Rule (Foundational Reachability)</span>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed">
+                    During build and development, Dinou&apos;s AST entry crawler traverses the application dependency tree starting strictly from:
+                  </p>
+                  <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+                    <li>Route entries (<code>page.tsx</code> and <code>layout.tsx</code> files).</li>
+                    <li>Client Components (files marked with <code>&quot;use client&quot;</code>).</li>
+                  </ol>
+                  <div className="p-2.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-200 mt-2 font-medium">
+                    ⚠️ <strong>If a file is never imported anywhere in the reachable graph, it is an Orphan Module:</strong> Nothing in that file is ever added to the manifest. It does not matter if the file has <code>&quot;use server&quot;</code> at the top or inside its functions—unreachable code has a <strong>0% HTTP attack surface</strong>.
+                  </div>
+                </div>
+
+                {/* Manifest Inclusion Decision Rules */}
+                <div className="space-y-3 text-xs">
+                  <div className="font-semibold text-foreground text-sm flex items-center gap-1.5">
+                    <Sliders className="h-4 w-4 text-blue-500" />
+                    <span>Manifest Inclusion Rules for Reachable Modules</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-3.5 rounded-lg bg-background border border-border space-y-2">
+                      <div className="font-semibold text-blue-600 dark:text-blue-400">
+                        In Module-Level Files (<code>&quot;use server&quot;</code> at line 1)
+                      </div>
+                      <ul className="space-y-1.5 text-muted-foreground list-disc pl-4">
+                        <li>
+                          <strong>All EXPORTED functions</strong> are registered in the manifest, even if an individual export is never called elsewhere in the app. The module boundary is declared public.
+                        </li>
+                        <li>
+                          <strong>Non-exported functions</strong> (e.g. <code>function helper()</code>) are <strong>never added</strong> to the manifest and are completely shielded from remote HTTP execution.
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="p-3.5 rounded-lg bg-background border border-border space-y-2">
+                      <div className="font-semibold text-purple-600 dark:text-purple-400">
+                        In Function-Level Files (Mixed Modules &amp; Components)
+                      </div>
+                      <ul className="space-y-1.5 text-muted-foreground list-disc pl-4">
+                        <li>
+                          <strong>ONLY functions containing <code>&quot;use server&quot;</code></strong> in their body enter the manifest. Utilities without the directive (e.g. <code>calculateTax</code>) are never registered.
+                        </li>
+                        <li>
+                          <strong>Unexported actions</strong> with <code>&quot;use server&quot;</code> are auto-exported by Dinou&apos;s AST compiler so the ESM dynamic loader can invoke them when dispatched.
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* The Comprehensive Comparison Matrix */}
+                <div className="space-y-2">
+                  <div className="font-semibold text-foreground text-sm flex items-center gap-1.5">
+                    <FileCode className="h-4 w-4 text-emerald-500" />
+                    <span>The Architectural Inclusion &amp; Security Matrix</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    This matrix defines exactly how Dinou evaluates any function across your codebase:
+                  </p>
+
+                  <div className="border rounded-lg overflow-x-auto bg-background w-full min-w-0">
+                    <table className="w-full text-left text-xs border-collapse min-w-[780px]">
+                      <thead>
+                        <tr className="border-b bg-muted/40 font-semibold text-foreground">
+                          <th className="p-2.5 w-[24%]">Scenario / Code Pattern</th>
+                          <th className="p-2.5 w-[14%] text-center">Module Reachable?</th>
+                          <th className="p-2.5 w-[14%]">Directive Location</th>
+                          <th className="p-2.5 w-[12%] text-center">Source Export?</th>
+                          <th className="p-2.5 w-[12%] text-center">Auto-Exported?</th>
+                          <th className="p-2.5 w-[12%] text-center">In Manifest?</th>
+                          <th className="p-2.5 w-[12%] text-center">HTTP Callable?</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border text-muted-foreground">
+                        <tr>
+                          <td className="p-2.5 font-medium text-foreground">
+                            Orphan Module (Never imported)
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-red-500">
+                              <X className="h-3.5 w-3.5" /> No
+                            </span>
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px]">Anywhere</td>
+                          <td className="p-2.5 text-center font-mono text-[11px]">Yes / No</td>
+                          <td className="p-2.5 text-center text-muted-foreground">No</td>
+                          <td className="p-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 font-semibold text-red-500 text-[11px]">
+                              <X className="h-3.5 w-3.5" /> No (0%)
+                            </span>
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 font-mono text-[10px]">
+                              400 Bad Request
+                            </span>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td className="p-2.5 font-medium text-foreground">
+                            Module-Level: Exported Function
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-600 dark:text-emerald-400">
+                              <Check className="h-3.5 w-3.5" /> Yes
+                            </span>
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px]">Line 1 of file</td>
+                          <td className="p-2.5 text-center font-mono text-[11px] text-emerald-600">Yes</td>
+                          <td className="p-2.5 text-center text-muted-foreground">N/A</td>
+                          <td className="p-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 text-[11px]">
+                              <Check className="h-3.5 w-3.5" /> Yes
+                            </span>
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[10px]">
+                              Allowed (200)
+                            </span>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td className="p-2.5 font-medium text-foreground">
+                            Module-Level: Private Helper
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-600 dark:text-emerald-400">
+                              <Check className="h-3.5 w-3.5" /> Yes
+                            </span>
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px]">Line 1 of file</td>
+                          <td className="p-2.5 text-center font-mono text-[11px] text-red-500">No</td>
+                          <td className="p-2.5 text-center text-muted-foreground">No</td>
+                          <td className="p-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 font-semibold text-red-500 text-[11px]">
+                              <X className="h-3.5 w-3.5" /> No
+                            </span>
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 font-mono text-[10px]">
+                              400 Bad Request
+                            </span>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td className="p-2.5 font-medium text-foreground">
+                            Function-Level: Exported Action
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-600 dark:text-emerald-400">
+                              <Check className="h-3.5 w-3.5" /> Yes
+                            </span>
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px]">Function body</td>
+                          <td className="p-2.5 text-center font-mono text-[11px] text-emerald-600">Yes</td>
+                          <td className="p-2.5 text-center text-muted-foreground">N/A</td>
+                          <td className="p-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 text-[11px]">
+                              <Check className="h-3.5 w-3.5" /> Yes
+                            </span>
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[10px]">
+                              Allowed (200)
+                            </span>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td className="p-2.5 font-medium text-foreground">
+                            Function-Level: Unexported Action
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-600 dark:text-emerald-400">
+                              <Check className="h-3.5 w-3.5" /> Yes
+                            </span>
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px]">Function body</td>
+                          <td className="p-2.5 text-center font-mono text-[11px] text-red-500">No</td>
+                          <td className="p-2.5 text-center font-mono text-[11px] text-emerald-600">Yes (AST)</td>
+                          <td className="p-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 text-[11px]">
+                              <Check className="h-3.5 w-3.5" /> Yes
+                            </span>
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[10px]">
+                              Allowed (200)
+                            </span>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td className="p-2.5 font-medium text-foreground">
+                            Mixed Module: Utility without &quot;use server&quot;
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-600 dark:text-emerald-400">
+                              <Check className="h-3.5 w-3.5" /> Yes
+                            </span>
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px] text-muted-foreground">None</td>
+                          <td className="p-2.5 text-center font-mono text-[11px] text-emerald-600">Yes</td>
+                          <td className="p-2.5 text-center text-muted-foreground">No</td>
+                          <td className="p-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 font-semibold text-red-500 text-[11px]">
+                              <X className="h-3.5 w-3.5" /> No
+                            </span>
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 font-mono text-[10px]">
+                              400 Bad Request
+                            </span>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td className="p-2.5 font-medium text-foreground">
+                            Mixed Module: Private Helper (No directive)
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-600 dark:text-emerald-400">
+                              <Check className="h-3.5 w-3.5" /> Yes
+                            </span>
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px] text-muted-foreground">None</td>
+                          <td className="p-2.5 text-center font-mono text-[11px] text-red-500">No</td>
+                          <td className="p-2.5 text-center text-muted-foreground">No</td>
+                          <td className="p-2.5 text-center">
+                            <span className="inline-flex items-center gap-1 font-semibold text-red-500 text-[11px]">
+                              <X className="h-3.5 w-3.5" /> No
+                            </span>
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <span className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 font-mono text-[10px]">
+                              400 Bad Request
+                            </span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* HTTP Dispatcher Validation Pipeline */}
+                <div className="p-4 rounded-lg bg-background border border-border space-y-3 text-xs">
+                  <div className="font-semibold text-foreground text-sm flex items-center gap-1.5">
+                    <Lock className="h-4 w-4 text-indigo-500" />
+                    <span>The HTTP Security Dispatcher Pipeline</span>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed">
+                    When the browser submits <code>POST /____server_function____</code> with payload <code>&#123; id: &quot;src/utils/billing.ts#submitPayment&quot;, args: [...] &#125;</code>:
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-[11px]">
+                    <div className="p-2.5 rounded bg-muted/40 border border-border space-y-1">
+                      <div className="font-semibold text-foreground">1. Path Check</div>
+                      <p className="text-muted-foreground">Verifies path starts with <code>src/</code> and prevents directory traversal attacks (<code>../</code>).</p>
+                    </div>
+                    <div className="p-2.5 rounded bg-muted/40 border border-border space-y-1">
+                      <div className="font-semibold text-foreground">2. Module Registry</div>
+                      <p className="text-muted-foreground">Ensures the file is registered in <code>server-functions-manifest.json</code>.</p>
+                    </div>
+                    <div className="p-2.5 rounded bg-muted/40 border border-border space-y-1">
+                      <div className="font-semibold text-foreground">3. Export Whitelist</div>
+                      <p className="text-muted-foreground">Checks that the exact export name exists in the allowed exports set for that file.</p>
+                    </div>
+                    <div className="p-2.5 rounded bg-muted/40 border border-border space-y-1">
+                      <div className="font-semibold text-foreground">4. Dynamic Import</div>
+                      <p className="text-muted-foreground">Dynamically imports the module and executes the function with passed and bound arguments.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Security Implications & Best Practices */}
+                <div className="space-y-3 text-xs">
+                  <div className="font-semibold text-foreground text-sm flex items-center gap-1.5">
+                    <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                    <span>Security Implications &amp; Developer Best Practices</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-muted-foreground">
+                    <div className="p-3 rounded-lg bg-background border border-border space-y-1">
+                      <strong className="text-foreground block">1. Treat Every Server Function as a Public API:</strong>
+                      Any action in the manifest can be called directly over HTTP with arbitrary parameters. <strong>Always authenticate</strong> sessions with <code>getContext()</code> and validate input arguments with schemas (e.g. Zod).
+                    </div>
+                    <div className="p-3 rounded-lg bg-background border border-border space-y-1">
+                      <strong className="text-foreground block">2. Modality Architectural Boundary:</strong>
+                      Use <strong>Module-Level</strong> for dedicated action files where every export is meant to be public. Use <strong>Function-Level</strong> in mixed files so sensitive helpers remain completely shielded from HTTP.
+                    </div>
+                    <div className="p-3 rounded-lg bg-background border border-border space-y-1">
+                      <strong className="text-foreground block">3. Pruning Deprecated Actions:</strong>
+                      If you no longer use an action, remove <code>&quot;use server&quot;</code> or delete the function. Leaving the directive in a reachable file keeps it registered in the manifest even if uncalled.
+                    </div>
+                    <div className="p-3 rounded-lg bg-background border border-border space-y-1">
+                      <strong className="text-foreground block">4. Closure Scope Prudence:</strong>
+                      In inline server functions, only close over necessary variables. Avoid capturing massive in-memory objects or master encryption keys in component scope.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 3. Passing Server Functions as Props & Closures */}
+            <section
+              id="passing-as-props"
+              className="mt-12 pt-8 border-t scroll-mt-20"
+            >
+              <h3>3. Passing Server Functions as Props &amp; Closures</h3>
+              <p>
+                A core design pattern in Dinou and React 19 is passing Server Functions as props from <strong>Server Components</strong> down to <strong>Client Components</strong>.
+              </p>
+              <p>
+                This allows client components to remain purely presentational while server components wire up business logic, route parameters, and closure state:
+              </p>
+
+              <div className="not-prose my-6">
+                <TabbedCodeBlock
+                  defaultTab="server-comp"
+                  tabs={[
+                    {
+                      id: "server-comp",
+                      label: "product/page.tsx (Server Component)",
+                      language: "tsx",
+                      code: `// src/product/page.tsx (Server Component)
+import { ProductView } from "./client-view";
+import { revalidatePathAction } from "@/actions/revalidate";
+import { db } from "@/server/db";
+
+export default async function ProductPage({ params }: { params: { id: string } }) {
+  const product = await db.products.find(params.id);
+  const userDiscount = await getCustomerDiscount();
+
+  // 1. Inline Server Function capturing lexical scope (params.id & userDiscount)
+  async function purchaseProduct(paymentToken: string) {
+    "use server";
+    return await db.orders.create({
+      productId: params.id,
+      discount: userDiscount,
+      token: paymentToken,
+    });
+  }
+
+  // 2. Bound Server Function attaching static argument
+  const refreshProduct = revalidatePathAction.bind(null, \`/product/\${params.id}\`);
+
+  return (
+    <ProductView
+      product={product}
+      onPurchase={purchaseProduct}
+      onRefresh={refreshProduct}
+    />
+  );
+}`,
+                    },
+                    {
+                      id: "client-comp",
+                      label: "product/client-view.tsx (Client Component)",
+                      language: "tsx",
+                      code: `// src/product/client-view.tsx
+"use client";
+
+import { useTransition } from "react";
+
+interface Props {
+  product: { id: string; name: string; price: number };
+  onPurchase: (token: string) => Promise<{ success: boolean }>;
+  onRefresh: () => Promise<void>;
+}
+
+export function ProductView({ product, onPurchase, onRefresh }: Props) {
+  const [isPending, startTransition] = useTransition();
+
+  const handleBuy = () => {
+    startTransition(async () => {
+      const res = await onPurchase("tok_card_visa_1234");
+      if (res.success) alert("Purchase confirmed!");
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <h1 className="text-2xl font-bold">{product.name}</h1>
+      <p className="text-lg">\${product.price}</p>
+      
+      <div className="flex gap-2">
+        <button onClick={handleBuy} disabled={isPending} className="btn-primary">
+          {isPending ? "Processing..." : "Buy Now"}
+        </button>
+        <button onClick={() => onRefresh()} className="btn-secondary">
+          Refresh Data
+        </button>
+      </div>
+    </div>
+  );
+}`,
+                    },
+                  ]}
+                />
+              </div>
+
+              <div className="border rounded-lg p-4 bg-muted/20 border-border text-xs text-muted-foreground space-y-2 not-prose">
+                <div className="font-semibold text-foreground flex items-center gap-1.5">
+                  <Sparkles className="h-4 w-4 text-purple-500" />
+                  <span>How Dinou Compiles Closures Under the Hood</span>
+                </div>
+                <p className="leading-relaxed">
+                  When Dinou&apos;s AST compiler detects <code>&quot;use server&quot;</code> inside a component function:
+                </p>
+                <ol className="list-decimal pl-5 space-y-1">
+                  <li>It runs scope analysis with <code>@babel/traverse</code> to determine which outer variables are referenced (e.g. <code>params.id</code> and <code>userDiscount</code>).</li>
+                  <li>It extracts and hoists the function to the module top level with a generated symbol: <code>export async function $$dinou_action_purchaseProduct_0(params, userDiscount, paymentToken)</code>.</li>
+                  <li>It replaces the original declaration with <code>$$dinou_action_purchaseProduct_0.bind(null, params, userDiscount)</code>.</li>
+                  <li>React 19 serializes both the action reference ID and bound variables into the Flight stream. When the client invokes <code>onPurchase(token)</code>, the client runtime sends both the bound and new arguments to <code>POST /____server_function____</code>.</li>
+                </ol>
+              </div>
+            </section>
+
+            {/* 4. Returning Live React Components (UI Streaming) */}
             <section
               id="ui-component-streaming"
               className="mt-12 pt-8 border-t scroll-mt-20"
@@ -182,7 +804,7 @@ export default function Page() {
               <div id="component-vs-data" className="scroll-mt-20" />
               <div id="suspense-integration" className="scroll-mt-20" />
               <h3>
-                1. Returning Live React Components (UI Streaming)
+                4. Returning Live React Components (UI Streaming)
               </h3>
               <p>
                 Dinou uniquely allows Server Functions to return fully rendered React component trees directly over Flight RPC. In Server Components, the component is awaited directly inside native <code>&lt;Suspense&gt;</code>; in Client Components, the returned promise is unwrapped with React 19&apos;s <code>use()</code> hook:
@@ -307,13 +929,13 @@ export default function BlogPage() {
               </div>
             </section>
 
-            {/* 2. Server Actions */}
+            {/* 5. Server Actions */}
             <section
               id="server-actions"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <h3>
-                2. Server Actions &amp; Form Mutations
+                5. Server Actions &amp; Form Mutations
               </h3>
               <p>
                 Server Functions passed to the <code>action</code> prop of a{" "}
@@ -321,14 +943,14 @@ export default function BlogPage() {
                 act as <strong>Server Actions</strong>.
               </p>
 
-              {/* 2.1 Server Actions in Forms */}
+              {/* 5.1 Server Actions in Forms */}
               <section
                 id="server-form-actions"
                 className="mt-6 scroll-mt-20"
               >
-                <h4>2.1. Server Actions in Forms</h4>
+                <h4>5.1. Server Actions in Forms</h4>
                 <p>
-                  In Dinou, Server Actions are declared in dedicated server files with the <code>&quot;use server&quot;</code> directive at the top. You can pass them directly to the <code>action</code> attribute of a <code>&lt;form&gt;</code> in both <strong>Server Components</strong> and <strong>Client Components</strong>:
+                  Server Actions can be declared either as dedicated action files or inline within Server Components and mixed modules. You can pass them directly to the <code>action</code> attribute of a <code>&lt;form&gt;</code> in both <strong>Server Components</strong> and <strong>Client Components</strong>:
                 </p>
 
                 <div className="not-prose my-4">
@@ -357,7 +979,7 @@ export default function NewsletterPage() {
                         label: "actions/subscribe.ts (Server Action)",
                         language: "typescript",
                         code: `// src/actions/subscribe.ts
-"use server"; // 👈 Required at the module level in Dinou
+"use server"; // Module-level or function-level directive
 
 import db from "@/lib/db";
 
@@ -371,9 +993,9 @@ export async function subscribeNewsletter(formData: FormData) {
                 </div>
 
                 <div className="border rounded-lg p-3 bg-muted/20 border-border text-xs text-muted-foreground space-y-1">
-                  <div className="font-semibold text-foreground">💡 Important: Module-Level Directives &amp; Client Execution</div>
+                  <div className="font-semibold text-foreground">💡 Tip: Flexible Directives &amp; Automatic RPC Routing</div>
                   <p>
-                    Dinou requires the <code>&quot;use server&quot;</code> directive to be placed at the <strong>top of the action file</strong> (not inline within function bodies). When a form submits, Dinou&apos;s client runtime transparently dispatches a Flight RPC request (<code>POST /____server_function____</code>) to execute the server action and receive updated UI state.
+                    You can define form actions in dedicated files using module-level <code>&quot;use server&quot;</code>, or inline inside Server Components using function-level <code>&quot;use server&quot;</code> (as detailed in Section 1 and Section 2). In both cases, submitting the form transparently dispatches a Flight RPC request (<code>POST /____server_function____</code>) validated against <code>server-functions-manifest.json</code>.
                   </p>
                 </div>
 
@@ -386,18 +1008,18 @@ export async function subscribeNewsletter(formData: FormData) {
                     This action returns <code>Promise&lt;void&gt;</code>, which resolves to <strong><code>undefined</code></strong>. In pure React 19 form actions (<code>&lt;form action=&#123;subscribeNewsletter&#125;&gt;</code>), this is completely standard for <em>fire-and-forget</em> mutations: the browser submits the form data, the server executes the database write, and no state payload is needed by the UI.
                   </p>
                   <p className="leading-relaxed">
-                    <strong>When should a Server Action return a value?</strong> If your UI needs to display interactive feedback (such as <em>&quot;Subscribed successfully!&quot;</em> or validation errors), the action should return a serializable payload (e.g. <code>&#123; success: true, message: &quot;...&quot; &#125;</code>) and be wired to React 19&apos;s <strong><code>useActionState</code></strong> hook (as explained in Section 2.2 below). Other common patterns include performing a server-side <code>redirect()</code> or calling <code>revalidatePath()</code> before completing.
+                    <strong>When should a Server Action return a value?</strong> If your UI needs to display interactive feedback (such as <em>&quot;Subscribed successfully!&quot;</em> or validation errors), the action should return a serializable payload (e.g. <code>&#123; success: true, message: &quot;...&quot; &#125;</code>) and be wired to React 19&apos;s <strong><code>useActionState</code></strong> hook (as explained in Section 5.2 below). Other common patterns include performing a server-side <code>redirect()</code> or calling <code>revalidatePath()</code> before completing.
                   </p>
                 </div>
               </section>
 
-              {/* 2.2 React 19 Hooks */}
+              {/* 5.2 React 19 Hooks */}
               <section
                 id="react-19-form-hooks"
                 className="mt-8 scroll-mt-20"
               >
                 <h4>
-                  2.2. React 19 Hooks: <code>useActionState</code> &amp;{" "}
+                  5.2. React 19 Hooks: <code>useActionState</code> &amp;{" "}
                   <code>useFormStatus</code>
                 </h4>
                 <p>
@@ -484,7 +1106,7 @@ export function CreatePostForm() {
                         label: "actions/posts.ts (Server Action)",
                         language: "typescript",
                         code: `// src/actions/posts.ts
-"use server"; // 👈 Module-level directive required in Dinou
+"use server";
 
 import db from "@/lib/db";
 
@@ -518,12 +1140,12 @@ export async function createPostAction(
                 </div>
               </section>
 
-              {/* 2.3 Optimistic Updates */}
+              {/* 5.3 Optimistic Updates */}
               <section
                 id="optimistic-updates"
                 className="mt-8 scroll-mt-20"
               >
-                <h4>2.3. Optimistic Updates with <code>useOptimistic</code></h4>
+                <h4>5.3. Optimistic Updates with <code>useOptimistic</code></h4>
                 <p>
                   With React 19&apos;s <code>useOptimistic</code>, you can update
                   the user interface immediately before the server responds:
@@ -569,7 +1191,7 @@ export function LikeButton({ postId, initialLikes }: { postId: string; initialLi
                         label: "actions/likes.ts (Server Action)",
                         language: "typescript",
                         code: `// src/actions/likes.ts
-"use server"; // 👈 Module-level directive required in Dinou
+"use server";
 
 import db from "@/lib/db";
 
@@ -602,13 +1224,13 @@ export async function toggleLikeAction(postId: string) {
               </section>
             </section>
 
-            {/* 3. Request Context */}
+            {/* 6. Request Context */}
             <section
               id="request-context"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <h3>
-                3. Request Context, Cookies &amp; Headers (<code>getContext</code>)
+                6. Request Context, Cookies &amp; Headers (<code>getContext</code>)
               </h3>
               <p>
                 Dinou provides <code>getContext()</code> (exported from{" "}
@@ -646,9 +1268,9 @@ export async function toggleLikeAction(postId: string) {
                 </ul>
               </div>
 
-              {/* 3.1 Reading */}
+              {/* 6.1 Reading */}
               <section id="reading-request" className="mt-6 scroll-mt-20">
-                <h4>3.1. Reading Query, Headers &amp; Cookies</h4>
+                <h4>6.1. Reading Query, Headers &amp; Cookies</h4>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
@@ -671,9 +1293,9 @@ export async function getCurrentUser() {
                 </CodeBlock>
               </section>
 
-              {/* 3.2 Mutating Cookies */}
+              {/* 6.2 Mutating Cookies */}
               <section id="mutating-cookies" className="mt-8 scroll-mt-20">
-                <h4>3.2. Setting &amp; Clearing Cookies</h4>
+                <h4>6.2. Setting &amp; Clearing Cookies</h4>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
@@ -712,10 +1334,10 @@ export async function logoutAction() {
               </section>
             </section>
 
-            {/* 4. Redirects */}
+            {/* 7. Redirects */}
             <section id="redirects" className="mt-12 pt-8 border-t scroll-mt-20">
               <h3>
-                4. Redirections (<code>redirect</code>)
+                7. Redirections (<code>redirect</code>)
               </h3>
               <p>
                 Dinou provides a universal <code>redirect(destination)</code>{" "}
