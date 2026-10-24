@@ -48,13 +48,39 @@ export default function MigrationIndexPage() {
 
         {/* Guides Grid */}
         <div className="grid gap-6 md:grid-cols-2 mt-8 not-prose">
+          {/* v8 to v9 */}
+          <Link href="/docs/migration/v8-to-v9" className="group md:col-span-2">
+            <Card className="h-full border-blue-500/30 bg-blue-50/20 dark:bg-blue-950/10 hover:border-blue-500 hover:shadow-lg transition-all duration-200 flex flex-col justify-between">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                    Latest Major • v9
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                </div>
+                <CardTitle className="text-xl font-bold mt-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-blue-500 shrink-0" />
+                  Migration from v8 to v9
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground space-y-3 flex-1 flex flex-col justify-between">
+                <p className="leading-relaxed">
+                  <strong className="text-foreground font-semibold">100% transparent upgrade with zero code changes required.</strong> Dinou v9 introduces a high-performance, zero-drift <strong>Dual-Mode Additive Vendoring System</strong> powered by native Node.js Subpath Imports (<code>#...</code>). Enjoy instant dev server cold starts and build times out of the box, with on-demand unvendorized debugging via the <code>-u</code> flag.
+                </p>
+                <div className="text-xs font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1 pt-2">
+                  Read v8 to v9 migration guide &rarr;
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
           {/* v7 to v8 */}
           <Link href="/docs/migration/v7-to-v8" className="group">
             <Card className="h-full border-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-950/10 hover:border-emerald-500 hover:shadow-lg transition-all duration-200 flex flex-col justify-between">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-                    Latest Major • v8
+                    v8.0.0
                   </span>
                   <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
                 </div>

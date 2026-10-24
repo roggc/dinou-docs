@@ -209,9 +209,14 @@ export const docsNavigation: NavSection[] = [
         icon: Compass,
       },
       {
+        title: "Migration from v8 to v9",
+        href: "/docs/migration/v8-to-v9",
+        icon: Sparkles,
+      },
+      {
         title: "Migration from v7 to v8",
         href: "/docs/migration/v7-to-v8",
-        icon: Sparkles,
+        icon: RefreshCw,
       },
       {
         title: "Migration from v6 to v7",
