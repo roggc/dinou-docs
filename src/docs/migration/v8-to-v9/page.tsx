@@ -157,7 +157,7 @@ export default function MigrationV8ToV9Page() {
                 </div>
 
                 <p className="text-sm text-muted-foreground">
-                  Your <code>package.json</code> will reflect the new major version:
+                  Your <code>package.json</code> will reflect the new major version (note that Dinou v9 requires <code>react</code> and <code>react-dom</code> at version <strong>19.3.1</strong> or higher):
                 </p>
 
                 <CodeBlock language="json" containerClassName="w-full overflow-hidden rounded-lg">
@@ -166,8 +166,8 @@ export default function MigrationV8ToV9Page() {
   "type": "module",
   "dependencies": {
     "dinou": "^9.0.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   }
 }`}
                 </CodeBlock>
@@ -508,7 +508,7 @@ npm run build`,
                   <CardContent className="text-xs text-muted-foreground space-y-2">
                     <p className="font-medium text-foreground">Kept strictly in standard node_modules:</p>
                     <ul className="list-disc pl-4 space-y-1">
-                      <li><strong>Native Platform Binaries:</strong> <code>esbuild</code> (Go executable), <code>@swc/core</code> (.node C++ bindings), <code>@tailwindcss/oxide</code>, <code>lightningcss</code> (Rust binaries).</li>
+                      <li><strong>Native Platform Binaries:</strong> <code>esbuild</code> (Go executable) and <code>@swc/core</code> (native Node-API <code>.node</code> binary bindings). Pre-compiling native platform binaries breaks architecture-specific resolution.</li>
                       <li><strong>React Singletons:</strong> <code>react</code>, <code>react-dom</code>, and <code>@roggc/react-server-dom-esm</code> must share an identical instance across client and server.</li>
                       <li><strong>Core Bundler Engines:</strong> <code>webpack</code> and <code>rollup</code> orchestrate dynamic user configurations and plugins at build time.</li>
                     </ul>
