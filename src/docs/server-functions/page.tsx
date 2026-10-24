@@ -143,7 +143,7 @@ export default function Page() {
             <section id="overview" className="scroll-mt-20">
               <h2>Overview &amp; &quot;use server&quot; Directive</h2>
               <p>
-                Server Functions (also known as Server Actions in the React Server Components ecosystem) are asynchronous JavaScript/TypeScript functions that run exclusively in the server runtime. They establish a type-safe, seamless Remote Procedure Call (RPC) bridge between client and server over an internal endpoint (<code>POST /____server_function____</code>).
+                Server Functions (also known as Server Actions in the React Server Components ecosystem) are asynchronous JavaScript/TypeScript functions that run exclusively in the server runtime. They establish a type-safe, seamless Remote Procedure Call (RPC) bridge between client and server.
               </p>
               <p>
                 In Dinou, you can author Server Functions using two standard modalities:
@@ -346,15 +346,7 @@ export default async function ProfilePage({ params }: { params: { userId: string
             >
               <h3>2. Deep Dive: Manifest Inclusion &amp; Security Rules</h3>
               <p>
-                Every client-invoked Server Function in Dinou routes through an internal, optimized HTTP endpoint:
-              </p>
-              <div className="not-prose my-3">
-                <code className="text-xs sm:text-sm font-mono px-3 py-1.5 rounded-md bg-muted border border-border text-foreground inline-block">
-                  POST /____server_function____
-                </code>
-              </div>
-              <p>
-                To prevent arbitrary code execution and protect private backend utilities, Dinou strictly validates every incoming request against a compiled <strong><code>server-functions-manifest.json</code></strong>.
+                Every client-invoked Server Function in Dinou routes through an internal, optimized Flight RPC bridge. To prevent arbitrary code execution and protect private backend utilities, Dinou strictly validates every incoming request against a compiled <strong><code>server-functions-manifest.json</code></strong>.
               </p>
 
               {/* The Deep Dive Container */}
@@ -448,7 +440,7 @@ export default async function ProfilePage({ params }: { params: { userId: string
                           <th className="p-2.5 w-[12%] text-center">Source Export?</th>
                           <th className="p-2.5 w-[12%] text-center">Auto-Exported?</th>
                           <th className="p-2.5 w-[12%] text-center">In Manifest?</th>
-                          <th className="p-2.5 w-[12%] text-center">HTTP Callable?</th>
+                          <th className="p-2.5 w-[12%] text-center">Remotely Callable?</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border text-muted-foreground">
@@ -631,7 +623,7 @@ export default async function ProfilePage({ params }: { params: { userId: string
                     <span>The HTTP Security Dispatcher Pipeline</span>
                   </div>
                   <p className="text-muted-foreground leading-relaxed">
-                    When the browser submits <code>POST /____server_function____</code> with payload <code>&#123; id: &quot;src/utils/billing.ts#submitPayment&quot;, args: [...] &#125;</code>:
+                    When the browser submits a Server Function call with action identifier and payload arguments:
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-[11px]">
                     <div className="p-2.5 rounded bg-muted/40 border border-border space-y-1">
@@ -791,7 +783,7 @@ export function ProductView({ product, onPurchase, onRefresh }: Props) {
                   <li>It runs scope analysis with <code>@babel/traverse</code> to determine which outer variables are referenced (e.g. <code>params.id</code> and <code>userDiscount</code>).</li>
                   <li>It extracts and hoists the function to the module top level with a generated symbol: <code>export async function $$dinou_action_purchaseProduct_0(params, userDiscount, paymentToken)</code>.</li>
                   <li>It replaces the original declaration with <code>$$dinou_action_purchaseProduct_0.bind(null, params, userDiscount)</code>.</li>
-                  <li>React 19 serializes both the action reference ID and bound variables into the Flight stream. When the client invokes <code>onPurchase(token)</code>, the client runtime sends both the bound and new arguments to <code>POST /____server_function____</code>.</li>
+                  <li>React 19 serializes both the action reference ID and bound variables into the Flight stream. When the client invokes <code>onPurchase(token)</code>, the client runtime sends both the bound and new arguments to the server.</li>
                 </ol>
               </div>
             </section>
@@ -995,7 +987,7 @@ export async function subscribeNewsletter(formData: FormData) {
                 <div className="border rounded-lg p-3 bg-muted/20 border-border text-xs text-muted-foreground space-y-1">
                   <div className="font-semibold text-foreground">💡 Tip: Flexible Directives &amp; Automatic RPC Routing</div>
                   <p>
-                    You can define form actions in dedicated files using module-level <code>&quot;use server&quot;</code>, or inline inside Server Components using function-level <code>&quot;use server&quot;</code> (as detailed in Section 1 and Section 2). In both cases, submitting the form transparently dispatches a Flight RPC request (<code>POST /____server_function____</code>) validated against <code>server-functions-manifest.json</code>.
+                    You can define form actions in dedicated files using module-level <code>&quot;use server&quot;</code>, or inline inside Server Components using function-level <code>&quot;use server&quot;</code> (as detailed in Section 1 and Section 2). In both cases, submitting the form transparently dispatches a Flight RPC request validated against <code>server-functions-manifest.json</code>.
                   </p>
                 </div>
 
