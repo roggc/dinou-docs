@@ -8,11 +8,6 @@ if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = "development";
 }
 
-import ensureVendorMode from "../core/ensure-vendor-mode.js";
-if (!ensureVendorMode()) {
-  await new Promise(() => {});
-}
-
 import http from "node:http";
 import path from "node:path";
 import fs from "node:fs";
@@ -182,15 +177,6 @@ async function findClientComponents(parsedClientManifest = {}) {
           const content = fs.readFileSync(full, "utf8");
           if (useClientRegex.test(content.trim()) && isSupportedClientModule(full, content)) {
             clientFiles.add(path.resolve(full));
-          } else if (useServerRegex.test(content.trim())) {
-            knownServerFiles.add(path.resolve(full));
-          } else if (hasServerFunctions(content)) {
-            try {
-              const sfRes = transformServerFunctions(content, full);
-              if (sfRes?.actions?.length > 0) {
-                knownServerFiles.add(path.resolve(full));
-              }
-            } catch (e) {}
           }
         } catch (e) {}
       }
@@ -599,6 +585,7 @@ async function updateManifestsState(options = {}) {
     }
   }
 
+  knownServerFiles.clear();
   for (const f of Object.keys(parsedServerFunctionsManifest)) {
     knownServerFiles.add(path.resolve(projectRoot, f));
   }
@@ -1775,16 +1762,7 @@ async function doRebuildBatch(changesMap) {
         try {
           const content = fs.readFileSync(absFilePath, "utf8");
           isClientFile = useClientRegex.test(content.trim());
-          if (useServerRegex.test(content.trim())) {
-            isServerFile = true;
-          } else if (hasServerFunctions(content)) {
-            try {
-              const sfRes = transformServerFunctions(content, absFilePath);
-              isServerFile = Boolean(sfRes?.actions?.length > 0);
-            } catch (e) {
-              isServerFile = false;
-            }
-          }
+          isServerFile = useServerRegex.test(content.trim()) || hasServerFunctions(content);
         } catch (e) {}
       }
 
@@ -1794,32 +1772,18 @@ async function doRebuildBatch(changesMap) {
       const wasServerFile = knownServerFiles.has(absFilePath);
       const serverDirectiveChanged = isServerFile !== wasServerFile;
 
-      if (isClientFile) {
-        knownClientFiles.add(absFilePath);
-      } else {
-        knownClientFiles.delete(absFilePath);
-      }
-
-      if (isServerFile) {
-        knownServerFiles.add(absFilePath);
-      } else {
-        knownServerFiles.delete(absFilePath);
-      }
-
       const isJsTsSource =
         normLower.endsWith(".tsx") ||
         normLower.endsWith(".jsx") ||
         normLower.endsWith(".ts") ||
         normLower.endsWith(".js");
 
-      const isPageRoute = /(?:^|[\\/])(page|layout)\.[jt]sx?$/i.test(absFilePath);
-
       const isClientRelevant =
         isClientFile ||
         wasClientFile ||
         clientDirectiveChanged ||
         isCssFile ||
-        (isJsTsSource && !isPageRoute);
+        isJsTsSource;
 
       if (isClientFile) {
         getCachedFileExports(absFilePath);

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "cross-env DINOU_BUILD_TOOL=esbuild node dinou/node/dev.js",
+    "dev": "npm run dev:esbuild",
     "build": "npm run build:node",
     "start": "npm run start:node",
     "dev:esbuild": "cross-env DINOU_BUILD_TOOL=esbuild node dinou/node/dev.js",

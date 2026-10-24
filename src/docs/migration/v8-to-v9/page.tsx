@@ -161,7 +161,7 @@ export default function MigrationV8ToV9Page() {
                 </p>
 
                 <CodeBlock language="json" containerClassName="w-full overflow-hidden rounded-lg">
-{`{
+                  {`{
   "name": "my-dinou-app",
   "type": "module",
   "dependencies": {
@@ -239,7 +239,7 @@ export default function MigrationV8ToV9Page() {
               {/* 2.1 Problems Solved */}
               <div id="problems-solved" className="space-y-4 mt-6">
                 <h3 className="text-lg font-bold">2.1 Solved: Cold Starts, FS Overhead &amp; Dependency Drift</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 not-prose my-4 min-w-0">
                   <Card className="border-blue-500/20 bg-blue-50/10 dark:bg-blue-950/10 min-w-0">
                     <CardHeader className="pb-2">
@@ -287,7 +287,7 @@ export default function MigrationV8ToV9Page() {
                 </p>
 
                 <CodeBlock language="json" containerClassName="w-full overflow-hidden rounded-lg">
-{`{
+                  {`{
   "imports": {
     "#babel/core": {
       "unvendorized": "@babel/core",
@@ -333,7 +333,7 @@ export default function MigrationV8ToV9Page() {
                   When you develop or build your application normally:
                 </p>
                 <CodeBlock language="bash" containerClassName="w-full overflow-hidden rounded-lg">
-{`# Starts the development server in default vendorized mode
+                  {`# Starts the development server in default vendorized mode
 npm run dev
 
 # Compiles for production using pre-bundled vendors
@@ -448,7 +448,7 @@ npm run build`,
               </ul>
 
               <CodeBlock language="json" containerClassName="w-full overflow-hidden rounded-lg">
-{`"scripts": {
+                {`"scripts": {
   "build:vendors": "node dinou/scripts/build-vendors.js"
 }`}
               </CodeBlock>
