@@ -100,19 +100,33 @@ export function DynamicCounter({ initialCount = 0, step = 2 }: { initialCount?: 
 
 export function LiveCpuIndicator() {
   const [load, setLoad] = useState(24);
+  const [clickCount, setClickCount] = useState(0);
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 font-mono text-xs">
-      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-      <span className="font-bold text-foreground">HMR Engine Load:</span>
-      <span className="text-emerald-500 font-bold">{load}%</span>
-      <button
-        type="button"
-        onClick={() => setLoad(Math.floor(Math.random() * 40) + 15)}
-        className="ml-auto text-[10px] text-muted-foreground hover:text-foreground underline"
-      >
-        Re-sample
-      </button>
+    <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl border-2 border-fuchsia-500/50 bg-gradient-to-r from-purple-950/40 via-fuchsia-950/20 to-indigo-950/40 font-mono text-xs shadow-xl transition-all">
+      <div className="flex items-center gap-2.5">
+        <div className="w-3.5 h-3.5 rounded-full bg-fuchsia-400 animate-bounce" />
+        <span className="font-extrabold text-fuchsia-400 tracking-wide">🎉 ¡ESTADO PRESERVADO CON ÉXITO!</span>
+        <span className="text-slate-300">Load:</span>
+        <span className="px-2 py-0.5 rounded bg-fuchsia-500/20 text-fuchsia-200 font-black text-sm">{load}%</span>
+      </div>
+
+      <div className="flex items-center gap-2 ml-auto">
+        <button
+          type="button"
+          onClick={() => setClickCount((c) => c + 1)}
+          className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 hover:from-amber-400 hover:to-rose-500 text-white font-extrabold text-xs shadow-md shadow-rose-500/30 transition-transform active:scale-95"
+        >
+          🔥 Conservado en: {clickCount} (¡Haz clic para sumar!)
+        </button>
+        <button
+          type="button"
+          onClick={() => setLoad(Math.floor(Math.random() * 60) + 20)}
+          className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-fuchsia-300 font-bold border border-fuchsia-500/40 transition-all text-[11px]"
+        >
+          Re-sample Load
+        </button>
+      </div>
     </div>
   );
 }
