@@ -10,6 +10,7 @@ import { TerminalConsole, StatusPill } from "./components/terminal-console";
 import { RollupBenchmarkGrid, LatencyRadar } from "./components/rollup-benchmark";
 import { ClusterMeshViewer } from "./components/cluster-grid";
 import { QuantumMeshGrid, EntropyMeter, VectorWaveCard, FluxCapacitorGauge, SpinStateIndicator, SuperconductingRing } from "./components/quantum-grid";
+import { LiveStressBox } from "./components/live-stress-box";
 
 export default function TestDevPageClientInverted() {
   const [activeTab, setActiveTab] = useState<"webpack" | "quantum" | "controls" | "metrics" | "benchmark" | "mesh" | "telemetry" | "console">("webpack");
@@ -37,11 +38,11 @@ export default function TestDevPageClientInverted() {
               <Flame className="h-5 w-5" />
             </span>
             <div>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                Stress Test: Webpack 5 Dual-Bundle (Turbulence Engine)
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                ⚡ LIVE HMR TEST: Sesión en Caliente Activa 🚀
               </h2>
-              <p className="text-xs text-muted-foreground">
-                react-server-dom-webpack, inversión dinámica RSC &harr; Client y 20+ exports reactivos.
+              <p className="text-xs text-rose-500 font-semibold dark:text-rose-400">
+                Fast Refresh Activo &bull; Sin recarga de página &bull; Edición en tiempo real por el agente
               </p>
             </div>
           </div>
@@ -56,6 +57,9 @@ export default function TestDevPageClientInverted() {
 
         {/* Live CPU / Engine load indicator */}
         <LiveCpuIndicator />
+
+        {/* Brand new component created live */}
+        <LiveStressBox />
 
         {/* Interactive Tab Controls */}
         <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-200/60 dark:border-slate-800/60">
