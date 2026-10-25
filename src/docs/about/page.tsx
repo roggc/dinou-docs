@@ -268,20 +268,62 @@ export default function AboutPage() {
                           className="text-[11px] font-mono border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5"
                         >
                           <Sparkles className="w-3 h-3 mr-1 text-indigo-500" />
-                          Antigravity-Gemini 3.8 Flash high
+                          Antigravity-Gemini 3.8 Flash High
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="text-sm space-y-3">
+                    <CardContent className="text-sm space-y-4">
                       <p className="text-muted-foreground text-xs leading-relaxed">
-                        Dinou has been crafted through intensive <strong>human-agent interaction</strong> between <strong>@roggc</strong> and <strong>Antigravity-Gemini 3.8 Flash high</strong> (by Google / Google DeepMind).
+                        Dinou has been crafted through an evolving <strong>human-agent engineering model</strong> between <strong>@roggc</strong> and <strong>Antigravity-Gemini 3.8 Flash High</strong> (by Google / Google DeepMind).
                       </p>
                       <p className="text-muted-foreground text-xs leading-relaxed">
+                        Up to <strong>version 4 (inclusive)</strong>, Dinou was engineered entirely by human hand without AI agents. Starting in <strong>version 5</strong>, AI agents began to be integrated into the workflow. From <strong>version 7 onwards</strong>, Dinou has been developed <strong>exclusively through autonomous agent execution</strong> under human architectural direction and production quality standards.
+                      </p>
+
+                      {/* Evolution Timeline Grid */}
+                      <div className="pt-1">
+                        <h4 className="text-[11px] font-semibold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-2">
+                          Development Evolution Timeline
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                          <div className="p-3 rounded-xl bg-background/80 border border-slate-200 dark:border-slate-800 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100">v1.0 &ndash; v4.x</span>
+                              <Badge variant="outline" className="text-[10px] font-mono">Pure Human</Badge>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground leading-snug">
+                              Conceived and coded entirely by @roggc with zero agent involvement.
+                            </p>
+                          </div>
+
+                          <div className="p-3 rounded-xl bg-background/80 border border-indigo-500/30 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">v5.0 &ndash; v6.x</span>
+                              <Badge variant="outline" className="text-[10px] font-mono border-indigo-500/30 text-indigo-600 dark:text-indigo-400">Agent Assisted</Badge>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground leading-snug">
+                              AI agents introduced into workflow for multi-bundler and compiler assistance.
+                            </p>
+                          </div>
+
+                          <div className="p-3 rounded-xl bg-background/80 border border-purple-500/40 bg-purple-50/20 dark:bg-purple-950/10 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">v7.0 &ndash; v9.x+</span>
+                              <Badge variant="outline" className="text-[10px] font-mono border-purple-500/40 text-purple-600 dark:text-purple-400 bg-purple-500/10 font-bold">100% Agentic</Badge>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground leading-snug">
+                              Developed exclusively by autonomous agent execution under human direction.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="text-muted-foreground text-xs leading-relaxed pt-1">
                         This pairing exemplifies the modern paradigm of agentic software engineering: human architectural intuition, design criteria, and production-tested standards directing an advanced autonomous agent capable of deep codebase analysis, high-speed refactoring, cross-bundler alignment, and zero-compromise precision.
                       </p>
                       <div className="p-3 rounded-lg bg-background/80 border border-indigo-500/20 text-xs text-slate-700 dark:text-slate-300 font-mono flex items-center gap-2">
                         <Bot className="h-4 w-4 text-indigo-500 shrink-0" />
-                        <span>Pair-programming synergy: Human direction + Antigravity-Gemini 3.8 Flash high execution</span>
+                        <span>Pair-programming synergy: Human direction + Antigravity-Gemini 3.8 Flash High execution</span>
                       </div>
                     </CardContent>
                   </Card>
