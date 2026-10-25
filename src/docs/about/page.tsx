@@ -277,7 +277,7 @@ export default function AboutPage() {
                         Dinou has been crafted through an evolving <strong>human-agent engineering model</strong> between <strong>@roggc</strong> and <strong>Antigravity-Gemini 3.8 Flash High</strong> (by Google / Google DeepMind).
                       </p>
                       <p className="text-muted-foreground text-xs leading-relaxed">
-                        Up to <strong>version 4 (inclusive)</strong>, Dinou was engineered entirely by human hand without AI agents. Starting in <strong>version 5</strong>, AI agents began to be integrated into the workflow. From <strong>version 7 onwards</strong>, Dinou has been developed <strong>exclusively through autonomous agent execution</strong> under human architectural direction and production quality standards.
+                        Up to <strong>version 4 (inclusive)</strong>, Dinou was engineered entirely by human hand without AI agents. In <strong>version 5</strong>, an AI agent was introduced for the first time to execute a major architectural codebase refactor. <strong>Version 6</strong> was subsequently authored directly by <strong>@roggc</strong> as it was a straightforward iteration. From <strong>version 7 onwards</strong>, Dinou has been developed <strong>exclusively through autonomous agent execution</strong> under human architectural direction and production quality standards.
                       </p>
 
                       {/* Evolution Timeline Grid */}
@@ -285,7 +285,7 @@ export default function AboutPage() {
                         <h4 className="text-[11px] font-semibold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-2">
                           Development Evolution Timeline
                         </h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                           <div className="p-3 rounded-xl bg-background/80 border border-slate-200 dark:border-slate-800 space-y-1">
                             <div className="flex items-center justify-between">
                               <span className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100">v1.0 &ndash; v4.x</span>
@@ -296,13 +296,23 @@ export default function AboutPage() {
                             </p>
                           </div>
 
-                          <div className="p-3 rounded-xl bg-background/80 border border-indigo-500/30 space-y-1">
+                          <div className="p-3 rounded-xl bg-background/80 border border-blue-500/30 space-y-1">
                             <div className="flex items-center justify-between">
-                              <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">v5.0 &ndash; v6.x</span>
-                              <Badge variant="outline" className="text-[10px] font-mono border-indigo-500/30 text-indigo-600 dark:text-indigo-400">Agent Assisted</Badge>
+                              <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400">v5.0</span>
+                              <Badge variant="outline" className="text-[10px] font-mono border-blue-500/30 text-blue-600 dark:text-blue-400">Agent Refactor</Badge>
                             </div>
                             <p className="text-[11px] text-muted-foreground leading-snug">
-                              AI agents introduced into workflow for multi-bundler and compiler assistance.
+                              First agent adoption, executing a major architectural codebase refactor.
+                            </p>
+                          </div>
+
+                          <div className="p-3 rounded-xl bg-background/80 border border-amber-500/30 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="font-mono text-xs font-bold text-amber-600 dark:text-amber-400">v6.0</span>
+                              <Badge variant="outline" className="text-[10px] font-mono border-amber-500/30 text-amber-600 dark:text-amber-400">Human Direct</Badge>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground leading-snug">
+                              Directly engineered by @roggc for focused, low-complexity features.
                             </p>
                           </div>
 
