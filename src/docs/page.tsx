@@ -71,7 +71,7 @@ export default function Page() {
             <div className="flex flex-wrap gap-2 pt-2">
               <Badge variant="secondary" className="text-xs font-mono">React 19 Native</Badge>
               <Badge variant="secondary" className="text-xs font-mono">Tri-Bundler (esbuild / Rollup / Webpack)</Badge>
-              <Badge variant="secondary" className="text-xs font-mono">2D Caching &amp; PPR</Badge>
+              <Badge variant="secondary" className="text-xs font-mono">3D Caching &amp; PPR</Badge>
               <Badge variant="secondary" className="text-xs font-mono">100% Ejectable</Badge>
               <Badge variant="secondary" className="text-xs font-mono">Universal Deploy</Badge>
             </div>
@@ -165,11 +165,11 @@ npm run dev`}
                   </ul>
                 </div>
 
-                {/* 3.4 2D Layered Caching & PPR */}
+                {/* 3.4 3D Layered Caching & PPR */}
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
                   <div className="flex items-center gap-2 font-semibold text-sm text-slate-900 dark:text-slate-100 mb-2">
                     <Layers className="w-4 h-4 text-cyan-500" />
-                    <span>2D Layered Caching &amp; Partial Prerendering (PPR)</span>
+                    <span>3D Layered Caching &amp; Partial Prerendering (PPR)</span>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5 leading-relaxed">
                     <li><strong>Horizontal layout caching:</strong> Layouts define their own TTLs via <code>layout_functions.ts</code>, preserving layout state across route transitions without unmounting or re-rendering child trees.</li>

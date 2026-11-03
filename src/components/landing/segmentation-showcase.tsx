@@ -16,7 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "dinou";
-import { CodeWindow } from "./code-window";
+import { CodeWindow, type CodeFile } from "./code-window";
 
 type SegmentationTab = "ppr" | "vertical" | "horizontal";
 
@@ -27,8 +27,7 @@ interface TabConfig {
   badgeColor: string;
   headline: string;
   description: string;
-  codeFile: string;
-  codeSnippet: string;
+  files: CodeFile[];
   docHref: string;
   docLabel: string;
   features: {
@@ -49,20 +48,31 @@ interface TabConfig {
 const tabConfigs: Record<SegmentationTab, TabConfig> = {
   ppr: {
     id: "ppr",
-    title: "Partial Prerendering (PPR)",
-    badge: "0ms TTFB + Live Streaming",
+    title: "Temporal Segmentation (PPR)",
+    badge: "Static Shell + Live Streaming",
     badgeColor: "border-cyan-500/30 text-cyan-600 dark:text-cyan-400 bg-cyan-500/10",
     headline: "Instant Static Shell Delivery with Live Dynamic Streaming",
     description:
-      "Dinou unifies static delivery and dynamic personalization in a single request. The static shell is served in under 20ms while personalized Suspense holes stream live in the background.",
+      "Dinou unifies static delivery and dynamic personalization in a single request. The static shell is served instantly while personalized Suspense holes stream live in the background.",
     docHref: "/docs/rendering#partial-prerendering",
     docLabel: "PPR Guide",
-    codeFile: "src/dashboard/page_functions.ts",
-    codeSnippet: `// 1. Enable Partial Prerendering on the route
+    files: [
+      {
+        filename: "src/dashboard/page_functions.ts",
+        badge: "PPR",
+        language: "typescript",
+        code: `// src/dashboard/page_functions.ts
+// 1. Enable Partial Prerendering on the route
 export const ppr = true;
-export const revalidate = 300; // Static shell refreshes every 5m
 
-// src/dashboard/page.tsx
+// 2. Static shell refreshes in background every 5 minutes
+export const revalidate = 300;`,
+      },
+      {
+        filename: "src/dashboard/page.tsx",
+        badge: "RSC",
+        language: "tsx",
+        code: `// src/dashboard/page.tsx
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import LiveUserFeed from "./user-feed";
@@ -70,7 +80,7 @@ import LiveUserFeed from "./user-feed";
 export default function DashboardPage() {
   return (
     <div className="space-y-6">
-      {/* ⚡ Static Shell: Pre-rendered & served instantly (< 20ms) */}
+      {/* ⚡ Static Shell: Pre-rendered & served instantly */}
       <h1 className="text-2xl font-bold">Analytics Overview</h1>
       
       {/* 🌊 Dynamic Hole: Streamed over the wire when ready */}
@@ -80,11 +90,35 @@ export default function DashboardPage() {
     </div>
   );
 }`,
+      },
+      {
+        filename: "src/dashboard/user-feed.tsx",
+        badge: "Dynamic RSC",
+        language: "tsx",
+        code: `// src/dashboard/user-feed.tsx
+import { db } from "@/lib/db";
+
+// Async Server Component streamed dynamically inside <Suspense>
+export default async function LiveUserFeed() {
+  const events = await db.analytics.getRealtimeFeed();
+
+  return (
+    <ul className="space-y-3">
+      {events.map((event) => (
+        <li key={event.id} className="p-4 rounded-xl bg-slate-900">
+          {event.message}
+        </li>
+      ))}
+    </ul>
+  );
+}`,
+      },
+    ],
     features: [
       {
         icon: Zap,
-        title: "Sub-20ms Global TTFB",
-        desc: "Edge CDNs serve the static layout shell instantly without waiting for database queries.",
+        title: "Instant Static Shell",
+        desc: "Dinou serves the pre-built static prelude directly from its cache without waiting for database queries.",
       },
       {
         icon: RefreshCw,
@@ -99,11 +133,11 @@ export default function DashboardPage() {
     ],
     visualPreview: {
       shellTitle: "Static Prelude (Instant)",
-      shellDesc: "Headers, navigation, layout cards and Suspense skeletons served from CDN cache.",
+      shellDesc: "Headers, navigation, layout cards and Suspense skeletons served directly from Dinou's built-in cache.",
       streamTitle: "Dynamic Stream (Live)",
       streamDesc: "Real-time user balances, personalized notifications and dynamic metrics stream in.",
-      stat: "< 15ms",
-      statLabel: "Time to First Byte (TTFB)",
+      stat: "2.42ms",
+      statLabel: "TTFB p50 (514 req/s @ 200 conns)",
     },
   },
   vertical: {
@@ -116,8 +150,13 @@ export default function DashboardPage() {
       "Stop invalidating entire pages when only one widget changes. Wrap expensive Server Components in <DinouCacheSlot> for independent TTL caching and in-place client refreshes without page reloads.",
     docHref: "/docs/rendering#micro-isr",
     docLabel: "Micro-ISR Guide",
-    codeFile: "src/dashboard/page.tsx",
-    codeSnippet: `import { DinouCacheSlot } from "dinou";
+    files: [
+      {
+        filename: "src/dashboard/page.tsx",
+        badge: "RSC",
+        language: "tsx",
+        code: `// src/dashboard/page.tsx
+import { DinouCacheSlot } from "dinou";
 import LiveStockTicker from "./stock-ticker";
 import RefreshButton from "./refresh-button";
 
@@ -133,11 +172,30 @@ export default function Dashboard() {
       <RefreshButton slotId="stock-ticker" />
     </div>
   );
-}
+}`,
+      },
+      {
+        filename: "src/dashboard/refresh-button.tsx",
+        badge: '"use client"',
+        language: "tsx",
+        code: `// src/dashboard/refresh-button.tsx
+"use client";
 
-// Client Component: Refresh only this component!
-// import { refreshSlot } from "dinou";
-// <button onClick={() => refreshSlot("stock-ticker")}>Update Ticker</button>`,
+import { refreshSlot } from "dinou";
+
+// Refresh only the target <DinouCacheSlot> without reloading the page
+export default function RefreshButton({ slotId }: { slotId: string }) {
+  return (
+    <button
+      onClick={() => refreshSlot(slotId)}
+      className="px-4 py-2 rounded-xl bg-emerald-600 text-white font-medium"
+    >
+      Update Ticker In-Place
+    </button>
+  );
+}`,
+      },
+    ],
     features: [
       {
         icon: Box,
@@ -159,7 +217,7 @@ export default function Dashboard() {
       shellTitle: "Slot Isolation Boundary",
       shellDesc: "Surrounding components remain interactive while the target slot updates in-place.",
       streamTitle: "Zero Full-Page Reloads",
-      streamDesc: "DOM reconciliation updates only the target subtree via /____rsc_slot____/:id.",
+      streamDesc: "DOM reconciliation updates only the target subtree without touching sibling state.",
       stat: "100%",
       statLabel: "Sibling State Preserved",
     },
@@ -174,17 +232,28 @@ export default function Dashboard() {
       "Layouts can declare their own data fetching and revalidation rules via layout_functions.ts. Changing routes never re-renders cached parent layouts, keeping media playback and search inputs alive.",
     docHref: "/docs/routing#layout-functions",
     docLabel: "Layout Functions Guide",
-    codeFile: "src/dashboard/layout_functions.ts",
-    codeSnippet: `// Independent layout caching: Shell cached for 1 hour
+    files: [
+      {
+        filename: "src/dashboard/layout_functions.ts",
+        badge: "Layout ISR",
+        language: "typescript",
+        code: `// src/dashboard/layout_functions.ts
+// Independent layout caching: Shell cached for 1 hour
 export const revalidate = 3600;
 export const tags = ["dashboard-shell", "nav-links"];
 
 export async function getProps() {
   const navStats = await fetchGlobalStats();
   return { navStats };
-}
+}`,
+      },
+      {
+        filename: "src/dashboard/layout.tsx",
+        badge: "RSC Layout",
+        language: "tsx",
+        code: `// src/dashboard/layout.tsx
+import { Sidebar } from "@/components/sidebar";
 
-// src/dashboard/layout.tsx
 export default function DashboardLayout({ children, navStats }: any) {
   return (
     <div className="flex min-h-screen">
@@ -194,6 +263,8 @@ export default function DashboardLayout({ children, navStats }: any) {
     </div>
   );
 }`,
+      },
+    ],
     features: [
       {
         icon: Layers,
@@ -207,8 +278,8 @@ export default function DashboardLayout({ children, navStats }: any) {
       },
       {
         icon: Clock,
-        title: "Query-String Aware",
-        desc: "Propagates URL query modifications (e.g. ?tab=billing) to layout slots in real time.",
+        title: "Surgical Layout Revalidation",
+        desc: "Update layouts in O(1) via revalidateLayout() with lazy HTML re-composition and zero hydration mismatch.",
       },
     ],
     visualPreview: {
@@ -216,8 +287,8 @@ export default function DashboardLayout({ children, navStats }: any) {
       shellDesc: "Sidebar navigation, breadcrumbs, and user profiles stay mounted during navigation.",
       streamTitle: "Independent Revalidation",
       streamDesc: "Layout revalidates on its own 3600s timer without re-triggering page-level APIs.",
-      stat: "0ms",
-      statLabel: "Layout Re-render Overhead",
+      stat: "1.20ms",
+      statLabel: "TTFB p50 (1,180 req/s · 0 Layout Re-fetches)",
     },
   },
 };
@@ -243,13 +314,13 @@ export function SegmentationShowcase() {
             Dinou Breakthrough
           </Badge>
           <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl text-slate-900 dark:text-white">
-            Two-Dimensional{" "}
+            Three-Dimensional{" "}
             <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
               Layered Segmentation
             </span>
           </h2>
           <p className="text-slate-600 dark:text-slate-300 md:text-lg leading-relaxed">
-            Eliminate all-or-nothing caching. Dinou breaks rendering and caching into independent horizontal and vertical dimensions for ultra-fast, granular web applications.
+            Eliminate all-or-nothing caching. Dinou breaks rendering and caching into independent horizontal, vertical, and temporal (PPR) dimensions for ultra-fast, granular web applications.
           </p>
         </div>
 
@@ -258,7 +329,7 @@ export function SegmentationShowcase() {
           <div className="inline-flex p-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm gap-1 max-w-full overflow-x-auto">
             {(
               [
-                { id: "ppr", label: "Partial Prerendering (PPR)", icon: Zap },
+                { id: "ppr", label: "Temporal (PPR)", icon: Zap },
                 { id: "vertical", label: "Vertical (<DinouCacheSlot>)", icon: Box },
                 { id: "horizontal", label: "Horizontal (layout_functions)", icon: Layers },
               ] as const
@@ -404,12 +475,11 @@ export function SegmentationShowcase() {
           {/* Right Column: Code Editor Preview (7 cols) */}
           <div className="lg:col-span-7 flex flex-col justify-between lg:h-[630px]">
             <CodeWindow
-              filename={activeConfig.codeFile}
-              code={activeConfig.codeSnippet}
+              files={activeConfig.files}
               language="tsx"
               statusLeft="Native React 19 RSC Pipeline"
               statusRight="TypeScript 5+ Ready"
-              className="h-[500px] sm:h-[540px] lg:h-full"
+              className="h-[500px] sm:h-[540px] lg:h-[630px] w-full shrink-0"
             />
           </div>
         </div>

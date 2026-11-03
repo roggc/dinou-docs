@@ -43,12 +43,12 @@ interface TabConfig {
 const tabConfigs: Record<DxTab, TabConfig> = {
   hmr: {
     id: "hmr",
-    title: "1. Sub-5ms Hot Reloading",
+    title: "1. ~260ms E2E Hot Reloading",
     badge: "Instant State Preservation",
     badgeColor: "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10",
     headline: "Instant HMR That Never Drops Component State",
     description:
-      "Dinou's custom WebSocket HMR server and React Refresh integration patch updates into your running application in under 5 milliseconds. Active form fields, counters, and scroll positions stay perfectly intact.",
+      "Dinou's custom WebSocket HMR server and React Refresh integration patch updates from file save to live browser DOM seamlessly. Active form fields, counters, and scroll positions stay perfectly intact.",
     codeFile: "src/components/counter.tsx",
     language: "tsx",
     codeSnippet: `"use client";
@@ -74,7 +74,7 @@ export function Counter() {
     features: [
       {
         icon: Zap,
-        title: "Sub-5ms Hot Patching",
+        title: "WebSocket Hot Patching",
         desc: "WebSocket-driven module replacement pushes changes without full page reloads.",
       },
       {
@@ -88,24 +88,24 @@ export function Counter() {
         desc: "Dependency manifests track exact module trees to avoid redundant work.",
       },
     ],
-    stat: "< 5ms",
-    statLabel: "Average HMR Patch Latency",
+    stat: "260ms",
+    statLabel: "Median E2E Edit → Browser DOM",
   },
   compiler: {
     id: "compiler",
     title: "2. Zero-Fork In-Process Dev",
-    badge: "150ms Cold Starts",
+    badge: "In-Memory Dual-Bundle",
     badgeColor: "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10",
     headline: "In-Memory Dual-Bundle Architecture",
     description:
-      "Eliminate the memory bloat of multi-process dev servers. Dinou compiles client components and server Flight streams in the same process memory space, cutting startup latency to under 150ms.",
+      "Eliminate the memory bloat of multi-process dev servers. Dinou compiles client components and server Flight streams in the same process memory space for fast cold starts and lean production builds.",
     codeFile: "terminal / npm run dev",
     language: "bash",
     codeSnippet: `$ npm run dev
 
 ✓ Build completed
 
-  🦖 Dinou (Dual-Bundle, 0-fork) in 5964ms
+  🦖 Dinou (Dual-Bundle, 0-fork) in 2090ms
 
   ➜  Local:   http://localhost:3000/
   ➜  Bundler: esbuild
@@ -114,7 +114,7 @@ export function Counter() {
     features: [
       {
         icon: Terminal,
-        title: "150ms Cold Start",
+        title: "Instant Server Readiness",
         desc: "Instant server readiness without waiting for massive background bundle graphs.",
       },
       {
@@ -128,8 +128,8 @@ export function Counter() {
         desc: "Adding or removing files updates `.dinou/routes.d.ts` in less than 2ms.",
       },
     ],
-    stat: "142ms",
-    statLabel: "Cold Server Startup Time",
+    stat: "2.09s",
+    statLabel: "Median Dev Cold Start (6.5s Prod Build)",
   },
   recovery: {
     id: "recovery",
@@ -201,7 +201,7 @@ export function DxShowcase() {
             </span>
           </h2>
           <p className="text-slate-600 dark:text-slate-300 md:text-lg leading-relaxed">
-            Built from scratch for sub-millisecond Hot Module Replacement (HMR), zero-fork in-memory compilation, instant route scanning, and instant terminal feedback.
+            Built from scratch for ~260ms E2E Hot Module Replacement (HMR), 2.09s dev cold starts, 6.5s production builds, and instant terminal feedback.
           </p>
         </div>
 
@@ -210,7 +210,7 @@ export function DxShowcase() {
           <div className="inline-flex p-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm gap-1 max-w-full overflow-x-auto">
             {(
               [
-                { id: "hmr", label: "1. Sub-5ms HMR", icon: Zap },
+                { id: "hmr", label: "1. ~260ms E2E HMR", icon: Zap },
                 { id: "compiler", label: "2. Zero-Fork In-Process", icon: Terminal },
                 { id: "recovery", label: "3. Resilient Error Recovery", icon: RefreshCw },
               ] as const
@@ -305,7 +305,7 @@ export function DxShowcase() {
                         </div>
                         <div className="text-xs sm:text-sm">
                           <strong className="text-slate-900 dark:text-white">{feat.title}:</strong>{" "}
-                          <span className="text-slate-600 dark:text-slate-300">{feat.desc}</span>
+                          <span className="text-slate-600 dark:text-slate-300">{feat.desc.split(/(`[^`]+`)/g).map((p, idx) => p.startsWith("`") && p.endsWith("`") ? <code key={idx} className="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-xs">{p.slice(1, -1)}</code> : p)}</span>
                         </div>
                       </div>
                     );

@@ -564,7 +564,7 @@ export default function ProductPage({ product }: { product: Product }) {
                   2.2. Page vs Layout Segmentation
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Through <strong>2D Horizontal Layered Segmentation</strong>, layouts fetch their own data independently in{" "}
+                  Through <strong>3D Horizontal Layered Segmentation</strong>, layouts fetch their own data independently in{" "}
                   <code>layout_functions.ts</code>. When a user navigates between sibling pages within the same layout,
                   the layout data is <strong>never re-fetched</strong>:
                 </p>

@@ -322,7 +322,7 @@ export function MiddlewareShowcase() {
                         </div>
                         <div className="text-xs sm:text-sm">
                           <strong className="text-slate-900 dark:text-white">{feat.title}:</strong>{" "}
-                          <span className="text-slate-600 dark:text-slate-300">{feat.desc}</span>
+                          <span className="text-slate-600 dark:text-slate-300">{feat.desc.split(/(`[^`]+`)/g).map((p, idx) => p.startsWith("`") && p.endsWith("`") ? <code key={idx} className="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-xs">{p.slice(1, -1)}</code> : p)}</span>
                         </div>
                       </div>
                     );

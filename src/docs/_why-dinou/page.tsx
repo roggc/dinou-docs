@@ -33,7 +33,7 @@ const tocItems = [
   { id: "react-primitives", title: "1.2. React 19 Primitives First", level: 3 },
   { id: "total-ownership", title: "1.3. Total Stack Ownership & Eject", level: 3 },
   { id: "why-dinou-v7", title: "2. The Dinou v7 Paradigm", level: 2 },
-  { id: "layered-segmentation", title: "2.1. 2D Layered Segmentation", level: 3 },
+  { id: "layered-segmentation", title: "2.1. 3D Layered Segmentation", level: 3 },
   { id: "partial-prerendering", title: "2.2. Partial Prerendering (PPR)", level: 3 },
   { id: "zero-fork-engine", title: "2.3. Zero-Fork In-Process Engine", level: 3 },
   { id: "architectural-pillars", title: "3. Architectural Pillars", level: 2 },
@@ -78,7 +78,7 @@ export default function WhyDinouPage() {
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words space-y-12">
             <blockquote className="border-l-4 border-l-blue-600 dark:border-l-blue-400 bg-blue-50/50 dark:bg-blue-950/20 py-3 px-4 rounded-r-lg my-6 not-italic">
               <strong className="text-foreground">
-                Dinou is a lightweight, 100% ejectable, multi-runtime React 19 framework with triple-bundler freedom, 2D Layered Segmentation, and native PPR, built directly on official React primitives without proprietary lock-in.
+                Dinou is a lightweight, 100% ejectable, multi-runtime React 19 framework with triple-bundler freedom, 3D Layered Segmentation, and native PPR, built directly on official React primitives without proprietary lock-in.
               </strong>
             </blockquote>
 
@@ -148,10 +148,10 @@ export default function WhyDinouPage() {
                 <div id="layered-segmentation" className="scroll-mt-20">
                   <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-2">
                     <Split className="h-5 w-5 text-blue-500" />
-                    2.1. 2D Layered Segmentation
+                    2.1. 3D Layered Segmentation
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                    In traditional frameworks, caching is an all-or-nothing proposition: if a single dynamic widget updates on a page, the entire page and all its parent layouts must be re-rendered. Dinou v7 introduces <strong>2D Layered Segmentation</strong>, decoupling cache invalidation across two distinct axes:
+                    In traditional frameworks, caching is an all-or-nothing proposition: if a single dynamic widget updates on a page, the entire page and all its parent layouts must be re-rendered. Dinou introduces <strong>3D Layered Segmentation</strong>, decoupling cache invalidation and streaming across three distinct axes (Horizontal, Vertical, and Temporal PPR):
                   </p>
 
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -363,7 +363,7 @@ export default function WhyDinouPage() {
                   <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-semibold text-base text-slate-900 dark:text-slate-100">
-                      2D Layered Segmentation &amp; &lt;DinouCacheSlot&gt;
+                      3D Layered Segmentation &amp; &lt;DinouCacheSlot&gt;
                     </h4>
                     <p className="text-sm text-muted-foreground mt-1">
                       Isolate layout caching horizontally via <code>layout_functions.ts</code>, and segment page sub-trees vertically with <code>&lt;DinouCacheSlot&gt;</code> for surgical cache revalidation.
@@ -482,8 +482,8 @@ export default function WhyDinouPage() {
                       <td className="py-3.5 px-4 text-muted-foreground">Proprietary wrappers &amp; synthetic APIs</td>
                     </tr>
                     <tr className="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
-                      <td className="py-3.5 px-4 font-medium text-slate-900 dark:text-slate-100">2D Layered Segmentation</td>
-                      <td className="py-3.5 px-4 text-blue-600 dark:text-blue-400 font-semibold">Horizontal (Layout ISR) + Vertical (&lt;DinouCacheSlot&gt;)</td>
+                      <td className="py-3.5 px-4 font-medium text-slate-900 dark:text-slate-100">3D Layered Segmentation</td>
+                      <td className="py-3.5 px-4 text-blue-600 dark:text-blue-400 font-semibold">Horizontal (Layout ISR) + Vertical (&lt;DinouCacheSlot&gt;) + Temporal (PPR)</td>
                       <td className="py-3.5 px-4 text-muted-foreground">All-or-nothing page level caching</td>
                     </tr>
                     <tr className="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">

@@ -19,7 +19,7 @@ export function DinouCacheSlotSection() {
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        The foundational primitive for <strong>Micro-ISR (Vertical 2D Segmentation)</strong> in React Server Components. Allows isolating, caching, and revalidating independent component subtrees within an active page without re-evaluating the parent page, re-fetching unchanged database queries, or resetting client component state.
+        The foundational primitive for <strong>Micro-ISR (Vertical 3D Segmentation)</strong> in React Server Components. Allows isolating, caching, and revalidating independent component subtrees within an active page without re-evaluating the parent page, re-fetching unchanged database queries, or resetting client component state.
       </p>
 
       {/* Sub-section 1: Props & Micro-ISR Reference */}

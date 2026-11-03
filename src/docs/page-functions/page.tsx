@@ -156,7 +156,7 @@ export default function Page() {
       <title>Page & Layout Functions | Dinou Docs</title>
       <meta
         name="description"
-        content="Dinou features 2D Horizontal Layered Segmentation. Route configuration and server lifecycles are decoupled into page_functions.ts and layout_functions.ts."
+        content="Dinou features 3D Horizontal Layered Segmentation. Route configuration and server lifecycles are decoupled into page_functions.ts and layout_functions.ts."
       />
       <link rel="canonical" href="https://dinou.dev/docs/page-functions" />
 
@@ -169,7 +169,7 @@ export default function Page() {
                 variant="secondary"
                 className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
               >
-                2D Horizontal Segmentation
+                3D Horizontal Segmentation
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
                 Dinou Complete Guide
@@ -182,7 +182,7 @@ export default function Page() {
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
               Dinou features{" "}
-              <strong>2D Horizontal Layered Segmentation</strong>. Route
+              <strong>3D Horizontal Layered Segmentation</strong>. Route
               configuration and server lifecycle functions are cleanly decoupled
               into <code>page_functions.ts</code> (for <code>page.tsx</code>) and{" "}
               <code>layout_functions.ts</code> (for <code>layout.tsx</code>).

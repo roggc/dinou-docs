@@ -13,7 +13,7 @@ export function EngineComparison() {
     },
     {
       dimension: "Process & Memory Model",
-      implementation: "Single-process unified memory-mapped engine with flat, predictable RAM",
+      implementation: "Single-process unified engine with flat RAM (275 MB idle / 492 MB peak @ 200 conns)",
     },
     {
       dimension: "Deployment Flexibility",
@@ -21,11 +21,11 @@ export function EngineComparison() {
     },
     {
       dimension: "Dev Server & DX",
-      implementation: "In-memory 0-fork compilation with sub-5ms WebSocket HMR (< 150ms startup)",
+      implementation: "In-memory 0-fork compilation (~2.09s cold start, ~260ms E2E HMR, 6.5s prod build)",
     },
     {
       dimension: "Rendering & Caching Model",
-      implementation: "2D Layered Segmentation (PPR, layout_functions & <DinouCacheSlot>)",
+      implementation: "3D Layered Segmentation (PPR, layout_functions & <DinouCacheSlot>)",
     },
     {
       dimension: "State Persistence on Navigation",

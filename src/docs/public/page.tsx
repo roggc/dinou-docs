@@ -397,7 +397,7 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
                 >
                   {`// Inside your root layout <head>
 <meta property="og:title" content="Dinou - High Performance Full-Stack Framework" />
-<meta property="og:description" content="Next-generation React framework with 2D micro-segmentation and in-process execution." />
+<meta property="og:description" content="Next-generation React framework with 3D micro-segmentation and in-process execution." />
 <meta property="og:image" content="https://mydinouapp.com/images/og-image.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />

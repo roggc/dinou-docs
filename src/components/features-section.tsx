@@ -25,9 +25,9 @@ export function FeaturesSection() {
       icon: Layers,
       color: "blue",
       title: "Layered Segmentation & PPR",
-      description: "2D caching and rendering architecture unifying instant static delivery with live dynamic streaming.",
+      description: "3D caching and rendering architecture unifying instant static delivery with live dynamic streaming.",
       bullets: [
-        "Partial Prerendering (PPR): Instant static shell (< 20ms TTFB) + dynamic Suspense streaming",
+        "Partial Prerendering (PPR): Instant static shell (~2.42ms p50 TTFB) + dynamic Suspense streaming",
         "Vertical Segmentation: <DinouCacheSlot> micro-caching with in-place client refresh",
         "Horizontal Segmentation: Decoupled layout_functions ISR (3600s) & persistent slot state",
         "Unified seconds-based revalidate: 0 for dynamic SSR, >= 1 for ISR, false for static SSG",
