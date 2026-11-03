@@ -237,7 +237,7 @@ export function ProductCard({ item }: { item: Product }) {
     benefits: [
       "Return Client & Server Components directly over the Flight RPC wire",
       "Stream interactive UI with native React 19 use() and <Suspense>",
-      "Pass server-fetched data as props with zero manual JSON boilerplate",
+      "Declare 'use server' at the module level or inline inside individual functions",
       "Also fully supports standard mutations with useActionState & useOptimistic",
     ],
     docLink: "/docs/server-functions",
