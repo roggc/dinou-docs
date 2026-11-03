@@ -12,7 +12,6 @@ import {
   Split,
   Globe,
   ShieldAlert,
-  Boxes,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -96,13 +95,12 @@ export default function DashboardLayout({ children }: LayoutProps) {
     badgeColor: "border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10",
     headline: "Parametric & Wildcard URL Matching",
     description:
-      "Handle dynamic parameters with [id] and multi-segment wildcards with [...slug]. Route parameters are typed via PageProps, while query strings are accessed via useSearchParams().",
+      "Handle dynamic parameters with [id], optional parameters with [[id]], and multi-segment wildcards with [...slug] and [[...slug]]. Extracted route parameters are automatically injected and typed via PageProps.",
     codeFile: "src/shop/[category]/[id]/page.tsx",
     codeSnippet: `import type { PageProps } from "dinou";
 import { db } from "@/lib/db";
 
 // Matches /shop/:category/:id with strongly typed params via PageProps
-// Query strings (?sort=asc) are read via useSearchParams() in client components
 export default async function ProductPage({
   params,
 }: PageProps<"/shop/[category]/[id]">) {
@@ -120,18 +118,18 @@ export default async function ProductPage({
     features: [
       {
         icon: Route,
-        title: "Type-Safe PageProps",
-        desc: "`params` is strongly typed via PageProps<T>. Query strings are read with `useSearchParams()`.",
+        title: "Dynamic & Optional Segments",
+        desc: "Match required (`[id]`), optional (`[[id]]`), and catch-all (`[...slug]`, `[[...slug]]`) segments.",
       },
       {
         icon: Globe,
-        title: "Catch-All Wildcards",
-        desc: "Use `[...slug]` to capture deep paths like docs or CMS trees as a string array.",
+        title: "Type-Safe PageProps Injection",
+        desc: "Extracted URL parameters are automatically passed to your component and strongly typed via `PageProps<T>`.",
       },
       {
         icon: ShieldCheck,
-        title: "Sanitized URL Decoding",
-        desc: "Dynamic segments are automatically decoded and validated before component execution.",
+        title: "Automatic URL Decoding",
+        desc: "Dynamic route segments are automatically URL-decoded before being passed to your components.",
       },
     ],
     stat: "< 1ms",
@@ -144,7 +142,7 @@ export default async function ProductPage({
     badgeColor: "border-purple-500/30 text-purple-600 dark:text-purple-400 bg-purple-500/10",
     headline: "Organize Without Polluting URLs",
     description:
-      "Organize routes into (group) folders without affecting the public URL path. Render parallel routes with @slot folders for simultaneous views, overlays, and isolated error boundaries.",
+      "Organize routes into (group) folders without affecting the public URL path. Render parallel routes with @slot folders for simultaneous views, overlays, and isolated slot error handling.",
     codeFile: "src/(app)/dashboard/layout.tsx",
     codeSnippet: `// Directory layout:
 // src/
@@ -171,7 +169,7 @@ export default function AppLayout({
   return (
     <>
       {children}
-      {/* Parallel slot rendered concurrently with its own error boundary */}
+      {/* Parallel slot: isolated from main page (renders @modal/error.tsx or null on failure) */}
       {modal}
     </>
   );
@@ -189,8 +187,8 @@ export default function AppLayout({
       },
       {
         icon: ShieldAlert,
-        title: "Isolated Error Boundaries",
-        desc: "Pair slots with localized `error.tsx` so unexpected failures in one widget never crash the page.",
+        title: "Isolated Slot Error Handling",
+        desc: "Slots never crash the page: failures render a co-located `error.tsx` fallback (or `null` if omitted).",
       },
     ],
     stat: "0 URL Impact",
@@ -224,7 +222,7 @@ export function RoutingShowcase() {
             </span>
           </h2>
           <p className="text-slate-600 dark:text-slate-300 md:text-lg leading-relaxed">
-            Every folder with a <code className="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-indigo-600 dark:text-indigo-400">page.tsx</code> in <code className="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-indigo-600 dark:text-indigo-400">src/</code> maps directly to a public route. Nested persistent layouts, dynamic params, route groups, and parallel slots work right out of the box.
+            Every folder with a <code className="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-indigo-600 dark:text-indigo-400">page.tsx</code> in <code className="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-indigo-600 dark:text-indigo-400">src/</code> maps directly to a public route. Nested layouts, dynamic params, route groups, and parallel slots work right out of the box.
           </p>
         </div>
 
@@ -304,7 +302,20 @@ export function RoutingShowcase() {
                         </div>
                         <div className="text-xs sm:text-sm">
                           <strong className="text-slate-900 dark:text-white">{feat.title}:</strong>{" "}
-                          <span className="text-slate-600 dark:text-slate-300">{feat.desc.split(/(`[^`]+`)/g).map((p, idx) => p.startsWith("`") && p.endsWith("`") ? <code key={idx} className="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-xs">{p.slice(1, -1)}</code> : p)}</span>
+                          <span className="text-slate-600 dark:text-slate-300">
+                            {feat.desc.split(/(`[^`]+`)/g).map((p, idx) =>
+                              p.startsWith("`") && p.endsWith("`") ? (
+                                <code
+                                  key={idx}
+                                  className="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-xs"
+                                >
+                                  {p.slice(1, -1)}
+                                </code>
+                              ) : (
+                                p
+                              )
+                            )}
+                          </span>
                         </div>
                       </div>
                     );
@@ -337,7 +348,7 @@ export function RoutingShowcase() {
               language="tsx"
               statusLeft="Dinou File-System Router"
               statusRight="Zero Runtime Overhead"
-              className="h-[500px] sm:h-[540px] lg:h-full"
+              className="h-[500px] sm:h-[540px] lg:h-[630px] w-full shrink-0"
             />
           </div>
         </div>
