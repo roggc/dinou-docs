@@ -6,7 +6,57 @@ import { AsyncLocalStorage } from "node:async_hooks";
 const pprStorage = new AsyncLocalStorage();
 const pageSegmentStorage = new AsyncLocalStorage();
 const layoutSegmentStorage = new AsyncLocalStorage();
+const cachedSlotStorage = new AsyncLocalStorage();
+const slotDiscoveryStorage = new AsyncLocalStorage();
 const pageRootElements = new WeakSet();
+
+const NO_DYNAMIC_HOOK_KEY = Symbol.for("dinou.ppr.noDynamic.hook");
+let currentComponentNoDynamic = false;
+
+export function noDynamic() {
+  currentComponentNoDynamic = true;
+  const store = pprStorage.getStore();
+  if (store && store.suspenseDepth > 0) {
+    store.noDynamic = true;
+  }
+}
+
+if (typeof globalThis !== "undefined") {
+  globalThis[NO_DYNAMIC_HOOK_KEY] = noDynamic;
+}
+
+export function resetComponentNoDynamicFlag() {
+  currentComponentNoDynamic = false;
+}
+
+export function consumeComponentNoDynamicFlag() {
+  const val = currentComponentNoDynamic;
+  currentComponentNoDynamic = false;
+  return val;
+}
+
+export function isNoDynamicActive() {
+  if (currentComponentNoDynamic) return true;
+  const store = pprStorage.getStore();
+  return Boolean(store && store.noDynamic);
+}
+
+export function runInCachedSlot(callback) {
+  const prev = cachedSlotStorage.getStore();
+  return cachedSlotStorage.run({ depth: (prev?.depth || 0) + 1 }, callback);
+}
+
+export function isInsideCachedSlot() {
+  return Boolean((cachedSlotStorage.getStore()?.depth || 0) > 0);
+}
+
+export function runInSlotDiscovery(callback) {
+  return slotDiscoveryStorage.run({ active: true }, callback);
+}
+
+export function isSlotDiscoveryActive() {
+  return Boolean(slotDiscoveryStorage.getStore()?.active);
+}
 
 export function markPageRootElement(el) {
   if (el && typeof el === "object") {
@@ -128,6 +178,8 @@ export function runInSuspense(callback, explicitHoleId = null) {
     suspenseDepth: store.suspenseDepth + 1,
     currentHoleId: holeId,
     holeStack: nextStack,
+    noDynamic: false,
+    settled: false,
     pendingEffects,
     parentPendingEffects: Array.isArray(store.pendingEffects)
       ? store.pendingEffects
@@ -145,6 +197,9 @@ export function deferPprSuspenseEffect(effectFn) {
     Array.isArray(store.pendingEffects) &&
     typeof effectFn === "function"
   ) {
+    if (store.settled) {
+      return true;
+    }
     store.pendingEffects.push(effectFn);
     return true;
   }
@@ -237,6 +292,14 @@ export function getRegisteredHoles() {
 }
 
 export default {
+  noDynamic,
+  resetComponentNoDynamicFlag,
+  consumeComponentNoDynamicFlag,
+  isNoDynamicActive,
+  runInCachedSlot,
+  isInsideCachedSlot,
+  runInSlotDiscovery,
+  isSlotDiscoveryActive,
   runInPageSegment,
   isInsidePageSegment,
   runWithPprContext,

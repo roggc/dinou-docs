@@ -1747,7 +1747,10 @@ async function handleRequest(request, platformContext = {}) {
       try {
         let jsx;
         if (platformContext?.isSSG) {
-          jsx = await runWithPprContext({ isPpr: true }, async () => {
+          const ssgIsPpr = isLayoutReq
+            ? Boolean(isRoutePpr || (await resolvePprForRoute(null, null, reqSegments, queryObj)))
+            : Boolean(isRoutePpr);
+          jsx = await runWithPprContext({ isPpr: ssgIsPpr }, async () => {
             const rawJsx = await getJSX(reqPath, queryObj, isNotFound, isDevelopment, isPathBlocked, {
               segment,
             });

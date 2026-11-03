@@ -10,8 +10,8 @@ This document provides a complete technical overview of **Partial Prerendering (
 
 1. **At Build Time (or On-Demand Static Shell Generation)**:
    - Dinou renders the route inside a PPR context (`runWithPprContext({ isPpr: true })`).
-   - Static parts of the layout and page—including `<Suspense>` boundaries whose children only perform static async work (e.g., cached data fetches, timers, computations that do **not** read request-specific data)—are **fully resolved and baked into `shell.html` and `shell.rsc`**.
-   - Whenever an async Server Component wrapped inside a `<Suspense>` boundary accesses dynamic request properties (`req.cookies`, `req.headers`, `req.query`, `req.searchParams`, or `bailoutToDynamic()`), Dinou's **Bailout Proxy** throws a `PprBailoutError` (`$$typeof: Symbol.for("dinou.ppr.postpone")`).
+   - Static parts of the layout and page—including `<Suspense>` boundaries that wrap a cached `<DinouCacheSlot>` (`revalidate >= 1` or `undefined`) or an async Server Component that explicitly opts out via `noDynamic()`—are **fully resolved and baked into `shell.html` and `shell.rsc`**.
+   - Whenever a `<Suspense>` boundary wraps an `async` Server Component (by default), a `<DinouCacheSlot revalidate={0}>`, or a component that accesses dynamic request properties (`req.cookies`, `req.headers`, `req.query`), Dinou throws a `PprBailoutError` (`$$typeof: Symbol.for("dinou.ppr.postpone")`).
    - Instead of bailing out the entire page to dynamic SSR, Dinou catches the `PprBailoutError` at the **nearest enclosing `<Suspense>` boundary**, renders that boundary's `fallback` into the static shell wrapped in a marker (`<div data-ppr-hole="ppr-hole-N" style="display:contents">...</div>`), and records `"ppr-hole-N"` in the route's `metadata.json` (`holes: [...]`).
    - If dynamic request data is accessed **outside** any `<Suspense>` boundary, the `PprBailoutError` bubbles up to the route level (`dynamicState.value = true`), causing a full-route bailout (no `shell.html` is saved, and the route renders dynamically on every request).
 
@@ -128,8 +128,8 @@ During rigorous auditing of Dinou's PPR implementation (`src/t-ppr-rigorous` and
 | Pattern | Build-Time Behavior (`shell.html`) | Request-Time Behavior (`handlePprResume`) |
 |---|---|---|
 | **Static Server Component outside `<Suspense>`** | Rendered and baked into `shell.html` | Served immediately in `shellPrelude` (`0ms TTFB`) |
-| **Static `<Suspense>` boundary** (async work without `cookies`/`headers`/`query`) | Resolved at build time and baked into `shell.html` (not added to `metadata.holes`) | Served in `shellPrelude`; **not** re-executed or re-streamed at request time |
-| **Dynamic `<Suspense>` hole** (reads `cookies`, `headers`, `query`) | Catches `PprBailoutError`, bakes `<div data-ppr-hole="ppr-hole-N">` fallback into `shell.html`, records in `metadata.holes` | Evaluates in parallel at request time and streams `<template id="ppr-content-ppr-hole-N">` + inline DOM swap `<script>` |
+| **Static `<Suspense>` boundary** (`noDynamic()` opt-out or cached `<DinouCacheSlot revalidate={N}>`) | Resolved at build time and baked into `shell.html` (not added to `metadata.holes`) | Served in `shellPrelude`; **not** re-executed or re-streamed at request time |
+| **Dynamic `<Suspense>` hole** (default for `async` Server Component, `<DinouCacheSlot revalidate={0}>`, or reading `cookies`/`headers`/`query`) | Catches `PprBailoutError`, bakes `<div data-ppr-hole="ppr-hole-N">` fallback into `shell.html`, records in `metadata.holes` | Evaluates in parallel at request time and streams `<template id="ppr-content-ppr-hole-N">` + inline DOM swap `<script>` |
 | **Client Component (`"use client"`) inside Dynamic `<Suspense>` hole** | Fallback baked into `shell.html` | Streamed at request time via Pass A (RSC) + Pass B (SSR) and hydrated on the client |
 | **Nested Dynamic `<Suspense>` inside Static `<Suspense>`** | Outer boundary baked into `shell.html`; inner boundary bails out as `ppr-hole-N` | Outer wrapper served in `shellPrelude`; inner hole streamed on demand |
 | **Nested Dynamic `<Suspense>` inside Dynamic `<Suspense>`** | Outer boundary bails out at build time (`ppr-hole-N`) without duplicate inner registration | Outer boundary streams and resolves its inner `<Suspense>` tree at request time |

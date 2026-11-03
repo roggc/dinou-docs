@@ -17,14 +17,12 @@ import {
   runWithPprContext,
   isInsideLayoutSegment,
   isInsidePageSegment,
+  markDynamicAccess,
+  runInCachedSlot,
+  runInSlotDiscovery,
+  isSlotDiscoveryActive,
 } from "./ppr-context.js";
 import { createRequire } from "node:module";
-import { AsyncLocalStorage } from "node:async_hooks";
-
-const slotDiscoveryStorage = new AsyncLocalStorage();
-function isSlotDiscoveryActive() {
-  return Boolean(slotDiscoveryStorage.getStore()?.active);
-}
 
 const require = createRequire(import.meta.url);
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
@@ -479,10 +477,18 @@ async function refreshNestedSlotsInTree(node, currentSlotId, options = {}) {
  */
 async function DinouCacheSlot(props) {
   const { id, tag, tags, revalidate, children } = props || {};
+  const isNoCache = typeof revalidate === "number" && revalidate < 1;
 
   const slotId = id || tag || (Array.isArray(tags) ? tags[0] : null);
   if (!slotId) {
-    return typeof children === "function" ? await children() : children;
+    if (isNoCache && isPprBuildActive() && isInsideSuspense() && !isSlotDiscoveryActive()) {
+      markDynamicAccess("slot-revalidate-0");
+    }
+    const runScope = isNoCache ? (fn) => fn() : runInCachedSlot;
+    return await runScope(async () => {
+      const childElement = typeof children === "function" ? await children() : children;
+      return await asyncRenderJSXToClientJSX(childElement);
+    });
   }
 
   const allTags = Array.isArray(tags)
@@ -494,7 +500,7 @@ async function DinouCacheSlot(props) {
 
   const storageKey = `slots/${slotId}/slot.json`;
   const storage = getStorageAdapter();
-  const isNoCache = revalidate === 0;
+  const runSlotScope = isNoCache ? (fn) => fn() : runInCachedSlot;
 
   function wrapWithBoundary(content, alreadyRendered = false) {
     const Boundary = getCacheSlotBoundary();
@@ -523,14 +529,16 @@ async function DinouCacheSlot(props) {
   // Register in slotRegistry for on-demand endpoint re-rendering and nested slot discovery
   slotRegistry.set(slotId, {
     render: async () => {
-      const childElement = typeof children === "function" ? await children() : children;
-      return await asyncRenderJSXToClientJSX(childElement);
+      return await runSlotScope(async () => {
+        const childElement = typeof children === "function" ? await children() : children;
+        return await asyncRenderJSXToClientJSX(childElement);
+      });
     },
     discover: async () => {
       if (discoveringSlots.has(slotId)) return;
       discoveringSlots.add(slotId);
       try {
-        await slotDiscoveryStorage.run({ active: true }, async () => {
+        await runInSlotDiscovery(async () => {
           const childElement = typeof children === "function" ? await children() : children;
           await asyncRenderJSXToClientJSX(childElement);
         });
@@ -551,9 +559,15 @@ async function DinouCacheSlot(props) {
     }
   }
 
+  if (isNoCache && isPprBuildActive() && isInsideSuspense() && !isSlotDiscoveryActive()) {
+    markDynamicAccess("slot-revalidate-0");
+  }
+
   if (!storage || isNoCache) {
-    const childElement = typeof children === "function" ? await children() : children;
-    const directContent = await asyncRenderJSXToClientJSX(childElement);
+    const directContent = await runSlotScope(async () => {
+      const childElement = typeof children === "function" ? await children() : children;
+      return await asyncRenderJSXToClientJSX(childElement);
+    });
     commitSlotTags(slotTagsToCommit);
     return wrapWithBoundary(directContent, true);
   }
@@ -585,7 +599,10 @@ async function DinouCacheSlot(props) {
         ? meta.revalidate
         : undefined;
 
-    if (revalidateSeconds === 0) {
+    if (typeof revalidateSeconds === "number" && revalidateSeconds < 1) {
+      if (isPprBuildActive() && isInsideSuspense() && !isSlotDiscoveryActive()) {
+        markDynamicAccess("slot-revalidate-0");
+      }
       const childElement = typeof children === "function" ? await children() : children;
       const directContent = await asyncRenderJSXToClientJSX(childElement);
       commitSlotTags(slotTagsToCommit);
@@ -620,8 +637,10 @@ async function DinouCacheSlot(props) {
   const isPprShellBuild = isPprBuildActive();
 
   const renderPromise = (async () => {
-    const childElement = typeof children === "function" ? await children() : children;
-    const resolved = await asyncRenderJSXToClientJSX(childElement);
+    const resolved = await runInCachedSlot(async () => {
+      const childElement = typeof children === "function" ? await children() : children;
+      return await asyncRenderJSXToClientJSX(childElement);
+    });
     const serialized = serializeJSX(resolved);
 
     const slotMeta = {
@@ -660,6 +679,7 @@ async function DinouCacheSlot(props) {
     inflightSlotRenders.delete(storageKey);
   }
 }
+DinouCacheSlot.$$dinouCacheSlot = true;
 
 /**
  * Resolves a slot ID or tag to its canonical slotId using slotRegistry or storage metadata.
@@ -800,7 +820,7 @@ async function getSlotJSX(slotId, options = {}) {
         try {
           const isNotFound = { value: false };
           await runWithPprContext({ isPpr: true }, async () => {
-            await slotDiscoveryStorage.run({ active: true }, async () => {
+            await runInSlotDiscovery(async () => {
               const pageJsx = await getJSX(options.currentPath, {}, isNotFound, false, false, {
                 segment: "page",
               });

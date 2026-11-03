@@ -1,13 +1,55 @@
 import React from "react";
 import {
   isPprBuildActive,
+  isInsideSuspense,
   runInSuspense,
   commitPprSuspenseEffects,
   registerHole,
+  markDynamicAccess,
   isPageRootElement,
   runInPageSegment,
+  resetComponentNoDynamicFlag,
+  consumeComponentNoDynamicFlag,
+  isNoDynamicActive,
+  isInsideCachedSlot,
+  isSlotDiscoveryActive,
 } from "./ppr-context.js";
 import { getContext } from "./request-context.js";
+
+function isThenable(val) {
+  return (
+    val !== null &&
+    (typeof val === "object" || typeof val === "function") &&
+    typeof val.then === "function"
+  );
+}
+
+function isCacheSlotComponent(fn) {
+  if (!fn) return false;
+  return Boolean(fn.$$dinouCacheSlot || fn.name === "DinouCacheSlot");
+}
+
+async function invokeServerComponentInPpr(fn, callFn) {
+  resetComponentNoDynamicFlag();
+  const rawResult = callFn();
+  const optedOut = consumeComponentNoDynamicFlag();
+  if (
+    isThenable(rawResult) &&
+    !isCacheSlotComponent(fn) &&
+    isPprBuildActive() &&
+    isInsideSuspense() &&
+    !isSlotDiscoveryActive() &&
+    !isInsideCachedSlot() &&
+    !optedOut &&
+    !isNoDynamicActive()
+  ) {
+    try {
+      rawResult.then(null, () => {});
+    } catch (_) {}
+    markDynamicAccess("async-suspense");
+  }
+  return await rawResult;
+}
 
 function cloneWithDevProps(jsx, newProps, resolvedKey, overrideType) {
   const cloned = {
@@ -133,14 +175,20 @@ async function asyncRenderJSXToClientJSXInner(jsx, key = null) {
                 );
               }
               throw err;
+            } finally {
+              if (suspenseStore) {
+                suspenseStore.settled = true;
+              }
             }
           });
         }
-        return cloneWithDevProps(
-          jsx,
-          await asyncRenderJSXToClientJSX(jsx.props),
-          key ?? jsx.key
-        );
+        return await runInSuspense(async () => {
+          return cloneWithDevProps(
+            jsx,
+            await asyncRenderJSXToClientJSX(jsx.props),
+            key ?? jsx.key
+          );
+        });
       } else if (
         jsx.type === Symbol.for("react.fragment") ||
         jsx.type === Symbol.for("react.view_transition") ||
@@ -171,7 +219,9 @@ async function asyncRenderJSXToClientJSXInner(jsx, key = null) {
           );
         } else {
           // Server component: execute and process
-          const returnedJsx = await Component(props);
+          const returnedJsx = await invokeServerComponentInPpr(Component, () =>
+            Component(props)
+          );
           return await asyncRenderJSXToClientJSX(returnedJsx, key ?? jsx.key);
         }
       } else if (
@@ -187,7 +237,10 @@ async function asyncRenderJSXToClientJSXInner(jsx, key = null) {
             jsx.type
           );
         } else {
-          const returnedJsx = await jsx.type.render(jsx.props, jsx.ref);
+          const returnedJsx = await invokeServerComponentInPpr(
+            jsx.type.render,
+            () => jsx.type.render(jsx.props, jsx.ref)
+          );
           return await asyncRenderJSXToClientJSX(returnedJsx, key ?? jsx.key);
         }
       } else if (
@@ -204,7 +257,12 @@ async function asyncRenderJSXToClientJSXInner(jsx, key = null) {
           );
         } else {
           const innerComp = jsx.type.type;
-          const returnedJsx = typeof innerComp === "function" ? await innerComp(jsx.props) : null;
+          const returnedJsx =
+            typeof innerComp === "function"
+              ? await invokeServerComponentInPpr(innerComp, () =>
+                  innerComp(jsx.props)
+                )
+              : null;
           return await asyncRenderJSXToClientJSX(returnedJsx, key ?? jsx.key);
         }
       } else {
