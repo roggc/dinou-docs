@@ -34,11 +34,11 @@ const bundlerCards = [
     badgeColor: "border-red-500/30 text-red-600 dark:text-red-400 bg-red-500/10",
     engineBadge: "Pure ESM Engine",
     headline: "Pristine ES Module Output",
-    description: "Surgical code-splitting and dead-code elimination. The optimal choice for Cloudflare Workers and Edge Isolates.",
+    description: "Surgical code-splitting and dead-code elimination. The optimal choice for Cloudflare Workers and edge runtimes.",
     speedMetric: "0% Unused",
     speedLabel: "Bundle Stripping",
     sampleCommand: "dinou build:rollup",
-    idealFor: "Edge isolates & serverless",
+    idealFor: "Edge runtimes & serverless",
   },
   {
     id: "webpack",

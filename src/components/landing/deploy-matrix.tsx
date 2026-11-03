@@ -51,7 +51,7 @@ const targets: TargetInfo[] = [
     id: "cloudflare",
     name: "Cloudflare Workers",
     icon: Zap,
-    badge: "Edge Isolates",
+    badge: "Global Edge Runtime",
     tagline: "Sub-millisecond global cold starts across 300+ cities with native Cloudflare KV integration.",
     buildCommand: "npm run build:cloudflare",
     runCommand: "npx wrangler deploy",
@@ -99,17 +99,17 @@ directory = ".dinou/dist3"
     buildCommand: "npm run build",
     runCommand: "git push origin main",
     highlights: [
-      "Native Netlify Functions v2 pre-bundled at .dinou/dist3/server",
-      "Built-in preferStatic: true serves assets directly from global CDN edge",
-      "Dynamic SSR streaming & Server Functions invoked serverless",
-      "Zero-config routing with node_bundler = 'none' in netlify.toml",
+      "Native Netlify Functions v2 adapter generated automatically on build",
+      "Static assets and pre-rendered pages served directly from Netlify's CDN",
+      "Dynamic SSR streaming & Server Functions executed serverless on demand",
+      "Pre-bundled by Dinou — deploys directly via git push without secondary bundling",
     ],
     docLink: "/docs/deployment#netlify-serverless",
     terminalOutput: [
       "$ git push origin main",
       "⚡ Netlify CI build triggered: executing \"npm run build\"...",
       "⚡ Pre-bundling Netlify Functions v2 adapter (.dinou/dist3/server)...",
-      "✔ Assets published from .dinou/dist3 (preferStatic: true)",
+      "✔ Static assets & Functions v2 adapter published from .dinou/dist3",
       "🚀 Published to https://my-app.netlify.app (Global Edge CDN)",
     ],
     configFile: {
@@ -160,7 +160,7 @@ directory = ".dinou/dist3"
     highlights: [
       "4 Flexible Modes: Standard Bun, Pure Bun (0 Node.js), and Compiled Binaries",
       "Self-contained native binary (bun build --compile) emitted at ./dist/server",
-      "Zero-copy asset streaming directly via native Bun.file() kernel bindings",
+      "Ideal for ultra-slim Docker containers and VPS hosts with zero runtime dependencies",
       "Cross-compilation targets: Linux x64/ARM64, macOS Apple Silicon, and Windows",
     ],
     docLink: "/docs/deployment#bun-runtime-compile",
@@ -239,7 +239,7 @@ directory = ".dinou/dist3"
     name: "Node.js AOT In-Process",
     icon: Server,
     badge: "In-Process AOT",
-    tagline: "Runs React Server Components and SSR directly in-process with standard Web Streams and flat memory footprint.",
+    tagline: "Runs React Server Components and SSR directly in a single Node.js process with native Web Streams and low, predictable memory usage.",
     buildCommand: "npm run build:node",
     runCommand: "npm run start:node",
     highlights: [
@@ -251,10 +251,10 @@ directory = ".dinou/dist3"
     docLink: "/docs/deployment",
     terminalOutput: [
       "$ npm run build:node",
-      "✔ Server and client bundles compiled successfully",
-      "✔ Static assets optimized in .dinou/public",
+      "✔ Node.js AOT orchestrator compiled (.dinou/node/server.mjs)",
+      "✔ Client bundles & static assets emitted in .dinou/dist3",
       "$ npm run start:node",
-      "🚀 Node.js server listening on http://localhost:3000 (Flat memory)",
+      "🚀 Node.js server listening on http://localhost:3000 (In-Process AOT)",
     ],
   },
   {
@@ -266,10 +266,10 @@ directory = ".dinou/dist3"
     buildCommand: "npm run export-static",
     runCommand: "npx surge out my-app.surge.sh",
     highlights: [
-      "Exports self-contained HTML and .rsc Flight binary payloads",
+      "Exports self-contained HTML and .rsc Flight payloads",
       "Client-side soft SPA transitions without any backend server",
       "Deploy for free on GitHub Pages, Cloudflare Pages, or AWS S3",
-      "Automatic dynamic bailout detection",
+      "Pre-renders static routes and dynamic paths via getStaticPaths() into ./out",
     ],
     docLink: "/docs/deployment",
     terminalOutput: [
@@ -283,7 +283,9 @@ directory = ".dinou/dist3"
 ];
 
 export function DeployMatrix() {
-  const [selectedTarget, setSelectedTarget] = useState<TargetInfo>(targets[0]);
+  const [selectedTargetId, setSelectedTargetId] = useState<string>(targets[0].id);
+  const activeTargetId = typeof selectedTargetId === "string" ? selectedTargetId : (selectedTargetId as TargetInfo)?.id;
+  const selectedTarget = targets.find((t) => t.id === activeTargetId) ?? targets[0];
   const [copied, setCopied] = useState(false);
   const [activeRightTab, setActiveRightTab] = useState<"terminal" | "config">("terminal");
   const [copiedConfig, setCopiedConfig] = useState(false);
@@ -340,7 +342,7 @@ export function DeployMatrix() {
               <button
                 key={target.id}
                 type="button"
-                onClick={() => setSelectedTarget(target)}
+                onClick={() => setSelectedTargetId(target.id)}
                 className={`flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 border text-left cursor-pointer ${
                   isSelected
                     ? "bg-slate-900 text-white border-blue-500/50 shadow-md dark:bg-white dark:text-slate-950"

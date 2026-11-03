@@ -13,7 +13,7 @@ export function EngineComparison() {
     },
     {
       dimension: "Process & Memory Model",
-      implementation: "Single-process unified engine with flat RAM (275 MB idle / 492 MB peak @ 200 conns)",
+      implementation: "Single-process unified engine with low memory usage (275 MB idle / 492 MB peak @ 200 conns)",
     },
     {
       dimension: "Deployment Flexibility",
@@ -55,7 +55,7 @@ export function EngineComparison() {
             </span>
           </h2>
           <p className="max-w-[760px] text-slate-600 dark:text-slate-400 md:text-lg leading-relaxed">
-            Dinou is built from the ground up on Web Standards and React 19. A unified in-process engine with direct memory streaming, flat RAM footprint, and zero subprocess overhead.
+            Dinou is built from the ground up on Web Standards and React 19. A unified in-process engine with direct memory streaming, low and predictable memory usage, and zero subprocess overhead.
           </p>
         </div>
 

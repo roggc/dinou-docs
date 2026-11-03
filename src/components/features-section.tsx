@@ -39,7 +39,7 @@ export function FeaturesSection() {
       title: "Deploy Everywhere",
       description: "Write your application once. Dinou compiles it to any production runtime in the world.",
       bullets: [
-        "Cloudflare Workers: V8 isolates with Cloudflare KV at the edge",
+        "Cloudflare Workers: Global edge execution with Cloudflare KV storage",
         "Bun: Ultra-fast standalone or single self-contained executable binary",
         "Deno: Native TypeScript with embedded Deno KV & Deno Deploy",
         "Node.js AOT in-process, Netlify Functions v2 & Static Site Export",
