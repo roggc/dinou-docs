@@ -247,5 +247,21 @@ The folder [`src/test-ppr`](./src/test-ppr) exercises all combinations of the ne
   - **Case 12 (`ppr-hole-14` & `ppr-hole-15`)**: Nested `<Suspense>` where the outer Static `<Suspense>` (`ppr-hole-14`) is baked into `shell.html` while the inner Dynamic `<Suspense>` (`ppr-hole-15`) is postponed and streamed at runtime.
 - **[`src/test-ppr/all-static/page.tsx`](./src/test-ppr/all-static/page.tsx)**: PPR route (`ppr = true`) where all `<Suspense>` boundaries are static (`holes: []`), verifying zero runtime Server Component executions.
 - **[`src/test-ppr/opt-out-route/page.tsx`](./src/test-ppr/opt-out-route/page.tsx)**: Child route (`ppr = false`) inside the `ppr = true` layout, verifying that `async` `<Suspense>` children on `ppr = false` routes resolve statically without requiring `noDynamic()`.
+- **[`src/test-ppr/bailout-cookies/page.tsx`](./src/test-ppr/bailout-cookies/page.tsx)**: PPR route (`ppr = true`) that reads `getContext().req.cookies` **outside** `<Suspense>`, verifying a **Full-Page Dynamic Bailout** (no `shell.html`, `index.html`, or `metadata.json` written to `.dinou/dist2`; full-page SSR on every request).
+- **[`src/test-ppr/bailout-slot-0/page.tsx`](./src/test-ppr/bailout-slot-0/page.tsx)**: PPR route (`ppr = true`) that renders `<DinouCacheSlot revalidate={0}>` **outside** `<Suspense>`, verifying a **Full-Page Dynamic Bailout** (no `shell.html`, `index.html`, or `metadata.json` written to `.dinou/dist2`; full-page SSR on every request).
+
+---
+
+## 6. Taxonomy of Full-Page Dynamic Bailouts (`ppr = true`)
+
+While dynamic operations **wrapped in `<Suspense>`** isolate dynamism into a **Dynamic PPR Hole** (preserving the Static Shell `shell.html`), dynamic operations performed **outside `<Suspense>`** (or via route segment configuration) force the **entire page** to bail out of static shell generation (`isDynamic = true`), skipping `.dinou/dist2/<route>/shell.html` and rendering 100% dynamically on every request:
+
+| # | Full-Page Dynamic Bailout Trigger (when `ppr = true`) | Mechanism |
+|---|---|---|
+| **1** | **Reading dynamic request data outside `<Suspense>`**: `getContext().req.cookies`, `getContext().req.headers`, `getContext().req.query`, or calling `useSearchParams()` in a Server Component outside `<Suspense>` | `createBailoutProxy` invokes `markAsDynamic()` at build time (`dinou/core/build-static-pages.js`) and `markDynamic()` at runtime (`dinou/core/handler.js`) because `isInsideSuspense()` is `false`. |
+| **2** | **Rendering `<DinouCacheSlot revalidate={0}>` (or `< 1`) outside `<Suspense>`** (or a `<DinouCacheSlot>` outside `<Suspense>` whose children read `req.cookies`/`headers`/`query`) | `DinouCacheSlot` checks `isNoCache` (`revalidate < 1`). When `isInsideSuspense()` is `false`, it calls `getContext()?._markDynamic?.()`, aborting static shell persistence for the entire page. |
+| **3** | **Mutating response state outside `<Suspense>`**: `getContext().res.cookie()`, `res.clearCookie()`, `res.setHeader()`, `res.status()`, `res.redirect()` / `redirect()` | `safeResCall` invokes `markDynamic()` in `dinou/core/handler.js`, preventing the response from being cached to disk. |
+| **4** | **Explicit route/layout configuration**: `export const revalidate = 0` in `page_functions.ts` or `layout_functions.ts` | `isDynamicRoute(revalidate)` evaluates to `true`, skipping build-time pre-rendering and forcing per-request dynamic SSR. |
+
 
 

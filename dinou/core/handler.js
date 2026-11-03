@@ -120,7 +120,7 @@ if (typeof globalThis !== "undefined" && globalThis.__DINOU_CONFIG__) {
 function copyCustomContextProperties(source, target) {
   if (!source || !target) return;
   for (const key of Object.keys(source)) {
-    if (!["req", "res", "env", "ctx"].includes(key)) {
+    if (!["req", "res", "env", "ctx", "platformContext", "_markDynamic"].includes(key)) {
       target[key] = source[key];
     }
   }
@@ -886,6 +886,7 @@ function createRequestContext(simReq, resBridge, platformContext = {}, dynamicSt
     env: platformContext.env || {},
     ctx: platformContext.ctx || null,
     platformContext,
+    _markDynamic: markDynamic,
   };
 
   if (dinouConfig.plugins && Array.isArray(dinouConfig.plugins)) {
@@ -2041,12 +2042,19 @@ async function handleRequest(request, platformContext = {}) {
     }
 
     // 2b. If PPR route shell was invalidated (e.g. by revalidateTag on a static shell slot),
+    // or is a dynamic-param ISG route being visited for the first time,
     // regenerate the static shell in an isolated SSG pass before resuming dynamic holes.
+    const shellHtmlKeyForCheck = cleanPath ? `${cleanPath}/shell.html` : "shell.html";
+    const isShellDeletedInStorage =
+      isRouteDeletedInStorage ||
+      (typeof storage.isDeleted === "function" && storage.isDeleted(shellHtmlKeyForCheck));
+    const hasDynamicUrlParams = Boolean(dynamicParams && Object.keys(dynamicParams).length > 0);
     if (
       !isDevelopment &&
       !cachedItem &&
       !dynamicState.value &&
       isPprConfig &&
+      (isShellDeletedInStorage || (hasDynamicUrlParams && allowISGValue !== false)) &&
       !isPathBlocked &&
       queryObj.ssr_crash !== "true" &&
       !platformContext?.isSSG
@@ -2814,6 +2822,9 @@ async function handleRequest(request, platformContext = {}) {
                   console.error("[Edge ISG] Error caching to KV:", cacheErr);
                 }
               } else {
+                if (inFlightKey) {
+                  inFlightGenerations.delete(inFlightKey);
+                }
                 fullHtml = fullHtml.replace(
                   "window.__DINOU_USE_STATIC__ = true;",
                   "window.__DINOU_USE_STATIC__ = false;"

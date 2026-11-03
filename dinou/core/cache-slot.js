@@ -481,8 +481,14 @@ async function DinouCacheSlot(props) {
 
   const slotId = id || tag || (Array.isArray(tags) ? tags[0] : null);
   if (!slotId) {
-    if (isNoCache && isPprBuildActive() && isInsideSuspense() && !isSlotDiscoveryActive()) {
-      markDynamicAccess("slot-revalidate-0");
+    if (isNoCache && !isSlotDiscoveryActive()) {
+      if (isPprBuildActive() && isInsideSuspense()) {
+        markDynamicAccess("slot-revalidate-0");
+      } else {
+        try {
+          getContext()?._markDynamic?.();
+        } catch (e) {}
+      }
     }
     const runScope = isNoCache ? (fn) => fn() : runInCachedSlot;
     return await runScope(async () => {
@@ -559,8 +565,14 @@ async function DinouCacheSlot(props) {
     }
   }
 
-  if (isNoCache && isPprBuildActive() && isInsideSuspense() && !isSlotDiscoveryActive()) {
-    markDynamicAccess("slot-revalidate-0");
+  if (isNoCache && !isSlotDiscoveryActive()) {
+    if (isPprBuildActive() && isInsideSuspense()) {
+      markDynamicAccess("slot-revalidate-0");
+    } else {
+      try {
+        getContext()?._markDynamic?.();
+      } catch (e) {}
+    }
   }
 
   if (!storage || isNoCache) {
@@ -600,8 +612,14 @@ async function DinouCacheSlot(props) {
         : undefined;
 
     if (typeof revalidateSeconds === "number" && revalidateSeconds < 1) {
-      if (isPprBuildActive() && isInsideSuspense() && !isSlotDiscoveryActive()) {
-        markDynamicAccess("slot-revalidate-0");
+      if (!isSlotDiscoveryActive()) {
+        if (isPprBuildActive() && isInsideSuspense()) {
+          markDynamicAccess("slot-revalidate-0");
+        } else {
+          try {
+            getContext()?._markDynamic?.();
+          } catch (e) {}
+        }
       }
       const childElement = typeof children === "function" ? await children() : children;
       const directContent = await asyncRenderJSXToClientJSX(childElement);
