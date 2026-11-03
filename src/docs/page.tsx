@@ -146,7 +146,7 @@ npm run dev`}
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5 leading-relaxed">
                     <li>Seamlessly call asynchronous server functions directly from client components (<code>&apos;use client&apos;</code>) wrapped inside <code>&lt;Suspense&gt;</code> boundaries.</li>
-                    <li>Eliminates boilerplate API routes, synthetic fetch hooks, and manual loading state management.</li>
+                    <li>Eliminates boilerplate API routes, manual <code>fetch</code> calls, and manual loading state management.</li>
                     <li>The server executes the logic and streams the response directly to the client fallback.</li>
                   </ul>
                 </div>
@@ -169,12 +169,12 @@ npm run dev`}
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
                   <div className="flex items-center gap-2 font-semibold text-sm text-slate-900 dark:text-slate-100 mb-2">
                     <Layers className="w-4 h-4 text-cyan-500" />
-                    <span>3D Layered Caching &amp; Partial Prerendering (PPR)</span>
+                    <span>3D Layered Segmentation</span>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5 leading-relaxed">
                     <li><strong>Horizontal layout caching:</strong> Layouts define their own TTLs via <code>layout_functions.ts</code>, preserving layout state across route transitions without unmounting or re-rendering child trees.</li>
                     <li><strong>Vertical component caching:</strong> Micro-cache expensive Server Components with <code>&lt;DinouCacheSlot&gt;</code> and refresh them independently from the client.</li>
-                    <li><strong>Partial Prerendering (PPR):</strong> Serve an instant static shell at edge CDN latency (&lt;20ms) while dynamic components concurrently stream into Suspense holes.</li>
+                    <li><strong>Temporal segmentation — Partial Prerendering (PPR):</strong> Serve an instant cached static shell (~2.42ms TTFB) while dynamic components concurrently stream into Suspense holes.</li>
                   </ul>
                 </div>
 
@@ -290,7 +290,7 @@ npm run dev`}
                     Dinou started with a very concrete need in modern React development: <strong>calling Server Functions (<code>&apos;use server&apos;</code>) wrapped in React <code>Suspense</code> directly from Client Components</strong>.
                   </p>
                   <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    Existing frameworks either did not allow this pattern, treated it as an edge case, or forced developers into heavy workarounds—writing synthetic REST/GraphQL endpoints, manual <code>fetch</code> wrappers, and complex client-side state flags just to stream a server result into a UI fallback.
+                    Other frameworks either did not support this pattern directly or required extra boilerplate—creating separate API routes, calling <code>fetch</code> manually, and managing <code>isLoading</code> state by hand in the client.
                   </p>
                   <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                     The initial mission of Dinou was simple and direct: build a clean execution engine where a Client Component could invoke an asynchronous server action naturally inside a standard React 19 <code>&lt;Suspense&gt;</code> boundary, letting React handle streaming and fallbacks the way it was designed to.
@@ -303,10 +303,10 @@ npm run dev`}
                     The Evolution: A Transparent Full-Stack Framework
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    Solving that core problem cleanly required opening up the framework black box. Rather than piling monkey-patches onto an opaque compiler, Dinou was re-architected from first principles using standard Web APIs (<code>Request</code>, <code>Response</code>, <code>ReadableStream</code>).
+                    Dinou began as a focused Node.js and Express framework with file-system routing and Webpack, progressively expanding to support all three major bundlers (esbuild, Rollup, and Webpack), client-side soft navigation, and native React Flight stream deserialization.
                   </p>
                   <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    From that foundation, Dinou naturally evolved into a complete full-stack framework: adding independent layout caching (<code>layout_functions.ts</code>), micro-caching with <code>&lt;DinouCacheSlot&gt;</code>, Partial Prerendering (PPR), multi-runtime portability (Node, Bun, Deno, Cloudflare Workers), and a 100% ejectable codebase.
+                    A major architectural leap later replaced Express with standard Web APIs (<code>Request</code>, <code>Response</code>, <code>ReadableStream</code>), making Dinou deployable everywhere (Node.js, Bun, Deno, Cloudflare Workers, Netlify, and standalone binaries). Today, running on a pure ESM core with pre-bundled vendor dependencies, it delivers true orthogonal 3D Layered Segmentation—combining horizontal layout caching (<code>layout_functions.ts</code>), vertical component caching (<code>&lt;DinouCacheSlot&gt;</code>), and Partial Prerendering (PPR) simultaneously.
                   </p>
                 </div>
               </div>

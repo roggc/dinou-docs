@@ -42,6 +42,7 @@ import {
   TableRow,
 } from "@/docs/components/ui/table";
 import { CodeBlock } from "@/docs/components/code-block";
+import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 import { CacheSlotGuideSection } from "@/docs/components/cache-slot-guide-section";
 import { PprCacheSlotSection } from "@/docs/components/ppr-cache-slot-section";
 
@@ -542,9 +543,15 @@ export function Counter({ initial = 0 }: { initial?: number }) {
                   React 19 supports passing an unresolved <strong>Promise</strong> as a prop from a Server Component to a Client Component. The Client Component reads the promise synchronously using the <code>use()</code> hook, automatically triggering Suspense fallbacks until the promise settles:
                 </p>
 
-                <CodeBlock language="tsx" containerClassName="rounded-lg">
-                  {`// Server Component
-import { Suspense } from "react";
+                <div className="not-prose">
+                  <TabbedCodeBlock
+                    defaultTab="page"
+                    tabs={[
+                      {
+                        id: "page",
+                        label: "src/profile/page.tsx (Server Component)",
+                        language: "tsx",
+                        code: `import { Suspense } from "react";
 import { UserProfile } from "./user-profile"; // "use client"
 
 export default function Page() {
@@ -556,18 +563,24 @@ export default function Page() {
       <UserProfile userPromise={userPromise} />
     </Suspense>
   );
-}
-
-// Client Component (user-profile.tsx)
-"use client";
+}`,
+                      },
+                      {
+                        id: "client",
+                        label: "src/profile/user-profile.tsx (Client Component)",
+                        language: "tsx",
+                        code: `"use client";
 import { use } from "react";
 
 export function UserProfile({ userPromise }: { userPromise: Promise<{ name: string }> }) {
   // Unwraps the promise value seamlessly
   const user = use(userPromise);
   return <h2>Hello, {user.name}</h2>;
-}`}
-                </CodeBlock>
+}`,
+                      },
+                    ]}
+                  />
+                </div>
               </div>
             </section>
 
@@ -613,9 +626,30 @@ export function UserProfile({ userPromise }: { userPromise: Promise<{ name: stri
                     A Client Component <strong>cannot directly import a Server Component</strong> (because bundling a Server Component into the client module would defeat the RSC boundary). However, a Client Component can receive Server Components as <code>children</code> or via named props!
                   </p>
 
-                  <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                    {`// Client Component: ModalContainer.tsx
-"use client";
+                  <TabbedCodeBlock
+                    defaultTab="page"
+                    tabs={[
+                      {
+                        id: "page",
+                        label: "src/page.tsx (Server Component)",
+                        language: "tsx",
+                        code: `import { ModalContainer } from "./ModalContainer";
+import { HeavyServerProfile } from "./HeavyServerProfile"; // Server Component
+
+export default function Page() {
+  return (
+    <ModalContainer>
+      {/* HeavyServerProfile remains 100% on the server! */}
+      <HeavyServerProfile />
+    </ModalContainer>
+  );
+}`,
+                      },
+                      {
+                        id: "modal",
+                        label: "src/ModalContainer.tsx (Client Component)",
+                        language: "tsx",
+                        code: `"use client";
 import { useState, type ReactNode } from "react";
 
 export function ModalContainer({ children }: { children: ReactNode }) {
@@ -632,21 +666,10 @@ export function ModalContainer({ children }: { children: ReactNode }) {
       )}
     </div>
   );
-}
-
-// Server Component: page.tsx
-import { ModalContainer } from "./ModalContainer";
-import { HeavyServerProfile } from "./HeavyServerProfile"; // Server Component
-
-export default function Page() {
-  return (
-    <ModalContainer>
-      {/* HeavyServerProfile remains 100% on the server! */}
-      <HeavyServerProfile />
-    </ModalContainer>
-  );
-}`}
-                  </CodeBlock>
+}`,
+                      },
+                    ]}
+                  />
                 </div>
 
                 {/* 6.3 Client-First Model */}
@@ -661,15 +684,14 @@ export default function Page() {
                     If you are building an interactive canvas, video editor, or complex SPA dashboard and prefer traditional React where you can use <code>useState</code> and <code>onClick</code> anywhere in the page without boundary splitting, use Dinou&apos;s <strong>Client-First Model</strong>:
                   </p>
 
-                  <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                    {`// src/canvas/page_functions.ts - Runs securely on the server
-export async function getProps(params: { id: string }) {
-  const project = await db.projects.findById(params.id);
-  return { project };
-}
-
-// src/canvas/page.tsx - Entire page is a Client Component
-"use client";
+                  <TabbedCodeBlock
+                    defaultTab="page"
+                    tabs={[
+                      {
+                        id: "page",
+                        label: "src/canvas/page.tsx (Client Component)",
+                        language: "tsx",
+                        code: `"use client";
 import { useState } from "react";
 
 export default function CanvasPage({ project }: { project: any }) {
@@ -682,8 +704,20 @@ export default function CanvasPage({ project }: { project: any }) {
       <Stage layers={layers} />
     </div>
   );
-}`}
-                  </CodeBlock>
+}`,
+                      },
+                      {
+                        id: "functions",
+                        label: "src/canvas/page_functions.ts (Server Data)",
+                        language: "ts",
+                        code: `// Runs securely on the server
+export async function getProps(params: { id: string }) {
+  const project = await db.projects.findById(params.id);
+  return { project };
+}`,
+                      },
+                    ]}
+                  />
                   <p className="text-xs text-muted-foreground mt-2">
                     <strong>Advantage:</strong> Fast development speed, traditional React ergonomics, with secure backend data fetching and SSR pre-rendering intact.
                   </p>
@@ -731,31 +765,14 @@ export default function CanvasPage({ project }: { project: any }) {
                     </p>
                   </div>
 
-                  <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                    {`// 1. Client Component: interactive-chart.tsx (Hydrates with 100% interactivity)
-"use client";
-import { useState } from "react";
-
-export function InteractiveChart({ data }: { data: any }) {
-  const [zoom, setZoom] = useState(1);
-  return (
-    <div className="p-4 border rounded-lg bg-card">
-      <div className="flex justify-between items-center mb-2">
-        <span className="text-sm font-bold">Metrics (Zoom: {zoom}x)</span>
-        <button 
-          onClick={() => setZoom((z) => z + 1)}
-          className="px-2 py-1 text-xs bg-primary text-primary-foreground rounded"
-        >
-          Zoom In
-        </button>
-      </div>
-      <canvas data-zoom={zoom} />
-    </div>
-  );
-}
-
-// 2. Server Component: page.tsx (Dynamic page with an isolated cached slot)
-import { Suspense } from "react";
+                  <TabbedCodeBlock
+                    defaultTab="page"
+                    tabs={[
+                      {
+                        id: "page",
+                        label: "src/dashboard/page.tsx (Server Component)",
+                        language: "tsx",
+                        code: `import { Suspense } from "react";
 import { DinouCacheSlot } from "dinou";
 import { db } from "@/lib/db";
 import { UserGreeting } from "./UserGreeting"; // Reads user session/cookies
@@ -784,8 +801,35 @@ export default function DashboardPage() {
       </Suspense>
     </main>
   );
-}`}
-                  </CodeBlock>
+}`,
+                      },
+                      {
+                        id: "chart",
+                        label: "src/dashboard/interactive-chart.tsx (Client Component)",
+                        language: "tsx",
+                        code: `"use client";
+import { useState } from "react";
+
+export function InteractiveChart({ data }: { data: any }) {
+  const [zoom, setZoom] = useState(1);
+  return (
+    <div className="p-4 border rounded-lg bg-card">
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-sm font-bold">Metrics (Zoom: {zoom}x)</span>
+        <button 
+          onClick={() => setZoom((z) => z + 1)}
+          className="px-2 py-1 text-xs bg-primary text-primary-foreground rounded"
+        >
+          Zoom In
+        </button>
+      </div>
+      <canvas data-zoom={zoom} />
+    </div>
+  );
+}`,
+                      },
+                    ]}
+                  />
 
                   <div className="pt-2 text-xs text-muted-foreground space-y-1.5">
                     <p>
