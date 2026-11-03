@@ -54,7 +54,7 @@ const tabConfigs: Record<SegmentationTab, TabConfig> = {
     headline: "Instant Static Shell Delivery with Live Dynamic Streaming",
     description:
       "Dinou unifies static delivery and dynamic personalization in a single request. The static shell is served instantly while personalized Suspense holes stream live in the background.",
-    docHref: "/docs/rendering#partial-prerendering",
+    docHref: "/docs/3d-segmentation#partial-prerendering",
     docLabel: "PPR Guide",
     files: [
       {
@@ -148,7 +148,7 @@ export default async function LiveUserFeed() {
     headline: "Component-Level Micro-Caching & In-Place Client Refresh",
     description:
       "Stop invalidating entire pages when only one widget changes. Wrap expensive Server Components in <DinouCacheSlot> for independent TTL caching and in-place client refreshes without page reloads.",
-    docHref: "/docs/rendering#micro-isr",
+    docHref: "/docs/3d-segmentation#micro-isr",
     docLabel: "Micro-ISR Guide",
     files: [
       {

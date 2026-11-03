@@ -29,6 +29,7 @@ import {
   DraftingCompass,
   Shredder,
   ShieldCheck,
+  Layers,
 } from "lucide-react";
 
 export interface NavItem {
@@ -97,6 +98,11 @@ export const docsNavigation: NavSection[] = [
         title: "Static & Dynamic Rendering",
         href: "/docs/rendering",
         icon: Shredder,
+      },
+      {
+        title: "3D Layered Segmentation",
+        href: "/docs/3d-segmentation",
+        icon: Layers,
       },
       {
         title: "Server Functions",
