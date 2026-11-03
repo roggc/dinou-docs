@@ -214,3 +214,38 @@ export default function DashboardPage() {
 - **Key Changes**:
   - Updated SSG `____rsc_page____` / `____rsc_layout____` rendering in `handler.js` and `revalidateLayout` in `cache-revalidate.js` to pass `{ isPpr: Boolean(isRoutePpr) }` / `{ isPpr: isLayoutPpr }` into `runWithPprContext` instead of hardcoded `{ isPpr: true }`, ensuring `<Suspense>` boundaries on non-PPR routes (`ppr = false`) always resolve their `async` children into the static payload while still counting `<Suspense>` boundaries via `getPprHoleCounter()`.
 
+### 4.6. Runtime Zero-Execution Optimization for Static `<Suspense>` Boundaries (`dinou/core/ppr-runtime.js`, `dinou/core/ppr-context.js`, `dinou/core/get-jsx.js`)
+- **Files Modified**: [`dinou/core/ppr-runtime.js`](./dinou/core/ppr-runtime.js), [`dinou/core/ppr-context.js`](./dinou/core/ppr-context.js), [`dinou/core/get-jsx.js`](./dinou/core/get-jsx.js)
+- **Key Changes**:
+  1. **Zero-Hole Fast Path**: In `handlePprResume` and `streamDynamicHoles` (`dinou/core/ppr-runtime.js`), if `holes` is an empty array (`holes.length === 0`, e.g., a PPR route where all `<Suspense>` boundaries opted into the Static Shell via `noDynamic()` or `<DinouCacheSlot revalidate={N}>`), Dinou flushes `shellPrelude` + `shellPostlude` immediately without invoking `getJSX` or traversing any components at runtime.
+  2. **`runInRuntimeStaticSuspense` & `SKIP_STATIC_SUSPENSE_SYMBOL`**: When a PPR route has both Static `<Suspense>` boundaries and Dynamic `<Suspense>` Holes, `streamDynamicHoles` and `spliceDynamicHolesIntoShell` wrap the traversal of non-streamed (`!shouldStream`) `<Suspense>` boundaries inside `runInRuntimeStaticSuspense(...)`. When `noDynamic()` is called inside `runInRuntimeStaticSuspense(...)` at runtime (`!isPprBuildActive()`), it immediately throws `{ $$typeof: Symbol.for("dinou.ppr.skipStatic") }`, which `ppr-runtime.js` catches silently—preventing the `noDynamic()` component's async work from executing on runtime requests while still allowing synchronous wrappers with nested Dynamic `<Suspense>` holes to be traversed.
+  3. **Early Stop Once All Dynamic Holes Are Found**: Both `streamDynamicHoles` (`holePromises.length >= knownHoleIds.size`) and `spliceDynamicHolesIntoShell` (`liveHolesMap.size >= knownHoleIds.size`) halt tree traversal immediately once all registered dynamic holes have been matched.
+  4. **`skipLayoutProbe` in `handlePprResume`**: `handlePprResume` passes `{ skipLayoutProbe: true }` to `getJSX` so `dinou/core/get-jsx.js` does not perform a redundant pre-render probe of the layout tree when resuming dynamic holes.
+
+---
+
+## 5. Comprehensive Verification Matrix (`src/test-ppr`)
+
+The folder [`src/test-ppr`](./src/test-ppr) exercises all combinations of the new PPR mental model end-to-end:
+
+- **[`src/test-ppr/layout.tsx`](./src/test-ppr/layout.tsx) & [`src/test-ppr/layout_functions.ts`](./src/test-ppr/layout_functions.ts)** (`ppr = true`):
+  - Layout Boundary 1 (`ppr-hole-1`): Static `<Suspense>` via `noDynamic()` &rarr; baked into `shell.html`, `0` runtime executions.
+  - Layout Boundary 2 (`ppr-hole-2`): `<DinouCacheSlot id="test-ppr-layout-slot" revalidate={3600}>` &rarr; baked into `shell.html` (`inStaticShell: true`), `0` runtime executions.
+  - Layout Boundary 3 (`ppr-hole-3`): Default `async` `<Suspense>` (`LayoutLiveClock`) &rarr; registered in `layout.metadata.json` (`holes: ["ppr-hole-3"]`) and streamed on every request.
+- **[`src/test-ppr/page.tsx`](./src/test-ppr/page.tsx) & [`src/test-ppr/page_functions.ts`](./src/test-ppr/page_functions.ts)** (`ppr = true`, 12 Cases):
+  - **Case 1**: Top-level `async` Page outside `<Suspense>` &rarr; baked into `shell.html`.
+  - **Case 2 (`ppr-hole-4`)**: Default `<Suspense>` + `async` Server Component (pure `await`, no cookies/headers/query) &rarr; Dynamic PPR Hole (`case2-fallback` in `shell.html`, `case2-resolved` streamed live on every request).
+  - **Case 3 (`ppr-hole-5`)**: `<Suspense>` + `async` Server Component reading `req.cookies`, `req.headers`, and `req.query` &rarr; Dynamic PPR Hole.
+  - **Case 4 (`ppr-hole-6`)**: `<Suspense>` + `async` Server Component calling `noDynamic()` from `"dinou"` &rarr; Static `<Suspense>` (`case4-resolved` baked into `shell.html`, `0` runtime executions).
+  - **Case 5 (`ppr-hole-7`)**: `<Suspense>` + parent `async` Server Component calling `noDynamic()` from `"dinou/server"` + nested `async` child inheriting `noDynamic` from the `<Suspense>` store &rarr; both baked into `shell.html`, `0` runtime executions.
+  - **Case 6 (`ppr-hole-8`)**: `<Suspense>` + `async` Server Component calling `noDynamic()` **and** reading `req.cookies.theme` &rarr; Dynamic bailout overrides `noDynamic()`, becoming a Dynamic PPR Hole (`ppr-hole-8`).
+  - **Case 7 (`ppr-hole-9`)**: `<Suspense>` + `async` Server Component calling `noDynamic()` **after** its first `await` &rarr; intercepted at the first `await`, becoming a Dynamic PPR Hole (`ppr-hole-9`).
+  - **Case 8 (`ppr-hole-10`)**: `<Suspense>` + `<DinouCacheSlot revalidate={3600}>` &rarr; baked into `shell.html` and persisted to `slots/test-ppr-slot-cached/slot.json` (`inStaticShell: true`), `0` runtime executions until `/____rsc_slot____/test-ppr-slot-cached?fresh=1`.
+  - **Case 9 (`ppr-hole-11`)**: `<Suspense>` + `<DinouCacheSlot>` (omitted `revalidate`) &rarr; baked into `shell.html` and persisted forever until on-demand invalidation.
+  - **Case 10 (`ppr-hole-12`)**: `<Suspense>` + `<DinouCacheSlot revalidate={0}>` &rarr; Dynamic PPR Hole (`ppr-hole-12`), re-evaluated on every request and never written to disk.
+  - **Case 11 (`ppr-hole-13`)**: `<Suspense>` + `<DinouCacheSlot revalidate={3600}>` reading `req.cookies.user` &rarr; postponed at build time into Dynamic PPR Hole (`ppr-hole-13`), then cached on first runtime request (`inStaticShell: false`) and refreshable via `/____rsc_slot____/test-ppr-slot-cookies?fresh=1`.
+  - **Case 12 (`ppr-hole-14` & `ppr-hole-15`)**: Nested `<Suspense>` where the outer Static `<Suspense>` (`ppr-hole-14`) is baked into `shell.html` while the inner Dynamic `<Suspense>` (`ppr-hole-15`) is postponed and streamed at runtime.
+- **[`src/test-ppr/all-static/page.tsx`](./src/test-ppr/all-static/page.tsx)**: PPR route (`ppr = true`) where all `<Suspense>` boundaries are static (`holes: []`), verifying zero runtime Server Component executions.
+- **[`src/test-ppr/opt-out-route/page.tsx`](./src/test-ppr/opt-out-route/page.tsx)**: Child route (`ppr = false`) inside the `ppr = true` layout, verifying that `async` `<Suspense>` children on `ppr = false` routes resolve statically without requiring `noDynamic()`.
+
+

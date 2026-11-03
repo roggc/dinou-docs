@@ -8,12 +8,38 @@ const pageSegmentStorage = new AsyncLocalStorage();
 const layoutSegmentStorage = new AsyncLocalStorage();
 const cachedSlotStorage = new AsyncLocalStorage();
 const slotDiscoveryStorage = new AsyncLocalStorage();
+const runtimeStaticSuspenseStorage = new AsyncLocalStorage();
 const pageRootElements = new WeakSet();
 
 const NO_DYNAMIC_HOOK_KEY = Symbol.for("dinou.ppr.noDynamic.hook");
+export const SKIP_STATIC_SUSPENSE_SYMBOL = Symbol.for("dinou.ppr.skipStatic");
 let currentComponentNoDynamic = false;
 
+export function runInRuntimeStaticSuspense(callback) {
+  const prev = runtimeStaticSuspenseStorage.getStore();
+  return runtimeStaticSuspenseStorage.run(
+    { active: true, depth: (prev?.depth || 0) + 1 },
+    callback
+  );
+}
+
+export function runInRuntimeDynamicHole(callback) {
+  return runtimeStaticSuspenseStorage.run({ active: false, depth: 0 }, callback);
+}
+
+export function isRuntimeStaticSuspenseActive() {
+  const store = runtimeStaticSuspenseStorage.getStore();
+  return Boolean(store && store.active && store.depth > 0);
+}
+
 export function noDynamic() {
+  if (isRuntimeStaticSuspenseActive() && !isPprBuildActive()) {
+    const err = new Error(
+      "[Dinou PPR] Skipping static noDynamic() subtree during runtime hole traversal"
+    );
+    err.$$typeof = SKIP_STATIC_SUSPENSE_SYMBOL;
+    throw err;
+  }
   currentComponentNoDynamic = true;
   const store = pprStorage.getStore();
   if (store && store.suspenseDepth > 0) {
@@ -293,6 +319,10 @@ export function getRegisteredHoles() {
 
 export default {
   noDynamic,
+  SKIP_STATIC_SUSPENSE_SYMBOL,
+  runInRuntimeStaticSuspense,
+  runInRuntimeDynamicHole,
+  isRuntimeStaticSuspenseActive,
   resetComponentNoDynamicFlag,
   consumeComponentNoDynamicFlag,
   isNoDynamicActive,
