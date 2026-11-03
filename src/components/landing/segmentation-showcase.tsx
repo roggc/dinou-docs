@@ -61,7 +61,7 @@ const tabConfigs: Record<SegmentationTab, TabConfig> = {
         filename: "src/dashboard/page_functions.ts",
         badge: "PPR",
         language: "typescript",
-        code: `// src/dashboard/page_functions.ts
+        code: `
 // 1. Enable Partial Prerendering on the route
 export const ppr = true;
 
@@ -72,7 +72,7 @@ export const revalidate = 300;`,
         filename: "src/dashboard/page.tsx",
         badge: "RSC",
         language: "tsx",
-        code: `// src/dashboard/page.tsx
+        code: `
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import LiveUserFeed from "./user-feed";
@@ -95,7 +95,7 @@ export default function DashboardPage() {
         filename: "src/dashboard/user-feed.tsx",
         badge: "Dynamic RSC",
         language: "tsx",
-        code: `// src/dashboard/user-feed.tsx
+        code: `
 import { db } from "@/lib/db";
 
 // Async Server Component streamed dynamically inside <Suspense>
@@ -155,7 +155,7 @@ export default async function LiveUserFeed() {
         filename: "src/dashboard/page.tsx",
         badge: "RSC",
         language: "tsx",
-        code: `// src/dashboard/page.tsx
+        code: `
 import { DinouCacheSlot } from "dinou";
 import LiveStockTicker from "./stock-ticker";
 import RefreshButton from "./refresh-button";
@@ -178,7 +178,7 @@ export default function Dashboard() {
         filename: "src/dashboard/refresh-button.tsx",
         badge: '"use client"',
         language: "tsx",
-        code: `// src/dashboard/refresh-button.tsx
+        code: `
 "use client";
 
 import { refreshSlot } from "dinou";
@@ -237,7 +237,7 @@ export default function RefreshButton({ slotId }: { slotId: string }) {
         filename: "src/dashboard/layout_functions.ts",
         badge: "Layout ISR",
         language: "typescript",
-        code: `// src/dashboard/layout_functions.ts
+        code: `
 // Independent layout caching: Shell cached for 1 hour
 export const revalidate = 3600;
 export const tags = ["dashboard-shell", "nav-links"];
@@ -251,7 +251,7 @@ export async function getProps() {
         filename: "src/dashboard/layout.tsx",
         badge: "RSC Layout",
         language: "tsx",
-        code: `// src/dashboard/layout.tsx
+        code: `
 import { Sidebar } from "@/components/sidebar";
 
 export default function DashboardLayout({ children, navStats }: any) {

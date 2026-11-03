@@ -46,7 +46,7 @@ const configs: Record<React19Tab, TabConfig> = {
         filename: "src/dashboard/page.tsx",
         badge: "RSC",
         language: "tsx",
-        code: `// src/dashboard/page.tsx
+        code: `
 // Pure Server Component: 0kb sent to browser
 import { db } from "@/lib/db";
 import { MarkdownParser } from "@/lib/heavy-parser";
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
         filename: "src/dashboard/client-chart.tsx",
         badge: '"use client"',
         language: "tsx",
-        code: `// src/dashboard/client-chart.tsx
+        code: `
 "use client";
 
 import { useState } from "react";
@@ -135,7 +135,7 @@ export function InteractiveChart({ data }: { data: Metric[] }) {
         filename: "src/actions/get-product.tsx",
         badge: '"use server"',
         language: "tsx",
-        code: `// src/actions/get-product.tsx
+        code: `
 "use server";
 
 import { db } from "@/lib/db";
@@ -156,7 +156,7 @@ export async function getFeaturedProduct(id: string) {
         filename: "src/components/product-feed.tsx",
         badge: '"use client"',
         language: "tsx",
-        code: `// src/components/product-feed.tsx
+        code: `
 "use client";
 
 import { useState, use, Suspense } from "react";
@@ -195,7 +195,7 @@ export function ProductFeed() {
         filename: "src/components/product-card.tsx",
         badge: '"use client"',
         language: "tsx",
-        code: `// src/components/product-card.tsx
+        code: `
 "use client";
 
 import { useState } from "react";

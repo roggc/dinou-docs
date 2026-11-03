@@ -11,12 +11,11 @@ import {
   Cpu,
   Sparkles,
   CheckCircle2,
-  XCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "dinou";
-import { CodeWindow } from "./code-window";
+import { CodeWindow, type CodeFile } from "./code-window";
 
 type TypeSafeTab = "navigation" | "params" | "architecture";
 
@@ -27,8 +26,9 @@ interface TabConfig {
   badgeColor: string;
   headline: string;
   description: string;
-  codeFile: string;
-  codeSnippet: string;
+  codeFile?: string;
+  codeSnippet?: string;
+  files?: CodeFile[];
   features: {
     icon: typeof Zap;
     title: string;
@@ -46,7 +46,7 @@ const tabConfigs: Record<TypeSafeTab, TabConfig> = {
     badgeColor: "border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10",
     headline: "Instant IDE Autocomplete & Dead-Link Prevention",
     description:
-      "Dinou generates TypeScript route definitions in real time. Your IDE automatically autocompletes all project paths inside <Link> and useRouter(), catching broken URLs at compile-time before reaching production.",
+      "Dinou generates TypeScript route definitions in real time. Your IDE automatically autocompletes all project paths inside <Link> and useRouter(), catching broken URLs at development time before reaching production.",
     codeFile: "src/components/navigation.tsx",
     codeSnippet: `import { Link, useRouter } from "dinou";
 
@@ -65,7 +65,7 @@ export default function Navigation() {
       <Link href="/demo?tab=settings#profile">Settings</Link>
       <Link href="../about">About</Link>
 
-      {/* ❌ TypeScript compile error on invalid/dead links */}
+      {/* ❌ TypeScript error in IDE on invalid/dead links */}
       {/* <Link href="/unknown-route">Broken Link</Link> */}
 
       <button onClick={() => router.push("/docs/api-reference")}>
@@ -78,11 +78,11 @@ export default function Navigation() {
       {
         icon: MousePointerClick,
         title: "IntelliSense Autocomplete",
-        desc: "Type `<Link href=\"` and immediately see every registered route in your project.",
+        desc: 'Type `<Link href="` and immediately see every registered route in your project.',
       },
       {
         icon: CheckCircle2,
-        title: "Compile-Time Dead Link Detection",
+        title: "Development-Time Dead Link Detection",
         desc: "Renaming or deleting a folder triggers immediate TypeScript errors where links are broken.",
       },
       {
@@ -102,30 +102,55 @@ export default function Navigation() {
     headline: "End-to-End Parameter Inference Without Any",
     description:
       "Pass your route pattern to PageProps, LayoutProps, or RouteParams. Dinou automatically infers the exact TypeScript types for all dynamic segments ([id], [...slug], [[lang]], [[...opt]]) with zero manual interfaces.",
-    codeFile: "src/blog/[slug]/page.tsx",
-    codeSnippet: `import type { PageProps, LayoutProps, RouteParams } from "dinou";
+    files: [
+      {
+        filename: "src/blog/[slug]/page.tsx",
+        badge: "PageProps",
+        language: "tsx",
+        code: `
+import type { PageProps } from "dinou";
 
-// 1. Page Component: Inferred params.slug is strongly typed as string
+// Inferred params.slug is strongly typed as string
 export default function BlogPost({ params }: PageProps<"/blog/[slug]">) {
   return <h1>Post: {params.slug}</h1>;
+
   // ❌ TypeScript Error: Property 'id' does not exist on type '{ slug: string }'
   // return <h1>{params.id}</h1>;
-}
+}`,
+      },
+      {
+        filename: "src/blog/[slug]/layout.tsx",
+        badge: "LayoutProps",
+        language: "tsx",
+        code: `
+import type { LayoutProps } from "dinou";
 
-// 2. Layout Component: Strictly types children and params
-export function BlogLayout({ children, params }: LayoutProps<"/blog/[slug]">) {
+// Strictly types both children and dynamic route params
+export default function BlogLayout({
+  children,
+  params,
+}: LayoutProps<"/blog/[slug]">) {
   return (
     <section>
-      <header>Category: {params.slug}</header>
+      <header>Slug: {params.slug}</header>
       <main>{children}</main>
     </section>
   );
-}
+}`,
+      },
+      {
+        filename: "src/blog/[slug]/page_functions.ts",
+        badge: "RouteParams",
+        language: "typescript",
+        code: `
+import type { RouteParams } from "dinou";
 
-// 3. Server Functions (page_functions.ts): Typed without React props
+// Page Functions: RouteParams<T> types the params object directly
 export async function getProps(params: RouteParams<"/blog/[slug]">) {
   return { postTitle: \`Post \${params.slug}\` };
 }`,
+      },
+    ],
     features: [
       {
         icon: Layers,
@@ -135,11 +160,11 @@ export async function getProps(params: RouteParams<"/blog/[slug]">) {
       {
         icon: Sparkles,
         title: "IDE Suggestion Workflow",
-        desc: "Type `PageProps<\"\">` and press Ctrl+Space to pick your route from a dropdown list.",
+        desc: 'Type `PageProps<"">` and press Ctrl+Space to pick your route from a dropdown list.',
       },
       {
         icon: ShieldCheck,
-        title: "Safe Server Functions & Error Boundaries",
+        title: "Safe Page Functions & Error Boundaries",
         desc: "Type `getProps` and `error.tsx` parameters cleanly with standalone `RouteParams<T>`.",
       },
     ],
@@ -151,9 +176,9 @@ export async function getProps(params: RouteParams<"/blog/[slug]">) {
     title: "3. Zero-Runtime Architecture",
     badge: "Zero-Cost TypeScript Engine",
     badgeColor: "border-purple-500/30 text-purple-600 dark:text-purple-400 bg-purple-500/10",
-    headline: "Sub-2ms Hot In-Memory Scanner & Module Augmentation",
+    headline: "Auto-Generated Route Types with Zero Bundle Cost",
     description:
-      "Everything lives strictly within auto-generated .d.ts files. Dinou's file-system scanner runs in under 2ms without importing code or spinning up test servers, keeping production bundles completely clean.",
+      "Dinou scans your src/ folder as you work and automatically generates .d.ts type declarations for every route. Because type declarations exist only for TypeScript, they add zero bytes and zero runtime overhead to your production bundles.",
     codeFile: ".dinou/types/routes.d.ts",
     codeSnippet: `// Auto-generated by Dinou. Do not edit directly.
 import "dinou";
@@ -224,7 +249,7 @@ export function TypeSafeShowcase() {
             </span>
           </h2>
           <p className="text-slate-600 dark:text-slate-400 md:text-lg leading-relaxed">
-            Eliminate dead links, catch typos at compile-time, and get instant IDE autocompletion for all your routes and parameters with zero bundle cost.
+            Eliminate dead links, catch route typos at development time, and get instant IDE autocompletion for all your routes and parameters with zero bundle cost.
           </p>
 
           {/* Interactive Navigation Tabs */}
@@ -321,10 +346,11 @@ export function TypeSafeShowcase() {
             <CodeWindow
               filename={activeConfig.codeFile}
               code={activeConfig.codeSnippet}
+              files={activeConfig.files}
               language="tsx"
               statusLeft="Dinou Route Scanner (<2ms)"
               statusRight="TypeScript 5.x"
-              className="h-[500px] sm:h-[540px] lg:h-full"
+              className="h-[500px] sm:h-[540px] lg:h-[630px] w-full shrink-0"
             />
           </div>
         </div>

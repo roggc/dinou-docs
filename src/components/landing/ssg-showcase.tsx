@@ -96,7 +96,7 @@ export async function getProps(params) {
         filename: "src/products/[id]/page_functions.ts",
         badge: "ISR",
         language: "typescript",
-        code: `// src/products/[id]/page_functions.ts
+        code: `
 // 1. Time-based background revalidation (seconds)
 export const revalidate = 60; // Refreshes in background every 1m
 
@@ -110,7 +110,7 @@ export const getCacheTags = (params) => [
         filename: "src/products/actions.ts",
         badge: '"use server"',
         language: "typescript",
-        code: `// src/products/actions.ts
+        code: `
 "use server";
 
 import { revalidateTag, revalidatePath } from "dinou/server";
