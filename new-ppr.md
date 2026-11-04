@@ -398,7 +398,28 @@ Here `Page` (and any unwrapped `<ChildAsync />` outside `<Suspense>`) is baked i
 
 ---
 
-### 7.3. Complete Comparative Summary Matrix
+### 7.3. Core Takeaway: The Only Difference Between `ppr = false` and `ppr = true` Is Inside `<Suspense>`
+
+#### 1. Everything **NOT** Wrapped in `<Suspense>` Behaves Identically in `ppr = false` and `ppr = true`
+Outside `<Suspense>`, Dinou is **Static by Default** in both modes:
+- **If it performs a pure `await` (or uses `<DinouCacheSlot revalidate={N}>` with $N \ge 1$)**:
+  - It is awaited during the build and its resolved HTML goes directly into the pre-rendered file (`index.html` in `ppr = false`, `shell.html` in `ppr = true`).
+- **If it reads `cookies`, `headers`, `query`, or uses `<DinouCacheSlot revalidate={0}>` outside `<Suspense>`**:
+  - It triggers a **Full-Page Dynamic Bailout** of the entire route in both `ppr = false` and `ppr = true`.
+
+In fact, if you declare `ppr = true` on a page that has **no `<Suspense>` boundaries at all** (or where every `<Suspense>` uses `noDynamic()`), the final build output is identical to a static `ppr = false` page (`holes: []`, promoted to `index.html`, with `0` runtime executions).
+
+#### 2. The Only Difference Between `ppr = false` and `ppr = true` Is Inside `<Suspense>`
+
+| What is inside `<Suspense>` | With `ppr = false` | With `ppr = true` |
+| :--- | :--- | :--- |
+| **`async` component (with a pure `await`)** | Awaited at build time and baked resolved into `index.html` (ignores `fallback` in the static HTML). | **Opens a Dynamic Hole** (`fallback` in `shell.html` + streamed on every request), unless [`noDynamic()`](./dinou/core/no-dynamic.js) is called before the first `await`. |
+| **`<DinouCacheSlot revalidate={N}>` ($N \ge 1$) with `await`** | Awaited at build time and baked resolved into `index.html`. | **Opens a Cached Dynamic Hole** (`fallback` in `shell.html` + hole served from `slot.json` in ~1ms for $N$ seconds), unless [`noDynamic()`](./dinou/core/no-dynamic.js) is called. |
+| **Reads `cookies` / `headers` / `query` or `<DinouCacheSlot revalidate={0}>`** | **Taints the entire page** $\rightarrow$ Full-Page Dynamic Bailout (everything falls back to per-request SSR). | **Isolates the dynamism into a Dynamic Hole** $\rightarrow$ the rest of the page stays static in `shell.html` (0ms TTFB) and only that `<Suspense>` executes per request. |
+
+---
+
+### 7.4. Complete Comparative Summary Matrix
 
 | Where is the `await`? | Wrapped in `<Suspense>`? | Reads `cookies` / `headers` / `query` (or `revalidate = 0`)? | Behavior when `ppr = false` | Behavior when `ppr = true` | Verified in `src/test-ppr` |
 |---|---|---|---|---|---|
@@ -409,7 +430,7 @@ Here `Page` (and any unwrapped `<ChildAsync />` outside `<Suspense>`) is baked i
 
 ---
 
-### 7.4. Destination Classification when `ppr = true`: Static Shell vs. Dynamic Hole vs. Full-Page Bailout
+### 7.5. Destination Classification when `ppr = true`: Static Shell vs. Dynamic Hole vs. Full-Page Bailout
 
 When `ppr = true`, every component in the route tree falls into one of three destinations:
 
@@ -431,7 +452,7 @@ When `ppr = true`, every component in the route tree falls into one of three des
 
 ---
 
-### 7.5. `<DinouCacheSlot revalidate={N}>` ($N \ge 1$) Lifecycle & TTL Expiration Transition (`ppr = true`)
+### 7.6. `<DinouCacheSlot revalidate={N}>` ($N \ge 1$) Lifecycle & TTL Expiration Transition (`ppr = true`)
 
 When `ppr = true` and a `<DinouCacheSlot id="..." revalidate={N}>` ($N \ge 1$) does not read `cookies`/`headers`/`query`, wrapping it in `<Suspense>` vs. leaving it unwrapped gives the developer a clear choice between a **Cached Dynamic Hole** and a **Static Shell Slot**:
 
@@ -444,7 +465,7 @@ When `ppr = true` and a `<DinouCacheSlot id="..." revalidate={N}>` ($N \ge 1$) d
 
 ---
 
-### 7.6. Performance Best Practice in `ppr = true` Routes with Dynamic Holes: Unwrapped `async` vs. `<Suspense>` + `noDynamic()` vs. `<DinouCacheSlot id="...">`
+### 7.7. Performance Best Practice in `ppr = true` Routes with Dynamic Holes: Unwrapped `async` vs. `<Suspense>` + `noDynamic()` vs. `<DinouCacheSlot id="...">`
 
 When a `ppr = true` route has **zero Dynamic Holes** (`holes.length === 0`, e.g., `/test-ppr/all-static`), Dinou promotes `shell.html` directly to a pure static `index.html`. At runtime, `serveStatic` delivers the file at 0ms TTFB and **never invokes `Page()` or traverses the component tree**. In that pure-static scenario, all static-shell forms behave identically at runtime.
 
