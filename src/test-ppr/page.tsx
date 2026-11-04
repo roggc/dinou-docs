@@ -112,27 +112,63 @@ async function LateNoDynamicComponent() {
 }
 
 // ============================================================================
-// CASE 8: <DinouCacheSlot revalidate={60}> inside <Suspense> -> Static Shell + Micro-ISR
+// CASE 8A/8B/8C: <DinouCacheSlot revalidate={3600}>
+// - 8A: Outside <Suspense> -> Static Shell
+// - 8B: Inside <Suspense> (async default) -> Cached Dynamic Hole (fallback in shell, cached in runtime)
+// - 8C: Inside <Suspense> + noDynamic() -> Static Shell
 // ============================================================================
+async function CachedSlotUnwrappedAsyncChild() {
+  await new Promise((r) => setTimeout(r, 15));
+  const count = incrementRenderCount("case8a-slot-unwrapped-shell");
+  return (
+    <div data-testid="case8a-resolved" data-render-count={String(count)} className="text-sm font-mono text-emerald-700 dark:text-emerald-300">
+      Case 8A (&lt;DinouCacheSlot revalidate=3600&gt; Outside &lt;Suspense&gt; &rarr; Static Shell) Render #{count}
+    </div>
+  );
+}
+
 async function CachedSlotAsyncChild() {
   await new Promise((r) => setTimeout(r, 15));
   const count = incrementRenderCount("case8-slot-revalidate-60");
   return (
     <div data-testid="case8-resolved" data-render-count={String(count)} className="text-sm font-mono text-blue-700 dark:text-blue-300">
-      Case 8 (&lt;DinouCacheSlot revalidate=60&gt; in Static Shell) Render #{count}
+      Case 8B (&lt;Suspense&gt; + &lt;DinouCacheSlot revalidate=3600&gt; &rarr; Cached Dynamic Hole) Render #{count}
+    </div>
+  );
+}
+
+async function CachedSlotNoDynamicAsyncChild() {
+  noDynamic();
+  await new Promise((r) => setTimeout(r, 15));
+  const count = incrementRenderCount("case8c-slot-nodynamic-shell");
+  return (
+    <div data-testid="case8c-resolved" data-render-count={String(count)} className="text-sm font-mono text-emerald-700 dark:text-emerald-300">
+      Case 8C (&lt;Suspense&gt; + &lt;DinouCacheSlot revalidate=3600&gt; + noDynamic() &rarr; Static Shell) Render #{count}
     </div>
   );
 }
 
 // ============================================================================
-// CASE 9: <DinouCacheSlot> (omitted revalidate) inside <Suspense> -> Static Shell Forever
+// CASE 9A/9B: <DinouCacheSlot> (omitted revalidate)
+// - 9A: Outside <Suspense> -> Static Shell Forever
+// - 9B: Inside <Suspense> (async default) -> Cached Dynamic Hole Forever
 // ============================================================================
+async function ForeverSlotUnwrappedAsyncChild() {
+  await new Promise((r) => setTimeout(r, 15));
+  const count = incrementRenderCount("case9a-slot-forever-unwrapped");
+  return (
+    <div data-testid="case9a-resolved" data-render-count={String(count)} className="text-sm font-mono text-emerald-700 dark:text-emerald-300">
+      Case 9A (&lt;DinouCacheSlot&gt; omitted revalidate Outside &lt;Suspense&gt; &rarr; Static Shell) Render #{count}
+    </div>
+  );
+}
+
 async function ForeverSlotAsyncChild() {
   await new Promise((r) => setTimeout(r, 15));
   const count = incrementRenderCount("case9-slot-forever");
   return (
     <div data-testid="case9-resolved" data-render-count={String(count)} className="text-sm font-mono text-blue-700 dark:text-blue-300">
-      Case 9 (&lt;DinouCacheSlot&gt; omitted revalidate in Static Shell) Render #{count}
+      Case 9B (&lt;Suspense&gt; + &lt;DinouCacheSlot&gt; omitted revalidate &rarr; Cached Dynamic Hole) Render #{count}
     </div>
   );
 }
@@ -151,15 +187,16 @@ async function NoCacheSlotAsyncChild() {
 }
 
 // ============================================================================
-// CASE 11: <DinouCacheSlot revalidate={60}> reading req.cookies inside <Suspense> -> Dynamic Hole!
+// CASE 11: <DinouCacheSlot revalidate={60}> + noDynamic() reading req.cookies inside <Suspense> -> Dynamic Hole!
 // ============================================================================
 async function SlotReadingCookiesChild() {
+  noDynamic();
   await new Promise((r) => setTimeout(r, 15));
   const user = getContext()?.req?.cookies?.user || "guest";
   const count = incrementRenderCount("case11-slot-cookies");
   return (
     <div data-testid="case11-resolved" data-user={String(user)} data-render-count={String(count)} className="text-sm font-mono text-amber-700 dark:text-amber-300">
-      Case 11 (&lt;DinouCacheSlot revalidate=60&gt; + cookies &rarr; Dynamic Hole) user={String(user)} | Render #{count}
+      Case 11 (&lt;DinouCacheSlot revalidate=60&gt; + noDynamic + cookies &rarr; Dynamic Hole) user={String(user)} | Render #{count}
     </div>
   );
 }
@@ -262,20 +299,31 @@ export default async function TestPprMatrixPage() {
         </Suspense>
       </section>
 
-      {/* CASE 8: <DinouCacheSlot revalidate={60}> inside <Suspense> */}
-      <section className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-        <h3 className="font-semibold text-slate-900 dark:text-white">Case 8: &lt;DinouCacheSlot revalidate=60&gt; inside &lt;Suspense&gt; (Baked in Static Shell)</h3>
-        <Suspense fallback={<div data-testid="case8-fallback">Loading Case 8 Cached Slot...</div>}>
+      {/* CASE 8A/8B/8C: <DinouCacheSlot revalidate={3600}> (Unwrapped vs <Suspense> vs <Suspense> + noDynamic) */}
+      <section className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2">
+        <h3 className="font-semibold text-slate-900 dark:text-white">Case 8: &lt;DinouCacheSlot revalidate=3600&gt; (8A Unwrapped Shell, 8B Suspense Hole, 8C Suspense + noDynamic Shell)</h3>
+        <DinouCacheSlot id="test-ppr-slot-unwrapped" tag="tag-ppr-unwrapped" revalidate={3600}>
+          <CachedSlotUnwrappedAsyncChild />
+        </DinouCacheSlot>
+        <Suspense fallback={<div data-testid="case8-fallback">Loading Case 8B Cached Slot Hole...</div>}>
           <DinouCacheSlot id="test-ppr-slot-cached" tag="tag-ppr-cached" revalidate={3600}>
             <CachedSlotAsyncChild />
           </DinouCacheSlot>
         </Suspense>
+        <Suspense fallback={<div data-testid="case8c-fallback">Loading Case 8C NoDynamic Slot...</div>}>
+          <DinouCacheSlot id="test-ppr-slot-nodynamic" tag="tag-ppr-nodynamic" revalidate={3600}>
+            <CachedSlotNoDynamicAsyncChild />
+          </DinouCacheSlot>
+        </Suspense>
       </section>
 
-      {/* CASE 9: <DinouCacheSlot> (omitted revalidate) inside <Suspense> */}
-      <section className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-        <h3 className="font-semibold text-slate-900 dark:text-white">Case 9: &lt;DinouCacheSlot&gt; (Omitted revalidate) inside &lt;Suspense&gt; (Baked in Static Shell)</h3>
-        <Suspense fallback={<div data-testid="case9-fallback">Loading Case 9 Forever Slot...</div>}>
+      {/* CASE 9A/9B: <DinouCacheSlot> (omitted revalidate) */}
+      <section className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2">
+        <h3 className="font-semibold text-slate-900 dark:text-white">Case 9: &lt;DinouCacheSlot&gt; (Omitted revalidate: 9A Unwrapped Shell, 9B Suspense Hole)</h3>
+        <DinouCacheSlot id="test-ppr-slot-forever-unwrapped" tag="tag-ppr-forever-unwrapped">
+          <ForeverSlotUnwrappedAsyncChild />
+        </DinouCacheSlot>
+        <Suspense fallback={<div data-testid="case9-fallback">Loading Case 9B Forever Slot Hole...</div>}>
           <DinouCacheSlot id="test-ppr-slot-forever" tag="tag-ppr-forever">
             <ForeverSlotAsyncChild />
           </DinouCacheSlot>

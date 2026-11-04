@@ -595,7 +595,7 @@ async function DinouCacheSlot(props) {
     isPprBuildActive() &&
     isInsideSuspense() &&
     cached &&
-    !cached.metadata?.inStaticShell
+    !cached.metadata?.inStaticSuspense
   ) {
     cached = null;
   }
@@ -667,6 +667,7 @@ async function DinouCacheSlot(props) {
       generatedAt: Date.now(),
       slotId,
       inStaticShell: Boolean(isPprShellBuild || cached?.metadata?.inStaticShell),
+      inStaticSuspense: Boolean(inPprSuspense || cached?.metadata?.inStaticSuspense),
     };
 
     const persistSlot = async () => {
@@ -919,6 +920,7 @@ async function getSlotJSX(slotId, options = {}) {
             generatedAt: Date.now(),
             slotId: targetId,
             inStaticShell: Boolean(cached?.metadata?.inStaticShell),
+            inStaticSuspense: Boolean(cached?.metadata?.inStaticSuspense),
           });
         }
         if (options.fresh && isLatestGen()) {

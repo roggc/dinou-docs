@@ -11,7 +11,6 @@ import {
   resetComponentNoDynamicFlag,
   consumeComponentNoDynamicFlag,
   isNoDynamicActive,
-  isInsideCachedSlot,
   isSlotDiscoveryActive,
 } from "./ppr-context.js";
 import { getContext } from "./request-context.js";
@@ -39,7 +38,6 @@ async function invokeServerComponentInPpr(fn, callFn) {
     isPprBuildActive() &&
     isInsideSuspense() &&
     !isSlotDiscoveryActive() &&
-    !isInsideCachedSlot() &&
     !optedOut &&
     !isNoDynamicActive()
   ) {

@@ -20,25 +20,28 @@ When `ppr = true` is active on a route, `<Suspense>` now acts as a true **tempor
 
 1. **Outside `<Suspense>` → Static Shell (`shell.html`)**:
    Synchronous and `async` Server Components outside `<Suspense>` execute at build time (or during background ISR shell revalidation) and are baked into the immutable Static Shell (`0ms TTFB`). *(If a component outside `<Suspense>` reads `req.cookies`, `req.headers`, or `req.query`, the route performs a full-route bailout to dynamic SSR as before).*
-2. **`<Suspense>` Wrapping an `async` Server Component → Dynamic PPR Hole by Default**:
-   Any `async` Server Component (returning a `Promise` / thenable) rendered inside `<Suspense>` on a `ppr = true` route automatically postpones at build time, bakes the `<Suspense fallback={...}>` into `shell.html` (`<div data-ppr-hole="ppr-hole-N">`), and executes + streams fresh on **every incoming HTTP request**—whether it reads `req.cookies` or performs `await fetch(...)` / database queries.
-3. **`<Suspense>` Wrapping `<DinouCacheSlot>` → Controlled by `revalidate`**:
-   - **Cached Slot (`revalidate >= 1` or `revalidate` omitted)**: Resolved at build time into the Static Shell (`shell.html`) and persisted to `slots/<id>/slot.json` (`inStaticShell: true`), unless a child inside the slot reads `req.cookies`, `req.headers`, or `req.query` (which still postpones to a Dynamic Hole to prevent cache poisoning).
-   - **Uncached Slot (`revalidate={0}`)**: Automatically triggers a PPR postpone (`slot-revalidate-0`), turning the enclosing `<Suspense>` boundary into a **Dynamic PPR Hole** that streams fresh on every request while remaining addressable on the client via `refreshSlot(id)`.
+2. **`<Suspense>` Wrapping an `async` Server Component → Dynamic PPR Hole by Default (Zero Exceptions)**:
+   Any `async` Server Component (returning a `Promise` / thenable) rendered inside `<Suspense>` on a `ppr = true` route automatically postpones at build time, bakes the `<Suspense fallback={...}>` into `shell.html` (`<div data-ppr-hole="ppr-hole-N">`), and streams dynamically at runtime—unless opted out via `noDynamic()` before the first `await`.
+3. **`<DinouCacheSlot>` in `ppr = true` → Controlled by `<Suspense>`, `revalidate`, and `noDynamic()`**:
+   - **Outside `<Suspense>` (`revalidate >= 1` or omitted)**: Resolved at build time into the **Static Shell (`shell.html`)** and persisted to `slots/<id>/slot.json` (`inStaticShell: true`).
+   - **Inside `<Suspense>` (`revalidate >= 1` or omitted, `async` child by default)**: Creates a **Cached Dynamic PPR Hole**. `shell.html` bakes the `<Suspense fallback={...}>` (`0ms TTFB` forever, even when the slot TTL expires or after `revalidateTag()`), while at runtime the hole streams from `slots/<id>/slot.json` in ~1ms for $N$ seconds and only re-executes the `async` child inside the hole stream when the TTL expires.
+   - **Inside `<Suspense>` (`revalidate >= 1` or omitted, with `noDynamic()` before first `await` or synchronous child)**: Opts out of the Dynamic Hole and bakes the resolved slot into the **Static Shell (`shell.html`)**.
+   - **Uncached Slot (`revalidate={0}`)**: Inside `<Suspense>`, automatically triggers a PPR postpone (`slot-revalidate-0`) to become an **Uncached Dynamic PPR Hole** (streams fresh on every request). Outside `<Suspense>`, triggers a **Full-Page Dynamic Bailout**.
 4. **`noDynamic()` Opt-Out → Static `<Suspense>` in the Static Shell**:
-   When a developer intentionally uses `<Suspense>` around an `async` Server Component whose promise should resolve at build time and remain baked into `shell.html` (for example, a shared component that streams during `dinou dev` or on non-PPR routes, or an outer `<Suspense>` wrapper around a nested dynamic `<Suspense>` hole), calling `noDynamic()` synchronously before the component's first `await` opts that `<Suspense>` boundary out of becoming a Dynamic Hole.
+   When a developer intentionally uses `<Suspense>` around an `async` Server Component (or inside a `<DinouCacheSlot>` wrapped in `<Suspense>`) whose promise should resolve at build time and remain baked into `shell.html`, calling `noDynamic()` synchronously before the component's first `await` opts that `<Suspense>` boundary out of becoming a Dynamic Hole.
 
 ---
 
 ## 2. Decision Matrix (`ppr = true`)
 
-| Pattern Inside `<Suspense>` (when `ppr = true`) | Build-Time Result (`shell.html`) | Request-Time Behavior (`handlePprResume`) |
+| Pattern (when `ppr = true`) | Build-Time Result (`shell.html`) | Request-Time Behavior (`handlePprResume`) |
 | :--- | :--- | :--- |
-| **`async` Server Component** (`await fetch(...)`, `await db.query(...)`, etc.) | **Dynamic Hole (`ppr-hole-N`)**: `fallback` baked into `shell.html`; hole registered in `metadata.holes` | Executed on every request and streamed via `<template id="ppr-content-ppr-hole-N">` + inline DOM swap `<script>` |
-| **Server Component reading `req.cookies`, `req.headers`, or `req.query`** | **Dynamic Hole (`ppr-hole-N`)**: `fallback` baked into `shell.html`; hole registered in `metadata.holes` | Executed on every request with live request context and streamed in parallel |
-| **`<DinouCacheSlot revalidate={0}>`** | **Dynamic Hole (`ppr-hole-N`)**: `fallback` baked into `shell.html`; hole registered in `metadata.holes` | Executed on every request (bypassing `slot.json`) and streamed in parallel; supports client `refreshSlot()` |
-| **`<DinouCacheSlot revalidate={N}>`** (`N >= 1` or omitted, no `req` reads) | **Static Shell**: `async` children inside the slot resolve at build time into `shell.html` and `slots/<id>/slot.json` (`inStaticShell: true`) | Served immediately in `shellPrelude` (`0ms TTFB`); refreshes by TTL clock, `revalidateTag()`, or client `refreshSlot()` |
-| **`async` Server Component calling `noDynamic()`** (no `req` reads) | **Static Shell**: Promise resolves at build time and output is baked into `shell.html` (excluded from `metadata.holes`) | Served immediately in `shellPrelude` (`0ms TTFB`); **not** re-executed or re-streamed at request time |
+| **`<Suspense>` + `async` Server Component** (`await fetch(...)`, `await db.query(...)`, etc.) | **Dynamic Hole (`ppr-hole-N`)**: `fallback` baked into `shell.html`; hole registered in `metadata.holes` | Executed on every request and streamed via `<template id="ppr-content-ppr-hole-N">` + inline DOM swap `<script>` |
+| **`<Suspense>` + Server Component reading `req.cookies`, `req.headers`, or `req.query`** | **Dynamic Hole (`ppr-hole-N`)**: `fallback` baked into `shell.html`; hole registered in `metadata.holes` | Executed on every request with live request context and streamed in parallel |
+| **`<Suspense>` + `<DinouCacheSlot revalidate={0}>`** | **Dynamic Hole (`ppr-hole-N`)**: `fallback` baked into `shell.html`; hole registered in `metadata.holes` | Executed on every request (bypassing `slot.json`) and streamed in parallel; supports client `refreshSlot()` |
+| **`<Suspense>` + `<DinouCacheSlot revalidate={N}>` (`N >= 1` or omitted) with `async` child** | **Cached Dynamic Hole (`ppr-hole-N`)**: `fallback` baked into `shell.html`; hole registered in `metadata.holes` | `shell.html` arrives at `0ms TTFB`; hole executes once on first request, caches `slots/<id>/slot.json` for $N$s, and streams from cache in ~1ms on subsequent requests |
+| **`<DinouCacheSlot revalidate={N}>` (`N >= 1` or omitted) OUTSIDE `<Suspense>`** (or **inside `<Suspense>` + `noDynamic()`**) | **Static Shell**: `async` children resolve at build time into `shell.html` and `slots/<id>/slot.json` (`inStaticShell: true`) | Served immediately in `shellPrelude` (`0ms TTFB`, `0` runtime executions while valid); refreshes when TTL expires, via `revalidateTag()`, or `refreshSlot()` |
+| **`<Suspense>` + `async` Server Component calling `noDynamic()`** (no `req` reads) | **Static Shell**: Promise resolves at build time and output is baked into `shell.html` (excluded from `metadata.holes`) | Served immediately in `shellPrelude` (`0ms TTFB`); **not** re-executed or re-streamed at request time |
 | **Outer `<Suspense>` with `noDynamic()` wrapping an inner `<Suspense>`** | Outer boundary resolves into `shell.html`; inner `<Suspense>` becomes **Dynamic Hole (`ppr-hole-N`)** | Outer wrapper arrives at `0ms TTFB`; inner hole streams dynamically per request |
 
 ---
@@ -112,26 +115,44 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
 4. **Never overrides request-specific dynamic bailouts**:
    If a component (or child) inside a `<Suspense>` boundary with `noDynamic()` reads `req.cookies`, `req.headers`, or `req.query`, Dinou's Bailout Proxy still postpones that `<Suspense>` boundary into a Dynamic Hole so request data can never poison `shell.html`.
 
-### 3.3. `<Suspense>` Wrapping `<DinouCacheSlot>` (`revalidate >= 1` vs. `revalidate={0}`)
+### 3.3. `<DinouCacheSlot>` with `ppr = true` (Static Shell vs. Cached Dynamic Hole vs. Uncached Hole)
 
 ```tsx
 import { Suspense } from "react";
+import { noDynamic } from "dinou";
 import { DinouCacheSlot } from "dinou/server";
 
 export default function DashboardPage() {
   return (
     <main>
-      {/* 1. Cached Slot (revalidate >= 1):
+      {/* 1. Static Shell Slot (outside <Suspense>, revalidate >= 1):
           Resolved at build time into shell.html and cached in slots/global-kpis/slot.json.
           Refreshes every 300s (or via revalidateTag("kpis") / refreshSlot("global-kpis")). */}
-      <Suspense fallback={<div>Loading KPIs...</div>}>
-        <DinouCacheSlot id="global-kpis" tag="kpis" revalidate={300}>
-          <AsyncKpiSummary />
+      <DinouCacheSlot id="global-kpis" tag="kpis" revalidate={300}>
+        <AsyncKpiSummary />
+      </DinouCacheSlot>
+
+      {/* 2. Cached Dynamic Hole (inside <Suspense>, revalidate >= 1, async child):
+          Postponed at build time so shell.html sends <GraphSkeleton /> immediately (0ms TTFB).
+          In runtime, the hole streams from slots/telemetry/slot.json in ~1ms for 60s
+          (executing the DB query only once every 60s without ever blocking shell TTFB). */}
+      <Suspense fallback={<GraphSkeleton />}>
+        <DinouCacheSlot id="telemetry" tag="telemetry" revalidate={60}>
+          <AsyncHeavyTelemetryGraph />
         </DinouCacheSlot>
       </Suspense>
 
-      {/* 2. Uncached Slot (revalidate={0}):
-          Postponed at build time into a Dynamic PPR Hole (ppr-hole-2).
+      {/* 3. Static Shell Slot inside <Suspense> via noDynamic():
+          When <Suspense> is kept in the JSX tree but the slot should resolve into shell.html,
+          call noDynamic() before the first await inside the child component. */}
+      <Suspense fallback={<div>Loading static slot...</div>}>
+        <DinouCacheSlot id="static-suspense-slot" revalidate={300}>
+          <AsyncChildCallingNoDynamic />
+        </DinouCacheSlot>
+      </Suspense>
+
+      {/* 4. Uncached Dynamic Hole (inside <Suspense>, revalidate={0}):
+          Postponed at build time into a Dynamic PPR Hole.
           Streams fresh on every HTTP request and can also be re-fetched live via refreshSlot("live-feed"). */}
       <Suspense fallback={<div>Streaming live feed...</div>}>
         <DinouCacheSlot id="live-feed" revalidate={0}>
@@ -161,11 +182,9 @@ export default function DashboardPage() {
   1. **`noDynamic()` & Per-Component / Per-`<Suspense>` Opt-Out Tracking**:
      - `noDynamic()` sets a synchronous per-invocation flag (`currentComponentNoDynamic = true`) and, if inside an active `<Suspense>` boundary (`store.suspenseDepth > 0`), sets `store.noDynamic = true` on that `<Suspense>` boundary's `childStore`.
      - When `runInSuspense` enters any `<Suspense>` boundary (including a nested `<Suspense>` inside an outer `noDynamic()` boundary), it initializes the new `childStore` with `noDynamic: false` and `settled: false`.
-  2. **Cached Slot Scope (`runInCachedSlot` / `isInsideCachedSlot`)**:
-     - Uses `cachedSlotStorage` (`AsyncLocalStorage`) to track when execution is inside a cached `<DinouCacheSlot>` (`revalidate >= 1` or `undefined`).
-  3. **Slot Discovery Scope (`runInSlotDiscovery` / `isSlotDiscoveryActive`)**:
+  2. **Slot Discovery Scope (`runInSlotDiscovery` / `isSlotDiscoveryActive`)**:
      - Unified `slotDiscoveryStorage` in `ppr-context.js` so cold-start `getSlotJSX` discovery passes can traverse into `async` Server Components inside `<Suspense>` to register nested `<DinouCacheSlot>`s without prematurely postponing at the outer `async` component.
-  4. **Settled `<Suspense>` Guard (`store.settled`)**:
+  3. **Settled `<Suspense>` Guard (`store.settled`)**:
      - Once a `<Suspense>` boundary finishes or postpones during a PPR build, `suspenseStore.settled = true` prevents any background continuation of an already-postponed promise from pushing late side effects into `pendingEffects`.
 
 ### 4.3. Zero-Latency First-`await` Postponement (`dinou/core/render-jsx-to-client-jsx.js`)
@@ -182,7 +201,6 @@ export default function DashboardPage() {
       isPprBuildActive() &&
       isInsideSuspense() &&
       !isSlotDiscoveryActive() &&
-      !isInsideCachedSlot() &&
       !optedOut &&
       !isNoDynamicActive()
     ) {
@@ -203,11 +221,12 @@ export default function DashboardPage() {
 ### 4.4. `<DinouCacheSlot>` Integration (`dinou/core/cache-slot.js` & `dinou/server.js`)
 - **Files Modified**: [`dinou/core/cache-slot.js`](./dinou/core/cache-slot.js), [`dinou/server.js`](./dinou/server.js)
 - **Key Changes**:
-  1. Both `DinouCacheSlot` in `dinou/core/cache-slot.js` and the re-export wrapper in `dinou/server.js` are tagged with `DinouCacheSlot.$$dinouCacheSlot = true` so `invokeServerComponentInPpr` delegates postponement decisions to `DinouCacheSlot` itself.
+  1. Both `DinouCacheSlot` in `dinou/core/cache-slot.js` and the re-export wrapper in `dinou/server.js` are tagged with `DinouCacheSlot.$$dinouCacheSlot = true` so `invokeServerComponentInPpr` does not postpone at `DinouCacheSlot`'s own internal storage read, delegating postponement to the slot's configuration and children.
   2. **When `revalidate === 0` (or `< 1`, `isNoCache === true`)**:
-     After registering the slot in `slotRegistry`, if `isPprBuildActive() && isInsideSuspense() && !isSlotDiscoveryActive()`, `DinouCacheSlot` calls `markDynamicAccess("slot-revalidate-0")`, turning the enclosing `<Suspense>` into a Dynamic PPR Hole.
+     After registering the slot in `slotRegistry`, if `isPprBuildActive() && isInsideSuspense() && !isSlotDiscoveryActive()`, `DinouCacheSlot` calls `markDynamicAccess("slot-revalidate-0")`, turning the enclosing `<Suspense>` into an uncached Dynamic PPR Hole. If `isInsideSuspense()` is `false`, it calls `getContext()?._markDynamic?.()` to trigger a Full-Page Dynamic Bailout.
   3. **When `revalidate >= 1` or `undefined` (`isNoCache === false`)**:
-     `DinouCacheSlot` evaluates its children inside `runInCachedSlot(async () => ...)`, allowing `async` Server Components inside the cached slot to resolve at build time and populate `slots/<id>/slot.json` (`inStaticShell: true`) and `shell.html`—while still postponing if any child inside the slot accesses `req.cookies`, `req.headers`, or `req.query`.
+     - **Outside `<Suspense>`** (or **inside `<Suspense>` with `noDynamic()` / synchronous child**): `DinouCacheSlot` resolves at build time, persists `slots/<id>/slot.json` (`inStaticShell: true`, `inStaticSuspense: Boolean(inPprSuspense)`), commits `slotTags` to the page/layout metadata, and bakes its HTML into `shell.html`.
+     - **Inside `<Suspense>` with an `async` child (without `noDynamic()`)**: The child's first `await` triggers `markDynamicAccess("async-suspense")`, postponing the `<Suspense>` boundary into a **Cached Dynamic PPR Hole** (`fallback` in `shell.html`). At runtime, `streamDynamicHoles` evaluates `DinouCacheSlot`, which caches the resolved payload in `slots/<id>/slot.json` for `revalidate` seconds (`inStaticShell: false`) so subsequent visitors receive the streamed hole from cache in ~1ms without re-executing the child component.
 
 ### 4.5. Route/Layout `isPpr` Isolation (`dinou/core/handler.js` & `dinou/core/cache-revalidate.js`)
 - **Files Modified**: [`dinou/core/handler.js`](./dinou/core/handler.js), [`dinou/core/cache-revalidate.js`](./dinou/core/cache-revalidate.js)
@@ -217,7 +236,7 @@ export default function DashboardPage() {
 ### 4.6. Runtime Zero-Execution Optimization for Static `<Suspense>` Boundaries (`dinou/core/ppr-runtime.js`, `dinou/core/ppr-context.js`, `dinou/core/get-jsx.js`)
 - **Files Modified**: [`dinou/core/ppr-runtime.js`](./dinou/core/ppr-runtime.js), [`dinou/core/ppr-context.js`](./dinou/core/ppr-context.js), [`dinou/core/get-jsx.js`](./dinou/core/get-jsx.js)
 - **Key Changes**:
-  1. **Zero-Hole Fast Path**: In `handlePprResume` and `streamDynamicHoles` (`dinou/core/ppr-runtime.js`), if `holes` is an empty array (`holes.length === 0`, e.g., a PPR route where all `<Suspense>` boundaries opted into the Static Shell via `noDynamic()` or `<DinouCacheSlot revalidate={N}>`), Dinou flushes `shellPrelude` + `shellPostlude` immediately without invoking `getJSX` or traversing any components at runtime.
+  1. **Zero-Hole Fast Path**: In `handlePprResume` and `streamDynamicHoles` (`dinou/core/ppr-runtime.js`), if `holes` is an empty array (`holes.length === 0`, e.g., a PPR route where all `<Suspense>` boundaries opted into the Static Shell via `noDynamic()`), Dinou flushes `shellPrelude` + `shellPostlude` immediately without invoking `getJSX` or traversing any components at runtime.
   2. **`runInRuntimeStaticSuspense` & `SKIP_STATIC_SUSPENSE_SYMBOL`**: When a PPR route has both Static `<Suspense>` boundaries and Dynamic `<Suspense>` Holes, `streamDynamicHoles` and `spliceDynamicHolesIntoShell` wrap the traversal of non-streamed (`!shouldStream`) `<Suspense>` boundaries inside `runInRuntimeStaticSuspense(...)`. When `noDynamic()` is called inside `runInRuntimeStaticSuspense(...)` at runtime (`!isPprBuildActive()`), it immediately throws `{ $$typeof: Symbol.for("dinou.ppr.skipStatic") }`, which `ppr-runtime.js` catches silently—preventing the `noDynamic()` component's async work from executing on runtime requests while still allowing synchronous wrappers with nested Dynamic `<Suspense>` holes to be traversed.
   3. **Early Stop Once All Dynamic Holes Are Found**: Both `streamDynamicHoles` (`holePromises.length >= knownHoleIds.size`) and `spliceDynamicHolesIntoShell` (`liveHolesMap.size >= knownHoleIds.size`) halt tree traversal immediately once all registered dynamic holes have been matched.
   4. **`skipLayoutProbe` in `handlePprResume`**: `handlePprResume` passes `{ skipLayoutProbe: true }` to `getJSX` so `dinou/core/get-jsx.js` does not perform a redundant pre-render probe of the layout tree when resuming dynamic holes.
@@ -230,22 +249,27 @@ The folder [`src/test-ppr`](./src/test-ppr) exercises all combinations of the ne
 
 - **[`src/test-ppr/layout.tsx`](./src/test-ppr/layout.tsx) & [`src/test-ppr/layout_functions.ts`](./src/test-ppr/layout_functions.ts)** (`ppr = true`):
   - Layout Boundary 1 (`ppr-hole-1`): Static `<Suspense>` via `noDynamic()` &rarr; baked into `shell.html`, `0` runtime executions.
-  - Layout Boundary 2 (`ppr-hole-2`): `<DinouCacheSlot id="test-ppr-layout-slot" revalidate={3600}>` &rarr; baked into `shell.html` (`inStaticShell: true`), `0` runtime executions.
-  - Layout Boundary 3 (`ppr-hole-3`): Default `async` `<Suspense>` (`LayoutLiveClock`) &rarr; registered in `layout.metadata.json` (`holes: ["ppr-hole-3"]`) and streamed on every request.
+  - Layout Unwrapped Slot: `<DinouCacheSlot id="test-ppr-layout-slot" revalidate={3600}>` (outside `<Suspense>`) &rarr; baked into `shell.html` (`inStaticShell: true`), `0` runtime executions.
+  - Layout Boundary 2 (`ppr-hole-2`): Default `async` `<Suspense>` (`LayoutLiveClock`) &rarr; registered in `layout.metadata.json` (`holes: ["ppr-hole-2"]`) and streamed on every request.
 - **[`src/test-ppr/page.tsx`](./src/test-ppr/page.tsx) & [`src/test-ppr/page_functions.ts`](./src/test-ppr/page_functions.ts)** (`ppr = true`, 12 Cases):
   - **Case 1 (`1A` & `1B`)**: Top-level `async` Page (`1A`) and unwrapped child `async` Server Component (`1B`, `UnwrappedAsyncChildOutsideSuspense`) outside `<Suspense>` &rarr; both baked into `shell.html` without requiring `noDynamic()`.
-  - **Case 2 (`ppr-hole-4`)**: Default `<Suspense>` + `async` Server Component (pure `await`, no cookies/headers/query) &rarr; Dynamic PPR Hole (`case2-fallback` in `shell.html`, `case2-resolved` streamed live on every request).
-  - **Case 3 (`ppr-hole-5`)**: `<Suspense>` + `async` Server Component reading `req.cookies`, `req.headers`, and `req.query` &rarr; Dynamic PPR Hole.
-  - **Case 4 (`ppr-hole-6`)**: `<Suspense>` + `async` Server Component calling `noDynamic()` from `"dinou"` &rarr; Static `<Suspense>` (`case4-resolved` baked into `shell.html`, `0` runtime executions).
-  - **Case 5 (`ppr-hole-7`)**: `<Suspense>` + parent `async` Server Component calling `noDynamic()` from `"dinou/server"` + nested `async` child inheriting `noDynamic` from the `<Suspense>` store &rarr; both baked into `shell.html`, `0` runtime executions.
-  - **Case 6 (`ppr-hole-8`)**: `<Suspense>` + `async` Server Component calling `noDynamic()` **and** reading `req.cookies.theme` &rarr; Dynamic bailout overrides `noDynamic()`, becoming a Dynamic PPR Hole (`ppr-hole-8`).
-  - **Case 7 (`ppr-hole-9`)**: `<Suspense>` + `async` Server Component calling `noDynamic()` **after** its first `await` &rarr; intercepted at the first `await`, becoming a Dynamic PPR Hole (`ppr-hole-9`).
-  - **Case 8 (`ppr-hole-10`)**: `<Suspense>` + `<DinouCacheSlot revalidate={3600}>` &rarr; baked into `shell.html` and persisted to `slots/test-ppr-slot-cached/slot.json` (`inStaticShell: true`), `0` runtime executions until `/____rsc_slot____/test-ppr-slot-cached?fresh=1`.
-  - **Case 9 (`ppr-hole-11`)**: `<Suspense>` + `<DinouCacheSlot>` (omitted `revalidate`) &rarr; baked into `shell.html` and persisted forever until on-demand invalidation.
-  - **Case 10 (`ppr-hole-12`)**: `<Suspense>` + `<DinouCacheSlot revalidate={0}>` &rarr; Dynamic PPR Hole (`ppr-hole-12`), re-evaluated on every request and never written to disk.
-  - **Case 11 (`ppr-hole-13`)**: `<Suspense>` + `<DinouCacheSlot revalidate={3600}>` reading `req.cookies.user` &rarr; postponed at build time into Dynamic PPR Hole (`ppr-hole-13`), then cached on first runtime request (`inStaticShell: false`) and refreshable via `/____rsc_slot____/test-ppr-slot-cookies?fresh=1`.
+  - **Case 2 (`ppr-hole-3`)**: Default `<Suspense>` + `async` Server Component (pure `await`, no cookies/headers/query) &rarr; Dynamic PPR Hole (`case2-fallback` in `shell.html`, `case2-resolved` streamed live on every request).
+  - **Case 3 (`ppr-hole-4`)**: `<Suspense>` + `async` Server Component reading `req.cookies`, `req.headers`, and `req.query` &rarr; Dynamic PPR Hole.
+  - **Case 4 (`ppr-hole-5`)**: `<Suspense>` + `async` Server Component calling `noDynamic()` from `"dinou"` &rarr; Static `<Suspense>` (`case4-resolved` baked into `shell.html`, `0` runtime executions).
+  - **Case 5 (`ppr-hole-6`)**: `<Suspense>` + parent `async` Server Component calling `noDynamic()` from `"dinou/server"` + nested `async` child inheriting `noDynamic` from the `<Suspense>` store &rarr; both baked into `shell.html`, `0` runtime executions.
+  - **Case 6 (`ppr-hole-7`)**: `<Suspense>` + `async` Server Component calling `noDynamic()` **and** reading `req.cookies.theme` &rarr; Dynamic bailout overrides `noDynamic()`, becoming a Dynamic PPR Hole (`ppr-hole-7`).
+  - **Case 7 (`ppr-hole-8`)**: `<Suspense>` + `async` Server Component calling `noDynamic()` **after** its first `await` &rarr; intercepted at the first `await`, becoming a Dynamic PPR Hole (`ppr-hole-8`).
+  - **Case 8 (`8A`, `8B`, `8C`)**: `<DinouCacheSlot revalidate={3600}>`:
+    - **Case 8A (Outside `<Suspense>`)**: Baked into `shell.html` (`inStaticShell: true`), `0` runtime executions until `/____rsc_slot____/test-ppr-slot-unwrapped?fresh=1`.
+    - **Case 8B (`ppr-hole-9`, Inside `<Suspense>` with `async` child)**: Postponed at build time into a **Cached Dynamic PPR Hole** (`case8-fallback` in `shell.html`); executes once on Runtime Request #1 (`inStaticShell: false`) and streams from `slots/test-ppr-slot-cached/slot.json` on Runtime Request #2 (`0` re-executions).
+    - **Case 8C (`ppr-hole-10`, Inside `<Suspense>` + `noDynamic()`)**: Baked into `shell.html` (`inStaticShell: true`, `inStaticSuspense: true`), `0` runtime executions.
+  - **Case 9 (`9A` & `9B`)**: `<DinouCacheSlot>` (omitted `revalidate`):
+    - **Case 9A (Outside `<Suspense>`)**: Baked into `shell.html` forever (`0` runtime executions).
+    - **Case 9B (`ppr-hole-11`, Inside `<Suspense>` with `async` child)**: Postponed at build time into a **Cached Dynamic PPR Hole** (`case9-fallback` in `shell.html`); executes once on Runtime Request #1 and streams from `slots/test-ppr-slot-forever/slot.json` forever on subsequent requests.
+  - **Case 10 (`ppr-hole-12`)**: `<Suspense>` + `<DinouCacheSlot revalidate={0}>` &rarr; Uncached Dynamic PPR Hole (`ppr-hole-12`), re-evaluated on every request and never written to disk.
+  - **Case 11 (`ppr-hole-13`)**: `<Suspense>` + `<DinouCacheSlot revalidate={3600}>` + `noDynamic()` reading `req.cookies.user` &rarr; Dynamic request access overrides `noDynamic()`, postponing at build time into Dynamic PPR Hole (`ppr-hole-13`), caching on first runtime request, and refreshing via `/____rsc_slot____/test-ppr-slot-cookies?fresh=1`.
   - **Case 12 (`ppr-hole-14` & `ppr-hole-15`)**: Nested `<Suspense>` where the outer Static `<Suspense>` (`ppr-hole-14`) is baked into `shell.html` while the inner Dynamic `<Suspense>` (`ppr-hole-15`) is postponed and streamed at runtime.
-- **[`src/test-ppr/all-static/page.tsx`](./src/test-ppr/all-static/page.tsx)**: PPR route (`ppr = true`) where all `<Suspense>` boundaries are static (`holes: []`), verifying zero runtime Server Component executions.
+- **[`src/test-ppr/all-static/page.tsx`](./src/test-ppr/all-static/page.tsx)**: PPR route (`ppr = true`) with Static `<Suspense>` (`noDynamic()`), unwrapped `<DinouCacheSlot revalidate={3600}>`, and `<Suspense>` + `<DinouCacheSlot revalidate={3600}>` + `noDynamic()` (`holes: []`), verifying zero runtime Server Component executions.
 - **[`src/test-ppr/opt-out-route/page.tsx`](./src/test-ppr/opt-out-route/page.tsx)**: Child route (`ppr = false`) inside the `ppr = true` layout, verifying that direct page `await`, unwrapped child `async` components, and `<Suspense>` + `async` child components on `ppr = false` routes all resolve statically into `index.html` without requiring `noDynamic()` and execute `0` times at runtime.
 - **[`src/test-ppr/bailout-cookies/page.tsx`](./src/test-ppr/bailout-cookies/page.tsx)**: PPR route (`ppr = true`) that reads `getContext().req.cookies` **outside** `<Suspense>`, verifying a **Full-Page Dynamic Bailout** (no `shell.html`, `index.html`, or `metadata.json` written to `.dinou/dist2`; full-page SSR on every request).
 - **[`src/test-ppr/bailout-slot-0/page.tsx`](./src/test-ppr/bailout-slot-0/page.tsx)**: PPR route (`ppr = true`) that renders `<DinouCacheSlot revalidate={0}>` **outside** `<Suspense>`, verifying a **Full-Page Dynamic Bailout** (no `shell.html`, `index.html`, or `metadata.json` written to `.dinou/dist2`; full-page SSR on every request).
@@ -364,11 +388,13 @@ export default async function Page() {
   );
 }
 ```
-Here `Page` (and any unwrapped `<ChildAsync />` outside `<Suspense>`) is baked into `shell.html`, while `<ChildAsync />` inside `<Suspense>` (`isInsideSuspense() === true`) follows the PPR mental model:
-1. **Default (no `noDynamic()`, not inside a cached `<DinouCacheSlot>`)**:
-   - Intercepted at its first `await` during the build &rarr; `<Spinner />` is baked into `shell.html` as a **Dynamic PPR Hole**, and `<ChildAsync />` is executed and streamed live on every request (Case 2 & Case 3 of [`src/test-ppr/page.tsx`](./src/test-ppr/page.tsx)).
-2. **With `noDynamic()` (before the first `await`) or `<DinouCacheSlot revalidate={N}>` ($N \ge 1$)**:
-   - If it does not access `cookies`/`headers`/`query`, Dinou awaits `<ChildAsync />` at build time, bakes its resolved HTML into `shell.html`, and skips executing `<ChildAsync />` at runtime (`0` runtime executions; Cases 4, 5, 8, and 9 of [`src/test-ppr/page.tsx`](./src/test-ppr/page.tsx)).
+Here `Page` (and any unwrapped `<ChildAsync />` outside `<Suspense>`) is baked into `shell.html`, while `<ChildAsync />` inside `<Suspense>` (`isInsideSuspense() === true`) follows one unified rule without exceptions:
+1. **Default (no `noDynamic()` before the first `await`)**:
+   - Intercepted at its first `await` during the build &rarr; `<Spinner />` is baked into `shell.html` as a **Dynamic PPR Hole**:
+     - If **not** wrapped in `<DinouCacheSlot revalidate={N}>` (or wrapped in `<DinouCacheSlot revalidate={0}>`), `<ChildAsync />` is executed and streamed live on every request (Cases 2, 3, and 10 of [`src/test-ppr/page.tsx`](./src/test-ppr/page.tsx)).
+     - If wrapped in **`<DinouCacheSlot revalidate={N}>`** ($N \ge 1$ or omitted), it becomes a **Cached Dynamic PPR Hole**: `shell.html` sends `<Spinner />` at 0ms TTFB, the first runtime request executes `<ChildAsync />` and caches `slots/<id>/slot.json` for $N$ seconds, and subsequent requests stream the hole from `slot.json` in ~1ms without re-executing `<ChildAsync />` (Cases 8B and 9B of [`src/test-ppr/page.tsx`](./src/test-ppr/page.tsx)).
+2. **With `noDynamic()` (called before the first `await`)**:
+   - If it does not access `cookies`/`headers`/`query`, Dinou awaits `<ChildAsync />` at build time, bakes its resolved HTML into `shell.html`, and skips executing `<ChildAsync />` at runtime (`0` runtime executions; Cases 4, 5, and 8C of [`src/test-ppr/page.tsx`](./src/test-ppr/page.tsx)).
 
 ---
 
@@ -376,9 +402,9 @@ Here `Page` (and any unwrapped `<ChildAsync />` outside `<Suspense>`) is baked i
 
 | Where is the `await`? | Wrapped in `<Suspense>`? | Reads `cookies` / `headers` / `query` (or `revalidate = 0`)? | Behavior when `ppr = false` | Behavior when `ppr = true` | Verified in `src/test-ppr` |
 |---|---|---|---|---|---|
-| In `Page` or `<ChildAsync />` | **No** | **No** | Resolved at build (`index.html`), `0` runtime executions | Resolved at build into Static Shell (`shell.html`) | `page.tsx` (Case 1A & 1B), `opt-out-route/page.tsx` |
+| In `Page` or `<ChildAsync />` (including `<DinouCacheSlot revalidate={N}>`) | **No** | **No** | Resolved at build (`index.html`), `0` runtime executions | Resolved at build into Static Shell (`shell.html`) | `page.tsx` (Cases 1A, 1B, 8A, 9A), `opt-out-route/page.tsx` |
 | In `Page` or `<ChildAsync />` | **No** | **Yes** | **Full-Page Dynamic Bailout** (per-request SSR) | **Full-Page Dynamic Bailout** (no `<Suspense>` to isolate hole; per-request SSR) | `bailout-cookies/page.tsx`, `bailout-slot-0/page.tsx` |
-| In `<ChildAsync />` | **Yes** | **No** | Resolved at build (`index.html`), `0` runtime executions | **Dynamic PPR Hole by default** (`fallback` in `shell.html` + live runtime stream), **unless** opted out via `noDynamic()` or `<DinouCacheSlot revalidate={N}>` ($N \ge 1$) | `page.tsx` (Cases 2, 4, 5, 8, 9), `opt-out-route/page.tsx` |
+| In `<ChildAsync />` | **Yes** | **No** | Resolved at build (`index.html`), `0` runtime executions | **Dynamic PPR Hole by default** (`fallback` in `shell.html` + runtime stream; cached for $N$s if inside `<DinouCacheSlot revalidate={N}>`), **unless** opted out via `noDynamic()` | `page.tsx` (Cases 2, 4, 5, 8B, 8C, 9B), `opt-out-route/page.tsx` |
 | In `<ChildAsync />` | **Yes** | **Yes** | **Full-Page Dynamic Bailout** (per-request streaming SSR) | **Dynamic PPR Hole** (rest of page keeps static `shell.html`; only this `<Suspense>` streams at runtime) | `page.tsx` (Cases 3, 6, 10, 11), `no-ppr-bailout/page.tsx` |
 
 ---
@@ -388,36 +414,34 @@ Here `Page` (and any unwrapped `<ChildAsync />` outside `<Suspense>`) is baked i
 When `ppr = true`, every component in the route tree falls into one of three destinations:
 
 #### A. Baked into the Static Shell (`.dinou/dist2/<route>/shell.html` at Build Time)
-1. **Any component (synchronous or `async`) rendered OUTSIDE `<Suspense>`** (`Page`, `Layout`, or an unwrapped `<ChildAsync />`), provided it does not read `cookies`/`headers`/`query`, does not render `<DinouCacheSlot revalidate={0}>`, and does not mutate `res`.
+1. **Any component (synchronous or `async`, including `<DinouCacheSlot revalidate={N}>` with $N \ge 1$ or omitted `revalidate`) rendered OUTSIDE `<Suspense>`**, provided it does not read `cookies`/`headers`/`query`, does not render `<DinouCacheSlot revalidate={0}>`, and does not mutate `res`.
 2. **`<Suspense>` wrapping only synchronous components** that do not read `cookies`/`headers`/`query`.
-3. **`<Suspense>` wrapping an `async` Server Component that calls `noDynamic()` before its first `await`**, provided its subtree does not read `cookies`/`headers`/`query` or render `<DinouCacheSlot revalidate={0}>`.
-4. **`<Suspense>` wrapping `<DinouCacheSlot revalidate={N}>` ($N \ge 1$) or `<DinouCacheSlot>` (omitted `revalidate`)**, provided its subtree does not read `cookies`/`headers`/`query`.
+3. **`<Suspense>` wrapping an `async` Server Component (or `<DinouCacheSlot revalidate={N}>`) that calls `noDynamic()` before its first `await`**, provided its subtree does not read `cookies`/`headers`/`query` or render `<DinouCacheSlot revalidate={0}>`.
 
 #### B. Postponed into a Dynamic PPR Hole (`data-ppr-hole` Fallback in `shell.html` + Streamed at Runtime)
 *(All cases require being **wrapped inside `<Suspense>`**)*:
-1. **`<Suspense>` wrapping an `async` Server Component by default** (without `noDynamic()` before its first `await` and outside a cached `DinouCacheSlot`), even if it only performs a pure `await` without reading `cookies`/`headers`/`query`.
+1. **`<Suspense>` wrapping an `async` Server Component by default** (without `noDynamic()` before its first `await`), even if it only performs a pure `await` without reading `cookies`/`headers`/`query`:
+   - **Uncached Dynamic Hole**: Normal `async` component or `<DinouCacheSlot revalidate={0}>` (executes on every request).
+   - **Cached Dynamic Hole**: `<DinouCacheSlot revalidate={N}>` ($N \ge 1$ or omitted `revalidate`) wrapping an `async` child without `noDynamic()` (`fallback` in `shell.html`, hole payload cached in `slots/<id>/slot.json` for $N$ seconds at runtime).
 2. **`<Suspense>` whose subtree reads `getContext().req.cookies`, `req.headers`, `req.query`, or `useSearchParams()`** (even if it called `noDynamic()` or is inside `<DinouCacheSlot revalidate={N}>`).
 3. **`<Suspense>` wrapping `<DinouCacheSlot revalidate={0}>`**.
 
 #### C. Full-Page Dynamic Bailout (No `shell.html`; 100% Per-Request Dynamic SSR)
-- Occurs whenever any dynamic operation from Group B (`cookies`, `headers`, `query`, `<DinouCacheSlot revalidate={0}>`, `res` mutations, or `export const revalidate = 0` in `page_functions.ts` / `layout_functions.ts`) happens **outside any `<Suspense>` boundary**.
+- Occurs whenever any dynamic operation (`cookies`, `headers`, `query`, `<DinouCacheSlot revalidate={0}>`, `res` mutations, or `export const revalidate = 0` in `page_functions.ts` / `layout_functions.ts`) happens **outside any `<Suspense>` boundary**.
 
 ---
 
 ### 7.5. `<DinouCacheSlot revalidate={N}>` ($N \ge 1$) Lifecycle & TTL Expiration Transition (`ppr = true`)
 
-When `ppr = true` and a `<DinouCacheSlot id="..." revalidate={N}>` ($N \ge 1$) does not read `cookies`/`headers`/`query`, it behaves **identically** whether it is wrapped in `<Suspense>` or rendered outside `<Suspense>`:
+When `ppr = true` and a `<DinouCacheSlot id="..." revalidate={N}>` ($N \ge 1$) does not read `cookies`/`headers`/`query`, wrapping it in `<Suspense>` vs. leaving it unwrapped gives the developer a clear choice between a **Cached Dynamic Hole** and a **Static Shell Slot**:
 
-1. **Build Time (`npm run build`)**:
-   - `DinouCacheSlot` executes its children, writes its serialized JSX to `.dinou/dist2/slots/<id>/slot.json` with `{ revalidate: N, generatedAt, inStaticShell: true }`, records its slot tags in `metadata.json` (`slotTags`), and bakes its resolved HTML into `shell.html`.
-2. **Runtime While Cache Is Valid ($t \le \text{generatedAt} + N$)**:
-   - The slot's HTML is served directly inside `shell.html`, and its child component executes **`0` times** at runtime.
-3. **Runtime Transition When `revalidate` ($N$ seconds) Expires ($t > \text{generatedAt} + N$)**:
-   - Unlike full-page ISR (which serves stale HTML and regenerates the whole page in the background), **Static-Shell Slot expiration is refreshed synchronously on the first request after expiration, but only re-executes the expired slot**:
-     - Before flushing `shell.html`, [`dinou/core/handler.js`](./dinou/core/handler.js) checks `await hasExpiredSlots(cachedItem.metadata.slotTags)` (and similarly for layout slots).
-     - When `hasExpiredSlots` returns `true`, Dinou awaits `revalidatePage(reqPath, { onlyRefreshSlots: true })` ([`dinou/core/cache-revalidate.js`](./dinou/core/cache-revalidate.js)).
-     - `revalidatePage(..., { onlyRefreshSlots: true })` deserializes `shell.page.json` and runs [`refreshNestedSlotsInTree`](./dinou/core/cache-slot.js), which **re-executes only the expired `<DinouCacheSlot>`** (without re-running the rest of the Static Shell), updates `.dinou/dist2/slots/<id>/slot.json` with a fresh `generatedAt`, and recomposes `.dinou/dist2/<route>/shell.html` and `shell.rsc`.
-     - Concurrent requests arriving at that exact moment are deduplicated via `inflightSlotRenders` and `enqueueRevalidation`, and the client immediately receives the updated `shell.html` (followed by the live stream of any Dynamic PPR Holes on the page).
+| Aspect | **1. Outside `<Suspense>`** (or **Inside `<Suspense>` + `noDynamic()`**) | **2. Inside `<Suspense>` (Default with `async` Child)** |
+|---|---|---|
+| **Role** | **Static Shell Slot** | **Cached Dynamic PPR Hole** |
+| **What goes into `shell.html`?** | The **final resolved HTML** of the slot | The **`<Suspense fallback={...}>`** (`<div data-ppr-hole="ppr-hole-X">`) |
+| **Runtime while cache is valid ($t \le \text{generatedAt} + N$)** | Served inside `shell.html` at 0ms TTFB (`0` runtime executions of the child component) | `shell.html` (with `fallback`) arrives at 0ms TTFB; hole streams from `slots/<id>/slot.json` in ~1ms (`0` re-executions of the child component after initial cache population) |
+| **Runtime transition when TTL expires ($t > \text{generatedAt} + N$) or after `revalidateTag()`** | `hasExpiredSlots(metadata.slotTags)` triggers `revalidatePage(reqPath, { onlyRefreshSlots: true })`, which re-executes **only** the expired slot and recomposes `shell.html` before responding | **`shell.html` (with `fallback`) is still flushed immediately at 0ms TTFB without waiting!** Inside `streamDynamicHoles`, `DinouCacheSlot` re-executes the child once, updates `slots/<id>/slot.json` for the next $N$s, and streams the fresh hole chunk |
+
 
 
 

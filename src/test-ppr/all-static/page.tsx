@@ -20,7 +20,18 @@ async function AllStaticSlotWidget() {
   const count = incrementRenderCount("all-static-slot-widget");
   return (
     <div data-testid="all-static-slot-resolved" data-render-count={String(count)}>
-      All-Static Cached Slot Widget Render #{count}
+      All-Static Cached Slot Widget (Unwrapped) Render #{count}
+    </div>
+  );
+}
+
+async function AllStaticSlotNoDynamicWidget() {
+  noDynamic();
+  await new Promise((r) => setTimeout(r, 15));
+  const count = incrementRenderCount("all-static-slot-nodynamic-widget");
+  return (
+    <div data-testid="all-static-slot-nodynamic-resolved" data-render-count={String(count)}>
+      All-Static Cached Slot Widget (Suspense + noDynamic) Render #{count}
     </div>
   );
 }
@@ -40,9 +51,12 @@ export default async function AllStaticPprPage() {
           <Suspense fallback={<div data-testid="all-static-nodynamic-fallback">Loading noDynamic...</div>}>
             <AllStaticNoDynamicWidget />
           </Suspense>
-          <Suspense fallback={<div data-testid="all-static-slot-fallback">Loading Slot...</div>}>
-            <DinouCacheSlot id="all-static-ppr-slot" revalidate={3600}>
-              <AllStaticSlotWidget />
+          <DinouCacheSlot id="all-static-ppr-slot" revalidate={3600}>
+            <AllStaticSlotWidget />
+          </DinouCacheSlot>
+          <Suspense fallback={<div data-testid="all-static-slot-nodynamic-fallback">Loading Slot noDynamic...</div>}>
+            <DinouCacheSlot id="all-static-ppr-slot-nodynamic" revalidate={3600}>
+              <AllStaticSlotNoDynamicWidget />
             </DinouCacheSlot>
           </Suspense>
         </div>

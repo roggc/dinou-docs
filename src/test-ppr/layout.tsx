@@ -81,18 +81,10 @@ export default async function TestPprLayout({ children }: { children: ReactNode 
             <LayoutStaticBanner />
           </Suspense>
 
-          {/* Layout Boundary 2: Static <Suspense> via <DinouCacheSlot revalidate={3600}> */}
-          <Suspense
-            fallback={
-              <div data-testid="layout-slot-cached-fallback" className="text-xs font-mono text-slate-500">
-                Loading Layout Cached Slot...
-              </div>
-            }
-          >
-            <DinouCacheSlot id="test-ppr-layout-slot" tag="tag-layout-slot" revalidate={3600}>
-              <LayoutCachedSlotContent />
-            </DinouCacheSlot>
-          </Suspense>
+          {/* Layout Item 2: <DinouCacheSlot revalidate={3600}> outside <Suspense> -> Static Shell */}
+          <DinouCacheSlot id="test-ppr-layout-slot" tag="tag-layout-slot" revalidate={3600}>
+            <LayoutCachedSlotContent />
+          </DinouCacheSlot>
 
           {/* Layout Boundary 3: Dynamic PPR Hole (<Suspense> + async without noDynamic) */}
           <Suspense
