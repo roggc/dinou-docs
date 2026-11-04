@@ -2,6 +2,8 @@ import React from "react";
 import {
   isPprBuildActive,
   isInsideSuspense,
+  isInsideOuterSuspenseOutsideSlot,
+  rollbackPprHolesAfter,
   isInsideCachedSlot,
   runInSuspense,
   getPprHoleCounter,
@@ -38,8 +40,7 @@ async function invokeServerComponentInPpr(fn, callFn) {
     isThenable(rawResult) &&
     !isCacheSlotComponent(fn) &&
     isPprBuildActive() &&
-    isInsideSuspense() &&
-    !isInsideCachedSlot() &&
+    isInsideOuterSuspenseOutsideSlot() &&
     !isSlotDiscoveryActive() &&
     !optedOut &&
     !isNoDynamicActive()
@@ -143,8 +144,8 @@ async function asyncRenderJSXToClientJSXInner(jsx, key = null) {
       if (jsx.type === Symbol.for("react.suspense")) {
         if (isPprBuildActive()) {
           return await runInSuspense(async (holeId, suspenseStore) => {
+            const countBefore = getPprHoleCounter();
             try {
-              const countBefore = getPprHoleCounter();
               const renderedChildren = await asyncRenderJSXToClientJSX(jsx.props?.children);
               const renderedFallback = await asyncRenderJSXToClientJSX(jsx.props?.fallback);
               const hasNestedSuspense = getPprHoleCounter() > countBefore;
@@ -167,11 +168,12 @@ async function asyncRenderJSXToClientJSXInner(jsx, key = null) {
               );
             } catch (err) {
               if (
-                !isInsideCachedSlot() &&
+                (suspenseStore?.slotDepthAtSuspense || 0) === 0 &&
                 ((err && err.$$typeof === Symbol.for("dinou.ppr.postpone")) ||
                   (err && typeof err?.then === "function") ||
                   (err && err?.$$typeof === Symbol.for("react.postpone")))
               ) {
+                rollbackPprHolesAfter(countBefore);
                 registerHole(holeId, { type: err.pprType || "suspense" });
                 const renderedFallback = await asyncRenderJSXToClientJSX(jsx.props?.fallback);
                 return cloneWithDevProps(

@@ -199,7 +199,7 @@ export default function DashboardPage() {
       isThenable(rawResult) &&
       !isCacheSlotComponent(fn) &&
       isPprBuildActive() &&
-      isInsideSuspense() &&
+      isInsideOuterSuspenseOutsideSlot() &&
       !isSlotDiscoveryActive() &&
       !optedOut &&
       !isNoDynamicActive()

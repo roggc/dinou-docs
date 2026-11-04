@@ -148,6 +148,16 @@ async function CachedSlotNoDynamicAsyncChild() {
   );
 }
 
+async function CachedSlotInnerSuspenseAsyncChild() {
+  await new Promise((r) => setTimeout(r, 15));
+  const count = incrementRenderCount("case8d-slot-wrapping-suspense-shell");
+  return (
+    <div data-testid="case8d-resolved" data-render-count={String(count)} className="text-sm font-mono text-emerald-700 dark:text-emerald-300">
+      Case 8D (&lt;DinouCacheSlot revalidate=3600&gt; Wrapping &lt;Suspense&gt; + Async Child &rarr; Static Shell) Render #{count}
+    </div>
+  );
+}
+
 // ============================================================================
 // CASE 9A/9B: <DinouCacheSlot> (omitted revalidate)
 // - 9A: Outside <Suspense> -> Static Shell Forever
@@ -214,11 +224,13 @@ async function InnerDynamicNestedHole() {
   );
 }
 
-function OuterStaticWrapperWithNestedDynamicHole() {
+async function OuterStaticWrapperWithNestedDynamicHole() {
+  noDynamic();
+  await new Promise((r) => setTimeout(r, 10));
   const outerCount = incrementRenderCount("case12-outer-static");
   return (
     <div data-testid="case12-outer-resolved" data-render-count={String(outerCount)} className="text-sm font-mono text-emerald-700 dark:text-emerald-300">
-      <div>Case 12 Outer Static &lt;Suspense&gt; Baked in Shell (Render #{outerCount})</div>
+      <div>Case 12 Outer Static &lt;Suspense&gt; (async + noDynamic) Baked in Shell (Render #{outerCount})</div>
       <Suspense fallback={<div data-testid="case12-inner-fallback">Loading Case 12 Inner Dynamic Hole...</div>}>
         <InnerDynamicNestedHole />
       </Suspense>
@@ -315,6 +327,11 @@ export default async function TestPprMatrixPage() {
             <CachedSlotNoDynamicAsyncChild />
           </DinouCacheSlot>
         </Suspense>
+        <DinouCacheSlot id="test-ppr-slot-outer-wrapping-suspense" tag="tag-ppr-outer-wrapping-suspense" revalidate={3600}>
+          <Suspense fallback={<div data-testid="case8d-fallback">Loading Case 8D Inner Suspense inside Slot...</div>}>
+            <CachedSlotInnerSuspenseAsyncChild />
+          </Suspense>
+        </DinouCacheSlot>
       </section>
 
       {/* CASE 9A/9B: <DinouCacheSlot> (omitted revalidate) */}

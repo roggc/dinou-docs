@@ -152,6 +152,32 @@ export function isInsideSuspense() {
   return Boolean(store && store.suspenseDepth > 0);
 }
 
+export function isInsideOuterSuspenseOutsideSlot() {
+  const store = getPprStore();
+  return Boolean(
+    store && store.suspenseDepth > 0 && store.hasOuterSuspenseOutsideSlot
+  );
+}
+
+export function rollbackPprHolesAfter(countBefore) {
+  const store = getPprStore();
+  if (!store) return;
+  const target = Number(countBefore) || 0;
+  const current = store.counter
+    ? store.counter.nextHoleIndex
+    : store.nextHoleIndex || 0;
+  if (current > target) {
+    for (let i = target + 1; i <= current; i++) {
+      store.holes.delete(`ppr-hole-${i}`);
+    }
+    if (store.counter) {
+      store.counter.nextHoleIndex = target;
+    } else {
+      store.nextHoleIndex = target;
+    }
+  }
+}
+
 export function resetPprHoles(startIndex = 0) {
   const store = getPprStore();
   if (store) {
@@ -199,6 +225,10 @@ export function runInSuspense(callback, explicitHoleId = null) {
     ? [...store.holeStack, holeId]
     : [holeId];
   const pendingEffects = [];
+  const slotDepthAtSuspense = cachedSlotStorage.getStore()?.depth || 0;
+  const hasOuterSuspenseOutsideSlot = Boolean(
+    store.hasOuterSuspenseOutsideSlot || slotDepthAtSuspense === 0
+  );
   const childStore = {
     ...store,
     suspenseDepth: store.suspenseDepth + 1,
@@ -206,6 +236,8 @@ export function runInSuspense(callback, explicitHoleId = null) {
     holeStack: nextStack,
     noDynamic: false,
     settled: false,
+    slotDepthAtSuspense,
+    hasOuterSuspenseOutsideSlot,
     pendingEffects,
     parentPendingEffects: Array.isArray(store.pendingEffects)
       ? store.pendingEffects
@@ -285,7 +317,12 @@ export function exitSuspense() {
 
 export function markDynamicAccess(type = "dynamic") {
   const store = getPprStore();
-  if (store && store.isPpr && store.suspenseDepth > 0) {
+  if (
+    store &&
+    store.isPpr &&
+    store.suspenseDepth > 0 &&
+    store.hasOuterSuspenseOutsideSlot
+  ) {
     const idx = store.counter ? store.counter.nextHoleIndex : store.nextHoleIndex;
     const holeId = store.currentHoleId || `ppr-hole-${idx}`;
     const error = new Error(
@@ -336,6 +373,8 @@ export default {
   getPprStore,
   isPprBuildActive,
   isInsideSuspense,
+  isInsideOuterSuspenseOutsideSlot,
+  rollbackPprHolesAfter,
   resetPprHoles,
   getPprHoleCounter,
   runInSuspense,

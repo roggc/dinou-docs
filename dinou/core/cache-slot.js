@@ -13,6 +13,7 @@ import { getJSX } from "./get-jsx.js";
 import {
   isPprBuildActive,
   isInsideSuspense,
+  isInsideOuterSuspenseOutsideSlot,
   deferPprSuspenseEffect,
   runWithPprContext,
   isInsideLayoutSegment,
@@ -487,7 +488,7 @@ async function DinouCacheSlot(props) {
   const slotId = id || tag || (Array.isArray(tags) ? tags[0] : null);
   if (!slotId) {
     if (isNoCache && !isSlotDiscoveryActive()) {
-      if (isPprBuildActive() && isInsideSuspense()) {
+      if (isPprBuildActive() && isInsideOuterSuspenseOutsideSlot()) {
         markDynamicAccess("slot-revalidate-0");
       } else {
         try {
@@ -571,7 +572,7 @@ async function DinouCacheSlot(props) {
   }
 
   if (isNoCache && !isSlotDiscoveryActive()) {
-    if (isPprBuildActive() && isInsideSuspense()) {
+    if (isPprBuildActive() && isInsideOuterSuspenseOutsideSlot()) {
       markDynamicAccess("slot-revalidate-0");
     } else {
       try {
@@ -598,7 +599,7 @@ async function DinouCacheSlot(props) {
   // triggers PPR postpone.
   if (
     isPprBuildActive() &&
-    isInsideSuspense() &&
+    isInsideOuterSuspenseOutsideSlot() &&
     cached &&
     !cached.metadata?.inStaticSuspense
   ) {
@@ -618,7 +619,7 @@ async function DinouCacheSlot(props) {
 
     if (typeof revalidateSeconds === "number" && revalidateSeconds < 1) {
       if (!isSlotDiscoveryActive()) {
-        if (isPprBuildActive() && isInsideSuspense()) {
+        if (isPprBuildActive() && isInsideOuterSuspenseOutsideSlot()) {
           markDynamicAccess("slot-revalidate-0");
         } else {
           try {
@@ -663,7 +664,7 @@ async function DinouCacheSlot(props) {
     } catch (e) {}
   }
 
-  const inPprSuspense = isPprBuildActive() && isInsideSuspense();
+  const inPprSuspense = isPprBuildActive() && isInsideOuterSuspenseOutsideSlot();
   const isPprShellBuild =
     isPprBuildActive() ||
     Boolean(getContext()?.platformContext?.isSSG) ||

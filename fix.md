@@ -60,9 +60,11 @@ This created a structural asymmetry between a **Slot Cache MISS** and a **Slot C
 
 ## 3. Behavior Model AFTER the Fix (How It Works Now)
 
-The architectural invariant enforced by the fix in `dinou/core/render-jsx-to-client-jsx.js` is:
+The architectural invariant enforced by the unified fix in `dinou/core/ppr-context.js` and `dinou/core/render-jsx-to-client-jsx.js` is:
 
-> **A cached `<DinouCacheSlot>` (`revalidate >= 1`, where `isInsideCachedSlot() === true`) is a self-contained vertical cache unit: any `async` Server Component and any `<Suspense>` boundary inside it must resolve into the cached `slot.json` payload, and must never postpone as a page-level `data-ppr-hole`.**
+> **Whether `<DinouCacheSlot>` belongs to the Static Shell or becomes a Cached Dynamic PPR Hole depends on the nesting order between `<Suspense>` and `<DinouCacheSlot>`:**
+> - **Scenario 2B (`<DinouCacheSlot>` outside wrapping `<Suspense>` inside, with no outer `<Suspense>` outside the slot)**: `slotDepthAtSuspense > 0` and `isInsideOuterSuspenseOutsideSlot() === false`. Any `async` Server Component and any `<Suspense>` boundary inside the slot resolves into `slot.json` and `shell.html`, preserving `Symbol.for("react.suspense")` in `slot.json` and never turning into a `<div data-ppr-hole>`.
+> - **Option A (`<Suspense>` outside wrapping `<DinouCacheSlot>` inside)**: `slotDepthAtSuspense === 0` on the outer `<Suspense>` and `isInsideOuterSuspenseOutsideSlot() === true`. Unless opted out with `noDynamic()`, the outer `<Suspense>` postpones at build time into a Cached Dynamic PPR Hole (`data-ppr-hole`) and caches `slot.json` when streamed at runtime.
 
 ```text
 +-----------------------------------------------------------------------------+
