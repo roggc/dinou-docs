@@ -442,6 +442,80 @@ When `ppr = true` and a `<DinouCacheSlot id="..." revalidate={N}>` ($N \ge 1$) d
 | **Runtime while cache is valid ($t \le \text{generatedAt} + N$)** | Served inside `shell.html` at 0ms TTFB (`0` runtime executions of the child component) | `shell.html` (with `fallback`) arrives at 0ms TTFB; hole streams from `slots/<id>/slot.json` in ~1ms (`0` re-executions of the child component after initial cache population) |
 | **Runtime transition when TTL expires ($t > \text{generatedAt} + N$) or after `revalidateTag()`** | `hasExpiredSlots(metadata.slotTags)` triggers `revalidatePage(reqPath, { onlyRefreshSlots: true })`, which re-executes **only** the expired slot and recomposes `shell.html` before responding | **`shell.html` (with `fallback`) is still flushed immediately at 0ms TTFB without waiting!** Inside `streamDynamicHoles`, `DinouCacheSlot` re-executes the child once, updates `slots/<id>/slot.json` for the next $N$s, and streams the fresh hole chunk |
 
+---
+
+### 7.6. Performance Best Practice in `ppr = true` Routes with Dynamic Holes: Unwrapped `async` vs. `<Suspense>` + `noDynamic()` vs. `<DinouCacheSlot id="...">`
+
+When a `ppr = true` route has **zero Dynamic Holes** (`holes.length === 0`, e.g., `/test-ppr/all-static`), Dinou promotes `shell.html` directly to a pure static `index.html`. At runtime, `serveStatic` delivers the file at 0ms TTFB and **never invokes `Page()` or traverses the component tree**. In that pure-static scenario, all static-shell forms behave identically at runtime.
+
+However, when a `ppr = true` route **does have at least one Dynamic Hole** (`holes.length > 0`), the runtime lifecycle on every HTTP request (`handlePprResume` in `dinou/core/server-core.js` + `streamDynamicHoles` in `dinou/core/ppr-runtime.js`) works in two phases:
+1. **Phase 1 (0ms TTFB)**: The server reads `.dinou/dist2/<route>/shell.html` from disk and flushes it immediately to the browser (`res.write(shellPrefix)`). The user sees the Static Shell (including any static `async` content already baked into `shell.html`) and the `fallback` placeholders of the Dynamic Holes right away.
+2. **Phase 2 (Runtime Tree Traversal to Resolve Dynamic Holes)**: Keeping the HTTP stream open, the server calls `getJSX()` and `streamDynamicHoles()` to walk the component tree from the root (`Layout` -> `Page`) in order to find and execute the `<Suspense>` boundaries that correspond to the Dynamic Holes (`holes` in `metadata.json`).
+
+#### Why Unwrapped `async` Components Delay Downstream Dynamic Holes
+Suppose a `ppr = true` route renders a heavy static `async` component (e.g., `<HeavyMarkdown />` taking `300ms` to parse Markdown) alongside a genuine Dynamic Hole (`<UserCart />` taking `50ms` to read cookies):
+
+```tsx
+export default async function Page() {
+  return (
+    <main>
+      {/* 1. Static Shell content (takes 300ms when executed) */}
+      <HeavyMarkdown />
+
+      {/* 2. Genuine Dynamic Hole (reads cookies, takes 50ms) */}
+      <Suspense fallback={<CartSkeleton />}>
+        <UserCart />
+      </Suspense>
+    </main>
+  );
+}
+```
+
+During **Phase 2 (`streamDynamicHoles`)**, as Dinou traverses `<main>`'s children:
+- If `<HeavyMarkdown />` is rendered **unwrapped** (or awaited directly inside `export default async function Page()`), Dinou does not know ahead of time whether `<HeavyMarkdown />` might return a nested `<Suspense>` hole inside its JSX. Therefore, `streamDynamicHoles` **must execute and `await <HeavyMarkdown />` (`300ms`)**, discard its output (since its HTML was already sent in `shell.html`), and only **then** reach `<Suspense><UserCart /></Suspense>` (`50ms`). As a result, `<UserCart />` streams to the browser at **$300\text{ms} + 50\text{ms} = 350\text{ms}$** instead of $50\text{ms}$!
+
+#### The Two Zero-Overhead Ways to Put `async` Content in the Static Shell
+To prevent static-shell `async` work from ever re-executing during Phase 2 (`streamDynamicHoles`), Dinou provides two short-circuit mechanisms:
+
+1. **`<Suspense>` + `noDynamic()` (`0.00ms` Memory Skip)**:
+   ```tsx
+   async function HeavyMarkdown() {
+     noDynamic(); // 👈 Static opt-out before first await
+     const html = await parseHeavyMarkdown(); // 300ms at build time ONLY
+     return <article dangerouslySetInnerHTML={{ __html: html }} />;
+   }
+
+   // In Page:
+   <Suspense fallback={null}>
+     <HeavyMarkdown />
+   </Suspense>
+   ```
+   - **At Build Time**: `noDynamic()` disables the PPR hole for this `<Suspense>`, so `<HeavyMarkdown />` resolves into `shell.html` and is **not** added to `metadata.holes`.
+   - **At Runtime (`streamDynamicHoles`)**: As soon as `streamDynamicHoles` encounters a `<Suspense>` boundary whose ID is not in `metadata.holes` (or when `noDynamic()` throws `SKIP_STATIC_SUSPENSE_SYMBOL` on line 1 during runtime resume), it **aborts that entire subtree in `0.00ms` in memory**, without executing `await parseHeavyMarkdown()` and without reading disk. `<UserCart />` starts immediately and resolves in **$50\text{ms}$**.
+
+2. **`<DinouCacheSlot id="...">` Outside `<Suspense>` (or Inside `<Suspense>` + `noDynamic()`) (`~1ms` Disk Cache Skip + Micro-ISR)**:
+   ```tsx
+   <DinouCacheSlot id="heavy-markdown">
+     <HeavyMarkdown />
+   </DinouCacheSlot>
+   ```
+   - **At Build Time**: Because it is outside `<Suspense>`, it resolves into `shell.html` and saves its serialized payload to `.dinou/dist2/<route>/slots/heavy-markdown/slot.json` (`inStaticShell: true`).
+   - **At Runtime (`streamDynamicHoles`)**: When `streamDynamicHoles` visits `<DinouCacheSlot id="heavy-markdown">`, `DinouCacheSlot` reads `slot.json` in `~1ms` and **never invokes `<HeavyMarkdown />`**. Plus, it unlocks independent slot revalidation (`revalidate={N}`, `revalidateTag()`, or the client `refreshSlot()` button).
+
+#### 3-Way Comparison for Static-Shell `async` Components in `ppr = true` Routes with Dynamic Holes
+
+| Approach for a Static-Shell `async` Component ($300\text{ms}$) | Baked into `shell.html` at Build? (`0\text{ms}` TTFB) | Re-executes the $300\text{ms}$ `await` at Runtime during `streamDynamicHoles`? | Extra Delay Added to Downstream Dynamic Holes (`<UserCart />`) | Supports Independent Micro-ISR (`revalidate={N}`, `revalidateTag`, `refreshSlot`)? |
+|---|---|---|---|---|
+| **1. Unwrapped `<HeavyMarkdown />` (or `await` directly inside `Page()`)** | ✅ Yes | ❌ **Yes** (re-runs on every request to inspect its JSX subtree for nested holes) | **$+300\text{ms}$** (delays downstream holes) | ❌ No |
+| **2. `<Suspense><HeavyMarkdownWithNoDynamic /></Suspense>`** | ✅ Yes | ✅ **No (`0.00ms`)** (`SKIP_STATIC_SUSPENSE_SYMBOL` aborts on line 1 in memory) | **$0\text{ms}$** | ❌ No (invalidated only via full-page ISR) |
+| **3. `<DinouCacheSlot id="..."><HeavyMarkdown /></DinouCacheSlot>`** *(unwrapped, or inside `<Suspense>` + `noDynamic()`)* | ✅ Yes | ✅ **No (`~1ms`)** (short-circuits from `slots/<id>/slot.json` without running `<HeavyMarkdown />`) | **$\approx 1\text{ms}$** | ✅ **Yes** |
+
+#### Golden Rule for `ppr = true` Routes
+Whenever a `ppr = true` route contains at least one Dynamic Hole, **avoid leaving heavy `async` static-shell work unwrapped in `Page()`**. Instead:
+- Wrap it in **`<Suspense>` + `noDynamic()`** if it is pure static build-time work ($0.00\text{ms}$ runtime skip in memory).
+- Wrap it in **`<DinouCacheSlot id="...">`** if you also want independent caching, `revalidate={N}`, `revalidateTag()`, or interactive `refreshSlot()` ($\approx 1\text{ms}$ runtime skip from disk).
+
+
 
 
 
