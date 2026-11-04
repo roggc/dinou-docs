@@ -189,18 +189,29 @@ function OuterStaticWrapperWithNestedDynamicHole() {
   );
 }
 
+async function UnwrappedAsyncChildOutsideSuspense() {
+  await new Promise((r) => setTimeout(r, 10));
+  const count = incrementRenderCount("case1b-unwrapped-async-child");
+  return (
+    <p data-testid="case1b-unwrapped-child-shell" data-render-count={String(count)} className="text-sm font-mono text-emerald-700 dark:text-emerald-300 mt-1">
+      Case 1B Unwrapped Async Child (Outside &lt;Suspense&gt;) Baked in Shell! Render #{count}
+    </p>
+  );
+}
+
 export default async function TestPprMatrixPage() {
   await new Promise((r) => setTimeout(r, 10));
   const shellCount = incrementRenderCount("case1-page-static-shell");
 
   return (
     <div className="space-y-6" data-testid="test-ppr-matrix-page">
-      {/* CASE 1: Top-level Async Server Component outside <Suspense> */}
+      {/* CASE 1: Top-level & Child Async Server Components outside <Suspense> */}
       <section className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-        <h3 className="font-semibold text-slate-900 dark:text-white">Case 1: Top-Level Async Server Component (Outside &lt;Suspense&gt;)</h3>
+        <h3 className="font-semibold text-slate-900 dark:text-white">Case 1: Top-Level &amp; Child Async Server Components (Outside &lt;Suspense&gt;)</h3>
         <p data-testid="case1-static-shell" data-render-count={String(shellCount)} className="text-sm font-mono text-emerald-700 dark:text-emerald-300">
-          Case 1 Static Shell Baked at Build! Render #{shellCount}
+          Case 1A Static Shell Baked at Build! Render #{shellCount}
         </p>
+        <UnwrappedAsyncChildOutsideSuspense />
       </section>
 
       {/* CASE 2: Default Dynamic Hole (<Suspense> + async Server Component) */}
