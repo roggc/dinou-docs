@@ -45,6 +45,7 @@ async function spliceDynamicHolesIntoShell(
   startHoleIndex = 0
 ) {
   const knownHoleIds = new Set();
+  const staticParentHoleIds = new Set();
   function collectKnownHoles(node) {
     if (!node || typeof node !== "object") return;
     if (Array.isArray(node)) {
@@ -54,6 +55,9 @@ async function spliceDynamicHolesIntoShell(
     if (node.$$typeof === Symbol.for("react.transitional.element")) {
       if (node.props && typeof node.props["data-ppr-hole"] === "string") {
         knownHoleIds.add(node.props["data-ppr-hole"]);
+      }
+      if (node.props && typeof node.props["data-ppr-static-parent"] === "string") {
+        staticParentHoleIds.add(node.props["data-ppr-static-parent"]);
       }
       if (node.props && typeof node.props === "object") {
         for (const val of Object.values(node.props)) {
@@ -172,7 +176,10 @@ async function spliceDynamicHolesIntoShell(
         liveHolesMap.set(currentHoleId, current);
         return;
       }
-      await runInRuntimeStaticSuspense(async () => {
+      const runStaticScope = staticParentHoleIds.has(currentHoleId)
+        ? runInRuntimeDynamicHole
+        : runInRuntimeStaticSuspense;
+      await runStaticScope(async () => {
         if (current.props?.children) {
           await traverse(current.props.children);
         }
@@ -259,7 +266,8 @@ async function streamDynamicHoles(
   writer,
   encoder,
   platformContext,
-  isDevelopment = false
+  isDevelopment = false,
+  staticParentHoles = null
 ) {
   let holeIndex = 0;
   const holePromises = [];
@@ -415,7 +423,11 @@ async function streamDynamicHoles(
       // Static <Suspense> boundary: do not re-stream it, but traverse its children & fallback
       // in the same order as asyncRenderJSXToClientJSX so nested dynamic <Suspense> holes are
       // discovered and holeIndex remains synchronized.
-      await runInRuntimeStaticSuspense(async () => {
+      const runStaticScope =
+        staticParentHoles && staticParentHoles.has(currentHoleId)
+          ? runInRuntimeDynamicHole
+          : runInRuntimeStaticSuspense;
+      await runStaticScope(async () => {
         if (current.props?.children) {
           await traverse(current.props.children);
         }
@@ -530,13 +542,25 @@ async function handlePprResume({
           { skipLayoutProbe: true }
         );
 
+        const staticParentHoles =
+          typeof shellPrelude === "string"
+            ? new Set(
+                [
+                  ...shellPrelude.matchAll(
+                    /data-ppr-static-parent="(ppr-hole-\d+)"/g
+                  ),
+                ].map((m) => m[1])
+              )
+            : null;
+
         await streamDynamicHoles(
           jsx,
           holes,
           writer,
           encoder,
           platformContext,
-          isDevelopment
+          isDevelopment,
+          staticParentHoles
         );
       });
     } catch (streamErr) {

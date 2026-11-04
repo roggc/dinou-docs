@@ -2,7 +2,9 @@ import React from "react";
 import {
   isPprBuildActive,
   isInsideSuspense,
+  isInsideCachedSlot,
   runInSuspense,
+  getPprHoleCounter,
   commitPprSuspenseEffects,
   registerHole,
   markDynamicAccess,
@@ -37,6 +39,7 @@ async function invokeServerComponentInPpr(fn, callFn) {
     !isCacheSlotComponent(fn) &&
     isPprBuildActive() &&
     isInsideSuspense() &&
+    !isInsideCachedSlot() &&
     !isSlotDiscoveryActive() &&
     !optedOut &&
     !isNoDynamicActive()
@@ -141,23 +144,33 @@ async function asyncRenderJSXToClientJSXInner(jsx, key = null) {
         if (isPprBuildActive()) {
           return await runInSuspense(async (holeId, suspenseStore) => {
             try {
+              const countBefore = getPprHoleCounter();
               const renderedChildren = await asyncRenderJSXToClientJSX(jsx.props?.children);
               const renderedFallback = await asyncRenderJSXToClientJSX(jsx.props?.fallback);
+              const hasNestedSuspense = getPprHoleCounter() > countBefore;
               await commitPprSuspenseEffects(suspenseStore);
               return cloneWithDevProps(
                 jsx,
                 {
                   ...jsx.props,
-                  children: renderedChildren,
+                  ...(hasNestedSuspense ? { "data-ppr-static-parent": holeId } : {}),
+                  children: hasNestedSuspense
+                    ? React.createElement(
+                        "div",
+                        { "data-ppr-static-parent": holeId, style: { display: "contents" } },
+                        renderedChildren
+                      )
+                    : renderedChildren,
                   fallback: renderedFallback,
                 },
                 key ?? jsx.key
               );
             } catch (err) {
               if (
-                (err && err.$$typeof === Symbol.for("dinou.ppr.postpone")) ||
-                (err && typeof err?.then === "function") ||
-                (err && err?.$$typeof === Symbol.for("react.postpone"))
+                !isInsideCachedSlot() &&
+                ((err && err.$$typeof === Symbol.for("dinou.ppr.postpone")) ||
+                  (err && typeof err?.then === "function") ||
+                  (err && err?.$$typeof === Symbol.for("react.postpone")))
               ) {
                 registerHole(holeId, { type: err.pprType || "suspense" });
                 const renderedFallback = await asyncRenderJSXToClientJSX(jsx.props?.fallback);

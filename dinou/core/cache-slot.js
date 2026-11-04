@@ -659,7 +659,7 @@ async function DinouCacheSlot(props) {
     try {
       const deduped = await inflightSlotRenders.get(storageKey);
       commitSlotTags(slotTagsToCommit);
-      return wrapWithBoundary(deduped, true);
+      return wrapWithBoundary(deduped, !isPprBuildActive());
     } catch (e) {}
   }
 
