@@ -452,16 +452,17 @@ When `ppr = true`, every component in the route tree falls into one of three des
 
 ---
 
-### 7.6. `<DinouCacheSlot revalidate={N}>` ($N \ge 1$) Lifecycle & TTL Expiration Transition (`ppr = true`)
+### 7.6. `<DinouCacheSlot revalidate={N}>` ($N \ge 1$) Lifecycle & TTL Expiration Transition
 
-When `ppr = true` and a `<DinouCacheSlot id="..." revalidate={N}>` ($N \ge 1$) does not read `cookies`/`headers`/`query`, wrapping it in `<Suspense>` vs. leaving it unwrapped gives the developer a clear choice between a **Cached Dynamic Hole** and a **Static Shell Slot**:
+When a `<DinouCacheSlot id="..." revalidate={N}>` ($N \ge 1$) does not read `cookies`/`headers`/`query`, wrapping it in `<Suspense>` (when `ppr = true`) vs. keeping it in the Static Shell gives the developer two complementary UX patterns with **zero TTFB blocking**:
 
-| Aspect | **1. Outside `<Suspense>`** (or **Inside `<Suspense>` + `noDynamic()`**) | **2. Inside `<Suspense>` (Default with `async` Child)** |
+| Aspect | **1. Static Shell Slot** (`ppr = false`, or `ppr = true` **Outside `<Suspense>`** / **Inside `<Suspense>` + `noDynamic()`**) | **2. Cached Dynamic PPR Hole** (`ppr = true` **Inside `<Suspense>`** with `async` Child) |
 |---|---|---|
-| **Role** | **Static Shell Slot** | **Cached Dynamic PPR Hole** |
-| **What goes into `shell.html`?** | The **final resolved HTML** of the slot | The **`<Suspense fallback={...}>`** (`<div data-ppr-hole="ppr-hole-X">`) |
-| **Runtime while cache is valid ($t \le \text{generatedAt} + N$)** | Served inside `shell.html` at 0ms TTFB (`0` runtime executions of the child component) | `shell.html` (with `fallback`) arrives at 0ms TTFB; hole streams from `slots/<id>/slot.json` in ~1ms (`0` re-executions of the child component after initial cache population) |
-| **Runtime transition when TTL expires ($t > \text{generatedAt} + N$) or after `revalidateTag()`** | `hasExpiredSlots(metadata.slotTags)` triggers `revalidatePage(reqPath, { onlyRefreshSlots: true })`, which re-executes **only** the expired slot and recomposes `shell.html` before responding | **`shell.html` (with `fallback`) is still flushed immediately at 0ms TTFB without waiting!** Inside `streamDynamicHoles`, `DinouCacheSlot` re-executes the child once, updates `slots/<id>/slot.json` for the next $N$s, and streams the fresh hole chunk |
+| **Role** | **Static Shell Slot (`inStaticShell: true`)** | **Cached Dynamic PPR Hole (`inStaticShell: false`)** |
+| **What goes into `index.html` / `shell.html`?** | The **final resolved HTML** of the slot | The **`<Suspense fallback={...}>`** (`<div data-ppr-hole="ppr-hole-X">`) |
+| **Runtime while cache is valid ($t \le \text{generatedAt} + N$)** | Served inside `index.html` / `shell.html` at **0ms TTFB** (`0` runtime executions of the child component) | `shell.html` (with `fallback`) arrives at **0ms TTFB**; hole streams from `slots/<id>/slot.json` in ~1ms (`0` re-executions of the child component after initial cache population) |
+| **Runtime transition when TTL expires ($t > \text{generatedAt} + N$)** | **Stale-While-Revalidate (Background ISR, 0ms TTFB)**: The server immediately serves the existing `index.html` / `shell.html` (and skips re-executing the slot during `streamDynamicHoles`), while `revalidatePage(reqPath, { onlyRefreshSlots: true })` runs **in the background** to re-execute only the expired slot and update `slot.json` and `index.html` / `shell.html` for subsequent requests | **Fresh Stream with Fallback (0ms TTFB)**: `shell.html` (with `fallback`) is flushed immediately at 0ms TTFB; while the user sees the `<Suspense fallback>`, `streamDynamicHoles` re-executes the child once, updates `slots/<id>/slot.json` for the next $N$s, and streams the **fresh** hole chunk in that same response |
+| **Explicit on-demand invalidation (`await revalidateTag()` or `refreshSlot()`)** | Synchronous update during the `revalidateTag()` / `refreshSlot()` call (`Read-Your-Own-Writes`) | `revalidateTag()` deletes `slot.json` in ~1ms; next visit streams fresh hole behind `fallback` |
 
 ---
 

@@ -45,6 +45,11 @@ if (!globalThis[RECENT_FRESH_KEY]) {
 }
 const recentFreshSlotRenders = globalThis[RECENT_FRESH_KEY];
 
+const REVAL_QUEUE_STORAGE_KEY = Symbol.for("dinou.reval.queue.storage");
+function isRevalidationActive() {
+  return Boolean(globalThis[REVAL_QUEUE_STORAGE_KEY]?.getStore());
+}
+
 const BG_REVAL_KEY = Symbol.for("dinou.slot.background.revalidations");
 if (!globalThis[BG_REVAL_KEY]) {
   globalThis[BG_REVAL_KEY] = new Set();
@@ -632,7 +637,14 @@ async function DinouCacheSlot(props) {
       revalidateSeconds > 0 &&
       now > generatedAt + revalidateSeconds * 1000;
 
-    if (!isExpired) {
+    const serveStaleWhileRevalidate =
+      isExpired &&
+      Boolean(meta.inStaticShell) &&
+      !isRevalidationActive() &&
+      !isPprBuildActive() &&
+      !getContext()?.platformContext?.isSSG;
+
+    if (!isExpired || serveStaleWhileRevalidate) {
       try {
         const restored = deserializeJSX(cached.content);
         const withRefreshedNested = await refreshNestedSlotsInTree(restored, slotId);
@@ -652,7 +664,11 @@ async function DinouCacheSlot(props) {
   }
 
   const inPprSuspense = isPprBuildActive() && isInsideSuspense();
-  const isPprShellBuild = isPprBuildActive();
+  const isPprShellBuild =
+    isPprBuildActive() ||
+    Boolean(getContext()?.platformContext?.isSSG) ||
+    isRevalidationActive() ||
+    !getContext()?._isPprRuntimeResume;
 
   const renderPromise = (async () => {
     const resolved = await runInCachedSlot(async () => {
@@ -796,7 +812,16 @@ async function getSlotJSX(slotId, options = {}) {
         revalidateSeconds > 0 &&
         now > generatedAt + revalidateSeconds * 1000);
 
-    if (!isExpired && !options.fresh) {
+    const serveStaleWhileRevalidate =
+      isExpired &&
+      !isNoCache &&
+      !options.fresh &&
+      Boolean(meta.inStaticShell) &&
+      !isRevalidationActive() &&
+      !isPprBuildActive() &&
+      !getContext()?.platformContext?.isSSG;
+
+    if ((!isExpired && !options.fresh) || serveStaleWhileRevalidate) {
       try {
         const restored = deserializeJSX(cached.content);
         return await refreshNestedSlotsInTree(restored, targetId, options);

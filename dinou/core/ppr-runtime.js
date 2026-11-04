@@ -511,6 +511,7 @@ async function handlePprResume({
 
       const dynamicState = { value: true };
       const context = createRequestContext(simReq, bridge, platformContext, dynamicState);
+      context._isPprRuntimeResume = true;
       if (typeof copyCustomContextProperties === "function") {
         copyCustomContextProperties(rootContext, context);
       }
