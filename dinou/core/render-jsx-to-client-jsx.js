@@ -2,12 +2,14 @@ import React from "react";
 import { createRequire } from "node:module";
 import {
   isPprBuildActive,
+  getPprStore,
   isInsideSuspense,
   isInsideOuterSuspenseOutsideSlot,
   rollbackPprHolesAfter,
   isInsideCachedSlot,
   getActiveCachedSlotStore,
   getActiveRuntimeDynamicHoleStore,
+  runInRuntimeDynamicHole,
   runInSuspense,
   getPprHoleCounter,
   commitPprSuspenseEffects,
@@ -496,12 +498,19 @@ function isClientComponent(type) {
   );
 }
 
+async function DinouSuspenseHoleBoundary({ holeId, children }) {
+  return await runInRuntimeDynamicHole(
+    () => asyncRenderJSXToClientJSX(children),
+    holeId
+  );
+}
+
 async function asyncRenderJSXToClientJSX(jsx, key = null) {
   if (isPageRootElement(jsx)) {
     return await runInPageSegment(async () => {
       const resolved = await asyncRenderJSXToClientJSXInner(jsx, key);
       const ctx = getContext();
-      if (ctx) {
+      if (ctx && getPprStore()) {
         ctx._resolvedPageClientJsx = resolved;
       }
       return resolved;
@@ -526,21 +535,11 @@ async function asyncRenderJSXToClientJSXInner(jsx, key = null) {
   ) {
     return jsx;
   } else if (Array.isArray(jsx)) {
-    if (isPprBuildActive()) {
-      const results = [];
-      for (const child of jsx) {
-        results.push(await asyncRenderJSXToClientJSX(child, child?.key ?? null));
-      }
-      return results;
+    const results = [];
+    for (const child of jsx) {
+      results.push(await asyncRenderJSXToClientJSX(child, child?.key ?? null));
     }
-    return await Promise.all(
-      jsx.map((child) =>
-        asyncRenderJSXToClientJSX(
-          child,
-          child?.key ?? null
-        )
-      )
-    );
+    return results;
   } else if (typeof jsx === "symbol") {
     if (jsx === Symbol.for("react.fragment")) {
       // Handle Fragment as an empty props object
@@ -558,7 +557,12 @@ async function asyncRenderJSXToClientJSXInner(jsx, key = null) {
           return await runInSuspense(async (holeId, suspenseStore) => {
             const countBefore = getPprHoleCounter();
             try {
-              const renderedChildren = await asyncRenderJSXToClientJSX(jsx.props?.children);
+              const renderedChildren = isInsideCachedSlot()
+                ? await asyncRenderJSXToClientJSX(jsx.props?.children)
+                : await runInRuntimeDynamicHole(
+                    () => asyncRenderJSXToClientJSX(jsx.props?.children),
+                    holeId
+                  );
               const renderedFallback = await asyncRenderJSXToClientJSX(jsx.props?.fallback);
               const hasNestedSuspense = getPprHoleCounter() > countBefore;
               await commitPprSuspenseEffects(suspenseStore);
@@ -607,10 +611,48 @@ async function asyncRenderJSXToClientJSXInner(jsx, key = null) {
             }
           });
         }
-        return await runInSuspense(async () => {
+        if (isInsideCachedSlot()) {
+          return await runInSuspense(async () => {
+            return cloneWithDevProps(
+              jsx,
+              await asyncRenderJSXToClientJSX(jsx.props),
+              key ?? jsx.key
+            );
+          });
+        }
+        if (Boolean(getPprStore()) || Boolean(getActiveRuntimeDynamicHoleStore())) {
+          return await runInSuspense(async (holeId) => {
+            const renderedChildren = await runInRuntimeDynamicHole(
+              () => asyncRenderJSXToClientJSX(jsx.props?.children),
+              holeId
+            );
+            const renderedFallback = await asyncRenderJSXToClientJSX(jsx.props?.fallback);
+            return cloneWithDevProps(
+              jsx,
+              {
+                ...jsx.props,
+                children: renderedChildren,
+                fallback: renderedFallback,
+              },
+              key ?? jsx.key
+            );
+          });
+        }
+        if (jsx.props?.children?.type === DinouSuspenseHoleBoundary) {
+          return jsx;
+        }
+        return await runInSuspense(async (holeId) => {
+          const renderedFallback = await asyncRenderJSXToClientJSX(jsx.props?.fallback);
           return cloneWithDevProps(
             jsx,
-            await asyncRenderJSXToClientJSX(jsx.props),
+            {
+              ...jsx.props,
+              children: React.createElement(DinouSuspenseHoleBoundary, {
+                holeId,
+                children: jsx.props?.children,
+              }),
+              fallback: renderedFallback,
+            },
             key ?? jsx.key
           );
         });
@@ -704,21 +746,11 @@ async function asyncRenderJSXToClientJSXInner(jsx, key = null) {
       return jsx;
     } else {
       // Process object props (e.g., { className: "foo" })
-      if (isPprBuildActive()) {
-        const entries = [];
-        for (const [propName, value] of Object.entries(jsx)) {
-          entries.push([propName, await asyncRenderJSXToClientJSX(value)]);
-        }
-        return Object.fromEntries(entries);
+      const entries = [];
+      for (const [propName, value] of Object.entries(jsx)) {
+        entries.push([propName, await asyncRenderJSXToClientJSX(value)]);
       }
-      return Object.fromEntries(
-        await Promise.all(
-          Object.entries(jsx).map(async ([propName, value]) => [
-            propName,
-            await asyncRenderJSXToClientJSX(value),
-          ])
-        )
-      );
+      return Object.fromEntries(entries);
     }
   } else {
     throw new Error("Not implemented");

@@ -33,6 +33,7 @@ export function runInRuntimeDynamicHole(callback, holeId = null) {
       depth: 0,
       holeId: holeId || prev?.holeId || null,
       idCount: 0,
+      childHoleCount: 0,
     },
     callback
   );
@@ -161,7 +162,8 @@ export function isLayoutChildrenPlaceholder(el) {
 
 export function runInPageSegment(callback, storeOverride = null) {
   const prev = pageSegmentStorage.getStore();
-  const store = storeOverride || prev || { active: true, idCount: 0 };
+  const store =
+    storeOverride || prev || { active: true, idCount: 0, holeCount: 0 };
   return pageSegmentStorage.run(store, callback);
 }
 
@@ -175,7 +177,8 @@ export function isInsidePageSegment() {
 
 export function runInLayoutSegment(callback, storeOverride = null) {
   const prev = layoutSegmentStorage.getStore();
-  const store = storeOverride || prev || { active: true, idCount: 0 };
+  const store =
+    storeOverride || prev || { active: true, idCount: 0, holeCount: 0 };
   return layoutSegmentStorage.run(store, callback);
 }
 
@@ -285,7 +288,29 @@ export function getPprHoleCounter() {
 export function runInSuspense(callback, explicitHoleId = null) {
   const store = getPprStore();
   if (!store) {
-    return callback(null, null);
+    let holeId = explicitHoleId;
+    if (!holeId) {
+      const holeStore = getActiveRuntimeDynamicHoleStore();
+      const layoutStore = getActiveLayoutSegmentStore();
+      const pageStore = getActivePageSegmentStore();
+      if (holeStore && holeStore.holeId) {
+        holeStore.childHoleCount = (holeStore.childHoleCount || 0) + 1;
+        holeId = `${holeStore.holeId}-${holeStore.childHoleCount}`;
+      } else if (
+        layoutStore &&
+        layoutStore.active &&
+        !isInsidePageSegment()
+      ) {
+        layoutStore.holeCount = (layoutStore.holeCount || 0) + 1;
+        holeId = `layout-hole-${layoutStore.holeCount}`;
+      } else if (pageStore && pageStore.active) {
+        pageStore.holeCount = (pageStore.holeCount || 0) + 1;
+        holeId = `ppr-hole-${pageStore.holeCount}`;
+      } else {
+        holeId = "ppr-hole-1";
+      }
+    }
+    return callback(holeId, null);
   }
   let holeId = explicitHoleId;
   if (!holeId) {

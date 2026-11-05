@@ -17,9 +17,12 @@ import {
   markPageRootElement,
   markLayoutRootElement,
   createLayoutChildrenPlaceholder,
+  runInPageSegment,
   runInLayoutSegment,
   isPprBuildActive,
+  getPprStore,
 } from "./ppr-context.js";
+import { getContext } from "./request-context.js";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
@@ -158,6 +161,14 @@ async function getJSX(
           `no_layout_not_found`,
         );
         if (existsSync(noLayoutNotFoundPath)) {
+          if (
+            !isPprBuildActive() &&
+            !getPprStore() &&
+            !getContext()?._isPprRuntimeResume &&
+            !options?.skipLayoutProbe
+          ) {
+            jsx = await runInPageSegment(() => asyncRenderJSXToClientJSX(jsx));
+          }
           return jsx;
         }
       }
@@ -190,6 +201,15 @@ async function getJSX(
       }
 
       jsx = markPageRootElement(React.createElement(Page, props));
+    }
+
+    if (
+      !isPprBuildActive() &&
+      !getPprStore() &&
+      !getContext()?._isPprRuntimeResume &&
+      !options?.skipLayoutProbe
+    ) {
+      jsx = await runInPageSegment(() => asyncRenderJSXToClientJSX(jsx));
     }
 
     // 2. Segmented handling for Page: If only the page is requested, return without layouts
@@ -226,7 +246,7 @@ async function getJSX(
 
   if (layouts && Array.isArray(layouts)) {
     let index = 0;
-    const layoutSegmentStore = { active: true, idCount: 0 };
+    const layoutSegmentStore = { active: true, idCount: 0, holeCount: 0 };
     for (const [layoutPath, dParams, slots] of layouts.reverse()) {
       const layoutModule = await importModule(layoutPath);
       const layoutFolderPath = path.dirname(layoutPath);
@@ -244,6 +264,7 @@ async function getJSX(
         const slotFilePath = slotValue?.slotPath || slotValue?.props?.__modulePath;
         const slotParams = slotValue?.slotParams || slotValue?.props?.params || {};
         const prevSlotIdCount = layoutSegmentStore.idCount;
+        const prevSlotHoleCount = layoutSegmentStore.holeCount;
         try {
           let elementToRender;
           if (slotValue && slotValue.slotPath) {
@@ -264,6 +285,7 @@ async function getJSX(
           updatedSlotElement = isPprBuildActive() ? elementToRender : resolvedSlot;
         } catch (e) {
           layoutSegmentStore.idCount = prevSlotIdCount;
+          layoutSegmentStore.holeCount = prevSlotHoleCount;
           if (slotFilePath) {
             const realSlotFolder = path.dirname(slotFilePath);
 
@@ -339,6 +361,7 @@ async function getJSX(
         }
       } else {
         const prevLayoutIdCount = layoutSegmentStore.idCount;
+        const prevLayoutHoleCount = layoutSegmentStore.holeCount;
         try {
           const placeholder = createLayoutChildrenPlaceholder();
           const testElement = React.createElement(Layout, props, placeholder);
@@ -349,6 +372,7 @@ async function getJSX(
           jsx = replaceLayoutChildrenPlaceholder(resolvedLayout, jsx, placeholder);
         } catch (layoutErr) {
           layoutSegmentStore.idCount = prevLayoutIdCount;
+          layoutSegmentStore.holeCount = prevLayoutHoleCount;
           console.warn(
             `[Dinou] Layout ${layoutPath} failed during render, isolating layout error:`,
             layoutErr?.message || layoutErr
