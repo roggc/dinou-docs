@@ -72,7 +72,10 @@ function InnerSlotSyncBadge({ renderedAt }: { renderedAt: string }) {
       className="p-3 rounded-lg border border-amber-500/30 bg-amber-500/10 text-xs space-y-1.5 mt-2"
     >
       <div className="font-semibold text-amber-700 dark:text-amber-300">
-        4B. Inner Nested &lt;DinouCacheSlot&gt; Sync Server Component (rendered at {renderedAt})
+        4B. Inner Nested &lt;DinouCacheSlot&gt; Sync Server Component{" "}
+        <span suppressHydrationWarning className="opacity-75">
+          (rendered at {renderedAt})
+        </span>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <label htmlFor={innerId} className="font-mono">
@@ -98,7 +101,10 @@ function OuterSlotSyncContainer({ outerRenderedAt }: { outerRenderedAt: string }
       className="p-3.5 rounded-lg border border-emerald-500/30 bg-emerald-500/5 text-xs space-y-2"
     >
       <div className="font-semibold text-emerald-700 dark:text-emerald-300">
-        4A. Outer &lt;DinouCacheSlot&gt; Sync Server Component (rendered at {outerRenderedAt})
+        4A. Outer &lt;DinouCacheSlot&gt; Sync Server Component{" "}
+        <span suppressHydrationWarning className="opacity-75">
+          (rendered at {outerRenderedAt})
+        </span>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <label htmlFor={outerId} className="font-mono">
@@ -151,7 +157,7 @@ function NoDynamicSyncChild({ loadedLabel }: { loadedLabel: string }) {
 
 async function StaticNoDynamicBoundary() {
   noDynamic();
-  await new Promise((r) => setTimeout(r, 5));
+  await Promise.resolve();
   return <NoDynamicSyncChild loadedLabel="baked into static shell" />;
 }
 
@@ -159,8 +165,8 @@ async function StaticNoDynamicBoundary() {
 function DynamicHoleSyncChild({ reqPath, streamedAt }: { reqPath: string; streamedAt: string }) {
   const holeInputId = useId();
   const memoText = useMemo(
-    () => `Streamed PPR Hole on ${reqPath} at ${streamedAt}`,
-    [reqPath, streamedAt]
+    () => `Streamed PPR Hole on ${reqPath}`,
+    [reqPath]
   );
 
   return (
@@ -170,7 +176,10 @@ function DynamicHoleSyncChild({ reqPath, streamedAt }: { reqPath: string; stream
       className="p-3 rounded-lg border border-purple-500/30 bg-purple-500/5 text-xs space-y-1.5"
     >
       <div className="font-semibold text-purple-600 dark:text-purple-400">
-        6. Dynamic PPR &lt;Suspense&gt; Hole Sync Child ({memoText})
+        6. Dynamic PPR &lt;Suspense&gt; Hole Sync Child ({memoText}){" "}
+        <span suppressHydrationWarning className="opacity-75">
+          at {streamedAt}
+        </span>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <label htmlFor={holeInputId} className="font-mono">
@@ -189,7 +198,8 @@ function DynamicHoleSyncChild({ reqPath, streamedAt }: { reqPath: string; stream
 
 async function DynamicPprHoleSection() {
   const ctx = getContext();
-  const currentPath = ctx?.req?.path || "/test-useid";
+  const rawPath = ctx?.req?.path || "/test-useid";
+  const currentPath = rawPath.replace(/\/+$/, "") || "/test-useid";
   await new Promise((r) => setTimeout(r, 15));
   const streamedAt = new Date().toISOString().slice(11, 23);
   return <DynamicHoleSyncChild reqPath={currentPath} streamedAt={streamedAt} />;

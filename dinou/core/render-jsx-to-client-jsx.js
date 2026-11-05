@@ -7,13 +7,17 @@ import {
   rollbackPprHolesAfter,
   isInsideCachedSlot,
   getActiveCachedSlotStore,
+  getActiveRuntimeDynamicHoleStore,
   runInSuspense,
   getPprHoleCounter,
   commitPprSuspenseEffects,
   registerHole,
   markDynamicAccess,
   isPageRootElement,
+  isLayoutRootElement,
+  isLayoutChildrenPlaceholder,
   runInPageSegment,
+  runInLayoutSegment,
   getActivePageSegmentStore,
   getActiveLayoutSegmentStore,
   resetComponentNoDynamicFlag,
@@ -52,20 +56,26 @@ function useServerId() {
     const safeSlot = sanitizeIdSegment(slotStore.slotId);
     return `_slot_${safeSlot}_dS_${slotStore.idCount.toString(32)}_`;
   }
-  const layoutStore = getActiveLayoutSegmentStore();
-  if (layoutStore && layoutStore.active) {
-    layoutStore.idCount = (layoutStore.idCount || 0) + 1;
-    return `_layout_dS_${layoutStore.idCount.toString(32)}_`;
+  const holeStore = getActiveRuntimeDynamicHoleStore();
+  if (holeStore && holeStore.holeId) {
+    holeStore.idCount = (holeStore.idCount || 0) + 1;
+    const safeHole = sanitizeIdSegment(holeStore.holeId);
+    return `_hole_${safeHole}_dS_${holeStore.idCount.toString(32)}_`;
   }
   const pageStore = getActivePageSegmentStore();
   if (pageStore && pageStore.active) {
     pageStore.idCount = (pageStore.idCount || 0) + 1;
     return `_page_dS_${pageStore.idCount.toString(32)}_`;
   }
+  const layoutStore = getActiveLayoutSegmentStore();
+  if (layoutStore && layoutStore.active) {
+    layoutStore.idCount = (layoutStore.idCount || 0) + 1;
+    return `_layout_dS_${layoutStore.idCount.toString(32)}_`;
+  }
   const reqCtx = getContext();
   if (reqCtx) {
     reqCtx._dinouUseIdCount = (reqCtx._dinouUseIdCount || 0) + 1;
-    return `_dS_${reqCtx._dinouUseIdCount.toString(32)}_`;
+    return `_page_dS_${reqCtx._dinouUseIdCount.toString(32)}_`;
   }
   const id = ++fallbackRenderSeq;
   return `_dS_${id.toString(32)}_`;
@@ -137,6 +147,36 @@ const DinouServerHooksDispatcher = {
   useEffectEvent: unsupportedHook,
 };
 
+function patchInternalsDispatcherSetter(internals) {
+  if (!internals || typeof internals !== "object" || internals._dinouPatchedH) {
+    return;
+  }
+  let currentH = internals.H;
+  if (currentH && typeof currentH === "object" && currentH.useId !== useServerId) {
+    try {
+      currentH.useId = useServerId;
+    } catch (_) {}
+  }
+  try {
+    Object.defineProperty(internals, "H", {
+      configurable: true,
+      enumerable: true,
+      get() {
+        return currentH;
+      },
+      set(nextH) {
+        if (nextH && typeof nextH === "object" && nextH.useId !== useServerId) {
+          try {
+            nextH.useId = useServerId;
+          } catch (_) {}
+        }
+        currentH = nextH;
+      },
+    });
+    internals._dinouPatchedH = true;
+  } catch (_) {}
+}
+
 let _cachedReactInternalsList = null;
 function getReactInternalsList() {
   if (_cachedReactInternalsList) return _cachedReactInternalsList;
@@ -145,8 +185,14 @@ function getReactInternalsList() {
     if (!mod || typeof mod !== "object") return;
     const s = mod.__SERVER_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
     const c = mod.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
-    if (s && typeof s === "object" && "H" in s) set.add(s);
-    if (c && typeof c === "object" && "H" in c) set.add(c);
+    if (s && typeof s === "object" && "H" in s) {
+      patchInternalsDispatcherSetter(s);
+      set.add(s);
+    }
+    if (c && typeof c === "object" && "H" in c) {
+      patchInternalsDispatcherSetter(c);
+      set.add(c);
+    }
   };
   addFromModule(React);
   try {
@@ -161,6 +207,15 @@ function getReactInternalsList() {
   _cachedReactInternalsList = Array.from(set);
   return _cachedReactInternalsList;
 }
+
+function ensureServerHooksPatched() {
+  const list = getReactInternalsList();
+  for (const internals of list) {
+    patchInternalsDispatcherSetter(internals);
+  }
+}
+
+ensureServerHooksPatched();
 
 function invokeWithServerHooksDispatcher(callFn) {
   const internalsList = getReactInternalsList();
@@ -238,6 +293,54 @@ function cloneWithDevProps(jsx, newProps, resolvedKey, overrideType) {
   return cloned;
 }
 
+function replaceLayoutChildrenPlaceholder(node, replacement, placeholder) {
+  if (node == null || typeof node !== "object") return node;
+  if (node === placeholder || isLayoutChildrenPlaceholder(node)) {
+    return replacement;
+  }
+  if (Array.isArray(node)) {
+    let changed = false;
+    const mapped = node.map((item) => {
+      const updated = replaceLayoutChildrenPlaceholder(item, replacement, placeholder);
+      if (updated !== item) changed = true;
+      return updated;
+    });
+    return changed ? mapped : node;
+  }
+  if (node.$$typeof === Symbol.for("react.transitional.element")) {
+    if (node.props && typeof node.props === "object") {
+      let changed = false;
+      const newProps = { ...node.props };
+      for (const [k, v] of Object.entries(node.props)) {
+        if (v && typeof v === "object") {
+          const updated = replaceLayoutChildrenPlaceholder(v, replacement, placeholder);
+          if (updated !== v) {
+            newProps[k] = updated;
+            changed = true;
+          }
+        }
+      }
+      if (changed) {
+        return cloneWithDevProps(node, newProps, node.key);
+      }
+    }
+    return node;
+  }
+  if (node instanceof Promise) return node;
+  let changed = false;
+  const clone = { ...node };
+  for (const [k, v] of Object.entries(node)) {
+    if (v && typeof v === "object") {
+      const updated = replaceLayoutChildrenPlaceholder(v, replacement, placeholder);
+      if (updated !== v) {
+        clone[k] = updated;
+        changed = true;
+      }
+    }
+  }
+  return changed ? clone : node;
+}
+
 // Function to check if a component is a client component
 function isClientComponent(type) {
   if (!type) {
@@ -259,6 +362,11 @@ async function asyncRenderJSXToClientJSX(jsx, key = null) {
         ctx._resolvedPageClientJsx = resolved;
       }
       return resolved;
+    });
+  }
+  if (isLayoutRootElement(jsx)) {
+    return await runInLayoutSegment(async () => {
+      return await asyncRenderJSXToClientJSXInner(jsx, key);
     });
   }
   return await asyncRenderJSXToClientJSXInner(jsx, key);
@@ -298,6 +406,9 @@ async function asyncRenderJSXToClientJSXInner(jsx, key = null) {
     console.error("Unsupported symbol:", String(jsx));
     throw new Error(`Unsupported symbol: ${String(jsx)}`);
   } else if (typeof jsx === "object") {
+    if (isLayoutChildrenPlaceholder(jsx)) {
+      return jsx;
+    }
     if (jsx.$$typeof === Symbol.for("react.transitional.element")) {
       if (jsx.type === Symbol.for("react.suspense")) {
         if (isPprBuildActive()) {
@@ -468,8 +579,12 @@ async function asyncRenderJSXToClientJSXInner(jsx, key = null) {
 export {
   asyncRenderJSXToClientJSX,
   invokeWithServerHooksDispatcher,
+  ensureServerHooksPatched,
+  replaceLayoutChildrenPlaceholder,
 };
 export default {
   asyncRenderJSXToClientJSX,
   invokeWithServerHooksDispatcher,
+  ensureServerHooksPatched,
+  replaceLayoutChildrenPlaceholder,
 };

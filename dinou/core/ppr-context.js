@@ -10,6 +10,8 @@ const cachedSlotStorage = new AsyncLocalStorage();
 const slotDiscoveryStorage = new AsyncLocalStorage();
 const runtimeStaticSuspenseStorage = new AsyncLocalStorage();
 const pageRootElements = new WeakSet();
+const layoutRootElements = new WeakSet();
+const layoutChildrenPlaceholders = new WeakSet();
 
 const NO_DYNAMIC_HOOK_KEY = Symbol.for("dinou.ppr.noDynamic.hook");
 export const SKIP_STATIC_SUSPENSE_SYMBOL = Symbol.for("dinou.ppr.skipStatic");
@@ -23,8 +25,22 @@ export function runInRuntimeStaticSuspense(callback) {
   );
 }
 
-export function runInRuntimeDynamicHole(callback) {
-  return runtimeStaticSuspenseStorage.run({ active: false, depth: 0 }, callback);
+export function runInRuntimeDynamicHole(callback, holeId = null) {
+  const prev = runtimeStaticSuspenseStorage.getStore();
+  return runtimeStaticSuspenseStorage.run(
+    {
+      active: false,
+      depth: 0,
+      holeId: holeId || prev?.holeId || null,
+      idCount: 0,
+    },
+    callback
+  );
+}
+
+export function getActiveRuntimeDynamicHoleStore() {
+  const store = runtimeStaticSuspenseStorage.getStore();
+  return store && store.holeId ? store : null;
 }
 
 export function isRuntimeStaticSuspenseActive() {
@@ -111,12 +127,42 @@ export function isPageRootElement(el) {
   return Boolean(el && typeof el === "object" && pageRootElements.has(el));
 }
 
-export function runInPageSegment(callback) {
-  const prev = pageSegmentStorage.getStore();
-  return pageSegmentStorage.run(
-    { active: true, idCount: prev?.idCount || 0 },
-    callback
+export function markLayoutRootElement(el) {
+  if (el && typeof el === "object") {
+    layoutRootElements.add(el);
+  }
+  return el;
+}
+
+export function isLayoutRootElement(el) {
+  return Boolean(el && typeof el === "object" && layoutRootElements.has(el));
+}
+
+export function createLayoutChildrenPlaceholder() {
+  const placeholder = {
+    $$typeof: Symbol.for("react.transitional.element"),
+    type: Symbol.for("dinou.layout.children.placeholder"),
+    key: null,
+    ref: null,
+    props: {},
+  };
+  layoutChildrenPlaceholders.add(placeholder);
+  return placeholder;
+}
+
+export function isLayoutChildrenPlaceholder(el) {
+  return Boolean(
+    el &&
+      typeof el === "object" &&
+      (layoutChildrenPlaceholders.has(el) ||
+        el.type === Symbol.for("dinou.layout.children.placeholder"))
   );
+}
+
+export function runInPageSegment(callback, storeOverride = null) {
+  const prev = pageSegmentStorage.getStore();
+  const store = storeOverride || prev || { active: true, idCount: 0 };
+  return pageSegmentStorage.run(store, callback);
 }
 
 export function getActivePageSegmentStore() {
@@ -127,12 +173,10 @@ export function isInsidePageSegment() {
   return Boolean(pageSegmentStorage.getStore()?.active);
 }
 
-export function runInLayoutSegment(callback) {
+export function runInLayoutSegment(callback, storeOverride = null) {
   const prev = layoutSegmentStorage.getStore();
-  return layoutSegmentStorage.run(
-    { active: true, idCount: prev?.idCount || 0 },
-    callback
-  );
+  const store = storeOverride || prev || { active: true, idCount: 0 };
+  return layoutSegmentStorage.run(store, callback);
 }
 
 export function getActiveLayoutSegmentStore() {
@@ -391,6 +435,7 @@ export default {
   SKIP_STATIC_SUSPENSE_SYMBOL,
   runInRuntimeStaticSuspense,
   runInRuntimeDynamicHole,
+  getActiveRuntimeDynamicHoleStore,
   isRuntimeStaticSuspenseActive,
   resetComponentNoDynamicFlag,
   consumeComponentNoDynamicFlag,
@@ -399,8 +444,16 @@ export default {
   isInsideCachedSlot,
   runInSlotDiscovery,
   isSlotDiscoveryActive,
+  markPageRootElement,
+  isPageRootElement,
+  markLayoutRootElement,
+  isLayoutRootElement,
+  createLayoutChildrenPlaceholder,
+  isLayoutChildrenPlaceholder,
   runInPageSegment,
   isInsidePageSegment,
+  runInLayoutSegment,
+  isInsideLayoutSegment,
   runWithPprContext,
   getPprStore,
   isPprBuildActive,

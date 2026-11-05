@@ -6,11 +6,20 @@ import {
   getFilePathAndDynamicParams,
 } from "./get-file-path-and-dynamic-params.js";
 import importModule from "./import-module.js";
-import { asyncRenderJSXToClientJSX } from "./render-jsx-to-client-jsx.js";
+import {
+  asyncRenderJSXToClientJSX,
+  replaceLayoutChildrenPlaceholder,
+} from "./render-jsx-to-client-jsx.js";
 import { getLayoutProps } from "./layout-functions.js";
 import { DinouPageSlot as RawDinouPageSlot } from "./slot.js";
 import { getErrorJSX } from "./get-error-jsx.js";
-import { markPageRootElement, runInLayoutSegment } from "./ppr-context.js";
+import {
+  markPageRootElement,
+  markLayoutRootElement,
+  createLayoutChildrenPlaceholder,
+  runInLayoutSegment,
+  isPprBuildActive,
+} from "./ppr-context.js";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
@@ -217,6 +226,7 @@ async function getJSX(
 
   if (layouts && Array.isArray(layouts)) {
     let index = 0;
+    const layoutSegmentStore = { active: true, idCount: 0 };
     for (const [layoutPath, dParams, slots] of layouts.reverse()) {
       const layoutModule = await importModule(layoutPath);
       const layoutFolderPath = path.dirname(layoutPath);
@@ -246,8 +256,11 @@ async function getJSX(
           } else {
             elementToRender = slotValue;
           }
-          await runInLayoutSegment(() => asyncRenderJSXToClientJSX(elementToRender));
-          updatedSlotElement = elementToRender;
+          const resolvedSlot = await runInLayoutSegment(
+            () => asyncRenderJSXToClientJSX(elementToRender),
+            layoutSegmentStore
+          );
+          updatedSlotElement = isPprBuildActive() ? elementToRender : resolvedSlot;
         } catch (e) {
           if (slotFilePath) {
             const realSlotFolder = path.dirname(slotFilePath);
@@ -298,12 +311,39 @@ async function getJSX(
       const layoutProps = await getLayoutProps(layoutPath, dParams);
       let props = { params: dParams, ...updatedSlots, ...(layoutProps ?? {}) };
       if (options?.skipLayoutProbe) {
-        jsx = React.createElement(Layout, props, jsx);
-      } else {
+        jsx = markLayoutRootElement(React.createElement(Layout, props, jsx));
+      } else if (isPprBuildActive()) {
         try {
           const testElement = React.createElement(Layout, props, null);
           await runInLayoutSegment(() => asyncRenderJSXToClientJSX(testElement));
-          jsx = React.createElement(Layout, props, jsx);
+          jsx = markLayoutRootElement(React.createElement(Layout, props, jsx));
+        } catch (layoutErr) {
+          console.warn(
+            `[Dinou] Layout ${layoutPath} failed during render, isolating layout error:`,
+            layoutErr?.message || layoutErr
+          );
+          const serializedError = {
+            message: layoutErr.message || "Unknown Error",
+            name: layoutErr.name || "Error",
+            stack: isDevelopment ? layoutErr.stack : undefined,
+          };
+          jsx = await getErrorJSX(
+            reqPath,
+            query,
+            serializedError,
+            isDevelopment,
+            { segment: "page" }
+          );
+        }
+      } else {
+        try {
+          const placeholder = createLayoutChildrenPlaceholder();
+          const testElement = React.createElement(Layout, props, placeholder);
+          const resolvedLayout = await runInLayoutSegment(
+            () => asyncRenderJSXToClientJSX(testElement),
+            layoutSegmentStore
+          );
+          jsx = replaceLayoutChildrenPlaceholder(resolvedLayout, jsx, placeholder);
         } catch (layoutErr) {
           console.warn(
             `[Dinou] Layout ${layoutPath} failed during render, isolating layout error:`,
