@@ -6,10 +6,12 @@ This document details the public API surface exported by **Dinou** across its tw
 
 ## 1. Overview of Entry Points
 
-Dinou exposes two package entry points:
+Dinou exposes two primary application entry points (plus dedicated subpaths for config, asset types, and runtime adapters):
 
 1. **`"dinou"` (`dinou/index.js` & `dinou/index.d.ts`)** — The universal entry point safe to import in **Server Components**, **Client Components**, **Server Functions**, and **configuration files**. All modules referenced by `"dinou"` are completely free of top-level Node.js native imports (`node:fs`, `node:crypto`, `node:path`, etc.) so client bundlers (Rollup/Vite) can process them cleanly.
-2. **`"dinou/server"` (`dinou/server.js` & `dinou/server.d.ts`)** — The dedicated server-only entry point for cache revalidation, vertical micro-ISR (`<DinouCacheSlot>`), and storage adapters. These modules depend on Dinou's RSC rendering engine and Node.js/server primitives.
+2. **`"dinou/server"` (`dinou/server.js` & `dinou/server.d.ts`)** — The dedicated server-only entry point for cache revalidation, vertical micro-ISR (`<DinouCacheSlot>`), server request context (`getContext`), PPR opt-out (`noDynamic`), and storage adapters. These modules depend on Dinou's RSC rendering engine and Node.js/server primitives.
+3. **`"dinou/config"` (`dinou/core/config.js` & `dinou/index.d.ts`)** — Dedicated lightweight entry point exporting `defineConfig` for `dinou.config.{mjs,js,ts}` without loading React or navigation modules.
+4. **`"dinou/env"` (`dinou/env.d.ts`) & `"dinou/adapters/*"`** — Ambient TypeScript declarations for static asset imports (`/// <reference types="dinou/env" />`) and platform runtime entry points (`node`, `bun`, `deno`, `cloudflare`, `netlify`).
 
 ---
 
@@ -164,7 +166,7 @@ Isolating them in `"dinou/server"` keeps `"dinou"` 100% browser-bundler safe whi
 | :--- | :--- | :--- | :--- |
 | **Client / SPA Navigation** | `Link`, `ClientRedirect`, `useRouter`, `useNavigationLoading`, `refreshSlot` | — | `"use client"` components and browser hooks; only exported from `"dinou"`. |
 | **Isomorphic Navigation (Server + Client)** | `usePathname`, `useSearchParams`, `redirect` | — | Work seamlessly in both Server Components and Client Components from the universal `"dinou"` entry point. |
-| **Build Configuration** | `defineConfig` | — | Identity helper for `dinou.config.ts`. |
+| **Build Configuration** | `defineConfig` (also exported from `"dinou/config"`) | — | Identity helper for `dinou.config.ts`. |
 | **Request Context & PPR Opt-Out (Zero `node:*` imports)** | `getContext`, `noDynamic` | `getContext`, `noDynamic` | **Exported from both**: safe for client bundlers in `"dinou"` and available in `"dinou/server"` so Server Components and Server Functions do not need to split imports. |
 | **Cache Revalidation, Micro-ISR & Storage (`node:*` / RSC engine)** | — | `DinouCacheSlot`, `revalidatePath`, `revalidatePage`, `revalidateLayout`, `revalidateTag`, `StorageAdapter`, `FileSystemStorage`, `CloudflareKVStorage`, `DenoKVStorage`, `MemoryStorage`, `RedisStorage`, `getStorageAdapter`, `setStorageAdapter` | **Exclusive to `"dinou/server"`**: depend on the RSC compiler and native Node.js modules (`node:fs`, `node:path`, `node:crypto`, `node:async_hooks`). |
 
