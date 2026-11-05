@@ -1,7 +1,7 @@
 // src/test-ppr/page.tsx
 import { Suspense } from "react";
 import { getContext, noDynamic } from "dinou";
-import { DinouCacheSlot, noDynamic as noDynamicFromServer } from "dinou/server";
+import { DinouCacheSlot, getContext as getContextFromServer, noDynamic as noDynamicFromServer } from "dinou/server";
 import { incrementRenderCount } from "./ppr-tracker";
 
 // ============================================================================
@@ -202,7 +202,7 @@ async function NoCacheSlotAsyncChild() {
 async function SlotReadingCookiesChild() {
   noDynamic();
   await new Promise((r) => setTimeout(r, 15));
-  const user = getContext()?.req?.cookies?.user || "guest";
+  const user = getContextFromServer()?.req?.cookies?.user || "guest";
   const count = incrementRenderCount("case11-slot-cookies");
   return (
     <div data-testid="case11-resolved" data-user={String(user)} data-render-count={String(count)} className="text-sm font-mono text-amber-700 dark:text-amber-300">

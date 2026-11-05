@@ -51,6 +51,12 @@ export type {
   LayoutFunctions,
   StaticPathItem,
   StaticPathsResult,
+  RequestContextStore,
+  ResponseProxy,
+  CookieOptions,
+  Query,
+  Cookies,
+  Headers,
 } from "./index";
 
 export interface DinouCacheSlotProps {
@@ -77,6 +83,13 @@ export declare function DinouCacheSlot(props: DinouCacheSlotProps): Promise<any>
  * bakes the rendered output directly into the Static Shell (`shell.html`).
  */
 export declare function noDynamic(): void;
+
+/**
+ * Gets the current request context (req and res proxy) synchronously.
+ * Must be called within a Server Component, `getProps`, or a `"use server"` Server Function.
+ * @returns The current request context store, or `undefined` if called outside a request scope.
+ */
+export declare function getContext(): import("./index").RequestContextStore | undefined;
 
 // ====================================================================
 // STORAGE ADAPTER TYPES (ISR / CACHE)
