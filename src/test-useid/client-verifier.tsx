@@ -55,7 +55,7 @@ export function ClientUseIdVerifier({ serverPassedId }: { serverPassedId: string
 
   const allPassed =
     report.checked &&
-    report.totalIds >= 7 &&
+    report.totalIds >= 19 &&
     report.totalIds === report.uniqueIds &&
     report.allLabelsMatchedInputs;
 

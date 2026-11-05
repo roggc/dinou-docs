@@ -170,10 +170,21 @@ async function spliceDynamicHolesIntoShell(
       }
       try {
         const innerComp = current.type.type;
-        const rendered =
-          typeof innerComp === "function"
-            ? await invokeWithServerHooksDispatcher(() => innerComp(current.props || {}))
-            : null;
+        let rendered = null;
+        if (typeof innerComp === "function") {
+          rendered = await invokeWithServerHooksDispatcher(() =>
+            innerComp(current.props || {})
+          );
+        } else if (
+          typeof innerComp === "object" &&
+          innerComp !== null &&
+          innerComp.$$typeof === Symbol.for("react.forward_ref") &&
+          typeof innerComp.render === "function"
+        ) {
+          rendered = await invokeWithServerHooksDispatcher(() =>
+            innerComp.render(current.props || {}, current.ref)
+          );
+        }
         await traverse(rendered);
       } catch (err) {
         if (err && err.$$typeof === SKIP_STATIC_SUSPENSE_SYMBOL) {
@@ -397,10 +408,21 @@ async function streamDynamicHoles(
       }
       try {
         const innerComp = current.type.type;
-        const rendered =
-          typeof innerComp === "function"
-            ? await invokeWithServerHooksDispatcher(() => innerComp(current.props || {}))
-            : null;
+        let rendered = null;
+        if (typeof innerComp === "function") {
+          rendered = await invokeWithServerHooksDispatcher(() =>
+            innerComp(current.props || {})
+          );
+        } else if (
+          typeof innerComp === "object" &&
+          innerComp !== null &&
+          innerComp.$$typeof === Symbol.for("react.forward_ref") &&
+          typeof innerComp.render === "function"
+        ) {
+          rendered = await invokeWithServerHooksDispatcher(() =>
+            innerComp.render(current.props || {}, current.ref)
+          );
+        }
         await traverse(rendered);
       } catch (err) {
         if (err && err.$$typeof === SKIP_STATIC_SUSPENSE_SYMBOL) {

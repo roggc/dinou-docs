@@ -84,6 +84,37 @@ function useServerId() {
   return `_dS_${id.toString(32)}_`;
 }
 
+function snapshotActiveIdCounts() {
+  const slotStore = getActiveCachedSlotStore();
+  const holeStore = getActiveRuntimeDynamicHoleStore();
+  const pageStore = getActivePageSegmentStore();
+  const layoutStore = getActiveLayoutSegmentStore();
+  const reqCtx = getContext();
+  return {
+    slotStore,
+    slotCount: slotStore ? slotStore.idCount || 0 : 0,
+    holeStore,
+    holeCount: holeStore ? holeStore.idCount || 0 : 0,
+    pageStore,
+    pageCount: pageStore ? pageStore.idCount || 0 : 0,
+    layoutStore,
+    layoutCount: layoutStore ? layoutStore.idCount || 0 : 0,
+    reqCtx,
+    reqCount: reqCtx ? reqCtx._dinouUseIdCount || 0 : 0,
+    fallbackSeq: fallbackRenderSeq,
+  };
+}
+
+function restoreActiveIdCounts(snap) {
+  if (!snap) return;
+  if (snap.slotStore) snap.slotStore.idCount = snap.slotCount;
+  if (snap.holeStore) snap.holeStore.idCount = snap.holeCount;
+  if (snap.pageStore) snap.pageStore.idCount = snap.pageCount;
+  if (snap.layoutStore) snap.layoutStore.idCount = snap.layoutCount;
+  if (snap.reqCtx) snap.reqCtx._dinouUseIdCount = snap.reqCount;
+  fallbackRenderSeq = snap.fallbackSeq;
+}
+
 function useServerUsable(usable) {
   if (
     (usable !== null && typeof usable === "object") ||
@@ -95,6 +126,29 @@ function useServerUsable(usable) {
       }
       if (usable.status === "rejected") {
         throw usable.reason;
+      }
+      if (typeof usable.status !== "string") {
+        usable.status = "pending";
+        usable.then(
+          (fulfilledValue) => {
+            if (usable.status === "pending") {
+              usable.status = "fulfilled";
+              usable.value = fulfilledValue;
+            }
+          },
+          (error) => {
+            if (usable.status === "pending") {
+              usable.status = "rejected";
+              usable.reason = error;
+            }
+          }
+        );
+        if (usable.status === "fulfilled") {
+          return usable.value;
+        }
+        if (usable.status === "rejected") {
+          throw usable.reason;
+        }
       }
       throw usable;
     }
@@ -150,15 +204,76 @@ const DinouServerHooksDispatcher = {
   useEffectEvent: unsupportedHook,
 };
 
+function getCallerComponentSite() {
+  const stack = new Error().stack;
+  if (!stack) return null;
+  const lines = stack.split("\n");
+  for (let i = 2; i < lines.length; i++) {
+    const line = lines[i];
+    if (
+      !line.includes("useServerId") &&
+      !line.includes("patchDispatcherObject") &&
+      !line.includes("exports.useId") &&
+      !line.includes("exports.use ") &&
+      !line.includes("Object.useId") &&
+      !line.includes("Object.use ")
+    ) {
+      return line.trim();
+    }
+  }
+  return null;
+}
+
+function patchDispatcherObject(dispatcher, internals) {
+  if (!dispatcher || typeof dispatcher !== "object" || dispatcher === DinouServerHooksDispatcher) {
+    return;
+  }
+  if (dispatcher._dinouWrappedDispatcher) {
+    return;
+  }
+  const origUse = typeof dispatcher.use === "function" ? dispatcher.use : null;
+  let activeOwnerKey = null;
+  let activeIdSnap = null;
+
+  try {
+    dispatcher.useId = function dinouPatchedUseId() {
+      const owner = internals?.A?.getOwner?.() || getCallerComponentSite();
+      if (owner !== activeOwnerKey || !activeIdSnap) {
+        activeOwnerKey = owner;
+        activeIdSnap = snapshotActiveIdCounts();
+      }
+      return useServerId();
+    };
+    if (origUse && origUse !== useServerUsable) {
+      dispatcher.use = function dinouPatchedUse(usable) {
+        const owner = internals?.A?.getOwner?.() || getCallerComponentSite();
+        try {
+          return origUse.call(this, usable);
+        } catch (err) {
+          if (activeIdSnap && (!owner || !activeOwnerKey || owner === activeOwnerKey)) {
+            restoreActiveIdCounts(activeIdSnap);
+          }
+          activeIdSnap = null;
+          activeOwnerKey = null;
+          throw err;
+        }
+      };
+    }
+    Object.defineProperty(dispatcher, "_dinouWrappedDispatcher", {
+      value: true,
+      enumerable: false,
+      configurable: true,
+    });
+  } catch (_) {}
+}
+
 function patchInternalsDispatcherSetter(internals) {
   if (!internals || typeof internals !== "object" || internals._dinouPatchedH) {
     return;
   }
   let currentH = internals.H;
-  if (currentH && typeof currentH === "object" && currentH.useId !== useServerId) {
-    try {
-      currentH.useId = useServerId;
-    } catch (_) {}
+  if (currentH && typeof currentH === "object") {
+    patchDispatcherObject(currentH, internals);
   }
   try {
     Object.defineProperty(internals, "H", {
@@ -168,10 +283,8 @@ function patchInternalsDispatcherSetter(internals) {
         return currentH;
       },
       set(nextH) {
-        if (nextH && typeof nextH === "object" && nextH.useId !== useServerId) {
-          try {
-            nextH.useId = useServerId;
-          } catch (_) {}
+        if (nextH && typeof nextH === "object") {
+          patchDispatcherObject(nextH, internals);
         }
         currentH = nextH;
       },
@@ -249,24 +362,51 @@ function isCacheSlotComponent(fn) {
 }
 
 async function invokeServerComponentInPpr(fn, callFn) {
-  resetComponentNoDynamicFlag();
-  const rawResult = invokeWithServerHooksDispatcher(callFn);
-  const optedOut = consumeComponentNoDynamicFlag();
-  if (
-    isThenable(rawResult) &&
-    !isCacheSlotComponent(fn) &&
-    isPprBuildActive() &&
-    isInsideOuterSuspenseOutsideSlot() &&
-    !isSlotDiscoveryActive() &&
-    !optedOut &&
-    !isNoDynamicActive()
-  ) {
+  while (true) {
+    resetComponentNoDynamicFlag();
+    const idSnap = snapshotActiveIdCounts();
+    let rawResult;
     try {
-      rawResult.then(null, () => {});
-    } catch (_) {}
-    markDynamicAccess("async-suspense");
+      rawResult = invokeWithServerHooksDispatcher(callFn);
+    } catch (thrown) {
+      restoreActiveIdCounts(idSnap);
+      const optedOutOnThrow = consumeComponentNoDynamicFlag();
+      if (isThenable(thrown)) {
+        if (
+          !isCacheSlotComponent(fn) &&
+          isPprBuildActive() &&
+          isInsideOuterSuspenseOutsideSlot() &&
+          !isSlotDiscoveryActive() &&
+          !optedOutOnThrow &&
+          !isNoDynamicActive()
+        ) {
+          try {
+            thrown.then(null, () => {});
+          } catch (_) {}
+          markDynamicAccess("async-suspense");
+        }
+        await thrown;
+        continue;
+      }
+      throw thrown;
+    }
+    const optedOut = consumeComponentNoDynamicFlag();
+    if (
+      isThenable(rawResult) &&
+      !isCacheSlotComponent(fn) &&
+      isPprBuildActive() &&
+      isInsideOuterSuspenseOutsideSlot() &&
+      !isSlotDiscoveryActive() &&
+      !optedOut &&
+      !isNoDynamicActive()
+    ) {
+      try {
+        rawResult.then(null, () => {});
+      } catch (_) {}
+      markDynamicAccess("async-suspense");
+    }
+    return await rawResult;
   }
-  return await rawResult;
 }
 
 function cloneWithDevProps(jsx, newProps, resolvedKey, overrideType) {
@@ -542,13 +682,19 @@ async function asyncRenderJSXToClientJSXInner(jsx, key = null) {
           );
         } else {
           const innerComp = jsx.type.type;
-          const returnedJsx =
-            typeof innerComp === "function"
-              ? await invokeServerComponentInPpr(innerComp, () =>
-                  innerComp(jsx.props)
-                )
-              : null;
-          return await asyncRenderJSXToClientJSX(returnedJsx, key ?? jsx.key);
+          if (typeof innerComp === "function") {
+            const returnedJsx = await invokeServerComponentInPpr(innerComp, () =>
+              innerComp(jsx.props)
+            );
+            return await asyncRenderJSXToClientJSX(returnedJsx, key ?? jsx.key);
+          }
+          if (typeof innerComp === "object" && innerComp !== null) {
+            return await asyncRenderJSXToClientJSX(
+              cloneWithDevProps(jsx, jsx.props, key ?? jsx.key, innerComp),
+              key ?? jsx.key
+            );
+          }
+          return null;
         }
       } else {
         console.error("Unsupported JSX type:", jsx.type);
