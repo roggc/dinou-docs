@@ -243,6 +243,7 @@ async function getJSX(
         let updatedSlotElement;
         const slotFilePath = slotValue?.slotPath || slotValue?.props?.__modulePath;
         const slotParams = slotValue?.slotParams || slotValue?.props?.params || {};
+        const prevSlotIdCount = layoutSegmentStore.idCount;
         try {
           let elementToRender;
           if (slotValue && slotValue.slotPath) {
@@ -262,6 +263,7 @@ async function getJSX(
           );
           updatedSlotElement = isPprBuildActive() ? elementToRender : resolvedSlot;
         } catch (e) {
+          layoutSegmentStore.idCount = prevSlotIdCount;
           if (slotFilePath) {
             const realSlotFolder = path.dirname(slotFilePath);
 
@@ -336,6 +338,7 @@ async function getJSX(
           );
         }
       } else {
+        const prevLayoutIdCount = layoutSegmentStore.idCount;
         try {
           const placeholder = createLayoutChildrenPlaceholder();
           const testElement = React.createElement(Layout, props, placeholder);
@@ -345,6 +348,7 @@ async function getJSX(
           );
           jsx = replaceLayoutChildrenPlaceholder(resolvedLayout, jsx, placeholder);
         } catch (layoutErr) {
+          layoutSegmentStore.idCount = prevLayoutIdCount;
           console.warn(
             `[Dinou] Layout ${layoutPath} failed during render, isolating layout error:`,
             layoutErr?.message || layoutErr
