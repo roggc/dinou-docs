@@ -206,6 +206,35 @@ function DynamicHoleSyncChild({ reqPath, streamedAt }: { reqPath: string; stream
   );
 }
 
+function DynamicHoleSlotSyncWidget({ renderedAt }: { renderedAt: string }) {
+  const holeSlotId = useId();
+  return (
+    <div
+      data-testid="dynamic-hole-slot-sync"
+      data-generated-id={holeSlotId}
+      className="p-2.5 rounded border border-purple-500/40 bg-purple-500/10 text-xs space-y-1 mt-2"
+    >
+      <div className="font-semibold text-purple-700 dark:text-purple-300">
+        6B. &lt;DinouCacheSlot&gt; Inside Dynamic PPR &lt;Suspense&gt; Hole{" "}
+        <span suppressHydrationWarning className="opacity-75">
+          (at {renderedAt})
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <label htmlFor={holeSlotId} className="font-mono">
+          Hole Slot ID ({holeSlotId}):
+        </label>
+        <input
+          id={holeSlotId}
+          defaultValue={`hole-slot:${holeSlotId}`}
+          readOnly
+          className="px-2 py-0.5 rounded border bg-background font-mono text-xs"
+        />
+      </div>
+    </div>
+  );
+}
+
 async function DynamicPprHoleSection() {
   const ctx = getContext();
   const rawPath = (ctx?.req?.path || "/test-useid").replace(
@@ -215,7 +244,21 @@ async function DynamicPprHoleSection() {
   const currentPath = rawPath.replace(/\/+$/, "") || "/test-useid";
   await new Promise((r) => setTimeout(r, 15));
   const streamedAt = new Date().toISOString().slice(11, 23);
-  return <DynamicHoleSyncChild reqPath={currentPath} streamedAt={streamedAt} />;
+  return (
+    <div className="space-y-2">
+      <DynamicHoleSyncChild reqPath={currentPath} streamedAt={streamedAt} />
+      <DinouCacheSlot
+        id="useid-dynamic-hole-slot"
+        tag="useid-dynamic-hole-slot-tag"
+        revalidate={180}
+      >
+        {() => {
+          const slotTs = new Date().toISOString().slice(11, 23);
+          return <DynamicHoleSlotSyncWidget renderedAt={slotTs} />;
+        }}
+      </DinouCacheSlot>
+    </div>
+  );
 }
 
 // 7. React.memo, React.forwardRef, and nested React.memo(React.forwardRef) Sync Server Components
@@ -483,6 +526,35 @@ function NoCacheSlotSyncWidget({ ts }: { ts: string }) {
   );
 }
 
+function SuspenseWrappedSlotSyncWidget({ ts }: { ts: string }) {
+  const suspSlotId = useId();
+  return (
+    <div
+      data-testid="suspense-slot-sync"
+      data-generated-id={suspSlotId}
+      className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 text-xs space-y-1.5"
+    >
+      <div className="font-semibold text-emerald-600 dark:text-emerald-400">
+        12. &lt;Suspense&gt; Wrapping &lt;DinouCacheSlot&gt; Sync Server Component{" "}
+        <span suppressHydrationWarning className="opacity-75">
+          (at {ts})
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <label htmlFor={suspSlotId} className="font-mono">
+          Suspense-&gt;Slot ID ({suspSlotId}):
+        </label>
+        <input
+          id={suspSlotId}
+          defaultValue={`suspense-slot:${suspSlotId}`}
+          readOnly
+          className="px-2 py-0.5 rounded border bg-background font-mono text-xs"
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function TestUseIdPage() {
   const listItems = ["Alpha", "Beta"];
 
@@ -552,6 +624,25 @@ export default function TestUseIdPage() {
           <ListItemSyncComponent key={name} index={idx} itemName={name} />
         ))}
       </div>
+
+      <Suspense
+        fallback={
+          <div className="p-3 border rounded text-xs">
+            Loading Suspense-wrapped DinouCacheSlot...
+          </div>
+        }
+      >
+        <DinouCacheSlot
+          id="useid-suspense-slot"
+          tag="useid-suspense-slot-tag"
+          revalidate={180}
+        >
+          {async () => {
+            const ts = new Date().toISOString().slice(11, 23);
+            return <SuspenseWrappedSlotSyncWidget ts={ts} />;
+          }}
+        </DinouCacheSlot>
+      </Suspense>
     </div>
   );
 }
