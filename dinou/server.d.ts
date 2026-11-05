@@ -57,6 +57,20 @@ export type {
   Query,
   Cookies,
   Headers,
+  DinouConfig,
+  DinouPlugin,
+  ServerHookContext,
+  NodeMiddleware,
+  PageProps,
+  LayoutProps,
+  ErrorProps,
+  RouteParams,
+  DinouRoutePattern,
+  DinouRoute,
+  DinouRouter,
+  CleanRoutePath,
+  ExtractRouteParams,
+  ExtractSegmentParam,
 } from "./index";
 
 export interface DinouCacheSlotProps {

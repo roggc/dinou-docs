@@ -25,11 +25,10 @@ Dinou exposes two package entry points:
 | `noDynamic()` | `dinou/core/no-dynamic.js` | **Server-only (PPR Build)**. Opts the enclosing `<Suspense>` boundary out of becoming a Dynamic PPR Hole when wrapping an `async` Server Component on a `ppr = true` route, resolving its promise at build time into `shell.html`. |
 | `defineConfig(config)` | `dinou/core/config.js` | **Build/Config-only** (`dinou.config.ts` / `dinou.config.mjs`). Identity helper providing TypeScript autocompletion for `DinouConfig`. |
 
-#### TypeScript Types Exported from `"dinou/index.d.ts"`
-* **Route & Segment Config Types**: `PageFunctions`, `LayoutFunctions`, `RouteSegmentConfig`, `PPRConfig`, `StaticPathItem`, `StaticPathsResult`
-* **Component Prop Types**: `PageProps`, `LayoutProps`, `ErrorProps`, `LinkProps`, `ClientRedirectProps`
-* **Typed Router Helpers**: `DinouRouter`, `DinouRoute`, `DinouRoutePattern`, `RouteParams`, `ExtractRouteParams`, `ExtractSegmentParam`, `NavigationOptions`
-* **Server Context & Plugin Types**: `RequestContextStore`, `ResponseProxy`, `CookieOptions`, `Query`, `Cookies`, `Headers`, `DinouConfig`, `DinouPlugin`, `ServerHookContext`, `NodeMiddleware`
+#### TypeScript Types (Server / Build-Only) Exported from `"dinou"` (and Re-exported from `"dinou/server"`)
+* **Route & Segment Config Types** (`page_functions.ts` / `layout_functions.ts`): `PageFunctions`, `LayoutFunctions`, `RouteSegmentConfig`, `PPRConfig`, `StaticPathItem`, `StaticPathsResult`
+* **Server Request Context Types** (`getContext()` & `onRequest` middleware): `RequestContextStore`, `ResponseProxy`, `CookieOptions`, `Query`, `Cookies`, `Headers`
+* **Server Plugin & Build Config Types** (`dinou.config.ts` & server plugins): `DinouConfig`, `DinouPlugin`, `ServerHookContext`, `NodeMiddleware`
 
 ---
 
@@ -43,6 +42,11 @@ Dinou exposes two package entry points:
 | `Link` | `dinou/core/link.jsx` | Client Component (`"use client"`) that can be imported and rendered inside both Server Components and Client Components for soft SPA navigation and hover prefetching. |
 | `ClientRedirect` | `dinou/core/client-redirect.jsx` | Client Component (`"use client"`) that triggers `router.replace(to)` upon mounting in the browser. Can be rendered by either Server or Client Components. |
 
+#### TypeScript Types (Universal — Server + Client) Exported from `"dinou"`
+* **Page, Layout & Error Component Prop Types** (primarily Server Components, also valid in `"use client"` pages/errors; also re-exported from `"dinou/server"`): `PageProps`, `LayoutProps`, `ErrorProps`
+* **Typed Route & Parameter Helpers** (also re-exported from `"dinou/server"`): `DinouRouter`, `DinouRoute`, `DinouRoutePattern`, `RouteParams`, `CleanRoutePath`, `ExtractRouteParams`, `ExtractSegmentParam`
+* **Universal Component Prop Types** (`"dinou"` only): `LinkProps`, `ClientRedirectProps`
+
 ---
 
 ### 2.3. Client-Only APIs Exported from `"dinou"`
@@ -52,6 +56,9 @@ Dinou exposes two package entry points:
 | `useRouter()` | `dinou/core/navigation.js` | Client Component hook returning `{ push, replace, back, forward, refresh, refreshSlot }`. |
 | `useNavigationLoading()` | `dinou/core/navigation.js` | Client Component hook returning `true` while a client-side SPA transition (`isPending`) is in progress. |
 | `refreshSlot(slotId, options)` | `dinou/core/navigation.js` | Browser utility to programmatically re-fetch and re-render a specific `<DinouCacheSlot>` without reloading the page. |
+
+#### TypeScript Types (Client-Only) Exported from `"dinou"`
+* **Programmatic Navigation Options** (`useRouter().push` / `useRouter().replace`): `NavigationOptions`
 
 ---
 
@@ -66,10 +73,16 @@ Dinou exposes two package entry points:
 | `revalidateLayout(path)` | `dinou/core/cache-revalidate.js` | Surgically invalidates and regenerates only `layout.rsc` and `layout.metadata.json`. |
 | `revalidateTag(tag)` | `dinou/core/cache-revalidate.js` | Invalidates and regenerates all pages, layouts, and `<DinouCacheSlot>` entries associated with `tag`. |
 | `DinouCacheSlot` | `dinou/core/cache-slot.js` | Async Server Component for vertical segmentation (Micro-ISR), allowing independent per-component TTL (`revalidate`) and tags (`tag` / `tags`). |
+| `getContext()` | `dinou/core/request-context.js` | Re-exported for convenience alongside `DinouCacheSlot` and `revalidateTag` so Server Components, `page_functions.ts`, and `"use server"` actions can import all server primitives from `"dinou/server"`. |
 | `noDynamic()` | `dinou/core/no-dynamic.js` | Re-exported for convenience alongside `DinouCacheSlot` so server modules can import all PPR/caching primitives from `"dinou/server"`. |
 | `StorageAdapter`, `FileSystemStorage`, `CloudflareKVStorage`, `DenoKVStorage`, `MemoryStorage`, `RedisStorage`, `getStorageAdapter`, `setStorageAdapter` | `dinou/core/storage-adapter.js` | Pluggable storage adapter classes and getters/setters for ISR/ISG/PPR cache persistence. |
 
-*(Additionally, `dinou/server.d.ts` re-exports `PPRConfig`, `RouteSegmentConfig`, `PageFunctions`, `LayoutFunctions`, `StaticPathItem`, and `StaticPathsResult` from `./index` for convenience).*
+#### TypeScript Types Exported from `"dinou/server"` (`dinou/server.d.ts`)
+* **Cache Slot & Storage Types**: `DinouCacheSlotProps`, `StorageItem`, `StorageAdapter`, `FileSystemStorage`, `CloudflareKVStorage`, `DenoKVStorage`, `MemoryStorage`, `RedisStorage`
+* **Route & Segment Config Types** (re-exported from `./index`): `PPRConfig`, `RouteSegmentConfig`, `PageFunctions`, `LayoutFunctions`, `StaticPathItem`, `StaticPathsResult`
+* **Server Request Context Types** (re-exported from `./index`): `RequestContextStore`, `ResponseProxy`, `CookieOptions`, `Query`, `Cookies`, `Headers`
+* **Page, Layout, Error & Route Param Types** (re-exported from `./index`): `PageProps`, `LayoutProps`, `ErrorProps`, `RouteParams`, `DinouRoutePattern`, `DinouRoute`, `DinouRouter`, `CleanRoutePath`, `ExtractRouteParams`, `ExtractSegmentParam`
+* **Server Plugin & Build Config Types** (re-exported from `./index`): `DinouConfig`, `DinouPlugin`, `ServerHookContext`, `NodeMiddleware`
 
 ---
 
