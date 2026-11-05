@@ -198,7 +198,10 @@ function DynamicHoleSyncChild({ reqPath, streamedAt }: { reqPath: string; stream
 
 async function DynamicPprHoleSection() {
   const ctx = getContext();
-  const rawPath = ctx?.req?.path || "/test-useid";
+  const rawPath = (ctx?.req?.path || "/test-useid").replace(
+    /^\/____rsc_[a-z_]+____/,
+    ""
+  );
   const currentPath = rawPath.replace(/\/+$/, "") || "/test-useid";
   await new Promise((r) => setTimeout(r, 15));
   const streamedAt = new Date().toISOString().slice(11, 23);
