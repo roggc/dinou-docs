@@ -50,6 +50,9 @@ function sanitizeIdSegment(val) {
 }
 
 function useServerId() {
+  if (isSlotDiscoveryActive()) {
+    return "_discovery_dS_";
+  }
   const slotStore = getActiveCachedSlotStore();
   if (slotStore && slotStore.slotId) {
     slotStore.idCount = (slotStore.idCount || 0) + 1;
