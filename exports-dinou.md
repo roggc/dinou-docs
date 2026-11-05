@@ -154,3 +154,55 @@ If those APIs were exported directly from `"dinou"` (`dinou/index.js`), any Clie
 
 Isolating them in `"dinou/server"` keeps `"dinou"` 100% browser-bundler safe while giving Server Components and Server Functions full access to Dinou's caching, revalidation, and storage engine.
 
+---
+
+## 6. Complete Distribution Matrix (`"dinou"` vs. `"dinou/server"`)
+
+### 6.1. Runtime Exports (`.js`)
+
+| Category | `"dinou"` (`dinou/index.js`) | `"dinou/server"` (`dinou/server.js`) | Rationale |
+| :--- | :--- | :--- | :--- |
+| **Client / SPA Navigation** | `Link`, `ClientRedirect`, `useRouter`, `useNavigationLoading`, `refreshSlot` | — | `"use client"` components and browser hooks; only exported from `"dinou"`. |
+| **Isomorphic Navigation (Server + Client)** | `usePathname`, `useSearchParams`, `redirect` | — | Work seamlessly in both Server Components and Client Components from the universal `"dinou"` entry point. |
+| **Build Configuration** | `defineConfig` | — | Identity helper for `dinou.config.ts`. |
+| **Request Context & PPR Opt-Out (Zero `node:*` imports)** | `getContext`, `noDynamic` | `getContext`, `noDynamic` | **Exported from both**: safe for client bundlers in `"dinou"` and available in `"dinou/server"` so Server Components and Server Functions do not need to split imports. |
+| **Cache Revalidation, Micro-ISR & Storage (`node:*` / RSC engine)** | — | `DinouCacheSlot`, `revalidatePath`, `revalidatePage`, `revalidateLayout`, `revalidateTag`, `StorageAdapter`, `FileSystemStorage`, `CloudflareKVStorage`, `DenoKVStorage`, `MemoryStorage`, `RedisStorage`, `getStorageAdapter`, `setStorageAdapter` | **Exclusive to `"dinou/server"`**: depend on the RSC compiler and native Node.js modules (`node:fs`, `node:path`, `node:crypto`, `node:async_hooks`). |
+
+---
+
+### 6.2. TypeScript Types (`.d.ts`)
+
+| Type Group | `"dinou"` (`dinou/index.d.ts`) | `"dinou/server"` (`dinou/server.d.ts`) | Coherence |
+| :--- | :---: | :---: | :--- |
+| **Client Navigation & Component Props** (`LinkProps`, `ClientRedirectProps`, `NavigationOptions`) | ✅ | — | Only in `"dinou"`, alongside `Link`, `ClientRedirect`, and `useRouter`. |
+| **Page / Layout / Error Props & Typed Routes** (`PageProps`, `LayoutProps`, `ErrorProps`, `RouteParams`, `DinouRoutePattern`, `DinouRoute`, `DinouRouter`, `CleanRoutePath`, `ExtractRouteParams`, `ExtractSegmentParam`) | ✅ | ✅ | In both: available whether a `page.tsx` / `layout.tsx` imports from `"dinou"` or consolidates its server imports into `"dinou/server"`. |
+| **Route Segment Config (`page_functions.ts` / `layout_functions.ts`)** (`PageFunctions`, `LayoutFunctions`, `RouteSegmentConfig`, `PPRConfig`, `StaticPathItem`, `StaticPathsResult`) | ✅ | ✅ | In both. |
+| **Server Request Context & Plugins** (`RequestContextStore`, `ResponseProxy`, `CookieOptions`, `Query`, `Cookies`, `Headers`, `DinouConfig`, `DinouPlugin`, `ServerHookContext`, `NodeMiddleware`) | ✅ | ✅ | In both, accompanying `getContext()` and server plugin configuration. |
+| **Cache Slot & Storage Adapter Types** (`DinouCacheSlotProps`, `StorageItem`, `StorageAdapter` classes) | — | ✅ | Only in `"dinou/server"`, alongside `DinouCacheSlot` and the storage adapters. |
+
+---
+
+## 7. Practical Import Safety Rules (TL;DR & Details)
+
+| Import Statement | In Server Component / Server Function (`"use server"`) | In Client Component (`"use client"`) |
+| :--- | :---: | :---: |
+| `import { ... } from "dinou"` (runtime values) | ✅ **OK** (100% safe) | ✅ **OK** (100% safe) |
+| `import type { ... } from "dinou"` (TypeScript types) | ✅ **OK** (erased at compile time) | ✅ **OK** (erased at compile time) |
+| `import { ... } from "dinou/server"` (runtime values) | ✅ **OK** (100% safe) | ❌ **NOT OK** (pulls `node:fs` / `node:path` into client bundler) |
+| `import type { ... } from "dinou/server"` (TypeScript types) | ✅ **OK** (erased at compile time) | ✅ **OK** (erased at compile time) |
+
+### 7.1. Is `import { ... } from "dinou"` Always Safe in a Server Component or Server Function?
+**Yes — 100% safe in all cases:**
+* **Server & Universal APIs** (`getContext`, `noDynamic`, `redirect`, `usePathname`, `useSearchParams`, `defineConfig`) execute natively on the server and read from the active `AsyncLocalStorage` request context.
+* **Client Components exported from `"dinou"`** (`Link`, `ClientRedirect`) carry their own `"use client"` directive (`dinou/core/link.jsx` and `dinou/core/client-redirect.jsx`), so Dinou's RSC loader automatically registers them as Client References (`Symbol.for("react.client.reference")`) when rendered inside a Server Component.
+* **Client Hooks/Utilities exported from `"dinou"`** (`useRouter`, `useNavigationLoading`, `refreshSlot`) include defensive SSR guards (`typeof window === "undefined"` and `React.useContext || (() => null)`), so even if accidentally invoked on the server they degrade to safe no-ops without throwing.
+
+### 7.2. Can `import { ... } from "dinou/server"` Be Used in a Client Component (`"use client"`)?
+* **Runtime value imports (`import { revalidateTag, DinouCacheSlot, ... } from "dinou/server"`) — NO:**
+  * `dinou/server.js` statically imports `./core/storage-adapter.js` (which imports `node:path` and `node:fs`) and dynamically imports `./core/cache-revalidate.js` and `./core/cache-slot.js` (which depend on `node:fs`, `node:path`, `node:async_hooks`, `node:module`, and the RSC rendering pipeline).
+  * Importing runtime values from `"dinou/server"` inside a `"use client"` file will cause the client bundler to trace into Node.js native modules (`node:fs`, `node:path`), failing the browser bundle build.
+  * To trigger cache revalidation (`revalidateTag`, `revalidatePath`, etc.) from a Client Component, invoke a **`"use server"` Server Function** that imports and calls those functions on the server, or call `refreshSlot(slotId)` / `router.refresh()` from `"dinou"`.
+* **Type-only imports (`import type { PageProps, ... } from "dinou/server"`) — YES (compile-time only):**
+  * TypeScript completely erases `import type` statements before bundling, so they produce zero runtime imports in the browser bundle (though `import type { ... } from "dinou"` remains the idiomatic choice in Client Components).
+
+
