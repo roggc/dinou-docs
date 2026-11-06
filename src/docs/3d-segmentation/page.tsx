@@ -521,21 +521,21 @@ export function WorkspaceControls() {
                         <td className="py-2.5 px-3 font-mono font-semibold text-foreground whitespace-nowrap">id?</td>
                         <td className="py-2.5 px-3 font-mono text-muted-foreground whitespace-nowrap">string</td>
                         <td className="py-2.5 px-3 text-muted-foreground leading-relaxed">
-                          Unique identifier for this slot&apos;s cache entry on the server and for targeting it from the client via <code>refreshSlot(id)</code>. <strong>Recommended on every <code>&lt;DinouCacheSlot&gt;</code></strong> using a descriptive string (e.g., <code>id=&quot;dashboard-analytics&quot;</code>—never reuse the same <code>id</code> across different slots). If omitted, Dinou falls back to <code>tag || tags[0]</code>, though keeping <code>id</code> (identity) separate from <code>tag</code> / <code>tags</code> (invalidation labels) avoids collisions.
+                          Unique identifier for this slot&apos;s cache entry on the server and for targeting it from the client via <code>refreshSlot(id)</code>. <strong>Recommended on every <code>&lt;DinouCacheSlot&gt;</code></strong> using a descriptive string (e.g., <code>id=&quot;dashboard-analytics&quot;</code>—never reuse the same <code>id</code> across different slots). If omitted, Dinou falls back to <code>tag || tags[0]</code>.
                         </td>
                       </tr>
                       <tr>
                         <td className="py-2.5 px-3 font-mono font-semibold text-foreground whitespace-nowrap">tag?</td>
                         <td className="py-2.5 px-3 font-mono text-muted-foreground whitespace-nowrap">string</td>
                         <td className="py-2.5 px-3 text-muted-foreground leading-relaxed">
-                          Assigns a <strong>single</strong> cache tag to invalidate the slot on the server via <code>revalidateTag(tag)</code> (or refresh all slots sharing that tag in the browser via <code>refreshSlot(tag)</code>). Do not combine <code>tag</code> and <code>tags</code> on the same slot—if <code>tags</code> is provided, Dinou uses <code>tags</code> and ignores <code>tag</code>.
+                          Assigns a <strong>single</strong> cache tag to invalidate the slot on the server via <code>revalidateTag(tag)</code> (or refresh all slots sharing that tag in the browser via <code>refreshSlot(tag)</code>). Do not combine <code>tag</code> and <code>tags</code> on the same slot—if <code>tags</code> is provided, Dinou uses <code>tags</code> and ignores <code>tag</code>. If <code>id</code> is omitted, <code>tag || tags[0]</code> is used as the slot&apos;s <code>id</code>.
                         </td>
                       </tr>
                       <tr>
                         <td className="py-2.5 px-3 font-mono font-semibold text-foreground whitespace-nowrap">tags?</td>
                         <td className="py-2.5 px-3 font-mono text-muted-foreground whitespace-nowrap">string[]</td>
                         <td className="py-2.5 px-3 text-muted-foreground leading-relaxed">
-                          Array of cache tags when a slot needs <strong>multiple</strong> tags at once (for example, an individual tag plus a shared group tag: <code>tags=&#123;[&quot;sales-chart&quot;, &quot;billing-group&quot;]&#125;</code>).
+                          Array of cache tags when a slot needs <strong>multiple</strong> tags at once (for example, an individual tag plus a shared group tag: <code>tags=&#123;[&quot;sales-chart&quot;, &quot;billing-group&quot;]&#125;</code>). If <code>id</code> is omitted, <code>tags[0]</code> is used as the slot&apos;s <code>id</code>.
                         </td>
                       </tr>
                       <tr>
@@ -552,9 +552,9 @@ export function WorkspaceControls() {
                       </tr>
                       <tr>
                         <td className="py-2.5 px-3 font-mono font-semibold text-foreground whitespace-nowrap">children</td>
-                        <td className="py-2.5 px-3 font-mono text-muted-foreground whitespace-nowrap">ReactNode | (() =&gt; Promise&lt;ReactNode&gt;)</td>
+                        <td className="py-2.5 px-3 font-mono text-muted-foreground whitespace-nowrap">ReactNode | (() =&gt; ReactNode | Promise&lt;ReactNode&gt;)</td>
                         <td className="py-2.5 px-3 text-muted-foreground leading-relaxed">
-                          The Server Component subtree to render and cache. You can pass standard JSX (<code>&lt;AsyncWidget /&gt;</code>) or an <strong>inline async function</strong> (<code>&#123;async () =&gt; &#123; ... &#125;&#125;</code>) to fetch data directly inline without creating a separate component.
+                          The Server Component subtree to render and cache. You can pass standard JSX (an async or synchronous component such as <code>&lt;AsyncWidget /&gt;</code> or <code>&lt;SyncWidget /&gt;</code>) or an <strong>inline async or synchronous function</strong> (<code>&#123;async () =&gt; &#123; ... &#125;&#125;</code> or <code>&#123;() =&gt; &#123; ... &#125;&#125;</code>) to compute or fetch data directly inline without creating a separate component.
                         </td>
                       </tr>
                     </tbody>
@@ -575,7 +575,7 @@ export function WorkspaceControls() {
                       1. Unique <code>id</code> + Optional <code>tag</code> / <code>tags</code>
                     </div>
                     <p className="text-muted-foreground leading-relaxed">
-                      Always give each slot a unique, descriptive <code>id</code> (e.g., <code>&lt;DinouCacheSlot id=&quot;analytics-widget&quot;&gt;</code>)—this alone lets you cache the slot on the server and refresh it from the client via <code>refreshSlot(&quot;analytics-widget&quot;)</code>. When you also need server-side invalidation with <code>revalidateTag()</code> or want to invalidate several widgets together, add <code>tag</code> or <code>tags</code> alongside <code>id</code> (e.g., <code>id=&quot;sales-chart&quot; tags=&#123;[&quot;sales&quot;, &quot;billing-group&quot;]&#125;</code>).
+                      Always give each slot a unique, descriptive <code>id</code> (e.g., <code>&lt;DinouCacheSlot id=&quot;analytics-widget&quot;&gt;</code>)—this alone lets you cache the slot on the server and refresh it from the client via <code>refreshSlot(&quot;analytics-widget&quot;)</code>. When you also need server-side invalidation with <code>revalidateTag()</code> or want to invalidate several widgets together, add <code>tag</code> or <code>tags</code> (e.g., <code>tags=&#123;[&quot;sales&quot;, &quot;billing-group&quot;]&#125;</code>); if you also want the ability to revalidate by <code>id</code>, place the <code>id</code> in <code>tag || tags[0]</code>.
                     </p>
                   </div>
 
@@ -599,10 +599,10 @@ export function WorkspaceControls() {
 
                   <div className="p-3.5 rounded-md bg-background border border-border space-y-1.5 min-w-0">
                     <div className="font-semibold text-foreground">
-                      4. Client Components &amp; Server Actions Inside a Slot
+                      4. Client Components &amp; Server Functions Inside a Slot
                     </div>
                     <p className="text-muted-foreground leading-relaxed">
-                      Although <code>&lt;DinouCacheSlot&gt;</code> runs on the server, the UI inside it can render interactive <code>&quot;use client&quot;</code> components and pass <code>&quot;use server&quot;</code> actions as props. When <code>refreshSlot()</code> updates that slot in the browser, React updates the server props in place without unmounting those Client Components, preserving open dropdowns, typed text, and local <code>useState</code> values.
+                      Although <code>&lt;DinouCacheSlot&gt;</code> runs on the server, the UI inside it can render interactive <code>&quot;use client&quot;</code> components and pass <code>&quot;use server&quot;</code> functions as props. When <code>refreshSlot()</code> updates that slot in the browser, React updates the server props in place without unmounting those Client Components, preserving open dropdowns, typed text, and local <code>useState</code> values.
                     </p>
                   </div>
                 </div>
@@ -656,10 +656,8 @@ export function WorkspaceControls() {
                     containerClassName="w-full overflow-hidden rounded-lg my-2"
                   >
 {`// src/dashboard/page.tsx
-import { Suspense } from "react";
 import { DinouCacheSlot } from "dinou/server";
 import { FastUserProfile, SlowAnalyticsWidget, FlashDealsBanner } from "./widgets";
-import { AnalyticsSkeleton } from "./skeletons";
 
 export default function DashboardPage() {
   return (
@@ -668,11 +666,9 @@ export default function DashboardPage() {
       <FastUserProfile />
 
       {/* 2. Micro-ISR Slot with multi-tag group invalidation */}
-      <Suspense fallback={<AnalyticsSkeleton />}>
-        <DinouCacheSlot id="analytics-widget" tags={["analytics", "dashboard-group"]} revalidate={300}>
-          <SlowAnalyticsWidget />
-        </DinouCacheSlot>
-      </Suspense>
+      <DinouCacheSlot id="analytics-widget" tags={["analytics", "dashboard-group"]} revalidate={300}>
+        <SlowAnalyticsWidget />
+      </DinouCacheSlot>
 
       {/* 3. Nested Slots (Outer 1h cache -> Inner 30s cache) + Inline async function child */}
       <DinouCacheSlot id="catalog-outer" tag="catalog-tree" revalidate={3600}>
@@ -745,29 +741,29 @@ export default function ProductDetailPage({ params }: PageProps<"/products/[slug
                 <div className="border rounded-lg p-5 bg-muted/20 not-prose my-6 space-y-4">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
                     <Info className="h-4 w-4 text-blue-500" />
-                    <span>When to Wrap <code>&lt;DinouCacheSlot&gt;</code> in <code>&lt;Suspense&gt;</code> vs. Unwrapped</span>
+                    <span>Does <code>&lt;DinouCacheSlot&gt;</code> Need <code>&lt;Suspense&gt;</code> Around It?</span>
                   </div>
 
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Whether you wrap <code>&lt;DinouCacheSlot&gt;</code> inside an outer <code>&lt;Suspense&gt;</code> depends on whether you want the slot to be <strong>included in the initial HTML shell</strong> or <strong>streamed as a dynamic hole</strong>:
+                    In standalone Vertical Segmentation (<code>ppr = false</code>), <code>&lt;DinouCacheSlot&gt;</code> resolves on the server and does <strong>not</strong> require an outer <code>&lt;Suspense&gt;</code> wrapper. Wrapping a slot in <code>&lt;Suspense&gt;</code> is only needed when combining it with <strong>Partial Prerendering (<code>ppr = true</code>, Section 6)</strong> to stream it as a dynamic hole:
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs min-w-0">
                     <div className="p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 space-y-1.5 min-w-0">
                       <div className="font-semibold text-emerald-700 dark:text-emerald-300">
-                        1. Unwrapped &lt;DinouCacheSlot&gt; (Static Shell Slot)
+                        1. Unwrapped &lt;DinouCacheSlot&gt; (Default in SSR, ISR &amp; PPR Static Shell)
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
-                        In Static/ISR pages (<code>ppr = false</code>) and in the Static Shell of PPR routes (<code>ppr = true</code>), leaving <code>&lt;DinouCacheSlot revalidate=&#123;60&#125;&gt;</code> <strong>outside</strong> <code>&lt;Suspense&gt;</code> (or wrapping an inner <code>&lt;Suspense&gt;</code> inside the slot) bakes the resolved widget directly into the initial HTML. Visitors see the complete content at 0ms with zero skeleton flash, and expired TTLs refresh in the background via SWR without blocking TTFB.
+                        In Dynamic SSR pages (<code>revalidate = 0</code>), Static/ISR pages (<code>ppr = false</code>), and the Static Shell of PPR routes (<code>ppr = true</code>), use <code>&lt;DinouCacheSlot&gt;</code> directly without an outer <code>&lt;Suspense&gt;</code>. On cache hits and expired TTLs (via Background SWR), the resolved widget is included directly in the initial HTML in ~1–2ms with zero skeleton flash.
                       </p>
                     </div>
 
                     <div className="p-3.5 rounded-md bg-purple-500/10 border border-purple-500/20 space-y-1.5 min-w-0">
                       <div className="font-semibold text-purple-700 dark:text-purple-300">
-                        2. &lt;Suspense&gt; Wrapping &lt;DinouCacheSlot&gt; (Streamed Hole)
+                        2. &lt;Suspense&gt; Wrapping &lt;DinouCacheSlot&gt; (With ppr = true in Section 6)
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
-                        In Dynamic SSR pages (<code>revalidate = 0</code>) or when you want a <strong>Cached Dynamic PPR Hole</strong> on a <code>ppr = true</code> route, place <code>&lt;Suspense fallback=&#123;...&#125;&gt;</code> <strong>outside</strong> <code>&lt;DinouCacheSlot&gt;</code>. The outer shell flushes immediately with the fallback skeleton, while the cached slot streams from server cache in ~2ms (or renders live on a cache miss without blocking TTFB).
+                        When a route enables <code>ppr = true</code> (Combination #6), placing <code>&lt;Suspense fallback=&#123;...&#125;&gt;</code> <strong>outside</strong> <code>&lt;DinouCacheSlot&gt;</code> turns that slot into a <strong>Cached Dynamic PPR Hole</strong>: the pre-rendered Static Shell flushes at 0ms with the fallback skeleton, while the cached slot streams from server cache in ~2ms.
                       </p>
                     </div>
                   </div>
