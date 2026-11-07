@@ -19,6 +19,8 @@ import {
   Server,
   Cloud,
   RotateCcw,
+  Boxes,
+  Sliders,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 import { Badge } from "@/docs/components/ui/badge";
@@ -28,6 +30,7 @@ const tocItems = [
   { id: "how-to-eject", title: "How to Eject (CLI & Scripts)", level: 2 },
   { id: "what-happens", title: "What Happens When You Eject?", level: 2 },
   { id: "directory-anatomy", title: "Anatomy of the Ejected dinou/ Directory", level: 2 },
+  { id: "ejected-vendoring", title: "Dual-Mode Vendoring (-u & build:vendors)", level: 2 },
   { id: "when-to-eject", title: "When to Consider Ejecting", level: 2 },
   { id: "agentic-era", title: "Ejection in the Agentic Era", level: 2 },
   { id: "customization-examples", title: "Practical Customization Examples", level: 2 },
@@ -186,10 +189,18 @@ npm run eject`}
 │   ├── rsc-renderer.js             # React 19 Server Components wire-format serializer
 │   ├── render-html.js              # Server-Side Rendering (SSR) HTML streaming
 │   ├── get-file-path-and-dynamic-params.js  # File-system router & param extractor
-│   ├── slot.js                     # Parallel routes (@slot) & layout resolution
+│   ├── cache-slot.js               # Micro-ISR (<DinouCacheSlot>) & surgical splicing
 │   ├── storage-adapter.js          # Multi-backend ISR & KV caching abstraction
 │   ├── generate-static.js          # SSG pre-generation & static export
-│   └── revalidating.js             # Background ISR revalidator & cache purger
+│   └── cache-revalidate.js         # O(1) layout/page/tag revalidation & lazy HTML re-composition
+│
+├── compiled/                       # 36 Pre-bundled ESM Toolchain Vendors (Instant Cold Starts)
+│   ├── babel-core/                 # Standalone ESM Babel AST & React Compiler bundles
+│   ├── postcss/                    # Pre-compiled PostCSS & Tailwind pipelines
+│   └── vendors-manifest.json       # Vendor version & integrity manifest
+│
+├── scripts/
+│   └── build-vendors.js            # Recompiles ./dinou/compiled/ from node_modules
 │
 ├── adapters/                       # Deployment Runtime Adapters
 │   ├── node.js                     # Standalone Node.js HTTP server (Docker, VPS)
@@ -219,6 +230,47 @@ npm run eject`}
                   <strong className="text-foreground">Eject and explore with your AI agent:</strong> Every module inside the <code>dinou/</code> directory is clean, standard JavaScript written with native Web Standards. Have your AI coding assistant (like Gemini Antigravity, Cursor, or Claude) explore the architecture, explain execution flows, or implement custom runtime features directly in your repo.
                 </div>
               </div>
+            </section>
+
+            {/* Dual-Mode Vendoring in Ejected Projects */}
+            <section id="ejected-vendoring" className="mt-12 scroll-mt-20">
+              <h2>Dual-Mode Vendoring in Ejected Projects (<code>-u</code> &amp; <code>build:vendors</code>)</h2>
+              <p>
+                Ejected Dinou projects retain full support for Dinou&apos;s <strong>Dual-Mode Additive Vendoring</strong> via Node.js Subpath Imports (<code>#...</code>) defined in your root <code>package.json</code>:
+              </p>
+
+              <div className="grid gap-4 sm:grid-cols-2 not-prose my-6">
+                <div className="p-4 rounded-lg border bg-card space-y-2">
+                  <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
+                    <Zap className="h-4 w-4 text-emerald-500" />
+                    <span>1. Default Vendorized Mode</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Running <code>npm run dev</code> or <code>npm run build</code> resolves internal toolchain imports (<code>#babel/core</code>, <code>#postcss</code>, <code>#chokidar</code>, etc.) from <code>./dinou/compiled/</code> for instant cold starts.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-lg border bg-card space-y-2">
+                  <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
+                    <Sliders className="h-4 w-4 text-blue-500" />
+                    <span>2. Unvendorized Mode (<code>-u</code>)</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Passing <code>-- -u</code> (e.g. <code>npm run dev -- -u</code> or <code>npm run build -- -u</code>) or setting <code>DINOU_UNVENDORIZED=true</code> bypasses <code>./dinou/compiled/</code> and loads packages directly from <code>node_modules</code>.
+                  </p>
+                </div>
+              </div>
+
+              <CodeBlock
+                language="bash"
+                containerClassName="w-full overflow-hidden rounded-lg"
+              >
+{`# 1. Test an upgraded or patched dependency in node_modules immediately with -u:
+npm run dev -- -u
+
+# 2. Once satisfied, recompile ./dinou/compiled/ (~5s) to lock in fast vendorized startup:
+npm run build:vendors`}
+              </CodeBlock>
             </section>
 
             {/* When to Eject */}
@@ -393,7 +445,7 @@ await esbuild.build(buildConfig);`}
                   <div className="space-y-2 flex-1">
                     <h4 className="text-sm font-semibold text-foreground">Restore package.json Scripts</h4>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      Change the scripts in your <code>package.json</code> back to the original Dinou scripts:
+                      Change the scripts in your <code>package.json</code> back to the original Dinou scripts (and remove the root <code>&quot;imports&quot;</code> block added during ejection):
                     </p>
                     <CodeBlock
                       language="json"

@@ -43,7 +43,10 @@ const tocItems = [
   { id: "context-and-slots", title: "getContext & DinouCacheSlot", level: 3 },
   { id: "cache-invalidation", title: "On-Demand Invalidation", level: 3 },
 
-  { id: "decision-matrix", title: "6. Decision Matrix: When to Use What", level: 2 },
+  { id: "cli-execution-modes", title: "6. CLI & Execution Modes", level: 2 },
+  { id: "cli-vendor-modes", title: "Vendorized vs. Unvendorized (-u)", level: 3 },
+
+  { id: "decision-matrix", title: "7. Decision Matrix: When to Use What", level: 2 },
   { id: "matrix-cache", title: "Cache Invalidation Matrix", level: 3 },
   { id: "matrix-redirects", title: "Redirection Strategy Matrix", level: 3 },
   { id: "matrix-params", title: "Route Parameter Access Matrix", level: 3 },
@@ -1125,11 +1128,113 @@ export default function Page() {
             </section>
 
             {/* ================================================================= */}
-            {/* SECTION 6: DECISION MATRIX */}
+            {/* SECTION 6: CLI & EXECUTION MODES */}
+            {/* ================================================================= */}
+            <section id="cli-execution-modes" className="scroll-mt-20 mt-12 pt-8 border-t border-border">
+              <h2 className="flex items-center gap-3">
+                6. CLI &amp; Execution Modes
+                <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                  dinou CLI
+                </span>
+              </h2>
+              <p>
+                Dual-mode additive vendoring controls whether Dinou resolves internal toolchain dependencies from pre-compiled ESM bundles or directly from <code>node_modules</code>.
+              </p>
+
+              <section id="cli-vendor-modes" className="scroll-mt-20">
+                <h3>Vendorized (Default) vs. Unvendorized (<code>-u</code>)</h3>
+                <div className="not-prose overflow-x-auto rounded-lg border border-border mt-3">
+                  <table className="w-full text-xs text-left">
+                    <thead className="bg-muted/70 text-muted-foreground font-semibold uppercase tracking-wider border-b border-border">
+                      <tr>
+                        <th className="py-2.5 px-3.5">Command / Env Var</th>
+                        <th className="py-2.5 px-3.5">Active Mode</th>
+                        <th className="py-2.5 px-3.5">Resolution Target</th>
+                        <th className="py-2.5 px-3.5">When to Use</th>
+                        <th className="py-2.5 px-3.5 text-right">Guide</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border bg-card">
+                      <tr>
+                        <td className="py-2.5 px-3.5 font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                          npm run dev / npm run build
+                        </td>
+                        <td className="py-2.5 px-3.5 font-medium">Vendorized (Default)</td>
+                        <td className="py-2.5 px-3.5 font-mono text-muted-foreground">
+                          dinou/compiled/
+                        </td>
+                        <td className="py-2.5 px-3.5 text-muted-foreground">
+                          Daily development and production builds with instant cold starts and zero upstream dependency drift.
+                        </td>
+                        <td className="py-2.5 px-3.5 text-right">
+                          <Link href="/docs/bundlers#dual-mode-vendoring" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
+                            Docs <ExternalLink className="h-3 w-3" />
+                          </Link>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-3.5 font-mono font-semibold text-blue-600 dark:text-blue-400">
+                          npm run dev -- -u
+                        </td>
+                        <td className="py-2.5 px-3.5 font-medium">Unvendorized (<code>-u</code> / <code>--unvendorized</code>)</td>
+                        <td className="py-2.5 px-3.5 font-mono text-muted-foreground">
+                          node_modules/
+                        </td>
+                        <td className="py-2.5 px-3.5 text-muted-foreground">
+                          Debugging upstream packages, testing local patches, or running upgraded dependencies directly from <code>node_modules</code>.
+                        </td>
+                        <td className="py-2.5 px-3.5 text-right">
+                          <Link href="/docs/bundlers#unvendorized-mode" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
+                            Docs <ExternalLink className="h-3 w-3" />
+                          </Link>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-3.5 font-mono font-semibold text-blue-600 dark:text-blue-400">
+                          DINOU_UNVENDORIZED=true
+                        </td>
+                        <td className="py-2.5 px-3.5 font-medium">Unvendorized (Env)</td>
+                        <td className="py-2.5 px-3.5 font-mono text-muted-foreground">
+                          node_modules/
+                        </td>
+                        <td className="py-2.5 px-3.5 text-muted-foreground">
+                          CI/CD pipelines or Docker containers where environment variables are preferred over CLI flags.
+                        </td>
+                        <td className="py-2.5 px-3.5 text-right">
+                          <Link href="/docs/bundlers#unvendorized-mode" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
+                            Docs <ExternalLink className="h-3 w-3" />
+                          </Link>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">
+                          npm run build:vendors
+                        </td>
+                        <td className="py-2.5 px-3.5 font-medium">Vendor Compiler (Ejected Only)</td>
+                        <td className="py-2.5 px-3.5 font-mono text-muted-foreground">
+                          ./dinou/compiled/
+                        </td>
+                        <td className="py-2.5 px-3.5 text-muted-foreground">
+                          Recompiles the 36 standalone ESM vendor bundles in ~5s after bumping dependencies in an ejected project.
+                        </td>
+                        <td className="py-2.5 px-3.5 text-right">
+                          <Link href="/docs/eject#ejected-vendoring" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
+                            Docs <ExternalLink className="h-3 w-3" />
+                          </Link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </section>
+
+            {/* ================================================================= */}
+            {/* SECTION 7: DECISION MATRIX */}
             {/* ================================================================= */}
             <section id="decision-matrix" className="scroll-mt-20 mt-12 pt-8 border-t border-border">
               <h2 className="flex items-center gap-3">
-                6. Decision Matrix: When to Use What
+                7. Decision Matrix: When to Use What
                 <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400 ring-1 ring-inset ring-amber-500/20">
                   Architectural Guide
                 </span>

@@ -32,6 +32,7 @@ import {
   Cloud,
   Globe,
   FileCode,
+  Sliders,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -568,13 +569,26 @@ dist
                     Run the development server with the fast esbuild bundler (default), or choose Rollup or Webpack:
                   </p>
                   <CodeBlock language="bash" containerClassName="w-full rounded-lg">
-                    {`# Start with default ultra-fast esbuild
+                    {`# Start with default ultra-fast esbuild (Vendorized Mode)
 npm run dev
 
 # Or start with Rollup or Webpack
 npm run dev:rollup
-npm run dev:webpack`}
+npm run dev:webpack
+
+# Optional: Run in Unvendorized Mode (-u) to resolve internal toolchain directly from node_modules
+npm run dev -- -u`}
                   </CodeBlock>
+
+                  <div className="mt-4 p-3.5 rounded-lg border border-border bg-muted/20 text-xs text-muted-foreground space-y-1">
+                    <div className="font-semibold text-foreground flex items-center gap-1.5">
+                      <Sliders className="h-3.5 w-3.5 text-blue-500" />
+                      <span>Vendorized (Default) vs. Unvendorized Mode (<code>-u</code>)</span>
+                    </div>
+                    <p className="leading-relaxed">
+                      By default, Dinou boots using pre-compiled ESM toolchain vendors (<code>dinou/compiled/</code>) for instant cold starts. Passing <code>-- -u</code> (or setting <code>DINOU_UNVENDORIZED=true</code>) switches to <strong>Unvendorized Mode</strong>, resolving internal compiler packages directly from <code>node_modules</code>. Learn more in the <Link href="/docs/bundlers#dual-mode-vendoring" className="text-blue-500 hover:underline font-medium">Bundlers Guide &rarr;</Link>
+                    </p>
+                  </div>
                 </div>
               </div>
             </section>

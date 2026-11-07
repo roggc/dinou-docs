@@ -28,8 +28,11 @@ import {
   Globe,
   RefreshCw,
   Binary,
+  Sliders,
+  Lock,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
+import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 import { Link } from "dinou";
 
 const tocItems = [
@@ -39,19 +42,23 @@ const tocItems = [
   { id: "rollup", title: "2.2 Rollup (Optimized Tree-Shaking)", level: 3 },
   { id: "webpack", title: "2.3 Webpack (Enterprise & React Compiler)", level: 3 },
   { id: "dual-bundle-engine", title: "3. The Dual-Bundle Engine Architecture", level: 2 },
-  { id: "cli-commands", title: "4. Complete Dinou Scripts Matrix", level: 2 },
-  { id: "dev-scripts", title: "4.1 Development Scripts (dinou dev)", level: 3 },
-  { id: "node-scripts", title: "4.2 Node.js Standard Build & Start (build:node)", level: 3 },
-  { id: "node-compile-scripts", title: "4.3 Node Standalone Binary Compilation (build:node:compile)", level: 3 },
-  { id: "node-pure-scripts", title: "4.4 Pure Bun Engine for Node.js (build:node:pure)", level: 3 },
-  { id: "node-pure-compile-scripts", title: "4.5 Pure Standalone Binary Compilation (build:node:pure:compile)", level: 3 },
-  { id: "node-build-matrix", title: "4.6 Node Build Architecture & Execution Matrix", level: 3 },
-  { id: "cloudflare-scripts", title: "4.7 Cloudflare Workers & Pages", level: 3 },
-  { id: "deno-scripts", title: "4.8 Deno & Standalone Compiles", level: 3 },
-  { id: "bun-scripts", title: "4.9 Bun Runtime & Standalone Compiles", level: 3 },
-  { id: "static-export-scripts", title: "4.10 Static HTML Export (dinou export-static)", level: 3 },
-  { id: "package-json-setup", title: "5. Recommended package.json Setup", level: 2 },
-  { id: "bundler-selection-guide", title: "6. Which Bundler & Target Should You Choose?", level: 2 },
+  { id: "dual-mode-vendoring", title: "4. Dual-Mode Vendoring (Vendorized vs. -u)", level: 2 },
+  { id: "vendorized-default", title: "4.1 Vendorized Mode (Default)", level: 3 },
+  { id: "unvendorized-mode", title: "4.2 Unvendorized Mode (-u / --unvendorized)", level: 3 },
+  { id: "vendor-catalog", title: "4.3 Compiled Vendors vs. External Exceptions", level: 3 },
+  { id: "cli-commands", title: "5. Complete Dinou Scripts Matrix", level: 2 },
+  { id: "dev-scripts", title: "5.1 Development Scripts (dinou dev)", level: 3 },
+  { id: "node-scripts", title: "5.2 Node.js Standard Build & Start (build:node)", level: 3 },
+  { id: "node-compile-scripts", title: "5.3 Node Standalone Binary Compilation (build:node:compile)", level: 3 },
+  { id: "node-pure-scripts", title: "5.4 Pure Bun Engine for Node.js (build:node:pure)", level: 3 },
+  { id: "node-pure-compile-scripts", title: "5.5 Pure Standalone Binary Compilation (build:node:pure:compile)", level: 3 },
+  { id: "node-build-matrix", title: "5.6 Node Build Architecture & Execution Matrix", level: 3 },
+  { id: "cloudflare-scripts", title: "5.7 Cloudflare Workers & Pages", level: 3 },
+  { id: "deno-scripts", title: "5.8 Deno & Standalone Compiles", level: 3 },
+  { id: "bun-scripts", title: "5.9 Bun Runtime & Standalone Compiles", level: 3 },
+  { id: "static-export-scripts", title: "5.10 Static HTML Export (dinou export-static)", level: 3 },
+  { id: "package-json-setup", title: "6. Recommended package.json Setup", level: 2 },
+  { id: "bundler-selection-guide", title: "7. Which Bundler & Target Should You Choose?", level: 2 },
 ];
 
 export default function Page() {
@@ -226,16 +233,135 @@ export default function Page() {
               </div>
             </section>
 
+            {/* Section 4: Dual-Mode Additive Vendoring */}
+            <section id="dual-mode-vendoring" className="mt-12 scroll-mt-20">
+              <h2>4. Dual-Mode Additive Vendoring (Vendorized vs. <code>-u</code>)</h2>
+              <p>
+                Dinou ships with a <strong>Dual-Mode Additive Vendoring System</strong> powered by native Node.js Subpath Imports (<code>#...</code>). Internal compiler, AST, and styling dependencies are pre-compiled into standalone ESM bundles inside <code>dinou/compiled/</code> while also remaining installed in standard <code>node_modules</code>.
+              </p>
+
+              <div id="vendorized-default" className="mt-6 space-y-3 scroll-mt-20">
+                <h3 className="text-lg font-bold">4.1 Vendorized Mode (Default — Instant Cold Starts)</h3>
+                <p>
+                  Whenever you run <code>npm run dev</code>, <code>npm run build</code>, or <code>npm start</code> without extra flags, Dinou executes in <strong>Vendorized Mode</strong>:
+                </p>
+                <ul>
+                  <li>
+                    <strong>Zero File-System Bottlenecks:</strong> Avoids traversing and parsing thousands of small CommonJS/ESM files inside deep <code>node_modules</code> trees during startup.
+                  </li>
+                  <li>
+                    <strong>Deterministic Builds:</strong> Guarantees identical compiler behavior across local machines and CI runners without subtle regressions from transitive dependency drift.
+                  </li>
+                </ul>
+              </div>
+
+              <div id="unvendorized-mode" className="mt-8 space-y-3 scroll-mt-20">
+                <h3 className="text-lg font-bold">4.2 Unvendorized Mode (<code>-u</code> / <code>--unvendorized</code>)</h3>
+                <p>
+                  Because Dinou&apos;s vendoring is strictly <strong>additive</strong>, all 36 vendorized packages still reside in <code>node_modules</code>. If you need to debug an upstream library, test a local patch, or immediately use an upgraded dependency in <code>node_modules</code> without rebuilding vendor bundles, pass the <strong><code>-u</code></strong> (or <code>--unvendorized</code>) flag, or set <code>DINOU_UNVENDORIZED=true</code>:
+                </p>
+
+                <div className="not-prose my-4">
+                  <TabbedCodeBlock
+                    defaultTab="npm-flag"
+                    tabs={[
+                      {
+                        id: "npm-flag",
+                        label: "npm run (-- -u)",
+                        language: "bash",
+                        code: `# Start dev server resolving directly from node_modules
+npm run dev -- -u
+
+# Run a specific bundler in unvendorized mode
+npm run dev:webpack -- -u
+
+# Build or start production server in unvendorized mode
+npm run build -- -u
+npm start -- -u`,
+                      },
+                      {
+                        id: "direct-cli",
+                        label: "npx dinou (-u)",
+                        language: "bash",
+                        code: `# Pass -u or --unvendorized directly to the Dinou CLI
+npx dinou dev -u
+npx dinou build:node:rollup --unvendorized`,
+                      },
+                      {
+                        id: "env-var",
+                        label: "Environment Variable (CI / Docker)",
+                        language: "bash",
+                        code: `# Opt out of pre-compiled vendors via environment variable
+DINOU_UNVENDORIZED=true npm run build
+
+# Windows PowerShell:
+$env:DINOU_UNVENDORIZED="true"; npm run dev`,
+                      },
+                    ]}
+                  />
+                </div>
+
+                <div className="p-4 rounded-lg bg-muted/20 border border-border text-xs text-muted-foreground space-y-1.5 not-prose">
+                  <div className="font-semibold text-foreground flex items-center gap-1.5">
+                    <Sliders className="h-4 w-4 text-blue-500" />
+                    <span>How <code>-u</code> Works Under the Hood</span>
+                  </div>
+                  <p className="leading-relaxed">
+                    When <code>-u</code> or <code>DINOU_UNVENDORIZED=true</code> is detected, Dinou automatically activates Node.js conditional exports resolution (<code>--conditions=unvendorized</code>), routing internal <code>#...</code> subpath imports directly to standard packages in <code>node_modules</code> instead of <code>dinou/compiled/</code>.
+                  </p>
+                </div>
+              </div>
+
+              <div id="vendor-catalog" className="mt-8 space-y-3 scroll-mt-20">
+                <h3 className="text-lg font-bold">4.3 Compiled Vendors vs. External Exceptions</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-4">
+                  <Card className="border-blue-500/20 bg-blue-50/10 dark:bg-blue-950/10">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400 text-sm">
+                        <Boxes className="h-4 w-4" />
+                        <span>36 Pre-Compiled Packages (dinou/compiled/)</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground space-y-1.5">
+                      <p>Bundled into standalone ESM for instant startup:</p>
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li><strong>Babel &amp; React Compiler:</strong> <code>@babel/core</code>, <code>@babel/parser</code>, <code>@babel/traverse</code>, <code>babel-plugin-react-compiler</code></li>
+                        <li><strong>Rollup &amp; Webpack Plugins:</strong> <code>@rollup/plugin-*</code>, <code>babel-loader</code>, <code>css-loader</code>, <code>mini-css-extract-plugin</code></li>
+                        <li><strong>CSS &amp; Runtime Utilities:</strong> <code>postcss</code>, <code>autoprefixer</code>, <code>@tailwindcss/postcss</code>, <code>chokidar</code>, <code>commander</code>, <code>dotenv</code>, <code>ws</code></li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-amber-500/20 bg-amber-50/10 dark:bg-amber-950/10">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center gap-2 font-semibold text-amber-600 dark:text-amber-400 text-sm">
+                        <Lock className="h-4 w-4" />
+                        <span>External Exceptions (Always in node_modules)</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="text-xs text-muted-foreground space-y-1.5">
+                      <p>Never vendorized to preserve native binaries and singletons:</p>
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li><strong>Native Platform Binaries:</strong> <code>esbuild</code> (Go binary) and <code>@swc/core</code> (native Rust <code>.node</code> bindings)</li>
+                        <li><strong>React Singletons:</strong> <code>react</code>, <code>react-dom</code>, and <code>@roggc/react-server-dom-esm</code></li>
+                        <li><strong>Core Bundler Engines:</strong> <code>webpack</code> and <code>rollup</code></li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </section>
+
             {/* Complete Dinou Scripts Matrix */}
             <section id="cli-commands" className="mt-12">
-              <h2>4. Complete Dinou Scripts Matrix</h2>
+              <h2>5. Complete Dinou Scripts Matrix</h2>
               <p>
                 Dinou exposes a complete set of CLI commands. Every command supports specifying your bundler (<code>:esbuild</code>, <code>:rollup</code>, <code>:webpack</code>) or omitting it to use the default:
               </p>
 
               {/* Dev Scripts */}
               <div id="dev-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">4.1 Development Scripts (dinou dev)</h3>
+                <h3 className="text-lg font-bold">5.1 Development Scripts (dinou dev)</h3>
                 <p>
                   Starts the development server with Hot Module Replacement (HMR) and in-memory compilation:
                 </p>
@@ -274,9 +400,9 @@ export default function Page() {
                 </div>
               </div>
 
-              {/* 4.2 Node Standard Build */}
+              {/* 5.2 Node Standard Build */}
               <div id="node-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">4.2 Node.js Standard Build &amp; Start (build:node)</h3>
+                <h3 className="text-lg font-bold">5.2 Node.js Standard Build &amp; Start (build:node)</h3>
                 <p>
                   Compiles your Dinou application for a standard Node.js production server environment:
                 </p>
@@ -334,13 +460,13 @@ export default function Page() {
                   </table>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  <strong>Runtime Requirement:</strong> Requires Node.js (v18+) and your application&apos;s external <code>node_modules</code> dependencies on the host server.
+                  <strong>Runtime Requirement:</strong> Requires Node.js (v20.6+) and your application&apos;s external <code>node_modules</code> dependencies on the host server.
                 </p>
               </div>
 
-              {/* 4.3 Node Compile Scripts */}
+              {/* 5.3 Node Compile Scripts */}
               <div id="node-compile-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">4.3 Node Standalone Binary Compilation (build:node:compile)</h3>
+                <h3 className="text-lg font-bold">5.3 Node Standalone Binary Compilation (build:node:compile)</h3>
                 <p>
                   <strong>How it works:</strong> Dinou uses <strong>Node.js</strong> to build your application, and then invokes <strong>Bun&apos;s native compiler</strong> (<code>bun build --compile</code>) to package the resulting server into a single, self-contained executable binary in <code>dist/</code>:
                 </p>
@@ -401,9 +527,9 @@ export default function Page() {
                 </p>
               </div>
 
-              {/* 4.4 Pure Bun Runner */}
+              {/* 5.4 Pure Bun Runner */}
               <div id="node-pure-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">4.4 Pure Bun Engine for Node.js (build:node:pure)</h3>
+                <h3 className="text-lg font-bold">5.4 Pure Bun Engine for Node.js (build:node:pure)</h3>
                 <p>
                   <strong>How it works:</strong> While standard <code>build:node</code> uses Node.js to execute the build, <code>build:node:pure</code> runs the build process using <strong>100% Bun</strong> to generate the Node.js production server.
                 </p>
@@ -457,9 +583,9 @@ export default function Page() {
                 </div>
               </div>
 
-              {/* 4.5 Pure Compile Scripts */}
+              {/* 5.5 Pure Compile Scripts */}
               <div id="node-pure-compile-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">4.5 Pure Standalone Binary Compilation (build:node:pure:compile)</h3>
+                <h3 className="text-lg font-bold">5.5 Pure Standalone Binary Compilation (build:node:pure:compile)</h3>
                 <p>
                   <strong>The Ultimate Zero-Dependency Pipeline:</strong> Combines 100% Bun build execution with Bun binary compilation. Bun builds the Node orchestrator and Bun compiles it into a standalone executable binary.
                 </p>
@@ -559,9 +685,9 @@ CMD ["./server"]`}
                 </div>
               </div>
 
-              {/* 4.6 Comparison Matrix */}
+              {/* 5.6 Comparison Matrix */}
               <div id="node-build-matrix" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">4.6 Node Build Architecture &amp; Execution Matrix</h3>
+                <h3 className="text-lg font-bold">5.6 Node Build Architecture &amp; Execution Matrix</h3>
                 <p>
                   Summary comparison of all Node.js build strategies supported by Dinou:
                 </p>
@@ -617,7 +743,7 @@ CMD ["./server"]`}
 
               {/* Cloudflare Scripts */}
               <div id="cloudflare-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">4.7 Cloudflare Workers &amp; Pages</h3>
+                <h3 className="text-lg font-bold">5.7 Cloudflare Workers &amp; Pages</h3>
                 <p>
                   Compiles your application into an edge-native worker bundle:
                 </p>
@@ -658,7 +784,7 @@ CMD ["./server"]`}
 
               {/* Deno Scripts */}
               <div id="deno-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">4.8 Deno &amp; Standalone Compiles</h3>
+                <h3 className="text-lg font-bold">5.8 Deno &amp; Standalone Compiles</h3>
                 <p>
                   Build for Deno KV runtime, or compile directly into a <strong>self-contained standalone executable binary</strong> with zero system dependencies:
                 </p>
@@ -709,7 +835,7 @@ CMD ["./server"]`}
 
               {/* Bun Scripts */}
               <div id="bun-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">4.9 Bun Runtime &amp; Standalone Compiles</h3>
+                <h3 className="text-lg font-bold">5.9 Bun Runtime &amp; Standalone Compiles</h3>
                 <p>
                   Target the ultra-fast Bun JavaScript runtime with standard or pure native modes:
                 </p>
@@ -775,7 +901,7 @@ CMD ["./server"]`}
 
               {/* Static Export Scripts */}
               <div id="static-export-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">4.10 Static HTML Export (dinou export-static)</h3>
+                <h3 className="text-lg font-bold">5.10 Static HTML Export (dinou export-static)</h3>
                 <p>
                   Crawls and generates a 100% static HTML/CSS/JS export in <code>out/</code> ready to host on Surge.sh, GitHub Pages, Cloudflare Pages, AWS S3, Netlify, or Apache/Nginx:
                 </p>
@@ -796,7 +922,7 @@ dinou export-static:webpack`}
 
             {/* Recommended package.json Setup */}
             <section id="package-json-setup" className="mt-12">
-              <h2>5. Recommended package.json Setup</h2>
+              <h2>6. Recommended package.json Setup</h2>
               <p>
                 Copy and paste the complete <code>&quot;scripts&quot;</code> block directly into your project&apos;s <code>package.json</code>:
               </p>
@@ -957,7 +1083,7 @@ dinou export-static:webpack`}
 
             {/* Bundler Selection Guide */}
             <section id="bundler-selection-guide" className="mt-12">
-              <h2>6. Which Bundler &amp; Target Should You Choose?</h2>
+              <h2>7. Which Bundler &amp; Target Should You Choose?</h2>
 
               <div className="grid gap-4 sm:grid-cols-2 not-prose my-6">
                 <div className="p-4 rounded-lg border bg-card space-y-2">
