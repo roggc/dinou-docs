@@ -1235,6 +1235,36 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   );
 }`,
                   },
+                  {
+                    id: "components",
+                    label: "src/products/[slug]/components.tsx",
+                    language: "tsx",
+                    code: `import db from "@/lib/db";
+
+export async function StaticDescription({ slug }: { slug: string }) {
+  // Executed once every 24h (with the outer page ISR)
+  const product = await db.products.findBySlug(slug);
+  return (
+    <article>
+      <h1 className="text-2xl font-bold">{product.title}</h1>
+      <p className="text-muted-foreground">{product.description}</p>
+    </article>
+  );
+}
+
+export async function LivePriceTicker({ slug }: { slug: string }) {
+  // Executed independently every 60s (via <DinouCacheSlot> Background SWR)
+  const pricing = await db.pricing.getLiveQuote(slug);
+  return (
+    <div className="mt-4 p-3 rounded-lg border bg-emerald-50/40">
+      <span className="font-mono text-lg font-bold">\${pricing.amount}</span>
+      <span className="ml-2 text-xs text-muted-foreground">
+        ({pricing.stock} in stock · updated {pricing.updatedAt})
+      </span>
+    </div>
+  );
+}`,
+                  },
                 ]}
               />
 
@@ -1311,6 +1341,34 @@ export default function FeedPage() {
         </Suspense>
       </aside>
     </div>
+  );
+}`,
+                  },
+                  {
+                    id: "components",
+                    label: "src/feed/components.tsx",
+                    language: "tsx",
+                    code: `import { getContext } from "dinou/server";
+import db from "@/lib/db";
+
+export async function UserGreeting() {
+  // Runs live on every request (reads per-user session cookie)
+  const sessionId = getContext()?.req.cookies.session_id;
+  const user = await db.users.findBySession(sessionId);
+  return <h1 className="text-2xl font-bold">Welcome back, {user.name}</h1>;
+}
+
+export async function GlobalTrendingWidget() {
+  // Heavy DB aggregation: executed once every 300s via <DinouCacheSlot>
+  const trends = await db.analytics.getGlobalTrending();
+  return (
+    <ul className="space-y-2">
+      {trends.map((item) => (
+        <li key={item.id} className="text-sm font-medium">
+          #{item.topic} ({item.postsCount} posts)
+        </li>
+      ))}
+    </ul>
   );
 }`,
                   },
@@ -1479,6 +1537,32 @@ export default function TrendingPage() {
       </Suspense>
     </main>
   );
+}`,
+                  },
+                  {
+                    id: "components",
+                    label: "src/trending/components.tsx",
+                    language: "tsx",
+                    code: `import db from "@/lib/db";
+
+export async function TrendingGrid() {
+  // Heavy query: executed once every 120s across all visitors via <DinouCacheSlot>
+  const items = await db.products.getViralTrending({ limit: 12 });
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      {items.map((item) => (
+        <div key={item.id} className="p-4 border rounded-xl">
+          <h3 className="font-semibold">{item.name}</h3>
+          <p className="text-sm text-emerald-600 font-mono">\${item.price}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function TrendingSkeleton() {
+  // Pre-rendered into the 0ms PPR static shell at build time
+  return <div className="h-48 rounded-xl bg-muted animate-pulse" />;
 }`,
                   },
                 ]}
