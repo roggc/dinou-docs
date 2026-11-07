@@ -800,23 +800,32 @@ export const revalidate: PageFunctions["revalidate"] = 86400;`,
                       Client-Side In-Place Refresh (<code>refreshSlot</code>)
                     </div>
                     <p className="text-muted-foreground leading-relaxed">
-                      Any interactive Client Component can trigger a surgical re-render of a specific slot (by <code>id</code> or <code>tag</code>) or all slots via wildcard <code>&quot;*&quot;</code> (updating both the slots currently mounted in the active page/layout and any slots cached in the client SPA session from previously visited pages) without a full page reload or React state loss:
+                      Any interactive Client Component (or client module) can trigger a surgical re-render of a specific slot (by <code>id</code> or <code>tag</code>) or all slots via wildcard <code>&quot;*&quot;</code> (updating both the slots currently mounted in the active page/layout and any slots cached in the client SPA session from previously visited pages) without a full page reload or React state loss. Both <code>refreshSlot()</code> and <code>router.refreshSlot()</code> are <strong>identical</strong> and return an <strong>awaitable <code>Promise&lt;void&gt;</code></strong> (ideal for React 19&apos;s <code>useTransition</code>):
                     </p>
                     <CodeBlock
                       language="tsx"
                       containerClassName="w-full overflow-hidden rounded-lg text-xs"
                     >
 {`"use client";
+import { useTransition } from "react";
 import { refreshSlot, useRouter } from "dinou";
 
 export function RefreshButton() {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   return (
     <div className="flex gap-2">
-      {/* Option 1: Standalone by ID or shared Tag (respects server slot TTL) */}
-      <button onClick={() => refreshSlot("analytics-widget")}>
-        Refresh Metrics
+      {/* Option 1: Standalone + awaitable inside useTransition (respects server TTL) */}
+      <button
+        disabled={isPending}
+        onClick={() =>
+          startTransition(async () => {
+            await refreshSlot("analytics-widget");
+          })
+        }
+      >
+        {isPending ? "Refreshing..." : "Refresh Metrics"}
       </button>
 
       {/* Option 2: Force fresh (bypasses server slot TTL immediately) */}
@@ -833,7 +842,8 @@ export function RefreshButton() {
 }`}
                     </CodeBlock>
                     <div className="text-[11px] text-muted-foreground bg-background/60 p-2.5 rounded border border-border/60 space-y-1.5 mt-2 break-words min-w-0">
-                      <div className="font-semibold text-foreground">How <code>refreshSlot</code> options and wildcard <code>&quot;*&quot;</code> work:</div>
+                      <div className="font-semibold text-foreground">How <code>refreshSlot</code> options, <code>router.refreshSlot</code>, and wildcard <code>&quot;*&quot;</code> work:</div>
+                      <div>• <strong><code>refreshSlot</code> vs. <code>router.refreshSlot</code> (Identical &amp; Awaitable)</strong>: <code>router.refreshSlot(id, opts)</code> is a direct alias for <code>refreshSlot(id, opts)</code>—both execute the exact same code and return a <code>Promise&lt;void&gt;</code> that resolves when the slot finishes updating. Prefer standalone <strong><code>refreshSlot</code></strong> when your component doesn&apos;t otherwise need <code>useRouter()</code> (avoiding subscribing the component to router context changes) or when calling it <strong>outside React components</strong> (e.g., inside WebSocket/SSE listeners, polling intervals, utility functions, or external state stores like Zustand); use <code>router.refreshSlot</code> for convenience when you already have <code>const router = useRouter()</code> in scope.</div>
                       <div>• <strong><code>refreshSlot(idOrTag)</code> (Default)</strong>: Refreshes the client DOM with the server&apos;s current state. If the slot&apos;s server-side TTL (e.g. <code>revalidate=&#123;300&#125;</code>) has not expired, it returns the cached server UI without touching your database (protecting against button spam and traffic spikes).</div>
                       <div>• <strong><code>refreshSlot(idOrTag, &#123; fresh: true &#125;)</code> (Bypass)</strong>: Hard revalidation. Forces the server to ignore any unexpired TTL, immediately re-run the server component&apos;s queries against your database, update the server cache, and update the client DOM in place.</div>
                       <div>• <strong><code>refreshSlot(&quot;*&quot;)</code> (Wildcard)</strong>: Refreshes all <code>&lt;DinouCacheSlot&gt;</code> instances currently mounted on screen (across the active <code>page.tsx</code>, <code>layout.tsx</code>, and parallel <code>@slot</code> routes) <strong>and</strong> refreshes in the background any slots cached in memory in the client SPA session from previously visited pages, so navigating back to those pages renders updated data immediately. ⚠️ <em>Avoid combining <code>&quot;*&quot;</code> with <code>&#123; fresh: true &#125;</code> in production: it triggers a fan-out of requests for every mounted and session-cached slot while forcing all of them to bypass their server TTL and hit your database simultaneously. Reserve <code>&#123; fresh: true &#125;</code> for specific slot IDs or tags.</em></div>
@@ -921,20 +931,20 @@ export function PostCreator() {
                     <div className="p-3.5 rounded-md bg-blue-500/10 border border-blue-500/20 space-y-1.5 min-w-0">
                       <div className="font-semibold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
                         <Globe className="h-3.5 w-3.5" />
-                        <span>1. Static Shell Slots: Background SWR</span>
+                        <span>1. Static Shell &amp; SSR Slots: Background SWR</span>
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
-                        For slots baked into the initial static shell (in a page or layout), an expired TTL serves the cached page immediately (<strong>0ms TTFB</strong>) and triggers a background refresh that re-executes only the expired slot and updates the cached page without re-running <code>page.tsx</code>.
+                        Applies to: <strong>(a)</strong> unwrapped slots (outside <code>&lt;Suspense&gt;</code>, or with <code>noDynamic()</code>) in Static/ISR and PPR Static Shells, and <strong>(b)</strong> <code>&lt;Suspense&gt;</code>-wrapped slots on Dynamic SSR routes (<code>ppr = false</code>, where the fallback is shown <em>only</em> on a cold cache miss). When the TTL expires, the next request serves the cached slot immediately inline (<strong>0ms, no fallback</strong>) and triggers a non-blocking background SWR refresh.
                       </p>
                     </div>
 
                     <div className="p-3.5 rounded-md bg-purple-500/10 border border-purple-500/20 space-y-1.5 min-w-0">
                       <div className="font-semibold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
                         <Zap className="h-3.5 w-3.5" />
-                        <span>2. Cached Dynamic Holes: Live Stream</span>
+                        <span>2. Cached Dynamic Holes (PPR): Fallback + Live Stream</span>
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
-                        For slots wrapped in <code>&lt;Suspense&gt;</code> on <code>ppr = true</code> routes (Cached Dynamic Holes), the static shell with the skeleton fallback is already flushed in <strong>0ms TTFB</strong>. When the slot&apos;s TTL expires, the hole re-executes live in the stream so that visitor immediately receives 100% fresh data.
+                        For slots wrapped in <code>&lt;Suspense&gt;</code> on <code>ppr = true</code> routes (Cached Dynamic Holes), the 0ms Static Shell always flushes with the <code>&lt;Suspense&gt;</code> skeleton fallback first. While the TTL is valid, the cached hole streams in ~2ms to replace it; when the slot&apos;s TTL expires, instead of serving stale data via SWR, the visitor sees the skeleton fallback while the hole re-executes live in the stream and receives 100% fresh data as soon as the query resolves.
                       </p>
                     </div>
 
@@ -961,31 +971,22 @@ export function PostCreator() {
                     <span>When NOT to Use &lt;DinouCacheSlot&gt;</span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs min-w-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs min-w-0">
                     <div className="p-3 bg-background/80 rounded-lg border border-rose-500/20 space-y-1">
                       <span className="font-bold text-rose-600 dark:text-rose-400 block">
-                        1. 100% Immutable Static Pages
+                        1. Wrapping the Entire Page
                       </span>
                       <p className="text-muted-foreground leading-relaxed">
-                        If an entire route is pre-rendered at build time with no revalidation and no dynamic holes, it is already cached as immutable HTML. Slots add zero benefit unless you need live client <code>refreshSlot()</code>.
+                        Wrapping the entire <code>page.tsx</code> body inside a single slot reinvents route-level ISR. Declare <code>export const revalidate = 300</code> in <code>page_functions.ts</code> instead.
                       </p>
                     </div>
 
                     <div className="p-3 bg-background/80 rounded-lg border border-rose-500/20 space-y-1">
                       <span className="font-bold text-rose-600 dark:text-rose-400 block">
-                        2. Wrapping the Entire Page
+                        2. Unparameterized ID for Private User Data
                       </span>
                       <p className="text-muted-foreground leading-relaxed">
-                        Wrapping the entire <code>page.tsx</code> body inside a slot reinvents route-level ISR. Declare <code>export const revalidate = 300</code> in <code>page_functions.ts</code> instead.
-                      </p>
-                    </div>
-
-                    <div className="p-3 bg-background/80 rounded-lg border border-rose-500/20 space-y-1">
-                      <span className="font-bold text-rose-600 dark:text-rose-400 block">
-                        3. Shared Static ID for Private Data
-                      </span>
-                      <p className="text-muted-foreground leading-relaxed">
-                        Never wrap private user data (such as a specific user&apos;s cart or auth session) with a shared static slot ID and <code>revalidate &gt;= 1</code>, as that would cache User A&apos;s data for User B.
+                        Never wrap private per-user data (such as a user&apos;s cart or session profile) with a fixed, unparameterized slot ID (e.g., <code>id=&quot;user-cart&quot;</code>) and <code>revalidate &gt;= 1</code>: because the server caches by <code>id</code>, User B would receive User A&apos;s cached slot. Either include the user identifier in the ID (<code>id=&#123;`cart-$&#123;userId&#125;`&#125;</code>) or use <code>revalidate=&#123;0&#125;</code>.
                       </p>
                     </div>
                   </div>
