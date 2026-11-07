@@ -54,7 +54,7 @@ const tocItems = [
   },
   {
     id: "strategy-5",
-    title: "5. RSC + <Suspense> + <DinouCacheSlot> (Static SSG / Asymmetric ISR)",
+    title: "5. RSC + <DinouCacheSlot> (Static SSG / Asymmetric ISR)",
     level: 2,
   },
   {
@@ -507,11 +507,11 @@ export default function DataFetchingPage() {
                           <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">5</TableCell>
                           <TableCell>
                             <a href="#strategy-5" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
-                              RSC with &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Static / Asymmetric ISR)
+                              RSC + &lt;DinouCacheSlot&gt; (Static / Asymmetric ISR)
                             </a>
-                            <div className="text-[11px] text-muted-foreground">Pre-rendered static shell with decoupled slot TTL or <code>refreshSlot()</code></div>
+                            <div className="text-[11px] text-muted-foreground">Pre-rendered static page with unwrapped slot TTL, Background SWR &amp; <code>refreshSlot()</code></div>
                           </TableCell>
-                          <TableCell className="text-muted-foreground">Build Time (Pre-rendered) + On-Demand Slot Reval</TableCell>
+                          <TableCell className="text-muted-foreground">Build Time (Pre-rendered) + Background SWR / Slot Reval</TableCell>
                           <TableCell>
                             <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
                               0ms (CDN Edge)
@@ -519,7 +519,7 @@ export default function DataFetchingPage() {
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                              Instant (~0-2ms)
+                              0ms (In Static HTML)
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -529,7 +529,7 @@ export default function DataFetchingPage() {
                           </TableCell>
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-amber-600 dark:text-amber-400 font-medium">Decoupled TTL / refreshSlot()</TableCell>
-                          <TableCell className="text-muted-foreground">Static/ISR pages (e.g. 24h page revalidate) containing a widget (stock, pricing) needing fast updates (60s) or surgical in-place client refreshes.</TableCell>
+                          <TableCell className="text-muted-foreground">Static/ISR pages (e.g. 24h page revalidate) containing a widget (stock, pricing) needing fast background updates (60s) or surgical in-place client refreshes.</TableCell>
                         </ClickableTableRow>
 
                         {/* Row 6 */}
@@ -542,9 +542,9 @@ export default function DataFetchingPage() {
                             <a href="#strategy-6" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
                               RSC with &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Dynamic)
                             </a>
-                            <div className="text-[11px] text-muted-foreground">Dynamic streaming with vertical Micro-ISR (TTL cache)</div>
+                            <div className="text-[11px] text-muted-foreground">Dynamic SSR with vertical Micro-ISR (cold miss streams fallback; cache hits resolve in ~1–2ms)</div>
                           </TableCell>
-                          <TableCell className="text-muted-foreground">Per Request (Cache hit: ~2ms / Miss: async query)</TableCell>
+                          <TableCell className="text-muted-foreground">Per Request (Cache hit: ~1–2ms in SSR / Cold miss: async stream)</TableCell>
                           <TableCell>
                             <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
                               Fast (Early Layout)
@@ -552,7 +552,7 @@ export default function DataFetchingPage() {
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                              Instant (~2ms Cache)
+                              Instant (~1-2ms Cache)
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -562,7 +562,7 @@ export default function DataFetchingPage() {
                           </TableCell>
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-amber-600 dark:text-amber-400 font-medium">TTL / Tag Reval</TableCell>
-                          <TableCell className="text-muted-foreground">Dynamic routes (with session/cookies) containing heavy widgets (analytics, feeds). Flushes layout instantly; slot streams from cache without DB load.</TableCell>
+                          <TableCell className="text-muted-foreground">Dynamic routes (with session/cookies) containing heavy widgets (analytics, feeds). Streams fallback on cold miss; resolves directly from slot cache (~1–2ms) on hits without DB load.</TableCell>
                         </ClickableTableRow>
 
                         {/* Row 7 */}
@@ -930,11 +930,11 @@ export default async function BlogIndexPage() {
                     id: "page",
                     label: "src/account/billing/page.tsx",
                     language: "tsx",
-                    code: `import { cookies } from "dinou/server";
+                    code: `import { getContext } from "dinou/server";
 import db from "@/lib/db";
 
 export default async function BillingPage() {
-  const sessionId = cookies().get("session_id");
+  const sessionId = getContext()?.req.cookies.session_id;
   if (!sessionId) throw new Error("Unauthorized");
 
   // BLOCKS TTFB: The browser receives 0 bytes until this query resolves
@@ -1183,7 +1183,7 @@ export default function AnalyticsPage() {
                     5
                   </span>
                   <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-                    RSC + &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Static SSG / Asymmetric ISR)
+                    RSC + &lt;DinouCacheSlot&gt; (Static SSG / Asymmetric ISR)
                   </h2>
                 </div>
                 <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
@@ -1194,14 +1194,14 @@ export default function AnalyticsPage() {
               {/* Metrics Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
                 <MetricCard label="TTFB" value="0ms (CDN Edge)" variant="emerald" />
-                <MetricCard label="Stream Ready" value="Instant (~0-2ms)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="0ms (In Static HTML)" variant="emerald" />
                 <MetricCard label="Server/DB Load" value="Near-Zero" variant="emerald" />
                 <MetricCard label="Waterfall" value="None" variant="emerald" />
                 <MetricCard label="Data Freshness" value="Decoupled TTL" variant="amber" className="col-span-2 sm:col-span-1" />
               </div>
 
               <p className="text-sm text-muted-foreground leading-relaxed">
-                <strong>How it works:</strong> Solves the &quot;all-or-nothing&quot; revalidation problem. The base outer page and layout are pre-rendered at build time (<strong>Static Site Generation - SSG</strong>) or configured with long-term ISR (e.g., 24 hours) delivered with <strong>0ms TTFB from Edge CDN</strong>. Meanwhile, an inner volatile component is wrapped in <code>&lt;DinouCacheSlot&gt;</code> with a fast TTL (e.g., 60 seconds). The heavy outer page remains immutable at the Edge CDN, while the slot revalidates independently in server memory/KV storage.
+                <strong>How it works:</strong> Solves the &quot;all-or-nothing&quot; revalidation problem on Static/ISR routes (<code>ppr = false</code>). The base outer page and layout are pre-rendered at build time (<strong>SSG</strong>) or configured with long-term ISR (e.g., 24 hours) and delivered with <strong>0ms TTFB</strong>. Meanwhile, an inner volatile component is wrapped directly in an unwrapped <code>&lt;DinouCacheSlot&gt;</code> with a fast TTL (e.g., 60 seconds). Because the route is static, the slot is pre-rendered directly into the static HTML (no <code>&lt;Suspense&gt;</code> wrapper needed, as a fallback would never be shown). When the slot&apos;s 60-second TTL expires, Dinou serves the existing static HTML immediately (0ms, zero skeleton flash) and triggers <strong>Background SWR</strong> to re-execute only that slot and surgically splice the updated widget into the cached <code>index.html</code> and <code>page.rsc</code> files on disk.
               </p>
 
               <TabbedCodeBlock
@@ -1217,22 +1217,20 @@ export default function AnalyticsPage() {
                     id: "page",
                     label: "src/products/[slug]/page.tsx",
                     language: "tsx",
-                    code: `import { Suspense } from "react";
-import { DinouCacheSlot } from "dinou/server";
+                    code: `import { DinouCacheSlot } from "dinou/server";
 import { LivePriceTicker, StaticDescription } from "./components";
 
 export default function ProductDetailPage({ params }: { params: { slug: string } }) {
   return (
     <div className="product-view">
-      {/* Static product description: cached at Edge CDN for 24h */}
+      {/* Static product description: cached for 24h */}
       <StaticDescription slug={params.slug} />
 
-      {/* Asymmetric Micro-ISR: revalidates every 60s or via refreshSlot() */}
-      <Suspense fallback={<p>Checking live pricing...</p>}>
-        <DinouCacheSlot id={\`price-\${params.slug}\`} revalidate={60} tag="pricing">
-          <LivePriceTicker slug={params.slug} />
-        </DinouCacheSlot>
-      </Suspense>
+      {/* Unwrapped Static Slot: baked into static HTML at build time;
+          refreshes every 60s via Background SWR or on-demand via refreshSlot() */}
+      <DinouCacheSlot id={\`price-\${params.slug}\`} revalidate={60} tags={["pricing"]}>
+        <LivePriceTicker slug={params.slug} />
+      </DinouCacheSlot>
     </div>
   );
 }`,
@@ -1241,7 +1239,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
-                <p>• <strong>Targeted Invalidation:</strong> Calling <code>refreshSlot(&quot;price-prod-1&quot;)</code> from a client button refreshes only the price widget without rebuilding the 24-hour page cache.</p>
+                <p>• <strong>Surgical Static Splicing:</strong> When the slot expires or <code>revalidateTag(&quot;pricing&quot;)</code> / <code>refreshSlot(&quot;price-prod-1&quot;)</code> is called, Dinou updates only the slot markers inside <code>index.html</code> and <code>page.rsc</code> without re-running the outer 24-hour page.</p>
                 <p>• <strong>Massive Cost Savings:</strong> Prevents volatile widgets from causing full-page rebuild cascades across thousands of static pages.</p>
               </div>
             </section>
@@ -1267,16 +1265,16 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               {/* Metrics Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
                 <MetricCard label="TTFB" value="Fast (Early Layout)" variant="emerald" />
-                <MetricCard label="Stream Ready" value="~2ms (Cache Hit)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="~1-2ms (Cache Hit)" variant="emerald" />
                 <MetricCard label="Server/DB Load" value="Near-Zero (99% Offload)" variant="emerald" />
                 <MetricCard label="Waterfall" value="None" variant="emerald" />
                 <MetricCard label="Data Freshness" value="TTL / Tag Reval" variant="amber" className="col-span-2 sm:col-span-1" />
               </div>
 
               <p className="text-sm text-muted-foreground leading-relaxed">
-                <strong>How it works:</strong> Used on dynamic routes that depend on user sessions, cookies, or headers.
-                The layout shell streams immediately. Inside the page, heavy components are protected by <code>&lt;DinouCacheSlot&gt;</code>.
-                On cache hit, the pre-computed RSC binary chunk is pulled from memory/KV in ~2ms and streamed down without querying PostgreSQL/MongoDB.
+                <strong>How it works:</strong> Used on Dynamic SSR routes (<code>ppr = false</code>) that render per-request using user sessions, cookies, or headers (where no static HTML exists on disk).
+                Wrapping <code>&lt;DinouCacheSlot&gt;</code> in <code>&lt;Suspense&gt;</code> ensures that on a <strong>cold cache miss</strong> (the very first request), the outer layout and fallback skeleton stream immediately without blocking TTFB while the slot populates in the background.
+                On subsequent requests (<strong>cache hits</strong>)—and even when its TTL expires—Dinou reads the cached slot payload from server storage (<code>slots/&lt;id&gt;/slot.json</code>) in ~1–2ms during the SSR pass, including the rendered widget directly in the streamed SSR response without suspending or flashing the skeleton fallback, while refreshing expired slots asynchronously via <strong>Background SWR</strong>.
               </p>
 
               <TabbedCodeBlock
@@ -1304,10 +1302,10 @@ export default function FeedPage() {
         <UserGreeting />
       </div>
 
-      {/* 2. Global trending feed: cached for 300s in server memory (Micro-ISR) */}
+      {/* 2. Global trending feed: cached for 300s in server storage (Micro-ISR) */}
       <aside className="col-span-1">
         <Suspense fallback={<p>Loading trends...</p>}>
-          <DinouCacheSlot id="global-trending" revalidate={300} tag="trends">
+          <DinouCacheSlot id="global-trending" revalidate={300} tags={["trends"]}>
             <GlobalTrendingWidget />
           </DinouCacheSlot>
         </Suspense>
@@ -1320,7 +1318,7 @@ export default function FeedPage() {
               />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
-                <p>• <strong>Stream Speed:</strong> Instead of waiting 1.5 seconds for the DB on every page visit, the slot resolves in ~2ms from RAM.</p>
+                <p>• <strong>Zero Skeleton Flash on Cache Hits:</strong> Only a cold cache miss displays the <code>&lt;Suspense&gt;</code> fallback. Once cached (and across TTL expirations via Background SWR), the slot resolves in ~1–2ms during SSR without triggering the fallback.</p>
                 <p>• <strong>Ideal For:</strong> Social feeds, dashboards, recommendations, and search suggestions in authenticated web apps.</p>
               </div>
             </section>
@@ -1475,7 +1473,7 @@ export default function TrendingPage() {
 
       {/* 2. Micro-ISR Slot: resolves in ~2ms from server memory/KV cache without DB query */}
       <Suspense fallback={<TrendingSkeleton />}>
-        <DinouCacheSlot id="viral-trending" revalidate={120} tag="trending">
+        <DinouCacheSlot id="viral-trending" revalidate={120} tags={["trending"]}>
           <TrendingGrid />
         </DinouCacheSlot>
       </Suspense>
@@ -1489,6 +1487,7 @@ export default function TrendingPage() {
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-emerald-50/30 dark:bg-emerald-950/20 p-3 rounded-lg border border-emerald-500/20">
                 <p>• <strong>Benchmarked Throughput:</strong> Under a spike of 50,000 requests/minute, only 1 query hits the database every 120 seconds.</p>
                 <p>• <strong>User Experience:</strong> 0ms TTFB first paint + ~2ms content resolution = Feels like a static page with near-live freshness.</p>
+                <p>• <strong>Nesting Order in PPR:</strong> Placing <code>&lt;Suspense&gt;</code> outside <code>&lt;DinouCacheSlot&gt;</code> creates a <strong>Cached Dynamic PPR Hole</strong> (streams the fallback in the 0ms shell and resolves in ~2ms from the slot cache). Conversely, placing <code>&lt;DinouCacheSlot&gt;</code> outside <code>&lt;Suspense&gt;</code> (or calling <code>noDynamic()</code> inside it) bakes the slot directly into the <strong>0ms Static Shell</strong> with zero skeleton flash, refreshing it in the background via Background SWR.</p>
               </div>
             </section>
 
@@ -1534,11 +1533,13 @@ export default function TrendingPage() {
                     label: "src/search/page.tsx (Server Component)",
                     language: "tsx",
                     code: `import { Suspense } from "react";
+import { useSearchParams } from "dinou";
 import db from "@/lib/db";
 import { SearchResultsClient } from "./search-results-client";
 
-export default function SearchPage({ searchParams }: { searchParams: { q?: string } }) {
-  const query = searchParams.q || "";
+export default function SearchPage() {
+  const searchParams = useSearchParams();
+  const query = searchParams.get("q") ?? "";
 
   // Start query WITHOUT awaiting! Passes un-awaited Promise to client:
   const resultsPromise = db.products.search({ query });
