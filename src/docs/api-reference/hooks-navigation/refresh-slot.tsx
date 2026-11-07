@@ -32,10 +32,10 @@ export function RefreshSlotSection() {
       <div className="p-3.5 rounded-lg bg-card border border-border not-prose my-4 space-y-1.5 text-xs">
         <div className="font-semibold text-foreground flex items-center gap-1.5">
           <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-          <span>Equivalence with <code>router.refreshSlot()</code></span>
+          <span>Awaitable <code>Promise&lt;void&gt;</code> &amp; Equivalence with <code>router.refreshSlot()</code></span>
         </div>
         <p className="text-muted-foreground leading-relaxed">
-          <code>refreshSlot(slotId, options)</code> is <strong>100% equivalent</strong> to <code>router.refreshSlot(slotId, options)</code> from <code>useRouter()</code>. While <code>useRouter()</code> requires a React component context, this standalone export can be called inside global callbacks, timers, or third-party service listeners without instantiating any hooks.
+          <code>refreshSlot(slotId, options): Promise&lt;void&gt;</code> is <strong>100% equivalent</strong> to <code>router.refreshSlot(slotId, options)</code> from <code>useRouter()</code>. Both return an awaitable <code>Promise&lt;void&gt;</code> that resolves once the network request completes and the new slot JSX is committed, so you can <code>await</code> it directly or pass it to React&apos;s <code>useTransition</code> (<code>startTransition(async () =&gt; &#123; await refreshSlot(...); &#125;)</code>) for exact loading indicators. Prefer the standalone <code>refreshSlot</code> export when calling from outside React components (WebSockets, stores, timers) or in Client Components that do not otherwise need <code>useRouter()</code>.
         </p>
       </div>
 
@@ -45,17 +45,17 @@ export function RefreshSlotSection() {
       <div id="refreshslot-parameters" className="scroll-mt-20 mt-6 pt-4 border-t border-border/60">
         <h4 className="text-base font-semibold text-foreground m-0 flex items-center gap-2">
           <Code2 className="h-4 w-4 text-emerald-500" />
-          <span>Parameters &amp; Wildcard Support</span>
+          <span>Parameters, Return Type &amp; Wildcard Support</span>
         </h4>
         <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-          Accepts a specific slot ID or a wildcard string to update multiple slots in parallel.
+          Signature: <code>refreshSlot(slotId: string, options?: &#123; fresh?: boolean &#125;): Promise&lt;void&gt;</code>. Accepts a specific slot <code>id</code>, a shared slot <code>tag</code>, or the <code>&quot;*&quot;</code> wildcard.
         </p>
 
         <div className="not-prose overflow-x-auto rounded-lg border border-border mt-3">
           <table className="w-full text-xs text-left border-collapse min-w-[650px]">
             <thead className="bg-muted/50 border-b border-border text-muted-foreground font-semibold">
               <tr>
-                <th className="p-3">Parameter</th>
+                <th className="p-3">Parameter / Return</th>
                 <th className="p-3">Type</th>
                 <th className="p-3">Description</th>
               </tr>
@@ -68,13 +68,13 @@ export function RefreshSlotSection() {
                 </td>
                 <td className="p-3 align-top leading-relaxed space-y-1">
                   <p>
-                    The unique identifier matching the <code>id</code> prop of a mounted <code>&lt;DinouCacheSlot&gt;</code> (e.g. <code>&quot;cart-counter&quot;</code>, <code>&quot;stock-aapl&quot;</code>).
+                    The unique identifier matching the <code>id</code> or <code>tag</code>/<code>tags</code> prop of a <code>&lt;DinouCacheSlot&gt;</code> (e.g. <code>&quot;cart-counter&quot;</code>, <code>&quot;stock-aapl&quot;</code>).
                   </p>
                   <p className="text-[11px] text-foreground font-semibold">
                     Wildcard <code>&quot;*&quot;</code> Support:
                   </p>
                   <p>
-                    Passing <code>&quot;*&quot;</code> targets <strong>every active slot</strong> mounted on the current page simultaneously, executing their revalidation in parallel with a single call.
+                    Passing <code>&quot;*&quot;</code> targets <strong>every active slot</strong> mounted on screen (active page, parent layouts, and <code>@slot</code> routes) and also refreshes in the background any slots cached in memory in the client SPA session from previously visited pages.
                   </p>
                 </td>
               </tr>
@@ -95,6 +95,15 @@ export function RefreshSlotSection() {
                       <strong><code>true</code>:</strong> Bypasses the server-side cache entirely (even if the TTL is still valid), forces an immediate live re-render on the backend, updates the storage cache, and delivers fresh UI to the client.
                     </li>
                   </ul>
+                </td>
+              </tr>
+              <tr>
+                <td className="p-3 font-mono font-semibold text-primary align-top">Returns</td>
+                <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                  Promise&lt;void&gt;
+                </td>
+                <td className="p-3 align-top leading-relaxed">
+                  Resolves when the target slot(s) have finished re-fetching and updating in the client. Can be awaited with <code>await refreshSlot(...)</code> or passed inside an async <code>startTransition(async () =&gt; &#123; await refreshSlot(...); &#125;)</code> callback.
                 </td>
               </tr>
             </tbody>
@@ -144,13 +153,13 @@ export function RefreshSlotSection() {
           <div className="md:col-span-2 p-4 rounded-lg bg-card border border-border space-y-2">
             <div className="font-semibold text-foreground flex items-center gap-1.5">
               <CheckCircle2 className="h-4 w-4 text-primary" />
-              <span>Why <code>refreshSlot(&quot;*&quot;, &#123; fresh: true &#125;)</code> is Unique</span>
+              <span>Wildcard <code>refreshSlot(&quot;*&quot;)</code> vs. <code>router.refresh()</code></span>
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              When you execute a soft route refresh via <code>router.refresh()</code>, Dinou re-runs the outer page Server Component, but any mounted <code>&lt;DinouCacheSlot&gt;</code> continues serving its cached JSX from storage as long as its <code>revalidate</code> TTL has not expired.
+              Calling <code>refreshSlot(&quot;*&quot;)</code> refreshes every mounted <code>&lt;DinouCacheSlot&gt;</code> on screen (active page, parent layouts, and <code>@slot</code> routes) and also updates in the background any slots cached in memory in the client SPA session from previously visited pages.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              Because <code>router.refresh()</code> cannot pass freshness parameters down to individual slot caches, calling <code>refreshSlot(&quot;*&quot;, &#123; fresh: true &#125;)</code> is the only client mechanism available to command every cached slot component on the active page to bypass storage and recalculate live on the server.
+              <strong>Production Caution:</strong> Avoid combining <code>&quot;*&quot;</code> with <code>&#123; fresh: true &#125;</code> in production unless strictly needed, as it triggers one parallel HTTP request per mounted and in-memory cached slot and forces every one of them to bypass its server TTL simultaneously.
             </p>
           </div>
         </div>
@@ -165,7 +174,7 @@ export function RefreshSlotSection() {
           <span>Production Implementation Patterns</span>
         </h4>
         <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-          Explore real-world patterns for real-time WebSocket events, wildcard dashboard refreshing, and external state stores.
+          Explore real-world patterns for real-time WebSocket events, awaitable <code>useTransition</code> wildcard refreshing, and external state stores.
         </p>
 
         <div className="not-prose my-4">
@@ -198,24 +207,23 @@ socket.onmessage = (event) => {
               },
               {
                 id: "wildcard",
-                label: "dashboard-toolbar.tsx (Wildcard Refresh)",
+                label: "dashboard-toolbar.tsx (useTransition + await)",
                 language: "tsx",
                 code: `// src/components/dashboard-toolbar.tsx (Client Component)
 "use client";
 
-import { useState } from "react";
+import { useTransition } from "react";
 import { refreshSlot } from "dinou";
 
 export function DashboardToolbar() {
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isRefreshing, startTransition] = useTransition();
 
   const handleRefreshAll = () => {
-    setIsRefreshing(true);
-
-    // "*" instructs Dinou to revalidate every mounted <DinouCacheSlot> across the page
-    refreshSlot("*", { fresh: true });
-
-    setTimeout(() => setIsRefreshing(false), 600);
+    // Because refreshSlot returns a Promise<void>, awaiting it inside
+    // startTransition keeps isRefreshing === true until all slots finish updating!
+    startTransition(async () => {
+      await refreshSlot("*");
+    });
   };
 
   return (
@@ -234,7 +242,7 @@ export function DashboardToolbar() {
               },
               {
                 id: "mutation-store",
-                label: "cart-store.ts (State Action)",
+                label: "cart-store.ts (Awaitable Store Action)",
                 language: "typescript",
                 code: `// src/stores/cart-store.ts (Client Action / Store)
 import { refreshSlot } from "dinou";
@@ -246,9 +254,11 @@ export async function onCartItemAdded(productId: string) {
     body: JSON.stringify({ productId, quantity: 1 }),
   });
 
-  // Revalidate the cart summary slot and checkout totals immediately
-  refreshSlot("cart-summary", { fresh: true });
-  refreshSlot("checkout-totals", { fresh: true });
+  // Await both slot refreshes in parallel until the UI is updated
+  await Promise.all([
+    refreshSlot("cart-summary", { fresh: true }),
+    refreshSlot("checkout-totals", { fresh: true }),
+  ]);
 }`,
               },
             ]}

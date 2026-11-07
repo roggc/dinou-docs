@@ -116,7 +116,7 @@ export default function Page() {
                 </span>
               </h2>
               <p>
-                Directories inside <code>src/app/</code> directly map to URL paths. Standardized file names define UI leaves, layout shells, and decoupled server contracts.
+                Directories inside <code>src/</code> directly map to URL paths. Standardized file names define UI leaves, layout shells, and decoupled server contracts.
               </p>
 
               <section id="route-components" className="scroll-mt-20">
@@ -213,7 +213,7 @@ export default function Page() {
                           </span>
                         </td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Decoupled server contract for <code>layout.tsx</code>: independent <code>getProps</code> and <code>ppr</code> execution.
+                          Decoupled server contract for <code>layout.tsx</code>: independent <code>getProps</code>, <code>ppr</code>, and <code>getCacheTags</code> execution.
                         </td>
                       </tr>
                     </tbody>
@@ -223,7 +223,7 @@ export default function Page() {
                 <div className="border rounded-lg p-3 bg-muted/30 not-prose mt-3 flex items-start gap-2.5 text-xs text-muted-foreground">
                   <FolderTree className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-semibold text-foreground">Hierarchical Bubble-Up:</span> Dinou bubbles unhandled errors and 404s upward to the closest ancestor handler. A nested <code>src/app/blog/[slug]/not_found.tsx</code> intercepts 404s before the root <code>src/app/not_found.tsx</code>.
+                    <span className="font-semibold text-foreground">Hierarchical Bubble-Up:</span> Dinou bubbles unhandled errors and 404s upward to the closest ancestor handler. A nested <code>src/blog/[slug]/not_found.tsx</code> intercepts 404s before the root <code>src/not_found.tsx</code>.
                   </div>
                 </div>
               </section>
@@ -254,21 +254,21 @@ export default function Page() {
                         <td className="py-2.5 px-3.5 font-mono font-semibold text-amber-700 dark:text-amber-400">reset_layout</td>
                         <td className="py-2.5 px-3.5 font-mono">layout.tsx</td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          <strong>Resets the layout stack.</strong> Discards all ancestor layouts; this folder's <code>layout.tsx</code> becomes the isolated new Root Layout for this branch.
+                          <strong>Resets the layout stack.</strong> Discards all ancestor layouts; this folder&apos;s <code>layout.tsx</code> becomes the isolated new Root Layout for this branch.
                         </td>
                       </tr>
                       <tr>
                         <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">no_layout_error</td>
                         <td className="py-2.5 px-3.5 font-mono">error.tsx</td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Renders the segment's 500 error page without any surrounding layout shells.
+                          Renders the segment&apos;s 500 error page without any surrounding layout shells.
                         </td>
                       </tr>
                       <tr>
                         <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">no_layout_not_found</td>
                         <td className="py-2.5 px-3.5 font-mono">not_found.tsx</td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Renders the segment's 404 not found page without any surrounding layout shells.
+                          Renders the segment&apos;s 404 not found page without any surrounding layout shells.
                         </td>
                       </tr>
                     </tbody>
@@ -287,7 +287,7 @@ export default function Page() {
                     When to use Underscore Folders
                   </AlertTitle>
                   <AlertDescription className="text-xs text-muted-foreground mt-1">
-                    Standard project folders (e.g. <code>components/</code>, <code>hooks/</code>, <code>utils/</code>) do <strong>NOT</strong> require an underscore prefix; Dinou only treats a folder as a route if it contains a <code>page.*</code> file. Use <code>_</code> exclusively to quarantine legacy or backup folders containing <code>page.*</code> files (e.g., <code>src/app/_archived-v1/page.tsx</code>).
+                    Standard project folders (e.g. <code>components/</code>, <code>hooks/</code>, <code>utils/</code>) do <strong>NOT</strong> require an underscore prefix; Dinou only treats a folder as a route if it contains a <code>page.*</code> file. Use <code>_</code> exclusively to quarantine legacy or backup folders containing <code>page.*</code> files (e.g., <code>src/_archived-v1/page.tsx</code>).
                   </AlertDescription>
                 </Alert>
               </section>
@@ -572,7 +572,7 @@ export default function Page() {
                           []
                         </td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Associates cache tags with the route for targeted on-demand invalidation via <code>revalidateTag(tag)</code>.
+                          Associates cache tags with the route or layout for targeted on-demand invalidation via <code>revalidateTag(tag)</code>.
                         </td>
                         <td className="py-2.5 px-3.5 text-right">
                           <Link href="/docs/api-reference#getcachetags" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
@@ -893,7 +893,7 @@ export default function Page() {
                       </tr>
                       <tr>
                         <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">
-                          refreshSlot(slotId)
+                          refreshSlot(slotId, options?)
                         </td>
                         <td className="py-2.5 px-3.5">
                           <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
@@ -901,10 +901,10 @@ export default function Page() {
                           </span>
                         </td>
                         <td className="py-2.5 px-3.5 font-mono text-muted-foreground">
-                          (slotId: string) =&gt; Promise&lt;void&gt;
+                          (slotId: string, options?: &#123; fresh?: boolean &#125;) =&gt; Promise&lt;void&gt;
                         </td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Re-fetches a specific <code>&lt;DinouCacheSlot&gt;</code> without refreshing the rest of the page.
+                          Awaitable surgical refresh of a specific <code>&lt;DinouCacheSlot&gt;</code> without refreshing the rest of the page.
                         </td>
                         <td className="py-2.5 px-3.5 text-right">
                           <Link href="/docs/api-reference#refreshslot" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
@@ -982,6 +982,23 @@ export default function Page() {
                       </tr>
                       <tr>
                         <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">
+                          noDynamic()
+                        </td>
+                        <td className="py-2.5 px-3.5 font-mono text-muted-foreground">dinou/server</td>
+                        <td className="py-2.5 px-3.5 font-mono text-muted-foreground">
+                          () =&gt; void
+                        </td>
+                        <td className="py-2.5 px-3.5 text-muted-foreground">
+                          Opts an enclosing <code>&lt;Suspense&gt;</code> boundary out of becoming a dynamic PPR hole on <code>ppr = true</code> routes, baking it into <code>shell.html</code>.
+                        </td>
+                        <td className="py-2.5 px-3.5 text-right">
+                          <Link href="/docs/api-reference#nodynamic" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
+                            Docs <ExternalLink className="h-3 w-3" />
+                          </Link>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">
                           defineConfig(config)
                         </td>
                         <td className="py-2.5 px-3.5 font-mono text-muted-foreground">dinou</td>
@@ -989,7 +1006,7 @@ export default function Page() {
                           (config: DinouConfig) =&gt; DinouConfig
                         </td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Type helper for <code>dinou.config.js</code> (reactStrictMode, ppr, storage, plugins).
+                          Type helper for <code>dinou.config.js</code> (reactStrictMode, ppr, storage, plugins, setupFiles).
                         </td>
                         <td className="py-2.5 px-3.5 text-right">
                           <Link href="/docs/api-reference#defineconfig" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
@@ -1003,10 +1020,10 @@ export default function Page() {
                         </td>
                         <td className="py-2.5 px-3.5 font-mono text-muted-foreground">dinou/server</td>
                         <td className="py-2.5 px-3.5 font-mono text-muted-foreground">
-                          MemoryStorage, RedisStorage
+                          MemoryStorage, RedisStorage, FileSystemStorage, ...
                         </td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          ISR storage engines for single server or distributed multi-instance clusters.
+                          ISR storage engines for single server, edge KV, or distributed multi-instance clusters.
                         </td>
                         <td className="py-2.5 px-3.5 text-right">
                           <Link href="/docs/api-reference#storage-adapters-list" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
@@ -1035,17 +1052,34 @@ export default function Page() {
                     <tbody className="divide-y divide-border bg-card">
                       <tr>
                         <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">
-                          revalidateTag(tag)
+                          revalidatePage(path)
                         </td>
-                        <td className="py-2.5 px-3.5 font-medium">Tags (Pages &amp; Slots)</td>
+                        <td className="py-2.5 px-3.5 font-medium">Page Component Only</td>
                         <td className="py-2.5 px-3.5 font-mono text-muted-foreground">
-                          (tag: string) =&gt; Promise&lt;void&gt;
+                          (path: string) =&gt; Promise&lt;void&gt;
                         </td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Purges all pages and <code>&lt;DinouCacheSlot&gt;</code> components tagged with the identifier across the cluster.
+                          Regenerates only the page&apos;s <code>page.rsc</code> and <code>index.html</code> (or <code>shell.html</code>), leaving parent <code>layout.rsc</code> untouched.
                         </td>
                         <td className="py-2.5 px-3.5 text-right">
-                          <Link href="/docs/api-reference#revalidatetag" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
+                          <Link href="/docs/api-reference#revalidatepage" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
+                            Docs <ExternalLink className="h-3 w-3" />
+                          </Link>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">
+                          revalidateLayout(path)
+                        </td>
+                        <td className="py-2.5 px-3.5 font-medium">Layout Segment Only (O(1))</td>
+                        <td className="py-2.5 px-3.5 font-mono text-muted-foreground">
+                          (path: string) =&gt; Promise&lt;boolean&gt;
+                        </td>
+                        <td className="py-2.5 px-3.5 text-muted-foreground">
+                          Regenerates only <code>layout.rsc</code> in O(1) time (0 child pages executed); child <code>index.html</code> files lazily re-compose on demand.
+                        </td>
+                        <td className="py-2.5 px-3.5 text-right">
+                          <Link href="/docs/api-reference#revalidatelayout" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
                             Docs <ExternalLink className="h-3 w-3" />
                           </Link>
                         </td>
@@ -1054,12 +1088,12 @@ export default function Page() {
                         <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">
                           revalidatePath(path)
                         </td>
-                        <td className="py-2.5 px-3.5 font-medium">Exact Route Path</td>
+                        <td className="py-2.5 px-3.5 font-medium">Segment Layout + Page</td>
                         <td className="py-2.5 px-3.5 font-mono text-muted-foreground">
                           (path: string) =&gt; Promise&lt;void&gt;
                         </td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Purges the cached HTML and data for a specific pathname and triggers background re-generation.
+                          Regenerates both the segment&apos;s <code>layout.rsc</code> (if present) and its <code>page.rsc</code> + <code>index.html</code> (<code>revalidateLayout</code> + <code>revalidatePage</code>).
                         </td>
                         <td className="py-2.5 px-3.5 text-right">
                           <Link href="/docs/api-reference#revalidatepath" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
@@ -1069,17 +1103,17 @@ export default function Page() {
                       </tr>
                       <tr>
                         <td className="py-2.5 px-3.5 font-mono font-semibold text-primary">
-                          revalidatePage(pattern)
+                          revalidateTag(tag)
                         </td>
-                        <td className="py-2.5 px-3.5 font-medium">Route Pattern</td>
+                        <td className="py-2.5 px-3.5 font-medium">Tags (Pages, Layouts &amp; Slots)</td>
                         <td className="py-2.5 px-3.5 font-mono text-muted-foreground">
-                          (pattern: string) =&gt; Promise&lt;void&gt;
+                          (tag: string) =&gt; Promise&lt;void&gt;
                         </td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Purges all compiled cache instances matching a route pattern or page component.
+                          Purges and regenerates all pages, layouts (O(1)), and <code>&lt;DinouCacheSlot&gt;</code> fragments tagged with the identifier across the cluster.
                         </td>
                         <td className="py-2.5 px-3.5 text-right">
-                          <Link href="/docs/api-reference#revalidatepage" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
+                          <Link href="/docs/api-reference#revalidatetag" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
                             Docs <ExternalLink className="h-3 w-3" />
                           </Link>
                         </td>
@@ -1120,12 +1154,22 @@ export default function Page() {
                     <tbody className="divide-y divide-border bg-card">
                       <tr>
                         <td className="py-2.5 px-3.5 font-mono font-semibold text-emerald-600 dark:text-emerald-400">
-                          revalidateTag(tag)
+                          revalidatePage(path)
                         </td>
                         <td className="py-2.5 px-3.5 font-medium">Server (Action / Webhook / API)</td>
-                        <td className="py-2.5 px-3.5">Multi-page &amp; multi-slot cluster</td>
+                        <td className="py-2.5 px-3.5">Single route page only (<code>page.rsc</code> + <code>index.html</code>)</td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          <strong>Recommended for shared data models:</strong> when updating a database record (e.g., product or article) that appears across lists, detail pages, and sidebar widgets.
+                          <strong>Default for single-page edits:</strong> when updating content on a known URL (e.g. <code>&quot;/blog/post-1&quot;</code>) without touching shared layouts.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-3.5 font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                          revalidateLayout(path)
+                        </td>
+                        <td className="py-2.5 px-3.5 font-medium">Server (Action / Webhook / API)</td>
+                        <td className="py-2.5 px-3.5">Single layout shell in O(1) (<code>layout.rsc</code>)</td>
+                        <td className="py-2.5 px-3.5 text-muted-foreground">
+                          <strong>Shared layout updates:</strong> when updating a sidebar, header, or navigation menu (e.g. <code>&quot;/docs&quot;</code> or <code>&quot;/&quot;</code>); child routes lazily re-compose their HTML on demand.
                         </td>
                       </tr>
                       <tr>
@@ -1133,9 +1177,19 @@ export default function Page() {
                           revalidatePath(path)
                         </td>
                         <td className="py-2.5 px-3.5 font-medium">Server (Action / Webhook / API)</td>
-                        <td className="py-2.5 px-3.5">Single static route path</td>
+                        <td className="py-2.5 px-3.5">Segment layout + index page at <code>path</code></td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          When you know the exact URL that changed and want to purge its HTML/JSON (e.g. <code>"/pricing"</code> or <code>"/about"</code>).
+                          When a mutation updates <strong>both</strong> a section&apos;s layout and its index landing page simultaneously (e.g. <code>&quot;/store&quot;</code>).
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="py-2.5 px-3.5 font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                          revalidateTag(tag)
+                        </td>
+                        <td className="py-2.5 px-3.5 font-medium">Server (Action / Webhook / API)</td>
+                        <td className="py-2.5 px-3.5">Multi-page, layout &amp; slot cluster</td>
+                        <td className="py-2.5 px-3.5 text-muted-foreground">
+                          <strong>Recommended for shared data models:</strong> when updating a database record (e.g., product or article) that appears across lists, detail pages, and <code>&lt;DinouCacheSlot&gt;</code> widgets.
                         </td>
                       </tr>
                       <tr>
@@ -1145,7 +1199,7 @@ export default function Page() {
                         <td className="py-2.5 px-3.5 font-medium">Client Component (Browser)</td>
                         <td className="py-2.5 px-3.5">Single targeted slot on current page</td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          <strong>Zero layout re-render:</strong> when an interactive client widget updates (e.g. cart badge counter or mini ticker) without touching the rest of the page.
+                          <strong>Zero layout/page re-render:</strong> when an interactive client widget updates (e.g. cart badge counter or mini ticker) without touching the rest of the page.
                         </td>
                       </tr>
                       <tr>
@@ -1153,9 +1207,9 @@ export default function Page() {
                           router.refresh()
                         </td>
                         <td className="py-2.5 px-3.5 font-medium">Client Component (Browser)</td>
-                        <td className="py-2.5 px-3.5">Entire active page</td>
+                        <td className="py-2.5 px-3.5">Entire active route</td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          When a client action needs fresh server props for the whole page without losing client state or scrolling to top.
+                          When a client action needs fresh server props for the whole route without losing client state or scrolling to top.
                         </td>
                       </tr>
                     </tbody>
@@ -1214,7 +1268,7 @@ export default function Page() {
                         <td className="py-2.5 px-3.5 font-medium">Client Event Handler</td>
                         <td className="py-2.5 px-3.5">History replace without entry</td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Post-submission redirect where clicking browser "Back" should not re-submit the action (e.g. login form, payment checkout).
+                          Post-submission redirect where clicking browser &quot;Back&quot; should not re-submit the action (e.g. login form, payment checkout).
                         </td>
                       </tr>
                     </tbody>
@@ -1273,7 +1327,7 @@ export default function Page() {
                         <td className="py-2.5 px-3.5 font-medium">Universal (Server or Client)</td>
                         <td className="py-2.5 px-3.5 font-mono text-muted-foreground">{`RouteParams<Pattern>`}</td>
                         <td className="py-2.5 px-3.5 text-muted-foreground">
-                          Scoped 404 views displaying the missing item ID (e.g. <code>Item "{`{params.slug}`}" not found</code>).
+                          Scoped 404 views displaying the missing item ID (e.g. <code>Item &quot;{`{params.slug}`}&quot; not found</code>).
                         </td>
                       </tr>
                       <tr>

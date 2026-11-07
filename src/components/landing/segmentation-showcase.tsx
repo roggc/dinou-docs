@@ -294,7 +294,7 @@ export default function DashboardLayout({ children, navStats }: any) {
 };
 
 export function SegmentationShowcase() {
-  const [activeTab, setActiveTab] = useState<SegmentationTab>("ppr");
+  const [activeTab, setActiveTab] = useState<SegmentationTab>("horizontal");
 
   const activeConfig = tabConfigs[activeTab];
 
@@ -329,9 +329,9 @@ export function SegmentationShowcase() {
           <div className="inline-flex p-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm gap-1 max-w-full overflow-x-auto">
             {(
               [
-                { id: "ppr", label: "Temporal (PPR)", icon: Zap },
-                { id: "vertical", label: "Vertical (<DinouCacheSlot>)", icon: Box },
                 { id: "horizontal", label: "Horizontal (layout_functions)", icon: Layers },
+                { id: "vertical", label: "Vertical (<DinouCacheSlot>)", icon: Box },
+                { id: "ppr", label: "Temporal (PPR)", icon: Zap },
               ] as const
             ).map((tab) => {
               const Icon = tab.icon;

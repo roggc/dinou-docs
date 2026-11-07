@@ -1,7 +1,8 @@
 "use client";
 
+import { Alert, AlertDescription, AlertTitle } from "@/docs/components/ui/alert";
 import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
-import { Layers, Zap, ArrowRightLeft, Code2 } from "lucide-react";
+import { Layers, Zap, ArrowRightLeft, Code2, Sparkles } from "lucide-react";
 
 export function DinouCacheSlotSection() {
   return (
@@ -19,7 +20,7 @@ export function DinouCacheSlotSection() {
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        The foundational primitive for <strong>Micro-ISR (Vertical 3D Segmentation)</strong> in React Server Components. Allows isolating, caching, and revalidating independent component subtrees within an active page without re-evaluating the parent page, re-fetching unchanged database queries, or resetting client component state.
+        The foundational primitive for <strong>Micro-ISR (Vertical 3D Segmentation)</strong> in React Server Components. Allows isolating, caching, and revalidating independent component subtrees within an active page or layout without re-evaluating the parent route, re-fetching unchanged database queries, or resetting client component state.
       </p>
 
       {/* Sub-section 1: Props & Micro-ISR Reference */}
@@ -50,15 +51,15 @@ export function DinouCacheSlotSection() {
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">string</td>
                 <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Optional</td>
                 <td className="p-3 align-top leading-relaxed">
-                  Unique identifier for targeted client-side slot refreshing via <code>refreshSlot(id)</code> or <code>router.refreshSlot(id)</code>. If omitted, Dinou automatically falls back to using the first provided <code>tag</code> as the slot identifier.
+                  Unique identifier for targeted client-side slot refreshing via <code>refreshSlot(id)</code> or <code>router.refreshSlot(id)</code>, and the primary storage cache key. When caching personalized data, parameterize the ID (e.g. <code>id=&#123;`cart-${"{userId}"}`&#125;</code>). If omitted, Dinou falls back to using the first provided <code>tag</code>.
                 </td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-semibold text-primary align-top">revalidate</td>
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">number</td>
-                <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">false (Forever)</td>
+                <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">undefined (Forever)</td>
                 <td className="p-3 align-top leading-relaxed">
-                  Time-based TTL in seconds. Automatically refreshes and persists the slot subtree in the background once the timer expires.
+                  Time-based TTL in seconds. When <code>&gt;= 1</code>, serves from storage and refreshes in the background once expired. When <code>0</code>, bypasses server cache storage (always renders fresh) while still registering the slot for surgical client-side <code>refreshSlot(id)</code> updates. When omitted, caches indefinitely until <code>revalidateTag()</code> or <code>refreshSlot(id, &#123; fresh: true &#125;)</code>.
                 </td>
               </tr>
               <tr>
@@ -89,20 +90,36 @@ export function DinouCacheSlotSection() {
               <span>Independent Storage Persistence</span>
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              Dinou executes the slot&apos;s child components once, caches their rendered output in your storage backend (Redis, Memory, or FileSystem), and serves that cached payload to subsequent visitors. Database queries and server logic inside the slot never re-run until its TTL expires or an invalidation is triggered.
+              Dinou executes the slot&apos;s child components once, caches their rendered output in your storage backend (Redis, Memory, KV, or FileSystem), and serves that cached payload to subsequent visitors. Database queries and server logic inside the slot never re-run until its TTL expires or an invalidation is triggered.
             </p>
           </div>
 
           <div className="p-4 rounded-lg bg-card border border-border space-y-2">
             <div className="font-semibold text-foreground flex items-center gap-1.5">
               <ArrowRightLeft className="h-4 w-4 text-blue-500" />
-              <span>Client State Preservation</span>
+              <span>Client State &amp; Shell Splicing</span>
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              When a slot refreshes (either via time-based micro-ISR or <code>refreshSlot</code>), only that specific subtree updates in the browser DOM. Outer forms, input focus, scroll position, and client React state remain completely undisturbed.
+              When a slot refreshes (via <code>refreshSlot(id)</code>, time-based Micro-ISR, or <code>revalidateTag</code>), only that specific subtree updates in the browser DOM and in any host Static Shell (<code>shell.html</code> / <code>index.html</code>) without re-executing <code>page.tsx</code> or <code>layout.tsx</code>.
             </p>
           </div>
         </div>
+
+        <Alert className="not-prose mt-4">
+          <Sparkles className="h-4 w-4 text-emerald-500" />
+          <AlertTitle>PPR Synergy: Nesting Order with &lt;Suspense&gt;</AlertTitle>
+          <AlertDescription>
+            On <code>ppr = true</code> routes, nesting order determines whether a slot belongs to the Static Shell or streams as a Dynamic Hole:
+            <ul className="list-disc pl-4 mt-1.5 space-y-1">
+              <li>
+                <strong><code>&lt;Suspense&gt;&lt;DinouCacheSlot&gt;...&lt;/DinouCacheSlot&gt;&lt;/Suspense&gt;</code> (Cached Dynamic PPR Hole):</strong> The fallback is sent in the 0ms Static Shell, while the slot resolves asynchronously and streams from the Micro-ISR cache.
+              </li>
+              <li>
+                <strong>Unwrapped <code>&lt;DinouCacheSlot&gt;</code> (or with <code>noDynamic()</code>):</strong> Baked directly into the 0ms Static Shell (<code>shell.html</code>) and surgically spliced in storage whenever invalidated.
+              </li>
+            </ul>
+          </AlertDescription>
+        </Alert>
       </div>
 
       {/* Sub-section 2: Production Slot Patterns */}
@@ -114,7 +131,7 @@ export function DinouCacheSlotSection() {
           </h4>
         </div>
         <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-          Explore real-world patterns for independent TTLs, tag invalidations, and financial tickers.
+          Explore real-world patterns for independent TTLs, parameterized user slots, and multi-slot dashboards.
         </p>
 
         <div className="not-prose my-4">
@@ -155,11 +172,11 @@ async function LiveCryptoPrices() {
               },
               {
                 id: "cart-slot",
-                label: "cart-slot.tsx (Tag Invalidation)",
+                label: "cart-slot.tsx (Parameterized Tag Slot)",
                 language: "tsx",
                 code: `// src/components/cart-badge-slot.tsx (Server Component)
-import { DinouCacheSlot } from "dinou/server";
-import { getContext } from "dinou";
+import { Suspense } from "react";
+import { DinouCacheSlot, getContext } from "dinou/server";
 import db from "@/lib/db";
 
 export function CartBadgeSlot() {
@@ -167,13 +184,15 @@ export function CartBadgeSlot() {
   const userId = ctx?.req.cookies.user_id || "guest";
 
   return (
-    // Cached until a mutation calls revalidateTag(\`cart-\${userId}\`)
-    <DinouCacheSlot
-      id="header-cart"
-      tag={[\`cart-\${userId}\`, "cart"]}
-    >
-      <CartCounter userId={userId} />
-    </DinouCacheSlot>
+    <Suspense fallback={<span className="badge opacity-50">...</span>}>
+      {/* Parameterized ID & tag isolate each user's cached cart fragment */}
+      <DinouCacheSlot
+        id={\`header-cart-\${userId}\`}
+        tags={[\`cart-\${userId}\`, "cart"]}
+      >
+        <CartCounter userId={userId} />
+      </DinouCacheSlot>
+    </Suspense>
   );
 }
 
@@ -184,9 +203,9 @@ async function CartCounter({ userId }: { userId: string }) {
               },
               {
                 id: "dashboard",
-                label: "dashboard.tsx (Multi-Slot Grid)",
+                label: "src/dashboard/page.tsx (Multi-Slot Grid)",
                 language: "tsx",
-                code: `// src/app/dashboard/page.tsx (Server Component)
+                code: `// src/dashboard/page.tsx (Server Component)
 import { DinouCacheSlot } from "dinou/server";
 import { UserMetrics } from "@/components/metrics";
 import { GlobalAnnouncements } from "@/components/announcements";
@@ -205,14 +224,14 @@ export default function DashboardPage() {
       </DinouCacheSlot>
 
       <div className="grid grid-cols-3 gap-6">
-        {/* Main Content: High-velocity user metrics cached for 30s */}
+        {/* Main Content: High-velocity metrics cached for 30s */}
         <div className="col-span-2">
           <DinouCacheSlot id="metrics" revalidate={30} tag="metrics">
             <UserMetrics />
           </DinouCacheSlot>
         </div>
 
-        {/* Sidebar: Activity feed revalidated on-demand */}
+        {/* Sidebar: Activity feed revalidated on-demand via revalidateTag("activity-feed") */}
         <div>
           <DinouCacheSlot id="activity" tags={["activity-feed"]}>
             <ActivityFeed />

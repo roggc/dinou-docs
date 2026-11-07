@@ -16,10 +16,13 @@ export function RevalidatePageSection() {
         <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
           Target: Page Component Only
         </span>
+        <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
+          Returns: Promise&lt;void&gt;
+        </span>
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        Asynchronously invalidates and regenerates <strong>only the targeted page component</strong> (its <code>page.rsc</code> payload and static HTML), while leaving parent and ancestor layouts (<code>layout.rsc</code>) completely untouched.
+        Asynchronously invalidates and regenerates <strong>only the targeted page component</strong> (its <code>page.rsc</code> payload and static <code>index.html</code>, or its Page Static Shell <code>shell.html</code> on <code>ppr = true</code> routes), while leaving parent and ancestor layouts (<code>layout.rsc</code>) completely untouched.
       </p>
 
       {/* Sub-section 1: Scope & Behavior */}
@@ -44,7 +47,7 @@ export function RevalidatePageSection() {
               When updating an individual blog post or product price, re-rendering global headers, user navigation menus, and shared footer layouts is unnecessary overhead.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              <code>revalidatePage(path)</code> recalculates strictly the page JSX artifact, maximizing cache reuse for all wrapping layout hierarchies.
+              <code>revalidatePage(path)</code> recalculates strictly the page JSX artifact and composes the updated <code>index.html</code> (or <code>shell.html</code>) against the existing cached <code>layout.rsc</code>.
             </p>
           </div>
 

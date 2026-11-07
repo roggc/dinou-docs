@@ -70,6 +70,14 @@ export function DefineConfigSection() {
                 </td>
               </tr>
               <tr>
+                <td className="p-3 font-mono font-semibold text-primary align-top">setupFiles</td>
+                <td className="p-3 font-mono text-[11px] text-foreground align-top">string[]</td>
+                <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">[]</td>
+                <td className="p-3 align-top leading-relaxed">
+                  Array of setup or polyfill file paths executed at the earliest stage and injected into all bundler engines before any server or client modules are imported. When provided, overrides the root <code>dinou.setup.(mjs|js|ts)</code> convention.
+                </td>
+              </tr>
+              <tr>
                 <td className="p-3 font-mono font-semibold text-primary align-top">plugins</td>
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">DinouPlugin[]</td>
                 <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">[]</td>
@@ -165,6 +173,7 @@ const apiAuthPlugin: DinouPlugin = {
 export default defineConfig({
   reactStrictMode: true,
   ppr: true,
+  setupFiles: ["./src/setup/polyfills.ts"],
   plugins: [apiAuthPlugin],
 });`,
               },

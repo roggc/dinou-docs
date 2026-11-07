@@ -43,6 +43,24 @@ export function DinouPluginSection() {
               </td>
             </tr>
             <tr>
+              <td className="p-3 font-mono font-semibold text-primary align-top">setupFiles</td>
+              <td className="p-3 font-mono text-[11px] text-foreground align-top">string[]</td>
+              <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Optional</td>
+              <td className="p-3 align-top leading-relaxed">
+                Array of setup or polyfill file paths injected into all bundler engines and executed at the earliest stage before any application modules are loaded.
+              </td>
+            </tr>
+            <tr>
+              <td className="p-3 font-mono font-semibold text-primary align-top">configureServer</td>
+              <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                (context: ServerHookContext) =&gt; void | Promise&lt;void&gt;
+              </td>
+              <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Optional</td>
+              <td className="p-3 align-top leading-relaxed">
+                Low-level Node.js HTTP/HTTPS server configuration hook invoked before <code>server.listen()</code> in Node.js and Bun environments. Receives <code>&#123; server, isDev, use &#125;</code> to attach WebSockets (Socket.IO, <code>ws</code>), listeners, or raw <code>(req, res, next)</code> middlewares without ejecting.
+              </td>
+            </tr>
+            <tr>
               <td className="p-3 font-mono font-semibold text-primary align-top">onRequest</td>
               <td className="p-3 font-mono text-[11px] text-foreground align-top">
                 (request: Request, context: RequestContextStore) =&gt; Promise&lt;Response | void&gt; | Response | void

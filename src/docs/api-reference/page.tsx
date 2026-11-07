@@ -32,6 +32,8 @@ import {
 } from "./server-context-config";
 import {
   DinouCacheSlotSection,
+  NoDynamicSection,
+  RevalidateLayoutSection,
   RevalidatePageSection,
   RevalidatePathSection,
   RevalidateTagSection,
@@ -93,11 +95,13 @@ const tocItems = [
   { id: "dinouplugin-examples", title: "Production Plugins", level: 4 },
   { id: "server-cache-revalidation", title: "5. Server Cache & Revalidation (dinou/server)", level: 2 },
   { id: "revalidatepage", title: "revalidatePage()", level: 3 },
+  { id: "revalidatelayout", title: "revalidateLayout()", level: 3 },
   { id: "revalidatepath", title: "revalidatePath()", level: 3 },
   { id: "revalidatetag", title: "revalidateTag()", level: 3 },
   { id: "dinoucacheslot", title: "<DinouCacheSlot>", level: 3 },
   { id: "dinoucacheslot-props", title: "Props & Micro-ISR", level: 4 },
   { id: "dinoucacheslot-examples", title: "Production Slot Patterns", level: 4 },
+  { id: "nodynamic", title: "noDynamic()", level: 3 },
   { id: "storage-adapters", title: "6. Storage Adapters (dinou/server)", level: 2 },
   { id: "storage-adapters-list", title: "Built-In Adapters", level: 3 },
   { id: "storage-adapters-interface", title: "StorageAdapter Interface", level: 3 },
@@ -251,9 +255,11 @@ export default function Page() {
               </h2>
 
               <RevalidatePageSection />
+              <RevalidateLayoutSection />
               <RevalidatePathSection />
               <RevalidateTagSection />
               <DinouCacheSlotSection />
+              <NoDynamicSection />
             </section>
 
             {/* ================================================================= */}

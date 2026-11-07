@@ -110,10 +110,10 @@ export function UseRouterSection() {
               <tr>
                 <td className="p-3 font-mono font-semibold text-primary align-top">refreshSlot</td>
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">
-                  (slotId: string, options?: &#123; fresh?: boolean &#125;) =&gt; void
+                  (slotId: string, options?: &#123; fresh?: boolean &#125;) =&gt; Promise&lt;void&gt;
                 </td>
                 <td className="p-3 align-top leading-relaxed">
-                  Revalidates an isolated <code>&lt;DinouCacheSlot&gt;</code> on the current page without re-rendering or refetching surrounding components or layouts. Pass <code>&#123; fresh: true &#125;</code> to bypass the slot&apos;s server-side storage cache (ignoring any unexpired revalidate TTL) and force an immediate live re-render on the backend. This method is <strong>completely equivalent</strong> to the standalone <a href="#refreshslot" className="text-primary underline"><code>refreshSlot()</code></a> helper exported directly from <code>&quot;dinou&quot;</code>.
+                  Revalidates an isolated <code>&lt;DinouCacheSlot&gt;</code> (by <code>id</code>, <code>tag</code>, or wildcard <code>&quot;*&quot;</code>) without re-rendering or refetching surrounding components or layouts, returning an awaitable <code>Promise&lt;void&gt;</code> that resolves once the updated slot UI is committed (compatible with <code>await</code> and React&apos;s <code>useTransition</code>). Pass <code>&#123; fresh: true &#125;</code> to bypass the slot&apos;s server-side storage cache (ignoring any unexpired revalidate TTL) and force an immediate live re-render on the backend. This method is <strong>completely equivalent</strong> to the standalone <a href="#refreshslot" className="text-primary underline"><code>refreshSlot()</code></a> helper exported directly from <code>&quot;dinou&quot;</code>.
                 </td>
               </tr>
             </tbody>

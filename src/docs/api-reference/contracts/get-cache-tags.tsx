@@ -77,10 +77,10 @@ export function GetCacheTagsContract() {
         <AlertTitle>Surgical Invalidation Targets: page_functions vs layout_functions</AlertTitle>
         <AlertDescription className="space-y-2 text-xs">
           <div>
-            <strong>Tags in <code>page_functions.ts</code>.</strong> Targets individual route documents. Invoking <code>revalidateTag(tag)</code> executes a surgical <code>revalidatePage()</code>, regenerating exclusively <code>page.rsc</code> and <code>index.html</code> for matching pages. Parent layouts remain completely untouched in cache, avoiding unnecessary layout recompilations.
+            <strong>Tags in <code>page_functions.ts</code>:</strong> Targets individual route documents. Invoking <code>revalidateTag(tag)</code> executes a surgical <code>revalidatePage()</code>, regenerating exclusively <code>page.rsc</code> and <code>index.html</code> (or <code>shell.html</code>) for matching pages while leaving parent layouts completely untouched in cache.
           </div>
           <div>
-            <strong>Tags in <code>layout_functions.ts</code>.</strong> Targets the shared layout shell across an entire subtree. By default, invoking <code>revalidateTag(tag)</code> executes a surgical <code>revalidateLayout()</code>, regenerating exclusively <code>layout.rsc</code> while child page HTML remains untouched for maximum efficiency. When passed <code>&#123; cascade: true &#125;</code> (e.g. <code>revalidateTag(tag, &#123; cascade: true &#125;)</code>), Dinou regenerates <code>layout.rsc</code> and cascades downward to re-bake the updated layout into all child <code>index.html</code> files.
+            <strong>Tags in <code>layout_functions.ts</code>:</strong> Targets the shared layout shell across an entire subtree. Invoking <code>revalidateTag(tag)</code> executes a surgical <code>revalidateLayout()</code> in O(1) time, regenerating exclusively <code>layout.rsc</code> while child routes lazily re-compose their <code>index.html</code> on demand (preserving their cached <code>page.rsc</code> payloads and guaranteeing zero hydration mismatch).
           </div>
         </AlertDescription>
       </Alert>
@@ -96,9 +96,9 @@ export function GetCacheTagsContract() {
           tabs={[
             {
               id: "sync-tag",
-              label: "products/[id]/page_functions.ts",
+              label: "src/products/[id]/page_functions.ts",
               language: "typescript",
-              code: `// src/app/products/[id]/page_functions.ts
+              code: `// src/products/[id]/page_functions.ts
 import type { PageFunctions } from "dinou";
 
 // Synchronous tag generation derived directly from route parameters
@@ -111,9 +111,9 @@ export const getCacheTags: PageFunctions<"/products/[id]">["getCacheTags"] = (pa
             },
             {
               id: "async-tag",
-              label: "products/[id]/async_page_functions.ts",
+              label: "src/products/[id]/async_page_functions.ts",
               language: "typescript",
-              code: `// src/app/products/[id]/page_functions.ts
+              code: `// src/products/[id]/page_functions.ts
 import type { PageFunctions } from "dinou";
 import { db } from "@/lib/database";
 
@@ -131,9 +131,9 @@ export const getCacheTags: PageFunctions<"/products/[id]">["getCacheTags"] = asy
             },
             {
               id: "constant-tag",
-              label: "catalog/page_functions.ts",
+              label: "src/catalog/page_functions.ts",
               language: "typescript",
-              code: `// src/app/catalog/page_functions.ts
+              code: `// src/catalog/page_functions.ts
 import type { PageFunctions } from "dinou";
 
 // Constant string array for static route segments
@@ -144,12 +144,12 @@ export const getCacheTags: PageFunctions["getCacheTags"] = [
             },
             {
               id: "layout-tag",
-              label: "dashboard/layout_functions.ts",
+              label: "src/dashboard/layout_functions.ts",
               language: "typescript",
-              code: `// src/app/dashboard/layout_functions.ts
+              code: `// src/dashboard/layout_functions.ts
 import type { LayoutFunctions } from "dinou";
 
-// Branch-level tagging cascading to all nested child pages
+// Branch-level tagging for the shared dashboard layout shell
 export const getCacheTags: LayoutFunctions["getCacheTags"] = [
   "dashboard",
   "admin-shell",
@@ -157,9 +157,11 @@ export const getCacheTags: LayoutFunctions["getCacheTags"] = [
             },
             {
               id: "revalidate-trigger",
-              label: "actions/update-product.ts",
+              label: "src/actions/update-product.ts",
               language: "typescript",
               code: `// src/actions/update-product.ts
+"use server";
+
 import { revalidateTag } from "dinou/server";
 import { db } from "@/lib/database";
 
@@ -169,8 +171,8 @@ export async function updateProduct(id: string, data: any) {
   // 1. Surgical page invalidation (targets page.rsc and index.html)
   await revalidateTag(\`product-\${id}\`);
 
-  // 2. Layout invalidation with cascade to all child documents
-  await revalidateTag("admin-shell", { cascade: true });
+  // 2. O(1) Layout invalidation (regenerates layout.rsc; child HTML lazily re-composes on demand)
+  await revalidateTag("admin-shell");
 }`,
             },
           ]}
