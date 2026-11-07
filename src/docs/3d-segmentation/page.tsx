@@ -2,7 +2,6 @@ import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
 import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
 import { Badge } from "@/docs/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/docs/components/ui/tabs";
 import {
   Zap,
   RefreshCw,
@@ -18,6 +17,7 @@ import {
   TrendingDown,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
+import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 
 const tocItems = [
   {
@@ -709,18 +709,14 @@ export default function DashboardPage() {
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     The parent route has a slow revalidation of 24 hours (<code>revalidate = 86400</code>). Inside it, a volatile inventory counter revalidates vertically every 60 seconds (<code>revalidate=&#123;60&#125;</code>) or on-demand when purchases occur:
                   </p>
-                  <CodeBlock
-                    language="tsx"
-                    containerClassName="w-full overflow-hidden rounded-lg my-2"
-                  >
-{`// src/products/[slug]/page_functions.ts
-import type { PageFunctions } from "dinou/server";
-
-// 1. Slow revalidation for outer page & descriptions (24 hours = 86,400s)
-export const revalidate: PageFunctions["revalidate"] = 86400;
-
-// src/products/[slug]/page.tsx
-import { DinouCacheSlot, type PageProps } from "dinou/server";
+                  <TabbedCodeBlock
+                    containerClassName="my-2"
+                    tabs={[
+                      {
+                        id: "page",
+                        label: "src/products/[slug]/page.tsx",
+                        language: "tsx",
+                        code: `import { DinouCacheSlot, type PageProps } from "dinou/server";
 import { ProductHero, ProductDescription } from "./static-widgets";
 import { LiveStockCounter } from "./stock-widgets";
 
@@ -742,8 +738,19 @@ export default function ProductDetailPage({ params }: PageProps<"/products/[slug
       </DinouCacheSlot>
     </main>
   );
-}`}
-                  </CodeBlock>
+}`,
+                      },
+                      {
+                        id: "page_functions",
+                        label: "src/products/[slug]/page_functions.ts",
+                        language: "typescript",
+                        code: `import type { PageFunctions } from "dinou/server";
+
+// Slow revalidation for outer page & descriptions (24 hours = 86,400s)
+export const revalidate: PageFunctions["revalidate"] = 86400;`,
+                      },
+                    ]}
+                  />
                 </div>
 
                 {/* Boundary Placement Box */}
@@ -772,7 +779,7 @@ export default function ProductDetailPage({ params }: PageProps<"/products/[slug
                         2. Unwrapped &lt;DinouCacheSlot&gt; (Recommended in Static / ISR &amp; PPR Static Shell)
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
-                        In <strong>Static / ISR pages</strong> (Pattern 2 above, <code>ppr = false</code>) and in the <strong>Static Shell of PPR routes</strong> (<code>ppr = true</code>), leave <code>&lt;DinouCacheSlot&gt;</code> <strong>outside</strong> <code>&lt;Suspense&gt;</code>. The widget is pre-rendered directly into the static HTML at build time (0ms TTFB, zero skeleton flash) and refreshed in the background via SWR whenever its TTL expires.
+                        In <strong>Static / ISR pages</strong> (Pattern 2 above, <code>ppr = false</code>) and in the <strong>Static Shell of PPR routes</strong> (<code>ppr = true</code>), leave <code>&lt;DinouCacheSlot&gt;</code> <strong>outside</strong> <code>&lt;Suspense&gt;</code>. The widget is pre-rendered directly into the static HTML at build time (0ms TTFB) and refreshed in the background via SWR whenever its TTL expires. Even when invalidated on-demand via <code>revalidateTag</code>, it <strong>never blocks</strong> incoming requests: visitors always receive a cached response immediately—serving the previous cached version while <code>revalidateTag</code> is still in progress, and the newly updated cached version as soon as <code>revalidateTag</code> resolves.
                       </p>
                     </div>
                   </div>
@@ -793,7 +800,7 @@ export default function ProductDetailPage({ params }: PageProps<"/products/[slug
                       Client-Side In-Place Refresh (<code>refreshSlot</code>)
                     </div>
                     <p className="text-muted-foreground leading-relaxed">
-                      Any interactive Client Component can trigger a surgical re-render of a specific slot (by <code>id</code> or <code>tag</code>) or all mounted slots (via wildcard <code>&quot;*&quot;</code>) without a full page reload or React state loss:
+                      Any interactive Client Component can trigger a surgical re-render of a specific slot (by <code>id</code> or <code>tag</code>) or all slots via wildcard <code>&quot;*&quot;</code> (updating both the slots currently mounted in the active page/layout and any slots cached in the client SPA session from previously visited pages) without a full page reload or React state loss:
                     </p>
                     <CodeBlock
                       language="tsx"
@@ -817,8 +824,8 @@ export function RefreshButton() {
         Force Fresh
       </button>
 
-      {/* Option 3: Wildcard "*" refreshes all mounted slots on screen */}
-      <button onClick={() => refreshSlot("*", { fresh: true })}>
+      {/* Option 3: Wildcard "*" refreshes all mounted slots + slots cached in client session */}
+      <button onClick={() => refreshSlot("*")}>
         Refresh All Slots
       </button>
     </div>
@@ -826,9 +833,10 @@ export function RefreshButton() {
 }`}
                     </CodeBlock>
                     <div className="text-[11px] text-muted-foreground bg-background/60 p-2.5 rounded border border-border/60 space-y-1.5 mt-2 break-words min-w-0">
-                      <div className="font-semibold text-foreground">Why does <code>fresh: true</code> exist if it is already called <code>refreshSlot</code>?</div>
+                      <div className="font-semibold text-foreground">How <code>refreshSlot</code> options and wildcard <code>&quot;*&quot;</code> work:</div>
                       <div>• <strong><code>refreshSlot(idOrTag)</code> (Default)</strong>: Refreshes the client DOM with the server&apos;s current state. If the slot&apos;s server-side TTL (e.g. <code>revalidate=&#123;300&#125;</code>) has not expired, it returns the cached server UI without touching your database (protecting against button spam and traffic spikes).</div>
                       <div>• <strong><code>refreshSlot(idOrTag, &#123; fresh: true &#125;)</code> (Bypass)</strong>: Hard revalidation. Forces the server to ignore any unexpired TTL, immediately re-run the server component&apos;s queries against your database, update the server cache, and update the client DOM in place.</div>
+                      <div>• <strong><code>refreshSlot(&quot;*&quot;)</code> (Wildcard)</strong>: Refreshes all <code>&lt;DinouCacheSlot&gt;</code> instances currently mounted on screen (across the active <code>page.tsx</code>, <code>layout.tsx</code>, and parallel <code>@slot</code> routes) <strong>and</strong> refreshes in the background any slots cached in memory in the client SPA session from previously visited pages, so navigating back to those pages renders updated data immediately. ⚠️ <em>Avoid combining <code>&quot;*&quot;</code> with <code>&#123; fresh: true &#125;</code> in production: it triggers a fan-out of requests for every mounted and session-cached slot while forcing all of them to bypass their server TTL and hit your database simultaneously. Reserve <code>&#123; fresh: true &#125;</code> for specific slot IDs or tags.</em></div>
                     </div>
                   </div>
 
@@ -839,54 +847,42 @@ export function RefreshButton() {
                         Server-Side Tag Invalidation (<code>revalidateTag</code>)
                       </div>
                       <p className="text-muted-foreground leading-relaxed mb-3">
-                        Mutations purge slots globally via <code>revalidateTag()</code> (imported from <code>&quot;dinou/server&quot;</code>), while the client immediately pulls the fresh result via <code>refreshSlot()</code>:
+                        Server mutations purge and update cached slots globally via <code>revalidateTag()</code> (imported from <code>&quot;dinou/server&quot;</code>). Any subsequent request or navigation automatically receives the new cached slot—while optionally calling <code>refreshSlot()</code> in the client updates the already-mounted DOM on the current user&apos;s screen in place:
                       </p>
 
-                      <Tabs defaultValue="server" className="w-full not-prose min-w-0">
-                        <TabsList className="grid grid-cols-2 h-7 p-0.5 bg-muted/60 text-[11px] mb-2">
-                          <TabsTrigger value="server" className="h-6 text-[11px]">
-                            actions.ts (Server)
-                          </TabsTrigger>
-                          <TabsTrigger value="client" className="h-6 text-[11px]">
-                            post-creator.tsx (Client)
-                          </TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="server" className="mt-0 min-w-0">
-                          <CodeBlock
-                            language="typescript"
-                            containerClassName="w-full overflow-hidden rounded-lg text-xs"
-                          >
-{`// src/feed/actions.ts
-"use server";
+                      <TabbedCodeBlock
+                        tabs={[
+                          {
+                            id: "server",
+                            label: "src/feed/actions.ts",
+                            language: "typescript",
+                            code: `"use server";
 import { revalidateTag } from "dinou/server";
 
 export async function publishPost(formData: FormData) {
   const content = formData.get("content") as string;
   await db.posts.insert({ content, createdAt: new Date() });
 
-  // 1. Purges & regenerates tagged slots/shells for ALL future visitors
+  // Standalone server invalidation: purges & updates tagged slots/shells
+  // so any subsequent page load or navigation gets the fresh cache automatically
   await revalidateTag("feed");
-}`}
-                          </CodeBlock>
-                        </TabsContent>
-
-                        <TabsContent value="client" className="mt-0 min-w-0">
-                          <CodeBlock
-                            language="tsx"
-                            containerClassName="w-full overflow-hidden rounded-lg text-xs"
-                          >
-{`// src/feed/post-creator.tsx
-"use client";
+}`,
+                          },
+                          {
+                            id: "client",
+                            label: "src/feed/post-creator.tsx",
+                            language: "tsx",
+                            code: `"use client";
 import { refreshSlot } from "dinou";
 import { publishPost } from "./actions";
 
 export function PostCreator() {
   const handleSubmit = async (formData: FormData) => {
-    // 1. Mutate & revalidate cache on server
+    // 1. Mutate & update cache on server
     await publishPost(formData);
 
-    // 2. Surgically re-render feed slot in local DOM
+    // 2. Optional: if the feed slot is already mounted on this screen,
+    // update it in place right now without reloading or navigating
     refreshSlot("feed-widget");
   };
 
@@ -896,16 +892,16 @@ export function PostCreator() {
       <button type="submit">Publish</button>
     </form>
   );
-}`}
-                          </CodeBlock>
-                        </TabsContent>
-                      </Tabs>
+}`,
+                          },
+                        ]}
+                      />
                     </div>
 
                     <div className="text-[11px] text-muted-foreground bg-background/60 p-2.5 rounded border border-border/60 space-y-1.5 mt-2 break-words min-w-0">
-                      <div className="font-semibold text-foreground">The Synergy of <code>revalidateTag</code> + <code>refreshSlot</code>:</div>
-                      <div>• <strong><code>await revalidateTag(&quot;feed&quot;)</code></strong>: Purges the slot cache and updates any affected static shells on the server (re-running only the invalidated slot without re-executing <code>page.tsx</code>) for <em>all future users</em> before resolving.</div>
-                      <div>• <strong><code>refreshSlot(&quot;feed-widget&quot;)</code></strong>: Pulls the freshly regenerated UI immediately into the <em>current user&apos;s screen</em> without needing <code>&#123; fresh: true &#125;</code>.</div>
+                      <div className="font-semibold text-foreground">Standalone <code>revalidateTag</code> vs. Optional <code>refreshSlot</code>:</div>
+                      <div>• <strong><code>await revalidateTag(&quot;feed&quot;)</code> (Standalone on Server)</strong>: Purges the slot cache and updates any affected static shells on the server (re-running only the invalidated slot without re-executing <code>page.tsx</code>). You do <strong>not</strong> need <code>refreshSlot()</code> for future page loads or navigations—they automatically receive the new cached version.</div>
+                      <div>• <strong><code>refreshSlot(&quot;feed-widget&quot;)</code> (Optional on Client)</strong>: Only needed when the user triggering the Server Function <em>already has that slot mounted on their current screen</em> and you want their open DOM to update in place immediately (without a page reload or navigation, and without needing <code>&#123; fresh: true &#125;</code>).</div>
                     </div>
                   </div>
                 </div>
