@@ -29,7 +29,7 @@ import {
 const tocItems = [
   {
     id: "overview",
-    title: "Overview: 13-Strategy Architecture",
+    title: "Overview: 14-Strategy Architecture",
     level: 2,
   },
   {
@@ -89,12 +89,17 @@ const tocItems = [
   },
   {
     id: "strategy-12",
-    title: "12. Client Calling Server Function (Initial Mount - Dynamic RPC)",
+    title: "12. Client-First getProps Promise ➔ Client use() (React 19)",
     level: 2,
   },
   {
     id: "strategy-13",
-    title: "13. Client Server Functions (User Actions & Mutations)",
+    title: "13. Client Calling Server Function (Initial Mount - Dynamic RPC)",
+    level: 2,
+  },
+  {
+    id: "strategy-14",
+    title: "14. Client Server Functions (User Actions & Mutations)",
     level: 2,
   },
   {
@@ -141,7 +146,7 @@ export default function DataFetchingPage() {
       <title>Data Fetching Strategies | Dinou Docs</title>
       <meta
         name="description"
-        content="A comprehensive case-by-case engineering guide covering each of the 13 data fetching and rendering patterns available in Dinou."
+        content="A comprehensive case-by-case engineering guide covering each of the 14 data fetching and rendering patterns available in Dinou."
       />
       <link rel="canonical" href="https://dinou.dev/docs/data-fetching" />
 
@@ -154,7 +159,7 @@ export default function DataFetchingPage() {
                 variant="secondary"
                 className="font-mono text-xs text-foreground bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
               >
-                13 Execution Strategies
+                14 Execution Strategies
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
                 Deep Dive Catalog
@@ -167,10 +172,10 @@ export default function DataFetchingPage() {
               </Badge>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Data Fetching: The 13 Strategies
+              Data Fetching: The 14 Strategies
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              A comprehensive case-by-case engineering guide covering each of the 13 data fetching and rendering patterns available in Dinou.
+              A comprehensive case-by-case engineering guide covering each of the 14 data fetching and rendering patterns available in Dinou.
               Every strategy is examined with concrete code snippets, runtime lifecycle behavior, TTFB metrics, server load characteristics, and production trade-offs.
             </p>
           </div>
@@ -179,7 +184,7 @@ export default function DataFetchingPage() {
             {/* Overview */}
             <section id="overview" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                Overview: The 13-Strategy Architecture
+                Overview: The 14-Strategy Architecture
               </h2>
               <p>
                 Dinou provides unprecedented flexibility by separating <strong>where code executes</strong> (Server Component vs Client Component),{" "}
@@ -195,7 +200,7 @@ export default function DataFetchingPage() {
                     <span>Interactive Strategy Index</span>
                   </div>
                   <span className="text-[11px] font-mono text-muted-foreground">
-                    13 Architecture Patterns
+                    14 Architecture Patterns
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
@@ -294,7 +299,7 @@ export default function DataFetchingPage() {
                       id: "strategy-11",
                       num: 11,
                       name: "Client-First getProps (Dynamic)",
-                      badge: "SSR Client",
+                      badge: "Blocked TTFB",
                       numBg: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
                       badgeClass: "border-rose-500/30 text-rose-700 dark:text-rose-400 bg-rose-50/60 dark:bg-rose-950/30",
                       hoverClass: "hover:border-rose-500/40 hover:bg-rose-50/30 dark:hover:bg-rose-950/20",
@@ -302,8 +307,8 @@ export default function DataFetchingPage() {
                     {
                       id: "strategy-12",
                       num: 12,
-                      name: "Client Calling Server Function",
-                      badge: "Mount RPC",
+                      name: "getProps Promise ➔ Client use()",
+                      badge: "React 19",
                       numBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
                       badgeClass: "border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-950/30",
                       hoverClass: "hover:border-amber-500/40 hover:bg-amber-50/30 dark:hover:bg-amber-950/20",
@@ -311,6 +316,15 @@ export default function DataFetchingPage() {
                     {
                       id: "strategy-13",
                       num: 13,
+                      name: "Client Calling Server Function",
+                      badge: "Mount RPC",
+                      numBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                      badgeClass: "border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-950/30",
+                      hoverClass: "hover:border-amber-500/40 hover:bg-amber-50/30 dark:hover:bg-amber-950/20",
+                    },
+                    {
+                      id: "strategy-14",
+                      num: 14,
                       name: "Client Server Functions (User)",
                       badge: "RPC Actions",
                       numBg: "bg-slate-500/10 text-slate-700 dark:text-slate-300",
@@ -741,6 +755,39 @@ export default function DataFetchingPage() {
                           <TableCell className="font-mono text-center text-amber-600 dark:text-amber-400 font-bold">12</TableCell>
                           <TableCell>
                             <a href="#strategy-12" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                              Client-First getProps Promise ➔ Client use() (Dynamic / PPR)
+                            </a>
+                            <div className="text-[11px] text-muted-foreground"><code>getProps</code> returns un-awaited Promise; Client Page unwraps via <code>use()</code></div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Server starts query in <code>getProps</code>; Client suspends</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
+                              0ms (with PPR) / Fast
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
+                              Waits for Promise
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
+                              Heavy (Live query)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
+                          <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
+                          <TableCell className="text-muted-foreground">Client-First pages (<code>&quot;use client&quot;</code> <code>page.tsx</code>) needing live server data without blocking TTFB or causing client-side fetch waterfalls.</TableCell>
+                        </ClickableTableRow>
+
+                        {/* Row 13 */}
+                        <ClickableTableRow
+                          targetId="strategy-13"
+                          className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-amber-600 dark:text-amber-400 font-bold">13</TableCell>
+                          <TableCell>
+                            <a href="#strategy-13" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
                               Client Calling Server Function (Initial Mount - Dynamic RPC)
                             </a>
                             <div className="text-[11px] text-muted-foreground">Client Component calls <code>&quot;use server&quot;</code> during initial mount</div>
@@ -763,17 +810,17 @@ export default function DataFetchingPage() {
                           </TableCell>
                           <TableCell className="text-center font-semibold text-rose-600 dark:text-rose-400">Yes (Waterfall)</TableCell>
                           <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
-                          <TableCell className="text-muted-foreground">Supported, but sub-optimal compared to pattern 9 (RSC Promise streaming) due to the second HTTP round trip.</TableCell>
+                          <TableCell className="text-muted-foreground">Supported, but sub-optimal compared to patterns 9 &amp; 12 (Server Promise streaming) due to the second HTTP round trip.</TableCell>
                         </ClickableTableRow>
 
-                        {/* Row 13 */}
+                        {/* Row 14 */}
                         <ClickableTableRow
-                          targetId="strategy-13"
+                          targetId="strategy-14"
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
-                          <TableCell className="font-mono text-center text-slate-600 dark:text-slate-400 font-bold">13</TableCell>
+                          <TableCell className="font-mono text-center text-slate-600 dark:text-slate-400 font-bold">14</TableCell>
                           <TableCell>
-                            <a href="#strategy-13" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                            <a href="#strategy-14" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
                               Client Calling Server Function (User Action - Dynamic RPC)
                             </a>
                             <div className="text-[11px] text-muted-foreground">Invoked on user button click, form submission, or mutation</div>
@@ -1669,6 +1716,7 @@ export function SearchResultsClient({ promise }: { promise: Promise<Product[]> }
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Zero Waterfall:</strong> The server initiates the query before the client even finishes parsing JavaScript.</p>
                 <p>• <strong>Interactive State:</strong> The client component immediately has access to full client hooks (<code>useState</code>, <code>useMemo</code>) to filter or mutate UI state.</p>
+                <p>• <strong>Client-First Equivalent:</strong> If your entire <code>page.tsx</code> is a <code>&quot;use client&quot;</code> component, see <strong>Strategy 12 (<code>getProps</code> Promise ➔ Client <code>use()</code>)</strong> to initiate the promise in <code>page_functions.ts</code> instead.</p>
               </div>
             </section>
 
@@ -1818,8 +1866,8 @@ export default function DocumentEditor({ document }: { document: any }) {
               />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
-                <p>• <strong>Trade-off:</strong> Because the server waits for <code>getProps</code> before sending the first byte, TTFB is slower compared to streaming patterns.</p>
-                <p>• <strong>Advantage:</strong> Eliminates client-side spinner flashing upon initial navigation compared to classic Single Page Apps.</p>
+                <p>• <strong>Blocking TTFB (Major Trade-off):</strong> Because the server must await <code>getProps()</code> on every request before rendering <code>page.tsx</code>, <strong>TTFB is completely blocked</strong>—the browser receives 0 bytes until your database or API query finishes.</p>
+                <p>• <strong>Why use it (vs. Strategy 12 &amp; 13):</strong> Allows <code>page.tsx</code> itself to be a <code>&quot;use client&quot;</code> component that receives live server data directly as synchronous initial props (e.g., <code>useState(document.initialBody)</code>) with full SSR HTML and no client-side fetch waterfall. To avoid blocking TTFB in a Client-First page, see <strong>Strategy 12 (<code>getProps</code> Promise ➔ Client <code>use()</code>)</strong>.</p>
               </div>
             </section>
 
@@ -1831,6 +1879,108 @@ export default function DocumentEditor({ document }: { document: any }) {
                 <div className="flex items-center gap-2">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-bold text-sm">
                     12
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    Client-First getProps Promise ➔ Client use() (React 19)
+                  </h2>
+                </div>
+                <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20 font-mono text-xs">
+                  getProps Promise Streaming
+                </Badge>
+              </div>
+
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="0ms (with PPR) / Fast" variant="emerald" />
+                <MetricCard label="Stream Ready" value="Waits for Promise" variant="amber" />
+                <MetricCard label="Server/DB Load" value="Heavy (Live query)" variant="rose" />
+                <MetricCard label="Waterfall" value="None" variant="emerald" />
+                <MetricCard label="Data Freshness" value="100% Live" variant="emerald" className="col-span-2 sm:col-span-1" />
+              </div>
+
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> The Client-First (<code>getProps</code>) equivalent of Strategy 9. Instead of awaiting the database query inside <code>getProps</code> (which blocks TTFB in Strategy 11), <code>getProps</code> in <code>page_functions.ts</code> starts the query <strong>without <code>await</code></strong> and returns the raw <code>Promise</code> inside the props object (<code>return &#123; documentPromise &#125;</code>). Because JavaScript only unwraps top-level promises, Dinou passes <code>documentPromise</code> immediately to your <code>&quot;use client&quot;</code> <code>page.tsx</code>. The outer client page shell streams immediately, while a child component inside <code>&lt;Suspense&gt;</code> unwraps the Flight promise using React 19&apos;s native <code>use()</code> hook.
+              </p>
+
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/editor/[docId]/page_functions.ts",
+                    language: "tsx",
+                    code: `import db from "@/lib/db";
+
+export const revalidate = 0; // Dynamic SSR (or export const ppr = true)
+
+export function getProps(params: { docId: string }) {
+  // Start query WITHOUT awaiting! Returns raw Promise inside props object:
+  const documentPromise = db.documents.findById(params.docId);
+  return { documentPromise };
+}`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/editor/[docId]/page.tsx (Client Component)",
+                    language: "tsx",
+                    code: `"use client";
+
+import { Suspense, use, useState } from "react";
+
+function EditorCanvas({
+  promise,
+}: {
+  promise: Promise<{ title: string; initialBody: string }>;
+}) {
+  // Unwraps the server-initiated Flight promise inside Suspense
+  const doc = use(promise);
+  const [content, setContent] = useState(doc.initialBody);
+
+  return (
+    <textarea
+      className="w-full h-64 p-3 border rounded-lg font-mono text-sm"
+      value={content}
+      onChange={(e) => setContent(e.target.value)}
+    />
+  );
+}
+
+export default function DocumentEditorPage({
+  documentPromise,
+}: {
+  documentPromise: Promise<{ title: string; initialBody: string }>;
+}) {
+  return (
+    <div className="p-6 max-w-4xl mx-auto space-y-4">
+      {/* Toolbar & shell stream immediately without waiting for DB */}
+      <header className="flex items-center justify-between border-b pb-3">
+        <h1 className="text-xl font-bold">Collaborative Editor</h1>
+      </header>
+
+      <Suspense fallback={<div className="h-64 rounded-lg bg-muted animate-pulse" />}>
+        <EditorCanvas promise={documentPromise} />
+      </Suspense>
+    </div>
+  );
+}`,
+                  },
+                ]}
+              />
+
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
+                <p>• <strong>Unblocks TTFB in Client-First Pages:</strong> Eliminates the TTFB bottleneck of Strategy 11 while keeping <code>page.tsx</code> 100% <code>&quot;use client&quot;</code> and avoiding any client-side network waterfall.</p>
+                <p>• <strong>Equivalent to Strategy 9:</strong> Achieves the exact same Flight Promise streaming as Strategy 9 (<code>RSC Promise ➔ Client use()</code>), using <code>page_functions.ts</code> (<code>getProps</code>) instead of a Server Component <code>page.tsx</code>.</p>
+              </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* STRATEGY 13 */}
+            {/* ============================================================ */}
+            <section id="strategy-13" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-bold text-sm">
+                    13
                   </span>
                   <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
                     Client Calling Server Function (Initial Mount - Dynamic RPC)
@@ -1920,18 +2070,18 @@ export function DashboardStatsWidget() {
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Modern React 19 Ergonomics:</strong> Unrolls promises synchronously with <code>use()</code> inside <code>&lt;Suspense&gt;</code>. Eliminates legacy <code>useEffect</code> lifecycle hooks, manual loading flags (<code>isLoading</code>, <code>error</code>), and fetch boilerplate.</p>
-                <p>• <strong>Network Round Trip:</strong> Supported and idiomatic for client widgets, but incurs a second client-side HTTP round trip after hydration. When you control the parent route, prefer <strong>Strategy 9 (RSC Promise)</strong> to initiate the promise on the server and eliminate the extra round trip.</p>
+                <p>• <strong>Network Round Trip:</strong> Supported and idiomatic for client widgets, but incurs a second client-side HTTP round trip after hydration. When you control the parent route, prefer <strong>Strategy 9 (RSC Promise)</strong> or <strong>Strategy 12 (<code>getProps</code> Promise)</strong> to initiate the promise on the server and eliminate the extra round trip.</p>
               </div>
             </section>
 
             {/* ============================================================ */}
-            {/* STRATEGY 13 */}
+            {/* STRATEGY 14 */}
             {/* ============================================================ */}
-            <section id="strategy-13" className="scroll-mt-20 pt-6 border-t">
+            <section id="strategy-14" className="scroll-mt-20 pt-6 border-t">
               <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
                 <div className="flex items-center gap-2">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-500/10 text-slate-700 dark:text-slate-300 font-mono font-bold text-sm">
-                    13
+                    14
                   </span>
                   <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
                     Client Server Functions (User Actions &amp; Mutations)
@@ -2055,7 +2205,7 @@ export function AddToCartButton({ productId }: { productId: string }) {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-muted-foreground space-y-1">
-                    <p>➔ <strong>Strategy 10 / 11 (Client-First):</strong> Server gets data via <code>getProps</code>, page is 100% interactive client component.</p>
+                    <p>➔ <strong>Strategy 10 / 11 / 12 (Client-First):</strong> Server gets data (or starts a Promise) via <code>getProps</code>; page is a 100% interactive client component.</p>
                   </CardContent>
                 </Card>
 
@@ -2066,7 +2216,7 @@ export function AddToCartButton({ productId }: { productId: string }) {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-muted-foreground space-y-1">
-                    <p>➔ <strong>Strategy 9 (React 19 use()):</strong> Start query on server, stream raw promise to client component without waterfalls.</p>
+                    <p>➔ <strong>Strategy 9 / 12 (React 19 use()):</strong> Start query on server (in RSC or <code>getProps</code>), stream raw promise to client component without waterfalls.</p>
                   </CardContent>
                 </Card>
               </div>

@@ -896,12 +896,12 @@ export function InteractiveChart({ data }: { data: any }) {
                 <Alert className="border-blue-500/20 bg-blue-50/40 dark:bg-blue-950/20">
                   <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   <AlertTitle className="text-blue-700 dark:text-blue-300 font-bold text-xs">
-                    Looking for the 13 Data Fetching &amp; Rendering Strategies Matrix?
+                    Looking for the 14 Data Fetching &amp; Rendering Strategies Matrix?
                   </AlertTitle>
                   <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1">
-                    For a complete comparison matrix and side-by-side code examples of all 13 data fetching and rendering patterns in Dinou (comparing TTFB, streaming resolution, server/database load, and network waterfalls), see{" "}
+                    For a complete comparison matrix and side-by-side code examples of all 14 data fetching and rendering patterns in Dinou (comparing TTFB, streaming resolution, server/database load, and network waterfalls), see{" "}
                     <Link href="/docs/data-fetching" className="font-semibold text-blue-600 dark:text-blue-400 hover:underline">
-                      Data Fetching: The 13 Strategies
+                      Data Fetching: The 14 Strategies
                     </Link>.
                   </AlertDescription>
                 </Alert>
