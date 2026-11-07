@@ -1,3 +1,4 @@
+import { Link } from "dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
 import { Badge } from "@/docs/components/ui/badge";
@@ -21,16 +22,9 @@ import {
   CheckCircle2,
   XCircle,
   HelpCircle,
-  Cpu,
   Zap,
-  Split,
   Sparkles,
-  ArrowRight,
-  ShieldAlert,
   Boxes,
-  Lock,
-  Globe,
-  Database,
   Code2,
 } from "lucide-react";
 import {
@@ -43,8 +37,6 @@ import {
 } from "@/docs/components/ui/table";
 import { CodeBlock } from "@/docs/components/code-block";
 import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
-import { CacheSlotGuideSection } from "@/docs/components/cache-slot-guide-section";
-import { PprCacheSlotSection } from "@/docs/components/ppr-cache-slot-section";
 
 // Pure React Server Component (no 'use client')
 const tocItems = [
@@ -67,9 +59,7 @@ const tocItems = [
   { id: "pattern-composition", title: "6.2. Composition: Server Components as Children", level: 3 },
   { id: "pattern-client-first", title: "6.3. Client-First with Server Data (getProps)", level: 3 },
   { id: "pattern-cache-slots", title: "6.4. Granular Caching with <DinouCacheSlot>", level: 3 },
-  { id: "pattern-ppr-cache-slot", title: "6.5. The Synergy: PPR + <DinouCacheSlot>", level: 3 },
-  { id: "pattern-cache-slot-guide", title: "6.6. When to Use <DinouCacheSlot>", level: 3 },
-  { id: "anti-patterns", title: "6.7. Common Traps & Anti-Patterns to Avoid", level: 3 },
+  { id: "anti-patterns", title: "6.5. Common Traps & Anti-Patterns to Avoid", level: 3 },
   { id: "rendering-strategies-matrix", title: "7. Data Fetching & Rendering Strategies Matrix", level: 2 },
 ];
 
@@ -751,7 +741,7 @@ export async function getProps(params: { id: string }) {
                         Dinou&apos;s Solution (&lt;DinouCacheSlot&gt;)
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
-                        Keep the component on the server! <code>&lt;DinouCacheSlot&gt;</code> caches the rendered RSC Flight payload of that specific subtree on the server for a designated TTL (e.g. 300s). The rest of the page remains 100% dynamic, while the expensive subtree serves in 0ms.
+                        Keep the component on the server! <code>&lt;DinouCacheSlot&gt;</code> caches the rendered RSC Flight payload of that specific subtree on the server for a designated TTL (e.g. <code>revalidate=&#123;300&#125;</code>). The rest of the page remains 100% dynamic, while the expensive subtree serves in ~0–2ms.
                       </p>
                     </div>
                   </div>
@@ -761,7 +751,7 @@ export async function getProps(params: { id: string }) {
                       Can a &lt;DinouCacheSlot&gt; Contain Client Components?
                     </h4>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      <strong>Yes, absolutely.</strong> While <code>&lt;DinouCacheSlot&gt;</code> itself is an async Server Component that executes exclusively on the server, its children can freely render interactive Client Components. Dinou caches the <strong>Client Component reference along with its pre-computed props</strong>. The client hydrates it normally with full interactivity (events, state, animations):
+                      <strong>Yes, absolutely.</strong> While <code>&lt;DinouCacheSlot&gt;</code> itself is an async Server Component that executes exclusively on the server, its children can freely render interactive Client Components (and pass <code>&quot;use server&quot;</code> functions as props). Dinou caches the <strong>Client Component reference along with its pre-computed server props</strong>, and the browser hydrates it normally with full interactivity:
                     </p>
                   </div>
 
@@ -773,7 +763,7 @@ export async function getProps(params: { id: string }) {
                         label: "src/dashboard/page.tsx (Server Component)",
                         language: "tsx",
                         code: `import { Suspense } from "react";
-import { DinouCacheSlot } from "dinou";
+import { DinouCacheSlot } from "dinou/server";
 import { db } from "@/lib/db";
 import { UserGreeting } from "./UserGreeting"; // Reads user session/cookies
 import { GreetingSkeleton, AnalyticsSkeleton } from "./skeletons";
@@ -793,9 +783,9 @@ export default function DashboardPage() {
         <UserGreeting />
       </Suspense>
 
-      {/* Micro-ISR hole: wrapped in Suspense so cache misses stream without blocking TTFB */}
+      {/* Micro-ISR slot: wrapped in Suspense so a cold cache miss streams without blocking TTFB */}
       <Suspense fallback={<AnalyticsSkeleton />}>
-        <DinouCacheSlot id="analytics-slot" duration={300} tags={["analytics"]}>
+        <DinouCacheSlot id="analytics-slot" revalidate={300} tags={["analytics"]}>
           <HeavyAnalyticsWidget />
         </DinouCacheSlot>
       </Suspense>
@@ -833,32 +823,43 @@ export function InteractiveChart({ data }: { data: any }) {
 
                   <div className="pt-2 text-xs text-muted-foreground space-y-1.5">
                     <p>
-                      <strong>Why wrap in &lt;Suspense&gt;?</strong> While <code>&lt;DinouCacheSlot&gt;</code> works without it on cache hits, on a <em>cache miss</em> (cold start or expired TTL) an unwrapped slot would block the entire HTTP response during the heavy query. Wrapping it in <code>&lt;Suspense&gt;</code> guarantees instant TTFB by streaming the layout and skeleton immediately.
+                      <strong>Why wrap in &lt;Suspense&gt;?</strong> On a Dynamic SSR route there is no pre-rendered static HTML—the server renders the response on every request. Wrapping <code>&lt;DinouCacheSlot&gt;</code> in <code>&lt;Suspense&gt;</code> ensures that on a <em>cold cache miss</em> (when the slot is not cached yet), the server streams the page layout and <code>&lt;AnalyticsSkeleton /&gt;</code> immediately instead of blocking TTFB for the 2-second query. On <em>cache hits</em> (and across expired TTLs via Background SWR), <code>&lt;DinouCacheSlot&gt;</code> resolves from the server slot cache (~1–2ms) without suspending, so the SSR response includes the rendered widget directly without showing the skeleton fallback.
                     </p>
                     <p>
-                      <strong>What about UserGreeting?</strong> In dynamic SSR, wrapping <code>UserGreeting</code> in <code>&lt;Suspense&gt;</code> ensures that reading user session or auth cookies does not delay the initial response, keeping TTFB fast. In PPR, it also prevents dynamic request data from de-optimizing the build-time static shell.
+                      <strong>What about UserGreeting?</strong> Wrapping <code>UserGreeting</code> in <code>&lt;Suspense&gt;</code> ensures that fetching user session data does not delay flushing the outer page layout during SSR (and on PPR routes, keeps session/cookie access isolated inside a dynamic hole).
                     </p>
                     <p>
-                      <strong>In-Place Client Refresh:</strong> Any Client Component can trigger an on-demand re-render of only this slot using <code>refreshSlot(&quot;analytics-slot&quot;)</code> from <code>&quot;dinou&quot;</code> without reloading the page or resetting state in other components.
+                      <strong>In-Place Client Refresh &amp; State Preservation:</strong> Any Client Component can trigger an on-demand re-render of only this slot using <code>await refreshSlot(&quot;analytics-slot&quot;)</code> from <code>&quot;dinou&quot;</code>. React reconciles the new server props in place <strong>without unmounting</strong> <code>&lt;InteractiveChart /&gt;</code>, preserving its local <code>zoom</code> state!
                     </p>
                     <p>
-                      <strong>On-Demand Invalidation:</strong> Server Functions and webhooks can invalidate the slot cache immediately via <code>revalidateTag(&quot;analytics&quot;)</code>.
+                      <strong>On-Demand Server Invalidation:</strong> Server Functions and webhooks can purge and update the slot cache globally via <code>await revalidateTag(&quot;analytics&quot;)</code>.
                     </p>
                   </div>
+
+                  <Alert className="not-prose border-emerald-500/20 bg-background/80">
+                    <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    <AlertTitle className="text-emerald-700 dark:text-emerald-300 font-bold text-xs">
+                      Deep Dive: &lt;DinouCacheSlot&gt; + Partial Prerendering (PPR) &amp; Decision Guide
+                    </AlertTitle>
+                    <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1">
+                      For the complete architectural guide on using <code>&lt;DinouCacheSlot&gt;</code> across Dynamic SSR, Static/ISR, and Partial Prerendering (including <code>&lt;Suspense&gt;</code> nesting-order semantics, nested slots, and when not to use a slot), see{" "}
+                      <Link href="/docs/3d-segmentation#micro-isr" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
+                        Vertical Axis: Micro-ISR (&lt;DinouCacheSlot&gt;)
+                      </Link>{" "}
+                      and{" "}
+                      <Link href="/docs/3d-segmentation#pairwise-slot-ppr" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
+                        Pairwise Synergy #3: Vertical + Temporal (PPR)
+                      </Link>.
+                    </AlertDescription>
+                  </Alert>
                 </div>
 
-                {/* 6.5 The Synergy: PPR + DinouCacheSlot */}
-                <PprCacheSlotSection />
-
-                {/* 6.6 When to Use DinouCacheSlot */}
-                <CacheSlotGuideSection />
-
-                {/* 6.7 Anti-Patterns */}
+                {/* 6.5 Anti-Patterns */}
                 <div id="anti-patterns" className="scroll-mt-20 p-5 rounded-xl border border-rose-500/20 bg-rose-50/20 dark:bg-rose-950/10">
                   <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-slate-100 mb-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 text-xs font-mono">7</span>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 text-xs font-mono">5</span>
                     <h3 className="text-base font-bold">
-                      6.7. Common Traps &amp; Anti-Patterns to Avoid
+                      6.5. Common Traps &amp; Anti-Patterns to Avoid
                     </h3>
                   </div>
 
@@ -1043,10 +1044,10 @@ export function InteractiveChart({ data }: { data: any }) {
                       <TableRow className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
                         <TableCell className="font-mono text-center text-muted-foreground font-bold">5</TableCell>
                         <TableCell>
-                          <div className="font-bold text-slate-900 dark:text-slate-100">RSC with &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Static / Asymmetric ISR)</div>
-                          <div className="text-[11px] text-muted-foreground">Pre-rendered static shell with decoupled slot TTL or <code>refreshSlot()</code></div>
+                          <div className="font-bold text-slate-900 dark:text-slate-100">RSC with &lt;DinouCacheSlot&gt; (Static / Asymmetric ISR)</div>
+                          <div className="text-[11px] text-muted-foreground">Pre-rendered into static shell with decoupled slot TTL (Background SWR) or <code>refreshSlot()</code></div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">Build Time (Pre-rendered) + On-Demand Slot Reval</TableCell>
+                        <TableCell className="text-muted-foreground">Build Time (Pre-rendered) + Background SWR / On-Demand Slot Reval</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
                             0ms (CDN Edge)
@@ -1054,7 +1055,7 @@ export function InteractiveChart({ data }: { data: any }) {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Instant (~0-2ms)
+                            Instant (0ms Inline)
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -1074,7 +1075,7 @@ export function InteractiveChart({ data }: { data: any }) {
                           <div className="font-bold text-slate-900 dark:text-slate-100">RSC with &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Dynamic)</div>
                           <div className="text-[11px] text-muted-foreground">Dynamic streaming with vertical Micro-ISR (TTL cache)</div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">Per Request (Cache hit: ~2ms / Miss: async query)</TableCell>
+                        <TableCell className="text-muted-foreground">Per Request (Cache hit / SWR: 0ms inline / Cold miss: async stream)</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
                             Fast (Early Layout)
@@ -1082,7 +1083,7 @@ export function InteractiveChart({ data }: { data: any }) {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Instant (~2ms Cache)
+                            Instant (~0-2ms Cache)
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -1092,7 +1093,7 @@ export function InteractiveChart({ data }: { data: any }) {
                         </TableCell>
                         <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                         <TableCell className="text-amber-600 dark:text-amber-400 font-medium">TTL / Tag Reval</TableCell>
-                        <TableCell className="text-muted-foreground">Dynamic routes (with session/cookies) containing heavy widgets (analytics, feeds). Flushes layout instantly; slot streams from cache without DB load.</TableCell>
+                        <TableCell className="text-muted-foreground">Dynamic routes (with session/cookies) containing heavy widgets (analytics, feeds). Flushes layout instantly; slot serves from cache without DB load.</TableCell>
                       </TableRow>
 
                       {/* Row 7 */}
@@ -1131,17 +1132,17 @@ export function InteractiveChart({ data }: { data: any }) {
                             <span>PPR + &lt;DinouCacheSlot&gt; (PPR Hybrid Synergy)</span>
                             <span className="text-[9px] uppercase px-1.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold tracking-wider">Synergy</span>
                           </div>
-                          <div className="text-[11px] text-muted-foreground">Static Edge Shell + Cached Streamed Hole (Max Concurrency)</div>
+                          <div className="text-[11px] text-muted-foreground">Static Edge Shell + Cached Streamed Hole (or Static Shell Slot)</div>
                         </TableCell>
                         <TableCell className="text-muted-foreground">Edge CDN (Shell) + Server Cache Storage (Slot)</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            0ms (Edge) + ~5ms (Slot)
+                            0ms (Edge) + ~2ms (Slot)
                           </Badge>
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                            Instant (~2-5ms Cache)
+                            Instant (~0-2ms Cache)
                           </Badge>
                         </TableCell>
                         <TableCell>

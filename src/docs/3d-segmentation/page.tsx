@@ -669,7 +669,7 @@ export default function DashboardPage() {
 
       {/* 2. Smart Cache-Aware <Suspense> + <DinouCacheSlot>:
              - 1st request (cold cache miss): streams <AnalyticsSkeleton /> immediately, then swaps in the widget
-             - 2nd+ requests (cache hit & background SWR): embeds the widget directly in initial HTML with 0 fallback! */}
+             - 2nd+ requests (cache hit & background SWR): resolves from server slot cache (~1-2ms) without suspending (0 fallback flash)! */}
       <Suspense fallback={<AnalyticsSkeleton />}>
         <DinouCacheSlot id="analytics-widget" tags={["analytics", "dashboard-group"]} revalidate={300}>
           <SlowAnalyticsWidget />
@@ -770,7 +770,7 @@ export const revalidate: PageFunctions["revalidate"] = 86400;`,
                         1. &lt;Suspense&gt; Wrapping &lt;DinouCacheSlot&gt; (Recommended in Dynamic SSR &amp; PPR Holes)
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
-                        In <strong>Dynamic SSR pages</strong> (Pattern 1 above), wrap every top-level <code>&lt;DinouCacheSlot&gt;</code> in <code>&lt;Suspense fallback=&#123;...&#125;&gt;</code> so a cold cache miss never blocks the page&apos;s TTFB: Dinou streams the fallback skeleton <strong>only on a cold cache miss</strong> (1st request or after <code>revalidateTag</code>), and once cached (including across expired TTLs via Background SWR), embeds the cached widget directly into the initial HTML with <strong>zero fallback flash</strong>. On <strong><code>ppr = true</code> routes</strong> (Section 6), it becomes a <strong>Cached Dynamic PPR Hole</strong>.
+                        In <strong>Dynamic SSR pages</strong> (Pattern 1 above), wrap every top-level <code>&lt;DinouCacheSlot&gt;</code> in <code>&lt;Suspense fallback=&#123;...&#125;&gt;</code> so a cold cache miss never blocks the page&apos;s TTFB: Dinou streams the fallback skeleton <strong>only on a cold cache miss</strong> (1st request or after <code>revalidateTag</code>), and once cached (including across expired TTLs via Background SWR), resolves the cached widget directly during the SSR pass (~1–2ms) without suspending (<strong>zero fallback flash</strong>). On <strong><code>ppr = true</code> routes</strong> (Section 6), it becomes a <strong>Cached Dynamic PPR Hole</strong>.
                       </p>
                     </div>
 
@@ -935,7 +935,7 @@ export function PostCreator() {
                         <span>1. Static Shell &amp; SSR Slots: Background SWR</span>
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
-                        Applies to: <strong>(a)</strong> unwrapped slots (outside <code>&lt;Suspense&gt;</code>, or with <code>noDynamic()</code>) in Static/ISR and PPR Static Shells, and <strong>(b)</strong> <code>&lt;Suspense&gt;</code>-wrapped slots on Dynamic SSR routes (<code>ppr = false</code>, where the fallback is shown <em>only</em> on a cold cache miss). When the TTL expires, the next request serves the cached slot immediately inline (<strong>0ms, no fallback</strong>) and triggers a non-blocking background SWR refresh.
+                        Applies to: <strong>(a)</strong> unwrapped slots (outside <code>&lt;Suspense&gt;</code>, or with <code>noDynamic()</code>) in Static/ISR and PPR Static Shells, and <strong>(b)</strong> <code>&lt;Suspense&gt;</code>-wrapped slots on Dynamic SSR routes (<code>ppr = false</code>, where the fallback is shown <em>only</em> on a cold cache miss). When the TTL expires, the next request serves the cached slot immediately inline (without triggering a fallback) and starts a non-blocking background SWR refresh.
                       </p>
                     </div>
 
