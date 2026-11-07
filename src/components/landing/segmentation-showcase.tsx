@@ -230,8 +230,8 @@ export default function RefreshButton({ slotId }: { slotId: string }) {
     headline: "Decoupled Layout ISR with Persistent Navigation State",
     description:
       "Layouts can declare their own data fetching and revalidation rules via layout_functions.ts. Changing routes never re-renders cached parent layouts, keeping media playback and search inputs alive.",
-    docHref: "/docs/routing#layout-functions",
-    docLabel: "Layout Functions Guide",
+    docHref: "/docs/3d-segmentation#horizontal-segmentation",
+    docLabel: "Horizontal Segmentation Guide",
     files: [
       {
         filename: "src/dashboard/layout_functions.ts",
@@ -240,7 +240,7 @@ export default function RefreshButton({ slotId }: { slotId: string }) {
         code: `
 // Independent layout caching: Shell cached for 1 hour
 export const revalidate = 3600;
-export const tags = ["dashboard-shell", "nav-links"];
+export const getCacheTags = ["dashboard-shell", "nav-links"];
 
 export async function getProps() {
   const navStats = await fetchGlobalStats();

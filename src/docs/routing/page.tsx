@@ -5,9 +5,7 @@ import { Badge } from "@/docs/components/ui/badge";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/docs/components/ui/card";
 import {
   Alert,
@@ -51,8 +49,8 @@ const tocItems = [
   { id: "validate-params", title: "3.2. Route Validation (validateParams)", level: 3 },
   { id: "query-params", title: "3.3. Query Parameters Access", level: 3 },
   { id: "layouts-special-files", title: "4. Layouts & Special Files", level: 2 },
-  { id: "nested-layouts", title: "4.1. Nested Layouts (layout.tsx)", level: 3 },
-  { id: "layout-functions", title: "4.2. Horizontal Segmentation & layout_functions.ts", level: 3 },
+  { id: "root-layout", title: "4.1. Root Layout (src/layout.tsx)", level: 3 },
+  { id: "nested-layouts", title: "4.2. Nested Layouts (layout.tsx)", level: 3 },
   { id: "layout-flags", title: "4.3. Layout Control Flags (reset_layout, no_layout)", level: 3 },
   { id: "error-handling", title: "4.4. Error Pages (error.tsx)", level: 3 },
   { id: "not-found-pages", title: "4.5. Custom 404 Pages (not_found.tsx)", level: 3 },
@@ -69,7 +67,7 @@ export default function Page() {
       <title>Routing & Layouts | Dinou Docs</title>
       <meta
         name="description"
-        content="Master Dinou's file-system router: nested layouts with independent Horizontal ISR, parallel slots with error isolation, and route parameters."
+        content="Master Dinou's file-system router: root and nested layouts, parallel slots with error isolation, route parameters, and layout control flags."
       />
       <link rel="canonical" href="https://dinou.dev/docs/routing" />
 
@@ -92,7 +90,7 @@ export default function Page() {
               Routing &amp; Layouts
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Master Dinou&apos;s file-system router: nested layouts with independent Horizontal ISR, parallel slots with error isolation, route parameters, and layout control flags.
+              Master Dinou&apos;s file-system router: root and nested layouts, parallel slots with error isolation, route parameters, and layout control flags.
             </p>
 
             {/* Type-Safe Routing Callout */}
@@ -519,20 +517,51 @@ export async function filterItems() {
                 4. Layouts &amp; Special Files
               </h2>
               <p>
-                Dinou provides special files that cascade down the directory hierarchy. They allow you to compose nested layouts, manage independent ISR lifecycles, isolate errors, and break out of hierarchies using control flags.
+                Dinou provides special files that cascade down the directory hierarchy. They allow you to define the root document shell, compose nested layouts that preserve client state across navigations, isolate runtime errors, and break out of layout hierarchies using control flags.
               </p>
 
-              <div id="nested-layouts" className="scroll-mt-20 mt-6 space-y-4">
+              <div id="root-layout" className="scroll-mt-20 mt-6 space-y-4">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Layers className="h-5 w-5 text-blue-500" />
-                  4.1. Nested Layouts (layout.tsx)
+                  <Layers className="h-5 w-5 text-indigo-500" />
+                  4.1. Root Layout (src/layout.tsx)
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  A <code>layout.tsx</code> wraps all child pages and sub-layouts in its directory. On client navigation between sibling pages, parent layouts preserve their React state, input fields, scroll position, and DOM tree without re-mounting.
+                  The top-level <code>src/layout.tsx</code> file is the <strong>Root Layout</strong> of your application. It is responsible for rendering the outer HTML document shell (<code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, and <code>&lt;body&gt;</code>), importing global stylesheets or fonts, and wrapping all child routes and nested layouts (unless explicitly bypassed with <code>reset_layout</code> or <code>no_layout</code>, or partitioned into multiple root layouts via <a href="#route-groups">Route Groups</a>):
+                </p>
+
+                <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
+                  {`// src/layout.tsx
+import type { LayoutProps } from "dinou";
+import "./globals.css";
+
+export default function RootLayout({ children }: LayoutProps<"/">) {
+  return (
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </head>
+      <body className="min-h-screen bg-background text-foreground antialiased">
+        {children}
+      </body>
+    </html>
+  );
+}`}
+                </CodeBlock>
+              </div>
+
+              <div id="nested-layouts" className="scroll-mt-20 mt-8 space-y-4">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-blue-500" />
+                  4.2. Nested Layouts (layout.tsx)
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Placing a <code>layout.tsx</code> file inside any route directory (e.g. <code>src/dashboard/[teamId]/layout.tsx</code>) creates a <strong>nested layout</strong> that wraps all child pages and deeper sub-layouts in that subtree. Unlike the root layout, nested layouts do not include <code>&lt;html&gt;</code> or <code>&lt;body&gt;</code> tags—they mount directly inside their parent layout&apos;s <code>&#123;children&#125;</code> slot.
                 </p>
 
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  A layout component receives <code>children</code>, <code>params</code>, any parallel slots (e.g. <code>sidebar</code>), and props returned by <code>layout_functions.ts</code>:
+                  On client navigation between sibling pages, parent layouts preserve their React state, input fields, scroll position, and DOM tree without re-mounting. Each layout receives <code>children</code>, typed <code>params</code>, any parallel slots (e.g. <code>sidebar</code>), and server props returned by an optional companion <code>layout_functions.ts</code> file:
                 </p>
 
                 <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
@@ -560,84 +589,24 @@ export default function DashboardLayout({
   );
 }`}
                 </CodeBlock>
-              </div>
 
-              <div id="layout-functions" className="scroll-mt-20 mt-8 space-y-4">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-indigo-500" />
-                  4.2. Horizontal Segmentation &amp; layout_functions.ts
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  In traditional SSR frameworks, layout shells and child pages are tightly coupled. Navigating to a dynamic child route often forces the entire layout to re-evaluate, resetting video playback, collapsing open menus, or wiping sidebar search state.
-                </p>
-
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Dinou introduces <strong>Horizontal Layered Segmentation</strong>. Layouts and pages travel on completely separate execution, streaming, and caching pathways:
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-4 min-w-0">
-                  <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-50/30 dark:bg-blue-950/20 space-y-2 min-w-0">
-                    <div className="flex items-center gap-2 font-bold text-xs text-blue-600 dark:text-blue-400">
-                      <Layers className="h-4 w-4" />
-                      1. The Layout Plane
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Renders exclusively the outer layout shell and any parallel slots, establishing the boundary where child page content is mounted.
-                    </p>
-                    <ul className="text-[11px] text-muted-foreground space-y-1 list-disc pl-4">
-                      <li>Governed by <code>layout_functions.ts</code></li>
-                      <li>Maintains its own independent cache TTL</li>
-                      <li><strong>Never unmounts or re-executes</strong> during sibling navigations</li>
-                    </ul>
-                  </div>
-
-                  <div className="p-4 rounded-xl border border-purple-500/20 bg-purple-50/30 dark:bg-purple-950/20 space-y-2 min-w-0">
-                    <div className="flex items-center gap-2 font-bold text-xs text-purple-600 dark:text-purple-400">
-                      <Split className="h-4 w-4" />
-                      2. The Page Plane
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Renders exclusively the active leaf page component (<code>&lt;Page /&gt;</code>) and streams into the layout&apos;s page slot.
-                    </p>
-                    <ul className="text-[11px] text-muted-foreground space-y-1 list-disc pl-4">
-                      <li>Governed by <code>page_functions.ts</code></li>
-                      <li>Can be highly dynamic or real-time SSR</li>
-                      <li>Navigating between siblings updates <em>only</em> this plane</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    Decoupled Lifecycles in Practice: layout_functions.ts
-                  </h4>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Because layouts and pages are horizontally decoupled, they can declare completely independent caching lifetimes (TTL / ISR). A layout shell can cache for hours while its child pages revalidate every few seconds:
-                  </p>
-                </div>
-
-                <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                  {`// src/dashboard/[teamId]/layout_functions.ts - Independent Layout ISR
-import type { RouteParams } from "dinou";
-
-// 1. Data Fetching for the Layout Shell
-export async function getProps(params: RouteParams<"/dashboard/[teamId]">) {
-  const team = await fetchTeamData(params.teamId);
-  return { team };
-}
-
-// 2. Independent Cache Lifetime (1 hour)
-// Child pages inside this dashboard can update every 5 seconds without invalidating this shell!
-export const revalidate = 3600;
-
-// 3. Granular Invalidation Tags (constant or function getCacheTags)
-// Calling revalidateTag("team-shell") purges only the layout without wiping child page caches.
-export const getCacheTags = ["team-shell"];`}
-                </CodeBlock>
-
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Props returned by <code>getProps</code> in <code>layout_functions.ts</code> are automatically injected into <code>layout.tsx</code> as top-level props alongside <code>children</code>, <code>params</code>, and any parallel slots.
-                </p>
+                <Alert className="not-prose border-indigo-500/20 bg-indigo-50/40 dark:bg-indigo-950/20">
+                  <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                  <AlertTitle className="text-indigo-700 dark:text-indigo-300 font-bold text-xs">
+                    Independent Layout Data Fetching &amp; Caching (layout_functions.ts)
+                  </AlertTitle>
+                  <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1">
+                    Both root and nested layouts can pair with a companion <code>layout_functions.ts</code> file for server data fetching (<code>getProps</code>), independent ISR cache lifetimes (<code>revalidate</code>), cache tags (<code>getCacheTags</code>), and surgical revalidation via <code>revalidateLayout()</code>. See{" "}
+                    <Link href="/docs/page-functions" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                      Page &amp; Layout Functions
+                    </Link>{" "}
+                    and{" "}
+                    <Link href="/docs/3d-segmentation#horizontal-segmentation" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+                      3D Segmentation (Horizontal Axis)
+                    </Link>{" "}
+                    for details.
+                  </AlertDescription>
+                </Alert>
               </div>
 
               <div id="layout-flags" className="scroll-mt-20 mt-8 space-y-4">
