@@ -755,14 +755,14 @@ export default function DataFetchingPage() {
                           <TableCell className="font-mono text-center text-amber-600 dark:text-amber-400 font-bold">12</TableCell>
                           <TableCell>
                             <a href="#strategy-12" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
-                              Client-First getProps Promise ➔ Client use() (Dynamic / PPR)
+                              Client-First getProps Promise ➔ Client use() (Dynamic)
                             </a>
                             <div className="text-[11px] text-muted-foreground"><code>getProps</code> returns un-awaited Promise; Client Page unwraps via <code>use()</code></div>
                           </TableCell>
                           <TableCell className="text-muted-foreground">Server starts query in <code>getProps</code>; Client suspends</TableCell>
                           <TableCell>
-                            <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                              0ms (with PPR) / Fast
+                            <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
+                              Fast (Early Shell)
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -1891,7 +1891,7 @@ export default function DocumentEditor({ document }: { document: any }) {
 
               {/* Metrics Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
-                <MetricCard label="TTFB" value="0ms (with PPR) / Fast" variant="emerald" />
+                <MetricCard label="TTFB" value="Fast (Early Shell)" variant="emerald" />
                 <MetricCard label="Stream Ready" value="Waits for Promise" variant="amber" />
                 <MetricCard label="Server/DB Load" value="Heavy (Live query)" variant="rose" />
                 <MetricCard label="Waterfall" value="None" variant="emerald" />
@@ -1911,7 +1911,7 @@ export default function DocumentEditor({ document }: { document: any }) {
                     language: "tsx",
                     code: `import db from "@/lib/db";
 
-export const revalidate = 0; // Dynamic SSR (or export const ppr = true)
+export const revalidate = 0; // Dynamic SSR
 
 export function getProps(params: { docId: string }) {
   // Start query WITHOUT awaiting! Returns raw Promise inside props object:
