@@ -659,7 +659,7 @@ export function WorkspaceControls() {
 import { Suspense } from "react";
 import { DinouCacheSlot } from "dinou/server";
 import { FastUserProfile, SlowAnalyticsWidget, FlashDealsBanner } from "./widgets";
-import { AnalyticsSkeleton } from "./skeletons";
+import { AnalyticsSkeleton, CatalogSkeleton } from "./skeletons";
 
 export default function DashboardPage() {
   return (
@@ -676,22 +676,24 @@ export default function DashboardPage() {
         </DinouCacheSlot>
       </Suspense>
 
-      {/* 3. Unwrapped Nested Slots (Outer 1h cache -> Inner 30s cache) + Inline async function child:
-             Always resolved directly in the initial HTML without a <Suspense> fallback */}
-      <DinouCacheSlot id="catalog-outer" tag="catalog-tree" revalidate={3600}>
-        {async () => {
-          const categories = await db.categories.getTree();
-          return (
-            <section>
-              <CategoryList items={categories} />
-              {/* Invalidating "flash-deals" re-renders ONLY this inner slot */}
-              <DinouCacheSlot id="flash-deals-banner" tag="flash-deals" revalidate={30}>
-                <FlashDealsBanner />
-              </DinouCacheSlot>
-            </section>
-          );
-        }}
-      </DinouCacheSlot>
+      {/* 3. Nested Slots (Outer 1h cache -> Inner 30s cache) + Inline async function child:
+             Wrapped in <Suspense> so cold cache misses never block TTFB on this Dynamic SSR page */}
+      <Suspense fallback={<CatalogSkeleton />}>
+        <DinouCacheSlot id="catalog-outer" tag="catalog-tree" revalidate={3600}>
+          {async () => {
+            const categories = await db.categories.getTree();
+            return (
+              <section>
+                <CategoryList items={categories} />
+                {/* Invalidating "flash-deals" re-renders ONLY this inner slot */}
+                <DinouCacheSlot id="flash-deals-banner" tag="flash-deals" revalidate={30}>
+                  <FlashDealsBanner />
+                </DinouCacheSlot>
+              </section>
+            );
+          }}
+        </DinouCacheSlot>
+      </Suspense>
     </main>
   );
 }`}
@@ -752,25 +754,25 @@ export default function ProductDetailPage({ params }: PageProps<"/products/[slug
                   </div>
 
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Whether you wrap <code>&lt;DinouCacheSlot&gt;</code> inside an outer <code>&lt;Suspense&gt;</code> depends on how you want <strong>cold cache misses</strong> (and PPR holes) to behave:
+                    Whether you wrap <code>&lt;DinouCacheSlot&gt;</code> inside an outer <code>&lt;Suspense&gt;</code> depends on whether the route is <strong>Dynamic SSR</strong>, <strong>Static / ISR</strong>, or <strong>PPR</strong>:
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs min-w-0">
-                    <div className="p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 space-y-1.5 min-w-0">
-                      <div className="font-semibold text-emerald-700 dark:text-emerald-300">
-                        1. Unwrapped &lt;DinouCacheSlot&gt; (Always Inlined in Initial HTML)
+                    <div className="p-3.5 rounded-md bg-purple-500/10 border border-purple-500/20 space-y-1.5 min-w-0">
+                      <div className="font-semibold text-purple-700 dark:text-purple-300">
+                        1. &lt;Suspense&gt; Wrapping &lt;DinouCacheSlot&gt; (Recommended in Dynamic SSR &amp; PPR Holes)
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
-                        Leaving <code>&lt;DinouCacheSlot revalidate=&#123;60&#125;&gt;</code> <strong>outside</strong> <code>&lt;Suspense&gt;</code> (like <code>catalog-outer</code> and <code>stock-$&#123;params.slug&#125;</code> above) always resolves the widget directly into the initial HTML with zero skeleton flash. In Dynamic SSR pages, only the very first cold request waits for the query; subsequent visits and expired TTLs (via Background SWR) serve from cache in ~1–2ms.
+                        In <strong>Dynamic SSR pages</strong> (Pattern 1 above), wrap every top-level <code>&lt;DinouCacheSlot&gt;</code> in <code>&lt;Suspense fallback=&#123;...&#125;&gt;</code> so a cold cache miss never blocks the page&apos;s TTFB: Dinou streams the fallback skeleton <strong>only on a cold cache miss</strong> (1st request or after <code>revalidateTag</code>), and once cached (including across expired TTLs via Background SWR), embeds the cached widget directly into the initial HTML with <strong>zero fallback flash</strong>. On <strong><code>ppr = true</code> routes</strong> (Section 6), it becomes a <strong>Cached Dynamic PPR Hole</strong>.
                       </p>
                     </div>
 
-                    <div className="p-3.5 rounded-md bg-purple-500/10 border border-purple-500/20 space-y-1.5 min-w-0">
-                      <div className="font-semibold text-purple-700 dark:text-purple-300">
-                        2. &lt;Suspense&gt; Wrapping &lt;DinouCacheSlot&gt; (Smart Cache-Aware Streaming)
+                    <div className="p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 space-y-1.5 min-w-0">
+                      <div className="font-semibold text-emerald-700 dark:text-emerald-300">
+                        2. Unwrapped &lt;DinouCacheSlot&gt; (Recommended in Static / ISR &amp; PPR Static Shell)
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
-                        In <strong>Dynamic SSR pages</strong> (<code>revalidate = 0</code>), wrapping <code>&lt;DinouCacheSlot&gt;</code> in <code>&lt;Suspense fallback=&#123;...&#125;&gt;</code> streams the fallback skeleton <strong>only on a cold cache miss</strong> (1st request or after <code>revalidateTag</code>) so TTFB is never blocked; once cached (and across expired TTLs via Background SWR), Dinou embeds the cached widget directly into the initial HTML with <strong>zero fallback flash</strong>. On <strong><code>ppr = true</code> routes</strong> (Section 6), it becomes a <strong>Cached Dynamic PPR Hole</strong>.
+                        In <strong>Static / ISR pages</strong> (Pattern 2 above, <code>ppr = false</code>) and in the <strong>Static Shell of PPR routes</strong> (<code>ppr = true</code>), leave <code>&lt;DinouCacheSlot&gt;</code> <strong>outside</strong> <code>&lt;Suspense&gt;</code>. The widget is pre-rendered directly into the static HTML at build time (0ms TTFB, zero skeleton flash) and refreshed in the background via SWR whenever its TTL expires.
                       </p>
                     </div>
                   </div>
