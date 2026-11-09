@@ -153,20 +153,20 @@ function replaceHoles(node) {
 
 ---
 
-## 5. Verification & Test Suite (`src/test-promise/`)
+## 5. Verification & Test Suite (`src/_test-promise/`)
 
-A dedicated test suite was created under `src/test-promise/`:
+A dedicated test suite is located under `src/_test-promise/` (prefixed with `_` so Dinou's file-based router treats it as a private folder rather than exposing public `/test-promise` routes):
 
-- `src/test-promise/client-consumer.tsx`: `"use client"` components (`ClientPromiseConsumer` and `ClientPromiseArrayConsumer`) that unwrap `promise` and `promises` using React 19's `use()`.
-- `src/test-promise/page.tsx` & `src/test-promise/page_functions.ts`: **Strategy 9 (Dynamic SSR)** route passing a single `Promise` and an array of `Promise`s from an RSC to Client Components inside `<Suspense>`.
-- `src/test-promise/ppr/page.tsx` & `src/test-promise/ppr/page_functions.ts`: **Strategy 9 + PPR (`export const ppr = true`)** route verifying static shell generation and `ppr-hole-1` registration when a Client Component inside `<Suspense>` receives a `Promise` prop.
-- `src/test-promise/getprops/page.tsx` & `src/test-promise/getprops/page_functions.ts`: **Strategy 12 (`getProps` Promise ➔ Client `use()`)** route where `getProps()` returns `{ docPromise }` without `await` to a `"use client"` page.
-- `src/test-promise/run-tests.mjs`: Automated test runner executing the Dinou pipeline (`getJSX`, `asyncRenderJSXToClientJSX`, `runWithPprContext`, `getRegisteredHoles`, and `use()` verification).
+- `src/_test-promise/client-consumer.tsx`: `"use client"` components (`ClientPromiseConsumer` and `ClientPromiseArrayConsumer`) that unwrap `promise` and `promises` using React 19's `use()`.
+- `src/_test-promise/page.tsx` & `src/_test-promise/page_functions.ts`: **Strategy 9 (Dynamic SSR)** route passing a single `Promise` and an array of `Promise`s from an RSC to Client Components inside `<Suspense>`.
+- `src/_test-promise/ppr/page.tsx` & `src/_test-promise/ppr/page_functions.ts`: **Strategy 9 + PPR (`export const ppr = true`)** route verifying static shell generation and `ppr-hole-1` registration when a Client Component inside `<Suspense>` receives a `Promise` prop.
+- `src/_test-promise/getprops/page.tsx` & `src/_test-promise/getprops/page_functions.ts`: **Strategy 12 (`getProps` Promise ➔ Client `use()`)** route where `getProps()` returns `{ docPromise }` without `await` to a `"use client"` page.
+- `src/_test-promise/run-tests.mjs`: Automated CLI test runner executing the Dinou pipeline (`getJSX`, `asyncRenderJSXToClientJSX`, `runWithPprContext`, `getRegisteredHoles`, and `use()` verification). Uses guarded dynamic imports so `npm run dev` and `npm run build` bundle cleanly, and automatically resolves Dinou core in both non-ejected (`node_modules/dinou/dinou/core`) and ejected (`./dinou/core`) modes.
 
 ### Running the Tests
 
 ```bash
-node src/test-promise/run-tests.mjs
+node src/_test-promise/run-tests.mjs
 ```
 
 1. **Before the fix (`git stash`)**: All 3 tests failed (`props.promise` and `tree.props.docPromise` were unwrapped into plain objects on the server, blocking TTFB, and PPR registered `[]` instead of `['ppr-hole-1']`).
