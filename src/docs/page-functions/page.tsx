@@ -100,7 +100,7 @@ const tocItems = [
   },
   {
     id: "allowisg",
-    title: "4. allowISG (Incremental Static Opt-Out)",
+    title: "4. allowISG (On-Demand ISG Control)",
     level: 2,
   },
   {
@@ -1511,71 +1511,164 @@ export const validateParams: PageFunctions<
             {/* 4. allowISG */}
             <section id="allowisg" className="mt-12 pt-8 border-t scroll-mt-20">
               <h3>
-                4. <code>allowISG</code> (Incremental Static Opt-Out)
+                4. <code>allowISG</code> (On-Demand ISG Control)
               </h3>
               <p>
-                Controls whether dynamic paths that were not pre-rendered at
-                build time (via <code>getStaticPaths</code> during <code>dinou build</code>) are allowed to be
-                generated on-demand on the first incoming user request. In Dinou, pre-rendering happens strictly during the build phase, ensuring production server startup is instantaneous.
+                Controls whether dynamic route segments (<code>[id]</code>,{" "}
+                <code>[slug]</code>, <code>[...catchAll]</code>) that were not
+                pre-rendered at build time (via <code>getStaticPaths</code> during{" "}
+                <code>dinou build</code>) are allowed to be generated and cached
+                on-demand on the first incoming user request. It is supported in
+                both <code>page_functions.ts</code> and{" "}
+                <code>layout_functions.ts</code>, as well as globally in{" "}
+                <code>dinou.config.js</code>.
               </p>
 
-              <div className="border rounded-lg p-4 bg-card not-prose my-4">
-                <div className="flex items-center gap-2 font-semibold mb-2">
+              <div className="border rounded-lg p-4 bg-card not-prose my-4 space-y-3">
+                <div className="flex items-center gap-2 font-semibold">
                   <Settings className="h-5 w-5 text-blue-500" />
-                  <span>Opt-Out Behavior</span>
+                  <span>Resolution Precedence &amp; Global Default</span>
                 </div>
-                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                <div className="font-mono text-xs bg-muted/60 p-2.5 rounded-md text-blue-700 dark:text-blue-300 break-words">
+                  effectiveAllowISG(segment) = segmentConfig.allowISG ?? (dinouConfig.allowISG ?? true)
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1.5 list-disc pl-4">
                   <li>
-                    <strong>Default:</strong> <code>true</code>. Any valid path
-                    not pre-generated at build time is generated on-demand and
-                    cached.
+                    <strong>Default (<code>true</code>):</strong> Unless overridden
+                    in the segment or in <code>dinou.config.js</code>, any valid
+                    dynamic path not pre-generated at build time is generated
+                    on-demand and cached statically (ISG).
                   </li>
                   <li>
-                    <strong>Strict SSG (false):</strong> Returning <code>false</code>{" "}
-                    disables on-demand generation. Any request to a path not
-                    included in <code>getStaticPaths</code> returns 404 immediately.
+                    <strong>Global Strict SSG (<code>dinou.config.js</code>):</strong>{" "}
+                    Setting <code>allowISG: false</code> inside{" "}
+                    <code>defineConfig(&#123; allowISG: false &#125;)</code>{" "}
+                    switches the entire project to strict SSG-only mode by default,
+                    while allowing individual dynamic segments to explicitly opt in
+                    with <code>export const allowISG = true</code>.
                   </li>
                   <li>
-                    <strong>Async Kill-Switch:</strong> Returning a <code>Promise&lt;boolean&gt;</code> dynamically evaluates runtime flags or system load before permitting on-demand generation.
+                    <strong>Segment Strict SSG (<code>false</code>):</strong>{" "}
+                    Returning <code>false</code> disables on-demand generation for
+                    that segment&apos;s dynamic parameters. Any unlisted parameter
+                    returns <code>404 Not Found</code> immediately.
+                  </li>
+                  <li>
+                    <strong>Programmatic / Async Kill-Switch:</strong> Accepting{" "}
+                    <code>() =&gt; boolean | Promise&lt;boolean&gt;</code> lets you
+                    dynamically evaluate feature flags, environment stages, or
+                    upstream load before permitting on-demand generation.
                   </li>
                 </ul>
+
+                <div className="rounded-lg border bg-background/80 overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/40">
+                        <TableHead className="text-xs font-semibold">
+                          <code>dinou.config.js</code> <code>allowISG</code>
+                        </TableHead>
+                        <TableHead className="text-xs font-semibold">
+                          Segment <code>allowISG</code> (<code>page_functions</code> / <code>layout_functions</code>)
+                        </TableHead>
+                        <TableHead className="text-xs font-semibold">
+                          Effective <code>allowISG</code>
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          <em>omitted</em> (or <code>true</code>)
+                        </TableCell>
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          <em>omitted</em>
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">true</span>{" "}
+                          <span className="text-muted-foreground">(on-demand ISG enabled by default)</span>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          <em>omitted</em> (or <code>true</code>)
+                        </TableCell>
+                        <TableCell className="font-mono text-xs font-semibold text-rose-600 dark:text-rose-400">
+                          false
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          <span className="font-mono font-bold text-rose-600 dark:text-rose-400">false</span>{" "}
+                          <span className="text-muted-foreground">(segment opts out of ISG; build-time paths only)</span>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold text-rose-600 dark:text-rose-400">
+                          false
+                        </TableCell>
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          <em>omitted</em>
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          <span className="font-mono font-bold text-rose-600 dark:text-rose-400">false</span>{" "}
+                          <span className="text-muted-foreground">(strict SSG-only by default across the project)</span>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold text-rose-600 dark:text-rose-400">
+                          false
+                        </TableCell>
+                        <TableCell className="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                          true
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">true</span>{" "}
+                          <span className="text-muted-foreground">(segment explicitly opts into on-demand ISG)</span>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-4 min-w-0">
-                <Card className="min-w-0">
-                  <CardHeader>
-                    <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400">
-                      <CheckCircle2 className="h-5 w-5" />
-                      <span>Static Boolean (Strict SSG)</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-sm space-y-2">
-                    <p className="text-muted-foreground">
-                      Disables on-demand generation permanently. Any path not returned by <code>getStaticPaths</code> returns 404 immediately:
-                    </p>
-                    <CodeBlock language="typescript" hideHeader>
-{`// src/blog/[slug]/page_functions.ts
+              <div className="not-prose my-6">
+                <TabbedCodeBlock
+                  tabs={[
+                    {
+                      id: "segment-opt-out",
+                      label: "1. Segment Opt-Out (Strict SSG)",
+                      language: "typescript",
+                      code: `// src/blog/[slug]/page_functions.ts
 import type { PageFunctions } from "dinou";
 
-// Strictly serve build-time pre-rendered paths
-export const allowISG: PageFunctions["allowISG"] = false;`}
-                    </CodeBlock>
-                  </CardContent>
-                </Card>
+export const getStaticPaths: PageFunctions<"/blog/[slug]">["getStaticPaths"] = [
+  "hello-world",
+  "dinou-9-4",
+];
 
-                <Card className="min-w-0">
-                  <CardHeader>
-                    <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400">
-                      <Zap className="h-5 w-5" />
-                      <span>Async Function (Dynamic Kill-Switch)</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-sm space-y-2">
-                    <p className="text-muted-foreground">
-                      Dynamically toggles ISG via remote config or feature flags (e.g. Redis, LaunchDarkly) to protect upstream databases:
-                    </p>
-                    <CodeBlock language="typescript" hideHeader>
-{`// src/blog/[slug]/page_functions.ts
+// Strictly serve build-time pre-rendered paths; any other slug returns 404
+export const allowISG: PageFunctions["allowISG"] = false;`,
+                    },
+                    {
+                      id: "global-default-opt-in",
+                      label: "2. Global Default + Opt-In",
+                      language: "typescript",
+                      code: `// 1. dinou.config.js — Disable on-demand ISG project-wide by default
+import { defineConfig } from "dinou";
+
+export default defineConfig({
+  allowISG: false,
+});
+
+// 2. src/products/[id]/page_functions.ts — Explicitly opt in for long-tail products
+import type { PageFunctions } from "dinou";
+
+export const allowISG: PageFunctions["allowISG"] = true;`,
+                    },
+                    {
+                      id: "async-kill-switch",
+                      label: "3. Async Kill-Switch",
+                      language: "typescript",
+                      code: `// src/blog/[slug]/page_functions.ts
 import type { PageFunctions } from "dinou";
 import { getFeatureFlag } from "@/lib/flags";
 
@@ -1583,10 +1676,199 @@ import { getFeatureFlag } from "@/lib/flags";
 export const allowISG: PageFunctions["allowISG"] = async () => {
   const isgAllowed = await getFeatureFlag("allow_ondemand_rendering");
   return isgAllowed;
-};`}
-                    </CodeBlock>
-                  </CardContent>
-                </Card>
+};`,
+                    },
+                    {
+                      id: "nested-layout-page",
+                      label: "4. Locked Layout + ISG Child",
+                      language: "typescript",
+                      code: `// 1. Parent Layout: src/team/[team]/layout_functions.ts
+import type { LayoutFunctions } from "dinou";
+
+export const getStaticPaths: LayoutFunctions<"/team/[team]">["getStaticPaths"] = ["alpha"];
+export const allowISG: LayoutFunctions["allowISG"] = false; // Only "alpha" is valid
+
+// 2. Child Page: src/team/[team]/posts/[postId]/page_functions.ts
+import type { PageFunctions } from "dinou";
+
+export const getStaticPaths: PageFunctions<"/team/[team]/posts/[postId]">["getStaticPaths"] = [
+  { team: "alpha", postId: "post-1" },
+];
+export const allowISG: PageFunctions["allowISG"] = true; // New posts under "alpha" can use ISG!`,
+                    },
+                  ]}
+                />
+              </div>
+
+              {/* Per-Segment Architecture Deep-Dive */}
+              <div className="not-prose my-6 rounded-xl border border-blue-500/20 bg-gradient-to-b from-blue-50/40 via-background to-muted/20 dark:from-blue-950/20 dark:via-background dark:to-muted/10 p-5 sm:p-6 space-y-5">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 font-bold text-base text-foreground">
+                    <Layers className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    <span>Per-Segment Evaluation Rules Across Layouts &amp; Nested Routes</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    In Dinou, <code>allowISG</code> (just like{" "}
+                    <code>validateParams</code>) is evaluated{" "}
+                    <strong>independently per segment</strong> along the active
+                    layout chain rather than overwriting a single route-wide
+                    boolean:
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs min-w-0">
+                  <div className="p-3.5 rounded-lg border bg-card space-y-1">
+                    <span className="font-semibold text-blue-600 dark:text-blue-400 block">
+                      1. Segment-Scoped Parameter Checks
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Each layout validates <strong>only</strong> the dynamic URL
+                      parameters accumulated up to its own directory. When a
+                      parent dynamic layout&apos;s parameter is valid, it{" "}
+                      <strong>never overwrites</strong> a child dynamic page&apos;s{" "}
+                      <code>allowISG = true</code>.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-lg border bg-card space-y-1">
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400 block">
+                      2. Static Layouts Ignore allowISG = false
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      If a parent layout has <strong>no dynamic parameters of its own</strong>{" "}
+                      (e.g. <code>src/blog/layout_functions.ts</code>), setting{" "}
+                      <code>allowISG = false</code> on that layout is a safe no-op
+                      and never blocks dynamic child pages (<code>src/blog/[slug]</code>).
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-lg border bg-card space-y-1">
+                    <span className="font-semibold text-indigo-600 dark:text-indigo-400 block">
+                      3. Respects no_layout &amp; reset_layout
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Checks run strictly along the <strong>active</strong> layout
+                      chain. Any ancestor layout bypassed via{" "}
+                      <code>no_layout</code> or <code>reset_layout</code> will
+                      never block its child routes.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-lg border bg-card space-y-1">
+                    <span className="font-semibold text-amber-600 dark:text-amber-400 block">
+                      4. Consistent 404 on Direct Loads &amp; SPA Navigations
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      When any active layout or page rejects a parameter via{" "}
+                      <code>allowISG = false</code> or <code>validateParams</code>,
+                      Dinou returns <code>404 Not Found</code> consistently on
+                      both direct URL loads and client-side navigations.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Nested Behavior Matrix */}
+                <div className="space-y-2">
+                  <div className="text-xs font-semibold text-foreground">
+                    Example Matrix: <code>/team/[team]/posts/[postId]</code>{" "}
+                    <span className="font-normal text-muted-foreground">
+                      (assuming <code>team = &quot;alpha&quot;</code> and{" "}
+                      <code>postId = &quot;post-1&quot;</code> were pre-rendered at build time)
+                    </span>
+                  </div>
+                  <div className="rounded-lg border bg-card overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/40">
+                          <TableHead className="text-xs font-semibold">
+                            Layout <code>/team/[team]</code>
+                          </TableHead>
+                          <TableHead className="text-xs font-semibold">
+                            Page <code>posts/[postId]</code>
+                          </TableHead>
+                          <TableHead className="text-xs font-semibold">
+                            Request URL
+                          </TableHead>
+                          <TableHead className="text-xs font-semibold">
+                            Result
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="font-mono text-xs text-rose-600 dark:text-rose-400">
+                            allowISG: false
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-emerald-600 dark:text-emerald-400">
+                            allowISG: true
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">
+                            /team/alpha/posts/post-1
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <strong className="text-emerald-600 dark:text-emerald-400">200 OK</strong> — Served directly from build-time static cache.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-mono text-xs text-rose-600 dark:text-rose-400">
+                            allowISG: false
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-emerald-600 dark:text-emerald-400">
+                            allowISG: true
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">
+                            /team/alpha/posts/post-2
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <strong className="text-emerald-600 dark:text-emerald-400">200 OK</strong> — <code>team = &quot;alpha&quot;</code> passes layout check; new <code>post-2</code> is generated and cached via ISG.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-mono text-xs text-rose-600 dark:text-rose-400">
+                            allowISG: false
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-emerald-600 dark:text-emerald-400">
+                            allowISG: true
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">
+                            /team/beta/posts/post-1
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <strong className="text-rose-600 dark:text-rose-400">404 Not Found</strong> — <code>team = &quot;beta&quot;</code> is rejected by layout <code>allowISG = false</code>.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-mono text-xs text-emerald-600 dark:text-emerald-400">
+                            allowISG: true
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-rose-600 dark:text-rose-400">
+                            allowISG: false
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">
+                            /team/beta/posts/post-1
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <strong className="text-rose-600 dark:text-rose-400">404 Not Found</strong> — <code>team = &quot;beta&quot;</code> is allowed by layout, but <code>/team/beta/posts/post-1</code> was not pre-rendered for the page.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-mono text-xs text-emerald-600 dark:text-emerald-400">
+                            allowISG: true
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-emerald-600 dark:text-emerald-400">
+                            allowISG: true
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">
+                            /team/beta/posts/post-1
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <strong className="text-emerald-600 dark:text-emerald-400">200 OK</strong> — Both <code>team = &quot;beta&quot;</code> and <code>/team/beta/posts/post-1</code> are generated and cached on-demand via ISG.
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -1789,7 +2071,10 @@ export const getCacheTags: PageFunctions<
               <p className="mt-4">
                 Partial Prerendering (PPR) combines the instant TTFB (Time to
                 First Byte) of a static page with the real-time capabilities of
-                dynamic server-side rendering over a single HTTP response.
+                dynamic server-side rendering over a single HTTP response. It
+                can be configured per segment in <code>page_functions.ts</code>{" "}
+                and <code>layout_functions.ts</code>, or globally in{" "}
+                <code>dinou.config.js</code>.
               </p>
 
               <div className="border rounded-lg p-5 bg-card not-prose my-6 space-y-3">
@@ -1798,7 +2083,7 @@ export const getCacheTags: PageFunctions<
                   <span>How PPR Works: Instant Shell + Progressive Streaming</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  PPR eliminates the traditional trade-off between static and dynamic rendering by dividing the page into two phases over a <strong>single HTTP connection</strong>:
+                  PPR eliminates the traditional trade-off between static and dynamic rendering by dividing delivery into two phases over a <strong>single HTTP connection</strong>:
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs min-w-0">
                   <div className="p-3 rounded-lg border bg-muted/40 space-y-1">
@@ -1806,53 +2091,144 @@ export const getCacheTags: PageFunctions<
                       1. Instant Static Shell (0ms TTFB)
                     </span>
                     <p className="text-muted-foreground leading-relaxed">
-                      All static UI (layouts, headers, navigation) along with the skeleton placeholders defined in <code>&lt;Suspense fallback=&#123;...&#125;&gt;</code> are delivered immediately to the browser with zero server wait time.
+                      All static UI (layouts, headers, navigation) along with the skeleton placeholders defined in <code>&lt;Suspense fallback=&#123;...&#125;&gt;</code> are pre-rendered at build time and delivered immediately with zero server wait time.
                     </p>
                   </div>
                   <div className="p-3 rounded-lg border bg-muted/40 space-y-1">
                     <span className="font-semibold text-purple-600 dark:text-purple-400 block">
-                      2. Parallel Component Streaming
+                      2. Parallel Suspense Streaming
                     </span>
                     <p className="text-muted-foreground leading-relaxed">
-                      Async Server Components wrapped in <code>&lt;Suspense&gt;</code> execute concurrently on the server. As each component resolves its database or API queries, its HTML/RSC chunk is streamed down to replace the skeleton in-place.
+                      Inside <code>&lt;Suspense&gt;</code>, async Server Components (including those reading <code>cookies</code>, <code>headers</code>, or <code>query</code>) and Client Components receiving un-awaited <code>Promise</code> props stream concurrently at request time, replacing each fallback skeleton in-place as data resolves.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="border rounded-lg p-4 bg-card not-prose my-4">
-                <div className="flex items-center gap-2 font-semibold mb-2">
+              <div className="border rounded-lg p-4 bg-card not-prose my-4 space-y-3">
+                <div className="flex items-center gap-2 font-semibold">
                   <Settings className="h-5 w-5 text-purple-500" />
-                  <span>Declaration Formats &amp; Type Signature</span>
+                  <span>Declaration Formats, Global Default &amp; Strict Per-Segment Resolution</span>
                 </div>
-                <div className="font-mono text-xs bg-muted/60 p-2.5 rounded-md mb-3 text-purple-700 dark:text-purple-300">
-                  type PPRConfig = boolean | (() =&gt; boolean | Promise&lt;boolean&gt;);
+                <div className="font-mono text-xs bg-muted/60 p-2.5 rounded-md text-purple-700 dark:text-purple-300 space-y-1 break-words">
+                  <div>type PPRConfig = boolean | (() =&gt; boolean | Promise&lt;boolean&gt;);</div>
+                  <div className="text-muted-foreground">
+                    effectivePpr(segment) = segmentConfig.ppr ?? Boolean(dinouConfig.ppr) ?? false
+                  </div>
                 </div>
                 <ul className="text-sm text-muted-foreground space-y-1.5 list-disc pl-4">
                   <li>
-                    <strong>Boolean Flag:</strong> <code>export const ppr: PageFunctions[&quot;ppr&quot;] = true;</code> (or <code>false</code> to opt out).
+                    <strong>Default (<code>false</code>):</strong> Every{" "}
+                    <code>layout</code> and <code>page</code> defaults to{" "}
+                    <code>ppr = false</code> unless explicitly enabled in its
+                    own configuration file or globally in{" "}
+                    <code>dinou.config.js</code>.
                   </li>
                   <li>
-                    <strong>Sync Function:</strong> <code>() =&gt; boolean</code> (e.g. evaluate environment variables or server conditions).
+                    <strong>Global Opt-In (<code>dinou.config.js</code>):</strong>{" "}
+                    Setting <code>defineConfig(&#123; ppr: true &#125;)</code>{" "}
+                    enables PPR across all layouts and pages by default, while
+                    allowing individual segments to opt out with{" "}
+                    <code>export const ppr = false</code>.
                   </li>
                   <li>
-                    <strong>Async Function:</strong> <code>() =&gt; Promise&lt;boolean&gt;</code> (e.g. await remote feature flags or rollout gates).
+                    <strong>No Parent-to-Child Inheritance:</strong> Each
+                    segment (<code>layout</code>, nested <code>layout</code>, or{" "}
+                    <code>page</code>) resolves <code>ppr</code> strictly from
+                    its own <code>layout_functions.ts</code> or{" "}
+                    <code>page_functions.ts</code>, falling back directly to{" "}
+                    <code>dinou.config.js</code>. Enabling <code>ppr = true</code>{" "}
+                    on a parent layout never cascades automatically to child
+                    layouts or pages.
+                  </li>
+                  <li>
+                    <strong>Sync / Async Function:</strong> Supports{" "}
+                    <code>() =&gt; boolean | Promise&lt;boolean&gt;</code> to
+                    evaluate environment variables or remote feature flags.
                   </li>
                 </ul>
+
+                <div className="rounded-lg border bg-background/80 overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/40">
+                        <TableHead className="text-xs font-semibold">
+                          <code>dinou.config.js</code> <code>ppr</code>
+                        </TableHead>
+                        <TableHead className="text-xs font-semibold">
+                          Segment <code>ppr</code> (<code>page_functions</code> / <code>layout_functions</code>)
+                        </TableHead>
+                        <TableHead className="text-xs font-semibold">
+                          Effective <code>ppr</code> for That Segment
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          <em>omitted</em> (or <code>false</code>)
+                        </TableCell>
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          <em>omitted</em>
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          <span className="font-mono font-bold text-slate-600 dark:text-slate-400">false</span>{" "}
+                          <span className="text-muted-foreground">(standard SSG / ISR / Dynamic SSR by default)</span>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          <em>omitted</em> (or <code>false</code>)
+                        </TableCell>
+                        <TableCell className="font-mono text-xs font-semibold text-purple-600 dark:text-purple-400">
+                          true
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          <span className="font-mono font-bold text-purple-600 dark:text-purple-400">true</span>{" "}
+                          <span className="text-muted-foreground">(PPR enabled exclusively for that segment)</span>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold text-purple-600 dark:text-purple-400">
+                          true
+                        </TableCell>
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          <em>omitted</em>
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          <span className="font-mono font-bold text-purple-600 dark:text-purple-400">true</span>{" "}
+                          <span className="text-muted-foreground">(PPR enabled by default across all segments)</span>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-mono text-xs font-semibold text-purple-600 dark:text-purple-400">
+                          true
+                        </TableCell>
+                        <TableCell className="font-mono text-xs font-semibold text-slate-600 dark:text-slate-400">
+                          false
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          <span className="font-mono font-bold text-slate-600 dark:text-slate-400">false</span>{" "}
+                          <span className="text-muted-foreground">(segment explicitly opts out of PPR)</span>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
 
-              <TabbedCodeBlock
-                containerClassName="mt-4"
-                tabs={[
-                  {
-                    id: "page_functions",
-                    label: "page_functions.ts",
-                    language: "typescript",
-                    code: `// src/dashboard/page_functions.ts
+              <div className="not-prose my-6">
+                <TabbedCodeBlock
+                  tabs={[
+                    {
+                      id: "page_functions",
+                      label: "1. Segment Opt-In",
+                      language: "typescript",
+                      code: `// src/dashboard/page_functions.ts
 import type { PageFunctions } from "dinou";
 import { getFeatureFlag } from "@/lib/flags";
 
-// 1. Static Boolean (Standard): Enable PPR for this route
+// 1. Static Boolean (Standard): Enable PPR for this page segment
 export const ppr: PageFunctions["ppr"] = true;
 
 // 2. Dynamic Async Function: Evaluate remote rollout flags or A/B testing
@@ -1860,33 +2236,182 @@ export const ppr: PageFunctions["ppr"] = true;
 //   const isPPREnabled = await getFeatureFlag("enable_ppr_dashboard");
 //   return isPPREnabled;
 // };`,
-                  },
-                  {
-                    id: "page",
-                    label: "page.tsx",
-                    language: "tsx",
-                    code: `// src/dashboard/page.tsx
-import { Suspense } from "react";
-import { UserStatsSkeleton, UserStats } from "./components";
+                    },
+                    {
+                      id: "global-ppr-opt-out",
+                      label: "2. Global Default + Opt-Out",
+                      language: "typescript",
+                      code: `// 1. dinou.config.js — Enable PPR globally across all layouts and pages
+import { defineConfig } from "dinou";
 
-export default function DashboardPage() {
-  return (
-    <div>
-      {/* 1. Static shell rendered and delivered instantly */}
-      <header className="p-6 border-b">
-        <h1>Dashboard Overview</h1>
-      </header>
+export default defineConfig({
+  ppr: true,
+});
 
-      {/* 2. Dynamic component streamed over HTTP once server data resolves */}
-      <Suspense fallback={<UserStatsSkeleton />}>
-        <UserStats />
-      </Suspense>
-    </div>
-  );
-}`,
-                  },
-                ]}
-              />
+// 2. src/about/page_functions.ts — Opt out on a purely static page
+import type { PageFunctions } from "dinou";
+
+export const ppr: PageFunctions["ppr"] = false;`,
+                    },
+                    {
+                      id: "mixed-segments",
+                      label: "3. Independent Layout & Page",
+                      language: "typescript",
+                      code: `// 1. Parent Layout: src/dashboard/layout_functions.ts
+import type { LayoutFunctions } from "dinou";
+
+// Enables PPR ONLY for src/dashboard/layout.tsx (and its parallel @slots).
+// Child layouts and pages do NOT inherit this automatically!
+export const ppr: LayoutFunctions["ppr"] = true;
+
+// 2. Child Page: src/dashboard/page_functions.ts
+import type { PageFunctions } from "dinou";
+
+// If dinou.config.js omits ppr, this page would default to ppr = false
+// unless it explicitly opts in as well:
+export const ppr: PageFunctions["ppr"] = true;`,
+                    },
+                  ]}
+                />
+              </div>
+
+              {/* Per-Segment PPR Scopes & Mixed Routes Deep-Dive */}
+              <div className="not-prose my-6 rounded-xl border border-purple-500/20 bg-gradient-to-b from-purple-50/40 via-background to-muted/20 dark:from-purple-950/20 dark:via-background dark:to-muted/10 p-5 sm:p-6 space-y-5">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 font-bold text-base text-foreground">
+                    <Layers className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    <span>Independent Per-Segment Scopes on Mixed Routes</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Because layouts and pages are independent segments, Dinou
+                    evaluates each segment inside its own isolated PPR execution
+                    scope without bleeding across boundaries:
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs min-w-0">
+                  <div className="p-3.5 rounded-lg border bg-card space-y-1">
+                    <span className="font-semibold text-purple-600 dark:text-purple-400 block">
+                      1. Isolated Segment Scopes
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Defining <code>ppr = true</code> in{" "}
+                      <code>src/dashboard/layout_functions.ts</code> applies
+                      exclusively to <code>src/dashboard/layout.tsx</code> and
+                      its parallel <code>@slots</code>. Child layouts and child
+                      pages resolve their own <code>ppr</code> setting independently.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-lg border bg-card space-y-1">
+                    <span className="font-semibold text-blue-600 dark:text-blue-400 block">
+                      2. Suspense in &quot;ppr: false&quot; Segments Stays Static
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      On mixed routes (e.g. a <code>ppr = true</code> layout
+                      wrapping a <code>ppr = false</code> page),{" "}
+                      <code>&lt;Suspense&gt;</code> boundaries inside the{" "}
+                      <code>ppr = false</code> segment resolve statically at
+                      build time instead of deferring to runtime streaming.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-lg border bg-card space-y-1">
+                    <span className="font-semibold text-amber-600 dark:text-amber-400 block">
+                      3. Dynamic Bailout Rules Are Preserved
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Reading <code>req.cookies</code>, <code>req.headers</code>,
+                      or <code>req.query</code> inside a <code>ppr = false</code>{" "}
+                      segment (even inside <code>&lt;Suspense&gt;</code>)—or{" "}
+                      <strong>outside</strong> <code>&lt;Suspense&gt;</code> in a{" "}
+                      <code>ppr = true</code> segment—triggers a Dynamic SSR
+                      bailout to protect cache integrity.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-lg border bg-card space-y-1">
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400 block">
+                      4. Zero Redundant Layout Work on Navigation
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      During client-side page navigations, Dinou renders only the
+                      target page segment in isolation without re-evaluating
+                      ancestor layouts or their <code>@slots</code> on the server.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Mixed Segments Matrix */}
+                <div className="space-y-2">
+                  <div className="text-xs font-semibold text-foreground">
+                    Behavior Matrix Across Mixed Layout &amp; Page Segments
+                  </div>
+                  <div className="rounded-lg border bg-card overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/40">
+                          <TableHead className="text-xs font-semibold">
+                            Layout <code>ppr</code>
+                          </TableHead>
+                          <TableHead className="text-xs font-semibold">
+                            Page <code>ppr</code>
+                          </TableHead>
+                          <TableHead className="text-xs font-semibold">
+                            Route Rendering Behavior
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="font-mono text-xs text-slate-600 dark:text-slate-400">
+                            false
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-slate-600 dark:text-slate-400">
+                            false
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <strong>Standard SSG / ISR</strong> (or Dynamic SSR if a dynamic request API is read).
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-mono text-xs text-purple-600 dark:text-purple-400 font-semibold">
+                            true
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-slate-600 dark:text-slate-400">
+                            false
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <strong>Composite PPR:</strong> The layout streams its <code>&lt;Suspense&gt;</code> boundaries at request time, while the page is statically pre-rendered inside the instant shell.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-mono text-xs text-slate-600 dark:text-slate-400">
+                            false
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-purple-600 dark:text-purple-400 font-semibold">
+                            true
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <strong>Composite PPR:</strong> The layout is statically pre-rendered in the shell, while the page streams its <code>&lt;Suspense&gt;</code> boundaries at request time.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-mono text-xs text-purple-600 dark:text-purple-400 font-semibold">
+                            true
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-purple-600 dark:text-purple-400 font-semibold">
+                            true
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <strong>Full PPR:</strong> Both layout and page deliver their static shells immediately (0ms TTFB) and stream their respective <code>&lt;Suspense&gt;</code> boundaries in parallel.
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              </div>
             </section>
 
             {/* 8. Consolidated Config Object (export default) */}

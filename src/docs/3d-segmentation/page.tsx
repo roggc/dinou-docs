@@ -72,7 +72,7 @@ const tocItems = [
   },
   {
     id: "ppr-architecture",
-    title: "3.1. Hybrid Architecture & The <Suspense> Boundary Rule",
+    title: "3.1. Static Shell, Dynamic Holes & The <Suspense> Boundary Rule",
     level: 3,
   },
   {
@@ -82,7 +82,7 @@ const tocItems = [
   },
   {
     id: "ppr-activation",
-    title: "3.3. Enabling PPR, Child Opt-Out & Specificity Hierarchy",
+    title: "3.3. Per-Segment Resolution, Global Default & Mixed Routes",
     level: 3,
   },
   {
@@ -131,7 +131,7 @@ const tocItems = [
     level: 3,
   },
   {
-    id: "ppr-slot-synergy",
+    id: "ppr-slot-hs-synergy",
     title: "7. The Triple Synergy: Horizontal + Vertical + Temporal",
     level: 2,
   },
@@ -1016,9 +1016,9 @@ export function PostCreator() {
 
               {/* 3.1 Architecture & The <Suspense> Boundary Rule */}
               <section id="ppr-architecture" className="mt-6 scroll-mt-20">
-                <h4>3.1. Hybrid Architecture &amp; The <code>&lt;Suspense&gt;</code> Boundary Rule</h4>
+                <h4>3.1. Static Shell, Dynamic Holes &amp; The <code>&lt;Suspense&gt;</code> Boundary Rule</h4>
                 <p>
-                  In Dinou, <strong>React <code>&lt;Suspense&gt;</code> is the single syntactic boundary</strong> separating the build-time Static Shell from request-time Dynamic PPR Holes on a <code>ppr = true</code> route:
+                  In Dinou, <strong>React <code>&lt;Suspense&gt;</code> is the single syntactic boundary</strong> separating the build-time Static Shell from request-time Dynamic PPR Holes inside any <code>ppr = true</code> segment (<code>page.tsx</code> or <code>layout.tsx</code>):
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-6 text-xs min-w-0">
@@ -1031,7 +1031,7 @@ export function PostCreator() {
                       Everything outside <code>&lt;Suspense&gt;</code>—including <code>getProps</code>, top-level <code>async</code> Page/Layout components, unwrapped child <code>async</code> Server Components, synchronous <code>&lt;Suspense&gt;</code> boundaries, and unwrapped <code>&lt;DinouCacheSlot revalidate=&#123;N&#125;&gt;</code>—is awaited at build/revalidation time and baked into the initial Static Shell.
                     </p>
                     <p className="text-[11px] text-amber-700 dark:text-amber-300 pt-1">
-                      ⚠️ Reading <code>req.cookies</code>, <code>req.headers</code>, <code>req.query</code>, or rendering <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code> <strong>outside</strong> <code>&lt;Suspense&gt;</code> triggers a Full-Page Dynamic Bailout (rendering the whole page dynamically per request).
+                      ⚠️ Reading <code>req.cookies</code>, <code>req.headers</code>, <code>req.query</code>, or rendering <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code> <strong>outside</strong> <code>&lt;Suspense&gt;</code> triggers a Full-Route Dynamic Bailout (rendering the route dynamically per request).
                     </p>
                   </div>
 
@@ -1041,10 +1041,21 @@ export function PostCreator() {
                       <span>Inside &lt;Suspense&gt; → Dynamic PPR Hole by Default</span>
                     </div>
                     <p className="text-muted-foreground leading-relaxed">
-                      On a <code>ppr = true</code> route, <strong>any <code>async</code> Server Component inside <code>&lt;Suspense&gt;</code></strong> automatically postpones at its very first <code>await</code> (with zero build latency) to become a <strong>Dynamic PPR Hole</strong>—even if it never touches cookies or headers! Reading <code>getContext()</code> (<code>cookies</code>/<code>headers</code>/<code>query</code>), <code>useSearchParams()</code>, or <code>revalidate=&#123;0&#125;</code> inside <code>&lt;Suspense&gt;</code> is likewise quarantined to that hole.
+                      Inside a <code>ppr = true</code> segment, a <code>&lt;Suspense&gt;</code> boundary automatically becomes a <strong>Dynamic PPR Hole</strong> whenever it wraps:
                     </p>
+                    <ul className="text-muted-foreground space-y-1 pl-4 list-disc leading-relaxed">
+                      <li>
+                        Any <strong><code>async</code> Server Component</strong> (postpones at its very first <code>await</code> with zero build latency—even if it never reads cookies or headers).
+                      </li>
+                      <li>
+                        Any <strong>Client Component (<code>&quot;use client&quot;</code>) receiving an un-awaited <code>Promise</code> prop</strong> (or array of <code>Promise</code>s, passed from a Server Component or <code>getProps</code> and unwrapped via React 19&apos;s <code>use(promise)</code>).
+                      </li>
+                      <li>
+                        Components reading request APIs (<code>getContext()</code> <code>cookies</code>/<code>headers</code>/<code>query</code>, <code>useSearchParams()</code>) or rendering <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code>.
+                      </li>
+                    </ul>
                     <p className="text-[11px] text-muted-foreground pt-1">
-                      💡 <strong>Core Takeaway:</strong> The <em>only</em> behavioral difference between <code>ppr = false</code> and <code>ppr = true</code> is inside <code>&lt;Suspense&gt;</code> (where <code>ppr = false</code> resolves <code>async</code> components into static HTML at build time, while <code>ppr = true</code> turns them into streaming holes unless opted out via <code>noDynamic()</code>).
+                      💡 <strong>Core Takeaway:</strong> The behavioral difference between <code>&quot;ppr: false&quot;</code> and <code>&quot;ppr: true&quot;</code> occurs inside <code>&lt;Suspense&gt;</code>: when <code>&quot;ppr: false&quot;</code>, async boundaries resolve into static HTML at build time; when <code>&quot;ppr: true&quot;</code>, they become streaming holes unless opted out via <code>noDynamic()</code>.
                     </p>
                   </div>
                 </div>
@@ -1062,20 +1073,24 @@ export function PostCreator() {
                       <strong>Concurrent Parallel Hole Execution:</strong> Dinou executes only the dynamic <code>&lt;Suspense&gt;</code> holes in parallel on the server (skipping static <code>noDynamic()</code> boundaries in 0ms).
                     </li>
                     <li>
-                      <strong>In-Place Streaming Replacement:</strong> As each hole resolves (fastest first), Dinou streams its resolved HTML down the same HTTP connection, swapping the skeleton with live content—even before client React hydration finishes.
+                      <strong>In-Place Streaming Replacement:</strong> As each hole resolves (fastest first), Dinou streams its resolved HTML (and any streamed <code>Promise</code> values for <code>use()</code>) down the same HTTP connection, swapping each skeleton with live UI with zero hydration mismatch.
                     </li>
                   </ol>
                 </div>
 
-                <CodeBlock
-                  language="tsx"
-                  containerClassName="w-full overflow-hidden rounded-lg text-xs my-4"
-                >
-{`// src/store/page.tsx (with export const ppr = true in page_functions.ts)
+                <TabbedCodeBlock
+                  containerClassName="my-4"
+                  tabs={[
+                    {
+                      id: "store-page",
+                      label: "src/store/page.tsx (Server)",
+                      language: "tsx",
+                      code: `// src/store/page.tsx (with export const ppr = true in page_functions.ts)
 import { Suspense } from "react";
 import { getContext } from "dinou/server";
 import db from "@/lib/db";
-import { CartBadgeSkeleton, StockSkeleton } from "@/components/skeletons";
+import { CartBadgeSkeleton, StockSkeleton, ReviewsSkeleton } from "@/components/skeletons";
+import { ProductReviews } from "./product-reviews";
 
 // 1. Unwrapped async Server Component (OUTSIDE <Suspense>) -> Baked into Static Shell at build time!
 async function FeaturedCatalogBanner() {
@@ -1097,6 +1112,9 @@ async function LiveCartBadge() {
 }
 
 export default async function StorePage() {
+  // 4. Start an async query WITHOUT await and pass the raw Promise to a Client Component
+  const reviewsPromise = db.reviews.getLatest();
+
   return (
     <main className="container">
       {/* Resolved at build time into the Static Shell */}
@@ -1107,14 +1125,56 @@ export default async function StorePage() {
         <RealtimeInventoryTicker />
       </Suspense>
 
-      {/* Cookie access quarantined inside <Suspense> -> Streamed per user without full-page bailout */}
+      {/* Cookie access quarantined inside <Suspense> -> Streamed per user without full-route bailout */}
       <Suspense fallback={<CartBadgeSkeleton />}>
         <LiveCartBadge />
       </Suspense>
+
+      {/* Un-awaited Promise passed to a Client Component -> Registered as a Dynamic PPR Hole! */}
+      <Suspense fallback={<ReviewsSkeleton />}>
+        <ProductReviews reviewsPromise={reviewsPromise} />
+      </Suspense>
     </main>
   );
-}`}
-                </CodeBlock>
+}`,
+                    },
+                    {
+                      id: "product-reviews",
+                      label: "src/store/product-reviews.tsx (Client)",
+                      language: "tsx",
+                      code: `// src/store/product-reviews.tsx
+"use client";
+
+import { use } from "react";
+
+interface Review {
+  id: string;
+  author: string;
+  rating: number;
+}
+
+// Unwraps the streamed Promise on the client via React 19's use() hook
+// (Works identically when an un-awaited Promise is returned from getProps!)
+export function ProductReviews({
+  reviewsPromise,
+}: {
+  reviewsPromise: Promise<Review[]>;
+}) {
+  const reviews = use(reviewsPromise);
+
+  return (
+    <ul className="reviews-list">
+      {reviews.map((r) => (
+        <li key={r.id}>
+          {r.author} — {r.rating}/5
+        </li>
+      ))}
+    </ul>
+  );
+}`,
+                    },
+                  ]}
+                />
               </section>
 
               {/* 3.2 Static <Suspense> Opt-Out via noDynamic() & Runtime Performance */}
@@ -1128,7 +1188,7 @@ export default async function StorePage() {
                     <strong>If the heavy static <code>async</code> component is unwrapped (outside <code>&lt;Suspense&gt;</code>):</strong> Its HTML is in the Static Shell, but during the runtime tree traversal to reach the dynamic holes, the server still has to <code>await</code> and re-run that unwrapped <code>async</code> component!
                   </li>
                   <li>
-                    <strong>If you wrap it in <code>&lt;Suspense&gt;</code> (default):</strong> On a <code>ppr = true</code> route, <code>&lt;Suspense&gt;</code> turns it into a Dynamic PPR Hole instead of baking it into the Static Shell.
+                    <strong>If you wrap it in <code>&lt;Suspense&gt;</code> (default):</strong> Inside a <code>ppr = true</code> segment, <code>&lt;Suspense&gt;</code> turns it into a Dynamic PPR Hole instead of baking it into the Static Shell.
                   </li>
                 </ul>
                 <p>
@@ -1136,7 +1196,7 @@ export default async function StorePage() {
                 </p>
                 <ol>
                   <li>
-                    <strong>At Build Time (Baked into Static Shell):</strong> <code>noDynamic()</code> opts the enclosing <code>&lt;Suspense&gt;</code> boundary out of becoming a Dynamic Hole, pre-rendering its resolved HTML and RSC payload directly into the Static Shell. Because it is already resolved in the Static Shell, <strong>its <code>&lt;Suspense&gt;</code> fallback is never shown in production</strong> (neither on initial load nor on SPA navigation; it is only used when streaming on demand in <code>dinou dev</code>).
+                    <strong>At Build Time (Baked into Static Shell):</strong> <code>noDynamic()</code> opts the enclosing <code>&lt;Suspense&gt;</code> boundary out of becoming a Dynamic Hole, pre-rendering its resolved UI directly into the Static Shell. Because it is already resolved in the Static Shell, <strong>its <code>&lt;Suspense&gt;</code> fallback is never shown in production</strong> (neither on initial load nor on SPA navigation; it is only used when streaming on demand in <code>dinou dev</code>).
                   </li>
                   <li>
                     <strong>At Request Time (0ms Runtime Short-Circuit):</strong> When Dinou traverses <code>page.tsx</code> to stream the other dynamic holes on the page, as soon as it enters that static <code>&lt;Suspense&gt;</code> boundary and hits <code>noDynamic()</code>, it immediately <strong>aborts and skips that entire subtree in 0ms</strong> without re-executing its async work!
@@ -1189,7 +1249,7 @@ export default function DocPage() {
                       <strong>Must Precede the First <code>await</code>:</strong> Because Dinou inspects the component&apos;s synchronous execution frame right when it returns its initial Promise, calling <code>noDynamic()</code> <em>after</em> the first <code>await</code> is too late and the boundary will still become a Dynamic Hole.
                     </li>
                     <li>
-                      <strong>Subtree Inheritance &amp; Nested Dynamic Holes:</strong> Calling <code>noDynamic()</code> in a parent component inside <code>&lt;Suspense&gt;</code> automatically opts out all child <code>async</code> components inside that same <code>&lt;Suspense&gt;</code> boundary. If that static <code>&lt;Suspense&gt;</code> boundary contains a nested inner <code>&lt;Suspense&gt;</code> boundary without <code>noDynamic()</code>, the outer wrapper bakes into the Static Shell while the inner boundary cleanly streams as a dynamic hole!
+                      <strong>Subtree Inheritance &amp; Nested Dynamic Holes:</strong> Calling <code>noDynamic()</code> in a parent component inside <code>&lt;Suspense&gt;</code> automatically opts out all child <code>async</code> components (and un-awaited <code>Promise</code> props) inside that same <code>&lt;Suspense&gt;</code> boundary. If that static <code>&lt;Suspense&gt;</code> boundary contains a nested inner <code>&lt;Suspense&gt;</code> boundary without <code>noDynamic()</code>, the outer wrapper bakes into the Static Shell while the inner boundary cleanly streams as a dynamic hole!
                     </li>
                     <li>
                       <strong>Dynamic Bailout Always Wins:</strong> If a component or child inside a <code>noDynamic()</code> boundary reads <code>req.cookies</code>, <code>req.headers</code>, <code>req.query</code>, or renders <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code>, Dinou overrides <code>noDynamic()</code> and turns the boundary into a Dynamic PPR Hole to prevent leaking request data into the shared Static Shell.
@@ -1198,35 +1258,62 @@ export default function DocPage() {
                 </div>
               </section>
 
-              {/* 3.3 Activation & Specificity */}
+              {/* 3.3 Per-Segment Resolution, Global Default & Mixed Routes */}
               <section id="ppr-activation" className="mt-8 scroll-mt-20">
-                <h4>3.3. Enabling PPR, Child Opt-Out (<code>ppr = false</code>) &amp; Specificity Hierarchy</h4>
+                <h4>3.3. Per-Segment Resolution, Global Default &amp; Mixed Routes</h4>
                 <p>
-                  In Dinou, <strong><code>ppr</code> is resolved per URL route as a single unified mode</strong> (a given URL route cannot have its layout in PPR mode and its page in non-PPR mode, or vice versa). Instead, you can configure the <code>ppr</code> flag across three hierarchical levels—<strong>Global</strong> (<code>dinou.config.js</code>), <strong>Layout</strong> (<code>layout_functions.ts</code>), and <strong>Page</strong> (<code>page_functions.ts</code>)—and for each URL route, the <strong>most specific declaration wins</strong> for the entire route (layout + page together). This allows a parent layout to enable <code>ppr = true</code> as the default for all its child routes, while a specific child page can opt out that route with <code>export const ppr = false</code>:
+                  In Dinou, <strong><code>ppr</code> defaults to <code>false</code> across all route segments</strong> (every root <code>layout.tsx</code>, nested <code>layout.tsx</code>, and leaf <code>page.tsx</code>), and you can change this project-wide default to <code>true</code> in <code>dinou.config.js</code> via <code>defineConfig(&#123; ppr: true &#125;)</code> (so every layout and page uses PPR automatically unless a specific segment opts out with <code>export const ppr = false</code>). Each segment resolves its <code>ppr</code> flag <strong>strictly from its own configuration file</strong> (<code>layout_functions.ts</code> or <code>page_functions.ts</code>) without parent-to-child inheritance, falling back directly to <code>dinou.config.js</code>:
                 </p>
 
-                <div className="border rounded-lg p-4 bg-card not-prose my-6">
-                  <div className="flex items-center gap-2 font-semibold mb-2">
+                <div className="border rounded-lg p-4 bg-card not-prose my-6 space-y-3">
+                  <div className="flex items-center gap-2 font-semibold">
                     <Split className="h-5 w-5 text-purple-500" />
-                    <span>Specificity Hierarchy (Most Specific Always Wins)</span>
+                    <span>Per-Segment Lookup Order (No Cascading Across Segments)</span>
                   </div>
-                  <div className="grid gap-2 font-mono text-xs mt-3">
-                    <div className="p-2 rounded bg-muted/80 flex items-center justify-between border-l-4 border-purple-500">
-                      <span>1. <strong>page_functions.ts</strong> (Page Level: <code>ppr = true | false</code>)</span>
-                      <span className="text-xs uppercase tracking-wider font-semibold text-purple-600 dark:text-purple-400">Highest Priority</span>
+                  <div className="font-mono text-xs bg-muted/60 p-2.5 rounded-md text-purple-700 dark:text-purple-300 break-words">
+                    effectivePpr(segment) = segmentConfig.ppr ?? Boolean(dinouConfig.ppr) ?? false
+                  </div>
+                  <div className="grid gap-2 font-mono text-xs">
+                    <div className="p-2.5 rounded bg-muted/80 flex items-center justify-between border-l-4 border-purple-500">
+                      <span>1. <strong>Own Segment Config</strong> (<code>page_functions.ts</code> or <code>layout_functions.ts</code>: <code>ppr = true | false</code>)</span>
+                      <span className="text-xs uppercase tracking-wider font-semibold text-purple-600 dark:text-purple-400">Segment Override</span>
                     </div>
-                    <div className="p-2 rounded bg-muted/80 flex items-center justify-between border-l-4 border-indigo-500">
-                      <span>2. <strong>layout_functions.ts</strong> (Nested Layouts: <code>ppr = true | false</code>)</span>
-                      <span className="text-xs uppercase tracking-wider font-semibold text-indigo-600 dark:text-indigo-400">Cascades to subroutes</span>
-                    </div>
-                    <div className="p-2 rounded bg-muted/80 flex items-center justify-between border-l-4 border-blue-500">
-                      <span>3. <strong>layout_functions.ts</strong> (Root Layout: <code>ppr = true | false</code>)</span>
-                      <span className="text-xs uppercase tracking-wider font-semibold text-blue-600 dark:text-blue-400">Section Default</span>
-                    </div>
-                    <div className="p-2 rounded bg-muted/80 flex items-center justify-between border-l-4 border-slate-500">
-                      <span>4. <strong>dinou.config.js</strong> (Global Application: <code>ppr = true | false</code>)</span>
+                    <div className="p-2.5 rounded bg-muted/80 flex items-center justify-between border-l-4 border-slate-500">
+                      <span>2. <strong>dinou.config.js</strong> (<code>defineConfig(&#123; ppr: true | false &#125;)</code> — defaults to <code>false</code>)</span>
                       <span className="text-xs uppercase tracking-wider font-semibold text-slate-500">Global Fallback</span>
                     </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 not-prose my-6 text-xs min-w-0">
+                  <div className="border rounded-lg p-4 bg-muted/20 space-y-1.5 border-border min-w-0">
+                    <div className="font-semibold text-foreground flex items-center gap-1.5">
+                      <Layers className="h-4 w-4 text-purple-500" />
+                      <span>1. Zero Parent Inheritance</span>
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Setting <code>export const ppr = true</code> in <code>src/dashboard/layout_functions.ts</code> enables PPR <strong>only</strong> for <code>src/dashboard/layout.tsx</code> (and its parallel <code>@slot</code> routes). Child layouts and child pages do not inherit it automatically.
+                    </p>
+                  </div>
+
+                  <div className="border rounded-lg p-4 bg-muted/20 space-y-1.5 border-border min-w-0">
+                    <div className="font-semibold text-foreground flex items-center gap-1.5">
+                      <Sparkles className="h-4 w-4 text-indigo-500" />
+                      <span>2. Composite Mixed Routes</span>
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed">
+                      A single URL route can freely combine <code>&quot;ppr: true&quot;</code> and <code>&quot;ppr: false&quot;</code> segments—for example, a <code>&quot;ppr: true&quot;</code> layout streaming a live user header around a <code>&quot;ppr: false&quot;</code> static page, or a static layout wrapping a <code>&quot;ppr: true&quot;</code> streaming page.
+                    </p>
+                  </div>
+
+                  <div className="border rounded-lg p-4 bg-muted/20 space-y-1.5 border-border min-w-0">
+                    <div className="font-semibold text-foreground flex items-center gap-1.5">
+                      <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                      <span>3. Isolated Execution Scopes</span>
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed">
+                      On mixed routes, <code>&lt;Suspense&gt;</code> boundaries inside a <code>&quot;ppr: false&quot;</code> segment resolve statically at build time without becoming PPR holes, and reading dynamic request APIs inside a <code>&quot;ppr: false&quot;</code> segment triggers a Dynamic SSR bailout as expected.
+                    </p>
                   </div>
                 </div>
               </section>
@@ -1389,7 +1476,7 @@ export default function WorkspacePage() {
                 </span>
               </div>
               <p className="mt-4">
-                When you combine <strong>Horizontal Segmentation</strong> and <strong>Partial Prerendering (PPR)</strong> (even without <code>&lt;DinouCacheSlot&gt;</code>), every layout, parallel route (<code>@sidebar</code>), and page maintains its own independent Static Shell while streaming its own dynamic <code>&lt;Suspense&gt;</code> holes in a single unified HTTP response.
+                When you combine <strong>Horizontal Segmentation</strong> and <strong>Partial Prerendering (PPR)</strong> (even without <code>&lt;DinouCacheSlot&gt;</code>), every layout, parallel route (<code>@sidebar</code>), and page resolves its <code>ppr</code> mode independently—allowing both segments to maintain independent Static Shells and stream parallel <code>&lt;Suspense&gt;</code> holes in a single HTTP response, or to mix <code>&quot;ppr: true&quot;</code> and <code>&quot;ppr: false&quot;</code> segments freely on the same URL route.
               </p>
 
               {/* 5.1 Independent Layout & Page Static Shells with Parallel Holes */}
@@ -1451,7 +1538,8 @@ export async function getProps() {
                       language: "typescript",
                       code: `import type { PageFunctions } from "dinou/server";
 
-// ppr = true is inherited automatically from src/dashboard/layout_functions.ts!
+// Each segment resolves ppr independently (or uses the global default from dinou.config.js)
+export const ppr: PageFunctions["ppr"] = true;
 export const revalidate: PageFunctions["revalidate"] = 300; // Page static shell cached independently for 5m
 export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"];`,
                     },
@@ -1463,7 +1551,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"
               <section id="hs-ppr-revalidation" className="mt-8 scroll-mt-20">
                 <h4>5.2. How Refresh, Revalidation &amp; Navigation Affect Layout vs. Page Shells and Holes</h4>
                 <p>
-                  Because Horizontal Segmentation separates the <strong>Layout</strong> from the <strong>Page</strong> and PPR separates the <strong>Static Shell</strong> from the <strong>Dynamic <code>&lt;Suspense&gt;</code> Holes</strong>, every route is composed of four independent parts: Layout Shell, Layout Holes, Page Shell, and Page Holes. The table below summarizes how each client refresh, server revalidation, and soft navigation operation targets only the relevant parts without re-executing or re-fetching the rest:
+                  Because Horizontal Segmentation separates the <strong>Layout</strong> from the <strong>Page</strong> and PPR separates the <strong>Static Shell</strong> from the <strong>Dynamic <code>&lt;Suspense&gt;</code> Holes</strong>, a segmented PPR route can have up to four independent parts: Layout Shell, Layout Holes, Page Shell, and Page Holes (or a subset on mixed routes where only the layout or only the page sets <code>ppr = true</code>). The table below summarizes how each client refresh, server revalidation, and soft navigation operation targets only the relevant parts without re-executing or re-fetching the rest:
                 </p>
 
                 <div className="not-prose overflow-x-auto rounded-lg border border-border my-6">
@@ -1494,12 +1582,17 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"
                       <tr>
                         <td className="p-3.5 font-mono font-semibold text-foreground">revalidateLayout(&quot;/dashboard&quot;) (or Layout Tag / Layout TTL)</td>
                         <td className="p-3.5 text-amber-600 dark:text-amber-400">Regenerates the layout static shell immediately (and lazily updates nested sub-layouts on demand when visited)</td>
-                        <td className="p-3.5 text-emerald-600 dark:text-emerald-400">0 page.tsx executions! When visited, child PPR pages lazily combine the new layout with their existing cached page shell</td>
+                        <td className="p-3.5 text-emerald-600 dark:text-emerald-400">0 page.tsx executions! When visited, child pages (both &quot;ppr: true&quot; and &quot;ppr: false&quot;) lazily combine the new layout with their existing cached page</td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono font-semibold text-foreground">Soft Nav: PPR Page ↔ Static Opt-Out Page (ppr = false)</td>
+                        <td className="p-3.5 font-mono font-semibold text-foreground">Soft Nav: PPR Page ↔ Static Non-PPR Page (&quot;ppr: false&quot;)</td>
                         <td className="p-3.5 text-emerald-600 dark:text-emerald-400">Shared parent PPR layout stays mounted with 0 layout network requests</td>
-                        <td className="p-3.5 text-muted-foreground">Seamlessly navigates between streamed PPR pages and 100% static opt-out child pages</td>
+                        <td className="p-3.5 text-muted-foreground">Seamlessly navigates between streamed PPR pages and 100% static non-PPR child pages</td>
+                      </tr>
+                      <tr>
+                        <td className="p-3.5 font-mono font-semibold text-foreground">Mixed Route: Static Layout (&quot;ppr: false&quot;) + PPR Page (&quot;ppr: true&quot;)</td>
+                        <td className="p-3.5 text-emerald-600 dark:text-emerald-400">Layout (including any layout &lt;Suspense&gt;) resolves statically at build time into the shell</td>
+                        <td className="p-3.5 text-purple-600 dark:text-purple-400">Page delivers its 0ms static shell and streams its own dynamic &lt;Suspense&gt; holes per request</td>
                       </tr>
                     </tbody>
                   </table>
@@ -1521,7 +1614,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"
                 </span>
               </div>
               <p className="mt-4">
-                With PPR alone, a route only has two parts: the <strong>0ms Static Shell</strong> and <strong>Dynamic <code>&lt;Suspense&gt;</code> Holes</strong> that re-execute from scratch on every request (and can only be refreshed all at once via <code>router.refresh()</code>). Combining all primitives of the <strong>Temporal Axis</strong> (<code>ppr = true</code>, <code>&lt;Suspense&gt;</code>, <code>noDynamic()</code>, request data) with the <strong>Vertical Axis</strong> (<code>&lt;DinouCacheSlot&gt;</code>, <code>revalidate=&#123;N&#125;</code> vs. <code>revalidate=&#123;0&#125;</code>, and nested slots) produces <strong>7 possible combinations</strong>:
+                With PPR alone, a PPR segment only has two parts: the <strong>0ms Static Shell</strong> and <strong>Dynamic <code>&lt;Suspense&gt;</code> Holes</strong> that re-execute from scratch on every request (and can only be refreshed all at once via <code>router.refresh()</code>). Combining all primitives of the <strong>Temporal Axis</strong> (<code>ppr = true</code>, <code>&lt;Suspense&gt;</code>, <code>noDynamic()</code>, request data) with the <strong>Vertical Axis</strong> (<code>&lt;DinouCacheSlot&gt;</code>, <code>revalidate=&#123;N&#125;</code> vs. <code>revalidate=&#123;0&#125;</code>, and nested slots) produces <strong>7 possible combinations</strong>:
               </p>
               <ul>
                 <li>
@@ -1543,7 +1636,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"
                   <strong>6. Nested Slots (<code>Outer &lt;DinouCacheSlot&gt; → Inner &lt;DinouCacheSlot&gt;</code>):</strong> You can nest a short-TTL slot (e.g., <code>revalidate=&#123;60&#125;</code>) inside a long-TTL slot (e.g., <code>revalidate=&#123;3600&#125;</code>) in either the Static Shell or a Dynamic Hole. When the inner slot expires or is refreshed, Dinou re-renders only the inner child slot and splices it into the cached parent slot without re-running the parent <em>(Section 6.2)</em>.
                 </li>
                 <li>
-                  <strong>7. <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code> (or Request Data Access) Outside <code>&lt;Suspense&gt;</code> (Full-Page Bailout):</strong> Because there is no outer <code>&lt;Suspense&gt;</code> boundary to isolate it into a PPR hole, placing <code>revalidate=&#123;0&#125;</code> or reading <code>cookies</code>/<code>headers</code>/<code>query</code> outside <code>&lt;Suspense&gt;</code> forces a <strong>Full-Page Dynamic Bailout</strong> (the entire route falls back to per-request SSR).
+                  <strong>7. <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code> (or Request Data Access) Outside <code>&lt;Suspense&gt;</code> (Full-Route Bailout):</strong> Because there is no outer <code>&lt;Suspense&gt;</code> boundary to isolate it into a PPR hole, placing <code>revalidate=&#123;0&#125;</code> or reading <code>cookies</code>/<code>headers</code>/<code>query</code> outside <code>&lt;Suspense&gt;</code> forces a <strong>Full-Route Dynamic Bailout</strong> (the entire route falls back to per-request SSR).
                 </li>
               </ul>
 
@@ -1551,7 +1644,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"
               <section id="ppr-slot-nesting" className="mt-6 scroll-mt-20">
                 <h4>6.1. Nesting-Order Semantics (<code>&lt;Suspense&gt;</code> vs. <code>&lt;DinouCacheSlot&gt;</code>)</h4>
                 <p>
-                  On a <code>ppr = true</code> route, the nesting order between <code>&lt;Suspense&gt;</code> and <code>&lt;DinouCacheSlot revalidate=&#123;N&#125;&gt;</code> (where <code>N &gt;= 1</code> or omitted) determines whether the slot becomes a <strong>Cached Dynamic PPR Hole</strong> or a <strong>Static Shell Slot</strong>:
+                  Inside a <code>ppr = true</code> segment (page or layout), the nesting order between <code>&lt;Suspense&gt;</code> and <code>&lt;DinouCacheSlot revalidate=&#123;N&#125;&gt;</code> (where <code>N &gt;= 1</code> or omitted) determines whether the slot becomes a <strong>Cached Dynamic PPR Hole</strong> or a <strong>Static Shell Slot</strong>:
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-6 text-xs min-w-0">
@@ -1675,7 +1768,7 @@ export default function FeedPage() {
 
             {/* 7. The Triple Synergy: Horizontal + Vertical + Temporal */}
             <section
-              id="ppr-slot-synergy"
+              id="ppr-slot-hs-synergy"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <div className="flex items-center gap-3">
@@ -1687,7 +1780,7 @@ export default function FeedPage() {
                 </span>
               </div>
               <p className="mt-4">
-                In <strong>Triple Synergy</strong>, all three dimensions operate simultaneously on the same route tree: multi-level <strong>Horizontal Layouts</strong> (<code>layout_functions.ts</code>), <strong>Temporal PPR Pages</strong> (<code>ppr = true</code> alongside <code>ppr = false</code> static sibling routes), and <strong>Vertical <code>&lt;DinouCacheSlot&gt;</code></strong> boundaries placed inside layout shells, page static shells, and streamed dynamic <code>&lt;Suspense&gt;</code> holes.
+                In <strong>Triple Synergy</strong>, all three dimensions operate simultaneously on the same route tree: multi-level <strong>Horizontal Layouts</strong> (<code>layout_functions.ts</code>), <strong>Per-Segment Temporal PPR</strong> (<code>&quot;ppr: true&quot;</code> on layouts and/or pages alongside <code>&quot;ppr: false&quot;</code> static segments), and <strong>Vertical <code>&lt;DinouCacheSlot&gt;</code></strong> boundaries placed inside layout shells, page static shells, and streamed dynamic <code>&lt;Suspense&gt;</code> holes.
               </p>
 
               {/* 7.1 High-Traffic Telemetry & Full-Stack 3D Composition Example */}
@@ -1774,7 +1867,8 @@ export default function TelemetryPage() {
                       language: "typescript",
                       code: `import type { PageFunctions } from "dinou/server";
 
-// ppr = true is inherited automatically from src/telemetry/layout_functions.ts!
+// Enable PPR for this page segment (or set ppr: true globally in dinou.config.js)
+export const ppr: PageFunctions["ppr"] = true;
 export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
                     },
                   ]}
@@ -1879,7 +1973,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
                       <td className="p-4 text-xs font-mono text-muted-foreground">ppr = true + &lt;Suspense&gt; (+ noDynamic)</td>
                       <td className="p-4 text-xs text-emerald-600 dark:text-emerald-400 font-medium">~2.42ms (0ms Cached Static Shell)</td>
                       <td className="p-4 text-xs text-emerald-600 dark:text-emerald-400 font-medium">Instant Static Shell + 100% real-time parallel &lt;Suspense&gt; holes</td>
-                      <td className="p-4 text-xs text-muted-foreground">Instant landing/store shells with personalized per-user cookie/query holes</td>
+                      <td className="p-4 text-xs text-muted-foreground">Instant landing/store shells with personalized per-user holes or streamed Client Promise props</td>
                     </tr>
                     <tr>
                       <td className="p-4 font-semibold text-foreground">4. Pairwise #1: H + V (Non-PPR)</td>
@@ -1890,10 +1984,10 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
                     </tr>
                     <tr>
                       <td className="p-4 font-semibold text-foreground">5. Pairwise #2: H + T (Layouts + PPR)</td>
-                      <td className="p-4 text-xs font-mono text-muted-foreground">layout_functions.ts + page_functions.ts + ppr = true</td>
+                      <td className="p-4 text-xs font-mono text-muted-foreground">ppr = true per segment (or in dinou.config.js) across layout_functions.ts / page_functions.ts</td>
                       <td className="p-4 text-xs text-emerald-600 dark:text-emerald-400 font-medium">~2.42ms (Independent Layout &amp; Page Shells)</td>
                       <td className="p-4 text-xs text-purple-600 dark:text-purple-400 font-medium">router.refresh() (page holes) vs. &#123; layout: true &#125; + Independent shell revalidation</td>
-                      <td className="p-4 text-xs text-muted-foreground">Multi-level portals mixing PPR layouts, @sidebar holes, PPR pages, and static opt-out pages</td>
+                      <td className="p-4 text-xs text-muted-foreground">Multi-level portals mixing PPR layouts, @sidebar holes, PPR pages, and static (&quot;ppr: false&quot;) pages</td>
                     </tr>
                     <tr>
                       <td className="p-4 font-semibold text-foreground">6. Pairwise #3: V + T (Slots + PPR)</td>
@@ -1904,7 +1998,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
                     </tr>
                     <tr>
                       <td className="p-4 font-semibold text-foreground">7. Triple Synergy: H + V + T</td>
-                      <td className="p-4 text-xs font-mono text-muted-foreground">layout_functions.ts + ppr = true + &lt;DinouCacheSlot&gt; everywhere</td>
+                      <td className="p-4 text-xs font-mono text-muted-foreground">layout_functions.ts + page_functions.ts + ppr = true + &lt;DinouCacheSlot&gt;</td>
                       <td className="p-4 text-xs text-emerald-600 dark:text-emerald-400 font-medium">~2.42ms (Shell) + ~2ms (Cached Hole) + 0 Layout Fetches</td>
                       <td className="p-4 text-xs text-emerald-600 dark:text-emerald-400 font-medium">4-Way Surgical Invalidation (Layout, Page, Shell Slot, Hole Slot) with 0 collateral rebuilds</td>
                       <td className="p-4 text-xs text-muted-foreground">Large-scale, high-concurrency e-commerce and real-time telemetry platforms</td>
@@ -1921,8 +2015,8 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
                   <thead className="bg-muted text-muted-foreground font-medium">
                     <tr>
                       <th className="p-3.5">Component Pattern</th>
-                      <th className="p-3.5">Behavior when <code>ppr = true</code></th>
-                      <th className="p-3.5">Behavior when <code>ppr = false</code></th>
+                      <th className="p-3.5">Behavior in a <code>&quot;ppr: true&quot;</code> Segment</th>
+                      <th className="p-3.5">Behavior in a <code>&quot;ppr: false&quot;</code> Segment</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border bg-card">
@@ -1937,7 +2031,12 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
                       <td className="p-3.5 text-emerald-600 dark:text-emerald-400 font-medium">Static HTML (resolved at build time into initial HTML)</td>
                     </tr>
                     <tr>
-                      <td className="p-3.5 font-mono">&lt;Suspense&gt; + async Server Component + noDynamic()</td>
+                      <td className="p-3.5 font-mono">&lt;Suspense&gt; + Client Component (&quot;use client&quot;) with un-awaited Promise prop (use())</td>
+                      <td className="p-3.5 text-purple-600 dark:text-purple-400 font-medium">Dynamic PPR Hole (fallback in initial HTML, streams live per request to use())</td>
+                      <td className="p-3.5 text-emerald-600 dark:text-emerald-400 font-medium">Static HTML (resolved at build time; or streamed per request on Dynamic SSR)</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3.5 font-mono">&lt;Suspense&gt; + async Server Component (or Promise prop) + noDynamic()</td>
                       <td className="p-3.5 text-emerald-600 dark:text-emerald-400 font-medium">Static Shell (pre-rendered into initial HTML + 0ms runtime skip)</td>
                       <td className="p-3.5 text-emerald-600 dark:text-emerald-400 font-medium">Static HTML (resolved at build time into initial HTML)</td>
                     </tr>
@@ -1959,12 +2058,12 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
                     <tr>
                       <td className="p-3.5 font-mono">Reading cookies/headers/query or revalidate=&#123;0&#125; inside &lt;Suspense&gt; (even with noDynamic)</td>
                       <td className="p-3.5 text-purple-600 dark:text-purple-400 font-medium">Dynamic PPR Hole (quarantined to hole; overrides noDynamic)</td>
-                      <td className="p-3.5 text-amber-600 dark:text-amber-400 font-medium">Full-Page Dynamic Bailout (entire route renders dynamically per request)</td>
+                      <td className="p-3.5 text-amber-600 dark:text-amber-400 font-medium">Full-Route Dynamic Bailout (entire route renders dynamically per request)</td>
                     </tr>
                     <tr>
                       <td className="p-3.5 font-mono">Reading cookies/headers/query or revalidate=&#123;0&#125; outside &lt;Suspense&gt;</td>
-                      <td className="p-3.5 text-amber-600 dark:text-amber-400 font-medium">Full-Page Dynamic Bailout (entire route renders dynamically per request)</td>
-                      <td className="p-3.5 text-amber-600 dark:text-amber-400 font-medium">Full-Page Dynamic Bailout (entire route renders dynamically per request)</td>
+                      <td className="p-3.5 text-amber-600 dark:text-amber-400 font-medium">Full-Route Dynamic Bailout (entire route renders dynamically per request)</td>
+                      <td className="p-3.5 text-amber-600 dark:text-amber-400 font-medium">Full-Route Dynamic Bailout (entire route renders dynamically per request)</td>
                     </tr>
                   </tbody>
                 </table>
