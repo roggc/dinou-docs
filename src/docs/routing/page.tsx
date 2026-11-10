@@ -1075,22 +1075,17 @@ export default function NotFound({ params, suggestions }: NotFoundProps) {
                   <div className="bg-card border rounded-xl p-4 text-xs min-w-0">
                     <div className="font-bold mb-2 text-slate-900 dark:text-slate-100">Layout Prop Injection</div>
                     <p className="text-muted-foreground mb-2">
-                      Slots are passed as named props directly alongside <code>children</code>:
+                      Slots are passed as named props alongside <code>children</code> and are automatically typed on <code>LayoutProps</code>:
                     </p>
                     <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                      {`import type { ReactNode } from "react";
-import type { LayoutProps } from "dinou";
-
-interface DashboardLayoutProps extends LayoutProps<"/dashboard"> {
-  sidebar?: ReactNode;
-  analytics?: ReactNode;
-}
+                      {`import type { LayoutProps } from "dinou";
 
 export default function Layout({
   children,
   sidebar,
   analytics,
-}: DashboardLayoutProps) {
+}: LayoutProps<"/dashboard">) {
+  // sidebar?: ReactNode & analytics?: ReactNode are auto-inferred!
   return (
     <div className="flex">
       <aside>{sidebar}</aside>

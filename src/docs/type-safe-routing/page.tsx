@@ -42,7 +42,7 @@ const tocItems = [
   { id: "zero-cost", title: "1.2. Zero-Runtime Cost (0 Extra Bytes)", level: 3 },
   { id: "quick-start", title: "2. Quick Start for Developers", level: 2 },
   { id: "level-1-navigation", title: "2.1. Level 1: Links & Navigation", level: 3 },
-  { id: "level-2-components", title: "2.2. Level 2: Typed Pages, Layouts & Route Functions", level: 3 },
+  { id: "level-2-components", title: "2.2. Level 2: Pages, Horizontal Layouts & Parallel Slots", level: 3 },
   { id: "core-types-table", title: "2.3. Quick Reference: Core Types", level: 3 },
   { id: "param-mapping", title: "3. Parameter Mapping Reference Table", level: 2 },
   { id: "advanced-recipes", title: "4. Advanced Usage & Real-World Recipes", level: 2 },
@@ -153,10 +153,10 @@ export default function TypeSafeRoutingPage() {
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground space-y-2">
                       <p>
-                        Strict parameter typing inside <code>page.tsx</code>, <code>layout.tsx</code>, and server-side <code>page_functions.ts</code> / <code>layout_functions.ts</code> via <code>PageProps</code>, <code>LayoutProps</code>, <code>PageFunctions</code>, <code>LayoutFunctions</code>, and <code>RouteParams</code>.
+                        Strict parameter &amp; slot typing across <code>page.tsx</code>, intermediate <code>layout.tsx</code>, parallel <code>@slot/page.tsx</code>, <code>error.tsx</code>, and <code>page_functions.ts</code> / <code>layout_functions.ts</code> via <code>PageProps</code>, <code>LayoutProps</code>, <code>SlotProps</code>, <code>ErrorProps</code>, <code>PageFunctions</code>, <code>LayoutFunctions</code>, and <code>RouteParams</code>.
                       </p>
                       <p>
-                        Completely eliminates untyped <code>params: any</code> and prevents runtime access to non-existent route parameters.
+                        Supports Dinou&apos;s Horizontal Segmentation natively: intermediate layouts without a sibling <code>page.tsx</code> and parallel <code>@slots</code> are fully typed without polluting navigable Level 1 URLs.
                       </p>
                     </CardContent>
                   </Card>
@@ -267,10 +267,10 @@ export function NavActions({ slug }: { slug: string }) {
               <div id="level-2-components" className="scroll-mt-20 mt-8 space-y-3">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Code2 className="h-5 w-5 text-indigo-500" />
-                  2.2. Level 2: Typed Pages, Layouts &amp; Route Functions
+                  2.2. Level 2: Pages, Horizontal Layouts &amp; Parallel Slots
                 </h3>
                 <p>
-                  Pass your route pattern as a generic argument to <code>PageProps</code>, <code>LayoutProps</code>, <code>PageFunctions</code>, <code>LayoutFunctions</code>, or <code>RouteParams</code>. Dinou infers the exact shape of <code>params</code> without manual interface declarations:
+                  Pass your segment pattern as a generic argument to <code>PageProps</code>, <code>LayoutProps</code>, <code>SlotProps</code>, <code>PageFunctions</code>, <code>LayoutFunctions</code>, or <code>RouteParams</code>. Both <code>PageProps&lt;TRoute, TProps&gt;</code> and <code>LayoutProps&lt;TLayout, TProps&gt;</code> also accept an optional second generic argument for custom props returned by <code>getProps</code>:
                 </p>
 
                 <div className="not-prose my-4">
@@ -287,8 +287,8 @@ import type { BlogPostData } from "./page_functions";
 export default function BlogPost({
   params,
   postTitle,
-}: PageProps<"/blog/[slug]"> & BlogPostData) {
-  // ✅ params.slug is strongly typed as string
+}: PageProps<"/blog/[slug]", BlogPostData>) {
+  // ✅ params.slug is string; postTitle is inferred from BlogPostData
   return <h1>{postTitle} ({params.slug})</h1>;
 
   // ❌ TypeScript error: Property 'id' does not exist on type '{ slug: string }'
@@ -355,9 +355,104 @@ export async function loadPostByRoute(params: RouteParams<"/blog/[slug]">) {
                   />
                 </div>
 
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  <strong>Tip for intermediate layouts without a sibling <code>page.tsx</code>:</strong> Because the route scanner indexes directories containing a <code>page.*</code> file, if a parent layout lives in an intermediate folder without its own <code>page.tsx</code> (e.g., <code>src/workspace/[org]/layout.tsx</code> with child pages deeper under <code>projects/[id]/page.tsx</code>), pass a direct parameter dictionary or <code>ExtractRouteParams</code>—such as <code>LayoutFunctions&lt;&#123; org: string &#125;&gt;</code> or <code>ExtractRouteParams&lt;&quot;/workspace/[org]&quot;&gt;</code>.
+                <p>
+                  Because Dinou features <strong>Horizontal Segmentation</strong> (independent lifecycles for layouts, parallel <code>@slots</code>, and pages), the route topology scanner indexes intermediate layouts—even when a folder has <strong>no sibling <code>page.tsx</code></strong>—and automatically infers parallel <code>@slot</code> props on <code>LayoutProps</code>:
                 </p>
+
+                <div className="not-prose my-4">
+                  <TabbedCodeBlock
+                    defaultTab="interm-layout"
+                    tabs={[
+                      {
+                        id: "interm-layout",
+                        label: "src/workspace/[org]/layout.tsx (No sibling page.tsx)",
+                        language: "tsx",
+                        code: `import type { LayoutProps } from "dinou";
+import type { OrgLayoutData } from "./layout_functions";
+
+// Folder has layout.tsx + @sidebar/page.tsx + @analytics/page.tsx,
+// and NO sibling page.tsx (leaf pages live under projects/[projectId]/page.tsx)
+export default function WorkspaceLayout({
+  children,
+  params,
+  sidebar,
+  analytics,
+  orgPlan,
+}: LayoutProps<"/workspace/[org]", OrgLayoutData>) {
+  // ✅ params.org is string (child projectId does NOT leak into parent layout!)
+  // ✅ sidebar?: ReactNode & analytics?: ReactNode are auto-inferred from @slots!
+  return (
+    <div className="grid grid-cols-[240px_1fr_320px]" data-plan={orgPlan}>
+      <aside>{sidebar}</aside>
+      <main data-org={params.org}>{children}</main>
+      <aside>{analytics}</aside>
+    </div>
+  );
+}`,
+                      },
+                      {
+                        id: "interm-layout-fn",
+                        label: "src/workspace/[org]/layout_functions.ts",
+                        language: "ts",
+                        code: `import type { LayoutFunctions } from "dinou";
+
+export interface OrgLayoutData {
+  orgPlan: "free" | "pro";
+}
+
+// ✅ Intermediate layout_functions.ts works even without a sibling page.tsx
+export const getProps: LayoutFunctions<
+  "/workspace/[org]",
+  OrgLayoutData
+>["getProps"] = async (params) => {
+  // params?.org is typed as string | undefined
+  return { orgPlan: params?.org === "acme" ? "pro" : "free" };
+};
+
+export const validateParams: LayoutFunctions<
+  "/workspace/[org]"
+>["validateParams"] = (params) => Boolean(params?.org);`,
+                      },
+                      {
+                        id: "parallel-slot",
+                        label: "src/workspace/[org]/@analytics/page.tsx",
+                        language: "tsx",
+                        code: `import type { SlotProps } from "dinou";
+
+// ✅ SlotProps (or PageProps<"/workspace/[org]/@analytics">) types cumulative params
+export default async function AnalyticsSlot({
+  params,
+}: SlotProps<"/workspace/[org]/@analytics">) {
+  // params.org is string — propagated at runtime & verified at compile time!
+  return <section>Live metrics for {params.org}</section>;
+}`,
+                      },
+                      {
+                        id: "leaf-page",
+                        label: "src/workspace/[org]/projects/[projectId]/page.tsx",
+                        language: "tsx",
+                        code: `import { Link, type PageProps } from "dinou";
+
+export default function ProjectPage({
+  params,
+}: PageProps<"/workspace/[org]/projects/[projectId]">) {
+  // ✅ Leaf page receives cumulative { org: string; projectId: string }
+  return (
+    <article>
+      <h1>{params.org} / Project #{params.projectId}</h1>
+      <Link href={\`/workspace/\${params.org}/projects/\${params.projectId}\`}>
+        Permalink
+      </Link>
+
+      {/* ❌ Compile error: /workspace/[org] has no page.tsx, so it is NOT navigable! */}
+      {/* <Link href={\`/workspace/\${params.org}\`}>Invalid Workspace Root</Link> */}
+    </article>
+  );
+}`,
+                      },
+                    ]}
+                  />
+                </div>
               </div>
 
               <div id="core-types-table" className="scroll-mt-20 mt-8 space-y-4">
@@ -380,19 +475,24 @@ export async function loadPostByRoute(params: RouteParams<"/blog/[slug]">) {
                     </thead>
                     <tbody className="divide-y divide-border bg-card text-xs">
                       <tr>
-                        <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">PageProps&lt;T&gt;</td>
-                        <td className="p-3 text-muted-foreground">React Page components (<code>page.tsx</code>)</td>
-                        <td className="p-3 font-mono">Page(&#123; params &#125;: PageProps&lt;&quot;/blog/[slug]&quot;&gt;)</td>
+                        <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">PageProps&lt;T, P?&gt;</td>
+                        <td className="p-3 text-muted-foreground">Page components (<code>page.tsx</code>, <code>not_found.tsx</code>, or <code>@slot/page.tsx</code>) + optional <code>getProps</code> payload <code>P</code></td>
+                        <td className="p-3 font-mono">Page(&#123; params &#125;: PageProps&lt;&quot;/blog/[slug]&quot;, Data&gt;)</td>
                       </tr>
                       <tr>
-                        <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">LayoutProps&lt;T&gt;</td>
-                        <td className="p-3 text-muted-foreground">React Layout components (<code>layout.tsx</code>)</td>
-                        <td className="p-3 font-mono">Layout(&#123; children, params &#125;: LayoutProps&lt;&quot;/blog/[slug]&quot;&gt;)</td>
+                        <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">LayoutProps&lt;T, P?&gt;</td>
+                        <td className="p-3 text-muted-foreground">Layouts (including intermediate folders without <code>page.tsx</code>) with auto-inferred <code>@slot</code> props + optional <code>P</code></td>
+                        <td className="p-3 font-mono">Layout(&#123; children, params, sidebar &#125;: LayoutProps&lt;&quot;/workspace/[org]&quot;&gt;)</td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">SlotProps&lt;T&gt;</td>
+                        <td className="p-3 text-muted-foreground">Parallel Slot Page components (<code>@slot/page.tsx</code>)</td>
+                        <td className="p-3 font-mono">Slot(&#123; params &#125;: SlotProps&lt;&quot;/workspace/[org]/@analytics&quot;&gt;)</td>
                       </tr>
                       <tr>
                         <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">ErrorProps&lt;T&gt;</td>
-                        <td className="p-3 text-muted-foreground">React Error Page components (<code>error.tsx</code>)</td>
-                        <td className="p-3 font-mono">Error(&#123; error, params &#125;: ErrorProps&lt;&quot;/blog/[slug]&quot;&gt;)</td>
+                        <td className="p-3 text-muted-foreground">Error boundaries across routes, intermediate folders &amp; <code>@slot/error.tsx</code></td>
+                        <td className="p-3 font-mono">Error(&#123; error, params &#125;: ErrorProps&lt;&quot;/workspace/[org]/@analytics&quot;&gt;)</td>
                       </tr>
                       <tr>
                         <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">PageFunctions&lt;T, P&gt;</td>
@@ -401,12 +501,12 @@ export async function loadPostByRoute(params: RouteParams<"/blog/[slug]">) {
                       </tr>
                       <tr>
                         <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">LayoutFunctions&lt;T, P&gt;</td>
-                        <td className="p-3 text-muted-foreground">Layout lifecycle &amp; data contracts (<code>layout_functions.ts</code>)</td>
-                        <td className="p-3 font-mono">const validateParams: LayoutFunctions&lt;&quot;/blog/[slug]&quot;&gt;[&quot;validateParams&quot;]</td>
+                        <td className="p-3 text-muted-foreground">Layout lifecycle &amp; data contracts (<code>layout_functions.ts</code>, including intermediate layouts)</td>
+                        <td className="p-3 font-mono">const validateParams: LayoutFunctions&lt;&quot;/workspace/[org]&quot;&gt;[&quot;validateParams&quot;]</td>
                       </tr>
                       <tr>
                         <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">RouteParams&lt;T&gt;</td>
-                        <td className="p-3 text-muted-foreground">Standalone helpers, data loaders &amp; services</td>
+                        <td className="p-3 text-muted-foreground">Standalone helpers across page, layout, or <code>@slot</code> segments</td>
                         <td className="p-3 font-mono">loadPost(params: RouteParams&lt;&quot;/blog/[slug]&quot;&gt;)</td>
                       </tr>
                       <tr>
@@ -600,7 +700,7 @@ import { useRouter, type ErrorProps } from "dinou";
 export default function AnalyticsSlotError({
   params,
   error,
-}: ErrorProps<"/dashboard/[org]">) {
+}: ErrorProps<"/dashboard/[org]/@analytics">) {
   const router = useRouter();
 
   return (
@@ -612,6 +712,30 @@ export default function AnalyticsSlotError({
         Retry Widget
       </button>
     </aside>
+  );
+}`,
+                      },
+                      {
+                        id: "interm-error",
+                        label: "src/workspace/[org]/error.tsx (Intermediate folder)",
+                        language: "tsx",
+                        code: `"use client";
+
+import { useRouter, type ErrorProps } from "dinou";
+
+// Catches unhandled errors thrown by any nested child route under /workspace/[org]/*
+export default function WorkspaceError({
+  params,
+  error,
+}: ErrorProps<"/workspace/[org]">) {
+  const router = useRouter();
+
+  return (
+    <div className="p-6 border rounded-xl bg-destructive/10">
+      <h2>Workspace error in {params.org}</h2>
+      <p className="text-sm text-muted-foreground">{error.message}</p>
+      <button onClick={() => router.refresh()}>Retry</button>
+    </div>
   );
 }`,
                       },
@@ -739,7 +863,7 @@ export function ProductCard({ product }: { product: Product }) {
                   <div className="bg-card border border-border/80 rounded-lg p-3 space-y-1">
                     <span className="text-[11px] font-mono text-blue-500 font-semibold">01. Filesystem</span>
                     <p className="font-semibold text-foreground">src/ Directory</p>
-                    <p className="text-[11px] text-muted-foreground leading-normal">Synchronous scan of <code>src/</code> for <code>page.(tsx|jsx|ts|js)</code> route files.</p>
+                    <p className="text-[11px] text-muted-foreground leading-normal">Single-pass scan of <code>src/</code> across pages, horizontal layouts, <code>@slots</code>, and error boundaries.</p>
                   </div>
                   <div className="bg-card border border-border/80 rounded-lg p-3 space-y-1">
                     <span className="text-[11px] font-mono text-emerald-500 font-semibold">02. Scanner</span>
@@ -776,8 +900,8 @@ export function ProductCard({ product }: { product: Product }) {
                       Implemented in <code className="text-foreground">dinou/core/generate-route-types.js</code>. Pure filesystem parsing without executing user code, importing components, or launching test servers.
                     </p>
                     <ul className="list-disc pl-4 space-y-1 pt-1">
-                      <li>Ignores private folders (<code>_*</code>) and parallel slots (<code>@*</code>).</li>
-                      <li>Transparently unwraps route groups (<code>(group)</code>).</li>
+                      <li>Ignores private folders (<code>_*</code>) and transparently unwraps route groups (<code>(group)</code>).</li>
+                      <li>Separates navigable <code>page.*</code> URLs from intermediate <code>layout.*</code> / <code>layout_functions.*</code> and parallel <code>@slot</code> segments.</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -797,9 +921,10 @@ export function ProductCard({ product }: { product: Product }) {
                       Generates <code>.dinou/types/routes.d.ts</code> augmenting the core <code>&quot;dinou&quot;</code> module with:
                     </p>
                     <ul className="list-disc pl-4 space-y-1 pt-1">
-                      <li><code>DinouStaticRoutes</code>: Union of exact string routes.</li>
-                      <li><code>DinouDynamicRoutes</code>: Parameterized template literal types.</li>
-                      <li><code>DinouRouteParamsMap</code>: Mapping from path pattern to param dictionary.</li>
+                      <li><code>DinouStaticRoutes</code> &amp; <code>DinouDynamicRoutes</code>: Navigable <code>page.*</code> URL unions.</li>
+                      <li><code>DinouRouteParamsMap</code>: Page &amp; <code>not_found.*</code> param dictionaries.</li>
+                      <li><code>DinouLayoutParamsMap</code> &amp; <code>DinouLayoutSlotsMap</code>: Intermediate &amp; leaf layout params plus auto-inferred <code>@slot</code> props.</li>
+                      <li><code>DinouSlotParamsMap</code> &amp; <code>DinouErrorParamsMap</code>: Parallel <code>@slot</code> and error boundary params.</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -816,7 +941,7 @@ export function ProductCard({ product }: { product: Product }) {
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground space-y-2">
                     <p>
-                      Types like <code>DinouRouter.Register</code>, <code>DinouRoutePattern</code>, and <code>ExtractRouteParams&lt;T&gt;</code> are exported to satisfy TypeScript declaration emit rules.
+                      Types like <code>DinouRouter.Register</code>, <code>DinouRoutePattern</code>, <code>DinouLayoutPattern</code>, <code>DinouSlotPattern</code>, <code>DinouErrorPattern</code>, and <code>ExtractRouteParams&lt;T&gt;</code> are exported to satisfy TypeScript declaration emit rules.
                     </p>
                     <p>
                       They allow module augmentation to wire seamlessly into the global type contract without polluting your daily application code.
@@ -879,7 +1004,7 @@ export function ProductCard({ product }: { product: Product }) {
                       Runs immediately at boot, then arms a low-overhead filesystem watcher on <code>src/</code>:
                     </p>
                     <ul className="list-disc pl-4 space-y-1">
-                      <li>Detects added, renamed, or deleted <code>page.(tsx|jsx|ts|js)</code> files.</li>
+                      <li>Detects added, renamed, or deleted <code>page</code>, <code>page_functions</code>, <code>layout</code>, <code>layout_functions</code>, <code>error</code>, and <code>not_found</code> files (including inside <code>@slot</code> folders).</li>
                       <li>Regenerates <code>.dinou/types/routes.d.ts</code> in under 2ms.</li>
                       <li>IDE autocomplete reflects changes instantly with <strong>no server restarts</strong>.</li>
                     </ul>
@@ -907,7 +1032,7 @@ export function ProductCard({ product }: { product: Product }) {
                     </p>
                     <ul className="list-disc pl-4 space-y-1">
                       <li>Generates <code>.dinou/types/routes.d.ts</code> deterministically at the start of <code>npm run build</code>.</li>
-                      <li>In clean CI/CD containers where <code>.dinou/</code> is gitignored, run <code>npm run build</code> <strong>before</strong> <code>tsc --noEmit</code> (e.g. <code>npm run build &amp;&amp; npx tsc --noEmit</code>) so TypeScript validates against the generated route map instead of falling back to <code>string</code>.</li>
+                      <li>In clean CI/CD containers where <code>.dinou/</code> is gitignored, run <code>npx dinou typegen &amp;&amp; npx tsc --noEmit</code> (for fast standalone typechecks) or <code>npm run build &amp;&amp; npx tsc --noEmit</code> so TypeScript validates against the generated topology maps instead of falling back to <code>string</code>.</li>
                     </ul>
                   </CardContent>
                 </Card>
