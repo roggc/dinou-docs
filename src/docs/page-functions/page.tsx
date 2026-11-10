@@ -284,13 +284,27 @@ export interface RouteSegmentConfig<TParams = any, TProps = any> {
 
 /**
  * Concrete semantic alias to import and use in 'page_functions.ts'
+ * Accepts either a route pattern string (e.g. "/blog/[slug]") or a params dictionary.
  */
-export type PageFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TParams, TProps>;
+export type PageFunctions<
+  TRouteOrParams extends DinouRoutePattern | object = any,
+  TProps = any
+> = RouteSegmentConfig<
+  [TRouteOrParams] extends [string] ? RouteParams<TRouteOrParams> : TRouteOrParams,
+  TProps
+>;
 
 /**
  * Concrete semantic alias to import and use in 'layout_functions.ts'
+ * Accepts either a route pattern string (e.g. "/[org]") or a params dictionary.
  */
-export type LayoutFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TParams, TProps>;`}
+export type LayoutFunctions<
+  TRouteOrParams extends DinouRoutePattern | object = any,
+  TProps = any
+> = RouteSegmentConfig<
+  [TRouteOrParams] extends [string] ? RouteParams<TRouteOrParams> : TRouteOrParams,
+  TProps
+>;`}
                 </CodeBlock>
 
                 {/* Practical Quick Rule */}
@@ -418,6 +432,16 @@ export type LayoutFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TP
                     <strong>Returns:</strong> <code>TProps | Promise&lt;TProps&gt;</code>{" "}
                     (Injected directly as the component's props)
                   </li>
+                  <li>
+                    <strong>Streaming Un-Awaited Promises (React 19 <code>use()</code>):</strong>{" "}
+                    <code>getProps</code> can also start non-critical queries{" "}
+                    <strong>without <code>await</code></strong> and return raw{" "}
+                    <code>Promise</code> properties (e.g.{" "}
+                    <code>&#123; post, commentsPromise &#125;</code>) so a Client
+                    Component wrapped in <code>&lt;Suspense&gt;</code> can unwrap
+                    them via React 19&apos;s <code>use(commentsPromise)</code>{" "}
+                    without blocking initial TTFB.
+                  </li>
                 </ul>
               </div>
 
@@ -433,7 +457,7 @@ export type LayoutFunctions<TParams = any, TProps = any> = RouteSegmentConfig<TP
                         label: "page_functions.ts",
                         language: "typescript",
                         code: `// src/blog/[slug]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 import { db, type Post } from "@/lib/db";
 
 export interface BlogPostData {
@@ -441,7 +465,7 @@ export interface BlogPostData {
 }
 
 // Best Practice: Type getProps using PageFunctions for strict parameters & return contract
-export const getProps: PageFunctions<RouteParams<"/blog/[slug]">, BlogPostData>["getProps"] = async (params) => {
+export const getProps: PageFunctions<"/blog/[slug]", BlogPostData>["getProps"] = async (params) => {
   const post = await db.getPost(params?.slug);
   // Directly returns BlogPostData for page.tsx
   return { post };
@@ -604,7 +628,7 @@ export default function BlogLayout({
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-mono text-xs text-rose-600 dark:text-rose-400 font-semibold">
-                            req.query
+                            req.query / RSC useSearchParams()
                           </TableCell>
                           <TableCell>
                             <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 px-2 py-0.5 text-[11px] font-medium text-rose-600 dark:text-rose-400">
@@ -612,7 +636,7 @@ export default function BlogLayout({
                             </span>
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground">
-                            URL query parameters (<code>?q=...</code>) are unconstrained runtime inputs.
+                            URL query parameters (<code>?q=...</code>) read on the server are unconstrained runtime inputs.
                           </TableCell>
                         </TableRow>
                         <TableRow>
@@ -652,7 +676,7 @@ export default function BlogLayout({
                       <span>The Recommended Pattern: Where Each Type of Data Belongs</span>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      To keep pages pre-renderable (SSG/ISR) and instant to load, organize your data into its natural layer: route data in <code>getProps</code>, session cookies inside <code>&lt;Suspense&gt;</code>, and query parameters via the universal <code>useSearchParams()</code> hook (in Server Components with <code>&lt;Suspense&gt;</code> or in Client Components):
+                      With Partial Prerendering (<code>ppr = true</code>), keep the page shell pre-rendered and instant (0ms TTFB) by organizing each data source into its natural layer: route data in <code>getProps</code>, session cookies inside <code>&lt;Suspense&gt;</code>, and query parameters via the universal <code>useSearchParams()</code> hook (in Server Components inside <code>&lt;Suspense&gt;</code>, or in Client Components inside the static shell):
                     </p>
                   </div>
 
@@ -663,16 +687,19 @@ export default function BlogLayout({
                         label: "page_functions.ts (Route)",
                         language: "typescript",
                         code: `// src/blog/[slug]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 import { db, type Post } from "@/lib/db";
 
 export interface BlogPostData {
   post: Post;
 }
 
+// Enable PPR so <Suspense> isolates cookies/query holes while preserving the Static Shell
+export const ppr: PageFunctions["ppr"] = true;
+
 // 1. Pure route loader: depends solely on params
-// Cached statically for all visitors (SSG / ISR)
-export const getProps: PageFunctions<RouteParams<"/blog/[slug]">, BlogPostData>["getProps"] = async (params) => {
+// Pre-rendered & cached statically for all visitors (SSG / ISR)
+export const getProps: PageFunctions<"/blog/[slug]", BlogPostData>["getProps"] = async (params) => {
   const post = await db.getPost(params?.slug);
   return { post };
 };`,
@@ -694,22 +721,22 @@ interface BlogPostProps extends PageProps<"/blog/[slug]">, BlogPostData {}
 export default function BlogPostPage({ params, post }: BlogPostProps) {
   return (
     <article className="post-container">
-      {/* 1. Instant static shell: delivered immediately from cache */}
+      {/* 1. Instant static shell: delivered immediately from cache (0ms TTFB) */}
       <header>
         <span className="text-xs text-muted-foreground">Route: /blog/{params.slug}</span>
         <h1>{post.title}</h1>
-        {/* Client Component using useSearchParams() for instant input sync */}
+        {/* Client Component using useSearchParams(): stays in Static Shell, syncs in browser */}
         <SearchFilter />
       </header>
 
       <div className="post-body">{post.content}</div>
 
-      {/* 2. Dynamic cookie component streamed via Suspense */}
+      {/* 2. Dynamic cookie component quarantined & streamed via Suspense (with ppr = true) */}
       <Suspense fallback={<div className="text-xs text-muted-foreground">Loading session...</div>}>
         <UserSession />
       </Suspense>
 
-      {/* 3. Server Component using useSearchParams() streamed via Suspense */}
+      {/* 3. Server Component using useSearchParams() streamed via Suspense (with ppr = true) */}
       <Suspense fallback={<div className="text-xs text-muted-foreground">Filtering articles...</div>}>
         <RelatedPosts />
       </Suspense>
@@ -725,11 +752,10 @@ export default function BlogPostPage({ params, post }: BlogPostProps) {
 import { getContext } from "dinou";
 import { auth } from "@/lib/auth";
 
-// Cookie & auth access isolated inside Suspense:
-// Streaming this component prevents getProps from bailing out to Dynamic SSR!
+// With ppr = true, isolating cookie & auth access inside <Suspense>
+// streams user state per request while keeping getProps & the post shell static!
 export async function UserSession() {
-  const { req } = getContext();
-  const sessionToken = req?.cookies?.session;
+  const sessionToken = getContext()?.req.cookies.session;
   const user = sessionToken ? await auth.verify(sessionToken) : null;
 
   if (!user) {
@@ -751,9 +777,9 @@ export async function UserSession() {
 import { useSearchParams } from "dinou";
 import { db } from "@/lib/db";
 
-// Universal hook in a Server Component:
-// Reads ctx.req.query to fetch filtered data from the DB on the server.
-// Because it reads query, wrap it in <Suspense> in page.tsx so the post shell stays static!
+// Universal hook in a Server Component (sync or async):
+// Reads ctx.req.query on the server. With ppr = true, wrapping it in <Suspense>
+// turns this boundary into a Dynamic PPR Hole so the post shell stays static!
 export async function RelatedPosts() {
   const searchParams = useSearchParams();
   const tag = searchParams.get("tag") ?? "featured";
@@ -781,13 +807,15 @@ export async function RelatedPosts() {
 import { useSearchParams } from "dinou";
 
 // Universal hook in a Client Component:
-// Reads URL params on the browser for reactive input state without contacting the server
+// Stays baked in the Static Shell (does NOT open a server hole), hydrates cleanly
+// on any ?tag=... URL, and syncs query params immediately in the browser!
 export function SearchFilter() {
   const searchParams = useSearchParams();
   const currentTag = searchParams.get("tag") ?? "";
 
   return (
     <input
+      key={currentTag}
       type="search"
       defaultValue={currentTag}
       placeholder="Filter by tag (?tag=...)..."
@@ -810,13 +838,13 @@ export function SearchFilter() {
                     <div className="rounded-lg border bg-muted/20 p-3 space-y-1">
                       <span className="text-xs font-bold text-foreground">2. Cookies &amp; Headers</span>
                       <p className="text-[11px] text-muted-foreground leading-relaxed">
-                        Handled in Server Components inside <code>&lt;Suspense&gt;</code> to stream without bailing out the whole page.
+                        With <code>ppr = true</code>, read in Server Components inside <code>&lt;Suspense&gt;</code> to stream without bailing out the static shell.
                       </p>
                     </div>
                     <div className="rounded-lg border bg-muted/20 p-3 space-y-1">
                       <span className="text-xs font-bold text-foreground">3. Universal useSearchParams()</span>
                       <p className="text-[11px] text-muted-foreground leading-relaxed">
-                        Works in <strong>Server Components</strong> (streamed with <code>&lt;Suspense&gt;</code>) and in <strong>Client Components</strong> (for instant UI state).
+                        Works in <strong>Server Components</strong> (streamed hole inside <code>&lt;Suspense&gt;</code> with <code>ppr = true</code>) and in <strong>Client Components</strong> (stays in static shell, syncs in browser).
                       </p>
                     </div>
                   </div>
@@ -834,10 +862,17 @@ export function SearchFilter() {
               </h3>
               <p>
                 Defines which dynamic parameter combinations should be
-                pre-rendered at build time (SSG). By default, any dynamic path
-                not returned is generated on-demand when first requested and <strong>cached
-                statically for all subsequent visitors</strong> (Incremental Static Generation / ISG),
-                unless disabled via <code>allowISG: false</code> (which strictly restricts routes to the pre-rendered list and returns <code>404</code> for any other path).
+                pre-rendered at build time (SSG) in both{" "}
+                <code>page_functions.ts</code> and{" "}
+                <code>layout_functions.ts</code> (for dynamic layouts). By
+                default, any dynamic path not returned is generated on-demand
+                when first requested and{" "}
+                <strong>cached statically for all subsequent visitors</strong>{" "}
+                (Incremental Static Generation / ISG), unless disabled via{" "}
+                <code>allowISG: false</code>—either per segment or globally in{" "}
+                <code>dinou.config.js</code>—which strictly restricts that
+                segment to its pre-rendered list and returns <code>404</code>{" "}
+                for any other path.
               </p>
 
               {/* 2.1 Constant vs Function */}
@@ -866,12 +901,12 @@ export function SearchFilter() {
                         Ideal for fixed sets of routes, locales, or documentation
                         sections without extra function execution overhead:
                       </p>
-                      <CodeBlock language="typescript" hideHeader>
+                      <CodeBlock language="typescript">
 {`// src/blog/[slug]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 
 // Best Practice: Type-safe constant array
-export const getStaticPaths: PageFunctions<RouteParams<"/blog/[slug]">]["getStaticPaths"] = [
+export const getStaticPaths: PageFunctions<"/blog/[slug]">["getStaticPaths"] = [
   "foo",
   "bar",
 ];`}
@@ -891,13 +926,13 @@ export const getStaticPaths: PageFunctions<RouteParams<"/blog/[slug]">]["getStat
                         Ideal for fetching IDs or slugs from external APIs or
                         databases at build time:
                       </p>
-                      <CodeBlock language="typescript" hideHeader>
+                      <CodeBlock language="typescript">
 {`// src/blog/[slug]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 import { db } from "@/lib/db";
 
 // Best Practice: Type-safe async function loader
-export const getStaticPaths: PageFunctions<RouteParams<"/blog/[slug]">]["getStaticPaths"] = async () => {
+export const getStaticPaths: PageFunctions<"/blog/[slug]">["getStaticPaths"] = async () => {
   const ids = await db.getTopProductIds();
   return ids;
 };`}
@@ -1045,10 +1080,10 @@ export const getStaticPaths: PageFunctions<RouteParams<"/blog/[slug]">]["getStat
                         label: "Standard [id]",
                         language: "typescript",
                         code: `// src/blog/[id]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 
 // Best Practice: Type-safe constant array (string[] or number[])
-export const getStaticPaths: PageFunctions<RouteParams<"/blog/[id]">]["getStaticPaths"] = [
+export const getStaticPaths: PageFunctions<"/blog/[id]">["getStaticPaths"] = [
   "1",
   "2",
   "3",
@@ -1060,12 +1095,10 @@ export const getStaticPaths: PageFunctions<RouteParams<"/blog/[id]">]["getStatic
                         label: "Optional [[category]]",
                         language: "typescript",
                         code: `// src/shop/[[category]]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 
 // Pass undefined to pre-render the base route without the segment
-export const getStaticPaths: PageFunctions<
-  RouteParams<"/shop/[[category]]">
->["getStaticPaths"] = [
+export const getStaticPaths: PageFunctions<"/shop/[[category]]">["getStaticPaths"] = [
   undefined,     // Generates /shop (root path, params.category will be undefined)
   "electronics", // Generates /shop/electronics
   "clothing",    // Generates /shop/clothing
@@ -1104,11 +1137,11 @@ export const getStaticPaths: PageFunctions<
                         label: "Standard [...slug]",
                         language: "typescript",
                         code: `// src/docs/[...slug]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 
 // Best Practice: Type-safe catch-all segments (string[][])
 // Each entry represents an array of path segments
-export const getStaticPaths: PageFunctions<RouteParams<"/docs/[...slug]">]["getStaticPaths"] = [
+export const getStaticPaths: PageFunctions<"/docs/[...slug]">["getStaticPaths"] = [
   ["intro"],             // Generates /docs/intro
   ["api", "v1", "auth"], // Generates /docs/api/v1/auth
 ];`,
@@ -1118,10 +1151,10 @@ export const getStaticPaths: PageFunctions<RouteParams<"/docs/[...slug]">]["getS
                         label: "Optional [[...slug]]",
                         language: "typescript",
                         code: `// src/docs/[[...slug]]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 
 // Pass an empty array [] to pre-render the root route (/docs)
-export const getStaticPaths: PageFunctions<RouteParams<"/docs/[[...slug]]">>["getStaticPaths"] = [
+export const getStaticPaths: PageFunctions<"/docs/[[...slug]]">["getStaticPaths"] = [
   [],                    // Generates /docs (root path)
   ["intro"],             // Generates /docs/intro
   ["api", "v1", "auth"], // Generates /docs/api/v1/auth
@@ -1268,20 +1301,19 @@ export const getStaticPaths: PageFunctions<RouteParams<"/docs/[[...slug]]">>["ge
                           <CodeBlock
                             language="typescript"
                             containerClassName="w-full overflow-hidden rounded-lg text-xs"
-                            hideHeader
                           >
 {`// 1. Parent: src/shop/[category]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 
-export const getStaticPaths: PageFunctions<RouteParams<"/shop/[category]">]["getStaticPaths"] = [
+export const getStaticPaths: PageFunctions<"/shop/[category]">["getStaticPaths"] = [
   "shoes",
   "shirts",
 ];
 
 // 2. Child: src/shop/[category]/[id]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 
-export const getStaticPaths: PageFunctions<RouteParams<"/shop/[category]/[id]">]["getStaticPaths"] = [
+export const getStaticPaths: PageFunctions<"/shop/[category]/[id]">["getStaticPaths"] = [
   "100",
   "200",
 ];
@@ -1326,11 +1358,9 @@ export const getStaticPaths: PageFunctions<RouteParams<"/shop/[category]/[id]">]
                         language: "typescript",
                         code: `// Structure: src/shop/[category]/[brand]/[...specs]/page_functions.ts
 // ([category] and [brand] do NOT have their own page.tsx; [...specs] is terminal)
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 
-export const getStaticPaths: PageFunctions<
-  RouteParams<"/shop/[category]/[brand]/[...specs]">
->["getStaticPaths"] = [
+export const getStaticPaths: PageFunctions<"/shop/[category]/[brand]/[...specs]">["getStaticPaths"] = [
   {
     category: "electronics",
     brand: "apple",
@@ -1351,11 +1381,9 @@ export const getStaticPaths: PageFunctions<
                         language: "typescript",
                         code: `// Structure: src/shop/[category]/[id]/[[format]]/page_functions.ts
 // ([category] and [id] do NOT have their own page.tsx; [[format]] is terminal)
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 
-export const getStaticPaths: PageFunctions<
-  RouteParams<"/shop/[category]/[id]/[[format]]">
->["getStaticPaths"] = [
+export const getStaticPaths: PageFunctions<"/shop/[category]/[id]/[[format]]">["getStaticPaths"] = [
   {
     category: "electronics",
     id: "macbook-pro",
@@ -1403,11 +1431,11 @@ export const getStaticPaths: PageFunctions<
                   containerClassName="w-full overflow-hidden rounded-lg mt-4"
                 >
 {`// src/products/[id]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 import { db } from "@/lib/db";
 
 // Best Practice: Type-safe async generator querying a database or CMS
-export const getStaticPaths: PageFunctions<RouteParams<"/products/[id]">]["getStaticPaths"] = async () => {
+export const getStaticPaths: PageFunctions<"/products/[id]">["getStaticPaths"] = async () => {
   // Only pre-generate the top 50 products at build time
   const featured = await db.getFeaturedProducts({ limit: 50 });
   return featured.map((p) => p.id);
@@ -2073,8 +2101,11 @@ export const allowISG: PageFunctions["allowISG"] = true; // New posts under "alp
               </div>
               <p className="mt-4">
                 The <code>revalidate</code> export is Dinou&apos;s{" "}
-                <strong>single source of truth</strong> for route caching and
-                rendering behavior. It is measured in <strong>seconds (s)</strong>.
+                <strong>single source of truth</strong> for segment caching and
+                rendering behavior in both <code>page_functions.ts</code> and{" "}
+                <code>layout_functions.ts</code> (where layouts and child pages
+                maintain independent cache timers). It is measured in{" "}
+                <strong>seconds (s)</strong>.
               </p>
 
               <div className="border rounded-lg p-4 bg-card not-prose my-6">
@@ -2113,7 +2144,9 @@ export const allowISG: PageFunctions["allowISG"] = true; // New posts under "alp
                     <p className="text-muted-foreground mt-1">
                       <strong>Pure Static (SSG):</strong> Pre-rendered at build
                       time and cached indefinitely until explicit on-demand
-                      invalidation via <code>revalidatePath()</code> or{" "}
+                      invalidation via <code>revalidatePage()</code>,{" "}
+                      <code>revalidateLayout()</code>,{" "}
+                      <code>revalidatePath()</code>, or{" "}
                       <code>revalidateTag()</code>.
                     </p>
                   </div>
@@ -2173,8 +2206,12 @@ export const revalidate: PageFunctions["revalidate"] = 0;
                 </h3>
               </div>
               <p className="mt-4">
-                Assigns custom tags to the static page cache files, allowing the
-                page to be purged and regenerated on-demand using{" "}
+                Assigns custom invalidation tags to a cached{" "}
+                <code>page_functions.ts</code> or{" "}
+                <code>layout_functions.ts</code> segment (receiving the dynamic
+                parameters accumulated up to that segment), allowing individual
+                pages or layouts to be surgically purged and regenerated
+                on-demand using{" "}
                 <a
                   href="/docs/revalidation#revalidatetag"
                   className="text-primary font-medium underline underline-offset-4 hover:opacity-80"
@@ -2213,12 +2250,10 @@ export const revalidate: PageFunctions["revalidate"] = 0;
                     label: "Sync (Param-Based)",
                     language: "typescript",
                     code: `// src/products/[id]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 
 // Best Practice: Type-safe synchronous cache tags
-export const getCacheTags: PageFunctions<
-  RouteParams<"/products/[id]">
->["getCacheTags"] = (params) => {
+export const getCacheTags: PageFunctions<"/products/[id]">["getCacheTags"] = (params) => {
   // Associate the generated page with a general tag and a product tag
   return [
     "products",
@@ -2231,13 +2266,11 @@ export const getCacheTags: PageFunctions<
                     label: "Async (Database / Metadata Lookup)",
                     language: "typescript",
                     code: `// src/products/[id]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 import { db } from "@/lib/db";
 
 // Best Practice: Type-safe async tag resolver
-export const getCacheTags: PageFunctions<
-  RouteParams<"/products/[id]">
->["getCacheTags"] = async (params) => {
+export const getCacheTags: PageFunctions<"/products/[id]">["getCacheTags"] = async (params) => {
   // Query product relationships to attach category and brand tags not present in URL
   const product = await db.products.findById(params?.id);
 
@@ -2291,7 +2324,7 @@ export const getCacheTags: PageFunctions<
                       2. Parallel Suspense Streaming
                     </span>
                     <p className="text-muted-foreground leading-relaxed">
-                      Inside <code>&lt;Suspense&gt;</code>, async Server Components (including those reading <code>cookies</code>, <code>headers</code>, or <code>query</code>) and Client Components receiving un-awaited <code>Promise</code> props stream concurrently at request time, replacing each fallback skeleton in-place as data resolves.
+                      Inside <code>&lt;Suspense&gt;</code>, <code>async</code> Server Components, Server Components (sync or <code>async</code>) reading <code>cookies</code>, <code>headers</code>, <code>query</code>, or <code>useSearchParams()</code>, and Client Components receiving un-awaited <code>Promise</code> props stream concurrently at request time, replacing each fallback skeleton in-place as data resolves.
                     </p>
                   </div>
                 </div>
@@ -2513,12 +2546,15 @@ export const ppr: PageFunctions["ppr"] = true;`,
                       3. Dynamic Bailout Rules Are Preserved
                     </span>
                     <p className="text-muted-foreground leading-relaxed">
-                      Reading <code>req.cookies</code>, <code>req.headers</code>,
-                      or <code>req.query</code> inside a <code>ppr = false</code>{" "}
-                      segment (even inside <code>&lt;Suspense&gt;</code>)—or{" "}
+                      Reading <code>req.cookies</code>, <code>req.headers</code>,{" "}
+                      <code>req.query</code>, calling <code>useSearchParams()</code>{" "}
+                      in a Server Component, or rendering{" "}
+                      <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code>{" "}
+                      inside a <code>&quot;ppr: false&quot;</code> segment (even
+                      inside <code>&lt;Suspense&gt;</code>)—or{" "}
                       <strong>outside</strong> <code>&lt;Suspense&gt;</code> in a{" "}
-                      <code>ppr = true</code> segment—triggers a Dynamic SSR
-                      bailout to protect cache integrity.
+                      <code>&quot;ppr: true&quot;</code> segment—triggers a
+                      Dynamic SSR bailout to protect cache integrity.
                     </p>
                   </div>
 
@@ -2914,20 +2950,22 @@ export default pageConfig;`}
                     language="typescript"
                     containerClassName="w-full overflow-hidden rounded-lg"
                   >
-{`// src/admin/layout_functions.ts
+{`// src/workspace/[org]/layout_functions.ts
 import type { LayoutFunctions } from "dinou";
-import { getAdminSession } from "@/lib/auth";
+import { db } from "@/lib/db";
 
-interface AdminLayoutProps {
-  userSession: { role: string; email: string };
+interface WorkspaceLayoutProps {
+  workspace: { name: string; plan: string };
 }
 
-const layoutConfig: LayoutFunctions<"/admin/[...rest]", AdminLayoutProps> = {
-  ppr: true,
-  revalidate: 0, // Admin shell is dynamic
-  getProps: async () => {
-    const session = await getAdminSession();
-    return { userSession: session };
+const layoutConfig: LayoutFunctions<"/workspace/[org]", WorkspaceLayoutProps> = {
+  ppr: true,        // Enables PPR for this layout shell (without cascading to child pages)
+  revalidate: 3600, // Cache layout static shell independently for 1 hour
+  validateParams: (params) => Boolean(params?.org && /^[a-z0-9-]+$/.test(params.org)),
+  getCacheTags: (params) => ["workspaces", \`workspace-\${params?.org}\`],
+  getProps: async (params) => {
+    const workspace = await db.workspaces.findBySlug(params.org);
+    return { workspace };
   },
 };
 

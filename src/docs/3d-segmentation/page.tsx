@@ -348,7 +348,7 @@ export default function Page() {
                     <strong>Page Lifecycle (<code>page_functions.ts</code>):</strong> Controls data fetching, cache duration, and invalidation tags exclusively for <code>page.tsx</code>, without affecting or re-running the parent layout.
                   </li>
                   <li>
-                    <strong>Per-Segment Route Guards (<code>allowISG</code> &amp; <code>validateParams</code>):</strong> On nested dynamic routes, each segment validates only its own dynamic parameters along the active layout chain—so a parent dynamic layout locked with <code>allowISG = false</code> never blocks valid child dynamic pages from generating new parameters on-demand via <code>allowISG = true</code>.
+                    <strong>Per-Segment Route Guards (<code>allowISG</code> &amp; <code>validateParams</code>):</strong> On nested dynamic routes, each segment evaluates only the dynamic parameters accumulated up to that segment along the active layout chain—so a parent dynamic layout locked with <code>allowISG = false</code> never blocks valid child dynamic pages from generating new parameters on-demand via <code>allowISG = true</code>, and parent <code>validateParams</code> never sees deeper child parameters.
                   </li>
                 </ul>
 
@@ -1105,7 +1105,7 @@ export function PostCreator() {
                         Any <strong>Client Component (<code>&quot;use client&quot;</code>) receiving an un-awaited <code>Promise</code> prop</strong> (or array of <code>Promise</code>s, passed from a Server Component or <code>getProps</code> and unwrapped via React 19&apos;s <code>use(promise)</code>).
                       </li>
                       <li>
-                        <strong>Server Components</strong> reading request APIs (<code>getContext()</code> <code>cookies</code>/<code>headers</code>/<code>query</code>, or <code>useSearchParams()</code>) or rendering <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code>. <em>(In contrast, calling <code>useSearchParams()</code> inside a <code>&quot;use client&quot;</code> component stays in the Static Shell without creating a server hole, syncing URL query params in the browser right after hydration.)</em>
+                        <strong>Server Components (sync or <code>async</code>)</strong> reading request APIs (<code>getContext()</code> <code>cookies</code>/<code>headers</code>/<code>query</code>, or <code>useSearchParams()</code>) or rendering <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code>. <em>(In contrast, calling <code>useSearchParams()</code> inside a <code>&quot;use client&quot;</code> component—even when wrapped in <code>&lt;Suspense&gt;</code>—stays in the Static Shell without opening a server hole, hydrating cleanly both in the shell and inside holes before syncing URL query params in the browser.)</em>
                       </li>
                     </ul>
                     <p className="text-[11px] text-muted-foreground pt-1">
@@ -1366,7 +1366,7 @@ export default function DocPage() {
                       <span>3. Isolated Execution Scopes</span>
                     </div>
                     <p className="text-muted-foreground leading-relaxed">
-                      On mixed routes, <code>&lt;Suspense&gt;</code> boundaries inside a <code>&quot;ppr: false&quot;</code> segment resolve statically at build time without becoming PPR holes, and reading dynamic request APIs inside a <code>&quot;ppr: false&quot;</code> segment triggers a Dynamic SSR bailout as expected.
+                      On mixed routes, <code>&lt;Suspense&gt;</code> boundaries inside a <code>&quot;ppr: false&quot;</code> segment resolve statically at build time without becoming PPR holes, and reading dynamic request APIs (<code>cookies</code>/<code>headers</code>/<code>query</code>, RSC <code>useSearchParams()</code>, or <code>revalidate=&#123;0&#125;</code>) inside a <code>&quot;ppr: false&quot;</code> segment—<strong>even inside <code>&lt;Suspense&gt;</code></strong>—triggers a Full-Route Dynamic Bailout as expected.
                     </p>
                   </div>
                 </div>
@@ -1421,10 +1421,10 @@ export default function DocPage() {
                   <div className="border rounded-lg p-4 bg-muted/20 space-y-1.5 border-border min-w-0">
                     <div className="font-semibold text-foreground flex items-center gap-1.5">
                       <Zap className="h-4 w-4 text-amber-500" />
-                      <span>3. Dynamic Slot (revalidate=&#123;0&#125;) in Static Page</span>
+                      <span>3. Fast-TTL &amp; Nested Slots vs. revalidate=&#123;0&#125;</span>
                     </div>
                     <p className="text-muted-foreground leading-relaxed">
-                      On a <code>ppr = false</code> static page, rendering <code>&lt;DinouCacheSlot id=&quot;live-ticker&quot; revalidate=&#123;0&#125;&gt;</code> bypasses server caching for that widget on every refresh while keeping the surrounding static page and layout cached.
+                      Inside a <code>&quot;ppr: false&quot;</code> static page, use short-TTL or nested <code>Outer → Inner</code> slots (e.g., <code>revalidate=&#123;30&#125;</code> inside a 1-hour page) to keep the host page static while refreshing volatile widgets via SWR. Using <code>revalidate=&#123;0&#125;</code> on a <code>&quot;ppr: false&quot;</code> page opts that page into Dynamic SSR (while keeping the parent <code>layout.tsx</code> and sibling <code>revalidate &gt;= 1</code> slots cached—or pair <code>revalidate=&#123;0&#125;</code> with <code>ppr = true</code> + <code>&lt;Suspense&gt;</code> in Section 6 for a 0ms Static Shell).
                     </p>
                   </div>
 
@@ -1477,7 +1477,7 @@ export default function WorkspaceLayout({
                       language: "tsx",
                       code: `// Cached for 1h via page_functions.ts
 import { DinouCacheSlot } from "dinou/server";
-import { UsageBreakdownTable, RealtimePingWidget } from "./widgets";
+import { UsageBreakdownTable, DepartmentPanel, LiveQuotaTicker } from "./widgets";
 
 export default function WorkspacePage() {
   return (
@@ -1487,9 +1487,13 @@ export default function WorkspacePage() {
         <UsageBreakdownTable />
       </DinouCacheSlot>
 
-      {/* Always-fresh slot (revalidate={0}) inside a static host page */}
-      <DinouCacheSlot id="realtime-ping" revalidate={0}>
-        <RealtimePingWidget />
+      {/* Nested Outer (1h) -> Inner (30s) slots inside a cached static host page */}
+      <DinouCacheSlot id="workspace-dept-outer" tag="dept-outer" revalidate={3600}>
+        <DepartmentPanel>
+          <DinouCacheSlot id="workspace-quota-ticker" tag="quota-ticker" revalidate={30}>
+            <LiveQuotaTicker />
+          </DinouCacheSlot>
+        </DepartmentPanel>
       </DinouCacheSlot>
     </section>
   );
@@ -1681,7 +1685,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"
                   <strong>3. <code>&lt;Suspense&gt;</code> Wrapping <code>&lt;DinouCacheSlot revalidate=&#123;N&#125;&gt;</code> (Default):</strong> Becomes a <strong>Cached Dynamic PPR Hole</strong>. The Static Shell flushes immediately with the <code>&lt;Suspense&gt;</code> fallback, and the hole streams from the server slot cache in <strong>~2ms</strong> while its TTL is valid—re-executing live in the stream on expiry or <code>revalidateTag</code> without touching the Static Shell <em>(Section 6.1, Pattern A)</em>.
                 </li>
                 <li>
-                  <strong>4. <code>&lt;DinouCacheSlot revalidate=&#123;N&#125;&gt;</code> Inside a Personalized Dynamic <code>&lt;Suspense&gt;</code> Hole:</strong> When a <code>&lt;Suspense&gt;</code> hole must run live on every request because it reads user-specific request data (<code>req.cookies</code>, <code>req.headers</code>, or <code>req.query</code>), placing a parameterized <code>&lt;DinouCacheSlot&gt;</code> <em>inside</em> it caches the expensive shared UI (~2ms) across users who share that parameter <em>(Section 6.2)</em>.
+                  <strong>4. <code>&lt;DinouCacheSlot revalidate=&#123;N&#125;&gt;</code> Inside a Personalized Dynamic <code>&lt;Suspense&gt;</code> Hole:</strong> When a <code>&lt;Suspense&gt;</code> hole must run live on every request because a Server Component reads user-specific request data (<code>req.cookies</code>, <code>req.headers</code>, <code>req.query</code>, or <code>useSearchParams()</code>), placing a parameterized <code>&lt;DinouCacheSlot&gt;</code> <em>inside</em> it caches the expensive shared UI (~2ms) across users who share that parameter <em>(Section 6.2)</em>.
                 </li>
                 <li>
                   <strong>5. <code>&lt;Suspense&gt;</code> Wrapping <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code> (Surgically Refreshable Live Hole):</strong> With <code>revalidate=&#123;0&#125;</code>, the slot never caches on the server and streams live on every request as a Dynamic PPR Hole (without breaking the Static Shell). Unlike a plain <code>&lt;Suspense&gt;</code> hole (which can only be refreshed by re-running <em>all</em> page holes via <code>router.refresh()</code>), wrapping it in <code>&lt;DinouCacheSlot id=&quot;live-hole&quot; revalidate=&#123;0&#125;&gt;</code> lets you refresh <strong>only that specific hole</strong> from the client with <code>refreshSlot(&quot;live-hole&quot;)</code> <em>(Section 6.2)</em>.
@@ -1690,7 +1694,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"
                   <strong>6. Nested Slots (<code>Outer &lt;DinouCacheSlot&gt; → Inner &lt;DinouCacheSlot&gt;</code>):</strong> You can nest a short-TTL slot (e.g., <code>revalidate=&#123;60&#125;</code>) inside a long-TTL slot (e.g., <code>revalidate=&#123;3600&#125;</code>) in either the Static Shell or a Dynamic Hole. When the inner slot expires or is refreshed, Dinou re-renders only the inner child slot and splices it into the cached parent slot without re-running the parent <em>(Section 6.2)</em>.
                 </li>
                 <li>
-                  <strong>7. <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code> (or Request Data Access) Outside <code>&lt;Suspense&gt;</code> (Full-Route Bailout):</strong> Because there is no outer <code>&lt;Suspense&gt;</code> boundary to isolate it into a PPR hole, placing <code>revalidate=&#123;0&#125;</code> or reading <code>cookies</code>/<code>headers</code>/<code>query</code> outside <code>&lt;Suspense&gt;</code> forces a <strong>Full-Route Dynamic Bailout</strong> (the entire route falls back to per-request SSR).
+                  <strong>7. <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code> (or RSC Request Data Access) Outside <code>&lt;Suspense&gt;</code> (Full-Route Bailout):</strong> Because there is no outer <code>&lt;Suspense&gt;</code> boundary to isolate it into a PPR hole, placing <code>revalidate=&#123;0&#125;</code> or reading <code>cookies</code>/<code>headers</code>/<code>query</code>/RSC <code>useSearchParams()</code> outside <code>&lt;Suspense&gt;</code> forces a <strong>Full-Route Dynamic Bailout</strong> (the entire route falls back to per-request SSR).
                 </li>
               </ul>
 
@@ -1754,7 +1758,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"
               <section id="ppr-slot-patterns" className="mt-8 scroll-mt-20">
                 <h4>6.2. Personalized Holes with Nested Slots &amp; Surgically Refreshable Live Holes</h4>
                 <p>
-                  What if a dynamic PPR <code>&lt;Suspense&gt;</code> hole reads user-specific request data (<code>req.cookies</code>, <code>req.headers</code>, or <code>req.query</code>), and <em>inside</em> that personalized hole you also need to render an expensive shared calculation or a nested <code>Outer → Inner</code> slot hierarchy? Or what if you have a 100% live uncached hole that you want to refresh individually via <code>refreshSlot(id)</code> without re-running every other hole on the page via <code>router.refresh()</code>?
+                  What if a dynamic PPR <code>&lt;Suspense&gt;</code> hole reads user-specific request data in a Server Component (<code>req.cookies</code>, <code>req.headers</code>, <code>req.query</code>, or <code>useSearchParams()</code>), and <em>inside</em> that personalized hole you also need to render an expensive shared calculation or a nested <code>Outer → Inner</code> slot hierarchy? Or what if you have a 100% live uncached hole that you want to refresh individually via <code>refreshSlot(id)</code> without re-running every other hole on the page via <code>router.refresh()</code>?
                 </p>
                 <p>
                   Simply place parameterized <code>&lt;DinouCacheSlot&gt;</code> boundaries <strong>inside</strong> the personalized component, or wrap a live hole in <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code> inside <code>&lt;Suspense&gt;</code>:
@@ -2108,6 +2112,11 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
                       <td className="p-3.5 font-mono">&lt;Suspense&gt; wrapping &lt;DinouCacheSlot revalidate=&#123;N&#125;&gt; + noDynamic()</td>
                       <td className="p-3.5 text-emerald-600 dark:text-emerald-400 font-medium">Static Shell Slot (baked into initial HTML; Background SWR on expiry)</td>
                       <td className="p-3.5 text-emerald-600 dark:text-emerald-400 font-medium">Static Slot (baked into initial HTML; Background SWR on expiry)</td>
+                    </tr>
+                    <tr>
+                      <td className="p-3.5 font-mono">Client Component (&quot;use client&quot;) calling useSearchParams() (inside or outside &lt;Suspense&gt;)</td>
+                      <td className="p-3.5 text-emerald-600 dark:text-emerald-400 font-medium">Static Shell (does not open a server PPR hole; hydrates cleanly &amp; syncs query in browser)</td>
+                      <td className="p-3.5 text-emerald-600 dark:text-emerald-400 font-medium">Static HTML (pre-rendered at build time; hydrates cleanly &amp; syncs query in browser)</td>
                     </tr>
                     <tr>
                       <td className="p-3.5 font-mono">Reading cookies/headers/query, RSC useSearchParams(), or revalidate=&#123;0&#125; inside &lt;Suspense&gt; (even with noDynamic)</td>
