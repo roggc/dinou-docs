@@ -81,10 +81,18 @@ declare module "dinou" {
     | `?${string}`;
 
   export type DinouGeneratedRoute =
-    | DinouInternalRoute
-    | `${DinouInternalRoute}?${string}`
-    | `${DinouInternalRoute}#${string}`
-    | DinouRelativeOrExternalRoute;
+    | DinouStaticRoutes
+    | ((
+        | DinouDynamicRoutes
+        | `${DinouInternalRoute}?${string}`
+        | `${DinouInternalRoute}#${string}`
+        | DinouRelativeOrExternalRoute
+      ) & Record<never, never>);
+
+  export interface DinouNavigableParamsMap {
+    "/": Record<string, never>;
+    "/workspace/[org]/projects/[projectId]": { org: string; projectId: string };
+  }
 
   export interface DinouRouteParamsMap {
     "/": Record<string, never>;
@@ -118,6 +126,7 @@ declare module "dinou" {
   namespace DinouRouter {
     interface Register {
       route: DinouGeneratedRoute;
+      navigableParams: DinouNavigableParamsMap;
       params: DinouRouteParamsMap;
       layoutParams: DinouLayoutParamsMap;
       layoutSlots: DinouLayoutSlotsMap;
@@ -149,7 +158,8 @@ All routing types are exported from `"dinou"` (and re-exported from `"dinou/serv
 
 | Exported Type | Target File(s) | Description |
 | :--- | :--- | :--- |
-| `DinouRoute` | Any component / helper | Union of all navigable URLs (`page.*`), query/hash suffixes, relative paths, and external URLs (`http://`, `https://`, `mailto:`, `tel:`). Powers `<Link href / to>`, `router.push()`, and `router.replace()`. |
+| `DinouRoute` | Any component / helper | Union of all resolved navigable URLs (`page.*`), query/hash suffixes, relative paths, and external URLs (`http://`, `https://`, `mailto:`, `tel:`). Ideal for typing URL props on custom UI components. |
+| `DinouLinkTarget` / `LinkProps<T>` | `<Link>`, `useRouter()` | Combines `DinouRoute` with exact dynamic route pattern literals (`DinouDynamicRoutePattern`, e.g. `"/blog/[slug]"`) so IDEs surface dynamic routes in `Ctrl + Space` autocomplete while enforcing conditional `params` whenever `[param]` brackets are used. |
 | `PageProps<T, TProps?>` | `page.tsx`, `not_found.tsx`, `@slot/page.tsx` | Types `{ params: RouteParams<T> } & TProps`. Accepts both page patterns (`"/blog/[slug]"`) and registered slot patterns (`"/workspace/[org]/@sidebar"`), plus optional `TProps` from `page_functions.ts` (`getProps`). |
 | `LayoutProps<T, TProps?>` | `layout.tsx` (leaf or intermediate) | Types `{ children: ReactNode; params: LayoutParams<T> } & LayoutSlots<T> & TProps`. Works on intermediate folders without a sibling `page.tsx` and **auto-infers** optional `ReactNode` props for all sibling `@slot` pages! |
 | `SlotProps<T>` | `@slot/page.tsx` | Dedicated prop interface `{ params: SlotParams<T> }` with autocomplete scoped strictly to parallel `@slot` segments (e.g. `"/workspace/[org]/@analytics"`). |
@@ -287,10 +297,21 @@ src/
    }: PageProps<"/workspace/[org]/projects/[projectId]">) {
      return (
        <div>
-         {/* Valid navigable leaf URL */}
-         <Link href={`/workspace/${params.org}/projects/${params.projectId}`}>
-           Reload Project
+         {/* Option A: Autocompleted dynamic pattern + required typed params */}
+         <Link
+           to="/workspace/[org]/projects/[projectId]"
+           params={{ org: params.org, projectId: params.projectId }}
+         >
+           Reload Project (Pattern + params)
          </Link>
+
+         {/* Option B: Direct template string interpolation (no params prop) */}
+         <Link href={`/workspace/${params.org}/projects/${params.projectId}`}>
+           Reload Project (Template)
+         </Link>
+
+         {/* Compile-time TS error: uninterpolated [org]/[projectId] without params! */}
+         {/* <Link to="/workspace/[org]/projects/[projectId]">Missing params</Link> */}
 
          {/* Compile-time TS error: /workspace/[org] has no page.tsx! */}
          {/* <Link href={`/workspace/${params.org}`}>Workspace</Link> */}
@@ -343,6 +364,13 @@ Several subtle TypeScript type-checker constraints are handled in `dinou/index.d
    - Every helper type referenced in the signature of exported types (`SimplifyParams`, `FallbackRouteParams`, `FormatPatternKeys`, `FormatOptionalPatternKeys`, `IsUnion`, `CleanRoutePath`, `LookupSingleSegmentParams`, `LookupSegmentParams`, `DinouRegisteredSlotPattern`, `DinouSlotPattern`, `DinouLayoutPattern`, `DinouErrorPattern`, `DinouSegmentPattern`, `LayoutParams`, `LayoutSlots`, `SlotParams`, `ErrorParams`) is explicitly exported from both `dinou/index.d.ts` and `dinou/server.d.ts`, guaranteeing clean compilation under `declaration: true`.
 5. **Graceful Fallback Mode (Before `.dinou/types/routes.d.ts` Exists)**:
    - When `DinouRouter.Register` has not been augmented yet (e.g. in a brand-new project before running `dinou dev`, `dinou build`, or `dinou typegen`), `DinouRoute` falls back to `string` and `RouteParams` / `LayoutParams` / `SlotParams` / `ErrorParams` fall back to `FallbackRouteParams<T>` (template-literal `ExtractRouteParams<T>`), inferring `{ org: string }` directly from `"/workspace/[org]/@sidebar"`.
+6. **Dynamic Route Autocomplete (`Ctrl + Space`), Coexisting Navigation Styles & Ironclad Bracket Safety (`<Link>` & `useRouter`)**:
+   - **Why Template Literals Alone Don't Autocomplete**: TypeScript's `tsserver` (`getCompletionsAtPosition`) hides infinite `TemplateLiteralType` members like `` `/blog/${string | number}` `` from `Ctrl + Space` completion menus and only displays finite string literal types. Furthermore, TypeScript's union subtype reduction (`removeSubtypes`) normally absorbs string literals like `"/blog/[slug]"` (and sibling static routes next to catch-all routes) into `` `/blog/${string | number}` `` because `"[slug]"` is assignable to `string`!
+   - **Preserving Completion Literals (`& Record<never, never>`)**: Wrapping template-literal union branches in `& Record<never, never>` keeps them 100% assignable from interpolated template strings (`` `/blog/${slug}` ``) while preventing `removeSubtypes` from collapsing exact `DinouDynamicRoutePattern` literals (`"/blog/[slug]"`)—making every navigable dynamic route appear in `Ctrl + Space` inside `<Link to="|">`, `<Link href="|">`, `router.push("|")`, and `router.replace("|")`.
+   - **Pure Covariant Inference (`NoInfer<THref>`) & Conditional `params` Enforcement**: `Link<THref>` and `router.push<THref>` / `router.replace<THref>` keep `href` / `to` as pure covariant `THref` while wrapping `LinkParamsProps<NoInfer<THref>>` and `RouterNavigationArgs<NoInfer<THref>>` in `NoInfer<THref>`. Whenever `THref` contains internal `[...]` brackets:
+     - `HasInvalidBracketPattern<THref>` rejects unregistered bracket names (`"/blog/[wrong]"`) or half-interpolated templates (`` `/shop/${cat}/[item]` ``) with `never`.
+     - `LinkParamsProps<THref>` and `RouterNavigationArgs<THref>` make `params` **strictly required** whenever at least one parameter is required (`[param]` or `[...param]`), optional when all parameters are optional (`[[param]]` / `[[...param]]`), and forbidden (`params?: never`) on static or already-interpolated URLs.
+     - Deliberate bracket values passed inside `params` (e.g. `params={{ slug: "[slug]" }}`) are permitted and safely encoded via `encodeURIComponent` in `interpolateRouteParams()` (`dinou/core/navigation-utils.js`).
 
 ---
 
@@ -372,8 +400,11 @@ Several subtle TypeScript type-checker constraints are handled in `dinou/index.d
 | `dinou/core/get-jsx.js` | Added `dParams` fallback for `slotParams` and passed `slotParams` into `getFilePathAndDynamicParams` when resolving `@slot/error.*` in runtime RSC/SSR rendering. |
 | `dinou/core/get-error-jsx.js` | Propagated `dParams` / `slotParams` into parallel `@slot` and `@slot/error.*` rendering inside error recovery trees. |
 | `dinou/core/build-static-pages.js` | Propagated `slotParams` into `@slot/error.*` resolution during static/PPR build passes. |
-| `dinou/core/generate-route-types.js` | Added `collectRouteTopology()` and `inspectSlotDirectory()`, generating `DinouRouteParamsMap`, `DinouLayoutParamsMap`, `DinouLayoutSlotsMap`, `DinouSlotParamsMap`, and `DinouErrorParamsMap` while keeping `DinouGeneratedRoute` strictly scoped to `page.*` routes. |
-| `dinou/index.d.ts` | Upgraded `LayoutProps`, `PageProps`, `ErrorProps`, `RouteParams`, `PageFunctions`, and `LayoutFunctions`; added `SlotProps`, `NotFoundProps`, `LayoutParams`, `LayoutSlots`, `SlotParams`, `ErrorParams`, `DinouLayoutPattern`, `DinouSlotPattern`, `DinouErrorPattern`, `DinouNotFoundPattern`, and `TS2312`/`TS4058`-safe helpers. |
+| `dinou/core/generate-route-types.js` | Added `collectRouteTopology()` and `inspectSlotDirectory()`, generating `DinouNavigableParamsMap`, `DinouRouteParamsMap`, `DinouLayoutParamsMap`, `DinouLayoutSlotsMap`, `DinouSlotParamsMap`, and `DinouErrorParamsMap`, and preserving literal completions on `DinouGeneratedRoute` via `& Record<never, never>`. |
+| `dinou/core/navigation-utils.js` | Added zero-allocation fast-path `interpolateRouteParams(href, params)` supporting `[param]`, `[...param]`, `[[param]]`, `[[...param]]`, URL encoding, and query/hash preservation. |
+| `dinou/core/link.jsx` | Wired `params` prop into `<Link>` via `interpolateRouteParams` without leaking `params` onto the rendered `<a>` DOM element. |
+| `dinou/core/navigation.js` | Wired `{ params }` option into `useRouter().push()` and `useRouter().replace()` via `interpolateRouteParams`. |
+| `dinou/index.d.ts` | Upgraded `Link`, `LinkProps`, `useRouter`, `LayoutProps`, `PageProps`, `ErrorProps`, `RouteParams`, `PageFunctions`, and `LayoutFunctions`; added `DinouLinkTarget`, `LinkParamsProps`, `RouterNavigationArgs`, `SlotProps`, `NotFoundProps`, and `TS2312`/`TS4058`-safe helpers. |
 | `dinou/server.d.ts` | Re-exported all new horizontal routing types and helpers from `./index` so `"dinou"` and `"dinou/server"` stay in complete parity. |
 | `dinou/node/dev.js` | Expanded the hot route-type watcher regex to regenerate `.dinou/types/routes.d.ts` on `add`/`unlink` of `page`, `page_functions`, `layout`, `layout_functions`, `layout.functions`, `error`, and `not_found` files. |
 | `dinou/cli.js` | Added the `dinou typegen` CLI command for instant standalone `.dinou/types/routes.d.ts` generation. |

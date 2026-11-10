@@ -171,8 +171,13 @@ export function NavigationBar() {
       {/* ✅ Type-Safe href: autocompleted in your IDE via DinouRoute */}
       <Link href="/dashboard">Dashboard</Link>
 
-      {/* ✅ Dynamic interpolation typed against registered routes */}
-      <Link href={\`/blog/\${post.slug}\`}>Post</Link>
+      {/* ✅ Dynamic route pattern (Ctrl + Space autocompleted) with typed params */}
+      <Link href="/blog/[slug]" params={{ slug: post.slug }}>
+        Post
+      </Link>
+
+      {/* ✅ Or direct template string interpolation (without params) */}
+      <Link href={\`/blog/\${post.slug}\`}>Post (Template)</Link>
 
       {/* Disable prefetch for heavy routes or rarely visited pages */}
       <Link href="/analytics" prefetch={false}>
@@ -240,7 +245,7 @@ export default function LoginButton() {
                         router.push(href, options)
                       </td>
                       <td className="p-3.5 text-muted-foreground">
-                        Navigates to the route and adds a new entry to the browser history stack. Supports <code>&#123; fresh: true &#125;</code>.
+                        Navigates to the route and adds a new entry to the browser history stack. Supports <code>&#123; fresh: true &#125;</code> and <code>&#123; params &#125;</code> when <code>href</code> is a dynamic route pattern (e.g. <code>&quot;/blog/[slug]&quot;</code>).
                       </td>
                     </tr>
                     <tr>
@@ -248,7 +253,7 @@ export default function LoginButton() {
                         router.replace(href, options)
                       </td>
                       <td className="p-3.5 text-muted-foreground">
-                        Navigates to the route, replacing the current history entry without pushing a new history state. Supports <code>&#123; fresh: true &#125;</code>.
+                        Navigates to the route, replacing the current history entry without pushing a new history state. Supports <code>&#123; fresh: true &#125;</code> and <code>&#123; params &#125;</code> when <code>href</code> is a dynamic route pattern.
                       </td>
                     </tr>
                     <tr>

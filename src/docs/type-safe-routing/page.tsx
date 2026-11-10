@@ -39,7 +39,7 @@ import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 const tocItems = [
   { id: "overview", title: "1. Overview & Zero-Runtime Guarantee", level: 2 },
   { id: "core-pillars", title: "1.1. Outward Navigation vs. Inward Consumption", level: 3 },
-  { id: "zero-cost", title: "1.2. Zero-Runtime Cost (0 Extra Bytes)", level: 3 },
+  { id: "zero-cost", title: "1.2. Zero Generated Route Table Overhead", level: 3 },
   { id: "quick-start", title: "2. Quick Start for Developers", level: 2 },
   { id: "level-1-navigation", title: "2.1. Level 1: Links & Navigation", level: 3 },
   { id: "level-2-components", title: "2.2. Level 2: Pages, Horizontal Layouts & Parallel Slots", level: 3 },
@@ -49,7 +49,7 @@ const tocItems = [
   { id: "route-pattern-picking", title: "4.1. IDE Autocomplete Workflow (Ctrl + Space)", level: 3 },
   { id: "typed-error-pages", title: "4.2. Error & Not-Found Pages (ErrorProps & NotFoundProps)", level: 3 },
   { id: "custom-components", title: "4.3. Custom Navigation Components with DinouRoute", level: 3 },
-  { id: "dynamic-interpolation", title: "4.4. Dynamic Navigation with Typed Interpolation", level: 3 },
+  { id: "dynamic-interpolation", title: "4.4. Dynamic Navigation: Pattern + params vs. Template Strings", level: 3 },
   { id: "architecture", title: "5. Technical Architecture: Under the Hood", level: 2 },
   { id: "route-scanner", title: "5.1. Ultra-Fast Route Scanner", level: 3 },
   { id: "generated-definitions", title: "5.2. Module Augmentation", level: 3 },
@@ -167,15 +167,15 @@ export default function TypeSafeRoutingPage() {
               <div id="zero-cost" className="scroll-mt-20 mt-8 space-y-3">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Zap className="h-5 w-5 text-amber-500" />
-                  1.2. Zero-Runtime Cost (0 Extra Bytes)
+                  1.2. Zero Generated Route Table Overhead
                 </h3>
                 <p>
-                  Everything in Dinou&apos;s type-safe routing exists strictly at the TypeScript layer inside auto-generated <code>.d.ts</code> declaration files.
+                  Dinou&apos;s route registry lives exclusively at the TypeScript layer inside auto-generated <code>.d.ts</code> declaration files—shipping <strong>0 bytes of generated route manifests</strong> regardless of whether your project has 10 routes or 1,000 routes.
                 </p>
                 <div className="not-prose bg-muted/50 rounded-xl p-4 border border-border flex items-center gap-4">
                   <CheckCircle2 className="h-6 w-6 text-emerald-500 shrink-0" />
                   <div className="text-xs sm:text-sm text-slate-800 dark:text-slate-200">
-                    <strong>Zero Bundle Overhead:</strong> Production client JavaScript bundles and SSR server outputs contain <strong>0 extra bytes</strong>. No runtime regex engines, no runtime validators, and no performance penalty.
+                    <strong>Zero Per-Route Bundle Growth:</strong> Static and template-interpolated URLs pass straight through at runtime with zero allocations, while optional <code>params=&#123;&#123; ... &#125;&#125;</code> substitution uses a tiny built-in segment interpolator in Dinou&apos;s core navigation helper—no generated runtime route tables or validators.
                   </div>
                 </div>
               </div>
@@ -209,11 +209,16 @@ export default function TypeSafeRoutingPage() {
 export function Navbar({ post }: { post: { slug: string } }) {
   return (
     <nav className="flex gap-4">
-      {/* ✅ Instant autocompletion in your IDE (supports both href and to) */}
+      {/* ✅ Instant Ctrl + Space autocompletion for BOTH static & dynamic routes */}
       <Link href="/docs/routing">Routing Guide</Link>
 
-      {/* ✅ Dynamic routes with typed template strings */}
-      <Link href={\`/blog/\${post.slug}\`}>View Post</Link>
+      {/* ✅ Option A: Autocompleted dynamic pattern + required typed params */}
+      <Link href="/blog/[slug]" params={{ slug: post.slug }}>
+        View Post
+      </Link>
+
+      {/* ✅ Option B: Direct template string interpolation (no params prop needed) */}
+      <Link to={\`/blog/\${post.slug}\`}>View Post (Template)</Link>
 
       {/* ✅ Seamless support for queries, hashes, relative paths, and external URLs */}
       <Link href="/demo?tab=settings#section-1">Settings</Link>
@@ -221,7 +226,10 @@ export function Navbar({ post }: { post: { slug: string } }) {
       <Link href="https://github.com/roggc/dinou">GitHub</Link>
       <Link href="mailto:hello@example.com">Contact</Link>
 
-      {/* ❌ TypeScript error (IDE & tsc) when pointing to a non-existent route */}
+      {/* ❌ TypeScript error: [slug] pattern cannot be used without params! */}
+      {/* <Link href="/blog/[slug]">Forgot params</Link> */}
+
+      {/* ❌ TypeScript error when pointing to a non-existent route */}
       {/* <Link href="/unknown-route" /> */}
     </nav>
   );
@@ -240,21 +248,29 @@ export function NavActions({ slug }: { slug: string }) {
 
   return (
     <div className="flex gap-2">
-      {/* ✅ Autocompletes static & dynamic routes */}
+      {/* ✅ Autocompletes static & dynamic route patterns */}
       <button onClick={() => router.push("/docs/api-reference")}>
         View API Reference
       </button>
 
-      <button onClick={() => router.push(\`/blog/\${slug}\`, { fresh: true })}>
+      {/* ✅ Option A: Dynamic route pattern + required typed { params } */}
+      <button
+        onClick={() =>
+          router.push("/blog/[slug]", { params: { slug }, fresh: true })
+        }
+      >
         Reload Post Fresh
       </button>
 
-      {/* ✅ Replace history entry with full route validation */}
-      <button onClick={() => router.replace("/docs")}>
-        Back to Overview
+      {/* ✅ Option B: Direct template string interpolation */}
+      <button onClick={() => router.replace(\`/blog/\${slug}\`)}>
+        Replace Post URL
       </button>
 
-      {/* ❌ TypeScript error (IDE & tsc) */}
+      {/* ❌ TypeScript error: missing { params: { slug } } */}
+      {/* <button onClick={() => router.push("/blog/[slug]")} /> */}
+
+      {/* ❌ TypeScript error: unknown route */}
       {/* <button onClick={() => router.push("/typo-route")} /> */}
     </div>
   );
@@ -517,8 +533,13 @@ export default function ProjectPage({
                       </tr>
                       <tr>
                         <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">DinouRoute</td>
-                        <td className="p-3 text-muted-foreground">URL props, <code>&lt;Link href / to&gt;</code>, <code>router.push()</code>, <code>router.replace()</code> &amp; custom navigation components</td>
+                        <td className="p-3 text-muted-foreground">Resolved navigable URLs for custom navigation props, menus &amp; redirect helpers</td>
                         <td className="p-3 font-mono">interface NavProps &#123; href: DinouRoute &#125;</td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">LinkProps&lt;T&gt; / DinouLinkTarget</td>
+                        <td className="p-3 text-muted-foreground">Powers <code>&lt;Link&gt;</code> &amp; <code>useRouter()</code> with static/dynamic pattern autocomplete + conditional <code>params</code></td>
+                        <td className="p-3 font-mono">&lt;Link to=&quot;/blog/[slug]&quot; params=&#123;&#123; slug &#125;&#125;&gt;</td>
                       </tr>
                     </tbody>
                   </table>
@@ -668,15 +689,24 @@ export default function ProjectPage({
                   4.1. IDE Autocomplete Workflow (Ctrl + Space)
                 </h3>
                 <p>
-                  When typing a component, type <code>PageProps&lt;&quot;&quot;&gt;</code> and press <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border border-border">Ctrl + Space</kbd> (or <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border border-border">Cmd + Space</kbd>). Your editor will list every registered route pattern in the project:
+                  Press <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border border-border">Ctrl + Space</kbd> (or <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border border-border">Cmd + Space</kbd>) inside quotes in <strong>both</strong> navigation calls (<code>&lt;Link to=&quot;&quot;&gt;</code>, <code>&lt;Link href=&quot;&quot;&gt;</code>, <code>router.push(&quot;&quot;)</code>) and segment prop generics (<code>PageProps&lt;&quot;&quot;&gt;</code>, <code>LayoutProps&lt;&quot;&quot;&gt;</code>):
                 </p>
 
                 <CodeBlock language="tsx" containerClassName="rounded-xl overflow-hidden my-4">
-                  {`import type { PageProps } from "dinou";
+                  {`import { Link, type PageProps } from "dinou";
 
-// Trigger Ctrl + Space inside "" to pick from project routes
+// 1. Trigger Ctrl + Space inside PageProps<""> to pick any route pattern
 export default function BlogPost({ params }: PageProps<"/blog/[slug]">) {
-  return <h1>{params.slug}</h1>;
+  return (
+    <article>
+      <h1>{params.slug}</h1>
+      {/* 2. Trigger Ctrl + Space inside to="" — lists BOTH static routes AND
+             dynamic patterns like "/blog/[slug]", then autocompletes params! */}
+      <Link to="/blog/[slug]" params={{ slug: "next-article" }}>
+        Next Article
+      </Link>
+    </article>
+  );
 }`}
                 </CodeBlock>
               </div>
@@ -858,11 +888,19 @@ export function Sidebar() {
               <div id="dynamic-interpolation" className="scroll-mt-20 mt-8 space-y-3">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Code2 className="h-5 w-5 text-emerald-500" />
-                  4.4. Dynamic Navigation with Typed Interpolation
+                  4.4. Dynamic Navigation: Pattern + params vs. Template Strings
                 </h3>
                 <p>
-                  Template string URLs are verified against parameterized literal types:
+                  Dinou supports <strong>two coexisting, type-safe styles</strong> for navigating to dynamic routes in <code>&lt;Link&gt;</code> (<code>href</code> and <code>to</code>), <code>router.push()</code>, and <code>router.replace()</code>:
                 </p>
+                <ul className="text-sm space-y-1">
+                  <li>
+                    <strong>Pattern + <code>params</code>:</strong> Gives you full <code>Ctrl + Space</code> IDE autocomplete for dynamic routes too (because TypeScript only displays finite string literals in completion menus), auto-encodes values via <code>encodeURIComponent</code>, supports catch-all arrays (<code>[...slug]</code>) and optional segments (<code>[[lang]]</code>), and <strong>strictly requires <code>params</code></strong> whenever a required <code>[param]</code> bracket appears in the pattern.
+                  </li>
+                  <li>
+                    <strong>Template String Interpolation:</strong> Lets you build URLs inline (<code>`/products/&#36;&#123;product.id&#125;`</code>) with zero <code>params</code> prop, verified against generated template literal route types while still blocking accidentally uninterpolated <code>[param]</code> placeholders.
+                  </li>
+                </ul>
 
                 <CodeBlock language="tsx" containerClassName="rounded-xl overflow-hidden my-4">
                   {`"use client";
@@ -878,13 +916,36 @@ export function ProductCard({ product }: { product: Product }) {
   const router = useRouter();
 
   return (
-    <div className="card p-4 border rounded-xl">
-      {/* String interpolation verified against \`/products/\${string | number}\` */}
-      <Link href={\`/products/\${product.id}\`}>{product.name}</Link>
+    <div className="card p-4 border rounded-xl space-y-2">
+      {/* ✅ Style 1: Autocompleted dynamic pattern + required typed params */}
+      <Link to="/products/[id]" params={{ id: product.id }}>
+        {product.name}
+      </Link>
 
-      <button onClick={() => router.push(\`/products/\${product.id}\`)}>
+      {/* ✅ Catch-all & optional segments with params */}
+      <Link to="/docs/[...slug]" params={{ slug: ["guides", "routing"] }}>
+        Routing Docs
+      </Link>
+      <Link to="/i18n/[[lang]]">Default Locale</Link>
+
+      {/* ✅ Style 2: Direct template string interpolation (no params needed) */}
+      <Link href={\`/products/\${product.id}\`}>{product.name} (Direct)</Link>
+
+      {/* ✅ Both styles work identically in router.push() and router.replace() */}
+      <button
+        onClick={() =>
+          router.push("/products/[id]", { params: { id: product.id }, fresh: true })
+        }
+      >
         View Details
       </button>
+      <button onClick={() => router.replace(\`/products/\${product.id}\`)}>
+        Quick Replace
+      </button>
+
+      {/* ❌ Compile-time error: [id] can NEVER slip into the URL without params! */}
+      {/* <Link to="/products/[id]">Broken</Link> */}
+      {/* <button onClick={() => router.push("/products/[id]")} /> */}
     </div>
   );
 }`}
@@ -970,6 +1031,7 @@ export function ProductCard({ product }: { product: Product }) {
                     </p>
                     <ul className="list-disc pl-4 space-y-1 pt-1">
                       <li><code>DinouStaticRoutes</code> &amp; <code>DinouDynamicRoutes</code>: Navigable <code>page.*</code> URL unions.</li>
+                      <li><code>DinouNavigableParamsMap</code>: Navigable <code>page.*</code> dynamic patterns powering <code>&lt;Link&gt;</code> &amp; <code>useRouter()</code> autocomplete and <code>params</code> typing.</li>
                       <li><code>DinouRouteParamsMap</code>: Page &amp; <code>not_found.*</code> param dictionaries.</li>
                       <li><code>DinouLayoutParamsMap</code> &amp; <code>DinouLayoutSlotsMap</code>: Intermediate &amp; leaf layout params plus auto-inferred <code>@slot</code> props.</li>
                       <li><code>DinouSlotParamsMap</code> &amp; <code>DinouErrorParamsMap</code>: Parallel <code>@slot</code> and error boundary params.</li>
