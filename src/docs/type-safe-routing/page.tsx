@@ -68,7 +68,7 @@ export default function TypeSafeRoutingPage() {
       <title>Type-Safe Routing | Dinou Docs</title>
       <meta
         name="description"
-        content="Experience end-to-end compile-time type safety across your entire application with automatic TypeScript route generation and typed Link components."
+        content="Experience end-to-end static TypeScript route safety across your entire application with instant dev-time IDE autocomplete, typegen CLI, and typed Link components."
       />
       <link rel="canonical" href="https://dinou.dev/docs/type-safe-routing" />
 
@@ -98,7 +98,7 @@ export default function TypeSafeRoutingPage() {
               Type-Safe Routing System
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Experience end-to-end type safety across your entire application. Dinou combines sub-2ms compile-time route generation with intelligent TypeScript module augmentation, delivering instant IDE autocomplete and dead-link prevention with zero runtime cost.
+              Experience end-to-end static type safety across your entire application. Dinou combines sub-2ms route type generation with intelligent TypeScript module augmentation, delivering instant dev-time IDE autocomplete and dead-link prevention with zero runtime cost.
             </p>
           </div>
 
@@ -137,7 +137,7 @@ export default function TypeSafeRoutingPage() {
                         Instant autocomplete for all valid project paths inside <code>&lt;Link href=&quot;...&quot;&gt;</code> (or <code>to=&quot;...&quot;</code>), <code>router.push(&quot;...&quot;)</code>, and <code>router.replace(&quot;...&quot;)</code>.
                       </p>
                       <p>
-                        Catches typos, deleted routes, and broken URLs at compile-time before code ever reaches production.
+                        Catches typos, deleted routes, and broken URLs in your IDE at dev time and via <code>npm run typegen &amp;&amp; npx tsc --noEmit</code> before code ever reaches production.
                       </p>
                     </CardContent>
                   </Card>
@@ -157,7 +157,7 @@ export default function TypeSafeRoutingPage() {
                         Strict parameter &amp; slot typing across <code>page.tsx</code>, intermediate <code>layout.tsx</code>, parallel <code>@slot/page.tsx</code>, <code>error.tsx</code>, <code>not_found.tsx</code>, and <code>page_functions.ts</code> / <code>layout_functions.ts</code> via <code>PageProps</code>, <code>LayoutProps</code>, <code>SlotProps</code>, <code>ErrorProps</code>, <code>NotFoundProps</code>, <code>PageFunctions</code>, <code>LayoutFunctions</code>, and <code>RouteParams</code>.
                       </p>
                       <p>
-                        Supports Dinou&apos;s Horizontal Segmentation natively: intermediate layouts without a sibling <code>page.tsx</code> and parallel <code>@slots</code> are fully typed without polluting navigable Level 1 URLs.
+                        Supports Dinou&apos;s Horizontal Segmentation natively: intermediate layouts without a sibling <code>page.tsx</code> and parallel <code>@slots</code> are fully typed without exposing non-page folders or <code>@slots</code> as valid <code>&lt;Link&gt;</code> URLs.
                       </p>
                     </CardContent>
                   </Card>
@@ -221,7 +221,7 @@ export function Navbar({ post }: { post: { slug: string } }) {
       <Link href="https://github.com/roggc/dinou">GitHub</Link>
       <Link href="mailto:hello@example.com">Contact</Link>
 
-      {/* ❌ TypeScript compile-time error when pointing to a non-existent route */}
+      {/* ❌ TypeScript error (IDE & tsc) when pointing to a non-existent route */}
       {/* <Link href="/unknown-route" /> */}
     </nav>
   );
@@ -254,7 +254,7 @@ export function NavActions({ slug }: { slug: string }) {
         Back to Overview
       </button>
 
-      {/* ❌ TypeScript compile-time error */}
+      {/* ❌ TypeScript error (IDE & tsc) */}
       {/* <button onClick={() => router.push("/typo-route")} /> */}
     </div>
   );
@@ -424,7 +424,7 @@ export const validateParams: LayoutFunctions<
 export default async function AnalyticsSlot({
   params,
 }: SlotProps<"/workspace/[org]/@analytics">) {
-  // params.org is string — propagated at runtime & verified at compile time!
+  // params.org is string — propagated at runtime & statically typed in TypeScript!
   return <section>Live metrics for {params.org}</section>;
 }`,
                       },
@@ -445,7 +445,7 @@ export default function ProjectPage({
         Permalink
       </Link>
 
-      {/* ❌ Compile error: /workspace/[org] has no page.tsx, so it is NOT navigable! */}
+      {/* ❌ TypeScript error: /workspace/[org] has no page.tsx, so it is NOT navigable! */}
       {/* <Link href={\`/workspace/\${params.org}\`}>Invalid Workspace Root</Link> */}
     </article>
   );
@@ -650,7 +650,7 @@ export default function ProjectPage({
                     TypeScript matches the first parameter with <code>id</code>, the slash with literal <code>/</code>, and the second parameter with empty string <code>&quot;&quot;</code>. However, at runtime Dinou normalizes trailing slashes, requesting <code>/posts/123</code> (which results in a <strong>404 Not Found</strong> because no <code>page.tsx</code> exists at the parent segment).
                   </p>
                   <p>
-                    <strong>Best Practice:</strong> Always avoid trailing slashes when building dynamic URLs. Written without the trailing slash (<code>`/posts/$&#123;id&#125;`</code>), TypeScript accurately flags the missing parameter at compile-time.
+                    <strong>Best Practice:</strong> Always avoid trailing slashes when building dynamic URLs. Written without the trailing slash (<code>`/posts/$&#123;id&#125;`</code>), TypeScript accurately flags the missing parameter in your IDE and when running <code>npm run typegen &amp;&amp; npx tsc --noEmit</code>.
                   </p>
                 </AlertDescription>
               </Alert>
@@ -798,7 +798,7 @@ export default function WorkspaceNotFound({
                   4.3. Custom Navigation Components with DinouRoute
                 </h3>
                 <p>
-                  When building reusable UI components (custom buttons, navigation tabs, or breadcrumb menus), type their destination props with <code>DinouRoute</code> to give your design system native compile-time link validation:
+                  When building reusable UI components (custom buttons, navigation tabs, or breadcrumb menus), type their destination props with <code>DinouRoute</code> to give your design system native static link validation in your IDE and <code>tsc</code>:
                 </p>
 
                 <div className="not-prose my-4">
@@ -837,7 +837,7 @@ import { NavButton } from "./nav-button";
 const menu: { label: string; href: DinouRoute }[] = [
   { label: "Overview", href: "/docs" },              // ✅ Autocompleted
   { label: "Routing", href: "/docs/routing" },       // ✅ Autocompleted
-  // { label: "Broken", href: "/non-existent-page" }, // ❌ TypeScript compile error!
+  // { label: "Broken", href: "/non-existent-page" }, // ❌ TypeScript error!
 ];
 
 export function Sidebar() {
@@ -1107,7 +1107,7 @@ export function ProductCard({ product }: { product: Product }) {
                     </p>
                     <ul className="list-disc pl-4 space-y-1">
                       <li>Generates <code>.dinou/types/routes.d.ts</code> deterministically as Step 0 of <code>npm run build</code>.</li>
-                      <li>Add <code>&quot;typegen&quot;: &quot;dinou typegen&quot;</code> (or <code>&quot;node dinou/cli.js typegen&quot;</code> in ejected apps) to <code>package.json</code> so CI pipelines can run either <code>npm run typegen &amp;&amp; npx tsc --noEmit</code> or <code>npm run build &amp;&amp; npx tsc --noEmit</code>.</li>
+                      <li><strong>Type-stripping vs. Type-checking:</strong> Because Dinou&apos;s bundlers perform fast type-stripping without invoking <code>tsc</code>, <code>npm run build</code> alone will not fail on broken route types. Enforce strict verification in CI/CD (or pre-commit hooks) by running <code>npm run typegen &amp;&amp; npx tsc --noEmit</code> (before or independently of the build) or <code>npm run build &amp;&amp; npx tsc --noEmit</code>.</li>
                     </ul>
                   </CardContent>
                 </Card>

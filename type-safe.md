@@ -353,6 +353,7 @@ Several subtle TypeScript type-checker constraints are handled in `dinou/index.d
    - Chokidar watcher triggers `generateRouteTypes(projectRoot)` (`< 2ms`) whenever any `page`, `page_functions`, `layout`, `layout_functions`, `layout.functions`, `error`, or `not_found` file (`.tsx`, `.ts`, `.jsx`, `.js`, `.mjs`) is added or removed anywhere under `src/` (including inside `@slot` and `(group)` directories).
 2. **Production Builds (`dinou build` across Node, Bun, Deno & Cloudflare)**:
    - `bundleDualEngine` (`dinou/node/bundle-dual-engine.js`) and the Bun, Deno, and Cloudflare build pipelines invoke `generateRouteTypes(projectRoot)` as Step 0 prior to bundling.
+   - Because Dinou's bundlers (`esbuild`, `Rollup`, `Webpack`) perform fast type-stripping rather than running `tsc`, static route errors are surfaced at **dev time in the IDE** (via the TypeScript Language Server) and whenever **`tsc --noEmit`** is executed (e.g., `npm run typegen && npx tsc --noEmit` in CI/CD).
 3. **Standalone CLI Command (`npm run typegen` / `npx dinou typegen` — `dinou/cli.js`)**:
    - Can be exposed in `package.json` as `"typegen": "dinou typegen"` (or `"node dinou/cli.js typegen"` in ejected projects).
    - Runs `generateRouteTypes(process.cwd())` directly in a few milliseconds without starting a dev server or running bundlers:
