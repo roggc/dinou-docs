@@ -55,9 +55,10 @@ const tocItems = [
   { id: "generated-definitions", title: "5.2. Module Augmentation", level: 3 },
   { id: "compiler-plumbing", title: "5.3. Internal Compiler Plumbing", level: 3 },
   { id: "tsconfig-wiring", title: "5.4. tsconfig.json Integration", level: 3 },
-  { id: "lifecycle", title: "6. Lifecycle: Dev Server & Production Builds", level: 2 },
+  { id: "lifecycle", title: "6. Lifecycle: Dev, Typegen CLI & Production Builds", level: 2 },
   { id: "dev-watcher", title: "6.1. Local Dev: Hot Watcher", level: 3 },
-  { id: "prod-builds", title: "6.2. Production: Deterministic CI/CD", level: 3 },
+  { id: "typegen-cli", title: "6.2. Standalone CLI: npm run typegen", level: 3 },
+  { id: "prod-builds", title: "6.3. Production: Deterministic Builds", level: 3 },
   { id: "backward-compat", title: "7. Backward Compatibility Guarantee", level: 2 },
 ];
 
@@ -521,6 +522,29 @@ export default function ProjectPage({
                       </tr>
                     </tbody>
                   </table>
+                </div>
+
+                <div className="not-prose bg-muted/40 rounded-xl p-4 border border-border text-xs text-muted-foreground space-y-2 my-4">
+                  <div className="font-semibold text-foreground flex items-center gap-1.5">
+                    <Info className="h-4 w-4 text-blue-500 shrink-0" />
+                    <span>When to use <code>PageProps</code> vs. Semantic Aliases vs. Dedicated Types</span>
+                  </div>
+                  <ul className="list-disc pl-4 space-y-1.5 leading-relaxed">
+                    <li>
+                      <strong>Semantic Aliases (<code>NotFoundProps</code> &amp; <code>SlotProps</code>):</strong> Both <code>not_found.tsx</code> and <code>@slot/page.tsx</code> receive the exact same <code>&#123; params &#125;</code> runtime contract as <code>page.tsx</code>. You can freely use <code>PageProps</code> in all three files, or use <code>NotFoundProps</code> / <code>SlotProps</code> for semantic clarity and narrower <code>Ctrl + Space</code> autocomplete (e.g., <code>SlotProps</code> filters suggestions strictly to <code>@slot</code> folders, while <code>NotFoundProps</code> hides <code>@slot</code> paths and already recognizes intermediate layout folders).
+                    </li>
+                    <li>
+                      <strong>Dedicated Non-Alias Types (<code>LayoutProps</code> &amp; <code>ErrorProps</code>):</strong> These are <strong>not</strong> aliases of <code>PageProps</code>—always use them for their respective files:
+                      <ul className="list-disc pl-4 mt-1 space-y-1">
+                        <li>
+                          <strong><code>LayoutProps</code> in <code>layout.tsx</code>:</strong> Injects <code>children: ReactNode</code>, auto-infers sibling parallel <code>@slot</code> props (<code>sidebar?: ReactNode</code>, etc.), and validates against <code>DinouLayoutParamsMap</code>—allowing intermediate layouts without a sibling <code>page.tsx</code> (where <code>PageProps</code> intentionally errors).
+                        </li>
+                        <li>
+                          <strong><code>ErrorProps</code> in <code>error.tsx</code> &amp; <code>@slot/error.tsx</code>:</strong> Injects <code>error: Error</code> alongside <code>params</code> (which <code>PageProps</code> does not include) and validates against <code>DinouErrorParamsMap</code> (supporting error-only intermediate folders).
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </section>
@@ -1001,10 +1025,10 @@ export function ProductCard({ product }: { product: Product }) {
             {/* Section 6: Lifecycle */}
             <section id="lifecycle" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                6. Lifecycle: Dev Server &amp; Production Builds
+                6. Lifecycle: Dev Server, Typegen CLI &amp; Production Builds
               </h2>
               <p className="text-muted-foreground">
-                How Dinou keeps your route typings strictly synchronized across local development and deployment pipelines:
+                How Dinou keeps your route typings strictly synchronized across local development, standalone type-checking, and deployment pipelines:
               </p>
 
               <div className="grid gap-4 sm:grid-cols-2 not-prose my-6">
@@ -1035,12 +1059,39 @@ export function ProductCard({ product }: { product: Product }) {
                   </CardContent>
                 </Card>
 
-                <Card id="prod-builds" className="scroll-mt-20 border-slate-200 dark:border-slate-800">
+                <Card id="typegen-cli" className="scroll-mt-20 border-slate-200 dark:border-slate-800">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Terminal className="h-5 w-5 text-emerald-500" />
+                        <CardTitle className="text-base">6.2. Standalone CLI: On-Demand Typegen</CardTitle>
+                      </div>
+                      <Badge variant="secondary" className="font-mono text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+                        Instant CLI
+                      </Badge>
+                    </div>
+                    <CardDescription className="text-xs font-mono">
+                      npm run typegen / npx dinou typegen
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="text-xs text-muted-foreground space-y-2">
+                    <p>
+                      Generates <code>.dinou/types/routes.d.ts</code> on demand in milliseconds without launching the dev server or running bundlers:
+                    </p>
+                    <ul className="list-disc pl-4 space-y-1">
+                      <li><strong>Fresh repo clones:</strong> Populate IDE autocomplete right after <code>npm install</code> (since <code>.dinou/</code> is gitignored).</li>
+                      <li><strong>Offline route scaffolding:</strong> Refresh route, intermediate layout, <code>not_found</code>, and <code>@slot</code> types while the dev server is stopped.</li>
+                      <li><strong>Fast CI type-checks:</strong> Run <code>npm run typegen &amp;&amp; npx tsc --noEmit</code> in lightweight PR checks without waiting for a full production build.</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <Card id="prod-builds" className="scroll-mt-20 sm:col-span-2 border-slate-200 dark:border-slate-800">
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Cpu className="h-5 w-5 text-indigo-500" />
-                        <CardTitle className="text-base">6.2. Production: Deterministic CI/CD</CardTitle>
+                        <CardTitle className="text-base">6.3. Production: Deterministic Builds</CardTitle>
                       </div>
                       <Badge variant="secondary" className="font-mono text-[10px] bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20">
                         Step 0 Build Hook
@@ -1052,11 +1103,11 @@ export function ProductCard({ product }: { product: Product }) {
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground space-y-2">
                     <p>
-                      All bundlers (esbuild, Rollup, Webpack, Bun, Deno, Cloudflare) run the scanner before bundling:
+                      All bundlers and target pipelines (esbuild, Rollup, Webpack, Node, Bun, Deno, Cloudflare) automatically invoke the topology scanner before bundling:
                     </p>
                     <ul className="list-disc pl-4 space-y-1">
-                      <li>Generates <code>.dinou/types/routes.d.ts</code> deterministically at the start of <code>npm run build</code>.</li>
-                      <li>In clean CI/CD containers where <code>.dinou/</code> is gitignored, run <code>npx dinou typegen &amp;&amp; npx tsc --noEmit</code> (for fast standalone typechecks) or <code>npm run build &amp;&amp; npx tsc --noEmit</code> so TypeScript validates against the generated topology maps instead of falling back to <code>string</code>.</li>
+                      <li>Generates <code>.dinou/types/routes.d.ts</code> deterministically as Step 0 of <code>npm run build</code>.</li>
+                      <li>Add <code>&quot;typegen&quot;: &quot;dinou typegen&quot;</code> (or <code>&quot;node dinou/cli.js typegen&quot;</code> in ejected apps) to <code>package.json</code> so CI pipelines can run either <code>npm run typegen &amp;&amp; npx tsc --noEmit</code> or <code>npm run build &amp;&amp; npx tsc --noEmit</code>.</li>
                     </ul>
                   </CardContent>
                 </Card>

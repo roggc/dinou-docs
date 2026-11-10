@@ -7,6 +7,7 @@
     "dev": "node dinou/cli.js dev",
     "build": "node dinou/cli.js build",
     "start": "node dinou/cli.js start",
+    "typegen": "node dinou/cli.js typegen",
     "dev:esbuild": "node dinou/cli.js dev:esbuild",
     "dev:rollup": "node dinou/cli.js dev:rollup",
     "dev:webpack": "node dinou/cli.js dev:webpack",

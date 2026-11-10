@@ -314,6 +314,15 @@ src/
 
 > **Leading Slash Ergonomics**: All segment generic types (`PageProps`, `LayoutProps`, `SlotProps`, `ErrorProps`, `NotFoundProps`, `PageFunctions`, `LayoutFunctions`, `RouteParams`) accept patterns both with and without a leading slash (e.g. `"/workspace/[org]"` or `"workspace/[org]"`), normalized internally via `CleanRoutePath<T>`.
 
+### `PageProps` vs. Semantic Aliases (`NotFoundProps`, `SlotProps`) vs. Dedicated Types (`LayoutProps`, `ErrorProps`)
+
+- **Semantic Aliases (`NotFoundProps` & `SlotProps`)**:
+  - `not_found.tsx` and `@slot/page.tsx` receive the exact same `{ params }` runtime shape as `page.tsx`.
+  - Developers can freely use `PageProps` in `page.tsx`, `not_found.tsx`, and `@slot/page.tsx`, or opt into `NotFoundProps` / `SlotProps` for semantic clarity and scoped `Ctrl + Space` autocomplete (`SlotProps` lists only `@slot` folders; `NotFoundProps` excludes `@slot` folders and includes intermediate layout folders even before `not_found.tsx` is first saved).
+- **Dedicated Non-Alias Types (`LayoutProps` & `ErrorProps`)**:
+  - **`LayoutProps`** is **not** an alias of `PageProps`: always use `LayoutProps` in `layout.tsx`. It adds `children: ReactNode`, auto-infers sibling parallel `@slot` `ReactNode` props, and validates against `DinouLayoutParamsMap` (supporting intermediate layouts without a sibling `page.tsx`, where `PageProps` intentionally errors).
+  - **`ErrorProps`** is **not** an alias of `PageProps`: always use `ErrorProps` in `error.tsx` and `@slot/error.tsx`. It adds `error: Error` alongside `params` and validates against `DinouErrorParamsMap`.
+
 ---
 
 ## 4. TypeScript Compiler Guarantees & Edge Cases Solved
@@ -344,12 +353,13 @@ Several subtle TypeScript type-checker constraints are handled in `dinou/index.d
    - Chokidar watcher triggers `generateRouteTypes(projectRoot)` (`< 2ms`) whenever any `page`, `page_functions`, `layout`, `layout_functions`, `layout.functions`, `error`, or `not_found` file (`.tsx`, `.ts`, `.jsx`, `.js`, `.mjs`) is added or removed anywhere under `src/` (including inside `@slot` and `(group)` directories).
 2. **Production Builds (`dinou build` across Node, Bun, Deno & Cloudflare)**:
    - `bundleDualEngine` (`dinou/node/bundle-dual-engine.js`) and the Bun, Deno, and Cloudflare build pipelines invoke `generateRouteTypes(projectRoot)` as Step 0 prior to bundling.
-3. **Standalone CLI Command (`npx dinou typegen` — `dinou/cli.js`)**:
+3. **Standalone CLI Command (`npm run typegen` / `npx dinou typegen` — `dinou/cli.js`)**:
+   - Can be exposed in `package.json` as `"typegen": "dinou typegen"` (or `"node dinou/cli.js typegen"` in ejected projects).
    - Runs `generateRouteTypes(process.cwd())` directly in a few milliseconds without starting a dev server or running bundlers:
      ```bash
-     npx dinou typegen && npx tsc --noEmit
+     npm run typegen && npx tsc --noEmit
      ```
-   - Ideal for fast typecheck-only CI/CD jobs or right after cloning a repository where `.dinou/` is gitignored.
+   - Ideal right after cloning a repository (where `.dinou/` is gitignored), after offline route scaffolding while the dev server is stopped, or in fast typecheck-only CI/CD pipelines.
 
 ---
 
