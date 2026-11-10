@@ -251,25 +251,67 @@ export default function Page() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
                   <div className="p-3 rounded-md bg-background/80 border space-y-1">
                     <div className="font-bold text-foreground">3 Standalone Axes</div>
-                    <ul className="text-muted-foreground space-y-1 pl-3.5 list-disc">
-                      <li><strong>#1 Horizontal Only (H):</strong> Independent <code>layout_functions.ts</code> &amp; <code>page_functions.ts</code></li>
-                      <li><strong>#2 Vertical Only (V):</strong> <code>&lt;DinouCacheSlot&gt;</code> Micro-ISR</li>
-                      <li><strong>#3 Temporal Only (T):</strong> Pure PPR (Static Shell + <code>&lt;Suspense&gt;</code> Holes)</li>
+                    <ul className="text-muted-foreground space-y-1.5 pl-3.5 list-disc">
+                      <li>
+                        <a href="#horizontal-segmentation" className="text-foreground font-semibold underline decoration-border hover:decoration-primary underline-offset-4 transition-colors">
+                          #1 Horizontal Only (H):
+                        </a>{" "}
+                        Independent <code>layout_functions.ts</code> &amp; <code>page_functions.ts</code>
+                      </li>
+                      <li>
+                        <a href="#micro-isr" className="text-foreground font-semibold underline decoration-border hover:decoration-primary underline-offset-4 transition-colors">
+                          #2 Vertical Only (V):
+                        </a>{" "}
+                        <code>&lt;DinouCacheSlot&gt;</code> Micro-ISR
+                      </li>
+                      <li>
+                        <a href="#partial-prerendering" className="text-foreground font-semibold underline decoration-border hover:decoration-primary underline-offset-4 transition-colors">
+                          #3 Temporal Only (T):
+                        </a>{" "}
+                        Pure PPR (Static Shell + <code>&lt;Suspense&gt;</code> Holes)
+                      </li>
                     </ul>
                   </div>
                   <div className="p-3 rounded-md bg-background/80 border space-y-1">
                     <div className="font-bold text-foreground">3 Pairwise Synergies</div>
-                    <ul className="text-muted-foreground space-y-1 pl-3.5 list-disc">
-                      <li><strong>#4 H + V (Non-PPR):</strong> Layouts + <code>&lt;DinouCacheSlot&gt;</code></li>
-                      <li><strong>#5 H + T (No Slots):</strong> Segmented Layouts + PPR</li>
-                      <li><strong>#6 V + T:</strong> <code>&lt;DinouCacheSlot&gt;</code> + PPR</li>
+                    <ul className="text-muted-foreground space-y-1.5 pl-3.5 list-disc">
+                      <li>
+                        <a href="#pairwise-hs-slot" className="text-foreground font-semibold underline decoration-border hover:decoration-primary underline-offset-4 transition-colors">
+                          #4 H + V (Non-PPR):
+                        </a>{" "}
+                        Layouts + <code>&lt;DinouCacheSlot&gt;</code>
+                      </li>
+                      <li>
+                        <a href="#pairwise-hs-ppr" className="text-foreground font-semibold underline decoration-border hover:decoration-primary underline-offset-4 transition-colors">
+                          #5 H + T (No Slots):
+                        </a>{" "}
+                        Segmented Layouts + PPR
+                      </li>
+                      <li>
+                        <a href="#pairwise-slot-ppr" className="text-foreground font-semibold underline decoration-border hover:decoration-primary underline-offset-4 transition-colors">
+                          #6 V + T:
+                        </a>{" "}
+                        <code>&lt;DinouCacheSlot&gt;</code> + PPR
+                      </li>
                     </ul>
                   </div>
-                  <div className="p-3 rounded-md bg-background/80 border space-y-1">
-                    <div className="font-bold text-foreground">1 Triple Synergy</div>
-                    <ul className="text-muted-foreground space-y-1 pl-3.5 list-disc">
-                      <li><strong>#7 H + V + T:</strong> Segmented PPR Layouts + PPR/Static Pages + Shell &amp; Hole <code>&lt;DinouCacheSlot&gt;</code>s</li>
-                    </ul>
+                  <div className="p-3 rounded-md bg-background/80 border space-y-1 flex flex-col justify-between">
+                    <div className="space-y-1">
+                      <div className="font-bold text-foreground">1 Triple Synergy</div>
+                      <ul className="text-muted-foreground space-y-1.5 pl-3.5 list-disc">
+                        <li>
+                          <a href="#ppr-slot-hs-synergy" className="text-foreground font-semibold underline decoration-border hover:decoration-primary underline-offset-4 transition-colors">
+                            #7 H + V + T:
+                          </a>{" "}
+                          Segmented PPR Layouts + PPR/Static Pages + Shell &amp; Hole <code>&lt;DinouCacheSlot&gt;</code>s
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="pt-2 border-t border-border/60">
+                      <a href="#comparison-matrix" className="text-[11px] font-medium text-primary underline underline-offset-4 hover:opacity-80">
+                        Jump to Decision Matrices →
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -304,6 +346,9 @@ export default function Page() {
                   </li>
                   <li>
                     <strong>Page Lifecycle (<code>page_functions.ts</code>):</strong> Controls data fetching, cache duration, and invalidation tags exclusively for <code>page.tsx</code>, without affecting or re-running the parent layout.
+                  </li>
+                  <li>
+                    <strong>Per-Segment Route Guards (<code>allowISG</code> &amp; <code>validateParams</code>):</strong> On nested dynamic routes, each segment validates only its own dynamic parameters along the active layout chain—so a parent dynamic layout locked with <code>allowISG = false</code> never blocks valid child dynamic pages from generating new parameters on-demand via <code>allowISG = true</code>.
                   </li>
                 </ul>
 
@@ -344,7 +389,7 @@ export default function Page() {
                   containerClassName="w-full overflow-hidden rounded-lg my-4"
                 >
 {`// src/dashboard/layout_functions.ts
-import type { LayoutFunctions } from "dinou/server";
+import type { LayoutFunctions } from "dinou";
 
 // Parent layout caches independently for 1 hour (3,600s) with its own tag
 export const revalidate: LayoutFunctions["revalidate"] = 3600;
@@ -423,6 +468,9 @@ export async function updateEverything() {
                       <span>How the Client Router Isolates Layouts &amp; Pages</span>
                     </div>
                     <ul className="text-muted-foreground space-y-2 pl-4 list-disc leading-relaxed">
+                      <li>
+                        <strong>Initial Page Load (Zero Extra Hydration Fetches):</strong> On direct loads (dynamic SSR, PPR, or first-time ISG), Dinou evaluates layouts, parallel <code>@slots</code>, and the page <strong>once</strong> on the server and streams client hydration data inline inside the initial HTML response—requiring <strong>0 extra network requests</strong> to hydrate and preventing hydration mismatches even with live timestamps or counters.
+                      </li>
                       <li>
                         <strong>Sibling SPA Navigation (<code>&lt;Link&gt;</code>):</strong> Navigating between pages that share a layout (e.g., <code>/dashboard/overview</code> → <code>/dashboard/analytics</code>) fetches <strong>only</strong> the new page. The layout makes <strong>0 network requests</strong> and keeps 100% of its Client Component state (<code>useState</code>, open sidebars, scroll position, input text).
                       </li>
@@ -716,7 +764,8 @@ export default function DashboardPage() {
                         id: "page",
                         label: "src/products/[slug]/page.tsx",
                         language: "tsx",
-                        code: `import { DinouCacheSlot, type PageProps } from "dinou/server";
+                        code: `import type { PageProps } from "dinou";
+import { DinouCacheSlot } from "dinou/server";
 import { ProductHero, ProductDescription } from "./static-widgets";
 import { LiveStockCounter } from "./stock-widgets";
 
@@ -744,7 +793,7 @@ export default function ProductDetailPage({ params }: PageProps<"/products/[slug
                         id: "page_functions",
                         label: "src/products/[slug]/page_functions.ts",
                         language: "typescript",
-                        code: `import type { PageFunctions } from "dinou/server";
+                        code: `import type { PageFunctions } from "dinou";
 
 // Slow revalidation for outer page & descriptions (24 hours = 86,400s)
 export const revalidate: PageFunctions["revalidate"] = 86400;`,
@@ -761,28 +810,36 @@ export const revalidate: PageFunctions["revalidate"] = 86400;`,
                   </div>
 
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Whether you wrap <code>&lt;DinouCacheSlot&gt;</code> inside an outer <code>&lt;Suspense&gt;</code> depends on whether the route is <strong>Dynamic SSR</strong>, <strong>Static / ISR</strong>, or <strong>PPR</strong>:
+                    On standalone non-PPR routes, whether you wrap <code>&lt;DinouCacheSlot&gt;</code> inside an outer <code>&lt;Suspense&gt;</code> depends on whether the page is <strong>Dynamic SSR</strong> or <strong>Static / ISR</strong>:
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs min-w-0">
                     <div className="p-3.5 rounded-md bg-purple-500/10 border border-purple-500/20 space-y-1.5 min-w-0">
                       <div className="font-semibold text-purple-700 dark:text-purple-300">
-                        1. &lt;Suspense&gt; Wrapping &lt;DinouCacheSlot&gt; (Recommended in Dynamic SSR &amp; PPR Holes)
+                        1. &lt;Suspense&gt; Wrapping &lt;DinouCacheSlot&gt; (Recommended in Dynamic SSR)
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
-                        In <strong>Dynamic SSR pages</strong> (Pattern 1 above), wrap every top-level <code>&lt;DinouCacheSlot&gt;</code> in <code>&lt;Suspense fallback=&#123;...&#125;&gt;</code> so a cold cache miss never blocks the page&apos;s TTFB: Dinou streams the fallback skeleton <strong>only on a cold cache miss</strong> (1st request or after <code>revalidateTag</code>), and once cached (including across expired TTLs via Background SWR), resolves the cached widget directly during the SSR pass (~1–2ms) without suspending (<strong>zero fallback flash</strong>). On <strong><code>ppr = true</code> routes</strong> (Section 6), it becomes a <strong>Cached Dynamic PPR Hole</strong>.
+                        In <strong>Dynamic SSR pages</strong> (Pattern 1 above), wrap every top-level <code>&lt;DinouCacheSlot&gt;</code> in <code>&lt;Suspense fallback=&#123;...&#125;&gt;</code> so a cold cache miss never blocks the page&apos;s TTFB: Dinou streams the fallback skeleton <strong>only on a cold cache miss</strong> (1st request or after <code>revalidateTag</code>), and once cached (including across expired TTLs via Background SWR), resolves the cached widget directly during the SSR pass (~1–2ms) without suspending (<strong>zero fallback flash</strong>).
                       </p>
                     </div>
 
                     <div className="p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 space-y-1.5 min-w-0">
                       <div className="font-semibold text-emerald-700 dark:text-emerald-300">
-                        2. Unwrapped &lt;DinouCacheSlot&gt; (Recommended in Static / ISR &amp; PPR Static Shell)
+                        2. Unwrapped &lt;DinouCacheSlot&gt; (Recommended in Static / ISR)
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
-                        In <strong>Static / ISR pages</strong> (Pattern 2 above, <code>ppr = false</code>) and in the <strong>Static Shell of PPR routes</strong> (<code>ppr = true</code>), leave <code>&lt;DinouCacheSlot&gt;</code> <strong>outside</strong> <code>&lt;Suspense&gt;</code>. The widget is pre-rendered directly into the static HTML at build time (0ms TTFB) and refreshed in the background via SWR whenever its TTL expires. Even when invalidated on-demand via <code>revalidateTag</code>, it <strong>never blocks</strong> incoming requests: visitors always receive a cached response immediately—serving the previous cached version while <code>revalidateTag</code> is still in progress, and the newly updated cached version as soon as <code>revalidateTag</code> resolves.
+                        In <strong>Static / ISR pages</strong> (Pattern 2 above), leave <code>&lt;DinouCacheSlot&gt;</code> <strong>outside</strong> <code>&lt;Suspense&gt;</code>. The widget is pre-rendered directly into the static HTML at build time (0ms TTFB) and refreshed in the background via SWR whenever its TTL expires. Even when invalidated on-demand via <code>revalidateTag</code>, it <strong>never blocks</strong> incoming requests: visitors always receive a cached response immediately—serving the previous cached version while <code>revalidateTag</code> is in progress, and the newly updated version as soon as it resolves.
                       </p>
                     </div>
                   </div>
+
+                  <p className="text-[11px] text-muted-foreground pt-1">
+                    💡 Combining <code>&lt;DinouCacheSlot&gt;</code> with <strong>Partial Prerendering (PPR)</strong>? See{" "}
+                    <a href="#pairwise-slot-ppr" className="text-primary font-medium underline underline-offset-4 hover:opacity-80">
+                      Section 6 (Vertical + Temporal)
+                    </a>{" "}
+                    for how <code>&lt;Suspense&gt;</code> nesting controls Static Shell Slots vs. Cached Dynamic Holes.
+                  </p>
                 </div>
               </section>
 
@@ -921,44 +978,41 @@ export function PostCreator() {
                 <div className="border rounded-lg p-5 bg-muted/20 not-prose my-6 space-y-4">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
                     <Sparkles className="h-4 w-4 text-purple-500" />
-                    <span>Deep Dive: Slot TTL Expiration Lifecycle (Static Shell SWR vs. Dynamic Hole Stream vs. <code>refreshSlot</code>)</span>
+                    <span>Deep Dive: Slot TTL Expiration Lifecycle (Background SWR vs. Interactive <code>refreshSlot</code>)</span>
                   </div>
 
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    When a <code>&lt;DinouCacheSlot revalidate=&#123;N&#125;&gt;</code> TTL expires, Dinou adapts its revalidation strategy to the context so TTFB is <strong>never</strong> blocked:
+                    When a <code>&lt;DinouCacheSlot revalidate=&#123;N&#125;&gt;</code> TTL expires, Dinou adapts its refresh strategy to the trigger so TTFB is <strong>never</strong> blocked:
                   </p>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs min-w-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs min-w-0">
                     <div className="p-3.5 rounded-md bg-blue-500/10 border border-blue-500/20 space-y-1.5 min-w-0">
                       <div className="font-semibold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
                         <Globe className="h-3.5 w-3.5" />
-                        <span>1. Static Shell &amp; SSR Slots: Background SWR</span>
+                        <span>1. Page Requests (Static/ISR &amp; Dynamic SSR): Background SWR</span>
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
-                        Applies to: <strong>(a)</strong> unwrapped slots (outside <code>&lt;Suspense&gt;</code>, or with <code>noDynamic()</code>) in Static/ISR and PPR Static Shells, and <strong>(b)</strong> <code>&lt;Suspense&gt;</code>-wrapped slots on Dynamic SSR routes (<code>ppr = false</code>, where the fallback is shown <em>only</em> on a cold cache miss). When the TTL expires, the next request serves the cached slot immediately inline (without triggering a fallback) and starts a non-blocking background SWR refresh.
-                      </p>
-                    </div>
-
-                    <div className="p-3.5 rounded-md bg-purple-500/10 border border-purple-500/20 space-y-1.5 min-w-0">
-                      <div className="font-semibold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
-                        <Zap className="h-3.5 w-3.5" />
-                        <span>2. Cached Dynamic Holes (PPR): Fallback + Live Stream</span>
-                      </div>
-                      <p className="text-muted-foreground leading-relaxed">
-                        For slots wrapped in <code>&lt;Suspense&gt;</code> on <code>ppr = true</code> routes (Cached Dynamic Holes), the 0ms Static Shell always flushes with the <code>&lt;Suspense&gt;</code> skeleton fallback first. While the TTL is valid, the cached hole streams in ~2ms to replace it; when the slot&apos;s TTL expires, instead of serving stale data via SWR, the visitor sees the skeleton fallback while the hole re-executes live in the stream and receives 100% fresh data as soon as the query resolves.
+                        Applies to unwrapped slots in Static/ISR pages and <code>&lt;Suspense&gt;</code>-wrapped slots on Dynamic SSR pages (where the fallback is shown <em>only</em> on a cold cache miss). When the TTL expires, the next incoming request serves the cached slot immediately inline (0 fallback flash) and starts a non-blocking background SWR refresh.
                       </p>
                     </div>
 
                     <div className="p-3.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 space-y-1.5 min-w-0">
                       <div className="font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
                         <RefreshCw className="h-3.5 w-3.5" />
-                        <span>3. Interactive refreshSlot: Fresh Delivery</span>
+                        <span>2. Interactive refreshSlot: Fresh Delivery</span>
                       </div>
                       <p className="text-muted-foreground leading-relaxed">
                         When a user clicks a button calling <code>refreshSlot()</code> on an expired slot (or with <code>&#123; fresh: true &#125;</code>), the server awaits the new slot render, updates the cache, and returns the fresh UI directly while preserving the existing DOM and client state (zero skeleton flash).
                       </p>
                     </div>
                   </div>
+
+                  <p className="text-[11px] text-muted-foreground pt-1">
+                    💡 For how expired slot TTLs behave inside PPR <code>&lt;Suspense&gt;</code> holes, see{" "}
+                    <a href="#ppr-slot-nesting" className="text-primary font-medium underline underline-offset-4 hover:opacity-80">
+                      Section 6.1 (Cached Dynamic Holes vs. Static Shell Slots)
+                    </a>.
+                  </p>
                 </div>
               </section>
 
@@ -1031,7 +1085,7 @@ export function PostCreator() {
                       Everything outside <code>&lt;Suspense&gt;</code>—including <code>getProps</code>, top-level <code>async</code> Page/Layout components, unwrapped child <code>async</code> Server Components, synchronous <code>&lt;Suspense&gt;</code> boundaries, and unwrapped <code>&lt;DinouCacheSlot revalidate=&#123;N&#125;&gt;</code>—is awaited at build/revalidation time and baked into the initial Static Shell.
                     </p>
                     <p className="text-[11px] text-amber-700 dark:text-amber-300 pt-1">
-                      ⚠️ Reading <code>req.cookies</code>, <code>req.headers</code>, <code>req.query</code>, or rendering <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code> <strong>outside</strong> <code>&lt;Suspense&gt;</code> triggers a Full-Route Dynamic Bailout (rendering the route dynamically per request).
+                      ⚠️ Reading <code>req.cookies</code>, <code>req.headers</code>, <code>req.query</code>, calling <code>useSearchParams()</code> in a Server Component, or rendering <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code> <strong>outside</strong> <code>&lt;Suspense&gt;</code> triggers a Full-Route Dynamic Bailout (rendering the route dynamically per request).
                     </p>
                   </div>
 
@@ -1051,7 +1105,7 @@ export function PostCreator() {
                         Any <strong>Client Component (<code>&quot;use client&quot;</code>) receiving an un-awaited <code>Promise</code> prop</strong> (or array of <code>Promise</code>s, passed from a Server Component or <code>getProps</code> and unwrapped via React 19&apos;s <code>use(promise)</code>).
                       </li>
                       <li>
-                        Components reading request APIs (<code>getContext()</code> <code>cookies</code>/<code>headers</code>/<code>query</code>, <code>useSearchParams()</code>) or rendering <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code>.
+                        <strong>Server Components</strong> reading request APIs (<code>getContext()</code> <code>cookies</code>/<code>headers</code>/<code>query</code>, or <code>useSearchParams()</code>) or rendering <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code>. <em>(In contrast, calling <code>useSearchParams()</code> inside a <code>&quot;use client&quot;</code> component stays in the Static Shell without creating a server hole, syncing URL query params in the browser right after hydration.)</em>
                       </li>
                     </ul>
                     <p className="text-[11px] text-muted-foreground pt-1">
@@ -1073,7 +1127,7 @@ export function PostCreator() {
                       <strong>Concurrent Parallel Hole Execution:</strong> Dinou executes only the dynamic <code>&lt;Suspense&gt;</code> holes in parallel on the server (skipping static <code>noDynamic()</code> boundaries in 0ms).
                     </li>
                     <li>
-                      <strong>In-Place Streaming Replacement:</strong> As each hole resolves (fastest first), Dinou streams its resolved HTML (and any streamed <code>Promise</code> values for <code>use()</code>) down the same HTTP connection, swapping each skeleton with live UI with zero hydration mismatch.
+                      <strong>In-Place Streaming &amp; Single-Pass Inline Hydration:</strong> As each hole resolves (fastest first), Dinou streams both its resolved HTML (swapping the skeleton in place) and its inline client hydration data down that same single HTTP connection—executing each hole <strong>only once</strong> on the server with <strong>0 extra hydration network requests</strong> and zero hydration mismatch even with non-deterministic timestamps or live counters.
                     </li>
                   </ol>
                 </div>
@@ -1252,7 +1306,7 @@ export default function DocPage() {
                       <strong>Subtree Inheritance &amp; Nested Dynamic Holes:</strong> Calling <code>noDynamic()</code> in a parent component inside <code>&lt;Suspense&gt;</code> automatically opts out all child <code>async</code> components (and un-awaited <code>Promise</code> props) inside that same <code>&lt;Suspense&gt;</code> boundary. If that static <code>&lt;Suspense&gt;</code> boundary contains a nested inner <code>&lt;Suspense&gt;</code> boundary without <code>noDynamic()</code>, the outer wrapper bakes into the Static Shell while the inner boundary cleanly streams as a dynamic hole!
                     </li>
                     <li>
-                      <strong>Dynamic Bailout Always Wins:</strong> If a component or child inside a <code>noDynamic()</code> boundary reads <code>req.cookies</code>, <code>req.headers</code>, <code>req.query</code>, or renders <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code>, Dinou overrides <code>noDynamic()</code> and turns the boundary into a Dynamic PPR Hole to prevent leaking request data into the shared Static Shell.
+                      <strong>Dynamic Bailout Always Wins:</strong> If a Server Component inside a <code>noDynamic()</code> boundary reads <code>req.cookies</code>, <code>req.headers</code>, <code>req.query</code>, calls <code>useSearchParams()</code>, or renders <code>&lt;DinouCacheSlot revalidate=&#123;0&#125;&gt;</code>, Dinou overrides <code>noDynamic()</code> and turns the boundary into a Dynamic PPR Hole to prevent leaking request data into the shared Static Shell.
                     </li>
                   </ul>
                 </div>
@@ -1521,7 +1575,7 @@ export default function DashboardLayout({ children, sidebar, orgName }: any) {
                       id: "layout_functions",
                       label: "src/dashboard/layout_functions.ts",
                       language: "typescript",
-                      code: `import type { LayoutFunctions } from "dinou/server";
+                      code: `import type { LayoutFunctions } from "dinou";
 
 export const ppr: LayoutFunctions["ppr"] = true;
 export const revalidate: LayoutFunctions["revalidate"] = 3600; // Layout static shell cached for 1h
@@ -1536,7 +1590,7 @@ export async function getProps() {
                       id: "page_functions",
                       label: "src/dashboard/page_functions.ts",
                       language: "typescript",
-                      code: `import type { PageFunctions } from "dinou/server";
+                      code: `import type { PageFunctions } from "dinou";
 
 // Each segment resolves ppr independently (or uses the global default from dinou.config.js)
 export const ppr: PageFunctions["ppr"] = true;
@@ -1668,7 +1722,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"
                     <ul className="text-muted-foreground space-y-1 pl-4 list-disc leading-relaxed">
                       <li><strong>Build Time:</strong> Postpones into a PPR hole; the Static Shell includes the skeleton fallback.</li>
                       <li><strong>Runtime Cache Hit:</strong> Streams from the server slot cache in <strong>~2ms</strong> (99.9% DB offload across concurrent visitors).</li>
-                      <li><strong>On TTL Expiry / <code>revalidateTag</code>:</strong> Only the slot cache is cleared; the Static Shell stays 100% intact (0ms TTFB) and the hole refreshes live in the stream!</li>
+                      <li><strong>On TTL Expiry / <code>revalidateTag</code>:</strong> Instead of serving stale data via SWR, the Static Shell stays 100% intact (0ms TTFB) with its skeleton fallback while the hole re-executes live in the stream and delivers 100% fresh data!</li>
                     </ul>
                   </div>
 
@@ -1818,7 +1872,7 @@ export default function TelemetryLayout({ children }: { children: React.ReactNod
                       id: "layout_functions",
                       label: "src/telemetry/layout_functions.ts",
                       language: "typescript",
-                      code: `import type { LayoutFunctions } from "dinou/server";
+                      code: `import type { LayoutFunctions } from "dinou";
 
 export const ppr: LayoutFunctions["ppr"] = true;
 export const revalidate: LayoutFunctions["revalidate"] = 3600;
@@ -1865,7 +1919,7 @@ export default function TelemetryPage() {
                       id: "page_functions",
                       label: "src/telemetry/page_functions.ts",
                       language: "typescript",
-                      code: `import type { PageFunctions } from "dinou/server";
+                      code: `import type { PageFunctions } from "dinou";
 
 // Enable PPR for this page segment (or set ppr: true globally in dinou.config.js)
 export const ppr: PageFunctions["ppr"] = true;
@@ -2056,12 +2110,12 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
                       <td className="p-3.5 text-emerald-600 dark:text-emerald-400 font-medium">Static Slot (baked into initial HTML; Background SWR on expiry)</td>
                     </tr>
                     <tr>
-                      <td className="p-3.5 font-mono">Reading cookies/headers/query or revalidate=&#123;0&#125; inside &lt;Suspense&gt; (even with noDynamic)</td>
+                      <td className="p-3.5 font-mono">Reading cookies/headers/query, RSC useSearchParams(), or revalidate=&#123;0&#125; inside &lt;Suspense&gt; (even with noDynamic)</td>
                       <td className="p-3.5 text-purple-600 dark:text-purple-400 font-medium">Dynamic PPR Hole (quarantined to hole; overrides noDynamic)</td>
                       <td className="p-3.5 text-amber-600 dark:text-amber-400 font-medium">Full-Route Dynamic Bailout (entire route renders dynamically per request)</td>
                     </tr>
                     <tr>
-                      <td className="p-3.5 font-mono">Reading cookies/headers/query or revalidate=&#123;0&#125; outside &lt;Suspense&gt;</td>
+                      <td className="p-3.5 font-mono">Reading cookies/headers/query, RSC useSearchParams(), or revalidate=&#123;0&#125; outside &lt;Suspense&gt;</td>
                       <td className="p-3.5 text-amber-600 dark:text-amber-400 font-medium">Full-Route Dynamic Bailout (entire route renders dynamically per request)</td>
                       <td className="p-3.5 text-amber-600 dark:text-amber-400 font-medium">Full-Route Dynamic Bailout (entire route renders dynamically per request)</td>
                     </tr>

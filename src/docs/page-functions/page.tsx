@@ -95,7 +95,7 @@ const tocItems = [
   },
   {
     id: "validateparams",
-    title: "3. validateParams (Route Parameter Validation)",
+    title: "3. validateParams (Segment Parameter Validation)",
     level: 2,
   },
   {
@@ -1425,48 +1425,87 @@ export const getStaticPaths: PageFunctions<RouteParams<"/products/[id]">]["getSt
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <h3>
-                3. <code>validateParams</code> (Route Parameter Validation)
+                3. <code>validateParams</code> (Segment Parameter Validation)
               </h3>
               <p>
                 Validates dynamic parameters (such as <code>[id]</code> or{" "}
-                <code>[...slug]</code>) on the server prior to rendering. If{" "}
-                <code>validateParams</code> returns <code>false</code> (or a
-                falsy value), Dinou immediately terminates request processing and
-                issues a <strong>404 Not Found</strong> response.
+                <code>[...slug]</code>) on the server prior to rendering, in
+                both <code>page_functions.ts</code> and{" "}
+                <code>layout_functions.ts</code>. If <code>validateParams</code>{" "}
+                returns <code>false</code> (or a falsy value), Dinou immediately
+                terminates request processing and issues a{" "}
+                <strong>404 Not Found</strong> response on both direct URL loads
+                and client-side navigations.
               </p>
 
               <div className="border rounded-lg p-4 bg-card not-prose my-4">
                 <div className="flex items-center gap-2 font-semibold mb-2">
                   <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  <span>Function Signature</span>
+                  <span>Function Signature &amp; Parameter Scoping</span>
                 </div>
-                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+                <ul className="text-sm text-muted-foreground space-y-1.5 list-disc pl-4">
                   <li>
                     <strong>Arguments:</strong> <code>params?: TParams</code>{" "}
-                    (The normalized route parameters object)
+                    — Normalized dynamic parameters accumulated{" "}
+                    <strong>up to that specific segment</strong> (a layout only
+                    receives its own accumulated parameters, never deeper child
+                    parameters; the leaf page receives all route parameters).
                   </li>
                   <li>
-                    <strong>Returns:</strong> <code>boolean | Promise&lt;boolean&gt;</code>{" "}
-                    (Return <code>false</code> to abort rendering and return 404)
+                    <strong>Returns:</strong>{" "}
+                    <code>boolean | Promise&lt;boolean&gt;</code> (Return{" "}
+                    <code>false</code> to abort rendering and return{" "}
+                    <code>404 Not Found</code>; supports <code>async</code>{" "}
+                    database or tenant checks).
                   </li>
                 </ul>
               </div>
 
-              <CodeBlock
-                language="typescript"
-                containerClassName="w-full overflow-hidden rounded-lg mt-4"
-              >
-{`// src/posts/[id]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+              <div className="not-prose my-6">
+                <TabbedCodeBlock
+                  tabs={[
+                    {
+                      id: "single-page",
+                      label: "1. Page Validation",
+                      language: "typescript",
+                      code: `// src/posts/[id]/page_functions.ts
+import type { PageFunctions } from "dinou";
 
-// Best Practice: Type-safe route parameter validation
-export const validateParams: PageFunctions<
-  RouteParams<"/posts/[id]">
->["validateParams"] = (params) => {
+// Best Practice: Type-safe segment parameter validation
+export const validateParams: PageFunctions<"/posts/[id]">["validateParams"] = (params) => {
   // Only allow positive integer IDs; reject malformed requests with 404
   return typeof params?.id === "string" && /^\\d+$/.test(params.id);
-};`}
-              </CodeBlock>
+};`,
+                    },
+                    {
+                      id: "multi-segment-chain",
+                      label: "2. Multi-Segment Hierarchy (Layouts + Page)",
+                      language: "typescript",
+                      code: `// 1. Outer Layout: src/[org]/layout_functions.ts
+// Receives ONLY { org }
+import type { LayoutFunctions } from "dinou";
+
+export const validateParams: LayoutFunctions<"/[org]">["validateParams"] = async (params) => {
+  return Boolean(params?.org && await db.orgs.exists(params.org));
+};
+
+// 2. Nested Layout: src/[org]/projects/[project]/layout_functions.ts
+// Receives { org, project } (never deeper child params)
+export const validateParams: LayoutFunctions<"/[org]/projects/[project]">["validateParams"] = (params) => {
+  return Boolean(params?.project && /^[a-z0-9-]+$/.test(params.project));
+};
+
+// 3. Leaf Page: src/[org]/projects/[project]/tasks/[task]/page_functions.ts
+// Receives all accumulated params: { org, project, task }
+import type { PageFunctions } from "dinou";
+
+export const validateParams: PageFunctions<"/[org]/projects/[project]/tasks/[task]">["validateParams"] = (params) => {
+  return typeof params?.task === "string" && /^\\d+$/.test(params.task);
+};`,
+                    },
+                  ]}
+                />
+              </div>
 
               <div className="border rounded-lg p-5 bg-card not-prose my-6 space-y-4">
                 <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
@@ -1474,13 +1513,13 @@ export const validateParams: PageFunctions<
                   <span>Universal Gatekeeper: Authority Across All Rendering Modes</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  <code>validateParams</code> is the <strong>first line of defense</strong> executed by the Dinou server engine on every incoming request. It has ultimate veto power regardless of whether the route is pure static (SSG), on-demand (ISG), or dynamic (SSR):
+                  <code>validateParams</code> is the <strong>first line of defense</strong> executed by the Dinou server engine on every incoming request. It has ultimate veto power regardless of whether the route uses pure static (SSG), on-demand (ISG), Partial Prerendering (PPR), or dynamic (SSR) rendering:
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs min-w-0">
                   <div className="p-3 rounded-lg border bg-muted/40 space-y-1.5">
                     <span className="font-semibold text-blue-600 dark:text-blue-400 block">
-                      1. With ISG (allowISG: true)
+                      1. With ISG (&quot;allowISG: true&quot;)
                     </span>
                     <p className="text-muted-foreground leading-relaxed">
                       Rejects malformed or invalid IDs <strong>before</strong> on-demand generation starts. Prevents wasteful database queries and stops bots from polluting disk/KV cache with junk pages.
@@ -1489,10 +1528,10 @@ export const validateParams: PageFunctions<
 
                   <div className="p-3 rounded-lg border bg-muted/40 space-y-1.5">
                     <span className="font-semibold text-amber-600 dark:text-amber-400 block">
-                      2. With Strict SSG (allowISG: false)
+                      2. With Strict SSG (&quot;allowISG: false&quot;)
                     </span>
                     <p className="text-muted-foreground leading-relaxed">
-                      Ultimate veto: even if a static HTML file was pre-rendered by <code>getStaticPaths</code> at build time, returning <code>false</code> immediately blocks delivery with 404, preventing obsolete or revoked pages from being served.
+                      Ultimate veto: even if a static page was pre-rendered by <code>getStaticPaths</code> at build time, returning <code>false</code> immediately blocks delivery with 404, preventing obsolete or revoked pages from being served.
                     </p>
                   </div>
 
@@ -1501,8 +1540,161 @@ export const validateParams: PageFunctions<
                       3. With Dynamic SSR (revalidate &lt; 1)
                     </span>
                     <p className="text-muted-foreground leading-relaxed">
-                      Protects your live server from malicious parameter inputs. Rendering halts and returns 404 <strong>before</strong> <code>getProps</code> or your page component runs.
+                      Protects your live server from malicious parameter inputs. Rendering halts and returns 404 <strong>before</strong> <code>getProps</code> or your layout/page components run.
                     </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Per-Segment Validation Chain & Layout Escape Hatches */}
+              <div className="not-prose my-6 rounded-xl border border-emerald-500/20 bg-gradient-to-b from-emerald-50/40 via-background to-muted/20 dark:from-emerald-950/20 dark:via-background dark:to-muted/10 p-5 sm:p-6 space-y-5">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 font-bold text-base text-foreground">
+                    <Layers className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                    <span>Per-Segment Validation Chain, Scoping &amp; Layout Escape Hatches</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Just like <code>allowISG</code>, Dinou evaluates{" "}
+                    <code>validateParams</code>{" "}
+                    <strong>independently per segment</strong> along the{" "}
+                    <strong>active layout chain</strong>:
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs min-w-0">
+                  <div className="p-3.5 rounded-lg border bg-card space-y-1">
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400 block">
+                      1. Strict Cumulative Parameter Scope
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      In <code>/[org]/projects/[project]/tasks/[task]</code>, the{" "}
+                      <code>[org]</code> layout receives only{" "}
+                      <code>&#123; org &#125;</code>, the <code>[project]</code>{" "}
+                      layout receives <code>&#123; org, project &#125;</code>, and
+                      the <code>[task]</code> page receives{" "}
+                      <code>&#123; org, project, task &#125;</code>.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-lg border bg-card space-y-1">
+                    <span className="font-semibold text-blue-600 dark:text-blue-400 block">
+                      2. Subtree Gatekeeping Without Sibling Bleed
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      If a nested layout rejects its parameter, every route inside
+                      that subtree returns <code>404 Not Found</code> (on both
+                      direct loads and SPA navigations), while sibling routes
+                      outside that layout continue responding normally.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-lg border bg-card space-y-1">
+                    <span className="font-semibold text-indigo-600 dark:text-indigo-400 block">
+                      3. Leaf Page Failure Preserves Parent Routes
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      When all active layouts pass validation and only the leaf
+                      page&apos;s <code>validateParams</code> returns{" "}
+                      <code>false</code>, only that leaf page returns{" "}
+                      <code>404 Not Found</code>; parent routes and shared layouts
+                      remain unaffected.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-lg border bg-card space-y-1">
+                    <span className="font-semibold text-amber-600 dark:text-amber-400 block">
+                      4. Respects no_layout &amp; reset_layout
+                    </span>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Because Dinou walks only the <strong>active</strong> layout
+                      chain, ancestor layouts bypassed via{" "}
+                      <code>no_layout</code> or above a{" "}
+                      <code>reset_layout</code> boundary do not run{" "}
+                      <code>validateParams</code> and never block the route (only
+                      the active <code>reset_layout</code> / leaf page validators
+                      apply).
+                    </p>
+                  </div>
+                </div>
+
+                {/* Multi-Segment Behavior Matrix */}
+                <div className="space-y-2">
+                  <div className="text-xs font-semibold text-foreground">
+                    Example Matrix: <code>/[org]/projects/[project]/tasks/[task]</code>
+                  </div>
+                  <div className="rounded-lg border bg-card overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/40">
+                          <TableHead className="text-xs font-semibold">
+                            Scenario
+                          </TableHead>
+                          <TableHead className="text-xs font-semibold">
+                            <code>params</code> Received by Failing / Active Validator
+                          </TableHead>
+                          <TableHead className="text-xs font-semibold">
+                            Result
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="text-xs">
+                            All 3 segments return <code>true</code>
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-muted-foreground">
+                            &#123; org &#125; → &#123; org, project &#125; → &#123; org, project, task &#125;
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <strong className="text-emerald-600 dark:text-emerald-400">200 OK</strong> — Route renders (or caches via SSG/ISG) normally.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="text-xs">
+                            Outer <code>[org]</code> layout returns <code>false</code>
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-muted-foreground">
+                            &#123; org: &quot;bad-org&quot; &#125;
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <strong className="text-rose-600 dark:text-rose-400">404 Not Found</strong> — Entire <code>/bad-org/*</code> subtree is blocked on direct loads &amp; SPA navigations.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="text-xs">
+                            Nested <code>[project]</code> layout returns <code>false</code>
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-muted-foreground">
+                            &#123; org: &quot;acme&quot;, project: &quot;bad-proj&quot; &#125;
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <strong className="text-rose-600 dark:text-rose-400">404 Not Found</strong> on <code>/acme/projects/bad-proj/*</code>; sibling <code>/acme</code> stays <strong className="text-emerald-600 dark:text-emerald-400">200 OK</strong>.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="text-xs">
+                            Leaf <code>[task]</code> page returns <code>false</code>
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-muted-foreground">
+                            &#123; org: &quot;acme&quot;, project: &quot;web&quot;, task: &quot;bad&quot; &#125;
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <strong className="text-rose-600 dark:text-rose-400">404 Not Found</strong> on that task page; parent <code>/acme/projects/web</code> stays <strong className="text-emerald-600 dark:text-emerald-400">200 OK</strong>.
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="text-xs">
+                            Subroute uses <code>no_layout</code> or <code>reset_layout</code> under <code>bad-org</code>
+                          </TableCell>
+                          <TableCell className="font-mono text-xs text-muted-foreground">
+                            Bypassed <code>[org]</code> validator is skipped; active <code>reset_layout</code> / page runs
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <strong className="text-emerald-600 dark:text-emerald-400">200 OK</strong> if the active <code>reset_layout</code> / page validator passes (<strong className="text-rose-600 dark:text-rose-400">404</strong> if its own validator fails).
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
                   </div>
                 </div>
               </div>

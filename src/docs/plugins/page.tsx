@@ -43,11 +43,12 @@ const tocItems = [
   { id: "config-file", title: "2. The dinou.config.js File", level: 2 },
   { id: "config-bundling", title: "2.1 Esbuild Pre-Bundling & Native Path Aliases", level: 3 },
   { id: "config-options", title: "3. Top-Level Configuration Options", level: 2 },
-  { id: "ppr-option", title: "3.1 Global Partial Prerendering (ppr)", level: 3 },
-  { id: "strict-mode-option", title: "3.2 React StrictMode (reactStrictMode)", level: 3 },
-  { id: "storage-option", title: "3.3 Storage Adapter (storage)", level: 3 },
-  { id: "setup-files-option", title: "3.4 Universal Setup Files (setupFiles)", level: 3 },
-  { id: "plugins-option", title: "3.5 Plugins Array (plugins)", level: 3 },
+  { id: "ppr-option", title: "3.1 Global Partial Prerendering Default (ppr)", level: 3 },
+  { id: "allow-isg-option", title: "3.2 Global ISG Default (allowISG)", level: 3 },
+  { id: "strict-mode-option", title: "3.3 React StrictMode (reactStrictMode)", level: 3 },
+  { id: "storage-option", title: "3.4 Storage Adapter (storage)", level: 3 },
+  { id: "setup-files-option", title: "3.5 Universal Setup Files (setupFiles)", level: 3 },
+  { id: "plugins-option", title: "3.6 Plugins Array (plugins)", level: 3 },
   { id: "plugin-architecture", title: "4. Dinou Plugin Architecture", level: 2 },
   { id: "configure-server", title: "5. Low-Level Node Hook: configureServer", level: 2 },
   { id: "configure-server-context", title: "5.1 Context Parameters: server, isDev, use", level: 3 },
@@ -98,7 +99,7 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Customize your Dinou application with <code>dinou.config.js</code>, enable global Partial Prerendering (PPR), mount low-level Node.js servers and WebSockets with <code>configureServer</code>, inject compile-time polyfills with <code>setupFiles</code>, and intercept HTTP requests using Web Standards plugins.
+              Customize your Dinou application with <code>dinou.config.js</code>, set project-wide defaults for Partial Prerendering (<code>ppr</code>) and Incremental Static Generation (<code>allowISG</code>), mount low-level Node.js servers and WebSockets with <code>configureServer</code>, inject compile-time polyfills with <code>setupFiles</code>, and intercept HTTP requests using Web Standards plugins.
             </p>
           </div>
 
@@ -174,8 +175,11 @@ import { defineConfig } from "dinou";
 // import { RedisStorage } from "dinou/server";
 
 export default defineConfig({
-  // Global Partial Prerendering default (can be overridden per route)
+  // Project-wide Partial Prerendering default across all segments (defaults to false if omitted)
   ppr: false,
+
+  // Project-wide Incremental Static Generation default on dynamic segments (defaults to true if omitted)
+  allowISG: true,
 
   // React StrictMode in development (defaults to true)
   reactStrictMode: true,
@@ -222,16 +226,16 @@ export default defineConfig({
 
               {/* PPR Option */}
               <div id="ppr-option" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">3.1 Global Partial Prerendering (<code>ppr</code>)</h3>
+                <h3 className="text-lg font-bold">3.1 Global Partial Prerendering Default (<code>ppr</code>)</h3>
                 <p>
-                  Dinou introduces first-class <strong>Partial Prerendering (PPR)</strong>. When <code>ppr: true</code> is configured globally in <code>dinou.config.js</code>:
+                  Sets the project-wide default value for <strong>Partial Prerendering (PPR)</strong> across every route segment (<code>layout</code> and <code>page</code>). <strong>If omitted, <code>ppr</code> defaults to <code>false</code>.</strong>
                 </p>
                 <ul>
                   <li>
-                    All static-eligible routes pre-render an instant static HTML shell at build/ISR time.
+                    <strong>When omitted (or <code>false</code>):</strong> Every layout and page defaults to standard non-PPR rendering unless that specific segment explicitly opts in via <code>export const ppr = true</code> in its own <code>layout_functions.ts</code> or <code>page_functions.ts</code>.
                   </li>
                   <li>
-                    Dynamic components wrapped in React <code>&lt;Suspense&gt;</code> leave streaming placeholder holes that resume and stream from the server upon request.
+                    <strong>When set to <code>true</code>:</strong> Every static-eligible layout and page defaults to PPR—pre-rendering an instant static HTML shell at build/ISR time while streaming dynamic React <code>&lt;Suspense&gt;</code> boundaries (async Server Components, request-aware reads, and Client Components receiving un-awaited <code>Promise</code> props) per request.
                   </li>
                 </ul>
                 <CodeBlock
@@ -240,17 +244,47 @@ export default defineConfig({
                 >
 {`// dinou.config.js
 export default defineConfig({
-  ppr: true, // Enables Partial Prerendering across all eligible routes
+  // Defaults to false if omitted. Set to true to enable PPR by default across all segments:
+  ppr: true,
 });`}
                 </CodeBlock>
                 <p className="text-xs text-muted-foreground">
-                  You can override PPR on a per-route or per-layout basis inside <code>page_functions.ts</code> or <code>layout_functions.ts</code> by exporting <code>export const ppr = false;</code>.
+                  Because Dinou resolves <code>ppr</code> strictly per segment without parent-to-child inheritance, any individual page or layout can override this global default in its own <code>page_functions.ts</code> or <code>layout_functions.ts</code> (for example, opting out with <code>export const ppr = false;</code> when <code>ppr: true</code> is enabled globally).
+                </p>
+              </div>
+
+              {/* allowISG Option */}
+              <div id="allow-isg-option" className="mt-8 space-y-3">
+                <h3 className="text-lg font-bold">3.2 Global Incremental Static Generation Default (<code>allowISG</code>)</h3>
+                <p>
+                  Sets the project-wide default value controlling whether dynamic route segments (<code>[id]</code>, <code>[slug]</code>, <code>[...catchAll]</code>) not pre-rendered at build time by <code>getStaticPaths</code> are allowed to be generated and cached on-demand at runtime. <strong>If omitted, <code>allowISG</code> defaults to <code>true</code>.</strong>
+                </p>
+                <ul>
+                  <li>
+                    <strong>When omitted (or <code>true</code>):</strong> On-demand Incremental Static Generation (ISG) is enabled by default across all dynamic layouts and pages unless a segment explicitly opts out with <code>export const allowISG = false</code>.
+                  </li>
+                  <li>
+                    <strong>When set to <code>false</code>:</strong> Switches all dynamic segments across the project to <strong>strict SSG-only mode</strong> by default—returning <code>404 Not Found</code> immediately for any dynamic parameter not pre-rendered at build time.
+                  </li>
+                </ul>
+                <CodeBlock
+                  language="javascript"
+                  containerClassName="w-full overflow-hidden rounded-lg"
+                >
+{`// dinou.config.js
+export default defineConfig({
+  // Defaults to true if omitted. Set to false for strict SSG-only mode across the project:
+  allowISG: false,
+});`}
+                </CodeBlock>
+                <p className="text-xs text-muted-foreground">
+                  Individual dynamic layouts and pages can override this project-wide default in their own <code>layout_functions.ts</code> or <code>page_functions.ts</code> (for example, explicitly opting a specific dynamic route into on-demand ISG via <code>export const allowISG = true;</code> when <code>allowISG: false</code> is configured globally).
                 </p>
               </div>
 
               {/* Strict Mode Option */}
               <div id="strict-mode-option" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">3.2 React StrictMode (<code>reactStrictMode</code>)</h3>
+                <h3 className="text-lg font-bold">3.3 React StrictMode (<code>reactStrictMode</code>)</h3>
                 <p>
                   In Dinou, <code>reactStrictMode</code> defaults to <code>true</code>. When active in development mode, React intentionally invokes components and effects twice to identify unintended side effects and ensure strict compliance with the React Compiler.
                 </p>
@@ -268,7 +302,7 @@ export default defineConfig({
 
               {/* Storage Option */}
               <div id="storage-option" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">3.3 Storage Adapter (<code>storage</code>)</h3>
+                <h3 className="text-lg font-bold">3.4 Storage Adapter (<code>storage</code>)</h3>
                 <p>
                   Dinou&apos;s ISR and ISG caching engine uses a pluggable storage adapter. By default, Dinou uses the local filesystem (in Node.js/Bun) or Deno KV (in Deno). You can supply a custom storage adapter (such as Redis or Cloudflare KV) in <code>dinou.config.js</code>:
                 </p>
@@ -288,7 +322,7 @@ export default defineConfig({
 
               {/* Setup Files Option */}
               <div id="setup-files-option" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">3.4 Universal Setup Files (<code>setupFiles</code>)</h3>
+                <h3 className="text-lg font-bold">3.5 Universal Setup Files (<code>setupFiles</code>)</h3>
                 <p>
                   An array of file paths to execute before any application code runs. Injected at <strong>Line 1</strong> of every compilation stage across all target runtimes via Esbuild&apos;s native <code>inject</code> mechanism.
                 </p>
@@ -306,7 +340,7 @@ export default defineConfig({
 
               {/* Plugins Option */}
               <div id="plugins-option" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">3.5 Plugins Array (<code>plugins</code>)</h3>
+                <h3 className="text-lg font-bold">3.6 Plugins Array (<code>plugins</code>)</h3>
                 <p>
                   An array of plugin objects conforming to the <code>DinouPlugin</code> interface, executed sequentially on every incoming request.
                 </p>
