@@ -47,7 +47,7 @@ const tocItems = [
   { id: "param-mapping", title: "3. Parameter Mapping Reference Table", level: 2 },
   { id: "advanced-recipes", title: "4. Advanced Usage & Real-World Recipes", level: 2 },
   { id: "route-pattern-picking", title: "4.1. IDE Autocomplete Workflow (Ctrl + Space)", level: 3 },
-  { id: "typed-error-pages", title: "4.2. Typed Error Pages with ErrorProps", level: 3 },
+  { id: "typed-error-pages", title: "4.2. Error & Not-Found Pages (ErrorProps & NotFoundProps)", level: 3 },
   { id: "custom-components", title: "4.3. Custom Navigation Components with DinouRoute", level: 3 },
   { id: "dynamic-interpolation", title: "4.4. Dynamic Navigation with Typed Interpolation", level: 3 },
   { id: "architecture", title: "5. Technical Architecture: Under the Hood", level: 2 },
@@ -153,7 +153,7 @@ export default function TypeSafeRoutingPage() {
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground space-y-2">
                       <p>
-                        Strict parameter &amp; slot typing across <code>page.tsx</code>, intermediate <code>layout.tsx</code>, parallel <code>@slot/page.tsx</code>, <code>error.tsx</code>, and <code>page_functions.ts</code> / <code>layout_functions.ts</code> via <code>PageProps</code>, <code>LayoutProps</code>, <code>SlotProps</code>, <code>ErrorProps</code>, <code>PageFunctions</code>, <code>LayoutFunctions</code>, and <code>RouteParams</code>.
+                        Strict parameter &amp; slot typing across <code>page.tsx</code>, intermediate <code>layout.tsx</code>, parallel <code>@slot/page.tsx</code>, <code>error.tsx</code>, <code>not_found.tsx</code>, and <code>page_functions.ts</code> / <code>layout_functions.ts</code> via <code>PageProps</code>, <code>LayoutProps</code>, <code>SlotProps</code>, <code>ErrorProps</code>, <code>NotFoundProps</code>, <code>PageFunctions</code>, <code>LayoutFunctions</code>, and <code>RouteParams</code>.
                       </p>
                       <p>
                         Supports Dinou&apos;s Horizontal Segmentation natively: intermediate layouts without a sibling <code>page.tsx</code> and parallel <code>@slots</code> are fully typed without polluting navigable Level 1 URLs.
@@ -495,6 +495,11 @@ export default function ProjectPage({
                         <td className="p-3 font-mono">Error(&#123; error, params &#125;: ErrorProps&lt;&quot;/workspace/[org]/@analytics&quot;&gt;)</td>
                       </tr>
                       <tr>
+                        <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">NotFoundProps&lt;T, P?&gt;</td>
+                        <td className="p-3 text-muted-foreground">404 boundaries (<code>not_found.tsx</code>) across root, routes &amp; intermediate folders + optional <code>P</code></td>
+                        <td className="p-3 font-mono">NotFound(&#123; params &#125;: NotFoundProps&lt;&quot;/workspace/[org]&quot;&gt;)</td>
+                      </tr>
+                      <tr>
                         <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">PageFunctions&lt;T, P&gt;</td>
                         <td className="p-3 text-muted-foreground">Page lifecycle &amp; data contracts (<code>page_functions.ts</code>)</td>
                         <td className="p-3 font-mono">const getProps: PageFunctions&lt;&quot;/blog/[slug]&quot;, Data&gt;[&quot;getProps&quot;]</td>
@@ -655,10 +660,10 @@ export default function BlogPost({ params }: PageProps<"/blog/[slug]">) {
               <div id="typed-error-pages" className="scroll-mt-20 mt-8 space-y-3">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-amber-500" />
-                  4.2. Typed Error Pages with ErrorProps
+                  4.2. Typed Error &amp; Not-Found Pages (ErrorProps &amp; NotFoundProps)
                 </h3>
                 <p>
-                  In Dinou, error pages (<code>error.tsx</code> and parallel slot errors <code>@slot/error.tsx</code>) receive two props: <code>error: Error</code> and <code>params</code>. You can strictly type them directly using <code>ErrorProps&lt;T&gt;</code>:
+                  Error boundaries (<code>error.tsx</code> and <code>@slot/error.tsx</code>) receive <code>error: Error</code> and <code>params</code> via <code>ErrorProps&lt;T&gt;</code>, while custom 404 boundaries (<code>not_found.tsx</code>—including intermediate directory 404 boundaries without a sibling <code>page.tsx</code>) receive cumulative <code>params</code> (plus any sibling <code>page_functions.ts</code> <code>getProps</code> data) via <code>NotFoundProps&lt;T, P?&gt;</code>:
                 </p>
 
                 <div className="not-prose my-4">
@@ -736,6 +741,25 @@ export default function WorkspaceError({
       <p className="text-sm text-muted-foreground">{error.message}</p>
       <button onClick={() => router.refresh()}>Retry</button>
     </div>
+  );
+}`,
+                      },
+                      {
+                        id: "not-found",
+                        label: "src/workspace/[org]/not_found.tsx",
+                        language: "tsx",
+                        code: `import { Link, type NotFoundProps } from "dinou";
+
+// Catches 404s under /workspace/[org]/* (or validateParams returning false),
+// even when /workspace/[org] has NO sibling page.tsx!
+export default function WorkspaceNotFound({
+  params,
+}: NotFoundProps<"/workspace/[org]">) {
+  return (
+    <section className="p-6 border rounded-xl">
+      <h2>Nothing found in workspace &ldquo;{params.org}&rdquo;</h2>
+      <Link href="/">Back to Home</Link>
+    </section>
   );
 }`,
                       },
