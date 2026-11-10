@@ -141,7 +141,7 @@ export default function Page() {
                   Think of Server Components as the backbone of your application that orchestrates data fetching, layouts, and non-interactive UI (rendering pure HTML with zero client JavaScript). Client Components act as interactive &quot;islands&quot; or leaves embedded inside the server tree.
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  The server streams HTML and React Flight JSON representations across an open HTTP stream. The browser consumes this stream without ever downloading the JavaScript source code of your Server Components.
+                  On initial page load, Dinou multiplexes the rendered HTML and the segmented React Flight RSC payloads inline in a <strong>single server pass</strong> (with zero extra hydration fetches and zero hydration mismatches). The browser consumes this stream without ever downloading the JavaScript source code of your Server Components.
                 </p>
               </div>
             </section>
@@ -177,7 +177,6 @@ export default function Page() {
 
                 <CodeBlock language="tsx" containerClassName="rounded-lg mt-4">
                   {`// src/users/page.tsx (Server Component by default)
-import { getContext } from "dinou";
 import { db } from "@/lib/db"; // Never bundled to the client!
 
 export default async function UsersPage() {
@@ -281,7 +280,7 @@ async function UsersList() {
                           </Badge>
                         </div>
                         <CardDescription className="text-xs text-muted-foreground">
-                          Static Site Generation
+                          Static Site Generation (Default: &quot;ppr: false&quot;)
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="text-xs text-muted-foreground leading-relaxed space-y-2">
@@ -335,12 +334,12 @@ async function UsersList() {
                           </Badge>
                         </div>
                         <CardDescription className="text-xs text-muted-foreground">
-                          Static Shell + Live Holes
+                          Static Shell + Live Holes (&quot;ppr: true&quot;)
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="text-xs text-muted-foreground leading-relaxed space-y-2">
                         <p>
-                          <strong>Static Shell Prerender:</strong> The outer layout shell and the fallback skeleton are pre-rendered at build time and served immediately with <strong>0ms TTFB</strong> from the CDN edge.
+                          <strong>Static Shell Prerender:</strong> When <code>ppr = true</code> is enabled on the segment (or globally in <code>dinou.config.js</code>), the outer layout shell and fallback skeleton are pre-rendered at build time and served immediately with <strong>0ms TTFB</strong> from the CDN edge.
                         </p>
                         <p>
                           <strong>Fallback Behavior:</strong> The skeleton renders instantly from static cache, while the server concurrently executes only the dynamic query and streams live data into the hole.
@@ -370,6 +369,21 @@ async function UsersList() {
                     Cannot consume (read) React Context with <code>useContext()</code> or <code>use(Context)</code>. (While Server Components can render <code>&lt;Context&gt;</code> providers for client children, they cannot read context values themselves).
                   </li>
                 </ul>
+
+                <Alert className="not-prose my-3 border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-950/20">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <AlertTitle className="text-emerald-700 dark:text-emerald-300 font-bold text-xs">
+                    Which Hooks ARE Supported in Server Components?
+                  </AlertTitle>
+                  <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1 space-y-1.5">
+                    <p>
+                      <strong>1. React 19 Stateless Synchronous Hooks:</strong> Inside <strong>synchronous</strong> Server Components (never inside <code>async</code> Server Components), you can freely use <code>useId()</code>, <code>use(promise)</code>, <code>useMemo()</code>, <code>useCallback()</code>, and <code>useDebugValue()</code>. Dinou scopes server-generated <code>useId()</code> values deterministically across layouts, pages, <code>&lt;DinouCacheSlot&gt;</code> boundaries, and PPR dynamic holes with zero hydration mismatches.
+                    </p>
+                    <p>
+                      <strong>2. Dinou Universal Navigation Hooks:</strong> <code>usePathname()</code> and <code>useSearchParams()</code> (imported from <code>&quot;dinou&quot;</code>) work seamlessly in both Server Components (synchronous or <code>async</code>, reading the active server request) and Client Components.
+                    </p>
+                  </AlertDescription>
+                </Alert>
               </div>
             </section>
 
@@ -413,7 +427,7 @@ async function UsersList() {
                     SSR Execution Safety Rule
                   </AlertTitle>
                   <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1">
-                    Because Client Components run on the server during pre-rendering, accessing browser globals directly in the root of the component function (e.g. <code>const token = localStorage.getItem(&quot;token&quot;)</code>) will throw a server runtime error. Defer browser-only access inside a <code>useEffect</code> hook or guard it with <code>if (typeof window !== &quot;undefined&quot;)</code>.
+                    Because Client Components run on the server during pre-rendering, accessing browser globals directly in the root of the component function (e.g. <code>const token = localStorage.getItem(&quot;token&quot;)</code>) will throw a server runtime error. Read browser-only state inside <code>useEffect</code> or event handlers—avoid branching JSX output on <code>typeof window !== &quot;undefined&quot;</code> during render, as rendering different initial HTML on the server and client causes a React hydration mismatch (reserve <code>typeof window !== &quot;undefined&quot;</code> guards for imperative logic that does not alter initial markup).
                   </AlertDescription>
                 </Alert>
               </div>
@@ -425,7 +439,7 @@ async function UsersList() {
                 4. The &quot;use client&quot; Directive
               </h2>
               <p>
-                To declare a component as a Client Component, add the <code>&quot;use client&quot;</code> directive at the very top of the file, before any import statements or comments.
+                To declare a component as a Client Component, add the <code>&quot;use client&quot;</code> directive at the very top of the file, before any <code>import</code> statements or executable code (leading comments are allowed).
               </p>
 
               <div id="boundary-rules" className="scroll-mt-20 mt-6 space-y-3">
@@ -438,7 +452,7 @@ async function UsersList() {
                 </p>
 
                 <CodeBlock language="tsx" containerClassName="rounded-lg">
-                  {`"use client"; // Must be at the very top of the file!
+                  {`"use client"; // Must appear before any imports or code!
 
 import { useState } from "react";
 
@@ -464,6 +478,9 @@ export function Counter({ initial = 0 }: { initial?: number }) {
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Once a file declares <code>&quot;use client&quot;</code>, all components, utility modules, and third-party libraries imported by that file are automatically treated as part of the client bundle. You do not need to add <code>&quot;use client&quot;</code> to child modules imported by a Client Component.
+                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  <strong>Exception — Server Functions (<code>&quot;use server&quot;</code>):</strong> Modules or exported functions marked with <code>&quot;use server&quot;</code> <em>can</em> be imported directly into Client Components. Dinou compiles them into lightweight RPC stubs for the browser while keeping their implementation strictly on the server.
                 </p>
               </div>
             </section>
@@ -494,7 +511,7 @@ export function Counter({ initial = 0 }: { initial?: number }) {
                       <li><strong>Plain Objects &amp; Arrays:</strong> Objects with serializable values (e.g. <code>&#123; id: 1, name: &quot;Dinou&quot; &#125;</code>).</li>
                       <li><strong>Dates:</strong> <code>Date</code> objects are serialized and reconstructed by React.</li>
                       <li><strong>React Elements (JSX):</strong> Server Components passed as <code>children</code> or named slots.</li>
-                      <li><strong>Promises:</strong> Passed directly from Server to Client (read with React 19 <code>use()</code>).</li>
+                      <li><strong>Promises (and Arrays of Promises):</strong> Passed directly without <code>await</code> from Server to Client (unwrapped with React 19 <code>use()</code>).</li>
                       <li><strong>Server Functions:</strong> Bound actions declared with <code>&quot;use server&quot;</code>.</li>
                     </ul>
                   </div>
@@ -520,7 +537,7 @@ export function Counter({ initial = 0 }: { initial?: number }) {
                   5.2. Passing Promises &amp; React 19 use()
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  React 19 supports passing an unresolved <strong>Promise</strong> as a prop from a Server Component to a Client Component. The Client Component reads the promise synchronously using the <code>use()</code> hook, automatically triggering Suspense fallbacks until the promise settles:
+                  React 19 and Dinou support passing an unresolved <strong>Promise</strong> (or an <strong>array of Promises</strong>) as a prop from a Server Component to a Client Component without awaiting it on the server. Inside a <code>&lt;Suspense&gt;</code> boundary, the Client Component reads each promise with the <code>use()</code> hook, streaming the resolved data without blocking TTFB:
                 </p>
 
                 <div className="not-prose">
@@ -561,6 +578,9 @@ export function UserProfile({ userPromise }: { userPromise: Promise<{ name: stri
                     ]}
                   />
                 </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  <strong>Behavior with Partial Prerendering (<code>ppr = true</code>):</strong> Wrapping a Client Component that receives an un-awaited <code>Promise</code> prop (or array of <code>Promise</code>s) inside <code>&lt;Suspense&gt;</code> automatically registers that boundary as a <strong>Dynamic PPR Hole</strong>—the outer shell and <code>&lt;Suspense&gt;</code> fallback are pre-rendered at build time for 0ms TTFB, while the promise streams live at request time.
+                </p>
               </div>
             </section>
 
@@ -669,12 +689,16 @@ export function ModalContainer({ children }: { children: ReactNode }) {
                     tabs={[
                       {
                         id: "page",
-                        label: "src/canvas/page.tsx (Client Component)",
+                        label: "src/canvas/[id]/page.tsx (Client Component)",
                         language: "tsx",
                         code: `"use client";
 import { useState } from "react";
+import type { PageProps } from "dinou";
+import type { ProjectData } from "./page_functions";
 
-export default function CanvasPage({ project }: { project: any }) {
+export default function CanvasPage({
+  project,
+}: PageProps<"/canvas/[id]"> & ProjectData) {
   // Full access to state, effects, and events everywhere in the file!
   const [layers, setLayers] = useState(project.initialLayers);
 
@@ -688,19 +712,33 @@ export default function CanvasPage({ project }: { project: any }) {
                       },
                       {
                         id: "functions",
-                        label: "src/canvas/page_functions.ts (Server Data)",
+                        label: "src/canvas/[id]/page_functions.ts (Server Data)",
                         language: "ts",
-                        code: `// Runs securely on the server
-export async function getProps(params: { id: string }) {
+                        code: `import type { PageFunctions } from "dinou";
+import { db } from "@/lib/db";
+
+export interface ProjectData {
+  project: { id: string; initialLayers: string[] };
+}
+
+// Runs securely on the server
+export const getProps: PageFunctions<"/canvas/[id]", ProjectData>["getProps"] = async (
+  params
+) => {
   const project = await db.projects.findById(params.id);
   return { project };
-}`,
+};`,
                       },
                     ]}
                   />
-                  <p className="text-xs text-muted-foreground mt-2">
-                    <strong>Advantage:</strong> Fast development speed, traditional React ergonomics, with secure backend data fetching and SSR pre-rendering intact.
-                  </p>
+                  <div className="text-xs text-muted-foreground mt-2 space-y-1">
+                    <p>
+                      <strong>Advantage:</strong> Fast development speed and traditional React ergonomics, with secure backend data fetching and SSR pre-rendering intact.
+                    </p>
+                    <p>
+                      <strong>Non-Blocking Streaming Tip:</strong> <code>getProps</code> can also return un-awaited <code>Promise</code>s (e.g. <code>&#123; project, commentsPromise &#125;</code>) so your Client-First page flushes its interactive shell immediately and unwraps slow queries inside <code>&lt;Suspense&gt;</code> via React 19&apos;s <code>use()</code> hook without blocking TTFB.
+                    </p>
+                  </div>
                 </div>
 
                 {/* 6.4 Granular Caching */}
@@ -859,7 +897,7 @@ export function InteractiveChart({ data }: { data: any }) {
                         Trap 1: Placing &quot;use client&quot; at the root layout
                       </div>
                       <p>
-                        Marking <code>src/layout.tsx</code> as a Client Component cascades the client boundary to every single page in your application. Root layouts should always be Server Components to protect secrets and enable streaming.
+                        While child pages passed via <code>&#123;children&#125;</code> remain Server Components, marking <code>src/layout.tsx</code> with <code>&quot;use client&quot;</code> forces every module <strong>imported</strong> by the root layout into the global client JS bundle across all routes, and prevents <code>src/layout.tsx</code> itself from being <code>async</code>, querying databases/secrets directly, or rendering <code>&lt;DinouCacheSlot&gt;</code> directly. Keep <code>src/layout.tsx</code> as a Server Component and extract interactive UI (such as a <code>&lt;Navbar /&gt;</code> or <code>&lt;ThemeProvider&gt;</code>) into dedicated Client Components instead.
                       </p>
                     </div>
 
