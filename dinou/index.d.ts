@@ -1288,7 +1288,7 @@ export type LinkProps<
   THref extends DinouLinkTargetForFrom<TFrom> = DinouLinkTargetForFrom<TFrom>
 > = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
   /**
-   * Origin route/directory pattern (e.g. `"/t-slots/[slug]/contact"`) used to strictly
+   * Origin route/directory pattern (e.g. `"/workspace/[org]/contact"`) used to strictly
    * validate and autocomplete relative navigation targets (`"sub"`, `"./sub"`, `"../other"`).
    */
   from?: TFrom;

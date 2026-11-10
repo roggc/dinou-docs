@@ -707,7 +707,7 @@ export default function ProjectPage({
                   4.1. IDE Autocomplete Workflow (Ctrl + Space)
                 </h3>
                 <p>
-                  Press <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border border-border">Ctrl + Space</kbd> (or <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border border-border">Cmd + Space</kbd>) inside quotes in <strong>both</strong> navigation calls (<code>&lt;Link to=&quot;&quot;&gt;</code>, <code>&lt;Link href=&quot;&quot;&gt;</code>, <code>router.push(&quot;&quot;)</code>) and segment prop generics (<code>PageProps&lt;&quot;&quot;&gt;</code>, <code>LayoutProps&lt;&quot;&quot;&gt;</code>):
+                  Press <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border border-border">Ctrl + Space</kbd> (or <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border border-border">Cmd + Space</kbd>) inside quotes across navigation props (<code>&lt;Link from=&quot;&quot; to=&quot;&quot;&gt;</code>, <code>&lt;Link href=&quot;&quot;&gt;</code>, <code>router.push(&quot;&quot;)</code>) and segment prop generics (<code>PageProps&lt;&quot;&quot;&gt;</code>, <code>LayoutProps&lt;&quot;&quot;&gt;</code>):
                 </p>
 
                 <CodeBlock language="tsx" containerClassName="rounded-xl overflow-hidden my-4">
@@ -722,6 +722,12 @@ export default function BlogPost({ params }: PageProps<"/blog/[slug]">) {
              dynamic patterns like "/blog/[slug]", then autocompletes params! */}
       <Link to="/blog/[slug]" params={{ slug: "next-article" }}>
         Next Article
+      </Link>
+
+      {/* 3. Trigger Ctrl + Space inside from="" (picks the source folder),
+             then inside to="" (suggests "comments", "./comments", ".", "../..", etc.) */}
+      <Link from="/blog/[slug]" to="comments">
+        View Comments
       </Link>
     </article>
   );
@@ -976,69 +982,121 @@ export function ProductCard({ product }: { product: Product }) {
                   4.5. Strict Relative Navigation with <code>from</code>
                 </h3>
                 <p>
-                  At static analysis time, TypeScript cannot infer which URL is currently mounted in the browser—especially inside shared components, persistent layouts, or parallel <code>@slots</code>. To guarantee <strong>zero broken relative links</strong>, Dinou rejects unanchored relative paths (such as <code>to=&quot;./subs&quot;</code> or <code>to=&quot;sub&quot;</code> without <code>from</code>) and unlocks exact, filesystem-grade relative routing whenever you specify <code>from</code>:
+                  At static analysis time, TypeScript cannot infer which URL is currently mounted in the browser—especially inside shared components, persistent layouts, or parallel <code>@slots</code>. To guarantee <strong>zero unvalidated relative links</strong>, Dinou rejects unanchored relative paths (such as <code>to=&quot;./subs&quot;</code>, <code>to=&quot;./sub&quot;</code>, or <code>to=&quot;sub&quot;</code> without <code>from</code>) and unlocks exact, filesystem-grade relative routing whenever you specify <code>from</code>:
                 </p>
-                <ul className="text-sm space-y-1">
+                <ul className="text-sm space-y-1.5">
                   <li>
-                    <strong>Both <code>&quot;sub&quot;</code> and <code>&quot;./sub&quot;</code> (Filesystem Parity):</strong> Just like <code>cd sub</code> and <code>cd ./sub</code> in a terminal, Dinou treats every route as a directory. With <code>from</code> provided, TypeScript computes the exact finite set of valid relative destinations from that folder—surfacing <code>&quot;sub&quot;</code>, <code>&quot;./sub&quot;</code>, <code>&quot;.&quot;</code>, and valid parent/sibling paths (<code>&quot;../..&quot;</code>, <code>&quot;../sibling&quot;</code>) in <code>Ctrl + Space</code> while rejecting typos (<code>&quot;subs&quot;</code>, <code>&quot;./subs&quot;</code>) and intermediate parent folders that lack a <code>page.tsx</code>!
+                    <strong><code>Ctrl + Space</code> Autocomplete on Both <code>from</code> and <code>to</code> / <code>href</code>:</strong> Inside <code>from=&quot;&quot;</code>, your IDE suggests every route and intermediate directory prefix in your project (e.g., <code>&quot;/workspace&quot;</code>, <code>&quot;/workspace/[org]&quot;</code>, <code>&quot;/workspace/[org]/contact&quot;</code>, also accepting patterns without a leading slash like <code>&quot;workspace/[org]/contact&quot;</code>). Once <code>from</code> is set, <code>to=&quot;&quot;</code> / <code>href=&quot;&quot;</code> suggests only the exact finite set of valid navigable relative paths from that folder.
                   </li>
                   <li>
-                    <strong>Automatic Parent Param Inheritance:</strong> Navigating relatively within a dynamic subtree (e.g., <code>from=&quot;/t-slots/[slug]/contact&quot;</code> to <code>to=&quot;sub&quot;</code>) reuses the active <code>[slug]</code> segment already in the browser URL at runtime—no <code>params</code> prop needed! You only pass <code>params</code> when the relative target itself introduces a <em>new</em> child dynamic segment (e.g., <code>from=&quot;/t-slots&quot;</code> + <code>to=&quot;[slug]/contact/sub&quot;</code>).
+                    <strong>Both <code>&quot;sub&quot;</code> and <code>&quot;./sub&quot;</code> + Non-Page Parent Exclusion:</strong> Just like <code>cd sub</code> and <code>cd ./sub</code> in a terminal, Dinou treats every route as a directory. Both <code>&quot;sub&quot;</code> and <code>&quot;./sub&quot;</code> (plus <code>&quot;.&quot;</code>, <code>&quot;../..&quot;</code>, and valid siblings) appear in autocomplete, while typos (<code>&quot;subs&quot;</code>, <code>&quot;./subs&quot;</code>) and intermediate parent directories without a <code>page.tsx</code> (e.g., <code>&quot;..&quot;</code> when <code>/workspace/[org]</code> only has a <code>layout.tsx</code>) are automatically excluded and rejected!
                   </li>
                   <li>
-                    <strong>Layout &amp; Parallel <code>@slot</code> Safe:</strong> If a persistent layout or <code>@slot</code> at <code>from=&quot;/t-slots/[slug]&quot;</code> renders while the browser is deeper at <code>/t-slots/acme/contact/sub</code>, Dinou automatically slices the runtime base pathname to <code>/t-slots/acme</code> before resolving <code>to=&quot;contact&quot;</code>.
+                    <strong>Automatic Parent Param Inheritance:</strong> Navigating relatively within a dynamic subtree (e.g., <code>from=&quot;/workspace/[org]/contact&quot;</code> to <code>to=&quot;sub&quot;</code>) reuses the active <code>[org]</code> value already in the browser URL at runtime—no <code>params</code> prop needed! You only pass <code>params</code> when the relative target itself enters a <em>new</em> dynamic child segment (e.g., <code>from=&quot;/workspace&quot;</code> + <code>to=&quot;[org]/contact/sub&quot;</code>).
+                  </li>
+                  <li>
+                    <strong>Deterministic Inside <code>layout.tsx</code> &amp; Parallel <code>@slots</code>:</strong> Because <code>@slot</code> folders (like <code>@sidebar</code>) do not appear in browser URLs, anchor relative links inside <code>src/workspace/[org]/@sidebar/page.tsx</code> to their URL segment <code>from=&quot;/workspace/[org]&quot;</code>. Even when the browser is on a deeper child route like <code>/workspace/acme/contact/sub</code>, Dinou slices the runtime base pathname back to <code>/workspace/acme</code> so <code>to=&quot;contact&quot;</code> always resolves cleanly to <code>/workspace/acme/contact</code>.
+                  </li>
+                  <li>
+                    <strong>Identical Support in <code>useRouter()</code>:</strong> Both <code>router.push(relativeHref, &#123; from &#125;)</code> and <code>router.replace(relativeHref, &#123; from, fresh &#125;)</code> share the exact same autocomplete, parameter rules, and runtime base slicing.
                   </li>
                 </ul>
 
-                <CodeBlock language="tsx" containerClassName="rounded-xl overflow-hidden my-4">
-                  {`"use client";
+                <div className="not-prose my-4">
+                  <TabbedCodeBlock
+                    defaultTab="leaf-relative"
+                    tabs={[
+                      {
+                        id: "leaf-relative",
+                        label: "src/workspace/[org]/contact/page.tsx (Page & useRouter)",
+                        language: "tsx",
+                        code: `"use client";
 
 import { Link, useRouter } from "dinou";
 
-export function ContactActions({ nextSlug }: { nextSlug: string }) {
+// Assuming src/workspace/page.tsx, src/workspace/[org]/contact/page.tsx,
+// and src/workspace/[org]/contact/sub/page.tsx exist (no page.tsx at /workspace/[org]):
+export function ContactActions({ nextOrg }: { nextOrg: string }) {
   const router = useRouter();
 
   return (
     <nav className="flex flex-wrap gap-3">
       {/* ✅ Bare child ("sub") and dot-slash ("./sub") both autocomplete & validate! */}
-      {/*    Active [slug] is inherited from the browser URL — no params needed */}
-      <Link from="/t-slots/[slug]/contact" to="sub">
+      {/*    Active [org] is inherited from the browser URL — no params needed */}
+      <Link from="/workspace/[org]/contact" to="sub">
         Subpage (cd sub)
       </Link>
-      <Link from="/t-slots/[slug]/contact" to="./sub">
+      <Link from="/workspace/[org]/contact" to="./sub">
         Subpage (cd ./sub)
       </Link>
 
-      {/* ✅ Parent navigation: "../.." is valid (/t-slots has page.tsx),
-             whereas ".." is rejected if /t-slots/[slug] has no page.tsx! */}
-      <Link from="/t-slots/[slug]/contact" to="../..">
-        Back to T-Slots Root
+      {/* ✅ Parent navigation: "../.." resolves to /workspace (has page.tsx) */}
+      <Link from="/workspace/[org]/contact" to="../..">
+        Back to Workspace Hub
       </Link>
 
       {/* ✅ Entering a NEW dynamic child segment from a parent route requires params */}
-      <Link from="/t-slots" to="[slug]/contact/sub" params={{ slug: nextSlug }}>
-        Jump to Next Slug Subpage
+      <Link from="/workspace" to="[org]/contact/sub" params={{ org: nextOrg }}>
+        Switch Org Subpage
       </Link>
 
-      {/* ✅ Programmatic useRouter() supports { from } with the exact same guarantees */}
+      {/* ✅ Programmatic push() and replace() support { from } identically */}
       <button
-        onClick={() =>
-          router.push("sub", { from: "/t-slots/[slug]/contact", fresh: true })
-        }
+        onClick={() => router.push("sub", { from: "/workspace/[org]/contact" })}
       >
         Push Subpage
       </button>
+      <button
+        onClick={() =>
+          router.replace("../..", { from: "/workspace/[org]/contact", fresh: true })
+        }
+      >
+        Replace to Hub
+      </button>
+
+      {/* ❌ Compile-time error: ".." points to /workspace/[org], which has NO page.tsx! */}
+      {/* <Link from="/workspace/[org]/contact" to="..">Missing parent page</Link> */}
 
       {/* ❌ Compile-time error: typo in relative target */}
-      {/* <Link from="/t-slots/[slug]/contact" to="./subs">Typo</Link> */}
-      {/* <Link from="/t-slots/[slug]/contact" to="subs">Typo</Link> */}
+      {/* <Link from="/workspace/[org]/contact" to="subs">Typo</Link> */}
+      {/* <Link from="/workspace/[org]/contact" to="./subs">Typo</Link> */}
 
-      {/* ❌ Compile-time error: unanchored relative path (missing from) */}
+      {/* ❌ Compile-time error: unanchored relative path without from */}
       {/* <Link to="./sub">Missing from</Link> */}
+      {/* <Link to="sub">Missing from</Link> */}
     </nav>
   );
-}`}
-                </CodeBlock>
+}`,
+                      },
+                      {
+                        id: "slot-relative",
+                        label: "src/workspace/[org]/@sidebar/page.tsx (Layout & @slot)",
+                        language: "tsx",
+                        code: `import { Link, type SlotProps } from "dinou";
+
+export default function WorkspaceSidebar({
+  params,
+}: SlotProps<"/workspace/[org]/@sidebar">) {
+  return (
+    <aside className="space-y-2">
+      <h3>Org: {params.org}</h3>
+
+      {/* ✅ @sidebar is not part of the URL, so anchor from="/workspace/[org]"!
+             Even if the user is deep inside /workspace/acme/contact/sub,
+             Dinou slices the base pathname to /workspace/acme -> /workspace/acme/contact */}
+      <Link from="/workspace/[org]" to="contact">
+        Contact Overview
+      </Link>
+      <Link from="/workspace/[org]" to="contact/sub">
+        Contact Subpage
+      </Link>
+    </aside>
+  );
+}`,
+                      },
+                    ]}
+                  />
+                </div>
               </div>
             </section>
 
