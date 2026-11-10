@@ -34,6 +34,7 @@ import {
   Info,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
+import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 
 const tocItems = [
   { id: "overview", title: "1. Overview & Zero-Runtime Guarantee", level: 2 },
@@ -41,7 +42,7 @@ const tocItems = [
   { id: "zero-cost", title: "1.2. Zero-Runtime Cost (0 Extra Bytes)", level: 3 },
   { id: "quick-start", title: "2. Quick Start for Developers", level: 2 },
   { id: "level-1-navigation", title: "2.1. Level 1: Links & Navigation", level: 3 },
-  { id: "level-2-components", title: "2.2. Level 2: Typed Pages, Layouts & Server Functions", level: 3 },
+  { id: "level-2-components", title: "2.2. Level 2: Typed Pages, Layouts & Route Functions", level: 3 },
   { id: "core-types-table", title: "2.3. Quick Reference: Core Types", level: 3 },
   { id: "param-mapping", title: "3. Parameter Mapping Reference Table", level: 2 },
   { id: "advanced-recipes", title: "4. Advanced Usage & Real-World Recipes", level: 2 },
@@ -132,7 +133,7 @@ export default function TypeSafeRoutingPage() {
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground space-y-2">
                       <p>
-                        Instant autocomplete for all valid project paths inside <code>&lt;Link href=&quot;...&quot;&gt;</code> and <code>router.push(&quot;...&quot;)</code>.
+                        Instant autocomplete for all valid project paths inside <code>&lt;Link href=&quot;...&quot;&gt;</code> (or <code>to=&quot;...&quot;</code>), <code>router.push(&quot;...&quot;)</code>, and <code>router.replace(&quot;...&quot;)</code>.
                       </p>
                       <p>
                         Catches typos, deleted routes, and broken URLs at compile-time before code ever reaches production.
@@ -152,7 +153,7 @@ export default function TypeSafeRoutingPage() {
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground space-y-2">
                       <p>
-                        Strict parameter typing inside <code>page.tsx</code>, <code>layout.tsx</code>, and server-side <code>page_functions.ts</code> via <code>PageProps</code>, <code>LayoutProps</code>, and <code>RouteParams</code>.
+                        Strict parameter typing inside <code>page.tsx</code>, <code>layout.tsx</code>, and server-side <code>page_functions.ts</code> / <code>layout_functions.ts</code> via <code>PageProps</code>, <code>LayoutProps</code>, <code>PageFunctions</code>, <code>LayoutFunctions</code>, and <code>RouteParams</code>.
                       </p>
                       <p>
                         Completely eliminates untyped <code>params: any</code> and prevents runtime access to non-existent route parameters.
@@ -191,18 +192,23 @@ export default function TypeSafeRoutingPage() {
                   2.1. Level 1: Links &amp; Navigation
                 </h3>
                 <p>
-                  Import <code>Link</code> or <code>useRouter</code> from <code>&quot;dinou&quot;</code>. Your IDE will immediately suggest all valid static routes, parameterized dynamic routes, relative paths, queries, and hashes:
+                  Import <code>Link</code> or <code>useRouter</code> from <code>&quot;dinou&quot;</code>. Your IDE will immediately suggest all valid static routes, parameterized dynamic routes, relative paths, queries, hashes, and external protocols (<code>http://</code>, <code>https://</code>, <code>mailto:</code>, <code>tel:</code>) across <code>&lt;Link href=&quot;...&quot;&gt;</code> (and its <code>to</code> alias), <code>router.push()</code>, and <code>router.replace()</code>:
                 </p>
 
-                <CodeBlock language="tsx" containerClassName="rounded-xl overflow-hidden my-4">
-                  {`import { Link, useRouter } from "dinou";
+                <div className="not-prose my-4">
+                  <TabbedCodeBlock
+                    defaultTab="link"
+                    tabs={[
+                      {
+                        id: "link",
+                        label: "src/components/navbar.tsx (Declarative <Link>)",
+                        language: "tsx",
+                        code: `import { Link } from "dinou";
 
-export default function Navigation({ post }: { post: { slug: string } }) {
-  const router = useRouter();
-
+export function Navbar({ post }: { post: { slug: string } }) {
   return (
     <nav className="flex gap-4">
-      {/* ✅ Instant autocompletion in your IDE */}
+      {/* ✅ Instant autocompletion in your IDE (supports both href and to) */}
       <Link href="/docs/routing">Routing Guide</Link>
 
       {/* ✅ Dynamic routes with typed template strings */}
@@ -212,59 +218,146 @@ export default function Navigation({ post }: { post: { slug: string } }) {
       <Link href="/demo?tab=settings#section-1">Settings</Link>
       <Link href="../contact">Relative</Link>
       <Link href="https://github.com/roggc/dinou">GitHub</Link>
+      <Link href="mailto:hello@example.com">Contact</Link>
 
       {/* ❌ TypeScript compile-time error when pointing to a non-existent route */}
       {/* <Link href="/unknown-route" /> */}
+    </nav>
+  );
+}`,
+                      },
+                      {
+                        id: "router",
+                        label: "src/components/nav-actions.tsx (Programmatic useRouter)",
+                        language: "tsx",
+                        code: `"use client";
 
+import { useRouter } from "dinou";
+
+export function NavActions({ slug }: { slug: string }) {
+  const router = useRouter();
+
+  return (
+    <div className="flex gap-2">
+      {/* ✅ Autocompletes static & dynamic routes */}
       <button onClick={() => router.push("/docs/api-reference")}>
         View API Reference
       </button>
-    </nav>
+
+      <button onClick={() => router.push(\`/blog/\${slug}\`, { fresh: true })}>
+        Reload Post Fresh
+      </button>
+
+      {/* ✅ Replace history entry with full route validation */}
+      <button onClick={() => router.replace("/docs")}>
+        Back to Overview
+      </button>
+
+      {/* ❌ TypeScript compile-time error */}
+      {/* <button onClick={() => router.push("/typo-route")} /> */}
+    </div>
   );
-}`}
-                </CodeBlock>
+}`,
+                      },
+                    ]}
+                  />
+                </div>
               </div>
 
               <div id="level-2-components" className="scroll-mt-20 mt-8 space-y-3">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Code2 className="h-5 w-5 text-indigo-500" />
-                  2.2. Level 2: Typed Pages, Layouts &amp; Server Functions
+                  2.2. Level 2: Typed Pages, Layouts &amp; Route Functions
                 </h3>
                 <p>
-                  Pass your route pattern as a generic argument to <code>PageProps</code>, <code>LayoutProps</code>, or <code>RouteParams</code>. Dinou infers the exact shape of <code>params</code> without manual interface declarations:
+                  Pass your route pattern as a generic argument to <code>PageProps</code>, <code>LayoutProps</code>, <code>PageFunctions</code>, <code>LayoutFunctions</code>, or <code>RouteParams</code>. Dinou infers the exact shape of <code>params</code> without manual interface declarations:
                 </p>
 
-                <CodeBlock language="tsx" containerClassName="rounded-xl overflow-hidden my-4">
-                  {`import type { PageProps, LayoutProps, RouteParams } from "dinou";
+                <div className="not-prose my-4">
+                  <TabbedCodeBlock
+                    defaultTab="page"
+                    tabs={[
+                      {
+                        id: "page",
+                        label: "src/blog/[slug]/page.tsx",
+                        language: "tsx",
+                        code: `import type { PageProps } from "dinou";
+import type { BlogPostData } from "./page_functions";
 
-// 1. src/blog/[slug]/page.tsx
-export default function BlogPost({ params }: PageProps<"/blog/[slug]">) {
+export default function BlogPost({
+  params,
+  postTitle,
+}: PageProps<"/blog/[slug]"> & BlogPostData) {
   // ✅ params.slug is strongly typed as string
-  return <h1>Post: {params.slug}</h1>;
+  return <h1>{postTitle} ({params.slug})</h1>;
 
   // ❌ TypeScript error: Property 'id' does not exist on type '{ slug: string }'
   // return <h1>{params.id}</h1>;
-}
+}`,
+                      },
+                      {
+                        id: "layout",
+                        label: "src/blog/[slug]/layout.tsx",
+                        language: "tsx",
+                        code: `import type { LayoutProps } from "dinou";
 
-// 2. src/blog/[slug]/layout.tsx
-export function BlogLayout({ children, params }: LayoutProps<"/blog/[slug]">) {
+export default function BlogLayout({
+  children,
+  params,
+}: LayoutProps<"/blog/[slug]">) {
   // ✅ params.slug is strongly typed; children is typed as ReactNode
   return (
     <section>
-      <header>Category: {params.slug}</header>
+      <header>Post: {params.slug}</header>
       <main>{children}</main>
     </section>
   );
+}`,
+                      },
+                      {
+                        id: "page-functions",
+                        label: "src/blog/[slug]/page_functions.ts",
+                        language: "ts",
+                        code: `import type { PageFunctions } from "dinou";
+
+export interface BlogPostData {
+  postTitle: string;
 }
 
-// 3. src/blog/[slug]/page_functions.ts
-export async function getProps(params: RouteParams<"/blog/[slug]">) {
-  // ✅ Directly types the raw params object without params: any
+// ✅ Types both params?.slug and the returned BlogPostData contract
+export const getProps: PageFunctions<
+  "/blog/[slug]",
+  BlogPostData
+>["getProps"] = async (params) => {
   return {
-    postTitle: \`Post: \${params.slug}\`,
+    postTitle: \`Post: \${params?.slug}\`,
   };
-}`}
-                </CodeBlock>
+};
+
+export const validateParams: PageFunctions<
+  "/blog/[slug]"
+>["validateParams"] = (params) => {
+  return Boolean(params?.slug && /^[a-z0-9-]+$/.test(params.slug));
+};`,
+                      },
+                      {
+                        id: "helper",
+                        label: "src/lib/posts.ts",
+                        language: "ts",
+                        code: `import type { RouteParams } from "dinou";
+
+// ✅ Directly types standalone helpers, data loaders, or services
+export async function loadPostByRoute(params: RouteParams<"/blog/[slug]">) {
+  return fetchPost(params.slug);
+}`,
+                      },
+                    ]}
+                  />
+                </div>
+
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  <strong>Tip for intermediate layouts without a sibling <code>page.tsx</code>:</strong> Because the route scanner indexes directories containing a <code>page.*</code> file, if a parent layout lives in an intermediate folder without its own <code>page.tsx</code> (e.g., <code>src/workspace/[org]/layout.tsx</code> with child pages deeper under <code>projects/[id]/page.tsx</code>), pass a direct parameter dictionary or <code>ExtractRouteParams</code>—such as <code>LayoutFunctions&lt;&#123; org: string &#125;&gt;</code> or <code>ExtractRouteParams&lt;&quot;/workspace/[org]&quot;&gt;</code>.
+                </p>
               </div>
 
               <div id="core-types-table" className="scroll-mt-20 mt-8 space-y-4">
@@ -302,13 +395,23 @@ export async function getProps(params: RouteParams<"/blog/[slug]">) {
                         <td className="p-3 font-mono">Error(&#123; error, params &#125;: ErrorProps&lt;&quot;/blog/[slug]&quot;&gt;)</td>
                       </tr>
                       <tr>
+                        <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">PageFunctions&lt;T, P&gt;</td>
+                        <td className="p-3 text-muted-foreground">Page lifecycle &amp; data contracts (<code>page_functions.ts</code>)</td>
+                        <td className="p-3 font-mono">const getProps: PageFunctions&lt;&quot;/blog/[slug]&quot;, Data&gt;[&quot;getProps&quot;]</td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">LayoutFunctions&lt;T, P&gt;</td>
+                        <td className="p-3 text-muted-foreground">Layout lifecycle &amp; data contracts (<code>layout_functions.ts</code>)</td>
+                        <td className="p-3 font-mono">const validateParams: LayoutFunctions&lt;&quot;/blog/[slug]&quot;&gt;[&quot;validateParams&quot;]</td>
+                      </tr>
+                      <tr>
                         <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">RouteParams&lt;T&gt;</td>
-                        <td className="p-3 text-muted-foreground">Pure functions, data loaders &amp; services (<code>getProps</code>, API helpers)</td>
-                        <td className="p-3 font-mono">getProps(params: RouteParams&lt;&quot;/blog/[slug]&quot;&gt;)</td>
+                        <td className="p-3 text-muted-foreground">Standalone helpers, data loaders &amp; services</td>
+                        <td className="p-3 font-mono">loadPost(params: RouteParams&lt;&quot;/blog/[slug]&quot;&gt;)</td>
                       </tr>
                       <tr>
                         <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">DinouRoute</td>
-                        <td className="p-3 text-muted-foreground">URL props, <code>&lt;Link&gt;</code>, <code>router.push()</code> &amp; custom navigation components</td>
+                        <td className="p-3 text-muted-foreground">URL props, <code>&lt;Link href / to&gt;</code>, <code>router.push()</code>, <code>router.replace()</code> &amp; custom navigation components</td>
                         <td className="p-3 font-mono">interface NavProps &#123; href: DinouRoute &#125;</td>
                       </tr>
                     </tbody>
@@ -458,12 +561,22 @@ export default function BlogPost({ params }: PageProps<"/blog/[slug]">) {
                   In Dinou, error pages (<code>error.tsx</code> and parallel slot errors <code>@slot/error.tsx</code>) receive two props: <code>error: Error</code> and <code>params</code>. You can strictly type them directly using <code>ErrorProps&lt;T&gt;</code>:
                 </p>
 
-                <CodeBlock language="tsx" containerClassName="rounded-xl overflow-hidden my-4">
-                  {`"use client";
+                <div className="not-prose my-4">
+                  <TabbedCodeBlock
+                    defaultTab="route-error"
+                    tabs={[
+                      {
+                        id: "route-error",
+                        label: "src/blog/[slug]/error.tsx",
+                        language: "tsx",
+                        code: `"use client";
 
 import { useRouter, type ErrorProps } from "dinou";
 
-export default function BlogPostError({ params, error }: ErrorProps<"/blog/[slug]">) {
+export default function BlogPostError({
+  params,
+  error,
+}: ErrorProps<"/blog/[slug]">) {
   const router = useRouter();
 
   return (
@@ -474,8 +587,37 @@ export default function BlogPostError({ params, error }: ErrorProps<"/blog/[slug
       <button onClick={() => router.refresh()}>Try Again</button>
     </div>
   );
-}`}
-                </CodeBlock>
+}`,
+                      },
+                      {
+                        id: "slot-error",
+                        label: "src/dashboard/[org]/@analytics/error.tsx",
+                        language: "tsx",
+                        code: `"use client";
+
+import { useRouter, type ErrorProps } from "dinou";
+
+export default function AnalyticsSlotError({
+  params,
+  error,
+}: ErrorProps<"/dashboard/[org]">) {
+  const router = useRouter();
+
+  return (
+    <aside className="p-4 border rounded-lg bg-amber-500/10">
+      <h3>Analytics unavailable for {params.org}</h3>
+      <p className="text-xs text-muted-foreground">{error.message}</p>
+      {/* Re-fetch layout & parallel slots without full browser reload */}
+      <button onClick={() => router.refresh({ layout: true })}>
+        Retry Widget
+      </button>
+    </aside>
+  );
+}`,
+                      },
+                    ]}
+                  />
+                </div>
               </div>
 
               <div id="custom-components" className="scroll-mt-20 mt-8 space-y-3">
@@ -487,9 +629,15 @@ export default function BlogPostError({ params, error }: ErrorProps<"/blog/[slug
                   When building reusable UI components (custom buttons, navigation tabs, or breadcrumb menus), type their destination props with <code>DinouRoute</code> to give your design system native compile-time link validation:
                 </p>
 
-                <CodeBlock language="tsx" containerClassName="rounded-xl overflow-hidden my-4">
-                  {`import type { DinouRoute } from "dinou";
-import { Link } from "dinou";
+                <div className="not-prose my-4">
+                  <TabbedCodeBlock
+                    defaultTab="component"
+                    tabs={[
+                      {
+                        id: "component",
+                        label: "src/components/nav-button.tsx",
+                        language: "tsx",
+                        code: `import { Link, type DinouRoute } from "dinou";
 
 interface NavButtonProps {
   href: DinouRoute; // 👈 Inherits full autocompletion and route validation
@@ -498,19 +646,41 @@ interface NavButtonProps {
 
 export function NavButton({ href, label }: NavButtonProps) {
   return (
-    <Link href={href} className="px-3 py-1.5 rounded-lg bg-blue-600 text-white font-medium">
+    <Link
+      href={href}
+      className="px-3 py-1.5 rounded-lg bg-blue-600 text-white font-medium"
+    >
       {label}
     </Link>
   );
-}
+}`,
+                      },
+                      {
+                        id: "consumer",
+                        label: "src/components/sidebar.tsx",
+                        language: "tsx",
+                        code: `import type { DinouRoute } from "dinou";
+import { NavButton } from "./nav-button";
 
-// In your application code:
 const menu: { label: string; href: DinouRoute }[] = [
   { label: "Overview", href: "/docs" },              // ✅ Autocompleted
-  { label: "Routing", href: "/docs/routing" },        // ✅ Autocompleted
+  { label: "Routing", href: "/docs/routing" },       // ✅ Autocompleted
   // { label: "Broken", href: "/non-existent-page" }, // ❌ TypeScript compile error!
-];`}
-                </CodeBlock>
+];
+
+export function Sidebar() {
+  return (
+    <aside className="flex flex-col gap-2">
+      {menu.map((item) => (
+        <NavButton key={item.href} href={item.href} label={item.label} />
+      ))}
+    </aside>
+  );
+}`,
+                      },
+                    ]}
+                  />
+                </div>
               </div>
 
               <div id="dynamic-interpolation" className="scroll-mt-20 mt-8 space-y-3">
@@ -523,7 +693,9 @@ const menu: { label: string; href: DinouRoute }[] = [
                 </p>
 
                 <CodeBlock language="tsx" containerClassName="rounded-xl overflow-hidden my-4">
-                  {`import { Link, useRouter } from "dinou";
+                  {`"use client";
+
+import { Link, useRouter } from "dinou";
 
 interface Product {
   id: string;
@@ -567,7 +739,7 @@ export function ProductCard({ product }: { product: Product }) {
                   <div className="bg-card border border-border/80 rounded-lg p-3 space-y-1">
                     <span className="text-[11px] font-mono text-blue-500 font-semibold">01. Filesystem</span>
                     <p className="font-semibold text-foreground">src/ Directory</p>
-                    <p className="text-[11px] text-muted-foreground leading-normal">Synchronous read of all page &amp; layout files.</p>
+                    <p className="text-[11px] text-muted-foreground leading-normal">Synchronous scan of <code>src/</code> for <code>page.(tsx|jsx|ts|js)</code> route files.</p>
                   </div>
                   <div className="bg-card border border-border/80 rounded-lg p-3 space-y-1">
                     <span className="text-[11px] font-mono text-emerald-500 font-semibold">02. Scanner</span>
@@ -734,8 +906,8 @@ export function ProductCard({ product }: { product: Product }) {
                       All bundlers (esbuild, Rollup, Webpack, Bun, Deno, Cloudflare) run the scanner before bundling:
                     </p>
                     <ul className="list-disc pl-4 space-y-1">
-                      <li>Guarantees route typings exist before <code>tsc --noEmit</code> executes in CI/CD.</li>
-                      <li>Deterministic builds in clean, gitignored container environments (GitHub Actions, Docker, Vercel).</li>
+                      <li>Generates <code>.dinou/types/routes.d.ts</code> deterministically at the start of <code>npm run build</code>.</li>
+                      <li>In clean CI/CD containers where <code>.dinou/</code> is gitignored, run <code>npm run build</code> <strong>before</strong> <code>tsc --noEmit</code> (e.g. <code>npm run build &amp;&amp; npx tsc --noEmit</code>) so TypeScript validates against the generated route map instead of falling back to <code>string</code>.</li>
                     </ul>
                   </CardContent>
                 </Card>
