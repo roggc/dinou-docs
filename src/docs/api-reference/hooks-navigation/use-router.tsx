@@ -65,19 +65,19 @@ export function UseRouterSection() {
               <tr>
                 <td className="p-3 font-mono font-semibold text-primary align-top">push</td>
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">
-                  (href: DinouRoute, options?: NavigationOptions) =&gt; void
+                  (href: DinouLinkTarget, options?: NavigationOptions) =&gt; void
                 </td>
                 <td className="p-3 align-top leading-relaxed">
-                  Navigates to <code>href</code> and pushes a new entry onto the browser history stack. Validates route patterns via <code>DinouRoute</code>. Pass <code>&#123; fresh: true &#125;</code> to bypass the client-side memory cache and force a new flight request to the server.
+                  Navigates to <code>href</code> and pushes a new entry onto the browser history stack. Autocompletes static and dynamic route patterns; requires <code>&#123; params &#125;</code> when <code>href</code> contains <code>[param]</code> placeholders, accepts <code>&#123; from &#125;</code> to anchor strict relative paths (<code>&quot;sub&quot;</code>, <code>&quot;./sub&quot;</code>, <code>&quot;../billing&quot;</code>), and accepts <code>&#123; fresh: true &#125;</code> to bypass the client memory cache.
                 </td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-semibold text-primary align-top">replace</td>
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">
-                  (href: DinouRoute, options?: NavigationOptions) =&gt; void
+                  (href: DinouLinkTarget, options?: NavigationOptions) =&gt; void
                 </td>
                 <td className="p-3 align-top leading-relaxed">
-                  Navigates to <code>href</code> by replacing the current browser history entry (preventing the back button from returning to the previous screen). Also supports <code>&#123; fresh: true &#125;</code>.
+                  Navigates to <code>href</code> by replacing the current browser history entry (preventing the back button from returning to the previous screen). Supports the exact same <code>&#123; params &#125;</code>, <code>&#123; from &#125;</code>, and <code>&#123; fresh: true &#125;</code> options as <code>push</code>.
                 </td>
               </tr>
               <tr>

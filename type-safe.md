@@ -75,8 +75,6 @@ declare module "dinou" {
     | `https://${string}`
     | `mailto:${string}`
     | `tel:${string}`
-    | `./${string}`
-    | `../${string}`
     | `#${string}`
     | `?${string}`;
 
@@ -158,8 +156,9 @@ All routing types are exported from `"dinou"` (and re-exported from `"dinou/serv
 
 | Exported Type | Target File(s) | Description |
 | :--- | :--- | :--- |
-| `DinouRoute` | Any component / helper | Union of all resolved navigable URLs (`page.*`), query/hash suffixes, relative paths, and external URLs (`http://`, `https://`, `mailto:`, `tel:`). Ideal for typing URL props on custom UI components. |
-| `DinouLinkTarget` / `LinkProps<T>` | `<Link>`, `useRouter()` | Combines `DinouRoute` with exact dynamic route pattern literals (`DinouDynamicRoutePattern`, e.g. `"/blog/[slug]"`) so IDEs surface dynamic routes in `Ctrl + Space` autocomplete while enforcing conditional `params` whenever `[param]` brackets are used. |
+| `DinouRoute` | Any component / helper | Union of all resolved navigable URLs (`page.*`), query/hash suffixes, standalone queries/hashes (`?...`, `#...`), and external URLs (`http://`, `https://`, `mailto:`, `tel:`). Ideal for typing URL props on custom UI components. |
+| `DinouLinkTarget` / `LinkProps<TFrom, THref>` | `<Link>`, `useRouter()` | Combines `DinouRoute` with exact dynamic route pattern literals (`DinouDynamicRoutePattern`, e.g. `"/blog/[slug]"`) and strict `from`-anchored relative targets (`DinouRelativeLinkTarget<TFrom>`), surfacing static, dynamic, and relative routes (`"sub"`, `"./sub"`, `"../..."`) in `Ctrl + Space` autocomplete while enforcing conditional `params`. |
+| `DinouFromRoute` / `DinouRelativeLinkTarget<TFrom>` | `<Link from=...>`, `router.push(..., { from })` | Types valid `from` route/directory prefixes and computes the exact finite union of valid relative paths (excluding parent directories without `page.*`). |
 | `PageProps<T, TProps?>` | `page.tsx`, `not_found.tsx`, `@slot/page.tsx` | Types `{ params: RouteParams<T> } & TProps`. Accepts both page patterns (`"/blog/[slug]"`) and registered slot patterns (`"/workspace/[org]/@sidebar"`), plus optional `TProps` from `page_functions.ts` (`getProps`). |
 | `LayoutProps<T, TProps?>` | `layout.tsx` (leaf or intermediate) | Types `{ children: ReactNode; params: LayoutParams<T> } & LayoutSlots<T> & TProps`. Works on intermediate folders without a sibling `page.tsx` and **auto-infers** optional `ReactNode` props for all sibling `@slot` pages! |
 | `SlotProps<T>` | `@slot/page.tsx` | Dedicated prop interface `{ params: SlotParams<T> }` with autocomplete scoped strictly to parallel `@slot` segments (e.g. `"/workspace/[org]/@analytics"`). |
@@ -310,6 +309,16 @@ src/
            Reload Project (Template)
          </Link>
 
+         {/* Strict relative navigation anchored with `from`:
+             "../../.." resolves to "/" (valid page.tsx), whereas "../.." resolves to
+             "/workspace/[org]" (rejected because it has no page.tsx!) */}
+         <Link from="/workspace/[org]/projects/[projectId]" to="../../..">
+           Back to Root
+         </Link>
+
+         {/* Compile-time TS error: unanchored relative path without `from`! */}
+         {/* <Link to="./subs">Broken Relative</Link> */}
+
          {/* Compile-time TS error: uninterpolated [org]/[projectId] without params! */}
          {/* <Link to="/workspace/[org]/projects/[projectId]">Missing params</Link> */}
 
@@ -371,6 +380,12 @@ Several subtle TypeScript type-checker constraints are handled in `dinou/index.d
      - `HasInvalidBracketPattern<THref>` rejects unregistered bracket names (`"/blog/[wrong]"`) or half-interpolated templates (`` `/shop/${cat}/[item]` ``) with `never`.
      - `LinkParamsProps<THref>` and `RouterNavigationArgs<THref>` make `params` **strictly required** whenever at least one parameter is required (`[param]` or `[...param]`), optional when all parameters are optional (`[[param]]` / `[[...param]]`), and forbidden (`params?: never`) on static or already-interpolated URLs.
      - Deliberate bracket values passed inside `params` (e.g. `params={{ slug: "[slug]" }}`) are permitted and safely encoded via `encodeURIComponent` in `interpolateRouteParams()` (`dinou/core/navigation-utils.js`).
+7. **Strict Relative Navigation via `from` (Option B2 — Zero Unvalidated Relative Wildcards)**:
+   - Unanchored `./${string}` and `../${string}` wildcards are intentionally omitted from `DinouRelativeOrExternalRoute` so typos like `<Link to="./subs">` or `<Link to="sub">` without `from` fail at compile time.
+   - When `from` is provided (`<Link from="/t-slots/[slug]/contact" to="...">` or `router.push("...", { from: "/t-slots/[slug]/contact" })`), `BuildDirectoryPrefixes<SplitRouteSegments<Path>>` populates `DinouFromRoute` with all navigable routes and intermediate directory prefixes, and `DinouRelativeLinkTarget<TFrom>` computes every valid relative path from `TFrom` to registered `DinouNavigableParamsMap` entries:
+     - Emits **both** filesystem-style bare child segments (`"sub"`, like `cd sub`) and dot-slash child segments (`"./sub"`, like `cd ./sub`), plus `"."` (when `TFrom` itself has a `page.*`) and valid `".."` / `"../sibling"` paths (automatically excluding intermediate parent folders that lack `page.*`).
+     - Shared parent dynamic parameters already present in `TFrom` (e.g. `[slug]`) are inherited from the active browser URL at runtime without requiring `params`; only newly entered child dynamic segments require `params` (via `ExtractRelativeTargetParams`).
+     - At runtime, `resolveBasePathname(from, currentPathname)` (`dinou/core/navigation-utils.js`) slices `currentPathname` to `from`'s segment depth when `from` is a prefix of a deeper active URL, making relative links inside persistent layouts and parallel `@slots` 100% deterministic.
 
 ---
 
@@ -400,11 +415,11 @@ Several subtle TypeScript type-checker constraints are handled in `dinou/index.d
 | `dinou/core/get-jsx.js` | Added `dParams` fallback for `slotParams` and passed `slotParams` into `getFilePathAndDynamicParams` when resolving `@slot/error.*` in runtime RSC/SSR rendering. |
 | `dinou/core/get-error-jsx.js` | Propagated `dParams` / `slotParams` into parallel `@slot` and `@slot/error.*` rendering inside error recovery trees. |
 | `dinou/core/build-static-pages.js` | Propagated `slotParams` into `@slot/error.*` resolution during static/PPR build passes. |
-| `dinou/core/generate-route-types.js` | Added `collectRouteTopology()` and `inspectSlotDirectory()`, generating `DinouNavigableParamsMap`, `DinouRouteParamsMap`, `DinouLayoutParamsMap`, `DinouLayoutSlotsMap`, `DinouSlotParamsMap`, and `DinouErrorParamsMap`, and preserving literal completions on `DinouGeneratedRoute` via `& Record<never, never>`. |
-| `dinou/core/navigation-utils.js` | Added zero-allocation fast-path `interpolateRouteParams(href, params)` supporting `[param]`, `[...param]`, `[[param]]`, `[[...param]]`, URL encoding, and query/hash preservation. |
-| `dinou/core/link.jsx` | Wired `params` prop into `<Link>` via `interpolateRouteParams` without leaking `params` onto the rendered `<a>` DOM element. |
-| `dinou/core/navigation.js` | Wired `{ params }` option into `useRouter().push()` and `useRouter().replace()` via `interpolateRouteParams`. |
-| `dinou/index.d.ts` | Upgraded `Link`, `LinkProps`, `useRouter`, `LayoutProps`, `PageProps`, `ErrorProps`, `RouteParams`, `PageFunctions`, and `LayoutFunctions`; added `DinouLinkTarget`, `LinkParamsProps`, `RouterNavigationArgs`, `SlotProps`, `NotFoundProps`, and `TS2312`/`TS4058`-safe helpers. |
+| `dinou/core/generate-route-types.js` | Added `collectRouteTopology()` and `inspectSlotDirectory()`, generating `DinouNavigableParamsMap`, `DinouRouteParamsMap`, `DinouLayoutParamsMap`, `DinouLayoutSlotsMap`, `DinouSlotParamsMap`, and `DinouErrorParamsMap`, removing unvalidated `./` / `../` wildcards from `DinouRelativeOrExternalRoute`, and preserving literal completions on `DinouGeneratedRoute` via `& Record<never, never>`. |
+| `dinou/core/navigation-utils.js` | Added `interpolateRouteParams(href, params)` and `resolveBasePathname(from, currentPathname)` (wired into `resolveUrl`) for dynamic param interpolation and layout-safe relative resolution. |
+| `dinou/core/link.jsx` | Wired `params` and `from` props into `<Link>` without leaking either prop onto the rendered `<a>` DOM element. |
+| `dinou/core/navigation.js` | Wired `{ params, from }` options into `useRouter().push()` and `useRouter().replace()`. |
+| `dinou/index.d.ts` | Upgraded `Link`, `LinkProps`, `useRouter`, `LayoutProps`, `PageProps`, `ErrorProps`, `RouteParams`, `PageFunctions`, and `LayoutFunctions`; added `DinouFromRoute`, `DinouRelativeLinkTarget`, `DinouLinkTargetForFrom`, `LinkParamsPropsForFrom`, `DinouRouterNavigateFn`, `SlotProps`, `NotFoundProps`, and `TS2312`/`TS4058`-safe helpers. |
 | `dinou/server.d.ts` | Re-exported all new horizontal routing types and helpers from `./index` so `"dinou"` and `"dinou/server"` stay in complete parity. |
 | `dinou/node/dev.js` | Expanded the hot route-type watcher regex to regenerate `.dinou/types/routes.d.ts` on `add`/`unlink` of `page`, `page_functions`, `layout`, `layout_functions`, `layout.functions`, `error`, and `not_found` files. |
 | `dinou/cli.js` | Added the `dinou typegen` CLI command for instant standalone `.dinou/types/routes.d.ts` generation. |

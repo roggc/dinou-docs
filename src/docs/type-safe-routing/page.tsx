@@ -50,6 +50,7 @@ const tocItems = [
   { id: "typed-error-pages", title: "4.2. Error & Not-Found Pages (ErrorProps & NotFoundProps)", level: 3 },
   { id: "custom-components", title: "4.3. Custom Navigation Components with DinouRoute", level: 3 },
   { id: "dynamic-interpolation", title: "4.4. Dynamic Navigation: Pattern + params vs. Template Strings", level: 3 },
+  { id: "relative-navigation", title: "4.5. Strict Relative Navigation with from", level: 3 },
   { id: "architecture", title: "5. Technical Architecture: Under the Hood", level: 2 },
   { id: "route-scanner", title: "5.1. Ultra-Fast Route Scanner", level: 3 },
   { id: "generated-definitions", title: "5.2. Module Augmentation", level: 3 },
@@ -193,7 +194,7 @@ export default function TypeSafeRoutingPage() {
                   2.1. Level 1: Links &amp; Navigation
                 </h3>
                 <p>
-                  Import <code>Link</code> or <code>useRouter</code> from <code>&quot;dinou&quot;</code>. Your IDE will immediately suggest all valid static routes, parameterized dynamic routes, relative paths, queries, hashes, and external protocols (<code>http://</code>, <code>https://</code>, <code>mailto:</code>, <code>tel:</code>) across <code>&lt;Link href=&quot;...&quot;&gt;</code> (and its <code>to</code> alias), <code>router.push()</code>, and <code>router.replace()</code>:
+                  Import <code>Link</code> or <code>useRouter</code> from <code>&quot;dinou&quot;</code>. Your IDE immediately suggests (<code>Ctrl + Space</code>) and strictly validates all navigable <strong>static routes</strong>, <strong>dynamic route patterns</strong> (with required typed <code>params</code>), and <strong>relative paths anchored with <code>from</code></strong> (both <code>&quot;sub&quot;</code> and <code>&quot;./sub&quot;</code>, plus <code>&quot;../...&quot;</code>) across <code>&lt;Link href=&quot;...&quot;&gt;</code> (and its <code>to</code> alias), <code>router.push()</code>, and <code>router.replace()</code>. It also validates dynamic template strings (<code>`/blog/&#36;&#123;slug&#125;`</code>) and route suffixes (<code>?query</code>, <code>#hash</code>), while permitting standalone queries/hashes (<code>?tab=1</code>, <code>#top</code>) and external protocols (<code>http://</code>, <code>https://</code>, <code>mailto:</code>, <code>tel:</code>):
                 </p>
 
                 <div className="not-prose my-4">
@@ -220,14 +221,21 @@ export function Navbar({ post }: { post: { slug: string } }) {
       {/* ✅ Option B: Direct template string interpolation (no params prop needed) */}
       <Link to={\`/blog/\${post.slug}\`}>View Post (Template)</Link>
 
-      {/* ✅ Seamless support for queries, hashes, relative paths, and external URLs */}
+      {/* ✅ Strict relative navigation anchored with from ("sub", "./sub", "../...") */}
+      <Link from="/docs/routing" to="../navigation">
+        Navigation Guide (Relative)
+      </Link>
+
+      {/* ✅ Seamless support for queries, hashes, and external URLs */}
       <Link href="/demo?tab=settings#section-1">Settings</Link>
-      <Link href="../contact">Relative</Link>
       <Link href="https://github.com/roggc/dinou">GitHub</Link>
       <Link href="mailto:hello@example.com">Contact</Link>
 
       {/* ❌ TypeScript error: [slug] pattern cannot be used without params! */}
       {/* <Link href="/blog/[slug]">Forgot params</Link> */}
+
+      {/* ❌ TypeScript error: relative paths require from (catches "./subs" typos!) */}
+      {/* <Link to="./subs">Unanchored Relative</Link> */}
 
       {/* ❌ TypeScript error when pointing to a non-existent route */}
       {/* <Link href="/unknown-route" /> */}
@@ -267,8 +275,18 @@ export function NavActions({ slug }: { slug: string }) {
         Replace Post URL
       </button>
 
+      {/* ✅ Strict relative navigation anchored with { from } */}
+      <button
+        onClick={() => router.push("../navigation", { from: "/docs/routing" })}
+      >
+        Relative Push
+      </button>
+
       {/* ❌ TypeScript error: missing { params: { slug } } */}
       {/* <button onClick={() => router.push("/blog/[slug]")} /> */}
+
+      {/* ❌ TypeScript error: relative path without { from } */}
+      {/* <button onClick={() => router.push("./subs")} /> */}
 
       {/* ❌ TypeScript error: unknown route */}
       {/* <button onClick={() => router.push("/typo-route")} /> */}
@@ -537,9 +555,9 @@ export default function ProjectPage({
                         <td className="p-3 font-mono">interface NavProps &#123; href: DinouRoute &#125;</td>
                       </tr>
                       <tr>
-                        <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">LinkProps&lt;T&gt; / DinouLinkTarget</td>
-                        <td className="p-3 text-muted-foreground">Powers <code>&lt;Link&gt;</code> &amp; <code>useRouter()</code> with static/dynamic pattern autocomplete + conditional <code>params</code></td>
-                        <td className="p-3 font-mono">&lt;Link to=&quot;/blog/[slug]&quot; params=&#123;&#123; slug &#125;&#125;&gt;</td>
+                        <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">LinkProps&lt;TFrom, THref&gt;</td>
+                        <td className="p-3 text-muted-foreground">Powers <code>&lt;Link&gt;</code> &amp; <code>useRouter()</code> with static/dynamic pattern autocomplete, conditional <code>params</code>, and strict relative <code>from</code></td>
+                        <td className="p-3 font-mono">&lt;Link from=&quot;/blog/[slug]&quot; to=&quot;comments&quot;&gt;</td>
                       </tr>
                     </tbody>
                   </table>
@@ -947,6 +965,77 @@ export function ProductCard({ product }: { product: Product }) {
       {/* <Link to="/products/[id]">Broken</Link> */}
       {/* <button onClick={() => router.push("/products/[id]")} /> */}
     </div>
+  );
+}`}
+                </CodeBlock>
+              </div>
+
+              <div id="relative-navigation" className="scroll-mt-20 mt-8 space-y-3">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Compass className="h-5 w-5 text-indigo-500" />
+                  4.5. Strict Relative Navigation with <code>from</code>
+                </h3>
+                <p>
+                  At static analysis time, TypeScript cannot infer which URL is currently mounted in the browser—especially inside shared components, persistent layouts, or parallel <code>@slots</code>. To guarantee <strong>zero broken relative links</strong>, Dinou rejects unanchored relative paths (such as <code>to=&quot;./subs&quot;</code> or <code>to=&quot;sub&quot;</code> without <code>from</code>) and unlocks exact, filesystem-grade relative routing whenever you specify <code>from</code>:
+                </p>
+                <ul className="text-sm space-y-1">
+                  <li>
+                    <strong>Both <code>&quot;sub&quot;</code> and <code>&quot;./sub&quot;</code> (Filesystem Parity):</strong> Just like <code>cd sub</code> and <code>cd ./sub</code> in a terminal, Dinou treats every route as a directory. With <code>from</code> provided, TypeScript computes the exact finite set of valid relative destinations from that folder—surfacing <code>&quot;sub&quot;</code>, <code>&quot;./sub&quot;</code>, <code>&quot;.&quot;</code>, and valid parent/sibling paths (<code>&quot;../..&quot;</code>, <code>&quot;../sibling&quot;</code>) in <code>Ctrl + Space</code> while rejecting typos (<code>&quot;subs&quot;</code>, <code>&quot;./subs&quot;</code>) and intermediate parent folders that lack a <code>page.tsx</code>!
+                  </li>
+                  <li>
+                    <strong>Automatic Parent Param Inheritance:</strong> Navigating relatively within a dynamic subtree (e.g., <code>from=&quot;/t-slots/[slug]/contact&quot;</code> to <code>to=&quot;sub&quot;</code>) reuses the active <code>[slug]</code> segment already in the browser URL at runtime—no <code>params</code> prop needed! You only pass <code>params</code> when the relative target itself introduces a <em>new</em> child dynamic segment (e.g., <code>from=&quot;/t-slots&quot;</code> + <code>to=&quot;[slug]/contact/sub&quot;</code>).
+                  </li>
+                  <li>
+                    <strong>Layout &amp; Parallel <code>@slot</code> Safe:</strong> If a persistent layout or <code>@slot</code> at <code>from=&quot;/t-slots/[slug]&quot;</code> renders while the browser is deeper at <code>/t-slots/acme/contact/sub</code>, Dinou automatically slices the runtime base pathname to <code>/t-slots/acme</code> before resolving <code>to=&quot;contact&quot;</code>.
+                  </li>
+                </ul>
+
+                <CodeBlock language="tsx" containerClassName="rounded-xl overflow-hidden my-4">
+                  {`"use client";
+
+import { Link, useRouter } from "dinou";
+
+export function ContactActions({ nextSlug }: { nextSlug: string }) {
+  const router = useRouter();
+
+  return (
+    <nav className="flex flex-wrap gap-3">
+      {/* ✅ Bare child ("sub") and dot-slash ("./sub") both autocomplete & validate! */}
+      {/*    Active [slug] is inherited from the browser URL — no params needed */}
+      <Link from="/t-slots/[slug]/contact" to="sub">
+        Subpage (cd sub)
+      </Link>
+      <Link from="/t-slots/[slug]/contact" to="./sub">
+        Subpage (cd ./sub)
+      </Link>
+
+      {/* ✅ Parent navigation: "../.." is valid (/t-slots has page.tsx),
+             whereas ".." is rejected if /t-slots/[slug] has no page.tsx! */}
+      <Link from="/t-slots/[slug]/contact" to="../..">
+        Back to T-Slots Root
+      </Link>
+
+      {/* ✅ Entering a NEW dynamic child segment from a parent route requires params */}
+      <Link from="/t-slots" to="[slug]/contact/sub" params={{ slug: nextSlug }}>
+        Jump to Next Slug Subpage
+      </Link>
+
+      {/* ✅ Programmatic useRouter() supports { from } with the exact same guarantees */}
+      <button
+        onClick={() =>
+          router.push("sub", { from: "/t-slots/[slug]/contact", fresh: true })
+        }
+      >
+        Push Subpage
+      </button>
+
+      {/* ❌ Compile-time error: typo in relative target */}
+      {/* <Link from="/t-slots/[slug]/contact" to="./subs">Typo</Link> */}
+      {/* <Link from="/t-slots/[slug]/contact" to="subs">Typo</Link> */}
+
+      {/* ❌ Compile-time error: unanchored relative path (missing from) */}
+      {/* <Link to="./sub">Missing from</Link> */}
+    </nav>
   );
 }`}
                 </CodeBlock>

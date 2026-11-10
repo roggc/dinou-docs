@@ -55,15 +55,13 @@ export default function Navigation() {
 
   return (
     <nav className="flex gap-4">
-      {/* ✅ Instant autocompletion of all project routes */}
+      {/* ✅ Instant autocompletion of static & dynamic routes */}
       <Link href="/docs/routing">Routing Guide</Link>
+      <Link to="/blog/[slug]" params={{ slug: post.slug }}>View Post</Link>
 
-      {/* ✅ Typed template strings for dynamic segments */}
-      <Link href={\`/blog/\${post.slug}\`}>View Post</Link>
-
-      {/* ✅ Relative paths, query parameters & hashes */}
+      {/* ✅ Strict relative paths with from, queries & hashes */}
       <Link href="/demo?tab=settings#profile">Settings</Link>
-      <Link href="../about">About</Link>
+      <Link from="/docs/routing" to="../navigation">Navigation</Link>
 
       {/* ❌ TypeScript error in IDE on invalid/dead links */}
       {/* <Link href="/unknown-route">Broken Link</Link> */}

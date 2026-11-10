@@ -245,7 +245,7 @@ export default function LoginButton() {
                         router.push(href, options)
                       </td>
                       <td className="p-3.5 text-muted-foreground">
-                        Navigates to the route and adds a new entry to the browser history stack. Supports <code>&#123; fresh: true &#125;</code> and <code>&#123; params &#125;</code> when <code>href</code> is a dynamic route pattern (e.g. <code>&quot;/blog/[slug]&quot;</code>).
+                        Navigates to the route and adds a new entry to the browser history stack. Supports <code>&#123; fresh: true &#125;</code>, <code>&#123; params &#125;</code> when <code>href</code> is a dynamic route pattern (e.g. <code>&quot;/blog/[slug]&quot;</code>), and <code>&#123; from &#125;</code> when <code>href</code> is a relative path (e.g. <code>&quot;sub&quot;</code>, <code>&quot;./sub&quot;</code>, <code>&quot;../about&quot;</code>).
                       </td>
                     </tr>
                     <tr>
@@ -253,7 +253,7 @@ export default function LoginButton() {
                         router.replace(href, options)
                       </td>
                       <td className="p-3.5 text-muted-foreground">
-                        Navigates to the route, replacing the current history entry without pushing a new history state. Supports <code>&#123; fresh: true &#125;</code> and <code>&#123; params &#125;</code> when <code>href</code> is a dynamic route pattern.
+                        Navigates to the route, replacing the current history entry without pushing a new history state. Supports <code>&#123; fresh: true &#125;</code>, <code>&#123; params &#125;</code>, and <code>&#123; from &#125;</code>.
                       </td>
                     </tr>
                     <tr>
@@ -614,6 +614,21 @@ export function NavigationProgressBar() {
               <p className="text-xs text-muted-foreground mt-3">
                 This rule applies uniformly across all navigation methods, including the <code>&lt;Link&gt;</code> component and programmatic calls like <code>router.push()</code>.
               </p>
+
+              <Alert className="not-prose mt-4">
+                <ShieldCheck className="h-4 w-4 text-blue-500" />
+                <AlertTitle>Type-Safe Relative Navigation with <code>from</code></AlertTitle>
+                <AlertDescription className="space-y-2">
+                  <p>
+                    With Dinou&apos;s Type-Safe Routing active, pass <code>from</code> on <code>&lt;Link&gt;</code> (or <code>&#123; from &#125;</code> on <code>router.push()</code> / <code>router.replace()</code>) whenever using relative paths. Anchoring the source route pattern lets TypeScript autocomplete and strictly validate both bare child paths (<code>&quot;about&quot;</code>) and dot-prefixed paths (<code>&quot;./about&quot;</code>, <code>&quot;../about&quot;</code>) while rejecting typos like <code>&quot;./abouts&quot;</code> at dev and compile time:
+                  </p>
+                  <div className="font-mono text-xs bg-muted/80 p-2.5 rounded border border-border/60 space-y-1">
+                    <div>&lt;Link from=&quot;/blog/hello&quot; to=&quot;about&quot;&gt;Read More&lt;/Link&gt;</div>
+                    <div>&lt;Link from=&quot;/blog/hello&quot; to=&quot;./about&quot;&gt;Read More&lt;/Link&gt;</div>
+                    <div>router.push(&quot;../about&quot;, &#123; from: &quot;/blog/hello&quot; &#125;);</div>
+                  </div>
+                </AlertDescription>
+              </Alert>
             </section>
 
             {/* Documentation Previous / Next Pager */}

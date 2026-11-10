@@ -62,18 +62,34 @@ export function LinkSection() {
           <tbody className="divide-y divide-border bg-card text-muted-foreground">
             <tr>
               <td className="p-3 font-mono font-semibold text-primary align-top">href</td>
-              <td className="p-3 font-mono text-[11px] text-foreground align-top">DinouRoute | string</td>
+              <td className="p-3 font-mono text-[11px] text-foreground align-top">DinouLinkTarget</td>
               <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">—</td>
               <td className="p-3 align-top leading-relaxed">
-                Primary destination URL. Strongly typed with <code>DinouRoute</code> for compile-time route validation and IDE autocomplete. Supports absolute paths (<code>/dashboard</code>), relative paths (<code>./settings</code>, <code>../billing</code>), query strings, and external URLs.
+                Primary destination URL. Strongly typed for compile-time route validation and <code>Ctrl + Space</code> IDE autocomplete across static routes (<code>/dashboard</code>), dynamic route patterns (<code>/blog/[slug]</code> with <code>params</code>), relative paths when paired with <code>from</code> (<code>security</code>, <code>./security</code>, <code>../billing</code>), query/hash suffixes, and external URLs.
               </td>
             </tr>
             <tr>
               <td className="p-3 font-mono font-semibold text-primary align-top">to</td>
-              <td className="p-3 font-mono text-[11px] text-foreground align-top">DinouRoute | string</td>
+              <td className="p-3 font-mono text-[11px] text-foreground align-top">DinouLinkTarget</td>
               <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">—</td>
               <td className="p-3 align-top leading-relaxed">
-                Alias for <code>href</code> provided for compatibility with React Router and Remix codebases (evaluated as <code>href || to</code>).
+                Alias for <code>href</code> with identical type safety and autocomplete (evaluated as <code>href || to</code>).
+              </td>
+            </tr>
+            <tr>
+              <td className="p-3 font-mono font-semibold text-primary align-top">params</td>
+              <td className="p-3 font-mono text-[11px] text-foreground align-top">Record&lt;string, ...&gt;</td>
+              <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">—</td>
+              <td className="p-3 align-top leading-relaxed">
+                Conditionally required parameter dictionary whenever <code>href</code> or <code>to</code> contains dynamic <code>[param]</code> or <code>[...param]</code> placeholders (optional when all placeholders are <code>[[optional]]</code>). Values are interpolated and URL-encoded via <code>encodeURIComponent</code>.
+              </td>
+            </tr>
+            <tr>
+              <td className="p-3 font-mono font-semibold text-primary align-top">from</td>
+              <td className="p-3 font-mono text-[11px] text-foreground align-top">DinouFromRoute</td>
+              <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">—</td>
+              <td className="p-3 align-top leading-relaxed">
+                Source route pattern (e.g. <code>&quot;/dashboard/settings&quot;</code>) anchoring relative navigation in <code>href</code> / <code>to</code>. Enables strict compile-time validation and autocomplete for bare (<code>&quot;security&quot;</code>), dot-slash (<code>&quot;./security&quot;</code>), and parent (<code>&quot;../billing&quot;</code>) paths, and safely slices deeper browser pathnames when rendered inside a parent layout or <code>@slot</code>.
               </td>
             </tr>
             <tr>
@@ -115,10 +131,10 @@ export function LinkSection() {
               <strong>Absolute (<code>/</code>):</strong> Starts with a forward slash (e.g., <code>/dashboard</code>). Resolves strictly from the application root domain.
             </li>
             <li>
-              <strong>Relative Child (<code>./</code>):</strong> Resolves under the current segment (e.g., from <code>/products</code>, navigating to <code>./details</code> resolves to <code>/products/details</code>).
+              <strong>Relative Child (<code>details</code> or <code>./details</code>):</strong> With <code>from=&quot;/products&quot;</code>, both <code>details</code> and <code>./details</code> autocomplete and resolve under that route directory to <code>/products/details</code>.
             </li>
             <li>
-              <strong>Relative Sibling (<code>../</code>):</strong> Navigates up one directory level (e.g., from <code>/users/settings</code>, navigating to <code>../profile</code> resolves to <code>/users/profile</code>).
+              <strong>Relative Sibling / Parent (<code>../</code>):</strong> With <code>from=&quot;/users/settings&quot;</code>, navigating to <code>../profile</code> resolves up one directory level to <code>/users/profile</code>.
             </li>
           </ul>
         </AlertDescription>
@@ -229,13 +245,22 @@ export default function SettingsSubNav() {
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Relative Child navigation: resolves to /dashboard/settings/security */}
-      <Link href="./security" onClick={handleAuditClick} className="text-sm font-medium">
+      {/* Strict Relative Child navigation ("security" or "./security"): resolves to /dashboard/settings/security */}
+      <Link
+        from="/dashboard/settings"
+        href="security"
+        onClick={handleAuditClick}
+        className="text-sm font-medium"
+      >
         Security Settings
       </Link>
 
-      {/* Relative Sibling navigation: resolves to /dashboard/billing */}
-      <Link href="../billing" className="text-sm text-muted-foreground">
+      {/* Strict Relative Sibling navigation: resolves to /dashboard/billing */}
+      <Link
+        from="/dashboard/settings"
+        href="../billing"
+        className="text-sm text-muted-foreground"
+      >
         Billing & Subscriptions
       </Link>
 
