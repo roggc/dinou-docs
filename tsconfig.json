@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "rootDirs": [
+      "src",
+      ".dinou/routes"
+    ],
     "paths": {
       "@/*": [
         "./src/*"

@@ -103,14 +103,15 @@ export default function Navigation() {
     files: [
       {
         filename: "src/blog/[slug]/page.tsx",
-        badge: "PageProps",
+        badge: "./dinou (0 Boilerplate)",
         language: "tsx",
         code: `
-import type { PageProps } from "dinou";
+// Contextual "./dinou" pre-binds PageProps, Link & useRouter to this folder!
+import { Link, type PageProps } from "./dinou";
 
-// Inferred params.slug is strongly typed as string
-export default function BlogPost({ params }: PageProps<"/blog/[slug]">) {
-  return <h1>Post: {params.slug}</h1>;
+export default function BlogPost({ params }: PageProps) {
+  // ✅ params.slug is string & relative <Link> needs no "from" prop!
+  return <Link to="comments">Comments for {params.slug}</Link>;
 
   // ❌ TypeScript Error: Property 'id' does not exist on type '{ slug: string }'
   // return <h1>{params.id}</h1>;

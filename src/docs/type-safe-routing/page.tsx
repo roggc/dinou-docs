@@ -51,6 +51,7 @@ const tocItems = [
   { id: "custom-components", title: "4.3. Custom Navigation Components with DinouRoute", level: 3 },
   { id: "dynamic-interpolation", title: "4.4. Dynamic Navigation: Pattern + params vs. Template Strings", level: 3 },
   { id: "relative-navigation", title: "4.5. Strict Relative Navigation with from", level: 3 },
+  { id: "contextual-dinou", title: '4.6. Contextual "./dinou" (Zero Boilerplate)', level: 3 },
   { id: "architecture", title: "5. Technical Architecture: Under the Hood", level: 2 },
   { id: "route-scanner", title: "5.1. Ultra-Fast Route Scanner", level: 3 },
   { id: "generated-definitions", title: "5.2. Module Augmentation", level: 3 },
@@ -305,7 +306,7 @@ export function NavActions({ slug }: { slug: string }) {
                   2.2. Level 2: Pages, Horizontal Layouts &amp; Parallel Slots
                 </h3>
                 <p>
-                  Pass your segment pattern as a generic argument to <code>PageProps</code>, <code>LayoutProps</code>, <code>SlotProps</code>, <code>PageFunctions</code>, <code>LayoutFunctions</code>, or <code>RouteParams</code>. Both <code>PageProps&lt;TRoute, TProps&gt;</code> and <code>LayoutProps&lt;TLayout, TProps&gt;</code> also accept an optional second generic argument for custom props returned by <code>getProps</code>:
+                  Pass your segment pattern as a generic argument to <code>PageProps</code>, <code>LayoutProps</code>, <code>SlotProps</code>, <code>PageFunctions</code>, <code>LayoutFunctions</code>, or <code>RouteParams</code> when importing from <code>&quot;dinou&quot;</code>—or import them from <a href="#contextual-dinou" className="text-blue-600 dark:text-blue-400 underline"><code>&quot;./dinou&quot;</code></a> inside any route folder to get both pre-bound types and pre-bound relative <code>&lt;Link&gt;</code> / <code>useRouter()</code> with zero route strings! Both <code>PageProps&lt;TRoute, TProps&gt;</code> and <code>LayoutProps&lt;TLayout, TProps&gt;</code> also accept custom props returned by <code>getProps</code>:
                 </p>
 
                 <div className="not-prose my-4">
@@ -1000,6 +1001,9 @@ export function ProductCard({ product }: { product: Product }) {
                   <li>
                     <strong>Identical Support in <code>useRouter()</code>:</strong> Both <code>router.push(relativeHref, &#123; from &#125;)</code> and <code>router.replace(relativeHref, &#123; from, fresh &#125;)</code> share the exact same autocomplete, parameter rules, and runtime base slicing.
                   </li>
+                  <li>
+                    <strong>Want Zero <code>from</code> Boilerplate?</strong> Inside any route folder, import <code>&#123; Link, useRouter &#125;</code> from <a href="#contextual-dinou" className="text-blue-600 dark:text-blue-400 underline"><code>&quot;./dinou&quot;</code></a> (see Section 4.6 below) so <code>from</code> is pre-filled automatically from that folder!
+                  </li>
                 </ul>
 
                 <div className="not-prose my-4">
@@ -1098,6 +1102,112 @@ export default function WorkspaceSidebar({
                   />
                 </div>
               </div>
+
+              <div id="contextual-dinou" className="scroll-mt-20 mt-8 space-y-3">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <FolderTree className="h-5 w-5 text-emerald-500" />
+                  4.6. Zero-Boilerplate Contextual Module (<code>&quot;./dinou&quot;</code>)
+                </h3>
+                <p>
+                  Inside any route folder in <code>src/</code> (pages, intermediate layouts, route groups <code>(group)</code>, and parallel <code>@slots</code>), you can import directly from <strong><code>&quot;./dinou&quot;</code></strong> instead of <code>&quot;dinou&quot;</code> (or <code>&quot;../dinou&quot;</code> from a colocated <code>_components/</code> subfolder). Powered by TypeScript&apos;s <code>rootDirs: [&quot;src&quot;, &quot;.dinou/routes&quot;]</code>, Dinou generates a zero-pollution virtual module per route folder without touching your <code>src/</code> directory:
+                </p>
+                <ul className="text-sm space-y-1.5">
+                  <li>
+                    <strong>Zero Route Strings on Types:</strong> <code>PageProps</code>, <code>LayoutProps</code> (including auto-inferred sibling <code>@slot</code> props!), <code>SlotProps</code>, <code>ErrorProps</code>, <code>NotFoundProps</code>, <code>PageFunctions</code>, <code>LayoutFunctions</code>, and <code>RouteParams</code> are pre-bound to that folder&apos;s exact route segment—no string generic needed! If you rename a folder, every type and relative link updates automatically.
+                  </li>
+                  <li>
+                    <strong>Automatic <code>from</code> on <code>&lt;Link&gt;</code> &amp; <code>useRouter()</code>:</strong> Both <code>Link</code> and <code>useRouter()</code> imported from <code>&quot;./dinou&quot;</code> are pre-bound to that folder&apos;s URL origin (<code>ROUTE</code>). Pressing <code>Ctrl + Space</code> inside <code>&lt;Link to=&quot;&quot;&gt;</code> or <code>router.push(&quot;&quot;)</code> immediately suggests and validates <strong>both</strong> strict relative targets (<code>&quot;sub&quot;</code>, <code>&quot;./sub&quot;</code>, <code>&quot;../..&quot;</code>) <strong>and</strong> absolute static/dynamic routes—without writing <code>from</code>!
+                  </li>
+                  <li>
+                    <strong>Full <code>&quot;dinou&quot;</code> Parity:</strong> <code>&quot;./dinou&quot;</code> also exports the folder&apos;s literal <code>ROUTE</code> constant alongside all standard runtime utilities (<code>redirect</code>, <code>ClientRedirect</code>, <code>usePathname</code>, <code>useSearchParams</code>, <code>getContext</code>, <code>noDynamic</code>, <code>refreshSlot</code>, <code>useNavigationLoading</code>, <code>defineConfig</code>), so route files only need one unified import.
+                  </li>
+                  <li>
+                    <strong>Safe Boundary Between Route Folders &amp; Shared Components:</strong> Dinou only generates <code>&quot;./dinou&quot;</code> for route-tree directories. Global shared folders like <code>src/components/</code> or <code>src/lib/</code> intentionally do <strong>not</strong> receive <code>&quot;./dinou&quot;</code>, so accidentally writing <code>import &#123; Link &#125; from &quot;./dinou&quot;</code> in a shared navbar fails immediately with <code>TS2307</code>—reminding you to import from <code>&quot;dinou&quot;</code> there. Likewise, avoid naming a route subfolder or local file <code>dinou</code> (<code>dinou.tsx</code> / <code>dinou/</code>) inside a route folder so it does not shadow <code>&quot;./dinou&quot;</code>.
+                  </li>
+                </ul>
+
+                <div className="not-prose my-4">
+                  <TabbedCodeBlock
+                    defaultTab="ctx-page"
+                    tabs={[
+                      {
+                        id: "ctx-page",
+                        label: "src/workspace/[org]/contact/page.tsx",
+                        language: "tsx",
+                        code: `"use client";
+
+// 👇 Single unified import — pre-bound to "/workspace/[org]/contact"!
+import { Link, useRouter, ROUTE, type PageProps } from "./dinou";
+
+export default function ContactPage({ params }: PageProps<{ title?: string }>) {
+  // ✅ params.org is string — WITHOUT writing PageProps<"/workspace/[org]/contact">!
+  // ✅ ROUTE is typed as literal "/workspace/[org]/contact"
+  const router = useRouter();
+
+  return (
+    <section data-route={ROUTE}>
+      <h1>Contact {params.org}</h1>
+
+      {/* ✅ Relative links autocomplete & validate WITHOUT passing from! */}
+      <Link to="sub">Subpage (bare)</Link>
+      <Link to="./sub">Subpage (./)</Link>
+      <Link to="../..">Back to /workspace</Link>
+
+      {/* ✅ Absolute & dynamic routes ALSO work on the exact same <Link>! */}
+      <Link to="/docs/routing">Docs</Link>
+      <Link to="/workspace/[org]/contact/sub" params={{ org: params.org }}>
+        Explicit Dynamic Pattern
+      </Link>
+
+      {/* ✅ useRouter() is pre-bound too — no { from } needed! */}
+      <button onClick={() => router.push("sub")}>Push Subpage</button>
+
+      {/* ❌ Still strictly rejects typos & non-page parent ".."! */}
+      {/* <Link to="./subs">Typo</Link> */}
+      {/* <Link to="..">Parent /workspace/[org] has no page.tsx</Link> */}
+    </section>
+  );
+}`,
+                      },
+                      {
+                        id: "ctx-slot",
+                        label: "src/workspace/[org]/@sidebar/page.tsx",
+                        language: "tsx",
+                        code: `// Inside @sidebar, "./dinou" knows SlotProps has params: { org: string }
+// AND pre-binds <Link> / useRouter() to the URL segment "/workspace/[org]"!
+import { Link, type SlotProps } from "./dinou";
+
+export default function WorkspaceSidebar({ params }: SlotProps) {
+  return (
+    <aside>
+      <h3>{params.org}</h3>
+      {/* ✅ Resolves cleanly to /workspace/<org>/contact from any child depth */}
+      <Link to="contact">Contact</Link>
+      <Link to="contact/sub">Contact Subpage</Link>
+    </aside>
+  );
+}`,
+                      },
+                      {
+                        id: "ctx-layout",
+                        label: "src/workspace/layout.tsx",
+                        language: "tsx",
+                        code: `import { Link, type LayoutProps } from "./dinou";
+
+// ✅ LayoutProps automatically infers sibling @slot ReactNode props (e.g. sidebar)
+export default function WorkspaceRootLayout({ children, sidebar }: LayoutProps) {
+  return (
+    <div className="grid grid-cols-[240px_1fr]">
+      <aside>{sidebar}</aside>
+      <main>{children}</main>
+    </div>
+  );
+}`,
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
             </section>
 
             {/* Section 5: Technical Architecture */}
@@ -1127,14 +1237,14 @@ export default function WorkspaceSidebar({
                     <p className="text-[11px] text-muted-foreground leading-normal">In-memory scanner completes in &lt; 2ms.</p>
                   </div>
                   <div className="bg-card border border-border/80 rounded-lg p-3 space-y-1">
-                    <span className="text-[11px] font-mono text-indigo-500 font-semibold">03. Declaration</span>
-                    <p className="font-semibold text-foreground">routes.d.ts</p>
-                    <p className="text-[11px] text-muted-foreground leading-normal">Augments <code>&quot;dinou&quot;</code> module contract.</p>
+                    <span className="text-[11px] font-mono text-indigo-500 font-semibold">03. Declarations</span>
+                    <p className="font-semibold text-foreground">routes.d.ts + .dinou/routes</p>
+                    <p className="text-[11px] text-muted-foreground leading-normal">Augments <code>&quot;dinou&quot;</code> &amp; emits contextual <code>&quot;./dinou&quot;</code> modules.</p>
                   </div>
                   <div className="bg-card border border-border/80 rounded-lg p-3 space-y-1">
                     <span className="text-[11px] font-mono text-purple-500 font-semibold">04. IDE &amp; CI</span>
                     <p className="font-semibold text-foreground">tsconfig.json</p>
-                    <p className="text-[11px] text-muted-foreground leading-normal">Includes <code>.dinou/types/**/*.d.ts</code> for autocompletion.</p>
+                    <p className="text-[11px] text-muted-foreground leading-normal">Wires <code>include</code> + <code>rootDirs</code> with zero <code>src/</code> pollution.</p>
                   </div>
                 </div>
               </div>
@@ -1218,13 +1328,14 @@ export default function WorkspaceSidebar({
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground space-y-2">
                     <p>
-                      Generated definitions under <code>.dinou/types/routes.d.ts</code> are discovered by TypeScript via the <code>include</code> array in your root <code>tsconfig.json</code>:
+                      Global route declarations and virtual <code>&quot;./dinou&quot;</code> modules are wired cleanly in your root <code>tsconfig.json</code> via <code>rootDirs</code> and <code>include</code>:
                     </p>
-                    <div className="font-mono text-[11px] bg-muted/80 p-2 rounded border border-border/60">
-                      {`"include": ["src", "dinou-env.d.ts", ".dinou/types/**/*.d.ts"]`}
+                    <div className="font-mono text-[11px] bg-muted/80 p-2 rounded border border-border/60 whitespace-pre-wrap">
+                      {`"compilerOptions": { "rootDirs": ["src", ".dinou/routes"], ... },
+"include": ["src", "dinou-env.d.ts", ".dinou/types/**/*.d.ts"]`}
                     </div>
                     <p>
-                      Ensures IDEs and CI discover route typings immediately without manual triple-slash references in <code>dinou-env.d.ts</code>.
+                      Keeping <code>.dinou/routes</code> in <code>rootDirs</code> (and out of <code>include</code>) lets TypeScript resolve <code>&quot;./dinou&quot;</code> on demand without polluting IDE auto-import suggestions across unrelated routes.
                     </p>
                   </CardContent>
                 </Card>
@@ -1262,7 +1373,7 @@ export default function WorkspaceSidebar({
                     </p>
                     <ul className="list-disc pl-4 space-y-1">
                       <li>Detects added, renamed, or deleted <code>page</code>, <code>page_functions</code>, <code>layout</code>, <code>layout_functions</code>, <code>error</code>, and <code>not_found</code> files (including inside <code>@slot</code> folders).</li>
-                      <li>Regenerates <code>.dinou/types/routes.d.ts</code> in under 2ms.</li>
+                      <li>Regenerates <code>.dinou/types/routes.d.ts</code> and syncs/prunes <code>.dinou/routes/**/dinou.&#123;js,d.ts&#125;</code> in under 2ms.</li>
                       <li>IDE autocomplete reflects changes instantly with <strong>no server restarts</strong>.</li>
                     </ul>
                   </CardContent>
@@ -1285,7 +1396,7 @@ export default function WorkspaceSidebar({
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground space-y-2">
                     <p>
-                      Generates <code>.dinou/types/routes.d.ts</code> on demand in milliseconds without launching the dev server or running bundlers:
+                      Generates <code>.dinou/types/routes.d.ts</code> and all contextual <code>.dinou/routes/**/dinou.&#123;js,d.ts&#125;</code> modules on demand in milliseconds without launching the dev server or running bundlers:
                     </p>
                     <ul className="list-disc pl-4 space-y-1">
                       <li><strong>Fresh repo clones:</strong> Populate IDE autocomplete right after <code>npm install</code> (since <code>.dinou/</code> is gitignored).</li>

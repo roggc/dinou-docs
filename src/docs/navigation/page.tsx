@@ -617,13 +617,17 @@ export function NavigationProgressBar() {
 
               <Alert className="not-prose mt-4">
                 <ShieldCheck className="h-4 w-4 text-blue-500" />
-                <AlertTitle>Type-Safe Relative Navigation with <code>from</code></AlertTitle>
+                <AlertTitle>Type-Safe Relative Navigation: Contextual <code>&quot;./dinou&quot;</code> or Explicit <code>from</code></AlertTitle>
                 <AlertDescription className="space-y-2">
                   <p>
-                    With Dinou&apos;s Type-Safe Routing active, pass <code>from</code> on <code>&lt;Link&gt;</code> (or <code>&#123; from &#125;</code> on <code>router.push()</code> / <code>router.replace()</code>) whenever using relative paths. Anchoring the source route pattern lets TypeScript autocomplete and strictly validate both bare child paths (<code>&quot;about&quot;</code>) and dot-prefixed paths (<code>&quot;./about&quot;</code>, <code>&quot;../about&quot;</code>) while rejecting typos like <code>&quot;./abouts&quot;</code> at dev and compile time:
+                    Inside any route folder, import <code>&#123; Link, useRouter &#125;</code> from <code>&quot;./dinou&quot;</code> to get automatic zero-boilerplate relative autocomplete and strict compile-time validation without writing <code>from</code>—or pass <code>from</code> explicitly when importing from global <code>&quot;dinou&quot;</code>. Both bare child paths (<code>&quot;about&quot;</code>) and dot-prefixed paths (<code>&quot;./about&quot;</code>, <code>&quot;../about&quot;</code>) autocomplete while typos like <code>&quot;./abouts&quot;</code> are rejected immediately:
                   </p>
                   <div className="font-mono text-xs bg-muted/80 p-2.5 rounded border border-border/60 space-y-1">
-                    <div>&lt;Link from=&quot;/blog/hello&quot; to=&quot;about&quot;&gt;Read More&lt;/Link&gt;</div>
+                    <div className="text-muted-foreground">// Option A: Zero-boilerplate route-contextual "./dinou"</div>
+                    <div>import &#123; Link, useRouter &#125; from &quot;./dinou&quot;;</div>
+                    <div>&lt;Link to=&quot;about&quot;&gt;Read More&lt;/Link&gt;</div>
+                    <div>router.push(&quot;../about&quot;);</div>
+                    <div className="text-muted-foreground pt-1">// Option B: Global "dinou" with explicit from</div>
                     <div>&lt;Link from=&quot;/blog/hello&quot; to=&quot;./about&quot;&gt;Read More&lt;/Link&gt;</div>
                     <div>router.push(&quot;../about&quot;, &#123; from: &quot;/blog/hello&quot; &#125;);</div>
                   </div>

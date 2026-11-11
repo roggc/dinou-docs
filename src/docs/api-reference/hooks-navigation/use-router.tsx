@@ -68,7 +68,7 @@ export function UseRouterSection() {
                   (href: DinouLinkTarget, options?: NavigationOptions) =&gt; void
                 </td>
                 <td className="p-3 align-top leading-relaxed">
-                  Navigates to <code>href</code> and pushes a new entry onto the browser history stack. Autocompletes static and dynamic route patterns; requires <code>&#123; params &#125;</code> when <code>href</code> contains <code>[param]</code> placeholders, accepts <code>&#123; from &#125;</code> to anchor strict relative paths (<code>&quot;sub&quot;</code>, <code>&quot;./sub&quot;</code>, <code>&quot;../billing&quot;</code>), and accepts <code>&#123; fresh: true &#125;</code> to bypass the client memory cache.
+                  Navigates to <code>href</code> and pushes a new entry onto the browser history stack. Autocompletes static and dynamic route patterns; requires <code>&#123; params &#125;</code> when <code>href</code> contains <code>[param]</code> placeholders, accepts <code>&#123; from &#125;</code> to anchor strict relative paths (<code>&quot;sub&quot;</code>, <code>&quot;./sub&quot;</code>, <code>&quot;../billing&quot;</code>)—or omits <code>&#123; from &#125;</code> automatically when <code>useRouter</code> is imported from route-contextual <code>&quot;./dinou&quot;</code>—and accepts <code>&#123; fresh: true &#125;</code> to bypass the client memory cache.
                 </td>
               </tr>
               <tr>

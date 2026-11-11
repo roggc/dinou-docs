@@ -89,7 +89,7 @@ export function LinkSection() {
               <td className="p-3 font-mono text-[11px] text-foreground align-top">DinouFromRoute</td>
               <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">—</td>
               <td className="p-3 align-top leading-relaxed">
-                Source route pattern (e.g. <code>&quot;/dashboard/settings&quot;</code>) anchoring relative navigation in <code>href</code> / <code>to</code>. Enables strict compile-time validation and autocomplete for bare (<code>&quot;security&quot;</code>), dot-slash (<code>&quot;./security&quot;</code>), and parent (<code>&quot;../billing&quot;</code>) paths, and safely slices deeper browser pathnames when rendered inside a parent layout or <code>@slot</code>.
+                Source route pattern (e.g. <code>&quot;/dashboard/settings&quot;</code>) anchoring relative navigation in <code>href</code> / <code>to</code>. Enables strict compile-time validation and autocomplete for bare (<code>&quot;security&quot;</code>), dot-slash (<code>&quot;./security&quot;</code>), and parent (<code>&quot;../billing&quot;</code>) paths, and safely slices deeper browser pathnames when rendered inside a parent layout or <code>@slot</code>. <em>Tip:</em> Importing <code>&#123; Link &#125;</code> from route-contextual <code>&quot;./dinou&quot;</code> inside a route folder pre-binds <code>from</code> automatically so you can omit it!
               </td>
             </tr>
             <tr>
