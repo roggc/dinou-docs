@@ -56,7 +56,7 @@ const tocItems = [
   { id: "not-found-pages", title: "4.5. Custom 404 Pages (not_found.tsx)", level: 3 },
   { id: "route-organization", title: "5. Route Organization & Parallel Slots", level: 2 },
   { id: "route-groups", title: "5.1. Route Groups (folder)", level: 3 },
-  { id: "private-folders", title: "5.2. Escaping Route Scanning (_folder)", level: 3 },
+  { id: "private-folders", title: "5.2. Escaping Route & Bundler Scanning (_folder)", level: 3 },
   { id: "parallel-routes", title: "5.3. Parallel Routes & Slots (@slot)", level: 3 },
   { id: "error-containment", title: "5.4. Slot Error Containment Architecture", level: 3 },
 ];
@@ -1018,17 +1018,17 @@ export default function NotFound({ params, suggestions }: NotFoundProps) {
               <div id="private-folders" className="scroll-mt-20 mt-8 space-y-4">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <FolderLock className="h-5 w-5 text-slate-500" />
-                  5.2. Escaping Route Scanning with Underscore (<code>_folder</code>)
+                  5.2. Escaping Route &amp; Bundler Scanning with Underscore (<code>_folder</code>)
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  In Dinou, you <strong>do not need</strong> to prefix folders like <code>components/</code>, <code>hooks/</code>, or <code>utils/</code> with an underscore. Any directory that simply does not contain a <code>page.tsx</code> (or <code>page.jsx</code>) is already completely ignored by the router and will never register a route.
+                  In Dinou, you <strong>do not need</strong> to prefix folders like <code>components/</code>, <code>hooks/</code>, <code>actions/</code>, or <code>utils/</code> with an underscore. Any directory that simply does not contain a <code>page.tsx</code> (or <code>page.jsx</code>) is already completely ignored by the router and will never register a route.
                 </p>
 
                 <Alert className="not-prose my-4 border-slate-500/20 bg-slate-50/50 dark:bg-slate-900/10">
                   <FolderLock className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                  <AlertTitle>The Real Purpose of &quot;_&quot;: Legacy Code &amp; Archived Pages</AlertTitle>
+                  <AlertTitle>The Real Purpose of &quot;_&quot;: Parked, Draft &amp; Legacy Code</AlertTitle>
                   <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1">
-                    The <strong>sole and specific purpose</strong> of prefixing a directory with an underscore (<code>_folderName</code>) is to <strong>escape the in-process route scanner when dealing with legacy code, drafts, or archived folders that actually contain <code>page.tsx</code> / <code>page.jsx</code> files inside them</strong>.
+                    The <strong>sole and specific purpose</strong> of prefixing a directory with an underscore (<code>_folderName</code>) is to <strong>completely exclude that directory tree from both Dinou&apos;s router and Dinou&apos;s bundlers</strong> when parking legacy code, drafts, experiments, or archived routes that you want to keep in the repository without compiling or shipping them.
                   </AlertDescription>
                 </Alert>
 
@@ -1039,17 +1039,26 @@ export default function NotFound({ params, suggestions }: NotFoundProps) {
                   <div className="not-prose bg-muted/60 p-4 rounded-xl font-mono text-xs space-y-2 border">
                     <div className="text-slate-500 dark:text-slate-400">src/blog/</div>
                     <div className="pl-4">├── page.tsx <span className="text-blue-600 dark:text-blue-400 font-bold">&rarr; /blog (Active public route)</span></div>
-                    <div className="pl-4 text-emerald-600 dark:text-emerald-400 font-semibold">├── components/ <span className="text-muted-foreground font-normal">(No page.tsx &rarr; already safe without &quot;_&quot;)</span></div>
+                    <div className="pl-4 text-emerald-600 dark:text-emerald-400 font-semibold">├── components/ <span className="text-muted-foreground font-normal">(No page.tsx &rarr; safe active colocation without &quot;_&quot;)</span></div>
                     <div className="pl-8 text-muted-foreground">└── post-card.tsx</div>
-                    <div className="pl-4 text-amber-600 dark:text-amber-400 font-semibold">└── _legacy_v1/ <span className="text-muted-foreground font-normal">(Contains page.tsx, but &quot;_&quot; forces scanner to skip it!)</span></div>
-                    <div className="pl-8 text-muted-foreground">├── page.tsx <span className="text-red-500 font-semibold">(SKIPPED &mdash; NOT a route)</span></div>
-                    <div className="pl-8 text-muted-foreground">└── [slug]/page.tsx <span className="text-red-500 font-semibold">(SKIPPED &mdash; NOT a route)</span></div>
+                    <div className="pl-4 text-amber-600 dark:text-amber-400 font-semibold">└── _legacy_v1/ <span className="text-muted-foreground font-normal">(Completely ignored by router &amp; bundlers!)</span></div>
+                    <div className="pl-8 text-muted-foreground">├── page.tsx <span className="text-red-500 font-semibold">(SKIPPED &mdash; NOT routed or bundled)</span></div>
+                    <div className="pl-8 text-muted-foreground">├── widget.tsx <span className="text-red-500 font-semibold">(&quot;use client&quot; SKIPPED &mdash; 0 client chunks)</span></div>
+                    <div className="pl-8 text-muted-foreground">└── actions.ts <span className="text-red-500 font-semibold">(&quot;use server&quot; SKIPPED &mdash; NOT exposed)</span></div>
                   </div>
                 </div>
 
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Whenever Dinou&apos;s scanner encounters a folder starting with <code>_</code>, it completely bypasses that directory tree, ensuring that stale, archived, or legacy page files are never compiled into the production router.
+                  Whenever Dinou encounters a folder starting with <code>_</code>, it completely bypasses that directory tree across RSC/SSR compilation, <code>&quot;use client&quot;</code> chunk generation, <code>&quot;use server&quot;</code> endpoint registration, and CSS/asset scanning. If a parked route folder uses contextual <code>&quot;./dinou&quot;</code> imports, Dinou still emits lightweight fallback <code>.d.ts</code> shims in <code>.dinou/routes/_...</code> (while excluding the route from <code>.dinou/types/routes.d.ts</code>) so your IDE and <code>tsc --noEmit</code> remain error-free.
                 </p>
+
+                <Alert className="not-prose border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/20">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  <AlertTitle>Coming from Next.js? Do Not Use <code>_components</code> or <code>_actions</code> for Active Code</AlertTitle>
+                  <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1">
+                    Unlike Next.js Private Folders, a <code>_folder</code> in Dinou is <strong>fully excluded from bundling</strong>—not just from URL routing. Active files cannot import modules from a <code>_</code>-prefixed directory (Dinou&apos;s bundler will immediately report an explicit compile-time error if attempted). Always name active colocated directories cleanly without a leading underscore, such as <code>components/</code>, <code>hooks/</code>, or <code>actions/</code>.
+                  </AlertDescription>
+                </Alert>
               </div>
 
               <div id="parallel-routes" className="scroll-mt-20 mt-8 space-y-3">

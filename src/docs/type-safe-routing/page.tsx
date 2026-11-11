@@ -1207,6 +1207,10 @@ export default function WorkspaceRootLayout({ children, sidebar }: LayoutProps) 
                     ]}
                   />
                 </div>
+
+                <p className="text-xs text-muted-foreground leading-relaxed pt-1">
+                  <strong>Parking routes with <code>_folder</code>:</strong> If you temporarily disable a route folder by prefixing it with an underscore (e.g. renaming <code>src/workspace</code> to <code>src/_workspace</code>), Dinou excludes it from both the global route registry and all bundlers while still emitting fallback <code>.dinou/routes/_workspace/**/dinou.d.ts</code> shims—so any active links pointing to <code>/workspace</code> immediately surface dead-link errors, while parked files inside <code>src/_workspace</code> keep compiling cleanly in VS Code and <code>tsc --noEmit</code> without changing a single <code>&quot;./dinou&quot;</code> import.
+                </p>
               </div>
             </section>
 

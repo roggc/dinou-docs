@@ -11,7 +11,7 @@ Dinou's `"./dinou"` feature spans **two distinct layers** that should both run i
 | Layer | Tool in GitHub Actions | What It Verifies |
 | :--- | :--- | :--- |
 | **1. Compile-Time Type Safety** | `npm run typegen && npx tsc --noEmit` (+ tiny negative boundary check script) | - `tsconfig.json` `"rootDirs": ["src", ".dinou/routes"]` maps `.dinou/routes/<dir>/dinou.d.ts` onto `src/<dir>/` with zero files created inside `src/`.<br>- Zero-boilerplate `PageProps`, `LayoutProps` (with auto-inferred `@slot` props), `SlotProps`, `PageFunctions`, `Link`, and `useRouter` compile cleanly.<br>- Inline `@ts-expect-error` assertions guarantee invalid relative paths (`"./subs"`, `"subs"`, non-page parent `".."`) and missing `params` **fail compilation** (if TypeScript ever stops rejecting them, `tsc --noEmit` fails with `TS2578: Unused '@ts-expect-error' directive`).<br>- Importing `"./dinou"` from a non-route folder (`src/components/`) fails with `TS2307`. |
-| **2. Bundler & Runtime Behavior (Dev + Prod)** | **Playwright** (`tests/type-safe-contextual.spec.ts`) across `esbuild`, `rollup`, and `webpack` in both `dev` and `build + start` | - `esbuildContextualDinouPlugin` (including `.dinou/swc/src/...` dev disk-cache redirection in `dev:esbuild`), `rollupContextualDinouPlugin`, and `webpackContextualDinouPlugin` resolve `"./dinou"` and `"../dinou"` (from colocated `_components/`) in `"use client"` bundles.<br>- Dual-Engine Pass A (`react-server` RSC) and Pass B (SSR) resolve `"./dinou"` and `"../dinou"` in Server and Client Components.<br>- `run-ssg.js` static pre-rendering (`getStaticPaths`) succeeds during `npm run build`.<br>- Pre-bound `<Link>` and `useRouter()` inject `from = ROUTE` at runtime, slicing deeper browser URLs inside persistent layouts/`@slots` while preserving standalone `?query` and `#hash` links. |
+| **2. Bundler & Runtime Behavior (Dev + Prod)** | **Playwright** (`tests/type-safe-contextual.spec.ts`) across `esbuild`, `rollup`, and `webpack` in both `dev` and `build + start` | - `esbuildContextualDinouPlugin` (including `.dinou/swc/src/...` dev disk-cache redirection in `dev:esbuild`), `rollupContextualDinouPlugin`, and `webpackContextualDinouPlugin` resolve `"./dinou"` and `"../dinou"` (from colocated `components/`) in `"use client"` bundles.<br>- Escaped `_` folders (`_parked-legacy/`) are completely ignored by Dinou's router and bundlers while still receiving fallback `.dinou/routes/.../dinou.d.ts` shims so `tsc --noEmit` succeeds.<br>- Dual-Engine Pass A (`react-server` RSC) and Pass B (SSR) resolve `"./dinou"` and `"../dinou"` in Server and Client Components.<br>- `run-ssg.js` static pre-rendering (`getStaticPaths`) succeeds during `npm run build`.<br>- Pre-bound `<Link>` and `useRouter()` inject `from = ROUTE` at runtime, slicing deeper browser URLs inside persistent layouts/`@slots` while preserving standalone `?query` and `#hash` links. |
 
 ---
 
@@ -72,6 +72,8 @@ Create the following self-contained route subtree under `src/t-type-safe-context
 ```text
 src/t-type-safe-contextual/
 ├── page.tsx                                  # 1. Root hub (Server Component, "./dinou", dynamic relative Link + params)
+├── _parked-legacy/
+│   └── page.tsx                              # 1b. Escaped `_` route folder ("./dinou" compiles in tsc, ignored by router & bundlers)
 ├── (marketing)/
 │   └── pricing/
 │       └── page.tsx                          # 2. Route group unwrapping ((marketing) -> ROUTE="/t-type-safe-contextual/pricing")
@@ -83,7 +85,7 @@ src/t-type-safe-contextual/
         ├── page_functions.ts                 # 5. Typed PageFunctions + getStaticPaths for production SSG build coverage
         ├── page.tsx                          # 6. Server Component page ("./dinou" relative, absolute, dynamic + explicit `from` override)
         ├── client-actions.tsx                # 7. "use client" Component ("./dinou" Link + useRouter() in esbuild/swc, Rollup, Webpack)
-        ├── _components/
+        ├── components/
         │   ├── colocated-card.tsx            # 8. "use client" colocated helper importing "../dinou"
         │   └── typecheck-assertions.tsx      # 9. Compile-time @ts-expect-error assertions verified by `tsc --noEmit`
         └── sub/
@@ -249,7 +251,7 @@ export const getProps: PageFunctions<ContactExtraProps>["getProps"] = async (
 import { Link, ROUTE, type PageProps } from "./dinou";
 import type { ContactExtraProps } from "./page_functions";
 import { ClientActions } from "./client-actions";
-import { ColocatedCard } from "./_components/colocated-card";
+import { ColocatedCard } from "./components/colocated-card";
 
 export default function ContextualContactPage({
   params,
@@ -358,12 +360,12 @@ export function ClientActions() {
 }
 ```
 
-### 3.8. `src/t-type-safe-contextual/[slug]/contact/_components/colocated-card.tsx`
+### 3.8. `src/t-type-safe-contextual/[slug]/contact/components/colocated-card.tsx`
 
 ```tsx
 "use client";
 
-// Exercises parent relative "../dinou" resolution inside private `_components/`
+// Exercises parent relative "../dinou" resolution inside colocated `components/`
 // across esbuild (+ .dinou/swc/), Rollup, Webpack, and Dual-Engine SSR!
 import { Link, ROUTE } from "../dinou";
 
@@ -378,7 +380,7 @@ export function ColocatedCard() {
 }
 ```
 
-### 3.9. `src/t-type-safe-contextual/[slug]/contact/_components/typecheck-assertions.tsx`
+### 3.9. `src/t-type-safe-contextual/[slug]/contact/components/typecheck-assertions.tsx`
 
 > This file is never rendered at runtime, so it adds zero DOM noise, yet `npx tsc --noEmit` in GitHub Actions compiles it strictly. If any invalid route ever stops failing TypeScript, `tsc --noEmit` will fail with `TS2578: Unused '@ts-expect-error' directive`!
 
@@ -426,6 +428,24 @@ export function _CompileTimeAssertions({ params }: PageProps) {
       <Link from="/t-type-safe-contextual" to="sub">
         Invalid
       </Link>
+      {/* @ts-expect-error escaped `_parked-legacy` route must NOT be registered in active routes */}
+      <Link href="/t-type-safe-contextual/_parked-legacy">Invalid Parked</Link>
+    </div>
+  );
+}
+```
+
+### 3.9b. `src/t-type-safe-contextual/_parked-legacy/page.tsx`
+
+> Exercises `_`-prefixed route escaping: completely ignored by Dinou's router and bundlers (0 bytes bundled, never crashes `dev` or `build`), while still receiving a fallback `.dinou/routes/t-type-safe-contextual/_parked-legacy/dinou.d.ts` shim so `tsc --noEmit` succeeds!
+
+```tsx
+import { Link, type PageProps } from "./dinou";
+
+export default function ParkedLegacyPage(_props: PageProps) {
+  return (
+    <div>
+      <Link to="..">Back</Link>
     </div>
   );
 }
@@ -515,7 +535,7 @@ test.describe("Contextual './dinou' Module (Bundlers, RSC/SSR, Relative & @slot 
       "/t-type-safe-contextual/[slug]"
     );
 
-    // 4. Verify colocated `_components/colocated-card.tsx` resolved `../dinou` in client bundle
+    // 4. Verify colocated `components/colocated-card.tsx` resolved `../dinou` in client bundle
     await expect(page.getByTestId("ctx-colocated-card")).toHaveAttribute(
       "data-colocated-route",
       "/t-type-safe-contextual/[slug]/contact"
@@ -551,7 +571,7 @@ test.describe("Contextual './dinou' Module (Bundlers, RSC/SSR, Relative & @slot 
     await page.getByTestId("sub-back-contact").click();
     await expect(page).toHaveURL(/\/t-type-safe-contextual\/acme\/contact$/);
 
-    // 10. Colocated `_components/colocated-card.tsx` <Link to="./sub"> (from "../dinou")
+    // 10. Colocated `components/colocated-card.tsx` <Link to="./sub"> (from "../dinou")
     await page.getByTestId("colocated-link-sub").click();
     await expect(page).toHaveURL(/\/t-type-safe-contextual\/acme\/contact\/sub$/);
     await page.getByTestId("sub-back-contact").click();
