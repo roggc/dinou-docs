@@ -1,9 +1,10 @@
-import { Link } from "dinou"
+import { Link, type PageProps } from "./dinou";
 
-export default function Page() {
+export default function Page({ params }: PageProps) {
+    // params.slug;
     return <>
         <div>contact</div>
         <Link to="/t-slots/[slug]/contact/sub" params={{ slug: "dd" }}>sub</Link>
-        <Link from="t-slots/[slug]/contact" to="sub">sub</Link>
+        <Link to="sub">sub</Link>
     </>
 }
