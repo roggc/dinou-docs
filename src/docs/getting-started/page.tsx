@@ -1,4 +1,4 @@
-import { Link } from "dinou";
+import { Link } from "./dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
 import {
@@ -6,32 +6,17 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/docs/components/ui/alert";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/docs/components/ui/card";
 import { Badge } from "@/docs/components/ui/badge";
 import {
-  Rocket,
-  Wrench,
   Terminal,
-  FolderPlus,
-  Package,
-  Play,
   CheckCircle2,
-  ArrowRight,
   Zap,
   Cpu,
   Boxes,
-  Layers,
   Sparkles,
-  ShieldCheck,
   Server,
   Cloud,
   Globe,
-  FileCode,
   Sliders,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
@@ -50,8 +35,8 @@ const tocItems = [
   { id: "step-gitignore", title: "3.5. Configure .gitignore", level: 3 },
   { id: "step-dev-server", title: "3.6. Start Development Server", level: 3 },
   { id: "production-runtimes", title: "4. Building for Production & Runtimes", level: 2 },
-  { id: "bundler-selection", title: "4.1. Bundler Flexibility (esbuild, Rollup, Webpack)", level: 3 },
-  { id: "production-targets", title: "4.2. First-Class Multi-Runtime Targets", level: 3 },
+  { id: "bundler-selection", title: "4.1. Bundler Selection (esbuild, Rollup, Webpack)", level: 3 },
+  { id: "production-targets", title: "4.2. Target Runtimes (Deploy Anywhere)", level: 3 },
 ];
 
 export default function Page() {
@@ -107,14 +92,13 @@ export default function Page() {
                 </h3>
                 <ul className="space-y-2.5">
                   <li>
-                    <strong>Node.js 20.6.0+ (Required):</strong> Dinou utilizes Node&apos;s modern native ES module
-                    customization hooks (<code>module.register</code>) for zero-fork server execution and Web Standard APIs
+                    <strong>Node.js 20.6.0+ (Required):</strong> Dinou runs on native ES Modules, <code>AsyncLocalStorage</code> request context isolation, and Web Standard APIs
                     (<code>Request</code>, <code>Response</code>, <code>ReadableStream</code>, <code>Headers</code>) natively
-                    supported in modern Node.js versions.
+                    supported in modern Node.js versions—powering its Single-Process Dual-Bundle Engine with zero subprocess forks.
                   </li>
                   <li>
                     <strong>Bun 1.1+ (Optional):</strong> If you plan to run on Bun or compile self-contained standalone
-                    native executables using <code>npm run build:bun:compile</code>.
+                    native executables using <code>npm run build:bun:compile</code> or <code>npm run build:node:compile</code>.
                   </li>
                   <li>
                     <strong>Deno 2.0+ (Optional):</strong> If you target Deno or cross-compile single-file binaries
@@ -193,21 +177,22 @@ npm run dev`}
                     3.1. Install Dependencies
                   </h3>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Initialize your project folder and install React 19, React DOM, and the <code>dinou</code> framework package:
+                    Initialize an ES Module project folder and install React 19 (<code>&gt;=19.3.1</code>), React DOM, and the <code>dinou</code> framework package:
                   </p>
                   <CodeBlock language="bash" containerClassName="w-full rounded-lg">
                     {`# Create and enter directory
 mkdir my-dinou-app
 cd my-dinou-app
 
-# Initialize package.json
+# Initialize package.json in native ES Module mode
 npm init -y
+npm pkg set type=module
 
-# Install React 19 and Dinou
+# Install React 19 (>=19.3.1) and Dinou
 npm install react react-dom dinou
 
-# Install TypeScript definitions for IDE intellisense
-npm install -D @types/react @types/react-dom`}
+# Install TypeScript & React type definitions for IDE IntelliSense
+npm install -D typescript @types/react @types/react-dom`}
                   </CodeBlock>
                 </div>
 
@@ -249,9 +234,9 @@ export default function Page() {
                       </div>
                       <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
                         {`// src/layout.tsx - Root document layout
-import type { ReactNode } from "react";
+import type { LayoutProps } from "./dinou";
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="en">
       <head>
@@ -265,7 +250,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }`}
                       </CodeBlock>
                       <p className="text-xs text-muted-foreground mt-1.5">
-                        The root <code>layout.tsx</code> defines the shared <code>&lt;html&gt;</code> and <code>&lt;body&gt;</code> document shell, metadata, and global providers so you don&apos;t have to repeat them on each page.
+                        The root <code>layout.tsx</code> defines the shared <code>&lt;html&gt;</code> and <code>&lt;body&gt;</code> document shell, metadata, and global providers. Route-contextual <code>&quot;./dinou&quot;</code> modules are generated automatically when you run <code>npm run dev</code>, <code>npm run build</code>, or <code>npx dinou typegen</code>.
                       </p>
                     </div>
                   </div>
@@ -296,10 +281,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 │   ├── page.tsx               # Root page component (RSC)
 │   ├── layout.tsx             # Root document layout (<html/head/body>)
 │   └── globals.css            # Styles / Tailwind CSS
-├── dinou.config.ts            # Framework configuration (optional: ppr, plugins)
-├── dinou-env.d.ts             # Ambient framework typings
-├── tsconfig.json              # TypeScript configuration
-├── package.json
+├── dinou.config.ts            # Optional config (.ts/.mjs/.js/.cjs: ppr, allowISG, storage, plugins)
+├── dinou-env.d.ts             # Ambient framework typings (assets & CSS)
+├── tsconfig.json              # TypeScript, rootDirs & path alias configuration
+├── package.json               # Includes "type": "module" & Dinou scripts
 └── .gitignore`}</code>
                       </pre>
                     </div>
@@ -322,10 +307,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                     </div>
                     <ul className="text-xs text-muted-foreground space-y-1 list-disc pl-4 leading-relaxed">
                       <li>
+                        <strong>Contextual <code>&quot;./dinou&quot;</code> Resolution:</strong> Mapping <code>&quot;rootDirs&quot;: [&quot;src&quot;, &quot;.dinou/routes&quot;]</code> lets TypeScript and IDEs resolve auto-generated route-contextual <code>&quot;./dinou&quot;</code> modules in every route folder with zero boilerplate.
+                      </li>
+                      <li>
                         <strong>Import Aliases:</strong> Dinou&apos;s build engines (esbuild, Rollup, Webpack) automatically read <code>compilerOptions.paths</code> from <code>tsconfig.json</code> to resolve clean path aliases like <code>@/*</code> into <code>src/*</code>.
                       </li>
                       <li>
-                        <strong>IDE Autocomplete:</strong> With <code>&quot;allowJs&quot;: true</code>, code editors (VS Code, Cursor) use <code>tsconfig.json</code> to provide full autocomplete, auto-imports, and path resolution across all <code>.js</code> and <code>.jsx</code> files.
+                        <strong>IDE Autocomplete:</strong> With <code>&quot;allowJs&quot;: true</code>, code editors (VS Code, Cursor, Antigravity) use <code>tsconfig.json</code> to provide full route autocomplete, auto-imports, and path resolution across <code>.js</code> and <code>.jsx</code> files.
                       </li>
                     </ul>
                   </div>
@@ -338,12 +326,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                       <CodeBlock language="json" containerClassName="w-full rounded-lg">
                         {`{
   "compilerOptions": {
+    "target": "ES2022",
+    "rootDirs": [
+      "src",
+      ".dinou/routes"
+    ],
     "paths": {
       "@/*": [
         "./src/*"
       ]
     },
     "allowJs": true,
+    "skipLibCheck": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
@@ -368,7 +362,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                       </CodeBlock>
                       <p className="mt-2 text-xs text-muted-foreground">
                         The <code>dinou/env</code> reference automatically declares ambient typings for static assets
-                        (SVGs, images, web fonts) and CSS modules without manual type boilerplate.
+                        (SVGs, images, web fonts), CSS Modules (<code>*.module.css</code>), and global stylesheet imports (<code>*.css</code>) without manual type boilerplate.
                       </p>
                     </div>
                   </div>
@@ -532,6 +526,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   "export-static:esbuild": "dinou export-static:esbuild",
   "export-static:rollup": "dinou export-static:rollup",
   "export-static:webpack": "dinou export-static:webpack",
+  "typegen": "dinou typegen",
   "eject": "dinou eject"
 }`}
                   </CodeBlock>
@@ -555,7 +550,7 @@ dist
 .env`}
                   </CodeBlock>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    <code>.dinou/</code> holds internal dev artifacts and runtime builds; <code>out/</code> contains pages generated by <code>export-static</code>; <code>dist/</code> stores compiled single-executable binaries (Deno / Bun); and <code>.wrangler/</code> stores local state when testing Cloudflare Workers.
+                    <code>.dinou/</code> holds auto-generated route types (<code>.dinou/types/</code>), contextual <code>&quot;./dinou&quot;</code> modules (<code>.dinou/routes/</code>), dev caches, and runtime builds; <code>out/</code> contains pages generated by <code>export-static</code>; <code>dist/</code> stores compiled single-executable binaries (Node / Bun / Deno); and <code>.wrangler/</code> stores local state when testing Cloudflare Workers.
                   </p>
                 </div>
 
@@ -639,7 +634,7 @@ npm run build:node:webpack    # Dedicated Webpack production build`}
                       <Server className="h-4 w-4 text-blue-500" />
                       Node.js Server
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">Production server with HTTP/2 and native streaming.</p>
+                    <p className="text-xs text-muted-foreground mb-2">Standalone <code>node:http</code> server with native Web <code>ReadableStream</code> SSR &amp; RSC streaming.</p>
                     <code className="text-xs font-mono block p-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
                       npm run build:node &amp;&amp; npm run start:node
                     </code>
@@ -659,11 +654,11 @@ npm run build:node:webpack    # Dedicated Webpack production build`}
                   <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
                     <div className="flex items-center gap-2 font-semibold text-sm text-slate-900 dark:text-slate-100 mb-1">
                       <Cpu className="h-4 w-4 text-emerald-500" />
-                      Standalone Binaries (Deno / Bun)
+                      Standalone Binaries (Node / Bun / Deno)
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">Self-contained executable binary output directly to <code>dist/</code>.</p>
+                    <p className="text-xs text-muted-foreground mb-2">Self-contained executable binaries output directly to <code>dist/</code>.</p>
                     <code className="text-xs font-mono block p-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
-                      npm run build:deno:compile # or build:bun:compile
+                      npm run build:node:compile # or build:bun:compile / build:deno:compile
                     </code>
                   </div>
 
