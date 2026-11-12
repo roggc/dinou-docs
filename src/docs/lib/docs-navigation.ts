@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import type { DinouLinkTarget } from "dinou";
 import {
   BookOpen,
   Route,
@@ -13,7 +14,6 @@ import {
   Rocket,
   ClipboardList,
   BookMarked,
-  Cpu,
   Compass,
   Atom,
   RefreshCw,
@@ -34,8 +34,8 @@ import {
 
 export interface NavItem {
   title: string;
-  href: string;
-  icon?: LucideIcon;
+  href: DinouLinkTarget;
+  icon: LucideIcon;
   badge?: string;
   external?: boolean;
 }
