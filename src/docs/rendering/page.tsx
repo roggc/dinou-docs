@@ -90,7 +90,7 @@ export default function Page() {
       />
       <link rel="canonical" href="https://dinou.dev/docs/rendering" />
 
-      <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
+      <div className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
@@ -259,11 +259,13 @@ export default async function ProfilePage() {
 
                 <Alert className="not-prose mt-4">
                   <Zap className="h-4 w-4 text-amber-500" />
-                  <AlertTitle>Bailout Triggers in Server Components</AlertTitle>
+                  <AlertTitle>Bailout Triggers on the Server</AlertTitle>
                   <AlertDescription>
-                    Automatic bailout occurs when reading <code>context.req.cookies</code>,{" "}
-                    <code>context.req.headers</code>, or <code>context.req.query</code> (URL search parameters)
-                    during server component execution. (To isolate a bailout to a single <code>&lt;Suspense&gt;</code> hole without de-optimizing the rest of the page, see{" "}
+                    Automatic bailout occurs when reading properties on <code>context.req.cookies</code>,{" "}
+                    <code>context.req.headers</code>, or <code>context.req.query</code>, calling{" "}
+                    <code>useSearchParams()</code> inside a <strong>Server Component</strong>, or mutating the response (<code>context.res.cookie()</code>,{" "}
+                    <code>clearCookie()</code>, <code>setHeader()</code>, <code>redirect()</code>) during Server Component or <code>getProps</code> execution. Calling{" "}
+                    <code>getContext()</code> alone (or reading <code>context.req.path</code> / <code>context.req.method</code>) preserves static rendering. (To isolate a bailout to a single <code>&lt;Suspense&gt;</code> hole without de-optimizing the rest of the page, see{" "}
                     <Link href="/docs/3d-segmentation#partial-prerendering" className="underline font-medium">
                       Partial Prerendering (PPR)
                     </Link>
@@ -277,59 +279,48 @@ export default async function ProfilePage() {
                     <span>What about Client Components and <code>useSearchParams()</code>?</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Client Components (<code>&quot;use client&quot;</code>) that call <code>useSearchParams()</code> <strong>do not trigger dynamic bailout</strong>. The page remains 100% static (SSG). During build time, the component is pre-rendered with an empty parameter set, and live URL parameters are synchronized in the browser upon hydration.
+                    Client Components (<code>&quot;use client&quot;</code>) that call <code>useSearchParams()</code> <strong>never trigger dynamic bailout</strong>. The route remains 100% eligible for static pre-rendering (SSG), on-demand ISG caching, background ISR regeneration, and static PPR shells.
                   </p>
 
                   <div className="border-t border-border/60 pt-3 space-y-3">
                     <div>
                       <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                        <span className="text-amber-500">⚠️</span>
-                        <span>Understanding and Preventing Hydration Mismatches</span>
+                        <span className="text-emerald-500">✅</span>
+                        <span>Zero-Boilerplate Hydration Safety</span>
                       </p>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                        If a Client Component immediately renders <code>searchParams.get(&quot;q&quot;)</code> in its initial JSX markup, the server-generated static HTML (where the query was empty at build time) will differ from the live browser DOM (e.g. <code>?q=react</code>), triggering a React hydration mismatch error.
+                        Dinou&apos;s <code>useSearchParams()</code> hook automatically prevents React hydration mismatches on cached static and PPR pages. During static HTML generation and the browser&apos;s initial hydration pass, it deterministically returns an empty <code>URLSearchParams</code> instance (matching the cached HTML), and immediately re-renders on the client with the live URL query string—no manual <code>useState</code> or <code>useEffect</code> wrapper needed:
                       </p>
                     </div>
 
-                    <div className="space-y-2">
-                      <p className="text-xs font-medium text-foreground">
-                        Recommended Fix: Deferred Synchronization with <code>useEffect</code>
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Keep the initial render deterministic (matching the static build HTML), then read and apply the live search parameters inside <code>useEffect()</code> after the component mounts in the browser:
-                      </p>
-                      <CodeBlock
-                        language="tsx"
-                        containerClassName="w-full overflow-hidden rounded-lg text-xs"
-                      >
+                    <CodeBlock
+                      language="tsx"
+                      containerClassName="w-full overflow-hidden rounded-lg text-xs"
+                    >
 {`// src/components/search-filter.tsx
 "use client";
 
 import { useSearchParams } from "dinou";
-import { useState, useEffect } from "react";
 
 export function SearchFilter() {
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState<string | null>(null);
+  const query = searchParams.get("q") ?? "";
 
-  useEffect(() => {
-    // Synchronize client-side only after mounting -> eliminates hydration mismatch
-    setQuery(searchParams.get("q") ?? "");
-  }, [searchParams]);
-
-  // Initial render matches static HTML perfectly
-  if (query === null) {
-    return <span className="text-muted-foreground">Loading filter...</span>;
+  if (!query) {
+    return <span className="text-muted-foreground">Showing all items</span>;
   }
 
-  return <span>Filter: <strong>{query}</strong></span>;
+  return (
+    <span>
+      Filter: <strong>{query}</strong>
+    </span>
+  );
 }`}
-                      </CodeBlock>
-                    </div>
+                    </CodeBlock>
 
                     <div className="bg-background/80 rounded-md p-3 border text-xs text-muted-foreground leading-relaxed">
-                      <span className="font-semibold text-foreground">Alternative (Live SSR): </span>
-                      If the initial HTML sent over the wire <em>must</em> contain search parameters (e.g. for SEO or zero-layout-shift server pre-rendering), switch the page to Live SSR by setting <code>export const revalidate: PageFunctions[&quot;revalidate&quot;] = 0;</code> in <code>page_functions.ts</code>, or read <code>context.req.query</code> inside a dynamic Server Component.
+                      <span className="font-semibold text-foreground">Alternative (Live SSR or PPR Hole): </span>
+                      If the initial server HTML sent over the wire <em>must</em> already contain the query value (e.g. for search engine crawlers or server-filtered database queries), call <code>useSearchParams()</code> (or read <code>context.req.query</code>) inside a <strong>Server Component</strong>—either on a full Live SSR route (<code>export const revalidate: PageFunctions[&quot;revalidate&quot;] = 0;</code>) or wrapped in <code>&lt;Suspense&gt;</code> with <code>export const ppr = true;</code>.
                     </div>
                   </div>
                 </div>
@@ -368,9 +359,10 @@ export function SearchFilter() {
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// src/analytics/live/page_functions.ts
+import type { PageFunctions } from "./dinou";
 
 // Escapes static generation: executes dynamic SSR on every request
-export const revalidate = 0;`}
+export const revalidate: PageFunctions["revalidate"] = 0;`}
                 </CodeBlock>
 
                 <Alert className="not-prose mt-4">
@@ -403,12 +395,13 @@ export const revalidate = 0;`}
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// src/blog/page_functions.ts
+import type { PageFunctions } from "./dinou";
 
 // Rebuilds the cached page in the background at most once every 60 seconds
-export const revalidate = 60;
+export const revalidate: PageFunctions["revalidate"] = 60;
 
 // Or as a sync/async function:
-// export function revalidate() { return 60; }`}
+// export const revalidate: PageFunctions["revalidate"] = () => 60;`}
                 </CodeBlock>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-6 min-w-0">
@@ -437,7 +430,11 @@ export const revalidate = 60;
                     <CardContent className="text-sm text-muted-foreground">
                       Values are in seconds (e.g. <code>60</code> for 1 minute,{" "}
                       <code>3600</code> for 1 hour). If <code>false</code> or
-                      omitted, the page remains static forever until purged.
+                      omitted, the page remains cached until purged on demand via{" "}
+                      <Link href="/docs/revalidation" className="underline font-medium">
+                        <code>revalidateTag</code> / <code>revalidatePath</code>
+                      </Link>
+                      .
                     </CardContent>
                   </Card>
                 </div>
@@ -470,9 +467,12 @@ export const revalidate = 60;
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// src/products/[id]/page_functions.ts
+import type { PageFunctions } from "./dinou";
 
 // Pre-render only the top 10 products at build time
-export const getStaticPaths = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+export const getStaticPaths: PageFunctions["getStaticPaths"] = [
+  "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+];
 
 // Any other ID (e.g. /products/452) will be generated on-demand
 // on its first visitor and cached permanently.`}
@@ -483,8 +483,13 @@ export const getStaticPaths = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
               <section id="isg-governance" className="mt-8 scroll-mt-20">
                 <h4>3.2. Governance APIs (<code>validateParams</code> &amp; <code>allowISG</code>)</h4>
                 <p>
-                  Dinou provides strict server-side governance exports to secure
-                  dynamic generation against abuse:
+                  Dinou provides strict server-side governance exports in{" "}
+                  <code>page_functions.ts</code> and <code>layout_functions.ts</code> to secure
+                  dynamic generation against abuse (see{" "}
+                  <Link href="/docs/page-functions#validateparams">
+                    Page &amp; Layout Functions
+                  </Link>{" "}
+                  for full details):
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose my-4 min-w-0">
@@ -497,14 +502,19 @@ export const getStaticPaths = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground space-y-2">
                       <p>
-                        Validates parameters before generation. Returning{" "}
+                        Validates dynamic parameters before generation. Returning{" "}
                         <code>false</code> halts rendering and returns 404
                         immediately.
                       </p>
-                      <CodeBlock language="typescript" hideHeader>
-{`export function validateParams(params) {
-  return /^\\d+$/.test(params.id); // Only allow numeric IDs
-}`}
+                      <CodeBlock
+                        language="typescript"
+                        containerClassName="w-full overflow-hidden rounded-lg text-xs"
+                      >
+{`import type { PageFunctions } from "./dinou";
+
+export const validateParams: PageFunctions["validateParams"] = (params) => {
+  return typeof params?.id === "string" && /^\\d+$/.test(params.id);
+};`}
                       </CodeBlock>
                     </CardContent>
                   </Card>
@@ -518,12 +528,15 @@ export const getStaticPaths = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground space-y-2">
                       <p>
-                        Disables on-demand generation. If set to <code>false</code>,
-                        any path not in <code>getStaticPaths</code> returns 404
-                        instantly.
+                        Controls on-demand generation (accepts a <code>boolean</code> or sync/async function, and can also be defaulted globally in <code>dinou.config.ts</code>). When <code>false</code>, any path omitted from <code>getStaticPaths</code> returns 404 instantly.
                       </p>
-                      <CodeBlock language="typescript" hideHeader>
-{`export const allowISG = false; // Strict SSG only`}
+                      <CodeBlock
+                        language="typescript"
+                        containerClassName="w-full overflow-hidden rounded-lg text-xs"
+                      >
+{`import type { PageFunctions } from "./dinou";
+
+export const allowISG: PageFunctions["allowISG"] = false; // Strict SSG only`}
                       </CodeBlock>
                     </CardContent>
                   </Card>
@@ -597,7 +610,7 @@ export const getStaticPaths = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
             <DocsPager />
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Sidebar TOC - Visible on Desktop */}
       <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">
