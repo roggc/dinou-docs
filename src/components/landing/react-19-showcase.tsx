@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Link } from "dinou";
+import { Link, type DinouLinkTarget } from "dinou";
 import { CodeWindow, type CodeFile } from "./code-window";
 
 type React19Tab = "actions" | "rsc";
@@ -26,7 +26,7 @@ interface TabConfig {
   codeSnippet?: string;
   files?: CodeFile[];
   benefits: string[];
-  docLink: string;
+  docLink: DinouLinkTarget;
   docLabel: string;
   statusLeft?: string;
   statusRight?: string;

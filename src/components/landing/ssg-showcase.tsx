@@ -165,7 +165,7 @@ export async function getStaticPaths() {
   return popularDocs.map((doc) => doc.slug.split("/"));
 }
 
-// 2. allowISG is true by default (set to false to lock to getStaticPaths)
+// 2. allowISG defaults to true (configurable globally in dinou.config.js or per segment)
 // export const allowISG = false;
 
 // 3. Validate params to reject invalid routes & prevent cache poisoning

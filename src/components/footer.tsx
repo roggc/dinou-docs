@@ -30,7 +30,7 @@ export default function Footer() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="sm" asChild>
-                  <a href="https://www.npmjs.com/package/dinou" target="_blank">
+                  <a href="https://www.npmjs.com/package/dinou" target="_blank" rel="noreferrer">
                     <RiNpmjsFill className="h-4 w-4" />
                     <span className="sr-only">npm</span>
                   </a>
@@ -43,7 +43,7 @@ export default function Footer() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="sm" asChild>
-                  <a href="https://github.com/roggc/dinou">
+                  <a href="https://github.com/roggc/dinou" target="_blank" rel="noreferrer">
                     <Github className="h-4 w-4" />
                     <span className="sr-only">GitHub</span>
                   </a>

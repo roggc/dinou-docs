@@ -150,7 +150,7 @@ export const authPlugin: DinouPlugin = {
     badgeColor: "border-purple-500/30 text-purple-600 dark:text-purple-400 bg-purple-500/10",
     headline: "Centralized Runtime & Compiler Control",
     description:
-      "A single type-safe configuration file controls global Partial Prerendering (PPR), React StrictMode development parity, pluggable ISR cache backends, and sequential plugin chains.",
+      "A single type-safe configuration file controls global Partial Prerendering (PPR) and ISG defaults, React StrictMode development parity, pluggable ISR cache backends, and sequential plugin chains.",
     codeFile: "dinou.config.js",
     language: "javascript",
     codeSnippet: `import { defineConfig } from "dinou";
@@ -158,8 +158,9 @@ import { redisStorage } from "./src/lib/redis-storage";
 import { authPlugin } from "./plugins/auth-guard";
 
 export default defineConfig({
-  // 1. Global Partial Prerendering
+  // 1. Global Partial Prerendering & ISG defaults (overridable per segment)
   ppr: true,
+  allowISG: true,
 
   // 2. StrictMode development enforcement for React Compiler
   reactStrictMode: true,
@@ -178,8 +179,8 @@ export default defineConfig({
       },
       {
         icon: Sparkles,
-        title: "Global PPR Toggle",
-        desc: "Enable instant static shell generation across all eligible routes by default.",
+        title: "Global PPR & ISG Defaults",
+        desc: "Set project-wide defaults for Partial Prerendering (`ppr`) and Incremental Static Generation (`allowISG`).",
       },
       {
         icon: Cpu,

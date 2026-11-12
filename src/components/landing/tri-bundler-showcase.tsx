@@ -37,7 +37,7 @@ const bundlerCards = [
     description: "Surgical code-splitting and dead-code elimination. The optimal choice for Cloudflare Workers and edge runtimes.",
     speedMetric: "0% Unused",
     speedLabel: "Bundle Stripping",
-    sampleCommand: "dinou build:rollup",
+    sampleCommand: "dinou build:node:rollup",
     idealFor: "Edge runtimes & serverless",
   },
   {
@@ -50,7 +50,7 @@ const bundlerCards = [
     description: "Full compatibility with legacy npm dependencies and seamless native React Compiler pipeline integration.",
     speedMetric: "100%",
     speedLabel: "Ecosystem Coverage",
-    sampleCommand: "dinou build:webpack",
+    sampleCommand: "dinou build:node:webpack",
     idealFor: "Enterprise & React Compiler",
   },
 ];

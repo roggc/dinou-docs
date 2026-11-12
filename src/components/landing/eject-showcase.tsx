@@ -3,14 +3,11 @@
 import { useState } from "react";
 import {
   FolderTree,
-  ShieldCheck,
   CheckCircle2,
   ArrowRight,
-  Code2,
   LockOpen,
   Copy,
   Check,
-  Server,
   Zap,
   Bot,
 } from "lucide-react";
@@ -20,29 +17,29 @@ import { Link } from "dinou";
 
 const coreEjectedModules = [
   {
-    name: "compiler/",
-    role: "Dual-Bundle AOT Compiler",
-    desc: "Pluggable build pipelines for esbuild, Rollup, and Webpack.",
+    name: "core/",
+    role: "Universal RSC & HTTP Engine",
+    desc: "Web Standards request pipeline, Flight serializer, PPR, ISR, and router.",
   },
   {
-    name: "server/",
-    role: "Universal Server Adapters",
-    desc: "Multi-runtime server loop for Cloudflare, Bun, Node, and Deno.",
+    name: "adapters/",
+    role: "Multi-Runtime Server Adapters",
+    desc: "Native entrypoints for Cloudflare Workers, Netlify, Bun, Deno, and Node.js.",
   },
   {
-    name: "client/",
-    role: "Hydration & Navigation",
-    desc: "Progressive client hydration runtime, <Link>, and router.",
+    name: "esbuild/ · rollup/ · webpack/",
+    role: "Tri-Bundler Pipelines",
+    desc: "Pre-configured Dual-Bundle client and server build pipelines.",
   },
   {
-    name: "rsc-context/",
-    role: "React Flight Wire Protocol",
-    desc: "Serializes Server Components and dispatches Server Functions.",
+    name: "node/ · bun/ · deno/ · cloudflare/",
+    role: "Runtime Builders & HMR",
+    desc: "Zero-fork dev server with WebSocket HMR and AOT target builders.",
   },
   {
-    name: "static-isr/",
-    role: "Hybrid Cache & ISR Engine",
-    desc: "Static site generation and granular layout revalidation.",
+    name: "compiled/",
+    role: "Dual-Mode ESM Vendors",
+    desc: "36 pre-bundled toolchain packages for instant cold starts (or bypass via -u).",
   },
 ];
 
@@ -108,11 +105,11 @@ export function EjectShowcase() {
                     key={mod.name}
                     className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800"
                   >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="font-mono text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400">
                         {mod.name}
                       </span>
-                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400 text-right">
                         {mod.role}
                       </span>
                     </div>

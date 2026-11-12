@@ -125,7 +125,7 @@ export function Counter() {
       {
         icon: Sparkles,
         title: "Instant Route Scanner",
-        desc: "Adding or removing files updates `.dinou/routes.d.ts` in less than 2ms.",
+        desc: "Adding or removing files updates `.dinou/types/routes.d.ts` & `./dinou` shims in < 2ms.",
       },
     ],
     stat: "2.09s",

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Check, Copy, Zap, Server, Globe, Cpu, Terminal, ArrowUpRight, Cloud, FileCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "dinou";
+import { Link, type DinouLinkTarget } from "dinou";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism/index.js";
 
@@ -41,7 +41,7 @@ interface TargetInfo {
   buildCommand: string;
   runCommand: string;
   highlights: string[];
-  docLink: string;
+  docLink: DinouLinkTarget;
   terminalOutput: string[];
   configFile?: ConfigFile;
 }
@@ -83,6 +83,8 @@ compatibility_flags = ["nodejs_compat"]
 # Serve client bundles, CSS, and static assets directly via Cloudflare CDN
 [assets]
 directory = ".dinou/dist3"
+binding = "ASSETS"
+run_worker_first = true
 
 # Optional: Bind KV namespace for persistent ISR route caching
 # [[kv_namespaces]]
@@ -223,7 +225,7 @@ directory = ".dinou/dist3"
       code: `{
   "tasks": {
     "build": "dinou build:deno",
-    "start": "deno run --unstable-kv -A dinou/adapters/deno.js",
+    "start": "dinou start:deno",
     "compile": "dinou build:deno:compile",
     "deploy": "deno deploy --project=my-app .dinou/deno/main.js"
   },

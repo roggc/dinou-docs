@@ -48,7 +48,7 @@ const tabConfigs: Record<RoutingTab, TabConfig> = {
     description:
       "Every folder with a page.tsx in src/ maps directly to a public route. Nested layout.tsx files wrap child pages without remounting during navigation, preserving client state, audio playback, and scroll positions.",
     codeFile: "src/dashboard/layout.tsx",
-    codeSnippet: `import { Link, type LayoutProps } from "dinou";
+    codeSnippet: `import { Link, type LayoutProps } from "./dinou";
 
 // Nested layout wraps all /dashboard/* child pages
 export default function DashboardLayout({ children }: LayoutProps) {
@@ -57,9 +57,9 @@ export default function DashboardLayout({ children }: LayoutProps) {
       {/* Persistent sidebar: never remounts across child route changes */}
       <aside className="w-64 border-r border-slate-800 p-4">
         <nav className="space-y-2">
-          <Link href="/dashboard">Overview</Link>
-          <Link href="/dashboard/analytics">Analytics</Link>
-          <Link href="/dashboard/settings">Settings</Link>
+          <Link to=".">Overview</Link>
+          <Link to="analytics">Analytics</Link>
+          <Link to="settings">Settings</Link>
         </nav>
       </aside>
 
@@ -81,8 +81,8 @@ export default function DashboardLayout({ children }: LayoutProps) {
       },
       {
         icon: Sparkles,
-        title: "Layout Escape Hatches",
-        desc: "Use `reset_layout` or `no_layout` flags to instantly opt out of parent layout trees.",
+        title: "Layout & Route Escape Hatches",
+        desc: "Opt out of parent layouts with `reset_layout` / `no_layout`, or park folders completely with `_folder`.",
       },
     ],
     stat: "100%",
@@ -97,13 +97,11 @@ export default function DashboardLayout({ children }: LayoutProps) {
     description:
       "Handle dynamic parameters with [id], optional parameters with [[id]], and multi-segment wildcards with [...slug] and [[...slug]]. Extracted route parameters are automatically injected and typed via PageProps.",
     codeFile: "src/shop/[category]/[id]/page.tsx",
-    codeSnippet: `import type { PageProps } from "dinou";
+    codeSnippet: `import type { PageProps } from "./dinou";
 import { db } from "@/lib/db";
 
-// Matches /shop/:category/:id with strongly typed params via PageProps
-export default async function ProductPage({
-  params,
-}: PageProps<"/shop/[category]/[id]">) {
+// Matches /shop/:category/:id with auto-inferred params via "./dinou"
+export default async function ProductPage({ params }: PageProps) {
   const { category, id } = params;
   const product = await db.products.findById(id);
 
@@ -124,7 +122,7 @@ export default async function ProductPage({
       {
         icon: Globe,
         title: "Type-Safe PageProps Injection",
-        desc: "Extracted URL parameters are automatically passed to your component and strongly typed via `PageProps<T>`.",
+        desc: "Extracted URL parameters are automatically passed and strongly typed via contextual `./dinou` or `PageProps<T>`.",
       },
       {
         icon: ShieldCheck,
@@ -148,24 +146,19 @@ export default async function ProductPage({
 // src/
 // ├── (marketing)/          <- Route group: URL is /
 // │   └── page.tsx
-// ├── (app)/                <- Route group: URL is /dashboard
-// │   └── dashboard/
-// │       ├── @modal/       <- Parallel slot: rendered in layout
-// │       │   └── page.tsx
-// │       ├── layout.tsx
-// │       └── page.tsx
+// ├── _legacy-v1/           <- Escaped folder: ignored by router & bundlers
+// │   └── page.tsx
+// └── (app)/                <- Route group: URL is /dashboard
+//     └── dashboard/
+//         ├── @modal/       <- Parallel slot: auto-typed on LayoutProps!
+//         │   └── page.tsx
+//         ├── layout.tsx
+//         └── page.tsx
 
-import type { LayoutProps } from "dinou";
+import type { LayoutProps } from "./dinou";
 
-// Extend LayoutProps to include parallel slot props
-interface DashboardLayoutProps extends LayoutProps {
-  modal: React.ReactNode;
-}
-
-export default function AppLayout({
-  children,
-  modal,
-}: DashboardLayoutProps) {
+// Parallel @modal slot prop (ReactNode) is inferred automatically!
+export default function AppLayout({ children, modal }: LayoutProps) {
   return (
     <>
       {children}

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Link } from "dinou";
+import { Link, type DinouLinkTarget } from "dinou";
 import { CodeWindow, type CodeFile } from "./code-window";
 
 type SegmentationTab = "ppr" | "vertical" | "horizontal";
@@ -28,7 +28,7 @@ interface TabConfig {
   headline: string;
   description: string;
   files: CodeFile[];
-  docHref: string;
+  docHref: DinouLinkTarget;
   docLabel: string;
   features: {
     icon: typeof Zap;
@@ -127,8 +127,8 @@ export default async function LiveUserFeed() {
       },
       {
         icon: ShieldCheck,
-        title: "Inheritable or Granular",
-        desc: "Toggle globally in dinou.config.js, inherit across layouts, or override per page.",
+        title: "Global or Per-Segment",
+        desc: "Set a project-wide default in dinou.config.js or configure ppr independently per layout and page segment.",
       },
     ],
     visualPreview: {
@@ -156,7 +156,7 @@ export default async function LiveUserFeed() {
         badge: "RSC",
         language: "tsx",
         code: `
-import { DinouCacheSlot } from "dinou";
+import { DinouCacheSlot } from "dinou/server";
 import LiveStockTicker from "./stock-ticker";
 import RefreshButton from "./refresh-button";
 
@@ -252,9 +252,13 @@ export async function getProps() {
         badge: "RSC Layout",
         language: "tsx",
         code: `
-import { Sidebar } from "@/components/sidebar";
+import type { LayoutProps } from "./dinou";
+import { Sidebar, type NavStats } from "@/components/sidebar";
 
-export default function DashboardLayout({ children, navStats }: any) {
+export default function DashboardLayout({
+  children,
+  navStats,
+}: LayoutProps<{ navStats: NavStats }>) {
   return (
     <div className="flex min-h-screen">
       <Sidebar stats={navStats} />
