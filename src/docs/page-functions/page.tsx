@@ -1,3 +1,4 @@
+import { Link } from "dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
 import { Badge } from "@/docs/components/ui/badge";
@@ -11,7 +12,6 @@ import {
   FileCode,
   FolderTree,
   Layers,
-  RefreshCw,
   Zap,
   Cpu,
   AlertCircle,
@@ -160,7 +160,7 @@ export default function Page() {
       />
       <link rel="canonical" href="https://dinou.dev/docs/page-functions" />
 
-      <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
+      <div className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
@@ -228,7 +228,8 @@ export default function Page() {
                   </CardHeader>
                   <CardContent className="text-sm space-y-2">
                     <p>
-                      Placed alongside <code>layout.tsx</code>. Supplies data
+                      Placed alongside <code>layout.tsx</code> (also supports{" "}
+                      <code>layout.functions.ts</code>). Supplies data
                       directly to the layout component and manages segment-level
                       cache strategy independently from child pages.
                     </p>
@@ -247,19 +248,23 @@ export default function Page() {
                 
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   In Dinou, every server-side configuration file implements the exact same foundational contract: <strong><code>RouteSegmentConfig</code></strong>. 
-                  This is the framework&apos;s underlying &quot;abstract&quot; interface defining all segment capabilities. For day-to-day application code, Dinou exports two concrete, role-based aliases: <strong><code>PageFunctions</code></strong> (for pages) and <strong><code>LayoutFunctions</code></strong> (for layouts):
+                  This is the framework&apos;s underlying &quot;abstract&quot; interface defining all segment capabilities. For day-to-day application code, Dinou exports two concrete, role-based aliases—<strong><code>PageFunctions</code></strong> (for pages) and <strong><code>LayoutFunctions</code></strong> (for layouts)—available both from <code>&quot;dinou&quot;</code> (with explicit route pattern strings) and from each route directory&apos;s auto-generated <code>&quot;./dinou&quot;</code> module (with <code>params</code> pre-bound automatically):
                 </p>
 
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// Exported directly from "dinou" (dinou/index.d.ts):
+{`// Exported from "dinou" (dinou/index.d.ts):
 
 /**
  * Foundational "abstract" interface governing all route segments in Dinou.
  */
-export interface RouteSegmentConfig<TParams = any, TProps = any> {
+export interface RouteSegmentConfig<
+  TParams = any,
+  TProps = any,
+  TStaticPathParams = TParams
+> {
   // Partial Prerendering (PPR) configuration
   ppr?: boolean | (() => boolean | Promise<boolean>);
 
@@ -270,7 +275,9 @@ export interface RouteSegmentConfig<TParams = any, TProps = any> {
   getCacheTags?: string[] | ((params?: TParams) => string[] | Promise<string[]>);
 
   // Path generator for SSG (constant array or sync/async function)
-  getStaticPaths?: StaticPathItem<TParams>[] | (() => StaticPathsResult<TParams>);
+  getStaticPaths?:
+    | StaticPathItem<TStaticPathParams>[]
+    | (() => StaticPathsResult<TStaticPathParams>);
 
   // Server loader providing direct props to the component
   getProps?: (params?: TParams) => TProps | Promise<TProps>;
@@ -283,27 +290,48 @@ export interface RouteSegmentConfig<TParams = any, TProps = any> {
 }
 
 /**
- * Concrete semantic alias to import and use in 'page_functions.ts'
- * Accepts either a route pattern string (e.g. "/blog/[slug]") or a params dictionary.
+ * Concrete semantic alias for 'page_functions.ts' (imported from "dinou").
+ * Accepts a route pattern string (e.g. "/blog/[slug]") or a params dictionary.
+ * (Or import PageFunctions<TProps> from "./dinou" with RouteParams pre-bound!)
  */
 export type PageFunctions<
   TRouteOrParams extends DinouRoutePattern | object = any,
   TProps = any
 > = RouteSegmentConfig<
-  [TRouteOrParams] extends [string] ? RouteParams<TRouteOrParams> : TRouteOrParams,
-  TProps
+  0 extends 1 & TRouteOrParams
+    ? any
+    : [TRouteOrParams] extends [DinouRoutePattern]
+      ? RouteParams<Extract<TRouteOrParams, DinouRoutePattern>>
+      : TRouteOrParams,
+  TProps,
+  0 extends 1 & TRouteOrParams
+    ? any
+    : [TRouteOrParams] extends [DinouRoutePattern]
+      ? StaticPathParams<Extract<TRouteOrParams, DinouRoutePattern>>
+      : ToStaticPathParams<TRouteOrParams>
 >;
 
 /**
- * Concrete semantic alias to import and use in 'layout_functions.ts'
- * Accepts either a route pattern string (e.g. "/[org]") or a params dictionary.
+ * Concrete semantic alias for 'layout_functions.ts' (imported from "dinou").
+ * Accepts any DinouLayoutPattern (including intermediate layouts without a sibling page.tsx,
+ * e.g. "/[org]" or "/workspace/[org]") or a params dictionary.
+ * (Or import LayoutFunctions<TProps> from "./dinou" with LayoutParams pre-bound!)
  */
 export type LayoutFunctions<
-  TRouteOrParams extends DinouRoutePattern | object = any,
+  TRouteOrParams extends DinouLayoutPattern | object = any,
   TProps = any
 > = RouteSegmentConfig<
-  [TRouteOrParams] extends [string] ? RouteParams<TRouteOrParams> : TRouteOrParams,
-  TProps
+  0 extends 1 & TRouteOrParams
+    ? any
+    : [TRouteOrParams] extends [DinouLayoutPattern]
+      ? LayoutParams<Extract<TRouteOrParams, DinouLayoutPattern>>
+      : TRouteOrParams,
+  TProps,
+  0 extends 1 & TRouteOrParams
+    ? any
+    : [TRouteOrParams] extends [DinouLayoutPattern]
+      ? StaticPathParams<Extract<TRouteOrParams, DinouLayoutPattern>>
+      : ToStaticPathParams<TRouteOrParams>
 >;`}
                 </CodeBlock>
 
@@ -323,7 +351,7 @@ export type LayoutFunctions<
                           src/.../page_functions.ts
                         </TableCell>
                         <TableCell className="font-mono text-xs font-bold text-foreground">
-                          PageFunctions
+                          PageFunctions <span className="font-normal text-muted-foreground">(<code>&quot;./dinou&quot;</code> or <code>&quot;dinou&quot;</code>)</span>
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
                           Types data loading (<code>getProps</code>), static paths, and cache for the <strong>page</strong>.
@@ -334,7 +362,7 @@ export type LayoutFunctions<
                           src/.../layout_functions.ts
                         </TableCell>
                         <TableCell className="font-mono text-xs font-bold text-foreground">
-                          LayoutFunctions
+                          LayoutFunctions <span className="font-normal text-muted-foreground">(<code>&quot;./dinou&quot;</code> or <code>&quot;dinou&quot;</code>)</span>
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
                           Types data loading (<code>getProps</code>) and independent cache for the <strong>layout</strong> shell.
@@ -345,7 +373,7 @@ export type LayoutFunctions<
                           Plugins &amp; Shared Utils
                         </TableCell>
                         <TableCell className="font-mono text-xs font-bold text-foreground">
-                          RouteSegmentConfig
+                          RouteSegmentConfig <span className="font-normal text-muted-foreground">(<code>&quot;dinou&quot;</code>)</span>
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
                           Base &quot;abstract&quot; interface for generic utilities that process arbitrary route segments.
@@ -457,15 +485,16 @@ export type LayoutFunctions<
                         label: "page_functions.ts",
                         language: "typescript",
                         code: `// src/blog/[slug]/page_functions.ts
-import type { PageFunctions } from "dinou";
+import type { PageFunctions } from "./dinou";
 import { db, type Post } from "@/lib/db";
 
 export interface BlogPostData {
   post: Post;
 }
 
-// Best Practice: Type getProps using PageFunctions for strict parameters & return contract
-export const getProps: PageFunctions<"/blog/[slug]", BlogPostData>["getProps"] = async (params) => {
+// "./dinou" pre-binds { slug: string } automatically for this directory
+// (or import from "dinou" and write PageFunctions<"/blog/[slug]", BlogPostData>["getProps"])
+export const getProps: PageFunctions<BlogPostData>["getProps"] = async (params) => {
   const post = await db.getPost(params?.slug);
   // Directly returns BlogPostData for page.tsx
   return { post };
@@ -476,13 +505,12 @@ export const getProps: PageFunctions<"/blog/[slug]", BlogPostData>["getProps"] =
                         label: "page.tsx",
                         language: "tsx",
                         code: `// src/blog/[slug]/page.tsx
-import type { PageProps } from "dinou";
+import type { PageProps } from "./dinou";
 import type { BlogPostData } from "./page_functions";
 
-// Best Practice: Extend PageProps with the server-returned BlogPostData
-interface BlogPostProps extends PageProps<"/blog/[slug]">, BlogPostData {}
-
-export default function BlogPost({ params, post }: BlogPostProps) {
+// PageProps<BlogPostData> merges pre-bound { params: { slug: string } } with BlogPostData
+// (or import PageProps from "dinou" and write PageProps<"/blog/[slug]", BlogPostData>)
+export default function BlogPost({ params, post }: PageProps<BlogPostData>) {
   return (
     <article>
       <span className="text-xs text-muted-foreground">Route: /blog/{params.slug}</span>
@@ -507,15 +535,16 @@ export default function BlogPost({ params, post }: BlogPostProps) {
                         label: "layout_functions.ts",
                         language: "typescript",
                         code: `// src/blog/layout_functions.ts
-import type { LayoutFunctions } from "dinou";
+import type { LayoutFunctions } from "./dinou";
 import { db } from "@/lib/db";
 
 export interface BlogLayoutData {
   categories: string[];
 }
 
-// Best Practice: Type layout server functions with LayoutFunctions
-export const getProps: LayoutFunctions<any, BlogLayoutData>["getProps"] = async () => {
+// "./dinou" pre-binds layout params automatically
+// (or import from "dinou" and write LayoutFunctions<"/blog", BlogLayoutData>["getProps"])
+export const getProps: LayoutFunctions<BlogLayoutData>["getProps"] = async () => {
   const categories = await db.getCategories();
   // Directly returns props for layout.tsx
   return { categories };
@@ -526,16 +555,15 @@ export const getProps: LayoutFunctions<any, BlogLayoutData>["getProps"] = async 
                         label: "layout.tsx",
                         language: "tsx",
                         code: `// src/blog/layout.tsx
-import type { LayoutProps } from "dinou";
+import type { LayoutProps } from "./dinou";
 import type { BlogLayoutData } from "./layout_functions";
 
-// Best Practice: Extend LayoutProps for automatic typing of children and params
-interface BlogLayoutProps extends LayoutProps, BlogLayoutData {}
-
+// LayoutProps<BlogLayoutData> types children, params, @slots, and BlogLayoutData
+// (or import LayoutProps from "dinou" and write LayoutProps<"/blog", BlogLayoutData>)
 export default function BlogLayout({
   children,
   categories,
-}: BlogLayoutProps) {
+}: LayoutProps<BlogLayoutData>) {
   return (
     <div className="blog-shell">
       <BlogSidebar categories={categories} />
@@ -710,15 +738,13 @@ export const getProps: PageFunctions<"/blog/[slug]", BlogPostData>["getProps"] =
                         language: "tsx",
                         code: `// src/blog/[slug]/page.tsx
 import { Suspense } from "react";
-import type { PageProps } from "dinou";
+import type { PageProps } from "./dinou";
 import type { BlogPostData } from "./page_functions";
 import { UserSession } from "./user-session";
 import { RelatedPosts } from "./related-posts";
 import { SearchFilter } from "./search-filter";
 
-interface BlogPostProps extends PageProps<"/blog/[slug]">, BlogPostData {}
-
-export default function BlogPostPage({ params, post }: BlogPostProps) {
+export default function BlogPostPage({ params, post }: PageProps<BlogPostData>) {
   return (
     <article className="post-container">
       {/* 1. Instant static shell: delivered immediately from cache (0ms TTFB) */}
@@ -870,7 +896,7 @@ export function SearchFilter() {
                 <strong>cached statically for all subsequent visitors</strong>{" "}
                 (Incremental Static Generation / ISG), unless disabled via{" "}
                 <code>allowISG: false</code>—either per segment or globally in{" "}
-                <code>dinou.config.js</code>—which strictly restricts that
+                <code>dinou.config.ts</code>—which strictly restricts that
                 segment to its pre-rendered list and returns <code>404</code>{" "}
                 for any other path.
               </p>
@@ -1172,7 +1198,7 @@ export const getStaticPaths: PageFunctions<"/docs/[[...slug]]">["getStaticPaths"
                       <strong>What to return in <code>getStaticPaths</code>:</strong> To pre-render the root page without any segments (e.g. <code>/docs</code>), return an empty array <code>[]</code> (or <code>undefined</code>). <em>Never</em> return <code>[undefined]</code> or <code>[[undefined]]</code>.
                     </div>
                     <div>
-                      <strong>What <code>page.tsx</code> receives:</strong> In Dinou, <code>params.slug</code> is <strong>guaranteed to always be an array</strong> (<code>string[]</code>). For the root page, it receives an empty array <code>[]</code> (length 0). It is <strong>never</strong> <code>undefined</code>, <strong>never</strong> <code>[undefined]</code>, and <strong>never</strong> a bare string. You can safely call <code>params.slug.join(&quot;/&quot;)</code> or <code>params.slug.length</code> without defensive <code>Array.isArray()</code> checks.
+                      <strong>What <code>page.tsx</code> receives:</strong> In Dinou, <code>params.slug</code> is <strong>guaranteed to always be an array</strong> (<code>string[]</code>) at both runtime and compile time (<code>PageProps</code>, <code>LayoutProps</code>, and <code>getProps</code>)—while remaining optional when constructing links (<code>&lt;Link href=&quot;/docs/[[...slug]]&quot; /&gt;</code>) or object entries in <code>getStaticPaths</code>. For the root page, it receives an empty array <code>[]</code> (length 0). It is <strong>never</strong> <code>undefined</code>, <strong>never</strong> <code>[undefined]</code>, and <strong>never</strong> a bare string. You can safely call <code>params.slug.join(&quot;/&quot;)</code> or <code>params.slug.length</code> directly under TypeScript <code>strict: true</code> without defensive checks.
                     </div>
                   </AlertDescription>
                 </Alert>
@@ -1741,7 +1767,7 @@ export const validateParams: PageFunctions<"/[org]/projects/[project]/tasks/[tas
                 on-demand on the first incoming user request. It is supported in
                 both <code>page_functions.ts</code> and{" "}
                 <code>layout_functions.ts</code>, as well as globally in{" "}
-                <code>dinou.config.js</code>.
+                <code>dinou.config.ts</code>.
               </p>
 
               <div className="border rounded-lg p-4 bg-card not-prose my-4 space-y-3">
@@ -1755,12 +1781,12 @@ export const validateParams: PageFunctions<"/[org]/projects/[project]/tasks/[tas
                 <ul className="text-sm text-muted-foreground space-y-1.5 list-disc pl-4">
                   <li>
                     <strong>Default (<code>true</code>):</strong> Unless overridden
-                    in the segment or in <code>dinou.config.js</code>, any valid
+                    in the segment or in <code>dinou.config.ts</code>, any valid
                     dynamic path not pre-generated at build time is generated
                     on-demand and cached statically (ISG).
                   </li>
                   <li>
-                    <strong>Global Strict SSG (<code>dinou.config.js</code>):</strong>{" "}
+                    <strong>Global Strict SSG (<code>dinou.config.ts</code>):</strong>{" "}
                     Setting <code>allowISG: false</code> inside{" "}
                     <code>defineConfig(&#123; allowISG: false &#125;)</code>{" "}
                     switches the entire project to strict SSG-only mode by default,
@@ -1786,7 +1812,7 @@ export const validateParams: PageFunctions<"/[org]/projects/[project]/tasks/[tas
                     <TableHeader>
                       <TableRow className="bg-muted/40">
                         <TableHead className="text-xs font-semibold">
-                          <code>dinou.config.js</code> <code>allowISG</code>
+                          <code>dinou.config.ts</code> <code>allowISG</code>
                         </TableHead>
                         <TableHead className="text-xs font-semibold">
                           Segment <code>allowISG</code> (<code>page_functions</code> / <code>layout_functions</code>)
@@ -1872,7 +1898,7 @@ export const allowISG: PageFunctions["allowISG"] = false;`,
                       id: "global-default-opt-in",
                       label: "2. Global Default + Opt-In",
                       language: "typescript",
-                      code: `// 1. dinou.config.js — Disable on-demand ISG project-wide by default
+                      code: `// 1. dinou.config.ts — Disable on-demand ISG project-wide by default
 import { defineConfig } from "dinou";
 
 export default defineConfig({
@@ -2212,12 +2238,12 @@ export const revalidate: PageFunctions["revalidate"] = 0;
                 parameters accumulated up to that segment), allowing individual
                 pages or layouts to be surgically purged and regenerated
                 on-demand using{" "}
-                <a
+                <Link
                   href="/docs/revalidation#revalidatetag"
                   className="text-primary font-medium underline underline-offset-4 hover:opacity-80"
                 >
                   <code>revalidateTag(tag)</code> (On-Demand Revalidation)
-                </a>
+                </Link>
                 .
               </p>
 
@@ -2299,7 +2325,7 @@ export const getCacheTags: PageFunctions<"/products/[id]">["getCacheTags"] = asy
                 dynamic server-side rendering over a single HTTP response. It
                 can be configured per segment in <code>page_functions.ts</code>{" "}
                 and <code>layout_functions.ts</code>, or globally in{" "}
-                <code>dinou.config.js</code>.
+                <code>dinou.config.ts</code>.
               </p>
 
               <div className="border rounded-lg p-5 bg-card not-prose my-6 space-y-3">
@@ -2324,7 +2350,7 @@ export const getCacheTags: PageFunctions<"/products/[id]">["getCacheTags"] = asy
                       2. Parallel Suspense Streaming
                     </span>
                     <p className="text-muted-foreground leading-relaxed">
-                      Inside <code>&lt;Suspense&gt;</code>, <code>async</code> Server Components, Server Components (sync or <code>async</code>) reading <code>cookies</code>, <code>headers</code>, <code>query</code>, or <code>useSearchParams()</code>, and Client Components receiving un-awaited <code>Promise</code> props stream concurrently at request time, replacing each fallback skeleton in-place as data resolves.
+                      Inside <code>&lt;Suspense&gt;</code>, <code>async</code> Server Components, Server Components (sync or <code>async</code>) reading <code>cookies</code>, <code>headers</code>, <code>query</code>, or <code>useSearchParams()</code>, and Client Components receiving un-awaited <code>Promise</code> props stream concurrently at request time, replacing each fallback skeleton in-place as data resolves. (To resolve a build-time <code>async</code> Server Component directly into the Static Shell instead of opening a dynamic hole, call <code>noDynamic()</code> from <code>&quot;dinou&quot;</code> synchronously before its first <code>await</code>.)
                     </p>
                   </div>
                 </div>
@@ -2347,10 +2373,10 @@ export const getCacheTags: PageFunctions<"/products/[id]">["getCacheTags"] = asy
                     <code>layout</code> and <code>page</code> defaults to{" "}
                     <code>ppr = false</code> unless explicitly enabled in its
                     own configuration file or globally in{" "}
-                    <code>dinou.config.js</code>.
+                    <code>dinou.config.ts</code>.
                   </li>
                   <li>
-                    <strong>Global Opt-In (<code>dinou.config.js</code>):</strong>{" "}
+                    <strong>Global Opt-In (<code>dinou.config.ts</code>):</strong>{" "}
                     Setting <code>defineConfig(&#123; ppr: true &#125;)</code>{" "}
                     enables PPR across all layouts and pages by default, while
                     allowing individual segments to opt out with{" "}
@@ -2362,7 +2388,7 @@ export const getCacheTags: PageFunctions<"/products/[id]">["getCacheTags"] = asy
                     <code>page</code>) resolves <code>ppr</code> strictly from
                     its own <code>layout_functions.ts</code> or{" "}
                     <code>page_functions.ts</code>, falling back directly to{" "}
-                    <code>dinou.config.js</code>. Enabling <code>ppr = true</code>{" "}
+                    <code>dinou.config.ts</code>. Enabling <code>ppr = true</code>{" "}
                     on a parent layout never cascades automatically to child
                     layouts or pages.
                   </li>
@@ -2378,7 +2404,7 @@ export const getCacheTags: PageFunctions<"/products/[id]">["getCacheTags"] = asy
                     <TableHeader>
                       <TableRow className="bg-muted/40">
                         <TableHead className="text-xs font-semibold">
-                          <code>dinou.config.js</code> <code>ppr</code>
+                          <code>dinou.config.ts</code> <code>ppr</code>
                         </TableHead>
                         <TableHead className="text-xs font-semibold">
                           Segment <code>ppr</code> (<code>page_functions</code> / <code>layout_functions</code>)
@@ -2466,7 +2492,7 @@ export const ppr: PageFunctions["ppr"] = true;
                       id: "global-ppr-opt-out",
                       label: "2. Global Default + Opt-Out",
                       language: "typescript",
-                      code: `// 1. dinou.config.js — Enable PPR globally across all layouts and pages
+                      code: `// 1. dinou.config.ts — Enable PPR globally across all layouts and pages
 import { defineConfig } from "dinou";
 
 export default defineConfig({
@@ -2492,7 +2518,7 @@ export const ppr: LayoutFunctions["ppr"] = true;
 // 2. Child Page: src/dashboard/page_functions.ts
 import type { PageFunctions } from "dinou";
 
-// If dinou.config.js omits ppr, this page would default to ppr = false
+// If dinou.config.ts omits ppr, this page would default to ppr = false
 // unless it explicitly opts in as well:
 export const ppr: PageFunctions["ppr"] = true;`,
                     },
@@ -2674,13 +2700,15 @@ export const ppr: PageFunctions["ppr"] = true;`,
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// src/blog/[slug]/page_functions.ts
-import type { PageFunctions } from "dinou";
+import type { PageFunctions } from "./dinou";
 
 interface BlogProps {
   post: { title: string; content: string };
 }
 
-const pageConfig: PageFunctions<"/blog/[slug]", BlogProps> = {
+// "./dinou" pre-binds { slug: string } automatically
+// (or import PageFunctions from "dinou" and write PageFunctions<"/blog/[slug]", BlogProps>)
+const pageConfig: PageFunctions<BlogProps> = {
   ppr: true,
   revalidate: 60,
   allowISG: true,
@@ -2688,7 +2716,7 @@ const pageConfig: PageFunctions<"/blog/[slug]", BlogProps> = {
   validateParams: (params) => Boolean(params?.slug),
   getCacheTags: (params) => ["blog", \`post-\${params?.slug}\`],
   getProps: async (params) => {
-    const post = await fetchPost(params.slug);
+    const post = await fetchPost(params?.slug ?? "");
     return { post };
   },
 };
@@ -2753,21 +2781,24 @@ export default pageConfig;`}
                           id: "wrapper",
                           label: "route-helpers.ts",
                           language: "typescript",
-                          code: `// src/utils/route-helpers.ts
-import type { PageFunctions } from "dinou";
+                          code: `// src/utils/route-helpers.ts (shared helper: import from "dinou")
+import type { DinouRoutePattern, PageFunctions } from "dinou";
 
 // Reusable higher-order wrapper with optional default generics
-export function withProtectedCache<TParams = any, TProps = any>(
-  config: PageFunctions<TParams, TProps>
-): PageFunctions<TParams, TProps> {
+export function withProtectedCache<
+  TRouteOrParams extends DinouRoutePattern | object = any,
+  TProps = any
+>(
+  config: PageFunctions<TRouteOrParams, TProps>
+): PageFunctions<TRouteOrParams, TProps> {
   return {
     ...config,
     revalidate: 120,
-    getCacheTags: (params) => [
+    getCacheTags: async (params) => [
       "tenant-global",
       ...(typeof config.getCacheTags === "function"
-        ? config.getCacheTags(params)
-        : config.getCacheTags || []),
+        ? await config.getCacheTags(params)
+        : config.getCacheTags ?? []),
     ],
   };
 }`,
@@ -2852,14 +2883,46 @@ export const revalidate = 0;`}
                   8.3. Flexible Generics Typing
                 </h4>
                 <p className="mt-2 text-muted-foreground leading-relaxed break-words [overflow-wrap:anywhere]">
-                  The type definition is <code className="break-all sm:break-normal">PageFunctions&lt;TRouteOrParams = any, TProps = any&gt;</code>.
-                  Both type arguments are completely optional, adapting smoothly to your route&apos;s requirements:
+                  Inside a route directory, importing <code>PageFunctions&lt;TProps&gt;</code> from{" "}
+                  <code>&quot;./dinou&quot;</code> pre-binds that folder&apos;s <code>RouteParams</code> automatically.
+                  When importing from <code>&quot;dinou&quot;</code>, the signature is{" "}
+                  <code className="break-all sm:break-normal">PageFunctions&lt;TRouteOrParams = any, TProps = any&gt;</code>—and
+                  all type arguments remain optional:
                 </p>
 
                 <div className="flex flex-col gap-4 mt-6 w-full min-w-0">
+                  <div className="border rounded-lg p-4 bg-card w-full min-w-0 overflow-hidden border-emerald-500/30">
+                    <p className="font-semibold text-sm mb-1 break-words">
+                      1. Contextual Zero-Boilerplate (Recommended in Route Files): <code>import type &#123; PageFunctions &#125; from &quot;./dinou&quot;</code>
+                    </p>
+                    <p className="text-xs text-muted-foreground mb-3 break-words">
+                      Pre-binds the current route directory&apos;s parameters automatically without repeating route string patterns:
+                    </p>
+                    <div className="w-full min-w-0 overflow-hidden">
+                      <CodeBlock language="typescript" containerClassName="w-full min-w-0 overflow-hidden">
+{`// src/shop/[id]/page_functions.ts
+import type { PageFunctions } from "./dinou";
+
+interface ShopProps {
+  item: { id: string; name: string; price: number };
+}
+
+// RouteParams ({ id: string }) is pre-bound automatically!
+const pageConfig: PageFunctions<ShopProps> = {
+  getProps: async (params) => {
+    const item = await fetchItem(params?.id ?? "");
+    return { item }; // Validated strictly against ShopProps
+  },
+};
+
+export default pageConfig;`}
+                      </CodeBlock>
+                    </div>
+                  </div>
+
                   <div className="border rounded-lg p-4 bg-card w-full min-w-0 overflow-hidden">
                     <p className="font-semibold text-sm mb-1 break-words">
-                      1. Zero Generics: <code>PageFunctions</code>
+                      2. Zero Generics: <code>PageFunctions</code>
                     </p>
                     <p className="text-xs text-muted-foreground mb-3 break-words">
                       When the route only defines segment-level directives without dynamic parameter validation or <code>getProps</code>:
@@ -2881,10 +2944,10 @@ export default pageConfig;`}
 
                   <div className="border rounded-lg p-4 bg-card w-full min-w-0 overflow-hidden">
                     <p className="font-semibold text-sm mb-1 break-words">
-                      2. Route Pattern Only: <code className="break-all sm:break-normal">PageFunctions&lt;TRoute&gt;</code>
+                      3. Explicit Route Pattern Only: <code className="break-all sm:break-normal">PageFunctions&lt;TRoute&gt;</code>
                     </p>
                     <p className="text-xs text-muted-foreground mb-3 break-words">
-                      When you have dynamic parameters used in <code>validateParams</code>, <code>getCacheTags</code>, or <code>getStaticPaths</code>, but data fetching is handled directly inside the <code>page.tsx</code> Server Component:
+                      When importing from <code>&quot;dinou&quot;</code> with dynamic parameters used in <code>validateParams</code>, <code>getCacheTags</code>, or <code>getStaticPaths</code>, while data fetching lives directly inside the <code>page.tsx</code> Server Component:
                     </p>
                     <div className="w-full min-w-0 overflow-hidden">
                       <CodeBlock language="typescript" containerClassName="w-full min-w-0 overflow-hidden">
@@ -2893,8 +2956,8 @@ export default pageConfig;`}
 // Route string infers { section: string; slug: string }
 const pageConfig: PageFunctions<"/docs/[section]/[slug]"> = {
   revalidate: 3600,
-  validateParams: (params) => params.section === "guides",
-  getCacheTags: (params) => ["docs", params.section],
+  validateParams: (params) => params?.section === "guides",
+  getCacheTags: (params) => ["docs", \`section-\${params?.section}\`],
   getStaticPaths: [
     { section: "guides", slug: "get-started" },
     { section: "guides", slug: "installation" },
@@ -2908,10 +2971,10 @@ export default pageConfig;`}
 
                   <div className="border rounded-lg p-4 bg-card w-full min-w-0 overflow-hidden">
                     <p className="font-semibold text-sm mb-1 break-words">
-                      3. Route &amp; Props Generics: <code className="break-all sm:break-normal">PageFunctions&lt;TRoute, TProps&gt;</code>
+                      4. Explicit Route &amp; Props Generics: <code className="break-all sm:break-normal">PageFunctions&lt;TRoute, TProps&gt;</code>
                     </p>
                     <p className="text-xs text-muted-foreground mb-3 break-words">
-                      When implementing <code>getProps</code> and TypeScript must validate both parameters and returned props:
+                      When importing from <code>&quot;dinou&quot;</code> and validating both explicit route parameters and returned props:
                     </p>
                     <div className="w-full min-w-0 overflow-hidden">
                       <CodeBlock language="typescript" containerClassName="w-full min-w-0 overflow-hidden">
@@ -2923,7 +2986,7 @@ interface ShopProps {
 
 const pageConfig: PageFunctions<"/shop/[id]", ShopProps> = {
   getProps: async (params) => {
-    const item = await fetchItem(params.id);
+    const item = await fetchItem(params?.id ?? "");
     return { item }; // Strictly validated against ShopProps
   },
 };
@@ -2942,7 +3005,7 @@ export default pageConfig;`}
                 </h4>
                 <p className="mt-2 text-muted-foreground leading-relaxed">
                   All features, type inference rules, composition patterns, and precedence behaviors apply
-                  identically to layouts using <code>LayoutFunctions</code> and <code>export default layoutConfig</code>:
+                  identically to layouts using <code>LayoutFunctions</code> (including intermediate layouts without a sibling <code>page.tsx</code>) and <code>export default layoutConfig</code>:
                 </p>
 
                 <div className="mt-4">
@@ -2951,20 +3014,22 @@ export default pageConfig;`}
                     containerClassName="w-full overflow-hidden rounded-lg"
                   >
 {`// src/workspace/[org]/layout_functions.ts
-import type { LayoutFunctions } from "dinou";
+import type { LayoutFunctions } from "./dinou";
 import { db } from "@/lib/db";
 
 interface WorkspaceLayoutProps {
   workspace: { name: string; plan: string };
 }
 
-const layoutConfig: LayoutFunctions<"/workspace/[org]", WorkspaceLayoutProps> = {
+// "./dinou" pre-binds { org: string } automatically for this layout directory
+// (or import LayoutFunctions from "dinou" and write LayoutFunctions<"/workspace/[org]", WorkspaceLayoutProps>)
+const layoutConfig: LayoutFunctions<WorkspaceLayoutProps> = {
   ppr: true,        // Enables PPR for this layout shell (without cascading to child pages)
   revalidate: 3600, // Cache layout static shell independently for 1 hour
   validateParams: (params) => Boolean(params?.org && /^[a-z0-9-]+$/.test(params.org)),
   getCacheTags: (params) => ["workspaces", \`workspace-\${params?.org}\`],
   getProps: async (params) => {
-    const workspace = await db.workspaces.findBySlug(params.org);
+    const workspace = await db.workspaces.findBySlug(params?.org ?? "");
     return { workspace };
   },
 };
@@ -2986,7 +3051,7 @@ export default layoutConfig;`}
                 </h3>
               </div>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                A complete, end-to-end example demonstrating how page and layout configurations seamlessly connect server lifecycles with their corresponding React components with full type safety:
+                A complete, end-to-end example demonstrating how page and layout configurations seamlessly connect server lifecycles with their corresponding React components using zero-boilerplate contextual types from <code>&quot;./dinou&quot;</code>:
               </p>
 
               <div className="mt-6">
@@ -2997,7 +3062,7 @@ export default layoutConfig;`}
                       label: "page_functions.ts",
                       language: "typescript",
                       code: `// src/blog/[slug]/page_functions.ts
-import type { PageFunctions } from "dinou";
+import type { PageFunctions } from "./dinou";
 import { db } from "@/lib/db";
 
 // 1. Define page props types
@@ -3014,7 +3079,8 @@ export interface BlogPageProps {
 }
 
 // 2. Consolidated, strongly-typed page configuration
-const pageConfig: PageFunctions<"/blog/[slug]", BlogPageProps> = {
+// ("./dinou" pre-binds { slug: string } automatically)
+const pageConfig: PageFunctions<BlogPageProps> = {
   // Caching Strategy & PPR configuration
   revalidate: 60, // ISR 60s
   ppr: true,      // PPR: Static shell + Suspense streaming
@@ -3037,7 +3103,7 @@ const pageConfig: PageFunctions<"/blog/[slug]", BlogPageProps> = {
 
   // Props loader: loads article data for the 0ms static shell
   getProps: async (params) => {
-    // params?.slug is automatically inferred as string from "/blog/[slug]"
+    // params?.slug is automatically inferred as string | undefined
     const post = await db.posts.findUnique({ where: { slug: params?.slug } });
     if (!post) throw new Error("Post not found");
 
@@ -3054,14 +3120,12 @@ export default pageConfig;`,
                       language: "tsx",
                       code: `// src/blog/[slug]/page.tsx
 import { Suspense } from "react";
-import type { PageProps } from "dinou";
+import type { PageProps } from "./dinou";
 import type { BlogPageProps } from "./page_functions";
 import { RealtimeViews, ViewsSkeleton } from "./components";
 
-// Extend PageProps to receive both route params and loader data with full type safety
-interface BlogPostPageProps extends PageProps<"/blog/[slug]">, BlogPageProps {}
-
-export default function BlogPostPage({ params, post }: BlogPostPageProps) {
+// PageProps<BlogPageProps> combines pre-bound { params: { slug: string } } with BlogPageProps
+export default function BlogPostPage({ params, post }: PageProps<BlogPageProps>) {
   return (
     <article className="max-w-2xl mx-auto py-8">
       {/* 1. Static shell (pre-rendered at build time, delivered with 0ms TTFB) */}
@@ -3085,7 +3149,7 @@ export default function BlogPostPage({ params, post }: BlogPostPageProps) {
                       label: "layout_functions.ts",
                       language: "typescript",
                       code: `// src/blog/layout_functions.ts
-import type { LayoutFunctions } from "dinou";
+import type { LayoutFunctions } from "./dinou";
 import { db } from "@/lib/db";
 
 // 1. Define layout data contract
@@ -3101,7 +3165,7 @@ export interface BlogLayoutData {
 }
 
 // 2. Consolidated, strongly-typed layout configuration
-const layoutConfig: LayoutFunctions<"/blog", BlogLayoutData> = {
+const layoutConfig: LayoutFunctions<BlogLayoutData> = {
   // Segment-level caching strategy for the layout shell
   revalidate: 300, // Layout revalidates every 5 mins
   ppr: true,
@@ -3126,17 +3190,15 @@ export default layoutConfig;`,
                       label: "layout.tsx",
                       language: "tsx",
                       code: `// src/blog/layout.tsx
-import type { LayoutProps } from "dinou";
+import type { LayoutProps } from "./dinou";
 import type { BlogLayoutData } from "./layout_functions";
 
-// Extend LayoutProps to receive children, segment params, and layout loader data
-interface BlogLayoutComponentProps extends LayoutProps<"/blog">, BlogLayoutData {}
-
+// LayoutProps<BlogLayoutData> injects children, params, @slots, and BlogLayoutData
 export default function BlogLayout({
   children,
   categories,
   featuredSlug,
-}: BlogLayoutComponentProps) {
+}: LayoutProps<BlogLayoutData>) {
   return (
     <div className="blog-container">
       <aside className="blog-sidebar">
@@ -3163,7 +3225,7 @@ export default function BlogLayout({
             <DocsPager />
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Sidebar TOC - Hidden on Mobile */}
       <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">

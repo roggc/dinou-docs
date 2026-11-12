@@ -638,9 +638,9 @@ export default function ProjectPage({
                     </tr>
                     <tr>
                       <td className="p-3.5 font-bold font-sans text-foreground">Optional Catch-All <code>[[...opt]]</code></td>
-                      <td className="p-3.5 text-indigo-600 dark:text-indigo-400">string[] | undefined</td>
+                      <td className="p-3.5 text-emerald-600 dark:text-emerald-400">string[] <span className="text-[11px] font-sans text-muted-foreground">(<code>[]</code> on base; optional in <code>&lt;Link params&gt;</code>)</span></td>
                       <td className="p-3.5 text-blue-600 dark:text-blue-400">src/shop/[[...opt]]/page.tsx</td>
-                      <td className="p-3.5">&#123; opt?: string[] &#125;</td>
+                      <td className="p-3.5">&#123; opt: string[] &#125;</td>
                     </tr>
                     <tr>
                       <td className="p-3.5 font-bold font-sans text-foreground">Multiple Dynamic Segments</td>
