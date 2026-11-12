@@ -1,4 +1,4 @@
-import { Link } from "dinou";
+import { Link } from "./dinou";
 import { DocsPager } from "@/docs/components/docs-pager";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { Badge } from "@/docs/components/ui/badge";
@@ -44,6 +44,7 @@ const tocItems = [
   { id: "static-dynamic", title: "2.1. Static & Dynamic Segments", level: 3 },
   { id: "catch-all", title: "2.2. Catch-All & Optional Catch-All", level: 3 },
   { id: "no-gap-rule", title: "2.3. The Strict No-Gap Rule", level: 3 },
+  { id: "route-precedence", title: "2.4. Precedence & Branch Backtracking", level: 3 },
   { id: "route-props", title: "3. Route Parameters & Validation", level: 2 },
   { id: "params-injection", title: "3.1. Dynamic Params Prop Injection", level: 3 },
   { id: "validate-params", title: "3.2. Route Validation (validateParams)", level: 3 },
@@ -104,7 +105,7 @@ export default function Page() {
                     Looking for Type-Safe Routing?
                   </h4>
                   <p className="text-xs text-muted-foreground">
-                    Dinou introduces zero-runtime type safety with auto-generated route definitions, IDE autocomplete, and typed <code>PageProps</code> &amp; <code>&lt;Link&gt;</code>.
+                    Dinou provides zero-boilerplate contextual <code>&quot;./dinou&quot;</code> modules with auto-inferred <code>PageProps</code>, <code>LayoutProps</code> (including <code>@slots</code>), <code>NotFoundProps</code>, and compile-time validated <code>&lt;Link&gt;</code> navigation.
                   </p>
                 </div>
               </div>
@@ -338,6 +339,26 @@ export default function Page() {
                   </Card>
                 </div>
               </div>
+
+              <div id="route-precedence" className="scroll-mt-20 mt-8 space-y-3">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Compass className="h-5 w-5 text-blue-500" />
+                  2.4. Precedence &amp; Deterministic Branch Backtracking
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  When multiple sibling folders could match a URL segment, Dinou evaluates candidates in a strict, deterministic specificity order:
+                </p>
+                <div className="not-prose p-3.5 rounded-xl border border-border bg-muted/40 font-mono text-xs sm:text-sm text-center text-slate-800 dark:text-slate-200">
+                  <span className="font-bold text-blue-600 dark:text-blue-400">Static</span> &gt;{" "}
+                  <span className="font-bold text-indigo-600 dark:text-indigo-400">[param]</span> &gt;{" "}
+                  <span className="font-bold text-cyan-600 dark:text-cyan-400">[[param]]</span> &gt;{" "}
+                  <span className="font-bold text-purple-600 dark:text-purple-400">[...param]</span> &gt;{" "}
+                  <span className="font-bold text-amber-600 dark:text-amber-400">[[...param]]</span>
+                </div>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  Crucially, Dinou performs <strong>full multi-branch backtracking</strong> across route trees and <code>(group)</code> folders. For example, if both <code>src/en/contact/page.tsx</code> and <code>src/[lang]/about/page.tsx</code> exist, a request to <code>/en/about</code> checks the higher-priority static <code>src/en/</code> branch first, sees no <code>about</code> child there, and cleanly backtracks to match <code>src/[lang]/about/page.tsx</code> with <code>&#123; lang: &quot;en&quot; &#125;</code> instead of returning a false 404.
+                </p>
+              </div>
             </section>
 
             {/* Section 3: Route Parameters & Validation */}
@@ -355,41 +376,73 @@ export default function Page() {
                   3.1. Dynamic Params Prop Injection
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  In Dinou, parameters are strictly typed using <code>PageProps</code>, <code>LayoutProps</code>, <code>ErrorProps</code>, and <code>RouteParams</code>:
+                  Every route and <code>@slot</code> directory can import zero-boilerplate segment types directly from its auto-generated contextual <code>&quot;./dinou&quot;</code> module (or import explicit pattern generics from <code>&quot;dinou&quot;</code>):
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-1.5 list-disc pl-5">
-                  <li><code>page.tsx</code> components: <code>Page(&#123; params &#125;: PageProps&lt;&quot;/blog/[slug]&quot;&gt;)</code></li>
-                  <li><code>layout.tsx</code> components: <code>Layout(&#123; params, children &#125;: LayoutProps&lt;&quot;/blog/[slug]&quot;&gt;)</code></li>
-                  <li><code>error.tsx</code> pages: <code>Error(&#123; error, params &#125;: ErrorProps&lt;&quot;/blog/[slug]&quot;&gt;)</code></li>
-                  <li><code>not_found.tsx</code> 404 pages: <code>NotFound(&#123; params &#125;: PageProps&lt;&quot;/blog/[slug]&quot;&gt;)</code></li>
-                  <li>Parallel slot pages (<code>@slot/page.tsx</code>): <code>SlotPage(&#123; params &#125;: PageProps&lt;&quot;/dashboard/[teamId]&quot;&gt;)</code></li>
-                  <li>Server data fetching: <code>getProps(params: RouteParams&lt;&quot;/blog/[slug]&quot;&gt;)</code> in <code>page_functions.ts</code></li>
+                  <li><code>page.tsx</code> components: <code>Page(&#123; params &#125;: PageProps)</code> (or <code>PageProps&lt;&#123; post: Post &#125;&gt;</code> with server props)</li>
+                  <li><code>layout.tsx</code> components: <code>Layout(&#123; params, children &#125;: LayoutProps)</code> (auto-includes sibling <code>@slots</code>)</li>
+                  <li><code>error.tsx</code> boundaries: <code>Error(&#123; error, params &#125;: ErrorProps)</code></li>
+                  <li><code>not_found.tsx</code> 404 boundaries: <code>NotFound(&#123; params &#125;: NotFoundProps)</code></li>
+                  <li>Parallel slot pages (<code>@slot/page.tsx</code>): <code>SlotPage(&#123; params &#125;: SlotProps)</code></li>
+                  <li>Server data fetching: <code>getProps(params: RouteParams)</code> (or <code>PageFunctions</code> / <code>LayoutFunctions</code>) in <code>page_functions.ts</code> / <code>layout_functions.ts</code></li>
                 </ul>
 
-                <CodeBlock language="tsx" containerClassName="w-full rounded-lg mt-3">
-                  {`// src/blog/[slug]/page.tsx
-import type { PageProps } from "dinou";
+                <TabbedCodeBlock
+                  defaultTab="contextual"
+                  tabs={[
+                    {
+                      id: "contextual",
+                      label: 'Contextual "./dinou" (Recommended)',
+                      language: "tsx",
+                      code: `// src/blog/[slug]/page.tsx
+import type { PageProps } from "./dinou";
 
-interface BlogPostProps extends PageProps<"/blog/[slug]"> {
+interface PostData {
   post?: { title: string; content: string };
 }
 
-export default function BlogPost({ params, post }: BlogPostProps) {
-  // ✅ params.slug is strongly typed as string automatically
+export default function BlogPost({ params, post }: PageProps<PostData>) {
+  // ✅ params.slug is auto-inferred as string with zero route string literals!
   return (
     <article className="p-6">
       <h1 className="text-2xl font-bold">{post?.title ?? params.slug}</h1>
       <p className="mt-2 text-muted-foreground">{post?.content}</p>
     </article>
   );
-}`}
-                </CodeBlock>
+}`,
+                    },
+                    {
+                      id: "explicit",
+                      label: 'Explicit Pattern ("dinou")',
+                      language: "tsx",
+                      code: `// src/blog/[slug]/page.tsx
+import type { PageProps } from "dinou";
+
+interface PostData {
+  post?: { title: string; content: string };
+}
+
+export default function BlogPost({
+  params,
+  post,
+}: PageProps<"/blog/[slug]", PostData>) {
+  // ✅ Equivalent explicit route pattern generic from "dinou"
+  return (
+    <article className="p-6">
+      <h1 className="text-2xl font-bold">{post?.title ?? params.slug}</h1>
+      <p className="mt-2 text-muted-foreground">{post?.content}</p>
+    </article>
+  );
+}`,
+                    },
+                  ]}
+                />
 
                 <Alert className="not-prose mt-4">
                   <AlertCircle className="h-4 w-4 text-indigo-500" />
                   <AlertTitle>Strict Signature Rule</AlertTitle>
                   <AlertDescription className="text-xs text-muted-foreground mt-1">
-                    In <code>page_functions.ts</code> and <code>layout_functions.ts</code>, Dinou passes the parameters dictionary directly as the <strong>first argument</strong>: use <code>getProps(params)</code> and <code>validateParams(params)</code> (do <strong>not</strong> write <code>getProps(&#123; params &#125;)</code>). However, in React components (<code>page.tsx</code>, <code>layout.tsx</code>, <code>error.tsx</code>, <code>not_found.tsx</code>), <code>params</code> is passed as a component prop: <code>export default function Page(&#123; params &#125;)</code>.
+                    In <code>page_functions.ts</code> and <code>layout_functions.ts</code>, Dinou passes the parameters dictionary directly as the <strong>first argument</strong>: use <code>getProps(params)</code> and <code>validateParams(params)</code> (do <strong>not</strong> write <code>getProps(&#123; params &#125;)</code>). However, in React components (<code>page.tsx</code>, <code>layout.tsx</code>, <code>error.tsx</code>, <code>not_found.tsx</code>, <code>@slot/page.tsx</code>), <code>params</code> is passed as a component prop: <code>export default function Page(&#123; params &#125;)</code>.
                   </AlertDescription>
                 </Alert>
               </div>
@@ -405,14 +458,14 @@ export default function BlogPost({ params, post }: BlogPostProps) {
 
                 <CodeBlock language="typescript" containerClassName="w-full rounded-lg mt-2">
                   {`// src/product/[id]/page_functions.ts
-import type { RouteParams } from "dinou";
+import type { RouteParams } from "./dinou";
 
-export function validateParams(params: RouteParams<"/product/[id]">) {
+export function validateParams(params: RouteParams) {
   // Ensure the product ID is strictly numeric; otherwise render 404
   return /^\\d+$/.test(params.id);
 }
 
-export async function getProps(params: RouteParams<"/product/[id]">) {
+export async function getProps(params: RouteParams) {
   // Only called if validateParams returned true
   const product = await db.products.findById(params.id);
   return { product };
@@ -427,10 +480,14 @@ export async function getProps(params: RouteParams<"/product/[id]">) {
                       <strong>Dynamic SSR:</strong> Returns an instant 404 without running <code>getProps</code>, preventing wasteful database queries on invalid URLs.
                     </li>
                     <li>
-                      <strong>Incremental Static Generation (ISG / ISR):</strong> Prevents invalid URLs from triggering on-demand page generation or polluting edge caches with broken pages.
+                      <strong>Incremental Static Generation (ISG / ISR):</strong> Prevents invalid URLs from triggering on-demand page generation or polluting edge caches with broken pages. (To disable on-demand ISG entirely and serve <em>only</em> paths returned by <code>getStaticPaths</code>, set <code>allowISG = false</code> in the segment or globally in <code>dinou.config.*</code>—see{" "}
+                      <Link href="/docs/page-functions" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                        Page &amp; Layout Functions
+                      </Link>
+                      .)
                     </li>
                     <li>
-                      <strong>Static Site Exports (SSG):</strong> Only valid parameter combinations generate HTML files during <code>dinou export</code>.
+                      <strong>Static Site Exports (SSG):</strong> Only valid parameter combinations generate HTML files during <code>dinou export-static</code>.
                     </li>
                   </ul>
                 </div>
@@ -454,7 +511,7 @@ export async function getProps(params: RouteParams<"/product/[id]">) {
                       Use <code>useSearchParams()</code> anywhere. It returns a standard Web <code>URLSearchParams</code> instance:
                     </p>
                     <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                      {`import { useSearchParams } from "dinou";
+                      {`import { useSearchParams } from "./dinou";
 
 // Works identically in Server Components & "use client"!
 export default function SearchPage() {
@@ -470,7 +527,7 @@ export default function SearchPage() {
                       page_functions.ts &amp; Server Functions
                     </div>
                     <p className="text-xs text-muted-foreground mb-3">
-                      Outside React components (where hooks cannot run), access the active query via <code>getContext().req.query</code>:
+                      Outside React components (where hooks cannot run), access the active query via <code>getContext()?.req.query</code>:
                     </p>
                     <TabbedCodeBlock
                       defaultTab="page-functions"
@@ -479,13 +536,13 @@ export default function SearchPage() {
                           id: "page-functions",
                           label: "page_functions.ts",
                           language: "tsx",
-                          code: `import { getContext } from "dinou";
+                          code: `import { getContext } from "dinou/server";
 
 // src/search/page_functions.ts
-// getContext() is available in getProps, validateParams, etc.
+// getContext() returns RequestContextStore | undefined
 export async function getProps() {
-  const { req } = getContext();
-  const search = req.query?.search;
+  const ctx = getContext();
+  const search = ctx?.req.query?.search;
   return { search };
 }`,
                         },
@@ -495,12 +552,12 @@ export async function getProps() {
                           language: "tsx",
                           code: `"use server"; // Declared at the top of the file
 
-import { getContext } from "dinou";
+import { getContext } from "dinou/server";
 
 // src/actions/items.ts
 export async function filterItems() {
-  const { req } = getContext();
-  const search = req.query?.search;
+  const ctx = getContext();
+  const search = ctx?.req.query?.search;
   return db.items.find({ q: search });
 }`,
                         },
@@ -531,10 +588,10 @@ export async function filterItems() {
 
                 <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
                   {`// src/layout.tsx
-import type { LayoutProps } from "dinou";
+import type { LayoutProps } from "./dinou";
 import "./globals.css";
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="en">
       <head>
@@ -561,23 +618,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 </p>
 
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  On client navigation between sibling pages, parent layouts preserve their React state, input fields, scroll position, and DOM tree without re-mounting. Each layout receives <code>children</code>, typed <code>params</code>, any parallel slots (e.g. <code>sidebar</code>), and server props returned by an optional companion <code>layout_functions.ts</code> file:
+                  On client navigation between sibling pages, parent layouts preserve their React state, input fields, scroll position, and DOM tree without re-mounting. With <code>LayoutProps</code> from <code>&quot;./dinou&quot;</code>, each layout automatically receives <code>children</code>, strongly typed cumulative <code>params</code>, auto-inferred sibling parallel slots (e.g. <code>@sidebar</code> &rarr; <code>sidebar?: ReactNode</code>), and any custom server props passed via <code>LayoutProps&lt;TProps&gt;</code> from an optional companion <code>layout_functions.ts</code> file:
                 </p>
 
                 <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
                   {`// src/dashboard/[teamId]/layout.tsx
-import type { ReactNode } from "react";
-import type { LayoutProps } from "dinou";
-
-interface DashboardLayoutProps extends LayoutProps<"/dashboard/[teamId]"> {
-  sidebar?: ReactNode; // Parallel slot (@sidebar)
-}
+import type { LayoutProps } from "./dinou";
 
 export default function DashboardLayout({
   children,
   params,
   sidebar,
-}: DashboardLayoutProps) {
+}: LayoutProps) {
+  // ✅ params.teamId (string) & sidebar?: ReactNode (@sidebar) are auto-inferred!
   return (
     <div className="flex min-h-screen">
       <aside className="w-64 border-r p-4">{sidebar}</aside>
@@ -691,13 +744,35 @@ export default function DashboardLayout({
                 <TabbedCodeBlock
                   tabs={[
                     {
-                      id: "error-props",
-                      label: "ErrorProps (Recommended)",
+                      id: "contextual-error-props",
+                      label: 'Contextual "./dinou" (Recommended)',
+                      language: "tsx",
+                      code: `// src/dashboard/[teamId]/error.tsx
+import type { ErrorProps } from "./dinou";
+
+// Auto-infers params.teamId and types the captured error (works in intermediate & @slot folders too)
+export default function DashboardError({ error, params }: ErrorProps) {
+  return (
+    <div className="p-6 rounded-xl border border-rose-500/20 bg-rose-50/20">
+      <h3 className="text-rose-600 font-bold">Failed to load team {params.teamId}</h3>
+      <p className="text-xs text-muted-foreground mt-1">{error.message}</p>
+      {error.stack && (
+        <pre className="mt-3 p-3 bg-slate-900 text-slate-100 rounded text-xs overflow-auto">
+          {error.stack}
+        </pre>
+      )}
+    </div>
+  );
+}`,
+                    },
+                    {
+                      id: "explicit-error-props",
+                      label: 'Explicit Pattern ("dinou")',
                       language: "tsx",
                       code: `// src/dashboard/[teamId]/error.tsx
 import type { ErrorProps } from "dinou";
 
-// Native: ErrorProps infers params and types the captured error
+// Explicit segment pattern generic (supports page, intermediate, and @slot boundaries)
 export default function DashboardError({
   error,
   params,
@@ -716,48 +791,19 @@ export default function DashboardError({
 }`,
                     },
                     {
-                      id: "interface-extension",
-                      label: "Interface Extension (PageProps)",
+                      id: "inline-errorparams",
+                      label: "Inline ErrorParams",
                       language: "tsx",
                       code: `// src/dashboard/[teamId]/error.tsx
-import type { PageProps } from "dinou";
+import type { ErrorParams } from "dinou";
 
-// Alternative: extend PageProps if you declare an interface
-interface DashboardErrorProps extends PageProps<"/dashboard/[teamId]"> {
-  error: Error;
-}
-
-export default function DashboardError({
-  error,
-  params,
-}: DashboardErrorProps) {
-  return (
-    <div className="p-6 rounded-xl border border-rose-500/20 bg-rose-50/20">
-      <h3 className="text-rose-600 font-bold">Failed to load team {params.teamId}</h3>
-      <p className="text-xs text-muted-foreground mt-1">{error.message}</p>
-      {error.stack && (
-        <pre className="mt-3 p-3 bg-slate-900 text-slate-100 rounded text-xs overflow-auto">
-          {error.stack}
-        </pre>
-      )}
-    </div>
-  );
-}`,
-                    },
-                    {
-                      id: "inline-routeparams",
-                      label: "Inline RouteParams",
-                      language: "tsx",
-                      code: `// src/dashboard/[teamId]/error.tsx
-import type { RouteParams } from "dinou";
-
-// Alternative: inline typing using the RouteParams utility
+// Alternative: inline typing using the ErrorParams utility
 export default function DashboardError({
   error,
   params,
 }: {
   error: Error;
-  params: RouteParams<"/dashboard/[teamId]">;
+  params: ErrorParams<"/dashboard/[teamId]">;
 }) {
   return (
     <div className="p-6 rounded-xl border border-rose-500/20 bg-rose-50/20">
@@ -786,7 +832,7 @@ export default function DashboardError({
                   4.5. Custom 404 Pages (not_found.tsx)
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Define custom 404 views by placing <code>not_found.tsx</code> in any route directory. When an unmatched URL segment is requested, Dinou bubbles up to render the closest <code>not_found.tsx</code> template inside its enclosing layout.
+                  Define custom 404 views by placing <code>not_found.tsx</code> in any route or intermediate directory (with or without a sibling <code>page.tsx</code>). When an unmatched URL segment is requested or <code>validateParams</code> / <code>allowISG: false</code> rejects a request, Dinou bubbles up to render the closest <code>not_found.tsx</code> template inside its enclosing layout.
                 </p>
 
                 <TabbedCodeBlock
@@ -796,10 +842,10 @@ export default function DashboardError({
                       label: "Scoped 404 (Dynamic Route)",
                       language: "tsx",
                       code: `// src/blog/[slug]/not_found.tsx (Scoped to /blog/[slug])
-import { Link, type PageProps } from "dinou";
+import { Link, type NotFoundProps } from "./dinou";
 
-// Strongly types params.slug as string
-export default function NotFound({ params }: PageProps<"/blog/[slug]">) {
+// Automatically types params.slug as string
+export default function NotFound({ params }: NotFoundProps) {
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center">
       <h2 className="text-3xl font-bold">404 - Article Not Found</h2>
@@ -821,10 +867,10 @@ export default function NotFound({ params }: PageProps<"/blog/[slug]">) {
                       label: "Global Root 404 (src/not_found.tsx)",
                       language: "tsx",
                       code: `// src/not_found.tsx (Global Root Fallback)
-import { Link, type PageProps } from "dinou";
+import { Link, type NotFoundProps } from "./dinou";
 
-// PageProps<"/"> strictly ensures no dynamic params are accidentally accessed
-export default function GlobalNotFound({ params }: PageProps<"/">) {
+// Root NotFoundProps strictly ensures no dynamic params are accidentally accessed
+export default function GlobalNotFound(_props: NotFoundProps) {
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center">
       <h2 className="text-3xl font-bold">404 - Page Not Found</h2>
@@ -846,19 +892,24 @@ export default function GlobalNotFound({ params }: PageProps<"/">) {
                       label: "With Server Props (page_functions.ts)",
                       language: "tsx",
                       code: `// 1. Sibling server contract: src/blog/[slug]/page_functions.ts
-export async function getProps(params: { slug: string }) {
+import type { RouteParams } from "./dinou";
+
+export async function getProps(params: RouteParams) {
   const suggestions = await db.posts.findMany({ take: 3 });
   return { suggestions };
 }
 
 // 2. 404 Page: src/blog/[slug]/not_found.tsx
-import { Link, type PageProps } from "dinou";
+import { Link, type NotFoundProps } from "./dinou";
 
-interface NotFoundProps extends PageProps<"/blog/[slug]"> {
+interface SuggestionsData {
   suggestions: { id: string; title: string; slug: string }[];
 }
 
-export default function NotFound({ params, suggestions }: NotFoundProps) {
+export default function NotFound({
+  params,
+  suggestions,
+}: NotFoundProps<SuggestionsData>) {
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center">
       <h2 className="text-3xl font-bold">404 - Article Not Found</h2>
@@ -870,7 +921,8 @@ export default function NotFound({ params, suggestions }: NotFoundProps) {
           {suggestions.map((item) => (
             <li key={item.id}>
               <Link
-                href={\`/blog/\${item.slug}\`}
+                href="/blog/[slug]"
+                params={{ slug: item.slug }}
                 className="text-primary hover:underline text-sm font-medium"
               >
                 &rarr; {item.title}
@@ -887,7 +939,7 @@ export default function NotFound({ params, suggestions }: NotFoundProps) {
                 />
 
                 <p className="text-xs text-muted-foreground">
-                  When nested in a dynamic folder (such as <code>src/blog/[slug]/not_found.tsx</code>), pass the route pattern generic (<code>PageProps&lt;&quot;/blog/[slug]&quot;&gt;</code>) to strongly type <code>params</code>. For a root global 404 (<code>src/not_found.tsx</code>), pass <code>PageProps&lt;&quot;/&quot;&gt;</code> to ensure strict type safety without accidental parameters.
+                  Importing <code>NotFoundProps</code> from <code>&quot;./dinou&quot;</code> automatically binds the cumulative parameters for that directory (including intermediate folders without a sibling <code>page.tsx</code>). Alternatively, you can import <code>NotFoundProps</code> from <code>&quot;dinou&quot;</code> and pass the explicit pattern generic (e.g. <code>NotFoundProps&lt;&quot;/blog/[slug]&quot;&gt;</code> or <code>NotFoundProps&lt;&quot;/&quot;&gt;</code>).
                 </p>
 
                 <Alert className="not-prose border-blue-500/20 bg-blue-50/40 dark:bg-blue-950/20">
@@ -900,7 +952,7 @@ export default function NotFound({ params, suggestions }: NotFoundProps) {
                       <strong>Yes.</strong> If you define a <code>page_functions.{`{ts,js}`}</code> file in the same route directory as <code>not_found.tsx</code>, Dinou executes its <code>getProps(params)</code> server lifecycle and merges the returned data directly into the component&apos;s props alongside <code>params</code> (as demonstrated in the <em>With Server Props</em> tab above).
                     </p>
                     <p>
-                      This allows 404 views to dynamically query databases or external APIs (such as recommended articles, related categories, or search fallbacks) and combine them with <code>PageProps</code> via interface extension (<code>interface NotFoundProps extends PageProps&lt;&quot;/blog/[slug]&quot;&gt;</code>) or intersection types.
+                      This allows 404 views to dynamically query databases or external APIs (such as recommended articles, related categories, or search fallbacks) and type them cleanly via <code>NotFoundProps&lt;SuggestionsData&gt;</code> from <code>&quot;./dinou&quot;</code> (or <code>NotFoundProps&lt;&quot;/blog/[slug]&quot;, SuggestionsData&gt;</code> from <code>&quot;dinou&quot;</code>).
                     </p>
                     <p className="text-[11px] text-muted-foreground/80">
                       <strong>Difference with <code>error.tsx</code>:</strong> While <code>not_found.tsx</code> can safely execute <code>getProps</code>, <code>error.tsx</code> pages never invoke server contracts (they receive strictly <code>ErrorProps</code>) to prevent compounding unhandled server exceptions.
@@ -1049,7 +1101,7 @@ export default function NotFound({ params, suggestions }: NotFoundProps) {
                 </div>
 
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Whenever Dinou encounters a folder starting with <code>_</code>, it completely bypasses that directory tree across RSC/SSR compilation, <code>&quot;use client&quot;</code> chunk generation, <code>&quot;use server&quot;</code> endpoint registration, and CSS/asset scanning. If a parked route folder uses contextual <code>&quot;./dinou&quot;</code> imports, Dinou still emits lightweight fallback <code>.d.ts</code> shims in <code>.dinou/routes/_...</code> (while excluding the route from <code>.dinou/types/routes.d.ts</code>) so your IDE and <code>tsc --noEmit</code> remain error-free.
+                  Whenever Dinou encounters a folder starting with <code>_</code>, it completely bypasses that directory tree across RSC/SSR compilation, <code>&quot;use client&quot;</code> chunk generation, <code>&quot;use server&quot;</code> endpoint registration, and CSS/asset scanning. If a parked route folder uses contextual <code>&quot;./dinou&quot;</code> imports, Dinou still emits permissive fallback <code>.d.ts</code> shims in <code>.dinou/routes/_...</code> so those parked files remain error-free in your IDE—while excluding the parked routes from <code>.dinou/types/routes.d.ts</code> so any active <code>&lt;Link&gt;</code> pointing to them fails at compile time.
                 </p>
 
                 <Alert className="not-prose border-amber-500/20 bg-amber-50/50 dark:bg-amber-950/20">
@@ -1087,13 +1139,14 @@ export default function NotFound({ params, suggestions }: NotFoundProps) {
                       Slots are passed as named props alongside <code>children</code> and are automatically typed on <code>LayoutProps</code>:
                     </p>
                     <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
-                      {`import type { LayoutProps } from "dinou";
+                      {`// src/dashboard/layout.tsx
+import type { LayoutProps } from "./dinou";
 
 export default function Layout({
   children,
   sidebar,
   analytics,
-}: LayoutProps<"/dashboard">) {
+}: LayoutProps) {
   // sidebar?: ReactNode & analytics?: ReactNode are auto-inferred!
   return (
     <div className="flex">
@@ -1106,6 +1159,10 @@ export default function Layout({
                     </CodeBlock>
                   </div>
                 </div>
+
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Parallel <code>@slot</code> directories can also live inside <code>(group)</code> folders and define nested sub-routes (e.g. <code>src/dashboard/@analytics/settings/page.tsx</code> matching <code>/dashboard/settings</code>). Inside any slot page, import <code>SlotProps</code> (or <code>PageProps</code>) from its own <code>&quot;./dinou&quot;</code> module to receive strongly typed cumulative route parameters.
+                </p>
               </div>
 
               <div id="error-containment" className="scroll-mt-20 mt-8 space-y-4">

@@ -63,7 +63,7 @@ export default function Page() {
       />
       <link rel="canonical" href="https://dinou.dev/docs/server-client-components" />
 
-      <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
+      <div className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
@@ -169,6 +169,9 @@ export default function Page() {
                   </li>
                   <li>
                     <strong>Secure Secret Access:</strong> Database credentials, private API keys, and environment variables stay strictly on the server without risk of client exposure.
+                  </li>
+                  <li>
+                    <strong>Synchronous Request Context (<code>getContext()</code>):</strong> Read incoming <code>req.cookies</code>, <code>req.headers</code>, <code>req.query</code>, response helpers (<code>res</code>), and plugin/middleware data directly on the server via <code>getContext()</code> from <code>&quot;dinou&quot;</code> (or <code>&quot;dinou/server&quot;</code>).
                   </li>
                   <li>
                     <strong>Automatic Streaming with &lt;Suspense&gt;:</strong> When slow asynchronous operations are wrapped in React <code>&lt;Suspense&gt;</code>, the layout shell and fallback UI can be delivered immediately without waiting for slow queries, while data streams progressively into the HTTP response.
@@ -339,10 +342,10 @@ async function UsersList() {
                       </CardHeader>
                       <CardContent className="text-xs text-muted-foreground leading-relaxed space-y-2">
                         <p>
-                          <strong>Static Shell Prerender:</strong> When <code>ppr = true</code> is enabled on the segment (or globally in <code>dinou.config.js</code>), the outer layout shell and fallback skeleton are pre-rendered at build time and served immediately with <strong>0ms TTFB</strong> from the CDN edge.
+                          <strong>Static Shell Prerender:</strong> When <code>ppr = true</code> is enabled on the segment (or globally in <code>dinou.config.ts</code>), the outer layout shell and fallback skeleton are pre-rendered at build time and served immediately with <strong>0ms TTFB</strong> from the CDN edge.
                         </p>
                         <p>
-                          <strong>Fallback Behavior:</strong> The skeleton renders instantly from static cache, while the server concurrently executes only the dynamic query and streams live data into the hole.
+                          <strong>Fallback &amp; Static Opt-Out:</strong> The skeleton renders instantly from static cache while live data streams into the hole—or call <code>noDynamic()</code> synchronously at the top of an async component to resolve that specific <code>&lt;Suspense&gt;</code> boundary at build time inside <code>shell.html</code>.
                         </p>
                         <p>
                           <strong>Trade-off:</strong> Combines the instant delivery of SSG with the fresh, live data of dynamic SSR at minimal server compute cost.
@@ -609,9 +612,12 @@ export function UserProfile({ userPromise }: { userPromise: Promise<{ name: stri
                   <div className="bg-background/80 p-3.5 rounded-lg border font-mono text-xs space-y-1 text-slate-700 dark:text-slate-300">
                     <div>src/dashboard/layout.tsx &rarr; <span className="text-blue-600 dark:text-blue-400 font-bold">Server Component</span> (zero client JS)</div>
                     <div>src/dashboard/page.tsx &rarr; <span className="text-blue-600 dark:text-blue-400 font-bold">Server Component</span> (fetches data directly)</div>
-                    <div>src/dashboard/_components/search-bar.tsx &rarr; <span className="text-purple-600 dark:text-purple-400 font-bold">&quot;use client&quot;</span> (interactive leaf)</div>
-                    <div>src/dashboard/_components/action-button.tsx &rarr; <span className="text-purple-600 dark:text-purple-400 font-bold">&quot;use client&quot;</span> (interactive leaf)</div>
+                    <div>src/dashboard/components/search-bar.tsx &rarr; <span className="text-purple-600 dark:text-purple-400 font-bold">&quot;use client&quot;</span> (interactive leaf)</div>
+                    <div>src/dashboard/components/action-button.tsx &rarr; <span className="text-purple-600 dark:text-purple-400 font-bold">&quot;use client&quot;</span> (interactive leaf)</div>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-2.5">
+                    <strong>Folder naming note:</strong> Any subfolder without a <code>page.tsx</code> or <code>layout.tsx</code> (such as <code>src/dashboard/components/</code>) is automatically ignored as a URL route. Do <strong>not</strong> prefix active component folders with <code>_</code> (<code>_components/</code>), as <code>_*</code> directories are excluded from Dinou&apos;s router and client manifests for parking inactive code.
+                  </p>
                 </div>
 
                 {/* 6.2 Composition Pattern */}
@@ -693,12 +699,12 @@ export function ModalContainer({ children }: { children: ReactNode }) {
                         language: "tsx",
                         code: `"use client";
 import { useState } from "react";
-import type { PageProps } from "dinou";
+import type { PageProps } from "./dinou";
 import type { ProjectData } from "./page_functions";
 
 export default function CanvasPage({
   project,
-}: PageProps<"/canvas/[id]"> & ProjectData) {
+}: PageProps<ProjectData>) {
   // Full access to state, effects, and events everywhere in the file!
   const [layers, setLayers] = useState(project.initialLayers);
 
@@ -714,18 +720,18 @@ export default function CanvasPage({
                         id: "functions",
                         label: "src/canvas/[id]/page_functions.ts (Server Data)",
                         language: "ts",
-                        code: `import type { PageFunctions } from "dinou";
+                        code: `import type { PageFunctions } from "./dinou";
 import { db } from "@/lib/db";
 
 export interface ProjectData {
   project: { id: string; initialLayers: string[] };
 }
 
-// Runs securely on the server
-export const getProps: PageFunctions<"/canvas/[id]", ProjectData>["getProps"] = async (
+// Runs securely on the server (params is pre-typed as { id: string } | undefined)
+export const getProps: PageFunctions<ProjectData>["getProps"] = async (
   params
 ) => {
-  const project = await db.projects.findById(params.id);
+  const project = await db.projects.findById(params?.id ?? "");
   return { project };
 };`,
                       },
@@ -857,10 +863,10 @@ export function InteractiveChart({ data }: { data: any }) {
                       <strong>What about UserGreeting?</strong> Wrapping <code>UserGreeting</code> in <code>&lt;Suspense&gt;</code> ensures that fetching user session data does not delay flushing the outer page layout during SSR (and on PPR routes, keeps session/cookie access isolated inside a dynamic hole).
                     </p>
                     <p>
-                      <strong>In-Place Client Refresh &amp; State Preservation:</strong> Any Client Component can trigger an on-demand re-render of only this slot using <code>await refreshSlot(&quot;analytics-slot&quot;)</code> from <code>&quot;dinou&quot;</code>. React reconciles the new server props in place <strong>without unmounting</strong> <code>&lt;InteractiveChart /&gt;</code>, preserving its local <code>zoom</code> state!
+                      <strong>In-Place Client Refresh &amp; State Preservation:</strong> Any Client Component can trigger an on-demand re-render of only this slot using <code>await refreshSlot(&quot;analytics-slot&quot;)</code> from <code>&quot;dinou&quot;</code> (or pass <code>&#123; fresh: true &#125;</code> to bypass the server slot cache as well). React reconciles the new server props in place <strong>without unmounting</strong> <code>&lt;InteractiveChart /&gt;</code>, preserving its local <code>zoom</code> state!
                     </p>
                     <p>
-                      <strong>On-Demand Server Invalidation:</strong> Server Functions and webhooks can purge and update the slot cache globally via <code>await revalidateTag(&quot;analytics&quot;)</code>.
+                      <strong>On-Demand Server Invalidation:</strong> Server Functions and webhooks can purge and update the slot cache globally via <code>await revalidateTag(&quot;analytics&quot;)</code> from <code>&quot;dinou/server&quot;</code>.
                     </p>
                   </div>
 
@@ -950,7 +956,7 @@ export function InteractiveChart({ data }: { data: any }) {
             <DocsPager />
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Sidebar TOC - Visible on Desktop */}
       <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">

@@ -1,4 +1,3 @@
-import { Link } from "dinou";
 import { DocsPager } from "@/docs/components/docs-pager";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { Badge } from "@/docs/components/ui/badge";
@@ -20,11 +19,9 @@ import {
   Route,
   Sparkles,
   CheckCircle2,
-  XCircle,
   AlertTriangle,
   FolderTree,
   Cpu,
-  ArrowRight,
   Code2,
   FileCode,
   Compass,
@@ -52,6 +49,7 @@ const tocItems = [
   { id: "dynamic-interpolation", title: "4.4. Dynamic Navigation: Pattern + params vs. Template Strings", level: 3 },
   { id: "relative-navigation", title: "4.5. Strict Relative Navigation with from", level: 3 },
   { id: "contextual-dinou", title: '4.6. Contextual "./dinou" (Zero Boilerplate)', level: 3 },
+  { id: "contextual-directory-rules", title: '4.7. Deep Dive: "./dinou", "../dinou" & Folder Rules', level: 3 },
   { id: "architecture", title: "5. Technical Architecture: Under the Hood", level: 2 },
   { id: "route-scanner", title: "5.1. Ultra-Fast Route Scanner", level: 3 },
   { id: "generated-definitions", title: "5.2. Module Augmentation", level: 3 },
@@ -74,7 +72,7 @@ export default function TypeSafeRoutingPage() {
       />
       <link rel="canonical" href="https://dinou.dev/docs/type-safe-routing" />
 
-      <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
+      <div className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
@@ -552,8 +550,13 @@ export default function ProjectPage({
                       </tr>
                       <tr>
                         <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">DinouRoute</td>
-                        <td className="p-3 text-muted-foreground">Resolved navigable URLs for custom navigation props, menus &amp; redirect helpers</td>
+                        <td className="p-3 text-muted-foreground">Resolved navigable URLs (static, interpolated, query/hash, external) for custom nav props &amp; menus</td>
                         <td className="p-3 font-mono">interface NavProps &#123; href: DinouRoute &#125;</td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">DinouLinkTarget</td>
+                        <td className="p-3 text-muted-foreground">Union of <code>DinouRoute</code> plus raw dynamic patterns (e.g. <code>&quot;/blog/[slug]&quot;</code>) accepted by <code>&lt;Link&gt;</code> &amp; <code>useRouter()</code></td>
+                        <td className="p-3 font-mono">type Target = DinouLinkTarget</td>
                       </tr>
                       <tr>
                         <td className="p-3 font-mono font-bold text-blue-600 dark:text-blue-400">LinkProps&lt;TFrom, THref&gt;</td>
@@ -853,7 +856,7 @@ export default function WorkspaceNotFound({
                   4.3. Custom Navigation Components with DinouRoute
                 </h3>
                 <p>
-                  When building reusable UI components (custom buttons, navigation tabs, or breadcrumb menus), type their destination props with <code>DinouRoute</code> to give your design system native static link validation in your IDE and <code>tsc</code>:
+                  When building reusable UI components (custom buttons, navigation tabs, or breadcrumb menus) that accept already-resolved URLs, type their destination props with <code>DinouRoute</code> (or use <code>DinouLinkTarget</code> if your config/wrapper also accepts raw <code>&quot;/blog/[slug]&quot;</code> route patterns) to give your design system native static link validation in your IDE and <code>tsc</code>:
                 </p>
 
                 <div className="not-prose my-4">
@@ -1109,7 +1112,7 @@ export default function WorkspaceSidebar({
                   4.6. Zero-Boilerplate Contextual Module (<code>&quot;./dinou&quot;</code>)
                 </h3>
                 <p>
-                  Inside any route folder in <code>src/</code> (pages, intermediate layouts, route groups <code>(group)</code>, and parallel <code>@slots</code>), you can import directly from <strong><code>&quot;./dinou&quot;</code></strong> instead of <code>&quot;dinou&quot;</code> (or <code>&quot;../dinou&quot;</code> from a colocated <code>_components/</code> subfolder). Powered by TypeScript&apos;s <code>rootDirs: [&quot;src&quot;, &quot;.dinou/routes&quot;]</code>, Dinou generates a zero-pollution virtual module per route folder without touching your <code>src/</code> directory:
+                  Inside any route folder in <code>src/</code> (pages, intermediate layouts, route groups <code>(group)</code>, and parallel <code>@slots</code>), you can import directly from <strong><code>&quot;./dinou&quot;</code></strong> instead of <code>&quot;dinou&quot;</code> (or <code>&quot;../dinou&quot;</code> from a colocated <code>components/</code> subfolder—do <strong>not</strong> prefix active subfolders with <code>_</code>, as <code>_*</code> directories are reserved for parked/disabled code). Powered by TypeScript&apos;s <code>rootDirs: [&quot;src&quot;, &quot;.dinou/routes&quot;]</code>, Dinou generates a zero-pollution virtual module per route folder without touching your <code>src/</code> directory:
                 </p>
                 <ul className="text-sm space-y-1.5">
                   <li>
@@ -1122,7 +1125,7 @@ export default function WorkspaceSidebar({
                     <strong>Full <code>&quot;dinou&quot;</code> Parity:</strong> <code>&quot;./dinou&quot;</code> also exports the folder&apos;s literal <code>ROUTE</code> constant alongside all standard runtime utilities (<code>redirect</code>, <code>ClientRedirect</code>, <code>usePathname</code>, <code>useSearchParams</code>, <code>getContext</code>, <code>noDynamic</code>, <code>refreshSlot</code>, <code>useNavigationLoading</code>, <code>defineConfig</code>), so route files only need one unified import.
                   </li>
                   <li>
-                    <strong>Safe Boundary Between Route Folders &amp; Shared Components:</strong> Dinou only generates <code>&quot;./dinou&quot;</code> for route-tree directories. Global shared folders like <code>src/components/</code> or <code>src/lib/</code> intentionally do <strong>not</strong> receive <code>&quot;./dinou&quot;</code>, so accidentally writing <code>import &#123; Link &#125; from &quot;./dinou&quot;</code> in a shared navbar fails immediately with <code>TS2307</code>—reminding you to import from <code>&quot;dinou&quot;</code> there. Likewise, avoid naming a route subfolder or local file <code>dinou</code> (<code>dinou.tsx</code> / <code>dinou/</code>) inside a route folder so it does not shadow <code>&quot;./dinou&quot;</code>.
+                    <strong>When to Choose <code>&quot;./dinou&quot;</code> vs. <code>&quot;dinou&quot;</code>:</strong> Reach for <code>&quot;./dinou&quot;</code> specifically when a route file needs <strong>folder-contextual types</strong> (<code>PageProps</code>, <code>LayoutProps</code>, <code>PageFunctions</code>, etc.) or <strong>relative navigation</strong> without repeating <code>from</code>. For shared UI components (<code>src/components/</code>), utilities (<code>src/lib/</code>), or components that only perform absolute navigation and universal hooks, prefer importing from <code>&quot;dinou&quot;</code> so those modules remain decoupled from any folder path. Global shared folders like <code>src/components/</code> intentionally do <strong>not</strong> receive <code>&quot;./dinou&quot;</code> (failing immediately with <code>TS2307</code> if misused), and you should avoid naming a local file or subfolder <code>dinou</code> inside a route folder so it does not shadow <code>&quot;./dinou&quot;</code>.
                   </li>
                 </ul>
 
@@ -1192,7 +1195,7 @@ export default function WorkspaceSidebar({ params }: SlotProps) {
                         id: "ctx-layout",
                         label: "src/workspace/layout.tsx",
                         language: "tsx",
-                        code: `import { Link, type LayoutProps } from "./dinou";
+                        code: `import type { LayoutProps } from "./dinou";
 
 // ✅ LayoutProps automatically infers sibling @slot ReactNode props (e.g. sidebar)
 export default function WorkspaceRootLayout({ children, sidebar }: LayoutProps) {
@@ -1211,6 +1214,177 @@ export default function WorkspaceRootLayout({ children, sidebar }: LayoutProps) 
                 <p className="text-xs text-muted-foreground leading-relaxed pt-1">
                   <strong>Parking routes with <code>_folder</code>:</strong> If you temporarily disable a route folder by prefixing it with an underscore (e.g. renaming <code>src/workspace</code> to <code>src/_workspace</code>), Dinou excludes it from both the global route registry and all bundlers while still emitting fallback <code>.dinou/routes/_workspace/**/dinou.d.ts</code> shims—so any active links pointing to <code>/workspace</code> immediately surface dead-link errors, while parked files inside <code>src/_workspace</code> keep compiling cleanly in VS Code and <code>tsc --noEmit</code> without changing a single <code>&quot;./dinou&quot;</code> import.
                 </p>
+              </div>
+
+              {/* 4.7 Deep Dive: Directory Resolution Rules */}
+              <div id="contextual-directory-rules" className="scroll-mt-20 mt-10 space-y-4">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <Compass className="h-5 w-5 text-blue-500" />
+                  4.7. Deep Dive: Directory Resolution Rules (<code>&quot;./dinou&quot;</code>, <code>&quot;../dinou&quot;</code> &amp; Folder Types)
+                </h3>
+                <p>
+                  Understanding <em>where</em> Dinou generates contextual modules makes choosing between <code>&quot;./dinou&quot;</code>, <code>&quot;../dinou&quot;</code>, and <code>&quot;dinou&quot;</code> effortless. During its bottom-up scan of <code>src/</code>, Dinou emits <code>.dinou/routes/&lt;dir&gt;/dinou.&#123;js,d.ts&#125;</code> <strong>if and only if</strong> a directory:
+                </p>
+                <ol className="text-sm space-y-1">
+                  <li>
+                    Contains at least one route entry file of its own (<code>page.*</code>, <code>layout.*</code>, <code>error.*</code>, <code>not_found.*</code>, <code>page_functions.*</code>, or <code>layout_functions.*</code>), <strong>or</strong>
+                  </li>
+                  <li>
+                    Is an <strong>ancestor directory</strong> with at least one route nested beneath it in its subtree.
+                  </li>
+                </ol>
+                <p className="text-sm text-muted-foreground">
+                  Leaf folders that contain <strong>no</strong> route files and have <strong>no</strong> child routes below them (such as <code>src/components/</code> or a colocated <code>src/blog/[slug]/components/</code> folder) do not represent a URL segment and therefore do <strong>not</strong> receive their own <code>dinou.&#123;js,d.ts&#125;</code> file:
+                </p>
+
+                <CodeBlock language="text" containerClassName="rounded-xl overflow-hidden my-4">
+                  {`src/                                            ✅ Root route tree -> ROUTE = "/"
+├── components/
+│   └── navbar.tsx                              ❌ Shared non-route folder -> NO ./dinou (always import from "dinou")
+├── (marketing)/
+│   └── pricing/
+│       └── page.tsx                            ✅ Route group unwrapped -> ./dinou (ROUTE = "/pricing")
+├── blog/
+│   └── [slug]/
+│       ├── page.tsx                            ✅ Direct route folder -> ./dinou (ROUTE = "/blog/[slug]")
+│       └── components/
+│           └── post-pager.tsx                  🔹 Colocated leaf subfolder -> NO ./dinou (use "dinou" or "../dinou")
+├── workspace/
+│   └── [org]/
+│       ├── layout.tsx                          ✅ Intermediate layout -> ./dinou (ROUTE = "/workspace/[org]")
+│       ├── @sidebar/
+│       │   └── page.tsx                        ✅ Parallel @slot -> ./dinou (SlotProps: { org }, ROUTE = "/workspace/[org]")
+│       └── projects/                           ✅ Route ancestor (has child route below!) -> ./dinou (ROUTE = "/workspace/[org]/projects")
+│           └── [projectId]/
+│               └── page.tsx                    ✅ Leaf route -> ./dinou (ROUTE = "/workspace/[org]/projects/[projectId]")
+└── _legacy/
+    └── page.tsx                                ⏸️ Parked (_*) -> Ignored by router/bundlers; gets fallback ./dinou shim (ROUTE: string)`}
+                </CodeBlock>
+
+                <div className="not-prose overflow-x-auto rounded-xl border border-border my-4">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-muted text-muted-foreground font-semibold text-xs">
+                      <tr>
+                        <th className="p-3">Directory Type &amp; Example</th>
+                        <th className="p-3 w-36">Has <code>./dinou</code>?</th>
+                        <th className="p-3 w-40">Recommended Import</th>
+                        <th className="p-3">Resolution &amp; Practical Behavior</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border bg-card text-xs">
+                      <tr>
+                        <td className="p-3">
+                          <div className="font-semibold text-foreground">1. Direct Route Folder</div>
+                          <div className="font-mono text-[11px] text-blue-600 dark:text-blue-400">src/blog/[slug]/</div>
+                        </td>
+                        <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400 font-semibold">Yes</td>
+                        <td className="p-3 font-mono font-semibold">&quot;./dinou&quot; / &quot;dinou&quot;</td>
+                        <td className="p-3 text-muted-foreground">
+                          Pre-binds <code>PageProps</code>, <code>LayoutProps</code>, <code>PageFunctions</code>, etc. and sets <code>ROUTE = &quot;/blog/[slug]&quot;</code>. Colocated files in this exact same folder share <code>&quot;./dinou&quot;</code>.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3">
+                          <div className="font-semibold text-foreground">2. Route Ancestor Folder</div>
+                          <div className="font-mono text-[11px] text-blue-600 dark:text-blue-400">src/workspace/[org]/projects/</div>
+                        </td>
+                        <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400 font-semibold">Yes</td>
+                        <td className="p-3 font-mono font-semibold">&quot;./dinou&quot;</td>
+                        <td className="p-3 text-muted-foreground">
+                          Even with no <code>page.tsx</code> or <code>layout.tsx</code> of its own, having <code>[projectId]/page.tsx</code> below makes it part of the URL tree (<code>ROUTE = &quot;/workspace/[org]/projects&quot;</code>, <code>RouteParams = &#123; org: string &#125;</code>)—ready immediately if you add an intermediate <code>error.tsx</code> or <code>not_found.tsx</code>.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3">
+                          <div className="font-semibold text-foreground">3. Route Group <code>(group)</code></div>
+                          <div className="font-mono text-[11px] text-blue-600 dark:text-blue-400">src/(marketing)/pricing/</div>
+                        </td>
+                        <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400 font-semibold">Yes</td>
+                        <td className="p-3 font-mono font-semibold">&quot;./dinou&quot;</td>
+                        <td className="p-3 text-muted-foreground">
+                          Transparently strips <code>(marketing)</code> from the URL so <code>ROUTE = &quot;/pricing&quot;</code> while still resolving <code>&quot;./dinou&quot;</code> at the physical <code>(marketing)/pricing/</code> path.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3">
+                          <div className="font-semibold text-foreground">4. Parallel <code>@slot</code> Folder</div>
+                          <div className="font-mono text-[11px] text-blue-600 dark:text-blue-400">src/workspace/[org]/@sidebar/</div>
+                        </td>
+                        <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400 font-semibold">Yes</td>
+                        <td className="p-3 font-mono font-semibold">&quot;./dinou&quot;</td>
+                        <td className="p-3 text-muted-foreground">
+                          Types <code>SlotProps</code> / <code>ErrorProps</code> with cumulative <code>&#123; org: string &#125;</code>, while anchoring <code>ROUTE</code>, <code>&lt;Link&gt;</code>, and <code>useRouter()</code> to the parent URL segment <code>&quot;/workspace/[org]&quot;</code>.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3">
+                          <div className="font-semibold text-foreground">5. Colocated Leaf Subfolder</div>
+                          <div className="font-mono text-[11px] text-indigo-600 dark:text-indigo-400">src/blog/[slug]/components/</div>
+                        </td>
+                        <td className="p-3 font-mono text-muted-foreground">No (<code>TS2307</code>)</td>
+                        <td className="p-3 font-mono font-semibold">&quot;dinou&quot; or &quot;../dinou&quot;</td>
+                        <td className="p-3 text-muted-foreground">
+                          Do <strong>not</strong> prefix active subfolders with <code>_</code>. Because no routes exist inside or below <code>components/</code>, <code>&quot;./dinou&quot;</code> is absent: use <code>&quot;dinou&quot;</code> for portable/absolute links, or <code>&quot;../dinou&quot;</code> (or <code>&quot;../../dinou&quot;</code>) to inherit parent <code>&quot;/blog/[slug]&quot;</code> relative links.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3">
+                          <div className="font-semibold text-foreground">6. Global Shared Folder</div>
+                          <div className="font-mono text-[11px] text-purple-600 dark:text-purple-400">src/components/, src/lib/</div>
+                        </td>
+                        <td className="p-3 font-mono text-muted-foreground">No (<code>TS2307</code>)</td>
+                        <td className="p-3 font-mono font-bold text-emerald-600 dark:text-emerald-400">Always &quot;dinou&quot;</td>
+                        <td className="p-3 text-muted-foreground">
+                          Shared components can mount on any URL, so they must import from <code>&quot;dinou&quot;</code> and use absolute routes (or explicit <code>from</code>). Never use <code>&quot;../dinou&quot;</code> here.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3">
+                          <div className="font-semibold text-foreground">7. Parked <code>_folder</code></div>
+                          <div className="font-mono text-[11px] text-amber-600 dark:text-amber-400">src/_legacy/, src/blog/_draft/</div>
+                        </td>
+                        <td className="p-3 font-mono text-amber-600 dark:text-amber-400">Fallback shim</td>
+                        <td className="p-3 font-mono text-muted-foreground">Inactive only</td>
+                        <td className="p-3 text-muted-foreground">
+                          Excluded from router &amp; bundlers; active modules <strong>cannot</strong> import from <code>_*</code> (build error). Emits <code>ROUTE: string</code> fallback shims if parked route files exist so IDE diagnostics stay clean.
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <Alert className="not-prose my-4 border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  <AlertTitle className="text-amber-700 dark:text-amber-300 font-semibold">
+                    Pitfall to Avoid: Never Import <code>&quot;../dinou&quot;</code> Inside Global <code>src/components/</code>!
+                  </AlertTitle>
+                  <AlertDescription className="text-xs sm:text-sm text-muted-foreground mt-1.5 space-y-1.5">
+                    <p>
+                      Because <code>src/</code> itself is the root of your route tree, Dinou generates a root module at <code>.dinou/routes/dinou.&#123;js,d.ts&#125;</code> bound to <code>ROUTE = &quot;/&quot;</code>.
+                    </p>
+                    <p>
+                      While writing <code>import &#123; Link &#125; from &quot;./dinou&quot;</code> inside <code>src/components/navbar.tsx</code> rightly fails with <code>TS2307</code>, writing <code>import &#123; Link &#125; from &quot;../dinou&quot;</code> from <code>src/components/navbar.tsx</code> would climb up to <code>src/</code> and bind relative links to <code>ROUTE = &quot;/&quot;</code>—even when <code>&lt;Navbar /&gt;</code> is rendered on <code>/blog/hello</code>! Always import from <strong><code>&quot;dinou&quot;</code></strong> inside global folders (<code>src/components/</code>, <code>src/hooks/</code>, <code>src/lib/</code>), and reserve <code>&quot;../dinou&quot;</code> exclusively for route-local subfolders like <code>src/blog/[slug]/components/</code>.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+
+                <div className="not-prose bg-muted/40 rounded-xl p-4 border border-border text-xs text-muted-foreground space-y-1.5">
+                  <div className="font-semibold text-foreground flex items-center gap-1.5">
+                    <Info className="h-4 w-4 text-blue-500 shrink-0" />
+                    <span>Rule of Thumb: Choosing Your Import Specifier</span>
+                  </div>
+                  <ul className="list-disc pl-4 space-y-1 leading-relaxed">
+                    <li>
+                      <strong>Use <code>&quot;./dinou&quot;</code></strong> in route entry files (<code>page.tsx</code>, <code>layout.tsx</code>, <code>error.tsx</code>, <code>not_found.tsx</code>, <code>@slot/page.tsx</code>, <code>page_functions.ts</code>, <code>layout_functions.ts</code>) when typing route contracts (<code>PageProps</code>, <code>LayoutProps</code>, etc.) or writing relative links without <code>from</code>.
+                    </li>
+                    <li>
+                      <strong>Use <code>&quot;../dinou&quot;</code></strong> only inside a route-local helper subfolder (e.g. <code>src/blog/[slug]/components/</code>) when that component specifically needs relative navigation anchored to its parent route.
+                    </li>
+                    <li>
+                      <strong>Use <code>&quot;dinou&quot;</code> everywhere else</strong>—shared UI components, helpers, universal hooks (<code>usePathname</code>, <code>useSearchParams</code>, <code>getContext</code>, <code>redirect</code>), and any component that only uses absolute routes—so your components remain portable across folders.
+                    </li>
+                  </ul>
+                </div>
               </div>
             </section>
 
@@ -1270,8 +1444,8 @@ export default function WorkspaceRootLayout({ children, sidebar }: LayoutProps) 
                       Implemented in <code className="text-foreground">dinou/core/generate-route-types.js</code>. Pure filesystem parsing without executing user code, importing components, or launching test servers.
                     </p>
                     <ul className="list-disc pl-4 space-y-1 pt-1">
-                      <li>Ignores private folders (<code>_*</code>) and transparently unwraps route groups (<code>(group)</code>).</li>
-                      <li>Separates navigable <code>page.*</code> URLs from intermediate <code>layout.*</code> / <code>layout_functions.*</code> and parallel <code>@slot</code> segments.</li>
+                      <li>Excludes parked/escaped folders (<code>_*</code>—ignored by both the router and bundlers) and transparently unwraps route groups (<code>(group)</code>).</li>
+                      <li>Separates navigable <code>page.*</code> URLs from intermediate <code>layout.*</code> / <code>layout_functions.*</code> and parallel <code>@slot</code> segments (including <code>@slots</code> inside <code>(group)</code> folders and optional/catch-all slot sub-segments).</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -1484,7 +1658,7 @@ export default function WorkspaceRootLayout({ children, sidebar }: LayoutProps) 
             <DocsPager />
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Sidebar TOC - Visible on Desktop */}
       <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">

@@ -1,10 +1,6 @@
+import { Link } from "./dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/docs/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/docs/components/ui/card";
 import { Badge } from "@/docs/components/ui/badge";
 import {
@@ -111,7 +107,11 @@ export default function AboutPage() {
                     </li>
                     <li className="flex items-center gap-2.5">
                       <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                      <span><strong>Simple Condition:</strong> Only requires preserving the original copyright notice in distributions.</span>
+                      <span><strong>Simple Condition:</strong> Requires preserving the original copyright and license notice in copies or substantial portions of the software.</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <ShieldCheck className="h-4 w-4 text-slate-400 shrink-0" />
+                      <span><strong>Standard Limitation:</strong> Provided <code>&quot;AS IS&quot;</code> without warranty of any kind or author liability.</span>
                     </li>
                   </ul>
                 </div>
@@ -122,7 +122,7 @@ export default function AboutPage() {
                     1.2. Commercial &amp; Private Freedom
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Unlike modern web frameworks that adopt restrictive licensing (BSL, SSPL) or design their architectures to funnel workloads toward proprietary cloud platforms, Dinou will forever remain under the permissive MIT License. Your code, your build pipeline, and your deployment infrastructure remain entirely under your control.
+                    Unlike software projects that shift to restrictive source-available licenses (BSL, SSPL) or web frameworks designed to funnel workloads toward proprietary cloud platforms, Dinou will forever remain under the permissive MIT License. Your code, your build pipeline, and your deployment infrastructure remain entirely under your control.
                   </p>
 
                   <div className="not-prose pt-2">
@@ -183,7 +183,7 @@ export default function AboutPage() {
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground leading-relaxed">
-                      Each release includes detailed release notes, upgrade instructions, and commit diffs to ensure your production deployments remain completely reliable.
+                      Each release includes detailed release notes, <Link href="/docs/migration" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">upgrade instructions</Link>, and commit diffs to ensure your production deployments remain completely reliable.
                     </CardContent>
                   </Card>
                 </div>
@@ -368,7 +368,7 @@ export default function AboutPage() {
                         github.com/roggc/dinou
                       </a>
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-1 border-b border-slate-100 dark:border-slate-800/60">
                       <span className="font-medium text-slate-900 dark:text-slate-200">Issues &amp; Discussions</span>
                       <a
                         href="https://github.com/roggc/dinou/issues"
@@ -377,6 +377,17 @@ export default function AboutPage() {
                         className="font-mono text-xs text-blue-600 dark:text-blue-400 hover:underline"
                       >
                         github.com/roggc/dinou/issues
+                      </a>
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-1">
+                      <span className="font-medium text-slate-900 dark:text-slate-200">npm Package</span>
+                      <a
+                        href="https://www.npmjs.com/package/dinou"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        npmjs.com/package/dinou
                       </a>
                     </div>
                   </div>
