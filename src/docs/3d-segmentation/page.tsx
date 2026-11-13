@@ -1,3 +1,4 @@
+import { Link } from "dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
 import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
@@ -162,7 +163,7 @@ export default function Page() {
       />
       <link rel="canonical" href="https://dinou.dev/docs/3d-segmentation" />
 
-      <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
+      <div className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
@@ -323,9 +324,9 @@ export default function Page() {
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <div className="flex items-center gap-3">
-                <h3 className="m-0">
+                <h2 className="m-0">
                   1. Horizontal Axis (Standalone): Layout Isolation (<code>layout_functions.ts</code>)
-                </h3>
+                </h2>
                 <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
                   Combination #1 (H)
                 </span>
@@ -336,9 +337,16 @@ export default function Page() {
 
               {/* 1.1 Independent Lifecycles: Layout vs. Page */}
               <section id="horizontal-artifacts" className="mt-6 scroll-mt-20">
-                <h4>1.1. Independent Lifecycles: Layout vs. Page</h4>
+                <h3>1.1. Independent Lifecycles: Layout vs. Page</h3>
                 <p>
-                  Every <code>layout_functions.ts</code> file supports the <strong>exact same lifecycle functions as <code>page_functions.ts</code></strong> (<code>getProps</code>, <code>revalidate</code>, <code>getCacheTags</code>, <code>validateParams</code>, <code>getStaticPaths</code>, <code>allowISG</code>, and <code>ppr</code>), allowing Dinou to cache and manage layouts and pages independently:
+                  Every <code>layout_functions.ts</code> file supports the{" "}
+                  <strong>
+                    exact same lifecycle functions as{" "}
+                    <Link href="/docs/page-functions">
+                      <code>page_functions.ts</code>
+                    </Link>
+                  </strong>{" "}
+                  (<code>getProps</code>, <code>revalidate</code>, <code>getCacheTags</code>, <code>validateParams</code>, <code>getStaticPaths</code>, <code>allowISG</code>, and <code>ppr</code>), allowing Dinou to cache and manage layouts and pages independently:
                 </p>
                 <ul>
                   <li>
@@ -389,7 +397,7 @@ export default function Page() {
                   containerClassName="w-full overflow-hidden rounded-lg my-4"
                 >
 {`// src/dashboard/layout_functions.ts
-import type { LayoutFunctions } from "dinou";
+import type { LayoutFunctions } from "./dinou";
 
 // Parent layout caches independently for 1 hour (3,600s) with its own tag
 export const revalidate: LayoutFunctions["revalidate"] = 3600;
@@ -404,9 +412,9 @@ export async function getProps() {
 
               {/* 1.2 Surgical Revalidation & Zero Hydration Mismatch */}
               <section id="horizontal-revalidation" className="mt-8 scroll-mt-20">
-                <h4>1.2. Surgical Layout Revalidation &amp; Lazy On-Demand Propagation</h4>
+                <h3>1.2. Surgical Layout Revalidation &amp; Lazy On-Demand Propagation</h3>
                 <p>
-                  Because layouts and pages are cached independently, you can invalidate just the page (<code>revalidatePage</code>), just the layout (<code>revalidateLayout</code>), both at once (<code>revalidatePath</code>), or target either by tag (<code>revalidateTag</code>):
+                  Because layouts and pages are cached independently, you can invalidate just the page (<code>revalidatePage</code>), just the layout (<code>revalidateLayout</code>), both at once (<code>revalidatePath</code>), or target either by tag (<code>revalidateTag</code>)—see <Link href="/docs/revalidation">Revalidation</Link> for full API signatures and cascade options:
                 </p>
 
                 <CodeBlock
@@ -456,7 +464,7 @@ export async function updateEverything() {
 
               {/* 1.3 Client Navigation & Targeted Refresh */}
               <section id="horizontal-escape-hatches" className="mt-8 scroll-mt-20">
-                <h4>1.3. Client Navigation &amp; Targeted Refresh (<code>router.refresh</code>)</h4>
+                <h3>1.3. Client Navigation &amp; Targeted Refresh (<code>router.refresh</code>)</h3>
                 <p>
                   Horizontal Segmentation also extends to the browser. Because the client router manages the layout and the page as separate segments, you can navigate between pages or refresh the screen without re-fetching or losing state in your layout:
                 </p>
@@ -532,9 +540,9 @@ export function WorkspaceControls() {
             {/* 2. Vertical Axis: Micro-ISR */}
             <section id="micro-isr" className="mt-12 pt-8 border-t scroll-mt-20">
               <div className="flex items-center gap-3">
-                <h3 className="m-0">
+                <h2 className="m-0">
                   2. Vertical Axis (Standalone): Micro-ISR (<code>&lt;DinouCacheSlot&gt;</code>)
-                </h3>
+                </h2>
                 <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
                   Combination #2 (V)
                 </span>
@@ -663,7 +671,7 @@ export function WorkspaceControls() {
 
               {/* 2.1 Slot Caching */}
               <section id="slot-caching" className="mt-6 scroll-mt-20">
-                <h4>2.1. Component Caching: Dynamic vs. Static &amp; Key Patterns</h4>
+                <h3>2.1. Component Caching: Dynamic vs. Static &amp; Key Patterns</h3>
                 <p>
                   A frequent question is: <em>Is <code>&lt;DinouCacheSlot&gt;</code> meant for dynamic or static pages?</em> It functions as a <strong>universal caching primitive</strong> across both dynamic SSR and static/ISR routes:
                 </p>
@@ -692,10 +700,10 @@ export function WorkspaceControls() {
 
                 {/* Pattern 1 Implementation */}
                 <div className="space-y-3 my-6">
-                  <h5 className="font-semibold text-sm text-foreground flex items-center gap-2">
+                  <h4 className="font-semibold text-sm text-foreground flex items-center gap-2 m-0">
                     <Zap className="h-4 w-4 text-blue-500" />
                     Implementation Pattern 1: Dynamic SSR Dashboard with Cached, Nested &amp; Inline-Async Slots
-                  </h5>
+                  </h4>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     The route runs in Live SSR mode (evaluating user cookies and personal widgets live). Heavy calculations are cached on the server, including multi-tag slots, inline async function children, and nested Outer → Inner slots:
                   </p>
@@ -750,10 +758,10 @@ export default function DashboardPage() {
 
                 {/* Pattern 2 Implementation */}
                 <div className="space-y-3 my-6">
-                  <h5 className="font-semibold text-sm text-foreground flex items-center gap-2">
+                  <h4 className="font-semibold text-sm text-foreground flex items-center gap-2 m-0">
                     <Clock className="h-4 w-4 text-emerald-500" />
                     Implementation Pattern 2: Static / ISR Product Page with Parameterized Slot
-                  </h5>
+                  </h4>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     The parent route has a slow revalidation of 24 hours (<code>revalidate = 86400</code>). Inside it, a volatile inventory counter revalidates vertically every 60 seconds (<code>revalidate=&#123;60&#125;</code>) or on-demand when purchases occur:
                   </p>
@@ -764,12 +772,12 @@ export default function DashboardPage() {
                         id: "page",
                         label: "src/products/[slug]/page.tsx",
                         language: "tsx",
-                        code: `import type { PageProps } from "dinou";
+                        code: `import type { PageProps } from "./dinou";
 import { DinouCacheSlot } from "dinou/server";
 import { ProductHero, ProductDescription } from "./static-widgets";
 import { LiveStockCounter } from "./stock-widgets";
 
-export default function ProductDetailPage({ params }: PageProps<"/products/[slug]">) {
+export default function ProductDetailPage({ params }: PageProps) {
   return (
     <main className="container py-8 space-y-6">
       {/* 1. Heavy Static Content: Cached for 24 hours */}
@@ -793,7 +801,7 @@ export default function ProductDetailPage({ params }: PageProps<"/products/[slug
                         id: "page_functions",
                         label: "src/products/[slug]/page_functions.ts",
                         language: "typescript",
-                        code: `import type { PageFunctions } from "dinou";
+                        code: `import type { PageFunctions } from "./dinou";
 
 // Slow revalidation for outer page & descriptions (24 hours = 86,400s)
 export const revalidate: PageFunctions["revalidate"] = 86400;`,
@@ -845,7 +853,7 @@ export const revalidate: PageFunctions["revalidate"] = 86400;`,
 
               {/* 2.2 Interactive Revalidation & Invalidation */}
               <section id="slot-invalidation" className="mt-8 scroll-mt-20">
-                <h4>2.2. Interactive Refresh (<code>refreshSlot</code>), Tag Purging (<code>revalidateTag</code>) &amp; Background SWR</h4>
+                <h3>2.2. Interactive Refresh (<code>refreshSlot</code>), Tag Purging (<code>revalidateTag</code>) &amp; Background SWR</h3>
                 <p>
                   Dinou provides surgical mechanisms to refresh or purge <code>&lt;DinouCacheSlot&gt;</code> instances without re-rendering the surrounding page:
                 </p>
@@ -1018,7 +1026,7 @@ export function PostCreator() {
 
               {/* 2.3 Anti-Patterns */}
               <section id="slot-anti-patterns" className="mt-8 scroll-mt-20">
-                <h4>2.3. Anti-Patterns: When NOT to Use <code>&lt;DinouCacheSlot&gt;</code></h4>
+                <h3>2.3. Anti-Patterns: When NOT to Use <code>&lt;DinouCacheSlot&gt;</code></h3>
 
                 <div className="border border-rose-500/20 bg-rose-50/20 dark:bg-rose-950/10 rounded-xl p-5 not-prose space-y-3 my-4">
                   <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-bold text-sm">
@@ -1055,9 +1063,9 @@ export function PostCreator() {
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <div className="flex items-center gap-3">
-                <h3 className="m-0">
+                <h2 className="m-0">
                   3. Temporal Axis (Standalone): Partial Prerendering (PPR)
-                </h3>
+                </h2>
                 <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400 ring-1 ring-inset ring-purple-500/20">
                   Combination #3 (T)
                 </span>
@@ -1070,7 +1078,7 @@ export function PostCreator() {
 
               {/* 3.1 Architecture & The <Suspense> Boundary Rule */}
               <section id="ppr-architecture" className="mt-6 scroll-mt-20">
-                <h4>3.1. Static Shell, Dynamic Holes &amp; The <code>&lt;Suspense&gt;</code> Boundary Rule</h4>
+                <h3>3.1. Static Shell, Dynamic Holes &amp; The <code>&lt;Suspense&gt;</code> Boundary Rule</h3>
                 <p>
                   In Dinou, <strong>React <code>&lt;Suspense&gt;</code> is the single syntactic boundary</strong> separating the build-time Static Shell from request-time Dynamic PPR Holes inside any <code>ppr = true</code> segment (<code>page.tsx</code> or <code>layout.tsx</code>):
                 </p>
@@ -1233,7 +1241,7 @@ export function ProductReviews({
 
               {/* 3.2 Static <Suspense> Opt-Out via noDynamic() & Runtime Performance */}
               <section id="ppr-no-dynamic" className="mt-8 scroll-mt-20">
-                <h4>3.2. Static <code>&lt;Suspense&gt;</code> Opt-Out (<code>noDynamic()</code>) &amp; Runtime Performance</h4>
+                <h3>3.2. Static <code>&lt;Suspense&gt;</code> Opt-Out (<code>noDynamic()</code>) &amp; Runtime Performance</h3>
                 <p>
                   Suppose a <code>ppr = true</code> page has both a <strong>Dynamic PPR Hole</strong> (e.g., a live user header) and a <strong>heavy static <code>async</code> Server Component</strong> (e.g., compiling Markdown with syntax highlighting). On every request, after flushing the 0ms Static Shell, Dinou traverses <code>page.tsx</code>&apos;s component tree on the server to locate and stream the dynamic holes:
                 </p>
@@ -1246,7 +1254,7 @@ export function ProductReviews({
                   </li>
                 </ul>
                 <p>
-                  To get the best of both worlds, wrap the static component in <code>&lt;Suspense&gt;</code> and call <strong><code>noDynamic()</code></strong> (exported from both <code>&quot;dinou&quot;</code> and <code>&quot;dinou/server&quot;</code>) synchronously at the top of the component <strong>before its first <code>await</code></strong>:
+                  To get the best of both worlds, wrap the static component in <code>&lt;Suspense&gt;</code> and call <strong><code>noDynamic()</code></strong> (exported from <code>&quot;dinou/server&quot;</code>, <code>&quot;dinou&quot;</code>, and route-local <code>&quot;./dinou&quot;</code>) synchronously at the top of the component <strong>before its first <code>await</code></strong>:
                 </p>
                 <ol>
                   <li>
@@ -1262,7 +1270,7 @@ export function ProductReviews({
                   containerClassName="w-full overflow-hidden rounded-lg text-xs my-4"
                 >
 {`import { Suspense } from "react";
-import { noDynamic } from "dinou/server"; // or from "dinou"
+import { noDynamic } from "dinou/server"; // or from "dinou" / "./dinou"
 import { LiveUserBookmarkButton } from "./bookmarks";
 
 async function StaticMarkdownArticle({ slug }: { slug: string }) {
@@ -1314,9 +1322,9 @@ export default function DocPage() {
 
               {/* 3.3 Per-Segment Resolution, Global Default & Mixed Routes */}
               <section id="ppr-activation" className="mt-8 scroll-mt-20">
-                <h4>3.3. Per-Segment Resolution, Global Default &amp; Mixed Routes</h4>
+                <h3>3.3. Per-Segment Resolution, Global Default &amp; Mixed Routes</h3>
                 <p>
-                  In Dinou, <strong><code>ppr</code> defaults to <code>false</code> across all route segments</strong> (every root <code>layout.tsx</code>, nested <code>layout.tsx</code>, and leaf <code>page.tsx</code>), and you can change this project-wide default to <code>true</code> in <code>dinou.config.js</code> via <code>defineConfig(&#123; ppr: true &#125;)</code> (so every layout and page uses PPR automatically unless a specific segment opts out with <code>export const ppr = false</code>). Each segment resolves its <code>ppr</code> flag <strong>strictly from its own configuration file</strong> (<code>layout_functions.ts</code> or <code>page_functions.ts</code>) without parent-to-child inheritance, falling back directly to <code>dinou.config.js</code>:
+                  In Dinou, <strong><code>ppr</code> defaults to <code>false</code> across all route segments</strong> (every root <code>layout.tsx</code>, nested <code>layout.tsx</code>, and leaf <code>page.tsx</code>), and you can change this project-wide default to <code>true</code> in <code>dinou.config.ts</code> (or <code>.js</code>) via <code>defineConfig(&#123; ppr: true &#125;)</code> (so every layout and page uses PPR automatically unless a specific segment opts out with <code>export const ppr = false</code>). Each segment resolves its <code>ppr</code> flag—which accepts a boolean (<code>true | false</code>) or a sync/async function (<code>() =&gt; boolean | Promise&lt;boolean&gt;</code>)—<strong>strictly from its own configuration file</strong> (<code>layout_functions.ts</code> or <code>page_functions.ts</code>) without parent-to-child inheritance, falling back directly to <code>dinou.config.ts</code>:
                 </p>
 
                 <div className="border rounded-lg p-4 bg-card not-prose my-6 space-y-3">
@@ -1325,15 +1333,15 @@ export default function DocPage() {
                     <span>Per-Segment Lookup Order (No Cascading Across Segments)</span>
                   </div>
                   <div className="font-mono text-xs bg-muted/60 p-2.5 rounded-md text-purple-700 dark:text-purple-300 break-words">
-                    effectivePpr(segment) = segmentConfig.ppr ?? Boolean(dinouConfig.ppr) ?? false
+                    effectivePpr(segment) = (typeof segmentConfig.ppr === &quot;function&quot; ? await segmentConfig.ppr() : segmentConfig.ppr) ?? Boolean(dinouConfig.ppr) ?? false
                   </div>
                   <div className="grid gap-2 font-mono text-xs">
                     <div className="p-2.5 rounded bg-muted/80 flex items-center justify-between border-l-4 border-purple-500">
-                      <span>1. <strong>Own Segment Config</strong> (<code>page_functions.ts</code> or <code>layout_functions.ts</code>: <code>ppr = true | false</code>)</span>
+                      <span>1. <strong>Own Segment Config</strong> (<code>page_functions.ts</code> or <code>layout_functions.ts</code>: <code>ppr = true | false | (() =&gt; boolean | Promise&lt;boolean&gt;)</code>)</span>
                       <span className="text-xs uppercase tracking-wider font-semibold text-purple-600 dark:text-purple-400">Segment Override</span>
                     </div>
                     <div className="p-2.5 rounded bg-muted/80 flex items-center justify-between border-l-4 border-slate-500">
-                      <span>2. <strong>dinou.config.js</strong> (<code>defineConfig(&#123; ppr: true | false &#125;)</code> — defaults to <code>false</code>)</span>
+                      <span>2. <strong>dinou.config.ts</strong> (<code>defineConfig(&#123; ppr: true | false &#125;)</code> — defaults to <code>false</code>)</span>
                       <span className="text-xs uppercase tracking-wider font-semibold text-slate-500">Global Fallback</span>
                     </div>
                   </div>
@@ -1379,9 +1387,9 @@ export default function DocPage() {
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <div className="flex items-center gap-3">
-                <h3 className="m-0">
+                <h2 className="m-0">
                   4. Pairwise Synergy #1: Horizontal + Vertical (<code>layout_functions.ts</code> + <code>&lt;DinouCacheSlot&gt;</code>)
-                </h3>
+                </h2>
                 <span className="inline-flex items-center rounded-md bg-teal-500/10 px-2 py-0.5 text-xs font-medium text-teal-600 dark:text-teal-400 ring-1 ring-inset ring-teal-500/20">
                   Combination #4 (H + V)
                 </span>
@@ -1392,7 +1400,7 @@ export default function DocPage() {
 
               {/* 4.1 Layout Slots, @sidebar Slots & Cross-Axis Shared Tags */}
               <section id="hs-slot-capabilities" className="mt-6 scroll-mt-20">
-                <h4>4.1. Layout Slots, <code>@sidebar</code> Parallel Slots &amp; Cross-Axis Shared Tags</h4>
+                <h3>4.1. Layout Slots, <code>@sidebar</code> Parallel Slots &amp; Cross-Axis Shared Tags</h3>
                 <p>
                   Combining Horizontal and Vertical segmentation gives you four high-impact capabilities:
                 </p>
@@ -1447,16 +1455,14 @@ export default function DocPage() {
                       label: "src/workspace/layout.tsx",
                       language: "tsx",
                       code: `// Cached for 1h via layout_functions.ts
+import type { LayoutProps } from "./dinou";
 import { DinouCacheSlot } from "dinou/server";
 import { HeaderCreditsBadge } from "./widgets";
 
 export default function WorkspaceLayout({
   children,
-  sidebar,
-}: {
-  children: React.ReactNode;
-  sidebar: React.ReactNode;
-}) {
+  sidebar, // Automatically inferred from @sidebar!
+}: LayoutProps) {
   return (
     <div className="workspace-shell">
       <header>
@@ -1505,7 +1511,7 @@ export default function WorkspacePage() {
 
               {/* 4.2 Cross-Route Slot Persistence & Background Refresh */}
               <section id="hs-slot-client" className="mt-8 scroll-mt-20">
-                <h4>4.2. Cross-Route Slot Persistence &amp; Background Refresh Across Navigation</h4>
+                <h3>4.2. Cross-Route Slot Persistence &amp; Background Refresh Across Navigation</h3>
                 <p>
                   On standard routes, Dinou&apos;s client router caches visited pages in memory so round-trip soft navigation (<code>Page A → Page B → Page A</code>) completes in <strong>0ms with 0 network requests</strong>. Dinou keeps your live-refreshed <code>&lt;DinouCacheSlot&gt;</code> state in sync across those navigations automatically:
                 </p>
@@ -1526,9 +1532,9 @@ export default function WorkspacePage() {
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <div className="flex items-center gap-3">
-                <h3 className="m-0">
+                <h2 className="m-0">
                   5. Pairwise Synergy #2: Horizontal + Temporal (<code>layout_functions.ts</code> + PPR)
-                </h3>
+                </h2>
                 <span className="inline-flex items-center rounded-md bg-sky-500/10 px-2 py-0.5 text-xs font-medium text-sky-600 dark:text-sky-400 ring-1 ring-inset ring-sky-500/20">
                   Combination #5 (H + T)
                 </span>
@@ -1539,7 +1545,7 @@ export default function WorkspacePage() {
 
               {/* 5.1 Independent Layout & Page Static Shells with Parallel Holes */}
               <section id="hs-ppr-shells" className="mt-6 scroll-mt-20">
-                <h4>5.1. Independent Layout &amp; Page Static Shells with Parallel Streaming Holes</h4>
+                <h3>5.1. Independent Layout &amp; Page Static Shells with Parallel Streaming Holes</h3>
                 <p>
                   In a segmented PPR route hierarchy, your layout and your page each have their own independent static shell cache, TTL (<code>revalidate</code>), and invalidation tags (<code>getCacheTags</code>), while any <code>&lt;Suspense&gt;</code> holes inside the layout, <code>@sidebar</code>, and page stream in parallel on every request:
                 </p>
@@ -1552,6 +1558,7 @@ export default function WorkspacePage() {
                       label: "src/dashboard/layout.tsx",
                       language: "tsx",
                       code: `import { Suspense } from "react";
+import type { LayoutProps } from "./dinou";
 import { getContext } from "dinou/server";
 
 async function LiveUserHeaderHole() {
@@ -1560,7 +1567,11 @@ async function LiveUserHeaderHole() {
   return <span>Signed in as {user}</span>;
 }
 
-export default function DashboardLayout({ children, sidebar, orgName }: any) {
+export default function DashboardLayout({
+  children,
+  sidebar,
+  orgName,
+}: LayoutProps<{ orgName: string }>) {
   return (
     <div className="dashboard-shell">
       <header>
@@ -1579,7 +1590,7 @@ export default function DashboardLayout({ children, sidebar, orgName }: any) {
                       id: "layout_functions",
                       label: "src/dashboard/layout_functions.ts",
                       language: "typescript",
-                      code: `import type { LayoutFunctions } from "dinou";
+                      code: `import type { LayoutFunctions } from "./dinou";
 
 export const ppr: LayoutFunctions["ppr"] = true;
 export const revalidate: LayoutFunctions["revalidate"] = 3600; // Layout static shell cached for 1h
@@ -1594,9 +1605,9 @@ export async function getProps() {
                       id: "page_functions",
                       label: "src/dashboard/page_functions.ts",
                       language: "typescript",
-                      code: `import type { PageFunctions } from "dinou";
+                      code: `import type { PageFunctions } from "./dinou";
 
-// Each segment resolves ppr independently (or uses the global default from dinou.config.js)
+// Each segment resolves ppr independently (or uses the global default from dinou.config.ts)
 export const ppr: PageFunctions["ppr"] = true;
 export const revalidate: PageFunctions["revalidate"] = 300; // Page static shell cached independently for 5m
 export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"];`,
@@ -1607,7 +1618,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"
 
               {/* 5.2 Refresh, Revalidation & Navigation Matrix (Layout vs. Page) */}
               <section id="hs-ppr-revalidation" className="mt-8 scroll-mt-20">
-                <h4>5.2. How Refresh, Revalidation &amp; Navigation Affect Layout vs. Page Shells and Holes</h4>
+                <h3>5.2. How Refresh, Revalidation &amp; Navigation Affect Layout vs. Page Shells and Holes</h3>
                 <p>
                   Because Horizontal Segmentation separates the <strong>Layout</strong> from the <strong>Page</strong> and PPR separates the <strong>Static Shell</strong> from the <strong>Dynamic <code>&lt;Suspense&gt;</code> Holes</strong>, a segmented PPR route can have up to four independent parts: Layout Shell, Layout Holes, Page Shell, and Page Holes (or a subset on mixed routes where only the layout or only the page sets <code>ppr = true</code>). The table below summarizes how each client refresh, server revalidation, and soft navigation operation targets only the relevant parts without re-executing or re-fetching the rest:
                 </p>
@@ -1664,9 +1675,9 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <div className="flex items-center gap-3">
-                <h3 className="m-0">
+                <h2 className="m-0">
                   6. Pairwise Synergy #3: Vertical + Temporal (<code>&lt;DinouCacheSlot&gt;</code> + PPR)
-                </h3>
+                </h2>
                 <span className="inline-flex items-center rounded-md bg-violet-500/10 px-2 py-0.5 text-xs font-medium text-violet-600 dark:text-violet-400 ring-1 ring-inset ring-violet-500/20">
                   Combination #6 (V + T)
                 </span>
@@ -1700,7 +1711,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"
 
               {/* 6.1 Nesting-Order Semantics */}
               <section id="ppr-slot-nesting" className="mt-6 scroll-mt-20">
-                <h4>6.1. Nesting-Order Semantics (<code>&lt;Suspense&gt;</code> vs. <code>&lt;DinouCacheSlot&gt;</code>)</h4>
+                <h3>6.1. Nesting-Order Semantics (<code>&lt;Suspense&gt;</code> vs. <code>&lt;DinouCacheSlot&gt;</code>)</h3>
                 <p>
                   Inside a <code>ppr = true</code> segment (page or layout), the nesting order between <code>&lt;Suspense&gt;</code> and <code>&lt;DinouCacheSlot revalidate=&#123;N&#125;&gt;</code> (where <code>N &gt;= 1</code> or omitted) determines whether the slot becomes a <strong>Cached Dynamic PPR Hole</strong> or a <strong>Static Shell Slot</strong>:
                 </p>
@@ -1756,7 +1767,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["dashboard-home-tag"
 
               {/* 6.2 Caching Heavy Widgets Inside Personalized Holes & Surgical Live Holes */}
               <section id="ppr-slot-patterns" className="mt-8 scroll-mt-20">
-                <h4>6.2. Personalized Holes with Nested Slots &amp; Surgically Refreshable Live Holes</h4>
+                <h3>6.2. Personalized Holes with Nested Slots &amp; Surgically Refreshable Live Holes</h3>
                 <p>
                   What if a dynamic PPR <code>&lt;Suspense&gt;</code> hole reads user-specific request data in a Server Component (<code>req.cookies</code>, <code>req.headers</code>, <code>req.query</code>, or <code>useSearchParams()</code>), and <em>inside</em> that personalized hole you also need to render an expensive shared calculation or a nested <code>Outer → Inner</code> slot hierarchy? Or what if you have a 100% live uncached hole that you want to refresh individually via <code>refreshSlot(id)</code> without re-running every other hole on the page via <code>router.refresh()</code>?
                 </p>
@@ -1830,9 +1841,9 @@ export default function FeedPage() {
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <div className="flex items-center gap-3">
-                <h3 className="m-0">
+                <h2 className="m-0">
                   7. The Triple Synergy: Horizontal + Vertical + Temporal (PPR)
-                </h3>
+                </h2>
                 <span className="inline-flex items-center rounded-md bg-indigo-500/10 px-2 py-0.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 ring-1 ring-inset ring-indigo-500/20">
                   Combination #7 (H + V + T)
                 </span>
@@ -1843,7 +1854,7 @@ export default function FeedPage() {
 
               {/* 7.1 High-Traffic Telemetry & Full-Stack 3D Composition Example */}
               <section id="triple-synergy-example" className="mt-6 scroll-mt-20">
-                <h4>7.1. Full-Stack 3D Composition Example (Layout + Page + Slots + PPR)</h4>
+                <h3>7.1. Full-Stack 3D Composition Example (Layout + Page + Slots + PPR)</h3>
                 <p>
                   Below, a single route tree combines a segmented PPR Layout (hosting a layout-level <code>&lt;DinouCacheSlot&gt;</code>) with a PPR Page (hosting a Static Shell <code>&lt;DinouCacheSlot&gt;</code>, a Cached Dynamic Hole, and an uncached per-user Dynamic Hole):
                 </p>
@@ -1854,10 +1865,11 @@ export default function FeedPage() {
                       id: "layout",
                       label: "src/telemetry/layout.tsx",
                       language: "tsx",
-                      code: `import { DinouCacheSlot } from "dinou/server";
+                      code: `import type { LayoutProps } from "./dinou";
+import { DinouCacheSlot } from "dinou/server";
 import { ClusterRegionSelector, IncidentAlertBar } from "./layout-widgets";
 
-export default function TelemetryLayout({ children }: { children: React.ReactNode }) {
+export default function TelemetryLayout({ children }: LayoutProps) {
   return (
     <div className="telemetry-workspace">
       <header className="flex items-center justify-between">
@@ -1876,7 +1888,7 @@ export default function TelemetryLayout({ children }: { children: React.ReactNod
                       id: "layout_functions",
                       label: "src/telemetry/layout_functions.ts",
                       language: "typescript",
-                      code: `import type { LayoutFunctions } from "dinou";
+                      code: `import type { LayoutFunctions } from "./dinou";
 
 export const ppr: LayoutFunctions["ppr"] = true;
 export const revalidate: LayoutFunctions["revalidate"] = 3600;
@@ -1923,9 +1935,9 @@ export default function TelemetryPage() {
                       id: "page_functions",
                       label: "src/telemetry/page_functions.ts",
                       language: "typescript",
-                      code: `import type { PageFunctions } from "dinou";
+                      code: `import type { PageFunctions } from "./dinou";
 
-// Enable PPR for this page segment (or set ppr: true globally in dinou.config.js)
+// Enable PPR for this page segment (or set ppr: true globally in dinou.config.ts)
 export const ppr: PageFunctions["ppr"] = true;
 export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
                     },
@@ -1967,7 +1979,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
 
               {/* 7.2 4-Way Surgical Invalidation Without Collateral Rebuilds */}
               <section id="triple-synergy-invalidation" className="mt-8 scroll-mt-20">
-                <h4>7.2. 4-Way Surgical Invalidation Without Collateral Rebuilds</h4>
+                <h3>7.2. 4-Way Surgical Invalidation Without Collateral Rebuilds</h3>
                 <p>
                   Because Dinou tracks layout slots, page static-shell slots, and dynamic-hole slots independently, invalidating any piece of a Triple Synergy route never triggers unnecessary work in the rest of the tree:
                 </p>
@@ -1993,9 +2005,9 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
               id="comparison-matrix"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
-              <h3>
+              <h2>
                 8. Complete 7-Combination &amp; PPR Decision Matrices
-              </h3>
+              </h2>
               <p>
                 Summary of all <strong>7 non-empty architectural combinations (<code>2³ − 1 = 7</code>)</strong> across the Horizontal (H), Vertical (V), and Temporal (T) axes:
               </p>
@@ -2042,7 +2054,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
                     </tr>
                     <tr>
                       <td className="p-4 font-semibold text-foreground">5. Pairwise #2: H + T (Layouts + PPR)</td>
-                      <td className="p-4 text-xs font-mono text-muted-foreground">ppr = true per segment (or in dinou.config.js) across layout_functions.ts / page_functions.ts</td>
+                      <td className="p-4 text-xs font-mono text-muted-foreground">ppr = true per segment (or in dinou.config.ts) across layout_functions.ts / page_functions.ts</td>
                       <td className="p-4 text-xs text-emerald-600 dark:text-emerald-400 font-medium">~2.42ms (Independent Layout &amp; Page Shells)</td>
                       <td className="p-4 text-xs text-purple-600 dark:text-purple-400 font-medium">router.refresh() (page holes) vs. &#123; layout: true &#125; + Independent shell revalidation</td>
                       <td className="p-4 text-xs text-muted-foreground">Multi-level portals mixing PPR layouts, @sidebar holes, PPR pages, and static (&quot;ppr: false&quot;) pages</td>
@@ -2065,9 +2077,9 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
                 </table>
               </div>
 
-              <h4>
+              <h3>
                 Complete <code>&lt;Suspense&gt;</code> + <code>&lt;DinouCacheSlot&gt;</code> + <code>noDynamic()</code> Behavior Matrix
-              </h4>
+              </h3>
               <div className="not-prose overflow-x-auto rounded-lg border border-border my-6">
                 <table className="w-full text-xs text-left">
                   <thead className="bg-muted text-muted-foreground font-medium">
@@ -2137,7 +2149,7 @@ export const getCacheTags: PageFunctions["getCacheTags"] = ["telemetry-page"];`,
             <DocsPager />
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Sidebar TOC - Visible on Desktop */}
       <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">
