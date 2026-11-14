@@ -1,3 +1,4 @@
+import { Link } from "dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
 import {
@@ -10,26 +11,20 @@ import { Badge } from "@/docs/components/ui/badge";
 import {
   RefreshCw,
   Tag,
-  FolderOpen,
   Info,
   Zap,
-  ShieldCheck,
   AlertTriangle,
   Layers,
   Database,
-  Lock,
-  ArrowRight,
   Server,
   Sparkles,
   Sliders,
   FileCode,
   CheckCircle2,
-  GitCompare,
   Workflow,
   Cpu,
   Globe,
   FileText,
-  LayoutGrid,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 import {
@@ -184,7 +179,7 @@ export default function Page() {
       />
       <link rel="canonical" href="https://dinou.dev/docs/revalidation" />
 
-      <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
+      <div className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
@@ -216,6 +211,9 @@ export default function Page() {
             <section id="overview" className="scroll-mt-20">
               <h2>Overview &amp; Multi-Tier Architecture</h2>
               <p>
+                Building on Dinou&apos;s{" "}
+                <Link href="/docs/rendering">Rendering &amp; Caching (SSG, ISR &amp; PPR)</Link>{" "}
+                and <Link href="/docs/3d-segmentation">3D Route Segmentation</Link> engines,
                 Dinou implements a strictly decoupled <strong>two-tier caching architecture</strong>:
               </p>
 
@@ -332,7 +330,15 @@ export default function Page() {
                   <p>
                     <strong>Only in Mutative Event Contexts:</strong> Revalidation APIs (<code>revalidatePage</code>,{" "}
                     <code>revalidateLayout</code>, <code>revalidatePath</code>, <code>revalidateTag</code>) are mutative side-effects. They must only be invoked
-                    inside <strong>Server Functions</strong> (<code>&quot;use server&quot;</code>) or <strong>HTTP Webhook endpoints</strong> (such as Headless CMS publishing events).
+                    inside{" "}
+                    <Link href="/docs/server-functions" className="font-semibold underline underline-offset-2 text-foreground">
+                      Server Functions
+                    </Link>{" "}
+                    (<code>&quot;use server&quot;</code>) or <strong>HTTP Webhook endpoints</strong> (such as Headless CMS publishing events via{" "}
+                    <Link href="/docs/plugins" className="font-semibold underline underline-offset-2 text-foreground">
+                      Plugins
+                    </Link>
+                    ).
                   </p>
                   <p>
                     <strong>Never Inside Components or <code>getProps</code>:</strong> Calling revalidation during the component render phase or within{" "}
@@ -348,9 +354,9 @@ export default function Page() {
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
               <div className="flex items-center gap-3">
-                <h3 className="m-0">
+                <h2 className="m-0">
                   1. <code>revalidatePage</code> (Surgical Page Invalidation)
-                </h3>
+                </h2>
               </div>
 
               <p className="mt-4">
@@ -368,7 +374,7 @@ export default function Page() {
 
               {/* 1.1 Usage in Server Functions */}
               <section id="revalidate-page-usage" className="mt-6 scroll-mt-20">
-                <h4>1.1. Usage in Server Functions</h4>
+                <h3>1.1. Usage in Server Functions</h3>
                 <p>
                   Call <code>revalidatePage</code> directly inside your Server Functions or route handlers:
                 </p>
@@ -427,9 +433,9 @@ export async function updateArticle(slug: string, newContent: string) {
               id="revalidate-layout"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
-              <h3>
+              <h2>
                 2. <code>revalidateLayout</code> (Surgical Layout Invalidation)
-              </h3>
+              </h2>
               <p>
                 Exported from <code>&quot;dinou/server&quot;</code>, <code>revalidateLayout(path)</code> is the horizontal counterpart to <code>revalidatePage</code>. It surgically regenerates <strong>only the <code>layout.rsc</code> artifact</strong> for that route segment in <strong>O(1) time</strong>, executing <strong>0 <code>page.tsx</code> files</strong>:
               </p>
@@ -455,9 +461,9 @@ export async function updateWorkspaceBranding(newTitle: string) {
               {/* 2.1 Lazy On-Demand HTML Re-composition */}
               <section id="lazy-html-recomposition" className="mt-8 scroll-mt-20">
                 <div className="flex items-center gap-3">
-                  <h4 className="m-0">
+                  <h3 className="m-0">
                     2.1. O(1) Layout Update &amp; Lazy HTML Re-composition (Zero Hydration Mismatch)
-                  </h4>
+                  </h3>
                   <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
                     Automatic Scale Safety
                   </span>
@@ -495,16 +501,16 @@ export async function updateWorkspaceBranding(newTitle: string) {
               id="revalidate-path"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
-              <h3>
+              <h2>
                 3. <code>revalidatePath</code> &amp; Granularity Comparison
-              </h3>
+              </h2>
               <p>
                 Having introduced <code>revalidatePage</code> (page only) and <code>revalidateLayout</code> (layout only), this section covers <code>revalidatePath</code> (both together), compares all three APIs, and shows how relative paths are resolved.
               </p>
 
               {/* 3.1 revalidatePath */}
               <section id="revalidate-path-usage" className="mt-6 scroll-mt-20">
-                <h4>3.1. Combined Segment Purge (<code>revalidatePath</code>)</h4>
+                <h3>3.1. Combined Segment Purge (<code>revalidatePath</code>)</h3>
                 <p>
                   Exported from <code>&quot;dinou/server&quot;</code>, <code>revalidatePath(path)</code> is a convenience helper for when a mutation updates <strong>both the layout and the page</strong> located at that exact route path. Internally, it runs <code>revalidateLayout(path)</code> (if a layout exists in that segment) followed by <code>revalidatePage(path)</code>:
                 </p>
@@ -537,7 +543,7 @@ export async function refreshDashboardSegment() {
 
               {/* 3.2 revalidatePage vs revalidateLayout vs revalidatePath */}
               <section id="revalidate-page-vs-path" className="mt-8 scroll-mt-20">
-                <h4>3.2. <code>revalidatePage</code> vs. <code>revalidateLayout</code> vs. <code>revalidatePath</code></h4>
+                <h3>3.2. <code>revalidatePage</code> vs. <code>revalidateLayout</code> vs. <code>revalidatePath</code></h3>
                 <p>
                   Choose the server invalidation primitive that matches the exact scope of your data change:
                 </p>
@@ -584,9 +590,17 @@ export async function refreshDashboardSegment() {
 
               {/* 3.3 Absolute and Relative Paths */}
               <section id="absolute-and-relative" className="mt-8 scroll-mt-20">
-                <h4>3.3. Absolute &amp; Relative Route Paths</h4>
+                <h3>3.3. Absolute &amp; Relative Route Paths</h3>
                 <p>
-                  <code>revalidatePage</code>, <code>revalidateLayout</code>, and <code>revalidatePath</code> accept absolute route pathnames (and <code>revalidatePage</code> / <code>revalidatePath</code> also support relative paths resolved from the calling browser URL):
+                  All three path helpers—<code>revalidatePage</code>, <code>revalidateLayout</code>, and{" "}
+                  <code>revalidatePath</code>—accept both absolute route pathnames (e.g.{" "}
+                  <code>&quot;/catalog&quot;</code>) and relative paths (<code>&quot;./&quot;</code>,{" "}
+                  <code>&quot;..&quot;</code>, <code>&quot;../featured&quot;</code>) when called inside{" "}
+                  <Link href="/docs/server-functions">Server Functions</Link>. Dinou resolves relative paths
+                  against the automatic <code>x-dinou-current-path</code> request header attached by its client
+                  Server Function proxy (so resolution works reliably even under strict{" "}
+                  <code>Referrer-Policy: no-referrer</code> policies), falling back to the HTTP{" "}
+                  <code>Referer</code> header and <code>ctx.req.path</code>:
                 </p>
 
                 <CodeBlock
@@ -599,21 +613,21 @@ export async function refreshDashboardSegment() {
 import { revalidatePath, revalidatePage, revalidateLayout } from "dinou/server";
 import db from "@/lib/db";
 
-export async function updateCategory(categoryId: string, data: any) {
+export async function updateCategory(
+  categoryId: string,
+  data: { name: string }
+) {
   await db.categories.update({ where: { id: categoryId }, data });
 
-  // 1. Surgical layout-only invalidation for /catalog
-  await revalidateLayout("/catalog");
+  // 1. Absolute paths:
+  await revalidateLayout("/catalog"); // Layout-only O(1) update
+  await revalidatePath("/catalog");   // Layout + index page update
 
-  // 2. Combined segment invalidation for /catalog (layout.rsc + page.rsc + index.html)
-  await revalidatePath("/catalog");
-
-  // 3. Relative paths inside Server Functions (resolved via HTTP referer):
-  // Revalidate the current invoking leaf page surgically (e.g. /catalog/edit)
-  await revalidatePage("./");
-
-  // Revalidate an adjacent route segment (e.g. /catalog/featured)
-  await revalidatePath("../featured");
+  // 2. Relative paths inside Server Functions (resolved via x-dinou-current-path):
+  // If invoked from /catalog/electronics/edit:
+  await revalidatePage("./");          // -> /catalog/electronics/edit (leaf page only)
+  await revalidateLayout("..");        // -> /catalog/electronics (parent layout only)
+  await revalidatePath("../featured"); // -> /catalog/electronics/featured (layout + page)
 }`}
                 </CodeBlock>
               </section>
@@ -624,9 +638,9 @@ export async function updateCategory(categoryId: string, data: any) {
               id="revalidate-tag"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
-              <h3>
+              <h2>
                 4. <code>revalidateTag</code> (Cross-Cutting Invalidation)
-              </h3>
+              </h2>
               <p>
                 Purges all static pages, layouts, and component subtrees tagged with a specific key string across
                 your entire application with a single call:
@@ -650,7 +664,7 @@ export async function syncInventory() {
 
               {/* 4.1 Tag Assignment */}
               <section id="tag-assignment" className="mt-6 scroll-mt-20">
-                <h4>4.1. Tag Assignment (<code>getCacheTags</code>)</h4>
+                <h3>4.1. Tag Assignment (<code>getCacheTags</code>)</h3>
                 <p>
                   To attach cache tags to a route, export <code>getCacheTags</code> from your{" "}
                   <code>page_functions.ts</code> (using <code>PageFunctions</code>) or{" "}
@@ -671,7 +685,7 @@ export async function syncInventory() {
                       </p>
                       <CodeBlock language="typescript">
 {`// src/blog/page_functions.ts
-import type { PageFunctions } from "dinou";
+import type { PageFunctions } from "./dinou";
 
 export const getCacheTags: PageFunctions["getCacheTags"] = [
   "blog",
@@ -690,15 +704,16 @@ export const getCacheTags: PageFunctions["getCacheTags"] = [
                     </CardHeader>
                     <CardContent className="text-sm space-y-2">
                       <p className="text-muted-foreground">
-                        Ideal for dynamic, parameter-driven tags:
+                        Zero-boilerplate contextual typing via <code>&quot;./dinou&quot;</code>:
                       </p>
                       <CodeBlock language="typescript">
 {`// src/products/[id]/page_functions.ts
-import type { RouteParams } from "dinou";
+import type { PageFunctions } from "./dinou";
 
-export function getCacheTags(params: RouteParams<"/products/[id]">) {
+export const getCacheTags: PageFunctions["getCacheTags"] = (params) => {
+  // params.id is strictly inferred as string!
   return ["products", \`product-\${params.id}\`];
-}`}
+};`}
                       </CodeBlock>
                     </CardContent>
                   </Card>
@@ -706,16 +721,17 @@ export function getCacheTags(params: RouteParams<"/products/[id]">) {
 
                 <div className="mt-4 not-prose">
                   <p className="text-sm text-muted-foreground mb-2">
-                    You can also type the full contract using <code>PageFunctions</code> (or <code>LayoutFunctions</code>) together with <code>RouteParams</code>:
+                    You can also pass the route pattern explicitly to <code>PageFunctions</code> (or{" "}
+                    <code>LayoutFunctions</code>) imported from root <code>&quot;dinou&quot;</code>:
                   </p>
                   <CodeBlock language="typescript">
 {`// src/products/[id]/page_functions.ts
-import type { PageFunctions, RouteParams } from "dinou";
+import type { PageFunctions } from "dinou";
 
-export const getCacheTags: PageFunctions<
-  RouteParams<"/products/[id]">
->["getCacheTags"] = (params) => {
-  return ["products", \`product-\${params?.id}\`];
+export const getCacheTags: PageFunctions<"/products/[id]">["getCacheTags"] = (
+  params
+) => {
+  return ["products", \`product-\${params.id}\`];
 };`}
                   </CodeBlock>
 
@@ -725,7 +741,7 @@ export const getCacheTags: PageFunctions<
                       Transparent Sync and Async Support
                     </AlertTitle>
                     <AlertDescription className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                      The type declaration remains identical whether <code>getCacheTags</code> is synchronous or <code>async</code> (such as querying a database or CMS with <code>await</code>). Dinou&apos;s return contract (<code>string[] | Promise&lt;string[]&gt;</code>) and <code>RouteParams</code> polymorphically accommodate both forms without requiring separate types.
+                      The type declaration remains identical whether <code>getCacheTags</code> is synchronous or <code>async</code> (such as querying a database or CMS with <code>await</code>). Dinou&apos;s return contract (<code>string[] | Promise&lt;string[]&gt;</code>) polymorphically accommodates both forms without requiring separate types.
                     </AlertDescription>
                   </Alert>
                 </div>
@@ -734,9 +750,9 @@ export const getCacheTags: PageFunctions<
               {/* 4.2 Targeted Tag Resolution */}
               <section id="targeted-tag-resolution" className="mt-8 scroll-mt-20">
                 <div className="flex items-center gap-3">
-                  <h4 className="m-0">
+                  <h3 className="m-0">
                     4.2. Targeted Resolution (Layout vs Page vs Slot)
-                  </h4>
+                  </h3>
                   <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
                     Intelligent Purge
                   </span>
@@ -808,7 +824,7 @@ export const getCacheTags: PageFunctions<
 
               {/* 4.3 Golden Rules */}
               <section id="golden-rules" className="mt-8 scroll-mt-20">
-                <h4>4.3. Golden Rules of Invalidation</h4>
+                <h3>4.3. Golden Rules of Invalidation</h3>
                 <p>
                   Follow these best practices to maintain optimal cache hit rates and minimum server CPU usage:
                 </p>
@@ -851,12 +867,13 @@ export const getCacheTags: PageFunctions<
 
               {/* 4.4 CacheSlot Invalidation */}
               <section id="cache-slot-revalidation" className="mt-8 scroll-mt-20">
-                <h4>
+                <h3>
                   4.4. Invalidating <code>&lt;DinouCacheSlot&gt;</code> Subtrees
-                </h4>
+                </h3>
                 <p>
                   <code>revalidateTag</code> works seamlessly with micro-cached component subtrees created via{" "}
-                  <code>&lt;DinouCacheSlot&gt;</code>:
+                  <code>&lt;DinouCacheSlot&gt;</code> (see{" "}
+                  <Link href="/docs/3d-segmentation">3D Route Segmentation</Link> for vertical slot isolation):
                 </p>
 
                 <CodeBlock
@@ -892,9 +909,9 @@ export async function refreshTrends() {
               id="client-side-refresh"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
-              <h3>
+              <h2>
                 5. Client-Side Surgical Revalidation &amp; Router Caching
-              </h3>
+              </h2>
               <p>
                 Dinou provides a seamless SPA router experience with in-memory caching and granular refresh capabilities
                 directly in the browser:
@@ -902,7 +919,7 @@ export async function refreshTrends() {
 
               {/* 5.1 Router Caches */}
               <section id="router-caches" className="mt-6 scroll-mt-20">
-                <h4>5.1. The Router Caches (<code>pageCache</code> &amp; <code>layoutCache</code>)</h4>
+                <h3>5.1. The Router Caches (<code>pageCache</code> &amp; <code>layoutCache</code>)</h3>
                 <p>
                   The Dinou client router maintains two internal in-memory maps in the browser tab:
                 </p>
@@ -943,7 +960,7 @@ export async function refreshTrends() {
 
               {/* 5.2 Link fresh */}
               <section id="link-fresh" className="mt-8 scroll-mt-20">
-                <h4>5.2. Bypassing Client Cache with <code>&lt;Link fresh&gt;</code></h4>
+                <h3>5.2. Bypassing Client Cache with <code>&lt;Link fresh&gt;</code></h3>
                 <p>
                   Add the <code>fresh</code> prop to any <code>&lt;Link&gt;</code> component to bypass the client-side
                   cache for that navigation:
@@ -972,9 +989,9 @@ export async function refreshTrends() {
               {/* 5.3 router.refresh */}
               <section id="router-refresh" className="mt-8 scroll-mt-20">
                 <div className="flex items-center gap-3">
-                  <h4 className="m-0">
+                  <h3 className="m-0">
                     5.3. <code>router.refresh()</code> &amp; Layout Invalidation
-                  </h4>
+                  </h3>
                   <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-semibold text-purple-600 dark:text-purple-400 ring-1 ring-inset ring-purple-500/20">
                     layout: true
                   </span>
@@ -1050,12 +1067,15 @@ export function RefreshControl() {
 
               {/* 5.4 refreshSlot */}
               <section id="refresh-slot" className="mt-8 scroll-mt-20">
-                <h4>
+                <h3>
                   5.4. <code>refreshSlot</code> &amp; <code>router.refreshSlot</code>
-                </h4>
+                </h3>
                 <p>
-                  To refresh an isolated component without re-rendering sibling components or parent pages, use{" "}
-                  <code>refreshSlot</code>:
+                  To refresh an isolated <code>&lt;DinouCacheSlot&gt;</code> subtree in place without re-rendering
+                  sibling components or parent pages, use <code>refreshSlot(idOrTag, options)</code> (or{" "}
+                  <code>router.refreshSlot(idOrTag, options)</code>). Both return a <code>Promise&lt;void&gt;</code>{" "}
+                  and accept a unique slot <code>id</code>, a shared cache <code>tag</code> (refreshing every mounted
+                  slot carrying that tag), or <code>&quot;*&quot;</code> (refreshing all mounted slots on the active view):
                 </p>
 
                 <CodeBlock
@@ -1064,20 +1084,31 @@ export function RefreshControl() {
                 >
 {`"use client";
 
+import { useState } from "react";
 import { refreshSlot, useRouter } from "dinou";
 
 export function LiveAnalyticsButton() {
   const router = useRouter();
+  const [isPending, setIsPending] = useState(false);
 
-  const handleUpdate = () => {
-    // 1. Direct standalone function:
-    refreshSlot("analytics-summary", { fresh: true });
+  const handleUpdate = async () => {
+    setIsPending(true);
+    try {
+      // 1. Refresh a single slot ID (or pass a shared tag / "*" for all mounted slots):
+      await refreshSlot("analytics-summary", { fresh: true });
 
-    // 2. Or via router instance (identical signature and options):
-    // router.refreshSlot("analytics-summary", { fresh: true });
+      // 2. Or via router instance (identical Promise<void> signature and options):
+      // await router.refreshSlot("analytics-summary", { fresh: true });
+    } finally {
+      setIsPending(false);
+    }
   };
 
-  return <button onClick={handleUpdate}>Live Refresh Metrics</button>;
+  return (
+    <button onClick={handleUpdate} disabled={isPending}>
+      {isPending ? "Refreshing..." : "Live Refresh Metrics"}
+    </button>
+  );
 }`}
                 </CodeBlock>
 
@@ -1108,10 +1139,10 @@ export function LiveAnalyticsButton() {
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground space-y-1.5 leading-relaxed">
                       <p>
-                        Bypasses and ignores any unexpired server cache. Forces Dinou to immediately re-evaluate the Server Component, generate new JSX, overwrite the storage cache with the fresh timestamp, and stream it to the client.
+                        Bypasses any unexpired server cache, forces Dinou to immediately re-evaluate the slot&apos;s Server Component, updates the slot cache, and automatically splices the fresh slot into the host route&apos;s cached static/PPR HTML shell without re-executing <code>page.tsx</code> or <code>layout.tsx</code>—so subsequent hard reloads (F5) also serve the updated UI!
                       </p>
                       <p>
-                        <strong>Use Case:</strong> Explicit user-initiated refresh triggers (such as clicking a &quot;Live Sync&quot; button) where the user explicitly demands live data regardless of remaining TTL.
+                        <strong>Use Case:</strong> Explicit user-initiated refresh triggers (such as clicking a &quot;Live Sync&quot; button) where the user demands live data regardless of remaining TTL.
                       </p>
                     </CardContent>
                   </Card>
@@ -1124,13 +1155,13 @@ export function LiveAnalyticsButton() {
               id="storage-adapters"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
-              <h3>
+              <h2>
                 6. Pluggable Storage Adapters
-              </h3>
+              </h2>
 
               {/* 6.1 Distributed Problem */}
               <section id="distributed-problem" className="mt-6 scroll-mt-20">
-                <h4>6.1. Why Adapters Matter for Revalidation</h4>
+                <h3>6.1. Why Adapters Matter for Revalidation</h3>
 
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                   Revalidation (<code className="text-foreground">revalidatePage</code>, <code className="text-foreground">revalidateLayout</code>, <code className="text-foreground">revalidatePath</code>,{" "}
@@ -1200,7 +1231,7 @@ export function LiveAnalyticsButton() {
                       <p className="text-xs text-muted-foreground leading-relaxed">
                         In serverless runtimes like Cloudflare Workers, there is no writable filesystem. Dinou auto-binds to your{" "}
                         <code className="text-foreground font-mono">DINOU_CACHE</code> KV namespace at runtime.
-                        You <strong>never configure dinou.config.js</strong>—simply add the KV binding to{" "}
+                        You <strong>never configure dinou.config.ts</strong>—simply add the KV binding to{" "}
                         <code className="text-foreground font-mono">wrangler.toml</code>. Deno Deploy works identically with zero-config Deno KV.
                       </p>
                     </div>
@@ -1240,7 +1271,7 @@ export function LiveAnalyticsButton() {
                     <code className="text-foreground font-mono">revalidateTag(&quot;products&quot;)</code> or{" "}
                     <code className="text-foreground font-mono">revalidatePath(&quot;/catalog&quot;)</code>, your UI and
                     server components remain 100% identical whether you run on a single local Node.js VPS (<code className="text-foreground font-mono">FileSystemStorage</code>),
-                    scale to a multi-pod Kubernetes cluster (<code className="text-foreground font-mono">RedisStorage</code> in <code className="text-foreground font-mono">dinou.config.js</code>),
+                    scale to a multi-pod Kubernetes cluster (<code className="text-foreground font-mono">RedisStorage</code> in <code className="text-foreground font-mono">dinou.config.ts</code>),
                     or deploy to global Cloudflare Workers (automatic <code className="text-foreground font-mono">CloudflareKVStorage</code> via <code className="text-foreground font-mono">wrangler.toml</code>).
                   </p>
                 </div>
@@ -1248,7 +1279,7 @@ export function LiveAnalyticsButton() {
 
               {/* 6.2 Supported Adapters */}
               <section id="adapter-catalog" className="mt-8 scroll-mt-20">
-                <h4>6.2. Supported Storage Adapters &amp; Configuration</h4>
+                <h3>6.2. Supported Storage Adapters &amp; Configuration</h3>
 
                 <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
                   <Table>
@@ -1263,12 +1294,12 @@ export function LiveAnalyticsButton() {
                       <TableRow>
                         <TableCell className="font-mono text-xs font-semibold">FileSystemStorage</TableCell>
                         <TableCell className="text-xs">Node.js / Bun / Docker</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">Default. Zero config, atomic file writes on local disk.</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Default. Zero config, atomic file writes in <code>.dinou/dist2</code>.</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell className="font-mono text-xs font-semibold">RedisStorage</TableCell>
                         <TableCell className="text-xs">Distributed Clusters</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">Shared cluster cache across Kubernetes pods or multi-container VPS.</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Shared cluster cache across Kubernetes pods or multi-container VPS (default prefix <code>&quot;dinou:cache:&quot;</code>, lazy <code>.dinou/dist2</code> hydration &amp; cluster tombstones).</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell className="font-mono text-xs font-semibold">CloudflareKVStorage</TableCell>
@@ -1283,7 +1314,7 @@ export function LiveAnalyticsButton() {
                       <TableRow>
                         <TableCell className="font-mono text-xs font-semibold">MemoryStorage</TableCell>
                         <TableCell className="text-xs">Testing / CI / Mocks</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">In-memory ephemeral Map for unit tests and local mock runs.</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Isolated in-memory ephemeral Map for unit tests and read-only containers (<code>hydrateFromDisk: false</code> by default).</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -1292,16 +1323,15 @@ export function LiveAnalyticsButton() {
                 <p className="mt-4 text-sm text-muted-foreground">
                   In Node.js / Bun environments, override the default local disk storage by declaring a distributed adapter
                   (such as <code className="text-foreground font-mono">RedisStorage</code>) in{" "}
-                  <code className="text-foreground font-semibold">dinou.config.js</code>. Dinou binds it
-                  automatically to the internal revalidation and ISR pipeline on startup (edge environments like Cloudflare Workers
-                  and Deno Deploy activate automatically without editing this file):
+                  <code className="text-foreground font-semibold">dinou.config.ts</code> (or <code className="text-foreground font-mono">dinou.config.js</code>).
+                  During <code>npm run build</code>, static generation still writes exclusively to <code>.dinou/dist2</code> without touching Redis, and at runtime cold pods lazily hydrate pre-rendered artifacts into Redis on first access (compatible with <code>redis</code> v4/v5, <code>ioredis</code>, and <code>@upstash/redis</code>):
                 </p>
 
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`// dinou.config.js
+{`// dinou.config.ts
 import { defineConfig } from "dinou";
 import { RedisStorage } from "dinou/server";
 import { createClient } from "redis";
@@ -1310,8 +1340,9 @@ const redis = createClient({ url: process.env.REDIS_URL });
 await redis.connect();
 
 export default defineConfig({
-  // Cluster-wide distributed cache storage for ISR and revalidation
-  storage: new RedisStorage(redis, "dinou-cache:"),
+  // Accepts an optional string prefix (default "dinou:cache:")
+  // or options object: { prefix?: string; hydrateFromDisk?: boolean }
+  storage: new RedisStorage(redis, { prefix: "dinou:cache:" }),
 });`}
                 </CodeBlock>
 
@@ -1394,7 +1425,7 @@ export default defineConfig({
                       language="typescript"
                       containerClassName="w-full overflow-hidden rounded-lg text-xs"
                     >
-{`// 1. In dinou.config.js (conditional for CI / test environment)
+{`// 1. In dinou.config.ts (conditional for CI / test environment)
 import { defineConfig } from "dinou";
 import { MemoryStorage, RedisStorage } from "dinou/server";
 
@@ -1402,7 +1433,7 @@ export default defineConfig({
   // Use in-memory cache during tests to avoid external database dependencies
   storage: process.env.NODE_ENV === "test"
     ? new MemoryStorage()
-    : new RedisStorage(redisClient, "dinou-cache:"),
+    : new RedisStorage(redisClient, "dinou:cache:"),
 });
 
 // 2. Or directly in your test suite (Vitest / Jest) for total test isolation
@@ -1421,7 +1452,7 @@ beforeEach(() => {
                   <strong>Note for external worker scripts:</strong> If you run standalone background scripts or CLI tools outside
                   the Dinou web server that need to perform cache purges, you can imperatively bind the storage adapter using{" "}
                   <code className="text-foreground font-mono">setStorageAdapter(adapter)</code> from{" "}
-                  <code className="text-foreground font-mono">"dinou/server"</code>.
+                  <code className="text-foreground font-mono">&quot;dinou/server&quot;</code>.
                 </p>
               </section>
             </section>
@@ -1431,21 +1462,29 @@ beforeEach(() => {
               id="security-and-webhooks"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
-              <h3>
+              <h2>
                 7. Webhook Integrations (Headless CMS)
-              </h3>
+              </h2>
               <p>
                 External events, such as a Headless CMS (Sanity, Strapi, Contentful) publishing content or an e-commerce inventory sync, can trigger on-demand revalidation in Dinou. Webhook endpoints are created via{" "}
-                <strong>Web Standards Plugins</strong> using the <code>onRequest</code> hook in <code className="text-foreground font-semibold">dinou.config.js</code>:
+                <Link href="/docs/plugins">Web Standards Plugins</Link> using the <code>onRequest</code> hook in{" "}
+                <code className="text-foreground font-semibold">dinou.config.ts</code> (or <code className="text-foreground font-mono">dinou.config.js</code>):
               </p>
 
               <CodeBlock
                 language="typescript"
                 containerClassName="w-full overflow-hidden rounded-lg my-4"
               >
-{`// dinou.config.js
+{`// dinou.config.ts
 import { defineConfig } from "dinou";
 import { revalidateTag, revalidatePage, revalidateLayout, revalidatePath } from "dinou/server";
+
+interface RevalidatePayload {
+  tag?: string;
+  page?: string;
+  layout?: string;
+  path?: string;
+}
 
 export default defineConfig({
   plugins: [
@@ -1457,7 +1496,8 @@ export default defineConfig({
         // Intercept POST requests to /api/revalidate
         if (url.pathname === "/api/revalidate" && request.method === "POST") {
           try {
-            const { tag, page, layout, path } = await request.json();
+            const { tag, page, layout, path } =
+              (await request.json()) as RevalidatePayload;
 
             if (tag) {
               await revalidateTag(tag);
@@ -1476,8 +1516,10 @@ export default defineConfig({
             }
 
             return Response.json({ revalidated: true, timestamp: Date.now() });
-          } catch (err: any) {
-            return Response.json({ error: err.message }, { status: 500 });
+          } catch (err: unknown) {
+            const message =
+              err instanceof Error ? err.message : "Invalid webhook payload";
+            return Response.json({ error: message }, { status: 500 });
           }
         }
       },
@@ -1502,16 +1544,16 @@ export default defineConfig({
               id="strategy-matrix"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
-              <h3>
+              <h2>
                 8. Strategy Comparison Matrix
-              </h3>
+              </h2>
               <p>
                 Comprehensive reference guide for choosing the optimal invalidation and refresh mechanism in Dinou:
               </p>
 
               {/* 8.1 Server Matrix */}
               <section id="server-matrix" className="mt-8 scroll-mt-20">
-                <h4>8.1. Server-Side Invalidation Mechanisms</h4>
+                <h3>8.1. Server-Side Invalidation Mechanisms</h3>
                 <p className="text-sm text-muted-foreground">
                   Executed inside Server Functions, Webhook plugins, or route configurations to purge server-side HTML,
                   React Server Component payloads, and storage caches:
@@ -1565,7 +1607,7 @@ export default defineConfig({
 
               {/* 8.2 Client Matrix */}
               <section id="client-matrix" className="mt-10 scroll-mt-20">
-                <h4>8.2. Client-Side Router Refresh Mechanisms</h4>
+                <h3>8.2. Client-Side Router Refresh Mechanisms</h3>
                 <p className="text-sm text-muted-foreground">
                   Executed inside Client Components and user interactions to invalidate browser router caches
                   without triggering a full browser window reload (F5):
@@ -1605,11 +1647,11 @@ export default defineConfig({
                         <TableCell className="text-xs text-muted-foreground">No (serves server storage cache)</TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell className="font-mono text-xs font-semibold">refreshSlot(id, [options])</TableCell>
+                        <TableCell className="font-mono text-xs font-semibold">refreshSlot(idOrTag, [options])</TableCell>
                         <TableCell className="text-xs text-muted-foreground"><code>refreshSlot</code> / <code>useRouter()</code></TableCell>
-                        <TableCell className="text-xs text-amber-600 dark:text-amber-400 font-semibold">Re-fetches and replaces slot DOM only</TableCell>
+                        <TableCell className="text-xs text-amber-600 dark:text-amber-400 font-semibold">Re-fetches and replaces matching slot DOM (by ID, tag, or <code>&quot;*&quot;</code>)</TableCell>
                         <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Yes (entire page, layout &amp; scroll preserved)</TableCell>
-                        <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Only with <code>{`{ fresh: true }`}</code></TableCell>
+                        <TableCell className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Only with <code>{`{ fresh: true }`}</code> (+ splices host shell)</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -1621,7 +1663,7 @@ export default defineConfig({
             <DocsPager />
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Sidebar TOC - Hidden on Mobile */}
       <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">
