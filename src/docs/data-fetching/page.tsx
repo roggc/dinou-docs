@@ -1,3 +1,4 @@
+import { Link } from "dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
 import { ClickableTableRow } from "@/docs/components/clickable-table-row";
@@ -189,7 +190,12 @@ export default function DataFetchingPage() {
               <p>
                 Dinou provides unprecedented flexibility by separating <strong>where code executes</strong> (Server Component vs Client Component),{" "}
                 <strong>when data is fetched</strong> (Build time vs Per-request vs On-demand), and{" "}
-                <strong>how it is delivered</strong> (Blocking TTFB vs Progressive HTTP Streaming vs Micro-ISR Caching).
+                <strong>how it is delivered</strong> (Blocking TTFB vs Progressive HTTP Streaming vs Micro-ISR Caching). For deep dives into the underlying primitives, see{" "}
+                <Link href="/docs/rendering">Rendering &amp; Caching</Link>,{" "}
+                <Link href="/docs/3d-segmentation">3D Cache Segmentation</Link>,{" "}
+                <Link href="/docs/page-functions">Page &amp; Layout Functions</Link>,{" "}
+                <Link href="/docs/server-functions">Server Functions</Link>, and{" "}
+                <Link href="/docs/revalidation">On-Demand Revalidation</Link>.
               </p>
 
               {/* Quick Jump Grid */}
@@ -925,7 +931,7 @@ export default async function BlogIndexPage() {
                     When a page is a <strong>Server Component</strong>, fetching data via <code>getProps</code> in <code>page_functions.ts</code> is <strong>functionally equivalent</strong> to executing queries directly with top-level <code>await</code> inside the component body (Strategies 1 &amp; 2).
                   </p>
                   <p>
-                    Both patterns run exclusively on the server prior to rendering, introduce zero client JavaScript bundle overhead, exhibit identical database latency, and produce the exact same static HTML and pre-compiled <code>.rsc</code> payload. The primary architectural purpose of <code>getProps</code> is when utilizing the <strong>Client-First Model</strong> (Strategies 10 &amp; 11), where it extracts data on the server to feed directly as initial props into interactive Client Component pages (<code>&quot;use client&quot;</code>).
+                    Both patterns run exclusively on the server prior to rendering, introduce zero client JavaScript bundle overhead, exhibit identical database latency, and produce the exact same static HTML and pre-compiled <code>.rsc</code> payload. The primary architectural purpose of <code>getProps</code> (see <Link href="/docs/page-functions" className="underline underline-offset-2 font-medium text-foreground">Page &amp; Layout Functions</Link>) is when utilizing the <strong>Client-First Model</strong> (Strategies 10–12), where it extracts data on the server to feed directly as initial props into interactive Client Component pages (<code>&quot;use client&quot;</code>).
                   </p>
                 </AlertDescription>
               </Alert>
@@ -1214,7 +1220,8 @@ export default function AnalyticsPage() {
                     <li><strong>Direct Promise Children:</strong> In React Server Components, <code>&lt;Suspense&gt;</code> natively accepts a <code>Promise&lt;ReactNode&gt;</code> directly as children (<code>&#123;getMetricsTable()&#125;</code>), eliminating the need for boilerplate async wrapper components.</li>
                     <li><strong>Identical HTTP Streaming Behavior:</strong> In both cases, the initial layout shell and <code>&lt;AnalyticsSkeleton /&gt;</code> are flushed immediately in chunk 1 (fast TTFB). When the query resolves, the server streams the rendered HTML/RSC payload into chunk 2.</li>
                     <li><strong>Zero Client JavaScript:</strong> Database logic, ORM queries, and credentials remain 100% on the server in both solutions.</li>
-                    <li><strong>Versatility Bonus:</strong> Returning the JSX tree from a Server Function allows the exact same function to be triggered on-demand by Client Components later (e.g., a &quot;Refresh Metrics&quot; button or live filter) via Dinou&apos;s UI streaming RPC.</li>
+                    <li><strong>Versatility Bonus:</strong> Returning the JSX tree from a <Link href="/docs/server-functions" className="underline underline-offset-2 font-medium text-foreground">Server Function</Link> allows the exact same function to be triggered on-demand by Client Components later (e.g., a &quot;Refresh Metrics&quot; button or live filter) via Dinou&apos;s UI streaming RPC.</li>
+                    <li><strong>PPR Synchronous Request Nuance:</strong> On <Link href="/docs/rendering" className="underline underline-offset-2 font-medium text-foreground">PPR (<code>ppr = true</code>)</Link> routes, <code>&#123;getMetricsTable()&#125;</code> inside <code>&lt;Suspense&gt;</code> registers a dynamic hole automatically when it performs async I/O. However, if a helper reads <code>getContext()?.req</code> or <code>useSearchParams()</code> <strong>synchronously before its first <code>await</code></strong>, wrap it in a child Server Component (<code>&lt;SlowHeavyMetrics /&gt;</code>) inside <code>&lt;Suspense&gt;</code> so that synchronous request access executes inside the <code>&lt;Suspense&gt;</code> boundary rather than in the outer page frame.</li>
                   </ul>
                 </AlertDescription>
               </Alert>
@@ -1248,7 +1255,7 @@ export default function AnalyticsPage() {
               </div>
 
               <p className="text-sm text-muted-foreground leading-relaxed">
-                <strong>How it works:</strong> Solves the &quot;all-or-nothing&quot; revalidation problem on Static/ISR routes (<code>ppr = false</code>). The base outer page and layout are pre-rendered at build time (<strong>SSG</strong>) or configured with long-term ISR (e.g., 24 hours) and delivered with <strong>0ms TTFB</strong>. Meanwhile, an inner volatile component is wrapped directly in an unwrapped <code>&lt;DinouCacheSlot&gt;</code> with a fast TTL (e.g., 60 seconds). Because the route is static, the slot is pre-rendered directly into the static HTML (no <code>&lt;Suspense&gt;</code> wrapper needed, as a fallback would never be shown). When the slot&apos;s 60-second TTL expires, Dinou serves the existing static HTML immediately (0ms, zero skeleton flash) and triggers <strong>Background SWR</strong> to re-execute only that slot and surgically splice the updated widget into the cached <code>index.html</code> and <code>page.rsc</code> files on disk.
+                <strong>How it works:</strong> Solves the &quot;all-or-nothing&quot; revalidation problem on Static/ISR routes (<code>ppr = false</code>). The base outer page and layout are pre-rendered at build time (<strong>SSG</strong>) or on-demand (<strong>ISG</strong>) and configured with long-term ISR (e.g., 24 hours) for <strong>0ms TTFB</strong>. Meanwhile, an inner volatile component is wrapped directly in an unwrapped <Link href="/docs/3d-segmentation" className="underline underline-offset-2 font-medium text-foreground"><code>&lt;DinouCacheSlot&gt;</code></Link> with a fast TTL (e.g., 60 seconds). Because the route is static, the slot is pre-rendered directly into the static HTML (no <code>&lt;Suspense&gt;</code> wrapper needed, as a fallback would never be shown). When the slot&apos;s 60-second TTL expires, Dinou serves the existing static HTML immediately (0ms, zero skeleton flash) and triggers <strong>Background SWR</strong> to re-execute only that slot and surgically splice the updated widget into the cached <code>index.html</code> and <code>page.rsc</code> artifacts in your configured <code>StorageAdapter</code> (Filesystem, Memory, Redis, or Cloudflare KV).
               </p>
 
               <TabbedCodeBlock
@@ -1258,16 +1265,24 @@ export default function AnalyticsPage() {
                     id: "fn",
                     label: "src/products/[slug]/page_functions.ts",
                     language: "tsx",
-                    code: `export const revalidate = 86400; // Outer page revalidates once every 24 hours`,
+                    code: `import db from "@/lib/db";
+
+export const revalidate = 86400; // Outer page revalidates once every 24 hours
+
+// Pre-render top catalog slugs at build time (other slugs generate on-demand via ISG):
+export async function getStaticPaths() {
+  return await db.products.findFeaturedSlugs();
+}`,
                   },
                   {
                     id: "page",
                     label: "src/products/[slug]/page.tsx",
                     language: "tsx",
-                    code: `import { DinouCacheSlot } from "dinou/server";
+                    code: `import type { PageProps } from "dinou";
+import { DinouCacheSlot } from "dinou/server";
 import { LivePriceTicker, StaticDescription } from "./components";
 
-export default function ProductDetailPage({ params }: { params: { slug: string } }) {
+export default function ProductDetailPage({ params }: PageProps<"/products/[slug]">) {
   return (
     <div className="product-view">
       {/* Static product description: cached for 24h */}
@@ -1316,7 +1331,7 @@ export async function LivePriceTicker({ slug }: { slug: string }) {
               />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
-                <p>• <strong>Surgical Static Splicing:</strong> When the slot expires or <code>revalidateTag(&quot;pricing&quot;)</code> / <code>refreshSlot(&quot;price-prod-1&quot;)</code> is called, Dinou updates only the slot markers inside <code>index.html</code> and <code>page.rsc</code> without re-running the outer 24-hour page.</p>
+                <p>• <strong>Surgical Static Splicing:</strong> When the slot expires or <Link href="/docs/revalidation" className="underline underline-offset-2 font-medium text-foreground"><code>revalidateTag(&quot;pricing&quot;)</code></Link> / <code>refreshSlot(&quot;price-prod-1&quot;)</code> is called, Dinou updates only the slot inside <code>shell.page.json</code>, <code>index.html</code>, and <code>page.rsc</code> across your configured <code>StorageAdapter</code> without re-running the outer 24-hour page (or resetting the host page&apos;s own 24-hour ISR timer).</p>
                 <p>• <strong>Massive Cost Savings:</strong> Prevents volatile widgets from causing full-page rebuild cascades across thousands of static pages.</p>
               </div>
             </section>
@@ -1349,9 +1364,9 @@ export async function LivePriceTicker({ slug }: { slug: string }) {
               </div>
 
               <p className="text-sm text-muted-foreground leading-relaxed">
-                <strong>How it works:</strong> Used on Dynamic SSR routes (<code>ppr = false</code>) that render per-request using user sessions, cookies, or headers (where no static HTML exists on disk).
+                <strong>How it works:</strong> Used on Dynamic SSR routes (<code>ppr = false</code>) that render per-request using user sessions, cookies, or headers (where no static HTML artifact is cached).
                 Wrapping <code>&lt;DinouCacheSlot&gt;</code> in <code>&lt;Suspense&gt;</code> ensures that on a <strong>cold cache miss</strong> (the very first request), the outer layout and fallback skeleton stream immediately without blocking TTFB while the slot populates in the background.
-                On subsequent requests (<strong>cache hits</strong>)—and even when its TTL expires—Dinou reads the cached slot payload from server storage (<code>slots/&lt;id&gt;/slot.json</code>) in ~1–2ms during the SSR pass, including the rendered widget directly in the streamed SSR response without suspending or flashing the skeleton fallback, while refreshing expired slots asynchronously via <strong>Background SWR</strong>.
+                On subsequent requests (<strong>cache hits</strong>)—and even when its TTL expires—Dinou reads the cached slot payload from your <code>StorageAdapter</code> (<code>slots/&lt;id&gt;/slot.json</code>) in ~1–2ms during the SSR pass, including the rendered widget directly in the streamed SSR response without suspending or flashing the skeleton fallback, while refreshing expired slots asynchronously via <strong>Background SWR</strong>.
               </p>
 
               <TabbedCodeBlock
@@ -1537,16 +1552,16 @@ async function LiveStockBalance() {
               {/* Metrics Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
                 <MetricCard label="TTFB" value="0ms (Edge CDN)" variant="emerald" />
-                <MetricCard label="Stream Ready" value="~2-5ms (RAM Cache)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="~2-5ms (Slot Cache)" variant="emerald" />
                 <MetricCard label="Server/DB Load" value="99.9% Offload" variant="emerald" />
                 <MetricCard label="Waterfall" value="None" variant="emerald" />
                 <MetricCard label="Data Freshness" value="TTL / Tag Reval" variant="amber" className="col-span-2 sm:col-span-1" />
               </div>
 
               <p className="text-sm text-muted-foreground leading-relaxed">
-                <strong>How it works:</strong> The gold standard for high-traffic web applications. Combines Partial Prerendering
-                with component-level Micro-ISR. The Edge CDN delivers the static shell in <strong>0ms TTFB</strong>.
-                The server streams the dynamic hole almost instantly (~2ms) because the sub-tree is cached in memory/KV storage.
+                <strong>How it works:</strong> The gold standard for high-traffic web applications. Combines <Link href="/docs/rendering" className="underline underline-offset-2 font-medium text-foreground">Partial Prerendering</Link>{" "}
+                with component-level <Link href="/docs/3d-segmentation" className="underline underline-offset-2 font-medium text-foreground">Micro-ISR</Link>. The Edge CDN delivers the static shell in <strong>0ms TTFB</strong>.
+                The server streams the dynamic hole almost instantly (~2ms) because the sub-tree is cached in Dinou&apos;s pluggable <code>StorageAdapter</code> (Memory, Filesystem, Redis, or Cloudflare KV).
                 Visitors see zero visible skeleton flicker, while database queries are reduced by 99.9%.
               </p>
 
@@ -1576,7 +1591,7 @@ export default function TrendingPage() {
         <p className="text-muted-foreground text-sm">Ultra-high traffic viral catalog.</p>
       </header>
 
-      {/* 2. Micro-ISR Slot: resolves in ~2ms from server memory/KV cache without DB query */}
+      {/* 2. Micro-ISR Slot: resolves in ~2ms from Dinou's slot cache without DB query */}
       <Suspense fallback={<TrendingSkeleton />}>
         <DinouCacheSlot id="viral-trending" revalidate={120} tags={["trending"]}>
           <TrendingGrid />
@@ -1660,29 +1675,41 @@ export function TrendingSkeleton() {
                 containerClassName="my-3"
                 tabs={[
                   {
+                    id: "fn",
+                    label: "src/search/page_functions.ts",
+                    language: "tsx",
+                    code: `export const ppr = true; // Pre-renders the outer search shell for 0ms TTFB`,
+                  },
+                  {
                     id: "server",
                     label: "src/search/page.tsx (Server Component)",
                     language: "tsx",
                     code: `import { Suspense } from "react";
 import { useSearchParams } from "dinou";
 import db from "@/lib/db";
-import { SearchResultsClient } from "./search-results-client";
+import { SearchResultsClient, type Product } from "./search-results-client";
 
 export default function SearchPage() {
-  const searchParams = useSearchParams();
-  const query = searchParams.get("q") ?? "";
-
-  // Start query WITHOUT awaiting! Passes un-awaited Promise to client:
-  const resultsPromise = db.products.search({ query });
-
   return (
     <main className="p-6 max-w-4xl mx-auto space-y-4">
+      {/* 0ms Static PPR Shell */}
       <h1 className="text-2xl font-bold">Search Catalog</h1>
-      <Suspense key={query} fallback={<p className="text-muted-foreground">Searching catalog...</p>}>
-        <SearchResultsClient promise={resultsPromise} />
+      <Suspense fallback={<p className="text-muted-foreground">Searching catalog...</p>}>
+        <SearchResultsLoader />
       </Suspense>
     </main>
   );
+}
+
+// Synchronous Server Component inside <Suspense>: reads query params and initiates the Promise
+function SearchResultsLoader() {
+  const searchParams = useSearchParams();
+  const query = searchParams.get("q") ?? "";
+
+  // Start query WITHOUT awaiting! Passes un-awaited Flight Promise to client:
+  const resultsPromise: Promise<Product[]> = db.products.search({ query });
+
+  return <SearchResultsClient key={query} promise={resultsPromise} />;
 }`,
                   },
                   {
@@ -1693,6 +1720,12 @@ export default function SearchPage() {
 
 import { use, useState } from "react";
 
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+}
+
 export function SearchResultsClient({ promise }: { promise: Promise<Product[]> }) {
   // Native React 19 hook: unwraps the Flight RPC promise directly
   const products = use(promise);
@@ -1700,11 +1733,20 @@ export function SearchResultsClient({ promise }: { promise: Promise<Product[]> }
 
   return (
     <div>
-      <input type="range" max={500} value={filterPrice} onChange={(e) => setFilterPrice(+e.target.value)} />
+      <input
+        type="range"
+        max={500}
+        value={filterPrice}
+        onChange={(e) => setFilterPrice(Number(e.target.value))}
+      />
       <ul>
-        {products.filter(p => p.price <= filterPrice).map((p) => (
-          <li key={p.id}>{p.name} - \${p.price}</li>
-        ))}
+        {products
+          .filter((p) => p.price <= filterPrice)
+          .map((p) => (
+            <li key={p.id}>
+              {p.name} - \${p.price}
+            </li>
+          ))}
       </ul>
     </div>
   );
@@ -1715,6 +1757,7 @@ export function SearchResultsClient({ promise }: { promise: Promise<Product[]> }
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Zero Waterfall:</strong> The server initiates the query before the client even finishes parsing JavaScript.</p>
+                <p>• <strong>Preserving 0ms PPR Shell:</strong> Reading <code>useSearchParams()</code> inside a child Server Component wrapped in <code>&lt;Suspense&gt;</code> (<code>SearchResultsLoader</code>) turns only that boundary into a dynamic PPR hole while keeping <code>&lt;SearchPage&gt;</code>&apos;s outer shell 100% static (<strong>0ms TTFB</strong>). Calling <code>useSearchParams()</code> at the top of <code>SearchPage</code> outside <code>&lt;Suspense&gt;</code> would opt the entire route into Dynamic Streaming SSR (<strong>Fast TTFB</strong>).</p>
                 <p>• <strong>Interactive State:</strong> The client component immediately has access to full client hooks (<code>useState</code>, <code>useMemo</code>) to filter or mutate UI state.</p>
                 <p>• <strong>Client-First Equivalent:</strong> If your entire <code>page.tsx</code> is a <code>&quot;use client&quot;</code> component, see <strong>Strategy 12 (<code>getProps</code> Promise ➔ Client <code>use()</code>)</strong> to initiate the promise in <code>page_functions.ts</code> instead.</p>
               </div>
@@ -1761,8 +1804,9 @@ export function SearchResultsClient({ promise }: { promise: Promise<Product[]> }
                     label: "src/whiteboard/page_functions.ts",
                     language: "tsx",
                     code: `import db from "@/lib/db";
+import type { Template } from "./page";
 
-export async function getProps() {
+export async function getProps(): Promise<{ defaultTemplates: Template[] }> {
   const defaultTemplates = await db.templates.findDefaults();
   return { defaultTemplates };
 }`,
@@ -1774,10 +1818,21 @@ export async function getProps() {
                     code: `"use client";
 
 import { useState } from "react";
+import type { PageProps } from "dinou";
 import { CanvasStage, ToolPalette } from "@/components/canvas";
 
-export default function WhiteboardPage({ defaultTemplates }: { defaultTemplates: any[] }) {
-  const [selectedTemplate, setSelectedTemplate] = useState(defaultTemplates[0]);
+export interface Template {
+  id: string;
+  name: string;
+  nodes: unknown[];
+}
+
+export default function WhiteboardPage({
+  defaultTemplates,
+}: PageProps<"/whiteboard", { defaultTemplates: Template[] }>) {
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | undefined>(
+    defaultTemplates[0]
+  );
 
   return (
     <div className="h-screen flex flex-col">
@@ -1835,11 +1890,15 @@ export default function WhiteboardPage({ defaultTemplates }: { defaultTemplates:
                     id: "fn",
                     label: "src/editor/[docId]/page_functions.ts",
                     language: "tsx",
-                    code: `import db from "@/lib/db";
+                    code: `import type { RouteParams } from "dinou";
+import db from "@/lib/db";
+import type { DocumentData } from "./page";
 
 export const revalidate = 0; // Dynamic SSR
 
-export async function getProps(params: { docId: string }) {
+export async function getProps(
+  params: RouteParams<"/editor/[docId]">
+): Promise<{ document: DocumentData }> {
   const document = await db.documents.findById(params.docId);
   return { document };
 }`,
@@ -1851,8 +1910,17 @@ export async function getProps(params: { docId: string }) {
                     code: `"use client";
 
 import { useState } from "react";
+import type { PageProps } from "dinou";
 
-export default function DocumentEditor({ document }: { document: any }) {
+export interface DocumentData {
+  id: string;
+  title: string;
+  initialBody: string;
+}
+
+export default function DocumentEditor({
+  document,
+}: PageProps<"/editor/[docId]", { document: DocumentData }>) {
   const [content, setContent] = useState(document.initialBody);
 
   return (
@@ -1909,11 +1977,15 @@ export default function DocumentEditor({ document }: { document: any }) {
                     id: "fn",
                     label: "src/editor/[docId]/page_functions.ts",
                     language: "tsx",
-                    code: `import db from "@/lib/db";
+                    code: `import type { RouteParams } from "dinou";
+import db from "@/lib/db";
+import type { DocumentSummary } from "./page";
 
 export const revalidate = 0; // Dynamic SSR
 
-export function getProps(params: { docId: string }) {
+export function getProps(params: RouteParams<"/editor/[docId]">): {
+  documentPromise: Promise<DocumentSummary>;
+} {
   // Start query WITHOUT awaiting! Returns raw Promise inside props object:
   const documentPromise = db.documents.findById(params.docId);
   return { documentPromise };
@@ -1926,12 +1998,14 @@ export function getProps(params: { docId: string }) {
                     code: `"use client";
 
 import { Suspense, use, useState } from "react";
+import type { PageProps } from "dinou";
 
-function EditorCanvas({
-  promise,
-}: {
-  promise: Promise<{ title: string; initialBody: string }>;
-}) {
+export interface DocumentSummary {
+  title: string;
+  initialBody: string;
+}
+
+function EditorCanvas({ promise }: { promise: Promise<DocumentSummary> }) {
   // Unwraps the server-initiated Flight promise inside Suspense
   const doc = use(promise);
   const [content, setContent] = useState(doc.initialBody);
@@ -1947,9 +2021,7 @@ function EditorCanvas({
 
 export default function DocumentEditorPage({
   documentPromise,
-}: {
-  documentPromise: Promise<{ title: string; initialBody: string }>;
-}) {
+}: PageProps<"/editor/[docId]", { documentPromise: Promise<DocumentSummary> }>) {
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-4">
       {/* Toolbar & shell stream immediately without waiting for DB */}
@@ -2158,7 +2230,7 @@ export function AddToCartButton({ productId }: { productId: string }) {
               />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
-                <p>• <strong>Strict Rule:</strong> Only call Server Functions in mutative event contexts. Never invoke them during the render phase or inside components.</p>
+                <p>• <strong>Strict Mutation Rule:</strong> Invoke <strong>mutative</strong> <Link href="/docs/server-functions" className="underline underline-offset-2 font-medium text-foreground">Server Functions</Link> (database writes, cookie updates, <Link href="/docs/revalidation" className="underline underline-offset-2 font-medium text-foreground"><code>revalidateTag</code> / <code>revalidatePath</code></Link>, <code>redirect</code>) exclusively from event handlers, <code>&lt;form action&gt;</code>, or <code>startTransition</code>—never during rendering. In Client Components, read-only Server Functions must also never be called bare in the render body without memoizing via <code>useState(() =&gt; fn())</code> (Strategy 13), or every render will spawn a new RPC request loop.</p>
                 <p>• <strong>Type Safety:</strong> Arguments and return types are inferred end-to-end between client and server without manual fetch boilerplate.</p>
               </div>
             </section>
