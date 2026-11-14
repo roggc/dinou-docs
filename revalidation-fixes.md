@@ -59,9 +59,9 @@ Calling `await revalidateLayout("./")` inside a Server Function on `/dashboard/s
 
 #### Root Cause
 In `dinou/core/cache-revalidate.js`:
-- `revalidatePage` and `revalidateTag` branched on `if (isEdgeRuntime())` (`DINOU_RUNTIME === "edge" | "node-bundle" | "bun-bundle" | "deno-bundle"`).
-- When invoked in a standalone Node process where `isEdgeRuntime()` was `false` (such as Vitest unit tests with `setStorageAdapter(new MemoryStorage())`, standalone queue workers invalidating `RedisStorage`, or pure Node scripts), `revalidatePage` fell through to removed legacy helpers `getBuildStaticPage()` and `getGenerateStaticRSC()`, immediately crashing with `ReferenceError: getBuildStaticPage is not defined`!
-- Furthermore, that legacy branch hardcoded `.dinou/dist2` on disk (`fs.copyFileSync`, `walkMetadataFiles(".dinou/dist2")`), completely ignoring `getStorageAdapter()`.
+- Every Dinou v9 runtime (`node/build.js`, `node/dev.js`, `bun/build.js`, `deno/build.js`, `cloudflare/build.js`) sets `DINOU_RUNTIME` to `"node-bundle"`, `"bun-bundle"`, `"deno-edge"`, or `"edge"`, so `isEdgeRuntime()` is **always `true`** inside any running Dinou server—and that unified branch already preserves `index._old.html` and `page._old.rsc` backups via `storage.set(oldHtmlKey, ...)` / `storage.set(oldRscKey, ...)`.
+- However, `revalidatePage` and `revalidateTag` still had an orphaned pre-v9 fallback branch at the bottom of the function for `!isEdgeRuntime()`. Its helper getters (`getBuildStaticPage`, `getGenerateStaticRSC`, `getGenerateStaticPage`, `getSafeRename`, `getUpdateStatus`) had already been removed from `cache-revalidate.js` during the Dual-Bundle migration.
+- Consequently, whenever `revalidatePage` / `revalidatePath` / `revalidateTag` was called in a standalone Node process where `DINOU_RUNTIME` is unset (such as Vitest unit tests with `setStorageAdapter(new MemoryStorage())`, standalone queue workers invalidating `RedisStorage`, or CLI scripts), execution fell into that dead branch, ignored `getStorageAdapter()`, and crashed with `ReferenceError: getBuildStaticPage is not defined`!
 
 ---
 
@@ -168,43 +168,107 @@ Covers:
 ```js
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { Readable } from "node:stream";
-import {
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const dinouRoot = fs.existsSync(path.resolve(__dirname, "../dinou/core/storage-adapter.js"))
+  ? path.resolve(__dirname, "../dinou")
+  : path.resolve(__dirname, "..");
+const hasReactServerCond =
+  process.execArgv.includes("react-server") || process.argv.includes("--full-handler");
+
+const {
+  FileSystemStorage,
   MemoryStorage,
   RedisStorage,
-  FileSystemStorage,
+  getStorageAdapter,
   setStorageAdapter,
+  hasExplicitStorageAdapter,
   readDist2Fallback,
-} from "../dinou/core/storage-adapter.js";
-import {
+} = await import(pathToFileURL(path.join(dinouRoot, "core/storage-adapter.js")).href);
+
+const {
   revalidatePage,
   revalidatePath,
   revalidateLayout,
   revalidateTag,
-} from "../dinou/core/cache-revalidate.js";
-import { requestStorage } from "../dinou/core/request-context.js";
+} = await import(pathToFileURL(path.join(dinouRoot, "core/cache-revalidate.js")).href);
 
-// 1. Relative path resolution in revalidateLayout
+const { getSlotJSX } = await import(
+  pathToFileURL(path.join(dinouRoot, "core/cache-slot.js")).href
+);
+
+const { requestStorage } = await import(
+  pathToFileURL(path.join(dinouRoot, "core/request-context.js")).href
+);
+
+function createMockRedis(mode = "keys") {
+  const store = new Map();
+  const matchPattern = (pattern) => {
+    const prefix = String(pattern || "").replace(/\*$/, "");
+    return [...store.keys()].filter((k) => k.startsWith(prefix));
+  };
+  const base = {
+    store,
+    async get(k) { return store.has(k) ? store.get(k) : null; },
+    async set(k, v) { store.set(k, String(v)); return "OK"; },
+    async del(k) {
+      if (Array.isArray(k)) {
+        let c = 0;
+        for (const item of k) if (store.delete(item)) c++;
+        return c;
+      }
+      return store.delete(k) ? 1 : 0;
+    },
+    async exists(k) { return store.has(k) ? 1 : 0; },
+  };
+  if (mode === "scanIterator-v5") {
+    base.scanIterator = async function* ({ MATCH }) {
+      const matched = matchPattern(MATCH);
+      for (let i = 0; i < matched.length; i += 2) yield matched.slice(i, i + 2);
+    };
+  } else if (mode === "scanIterator-v4") {
+    base.scanIterator = async function* ({ MATCH }) {
+      for (const k of matchPattern(MATCH)) yield k;
+    };
+  } else if (mode === "scanStream") {
+    base.scanStream = ({ match }) => Readable.from([matchPattern(match)]);
+  } else if (mode === "keys") {
+    base.keys = async (pattern) => matchPattern(pattern);
+  } else if (mode === "scan-cursor") {
+    base.scan = async (cursor, _m, pattern) => {
+      const all = matchPattern(pattern);
+      return String(cursor) === "0" ? ["1", all.slice(0, 1)] : ["0", all.slice(1)];
+    };
+  }
+  return base;
+}
+
+// 1. Relative path resolution in revalidateLayout ("./", "..", "../billing")
 {
+  delete globalThis.__DINOU_RUNTIME__;
+  delete process.env.DINOU_RUNTIME;
+
   const mem = new MemoryStorage();
   setStorageAdapter(mem);
 
-  await mem.set("dashboard/settings/layout.rsc", "0:[\"old-settings-layout\"]\n", {
+  await mem.set("dashboard/settings/layout.rsc", '0:["old-settings-layout"]\n', {
     status: 200,
     generatedAt: 1000,
     tags: ["settings-layout"],
   });
-  await mem.set("dashboard/settings/layout.metadata.json", JSON.stringify({
-    status: 200,
-    generatedAt: 1000,
-    tags: ["settings-layout"],
-  }));
-  await mem.set("dashboard/layout.rsc", "0:[\"old-dashboard-layout\"]\n", {
+  await mem.set(
+    "dashboard/settings/layout.metadata.json",
+    JSON.stringify({ status: 200, generatedAt: 1000, tags: ["settings-layout"] })
+  );
+  await mem.set("dashboard/layout.rsc", '0:["old-dashboard-layout"]\n', {
     status: 200,
     generatedAt: 1000,
   });
-  await mem.set("dashboard/billing/layout.rsc", "0:[\"old-billing-layout\"]\n", {
+  await mem.set("dashboard/billing/layout.rsc", '0:["old-billing-layout"]\n', {
     status: 200,
     generatedAt: 1000,
   });
@@ -223,7 +287,17 @@ import { requestStorage } from "../dinou/core/request-context.js";
 
       assert.equal(await revalidateLayout(".."), true);
       assert.equal(await mem.get("dashboard/layout.rsc"), null);
+    }
+  );
 
+  await requestStorage.run(
+    {
+      req: {
+        path: "/____server_function____",
+        headers: { referer: "https://app.example.com/dashboard/settings?tab=plan#top" },
+      },
+    },
+    async () => {
       assert.equal(await revalidateLayout("../billing"), true);
       assert.equal(await mem.get("dashboard/billing/layout.rsc"), null);
     }
@@ -232,55 +306,182 @@ import { requestStorage } from "../dinou/core/request-context.js";
 
 // 2. RedisStorage across all 5 Redis scan/keys client variants + multi-pod tombstones
 {
-  function createMockRedis(mode) {
-    const store = new Map();
-    const matchPattern = (pattern) => {
-      const prefix = String(pattern || "").replace(/\*$/, "");
-      return [...store.keys()].filter((k) => k.startsWith(prefix));
-    };
-    const base = {
-      store,
-      async get(k) { return store.has(k) ? store.get(k) : null; },
-      async set(k, v) { store.set(k, String(v)); return "OK"; },
-      async del(k) { return store.delete(k) ? 1 : 0; },
-      async exists(k) { return store.has(k) ? 1 : 0; },
-    };
-    if (mode === "scanIterator-v5") {
-      base.scanIterator = async function* ({ MATCH }) {
-        const matched = matchPattern(MATCH);
-        for (let i = 0; i < matched.length; i += 2) yield matched.slice(i, i + 2);
-      };
-    } else if (mode === "scanIterator-v4") {
-      base.scanIterator = async function* ({ MATCH }) {
-        for (const k of matchPattern(MATCH)) yield k;
-      };
-    } else if (mode === "scanStream") {
-      base.scanStream = ({ match }) => Readable.from([matchPattern(match)]);
-    } else if (mode === "keys") {
-      base.keys = async (pattern) => matchPattern(pattern);
-    } else if (mode === "scan-cursor") {
-      base.scan = async (cursor, _m, pattern) => ["0", matchPattern(pattern)];
-    }
-    return base;
-  }
-
-  for (const mode of ["scanIterator-v5", "scanIterator-v4", "scanStream", "keys", "scan-cursor"]) {
+  for (const mode of [
+    "scanIterator-v5",
+    "scanIterator-v4",
+    "scanStream",
+    "keys",
+    "scan-cursor",
+  ]) {
     const client = createMockRedis(mode);
     const podA = new RedisStorage(client, { prefix: "dinou:test:" });
     const podB = new RedisStorage(client, { prefix: "dinou:test:" });
+    globalThis.__DINOU_RUNTIME__ = "node-bundle";
     setStorageAdapter(podA);
 
     const pageMeta = { status: 200, generatedAt: 2000, tags: ["featured"] };
     await podA.set("/shop/deals/index.html", "<html>Deals v1</html>", pageMeta);
     await podA.set("/shop/deals/metadata.json", JSON.stringify(pageMeta));
+    await podA.set(
+      "slots/featured-card/slot.json",
+      JSON.stringify({ type: "div", props: { children: "Cached Card" } }),
+      { generatedAt: Date.now(), tags: ["featured"], slotId: "featured-card", revalidate: 3600 }
+    );
+    await podA.set(
+      "slots/featured-card/slot.metadata.json",
+      JSON.stringify({ generatedAt: Date.now(), tags: ["featured"], slotId: "featured-card", revalidate: 3600 })
+    );
 
     assert.equal((await podB.get("shop/deals"))?.content, "<html>Deals v1</html>");
+    assert.equal(await podB.has("/shop/deals/"), true);
+
+    globalThis[Symbol.for("dinou.slot.registry")]?.clear?.();
+    setStorageAdapter(podB);
+    const resolvedJsxFromTag = await getSlotJSX("featured", { fresh: false });
+    assert.ok(resolvedJsxFromTag, `Pod B should resolve slot by tag in mode ${mode}`);
+
+    setStorageAdapter(podA);
     await revalidateTag("featured");
     assert.equal(await podB.get("shop/deals/index.html"), null);
+    assert.equal(await podB.get("slots/featured-card/slot.json"), null);
     assert.equal(await podB.isKeyDeleted("shop/deals/index.html"), true);
     assert.ok((await podB.getTagInvalidatedAtAsync("featured")) >= 2000);
+    assert.equal(
+      (await podB.keys()).some((k) => k.startsWith("__tombstone__") || k.startsWith("__tag_inv__")),
+      false
+    );
+  }
+  delete globalThis.__DINOU_RUNTIME__;
+}
+
+// 3. Cold .dinou/dist2 hydration, MemoryStorage isolation, multi-pod tombstones & SSG guard
+{
+  const tmpProj = fs.mkdtempSync(path.join(os.tmpdir(), "dinou-reval-unit-"));
+  const prevCwd = process.cwd();
+  try {
+    process.chdir(tmpProj);
+    const dist2 = path.join(tmpProj, ".dinou/dist2");
+    const diskFs = new FileSystemStorage(dist2);
+    const buildTime = Date.now() - 5000;
+
+    await diskFs.set("pricing/index.html", "<html><body>Pricing v1</body></html>", {
+      status: 200,
+      generatedAt: buildTime,
+      tags: ["pricing-tag"],
+    });
+    await diskFs.set("pricing/page.rsc", '0:["$","h1",null,{"children":"Pricing v1"}]\n');
+    await diskFs.set(
+      "slots/promo/slot.json",
+      JSON.stringify({ type: "span", props: { children: "Promo v1" } }),
+      { generatedAt: buildTime, tags: ["promo-tag"], slotId: "promo" }
+    );
+
+    // MemoryStorage must remain isolated from .dinou/dist2 by default
+    const mem = new MemoryStorage();
+    setStorageAdapter(mem);
+    assert.equal(hasExplicitStorageAdapter(), true);
+    assert.equal(await readDist2Fallback(mem, "pricing/index.html"), null);
+
+    // Cold RedisStorage hydrates from .dinou/dist2
+    const sharedRedis = createMockRedis("scanIterator-v4");
+    const redisPodA = new RedisStorage(sharedRedis);
+    setStorageAdapter(redisPodA);
+
+    const hydratedPricing = await readDist2Fallback(redisPodA, "pricing/index.html");
+    assert.equal(hydratedPricing?.content, "<html><body>Pricing v1</body></html>");
+    assert.equal((await redisPodA.get("pricing"))?.content, "<html><body>Pricing v1</body></html>");
+
+    // Multi-pod invalidation prevents sibling Pod B from resurrecting .dinou/dist2 slot
+    await revalidateTag("promo-tag");
+    const redisPodB = new RedisStorage(sharedRedis);
+    setStorageAdapter(redisPodB);
+    assert.equal(await readDist2Fallback(redisPodB, "slots/promo/slot.json", ["promo-tag"]), null);
+
+    // Optional full handler check when invoked with `NODE_ENV=production node --conditions react-server ... --full-handler`
+    if (hasReactServerCond) {
+      const { handleRequest } = await import(
+        pathToFileURL(path.join(dinouRoot, "core/handler.js")).href
+      );
+      const mockRenderHtmlStream = async () =>
+        new ReadableStream({
+          start(c) {
+            c.enqueue(new TextEncoder().encode("<html><body>Mock SSR</body></html>"));
+            c.close();
+          },
+        });
+      const configRedis = new RedisStorage(createMockRedis());
+      globalThis.__DINOU_CONFIG__ = { storage: configRedis, plugins: [] };
+      globalThis.__DINOU_IS_SSG_BUILD__ = true;
+      setStorageAdapter(diskFs);
+      await handleRequest(new Request("http://localhost/pricing"), {
+        runtime: "node-bundle",
+        isSSG: true,
+        renderHtmlStream: mockRenderHtmlStream,
+      });
+      assert.equal(getStorageAdapter(), diskFs);
+
+      await diskFs.set("pricing/index.html", "<html><body>Pricing v1</body></html>", {
+        status: 200,
+        generatedAt: buildTime,
+        tags: ["pricing-tag"],
+      });
+      await diskFs.set("pricing/page.rsc", '0:["$","h1",null,{"children":"Pricing v1"}]\n');
+
+      delete globalThis.__DINOU_IS_SSG_BUILD__;
+      const res = await handleRequest(new Request("http://localhost/pricing"), {
+        runtime: "node-bundle",
+        renderHtmlStream: mockRenderHtmlStream,
+      });
+      assert.equal(getStorageAdapter(), configRedis);
+      assert.ok((await res.text()).includes("Pricing v1"));
+      delete globalThis.__DINOU_CONFIG__;
+    }
+  } finally {
+    process.chdir(prevCwd);
+    fs.rmSync(tmpProj, { recursive: true, force: true });
   }
 }
+
+// 4. Standalone Vitest / Queue Worker execution (DINOU_RUNTIME unset, zero ReferenceError)
+{
+  delete globalThis.__DINOU_RUNTIME__;
+  delete process.env.DINOU_RUNTIME;
+
+  const warnings = [];
+  const origWarn = console.warn;
+  console.warn = (...args) => warnings.push(args.map(String).join(" "));
+  try {
+    const mem = new MemoryStorage();
+    setStorageAdapter(mem);
+
+    await mem.set("products/1/index.html", "<h1>Old Product 1</h1>", {
+      generatedAt: 1000,
+      tags: ["product-1"],
+    });
+    await mem.set("products/1/metadata.json", JSON.stringify({ generatedAt: 1000, tags: ["product-1"] }));
+    await mem.set("products/2/index.html", "<h1>Keep Product 2</h1>", {
+      generatedAt: 1000,
+      tags: ["product-2"],
+    });
+    await mem.set("products/2/metadata.json", JSON.stringify({ generatedAt: 1000, tags: ["product-2"] }));
+    await mem.set("shop/layout.rsc", '0:["$","nav",null,{}]\n', { generatedAt: 1000 });
+    await mem.set("shop/layout.metadata.json", JSON.stringify({ generatedAt: 1000 }));
+    await mem.set("shop/index.html", "<h1>Shop</h1>", { generatedAt: 1000 });
+
+    await revalidateTag("product-1");
+    assert.equal(await mem.get("products/1/index.html"), null);
+    assert.equal((await mem.get("products/2/index.html"))?.content, "<h1>Keep Product 2</h1>");
+
+    await revalidatePath("/shop");
+    assert.equal(await mem.get("shop/layout.rsc"), null);
+    assert.equal(await mem.get("shop/index.html"), null);
+    assert.equal(warnings.some((w) => w.includes("is not defined")), false);
+  } finally {
+    console.warn = origWarn;
+  }
+}
+
+console.log("🎉 ALL REVALIDATION & STORAGE UNIT TESTS PASSED!");
 ```
 
 ### 4.2. Dual-Bundle + SSG + `RedisStorage` + 3D Revalidation E2E Test (`tests/revalidation-dual-bundle-e2e.test.mjs`)
@@ -292,4 +493,276 @@ Verifies the complete production lifecycle end-to-end:
 4. Executes `await revalidateTag("quota-tag")`, asserting **only** `<DinouCacheSlot id="quota-slot" tags={["quota-tag"]}>` advances to `v2` (`SettingsPage` stays at `v1`) AND `metadata.pageGeneratedAt` is **preserved** while `metadata.generatedAt` advances.
 5. Executes `await revalidateTag("settings-page-tag")`, asserting `SettingsPage` advances to `v2`.
 6. Clears Redis completely to simulate a newly booted cold pod receiving `await revalidateTag("settings-page-tag")` *before* its first HTTP request, asserting the cold pod scans `.dinou/dist2` metadata, renders `v3`, and never resurrects stale `v1` HTML from disk.
+
+> **Note:** Run this E2E test inside a workspace/fixture directory that has `react`, `react-dom`, `react-server-dom-webpack`, and `dinou` resolvable in `node_modules` (such as `dinou`'s integration test workspace).
+
+```js
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+process.env.NODE_ENV = "production";
+process.env.DINOU_RUNTIME = "node-bundle";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const workspaceRoot = path.resolve(__dirname, "..");
+const dinouRoot = fs.existsSync(path.resolve(workspaceRoot, "dinou/core/generate-static.js"))
+  ? path.resolve(workspaceRoot, "dinou")
+  : workspaceRoot;
+const tmpApp = path.join(workspaceRoot, `.dinou/tmp-reval-bundle-${process.pid}`);
+const prevCwd = process.cwd();
+
+fs.rmSync(tmpApp, { recursive: true, force: true });
+fs.mkdirSync(path.join(tmpApp, "src/dashboard/settings"), { recursive: true });
+
+fs.writeFileSync(
+  path.join(tmpApp, "package.json"),
+  JSON.stringify({ name: "tmp-reval-bundle", type: "module" }, null, 2)
+);
+
+globalThis.__TEST_COUNTERS__ = {
+  layoutVersion: 1,
+  pageVersion: 1,
+  slotVersion: 1,
+  redisWritesDuringSsg: 0,
+  ssgActive: true,
+};
+
+globalThis.__TEST_REDIS_MAP__ = new Map();
+globalThis.__TEST_REDIS_CLIENT__ = {
+  async get(k) {
+    return globalThis.__TEST_REDIS_MAP__.has(k) ? globalThis.__TEST_REDIS_MAP__.get(k) : null;
+  },
+  async set(k, v) {
+    if (globalThis.__TEST_COUNTERS__.ssgActive) {
+      globalThis.__TEST_COUNTERS__.redisWritesDuringSsg++;
+    }
+    globalThis.__TEST_REDIS_MAP__.set(k, String(v));
+    return "OK";
+  },
+  async del(k) {
+    return globalThis.__TEST_REDIS_MAP__.delete(k) ? 1 : 0;
+  },
+  async exists(k) {
+    return globalThis.__TEST_REDIS_MAP__.has(k) ? 1 : 0;
+  },
+  async keys(pattern) {
+    const prefix = String(pattern || "").replace(/\*$/, "");
+    return [...globalThis.__TEST_REDIS_MAP__.keys()].filter((k) => k.startsWith(prefix));
+  },
+};
+
+fs.writeFileSync(
+  path.join(tmpApp, "dinou.config.ts"),
+  `import { defineConfig } from "dinou";
+import { RedisStorage } from "dinou/server";
+
+export default defineConfig({
+  storage: new RedisStorage((globalThis as any).__TEST_REDIS_CLIENT__, "cluster:"),
+});
+`
+);
+
+fs.writeFileSync(
+  path.join(tmpApp, "src/layout.tsx"),
+  `import React from "react";
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html>
+      <body>{children}</body>
+    </html>
+  );
+}
+`
+);
+
+fs.writeFileSync(
+  path.join(tmpApp, "src/page.tsx"),
+  `import React from "react";
+export default function HomePage() {
+  return <h1>Home</h1>;
+}
+`
+);
+
+fs.writeFileSync(
+  path.join(tmpApp, "src/dashboard/settings/layout.tsx"),
+  `import React from "react";
+export default function SettingsLayout({ children }: { children: React.ReactNode }) {
+  const v = (globalThis as any).__TEST_COUNTERS__.layoutVersion;
+  return (
+    <div data-layout-v={v}>
+      <header>SettingsLayout-v{v}</header>
+      {children}
+    </div>
+  );
+}
+`
+);
+
+fs.writeFileSync(
+  path.join(tmpApp, "src/dashboard/settings/layout_functions.ts"),
+  `export function getCacheTags() {
+  return ["settings-layout-tag"];
+}
+`
+);
+
+fs.writeFileSync(
+  path.join(tmpApp, "src/dashboard/settings/page.tsx"),
+  `import React from "react";
+import { DinouCacheSlot } from "dinou/server";
+
+export default async function SettingsPage() {
+  const pv = (globalThis as any).__TEST_COUNTERS__.pageVersion;
+  return (
+    <section>
+      <h1>SettingsPage-v{pv}</h1>
+      <DinouCacheSlot id="quota-slot" tags={["quota-tag"]}>
+        {async () => {
+          const sv = (globalThis as any).__TEST_COUNTERS__.slotVersion;
+          return <span>QuotaSlot-v{sv}</span>;
+        }}
+      </DinouCacheSlot>
+    </section>
+  );
+}
+`
+);
+
+fs.writeFileSync(
+  path.join(tmpApp, "src/dashboard/settings/page_functions.ts"),
+  `export function getCacheTags() {
+  return ["settings-page-tag"];
+}
+`
+);
+
+try {
+  process.chdir(tmpApp);
+
+  const { generateStatic } = await import(
+    pathToFileURL(path.join(dinouRoot, "core/generate-static.js")).href
+  );
+
+  // 1. Run SSG build with RedisStorage configured in dinou.config.ts
+  await generateStatic();
+  assert.equal(
+    globalThis.__TEST_COUNTERS__.redisWritesDuringSsg,
+    0,
+    "SSG build must write to .dinou/dist2 and NEVER touch RedisStorage at build time"
+  );
+  assert.ok(
+    fs.existsSync(path.join(tmpApp, ".dinou/dist2/dashboard/settings/index.html")),
+    ".dinou/dist2/dashboard/settings/index.html must exist on disk after SSG"
+  );
+  assert.equal(globalThis.__TEST_REDIS_MAP__.size, 0, "Redis must still be empty after SSG build");
+
+  // 2. Boot compiled Dual-Bundle runtime
+  globalThis.__TEST_COUNTERS__.ssgActive = false;
+  const rscMod = await import(
+    pathToFileURL(path.join(tmpApp, ".dinou/node/rsc-engine.mjs")).href
+  );
+  const ssrMod = await import(
+    pathToFileURL(path.join(tmpApp, ".dinou/node/ssr-engine.mjs")).href
+  );
+
+  // Increment versions BEFORE first request to prove cold RedisStorage hydrates v1 from .dinou/dist2
+  globalThis.__TEST_COUNTERS__.layoutVersion = 2;
+  globalThis.__TEST_COUNTERS__.pageVersion = 2;
+  globalThis.__TEST_COUNTERS__.slotVersion = 2;
+
+  const stripReactComments = (html) => html.replace(/<!--\s*-->/g, "");
+
+  const res1 = await rscMod.handleRequest(
+    new Request("http://localhost/dashboard/settings"),
+    { runtime: "node-bundle", renderHtmlStream: ssrMod.renderHtml }
+  );
+  const html1 = stripReactComments(await res1.text());
+  assert.ok(html1.includes("SettingsLayout-v1"));
+  assert.ok(html1.includes("SettingsPage-v1"));
+  assert.ok(html1.includes("QuotaSlot-v1"));
+  assert.ok(globalThis.__TEST_REDIS_MAP__.size > 0);
+
+  // 3. Test revalidateLayout("./") inside simulated Server Function -> updates ONLY layout to v2
+  const { revalidateLayout, revalidateTag } = await import(
+    pathToFileURL(path.join(dinouRoot, "core/cache-revalidate.js")).href
+  );
+  const { requestStorage } = await import(
+    pathToFileURL(path.join(dinouRoot, "core/request-context.js")).href
+  );
+
+  await requestStorage.run(
+    {
+      req: {
+        path: "/____server_function____",
+        headers: { "x-dinou-current-path": "/dashboard/settings" },
+      },
+    },
+    async () => {
+      await revalidateLayout("./");
+    }
+  );
+
+  const res2 = await rscMod.handleRequest(
+    new Request("http://localhost/dashboard/settings"),
+    { runtime: "node-bundle", renderHtmlStream: ssrMod.renderHtml }
+  );
+  const html2 = stripReactComments(await res2.text());
+  assert.ok(html2.includes("SettingsLayout-v2"));
+  assert.ok(html2.includes("SettingsPage-v1"));
+
+  // 4. Test revalidateTag("quota-tag") on RedisStorage -> splices QuotaSlot-v2, keeps SettingsPage-v1 & preserves pageGeneratedAt
+  const metaBeforeSlotRefresh = JSON.parse(
+    JSON.parse(globalThis.__TEST_REDIS_MAP__.get("cluster:dashboard/settings/metadata.json")).content
+  );
+  await revalidateTag("quota-tag");
+  const metaAfterSlotRefresh = JSON.parse(
+    JSON.parse(globalThis.__TEST_REDIS_MAP__.get("cluster:dashboard/settings/metadata.json")).content
+  );
+  assert.equal(metaAfterSlotRefresh.pageGeneratedAt, metaBeforeSlotRefresh.pageGeneratedAt);
+  assert.ok(metaAfterSlotRefresh.generatedAt > metaBeforeSlotRefresh.generatedAt);
+
+  const res3 = await rscMod.handleRequest(
+    new Request("http://localhost/dashboard/settings"),
+    { runtime: "node-bundle", renderHtmlStream: ssrMod.renderHtml }
+  );
+  const html3 = stripReactComments(await res3.text());
+  assert.ok(html3.includes("QuotaSlot-v2"));
+  assert.ok(html3.includes("SettingsPage-v1"));
+
+  // 5. Test revalidateTag("settings-page-tag") on RedisStorage -> updates SettingsPage to v2
+  await revalidateTag("settings-page-tag");
+  const res4 = await rscMod.handleRequest(
+    new Request("http://localhost/dashboard/settings"),
+    { runtime: "node-bundle", renderHtmlStream: ssrMod.renderHtml }
+  );
+  const html4 = stripReactComments(await res4.text());
+  assert.ok(html4.includes("SettingsPage-v2"));
+
+  // 6. Simulate completely cold Redis instance receiving revalidateTag BEFORE any HTTP request
+  globalThis.__TEST_REDIS_MAP__.clear();
+  globalThis.__TEST_COUNTERS__.pageVersion = 3;
+  globalThis.__TEST_COUNTERS__.slotVersion = 3;
+  await revalidateTag("settings-page-tag");
+  const res5 = await rscMod.handleRequest(
+    new Request("http://localhost/dashboard/settings"),
+    { runtime: "node-bundle", renderHtmlStream: ssrMod.renderHtml }
+  );
+  const html5 = stripReactComments(await res5.text());
+  assert.ok(html5.includes("SettingsPage-v3") && html5.includes("QuotaSlot-v3"));
+
+  console.log("🎉 FULL DUAL-BUNDLE + SSG + REDIS STORAGE + 3D REVALIDATION E2E PASSED!");
+} finally {
+  process.chdir(prevCwd);
+  delete globalThis.__TEST_COUNTERS__;
+  delete globalThis.__TEST_REDIS_MAP__;
+  delete globalThis.__TEST_REDIS_CLIENT__;
+  try {
+    fs.rmSync(tmpApp, { recursive: true, force: true });
+  } catch {}
+}
+```
+
 
