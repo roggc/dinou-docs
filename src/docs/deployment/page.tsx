@@ -502,10 +502,10 @@ compatibility_flags = ["nodejs_compat"]
 # ====================================================================
 # Cloudflare Workers Static Assets
 # ====================================================================
-# Serves client JS/CSS bundles and pre-rendered SSG pages directly from
-# Cloudflare's global edge network before requests hit the worker.
+# Serves public static assets from .dinou/cloudflare/assets while keeping
+# internal SSG/ISR/PPR cache files isolated under /__dinou_dist2/*.
 [assets]
-directory = ".dinou/dist3"
+directory = ".dinou/cloudflare/assets"
 binding = "ASSETS"
 run_worker_first = true
 
@@ -539,7 +539,7 @@ npx wrangler deploy`}
                   <span>How Cloudflare Workers Works in Dinou</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Dinou generates a self-contained Dual-Bundle orchestrator at <code>.dinou/cloudflare/worker.js</code>. Static assets and pre-rendered pages are served instantly by Cloudflare&apos;s global CDN through <code>env.ASSETS</code>. When bound to <code>env.DINOU_CACHE</code>, Dinou automatically activates <code>CloudflareKVStorage</code> to persist Incremental Static Regeneration (ISR) route caches across the edge. Secrets, D1 databases, and R2 buckets are injected seamlessly into Server Components via <code>getContext().env</code>.
+                  Dinou generates a self-contained Dual-Bundle orchestrator at <code>.dinou/cloudflare/worker.js</code> alongside a dedicated <code>.dinou/cloudflare/assets</code> directory (keeping <code>.dinou/dist3</code> 100% untouched). Public client bundles and <code>public/</code> files sit at the root of <code>.dinou/cloudflare/assets</code> and are served directly via <code>env.ASSETS</code>, while pre-rendered SSG/ISR/PPR route cache artifacts are isolated inside <code>.dinou/cloudflare/assets/__dinou_dist2</code> (blocked from direct external HTTP access). When bound to <code>env.DINOU_CACHE</code>, Dinou automatically activates <code>CloudflareKVStorage</code> to persist Incremental Static Regeneration (ISR) route caches across the edge. Secrets, D1 databases, and R2 buckets are injected seamlessly into Server Components via <code>getContext().env</code>.
                 </p>
               </div>
             </section>

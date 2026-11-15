@@ -82,7 +82,7 @@ compatibility_flags = ["nodejs_compat"]
 
 # Serve client bundles, CSS, and static assets directly via Cloudflare CDN
 [assets]
-directory = ".dinou/dist3"
+directory = ".dinou/cloudflare/assets"
 binding = "ASSETS"
 run_worker_first = true
 

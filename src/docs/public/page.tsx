@@ -277,9 +277,11 @@ export default function Page() {
                     <code>Deno.serve</code>.
                   </li>
                   <li>
-                    <strong>Cloudflare Workers:</strong> Served at the edge through the <code>env.ASSETS</code> static
-                    binding (including <code>/.well-known/*</code>, <code>/sitemap.xml</code>, standalone verification{" "}
-                    <code>.html</code> files, PDFs, and media) without waking the RSC renderer.
+                    <strong>Cloudflare Workers:</strong> Copied cleanly into <code>.dinou/cloudflare/assets</code> and
+                    served at the edge through the <code>env.ASSETS</code> static binding (including{" "}
+                    <code>/.well-known/*</code>, <code>/sitemap.xml</code>, standalone verification{" "}
+                    <code>.html</code> files, PDFs, and media) without waking the RSC renderer, while internal SSG/ISR
+                    cache files remain isolated inside <code>.dinou/cloudflare/assets/__dinou_dist2</code>.
                   </li>
                   <li>
                     <strong>Static Export (<code>dinou export-static</code>):</strong> Copies <code>public/</code> assets
