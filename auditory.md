@@ -115,7 +115,7 @@ Keep these invariants intact across all future audits and docs updates:
 2. **Underscore-Prefixed Escape Convention (`_folder`)**:
    - Any folder prefixed with `_` inside `src/` (top-level `src/_foo` or nested `src/docs/_foo`) is ignored by Dinou's router and bundlers (`dinou/core/resolve-contextual-dinou.js`, `x-escape.md`).
 3. **Existing `x-*.md` Upstream Handoff Documents in Repo Root**:
-   - `x-bailout.md`, `x-cache-slot-bailout.md`, `x-escape.md`, `x-server-functions-fixes.md`, `x-revalidation-fixes.md`, `x-streaming-suspense-fixes.md`, `x-ssr-server-references-fixes.md`, `x-react-compiler-fixes.md`, `x-public-static-assets-fixes.md`.
+   - `x-bailout.md`, `x-cache-slot-bailout.md`, `x-escape.md`, `x-server-functions-fixes.md`, `x-revalidation-fixes.md`, `x-streaming-suspense-fixes.md`, `x-ssr-server-references-fixes.md`, `x-react-compiler-fixes.md`, `x-public-static-assets-fixes.md`, `x-styles-css-fixes.md`.
 
 ---
 
@@ -141,8 +141,8 @@ Keep these invariants intact across all future audits and docs updates:
 - [x] `/docs/pattern` — The Dinou Pattern (`src/docs/pattern/page.tsx` • `x-ssr-server-references-fixes.md`)
 - [x] `/docs/compiler` — React Compiler (`src/docs/compiler/page.tsx` • `x-react-compiler-fixes.md`)
 - [x] `/docs/public` — Public Directory (`src/docs/public/page.tsx` • `x-public-static-assets-fixes.md`)
-- [ ] **`/docs/styles` — Styles (`src/docs/styles/page.tsx`)  ⬅️ NEXT ROUTE TO AUDIT**
-- [ ] `/docs/assets` — Assets (`src/docs/assets/page.tsx`)
+- [x] `/docs/styles` — Styles (`src/docs/styles/page.tsx` • `x-styles-css-fixes.md`)
+- [ ] **`/docs/assets` — Assets (`src/docs/assets/page.tsx`)  ⬅️ NEXT ROUTE TO AUDIT**
 - [ ] `/docs/env-vars` — Env Vars (`src/docs/env-vars/page.tsx`)
 - [ ] `/docs/alias` — Alias (`src/docs/alias/page.tsx`)
 - [ ] `/docs/plugins` — Plugins (`src/docs/plugins/page.tsx`)
