@@ -106,7 +106,7 @@ class WebpackServerFunctionsPluginSimple {
             if (shouldWriteToDisk) {
               const sfDir = path.resolve(
                 process.cwd(),
-                ".dinou/server_functions_manifest"
+                isDev ? ".dinou/node-dev" : ".dinou/dist1"
               );
               fs.mkdirSync(sfDir, { recursive: true });
               fs.writeFileSync(

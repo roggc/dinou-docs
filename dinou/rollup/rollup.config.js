@@ -147,9 +147,13 @@ export default async function () {
         del({
           targets: [
             `${outputDirectory}/*`,
-            ...(!isDevelopment ? [".dinou/dist1/*"] : []),
-            ".dinou/react_client_manifest/*",
-            ".dinou/server_functions_manifest/*",
+            ...(isDevelopment
+              ? [
+                  ".dinou/node-dev/react-client-manifest.json",
+                  ".dinou/node-dev/server-functions-manifest.json",
+                  ".dinou/node-dev/manifest.json",
+                ]
+              : [".dinou/dist1/*"]),
           ],
           runOnce: true,
           hook: "buildStart",
@@ -210,7 +214,7 @@ export default async function () {
       },
       reactClientManifest({
         manifestPath: path.join(
-          ".dinou/react_client_manifest",
+          isDevelopment ? ".dinou/node-dev" : ".dinou/dist1",
           "react-client-manifest.json",
         ),
         serverFiles,

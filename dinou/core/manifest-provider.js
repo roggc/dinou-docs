@@ -20,14 +20,16 @@ function isDevMode() {
 function getClientManifestPath() {
   return path.resolve(
     process.cwd(),
-    ".dinou/react_client_manifest/react-client-manifest.json"
+    isDevMode() ? ".dinou/node-dev" : ".dinou/dist1",
+    "react-client-manifest.json"
   );
 }
 
 function getServerFunctionsManifestPath() {
   return path.resolve(
     process.cwd(),
-    ".dinou/server_functions_manifest/server-functions-manifest.json"
+    isDevMode() ? ".dinou/node-dev" : ".dinou/dist1",
+    "server-functions-manifest.json"
   );
 }
 

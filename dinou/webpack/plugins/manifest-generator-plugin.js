@@ -46,10 +46,13 @@ class ManifestGeneratorPlugin {
               : process.env.DINOU_WRITE_TO_DISK === "true" || !isDev;
 
           if (shouldWriteToDisk) {
-            const dist1Dir = path.resolve(process.cwd(), ".dinou/dist1");
-            fs.mkdirSync(dist1Dir, { recursive: true });
+            const targetDir = path.resolve(
+              process.cwd(),
+              isDev ? ".dinou/node-dev" : ".dinou/dist1"
+            );
+            fs.mkdirSync(targetDir, { recursive: true });
             fs.writeFileSync(
-              path.join(dist1Dir, "manifest.json"),
+              path.join(targetDir, "manifest.json"),
               JSON.stringify(this.manifestData, null, 2),
               "utf8"
             );

@@ -62,10 +62,9 @@ const projectRoot = process.cwd();
 
 const outputDirs = [
   path.resolve(projectRoot, ".dinou/public"),
+  path.resolve(projectRoot, ".dinou/node-dev"),
   path.resolve(projectRoot, ".dinou/dist1"),
   path.resolve(projectRoot, ".dinou/dist3"),
-  path.resolve(projectRoot, ".dinou/react_client_manifest"),
-  path.resolve(projectRoot, ".dinou/server_functions_manifest"),
   path.resolve(projectRoot, "out"),
   path.resolve(projectRoot, "dist"),
 ];
@@ -100,8 +99,18 @@ export default async () => {
     cleanDir(outputDir);
     if (!isDevelopment) {
       cleanDir(path.resolve(process.cwd(), ".dinou/dist1"));
-      cleanDir(path.resolve(process.cwd(), ".dinou/react_client_manifest"));
-      cleanDir(path.resolve(process.cwd(), ".dinou/server_functions_manifest"));
+    } else {
+      const nodeDevDir = path.resolve(process.cwd(), ".dinou/node-dev");
+      for (const stale of [
+        "react-client-manifest.json",
+        "react-ssr-manifest.json",
+        "server-functions-manifest.json",
+        "manifest.json",
+      ]) {
+        try {
+          fs.rmSync(path.join(nodeDevDir, stale), { force: true });
+        } catch (e) {}
+      }
     }
   }
   const [cssEntries, , serverFiles] = await getCSSEntries();
@@ -342,13 +351,13 @@ export default async () => {
                     } catch (e) {}
                   }
                   if (shouldWriteToDisk) {
-                    const clientManifestDir = path.resolve(
+                    const manifestDir = path.resolve(
                       process.cwd(),
-                      ".dinou/react_client_manifest"
+                      isDevelopment ? ".dinou/node-dev" : ".dinou/dist1"
                     );
-                    fs.mkdirSync(clientManifestDir, { recursive: true });
+                    fs.mkdirSync(manifestDir, { recursive: true });
                     fs.writeFileSync(
-                      path.join(clientManifestDir, "react-client-manifest.json"),
+                      path.join(manifestDir, "react-client-manifest.json"),
                       jsonText,
                       "utf8"
                     );
@@ -363,10 +372,13 @@ export default async () => {
                     const ssrText = Buffer.isBuffer(rawSsr)
                       ? rawSsr.toString("utf8")
                       : String(rawSsr);
-                    const dist1Dir = path.resolve(process.cwd(), ".dinou/dist1");
-                    fs.mkdirSync(dist1Dir, { recursive: true });
+                    const manifestDir = path.resolve(
+                      process.cwd(),
+                      isDevelopment ? ".dinou/node-dev" : ".dinou/dist1"
+                    );
+                    fs.mkdirSync(manifestDir, { recursive: true });
                     fs.writeFileSync(
-                      path.join(dist1Dir, "react-ssr-manifest.json"),
+                      path.join(manifestDir, "react-ssr-manifest.json"),
                       ssrText,
                       "utf8"
                     );

@@ -88,8 +88,8 @@ function findManifest(filename, folder) {
   return fs.existsSync(candidate) ? candidate : null;
 }
 
-const clientManifestPath = findManifest("react-client-manifest.json", "react_client_manifest");
-const sfManifestPath = findManifest("server-functions-manifest.json", "server_functions_manifest");
+const clientManifestPath = findManifest("react-client-manifest.json", "dist1");
+const sfManifestPath = findManifest("server-functions-manifest.json", "dist1");
 
 let parsedClientManifest = {};
 if (clientManifestPath && fs.existsSync(clientManifestPath)) {

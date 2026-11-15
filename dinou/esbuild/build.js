@@ -19,8 +19,6 @@ const __dirname = path.dirname(__filename);
 const outdir = ".dinou/dist3";
 await fs.rm(outdir, { recursive: true, force: true });
 await fs.rm(".dinou/dist1", { recursive: true, force: true });
-await fs.rm(".dinou/react_client_manifest", { recursive: true, force: true });
-await fs.rm(".dinou/server_functions_manifest", { recursive: true, force: true });
 
 const absPathToClientRedirect = path.resolve(
   __dirname,

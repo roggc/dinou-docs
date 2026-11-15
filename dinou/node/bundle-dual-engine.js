@@ -85,8 +85,9 @@ export async function bundleDualEngine(options = {}) {
     return fs.existsSync(candidate) ? candidate : null;
   }
 
-  const clientManifestPath = findManifest("react-client-manifest.json", "react_client_manifest");
-  const sfManifestPath = findManifest("server-functions-manifest.json", "server_functions_manifest");
+  const manifestFolder = isDev ? "node-dev" : "dist1";
+  const clientManifestPath = findManifest("react-client-manifest.json", manifestFolder);
+  const sfManifestPath = findManifest("server-functions-manifest.json", manifestFolder);
 
   let parsedClientManifest = {};
   if (clientManifestPath && fs.existsSync(clientManifestPath)) {
@@ -323,7 +324,7 @@ export async function bundleDualEngine(options = {}) {
     manifestInlines += `\nglobalThis.__DINOU_SERVER_FUNCTIONS_MANIFEST__ = {};\n`;
   }
 
-  const assetManifestPath = findManifest("manifest.json", "dist1");
+  const assetManifestPath = findManifest("manifest.json", manifestFolder);
   if (assetManifestPath && fs.existsSync(assetManifestPath)) {
     const content = fs.readFileSync(assetManifestPath, "utf8");
     manifestInlines += `\nglobalThis.__DINOU_ASSET_MANIFEST__ = ${content};\n`;

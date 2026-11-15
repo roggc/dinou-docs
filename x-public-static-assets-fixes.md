@@ -11,10 +11,11 @@ During the `v9.4.0` audit of `/docs/public`, seven interconnected architectural,
      2. Users could not place a standard Progressive Web App `public/manifest.json` inside `public/` without colliding with (or being overwritten by) the bundler's internal chunk asset `manifest.json`.
      3. Webpack wrote its RSC manifests to `.dinou/dist3` / `.dinou/public` whereas Esbuild and Rollup wrote theirs to `.dinou/react_client_manifest` and `.dinou/server_functions_manifest`, forcing `isWebpack` branching across `core/` and all runtime builders.
    - **Architectural Fix**:
-     - Introduced **`.dinou/dist1`** as the dedicated internal build artifact directory:
-       - `.dinou/dist1/server/` now holds `handler.js`, `netlify.js`, source maps, and `package.json` across Esbuild, Rollup, and Webpack (`netlify.toml` `[functions] directory = ".dinou/dist1/server"`).
-       - `.dinou/dist1/manifest.json` now holds the bundler's internal chunk asset map across Esbuild, Rollup, and Webpack (and `.dinou/dist1/react-ssr-manifest.json` for Webpack).
-     - Unified Webpack's RSC manifests with Esbuild and Rollup so **all 3 bundlers** emit to `.dinou/react_client_manifest/react-client-manifest.json` and `.dinou/server_functions_manifest/server-functions-manifest.json` (and never emit internal manifests into `.dinou/dist3` or `.dinou/public`).
+     - Consolidated **all** production internal build artifacts and manifests directly into **`.dinou/dist1`** (eliminating the legacy `.dinou/react_client_manifest/` and `.dinou/server_functions_manifest/` directories completely):
+       - `.dinou/dist1/server/` holds `handler.js`, `netlify.js`, source maps, and `package.json` across Esbuild, Rollup, and Webpack (`netlify.toml` `[functions] directory = ".dinou/dist1/server"`).
+       - `.dinou/dist1/manifest.json` holds the bundler's internal chunk asset map across Esbuild, Rollup, and Webpack.
+       - `.dinou/dist1/react-client-manifest.json` and `.dinou/dist1/server-functions-manifest.json` hold the RSC Client Reference and Server Functions manifests across Esbuild, Rollup, and Webpack (plus `.dinou/dist1/react-ssr-manifest.json` for Webpack).
+       - In development mode when `DINOU_WRITE_TO_DISK=true` (rare; default dev mode is 100% in-memory via `globalThis.__DINOU_RAW_*__`), disk fallback manifests are written to **`.dinou/node-dev/`** so `dinou dev` and `dinou build` never overwrite or pollute each other's artifacts.
      - **Result**: `.dinou/dist3` is now a **100% pure public static webroot** containing exclusively client JS/CSS bundles, `/assets/*`, and copied `public/*` files—and users can freely place `public/manifest.json` in `public/` and serve it at `/manifest.json` with zero collisions!
 
 2. **Removal of Legacy `favicons/` Directory Support**:
@@ -43,22 +44,23 @@ During the `v9.4.0` audit of `/docs/public`, seven interconnected architectural,
 
 ```text
 .dinou/
-├── dist1/                        # Internal build & server artifacts (NEVER served publicly)
-│   ├── manifest.json             # Bundler chunk asset map ({"main.js": "main-<hash>.js", ...})
-│   ├── react-ssr-manifest.json   # Webpack SSR module loading manifest (Webpack builds only)
-│   └── server/                   # Pre-bundled server entrypoints (Node / Netlify Functions v2)
+├── dist1/                              # ALL production internal build & server artifacts (NEVER served publicly)
+│   ├── manifest.json                   # Bundler chunk asset map ({"main.js": "main-<hash>.js", ...})
+│   ├── react-client-manifest.json      # RSC client reference manifest (Esbuild, Rollup & Webpack)
+│   ├── server-functions-manifest.json  # Server Functions manifest (Esbuild, Rollup & Webpack)
+│   ├── react-ssr-manifest.json         # Webpack SSR module loading manifest (Webpack builds only)
+│   └── server/                         # Pre-bundled server entrypoints (Node / Netlify Functions v2)
 │       ├── handler.js
 │       ├── handler.js.map
 │       ├── netlify.js
 │       ├── netlify.js.map
 │       └── package.json
-├── react_client_manifest/        # RSC client reference manifest (Esbuild, Rollup & Webpack)
-│   └── react-client-manifest.json
-├── server_functions_manifest/    # Server Functions manifest (Esbuild, Rollup & Webpack)
-│   └── server-functions-manifest.json
-├── dist2/                        # Pre-rendered SSG / ISR / PPR HTML, RSC & slot cache store
-└── dist3/                        # 100% PURE public static webroot (client chunks, /assets/*, public/*)
+├── dist2/                              # Pre-rendered SSG / ISR / PPR HTML, RSC & slot cache store
+├── dist3/                              # 100% PURE public static webroot (client chunks, /assets/*, public/*)
+└── node-dev/                           # Dev-only workspace & optional DINOU_WRITE_TO_DISK=true manifests
 ```
+
+*(Note: Legacy `.dinou/react_client_manifest/` and `.dinou/server_functions_manifest/` directories have been completely eliminated.)*
 
 ---
 
@@ -68,29 +70,34 @@ During the `v9.4.0` audit of `/docs/public`, seven interconnected architectural,
 1. `dinou/core/static-assets.js`
 2. `dinou/core/copy-static-dirs.js`
 
-### Modified Files (22)
+### Modified Files (27)
 3. `dinou/esbuild/build.js`
-4. `dinou/esbuild/helpers-esbuild/get-config-esbuild.js`
-5. `dinou/esbuild/helpers-esbuild/get-config-esbuild-prod.js`
-6. `dinou/esbuild/plugins-esbuild/manifest-generator-plugin.js`
-7. `dinou/rollup/rollup.config.js`
-8. `dinou/rollup/rollup-plugins/manifest-generator-plugin.js`
-9. `dinou/webpack/webpack.config.js`
-10. `dinou/webpack/plugins/manifest-generator-plugin.js`
-11. `dinou/webpack/plugins/server-functions-plugin.js`
-12. `dinou/webpack/plugins/webpack-memory-plugin.js`
-13. `dinou/core/get-asset-from-manifest.js`
-14. `dinou/core/manifest-provider.js`
-15. `dinou/core/generate-static-rsc.js`
-16. `dinou/core/dinou-paths.js`
-17. `dinou/core/export-static.js`
-18. `dinou/node/dev.js`
-19. `dinou/node/build.js`
-20. `dinou/node/bundle-dual-engine.js`
-21. `dinou/bun/build.js`
-22. `dinou/deno/build.js`
-23. `dinou/cloudflare/build.js`
-24. `dinou/adapters/cloudflare.js`
+4. `dinou/esbuild/dev.js`
+5. `dinou/esbuild/helpers-esbuild/get-config-esbuild.js`
+6. `dinou/esbuild/helpers-esbuild/get-config-esbuild-prod.js`
+7. `dinou/esbuild/plugins-esbuild/manifest-generator-plugin.js`
+8. `dinou/esbuild/plugins-esbuild/react-client-manifest-plugin.js`
+9. `dinou/esbuild/plugins-esbuild/server-functions-plugin.js`
+10. `dinou/rollup/rollup.config.js`
+11. `dinou/rollup/rollup-plugins/manifest-generator-plugin.js`
+12. `dinou/rollup/rollup-plugins/rollup-plugin-react-client-manifest.js`
+13. `dinou/rollup/rollup-plugins/rollup-plugin-server-functions.js`
+14. `dinou/webpack/webpack.config.js`
+15. `dinou/webpack/plugins/manifest-generator-plugin.js`
+16. `dinou/webpack/plugins/server-functions-plugin.js`
+17. `dinou/webpack/plugins/webpack-memory-plugin.js`
+18. `dinou/core/get-asset-from-manifest.js`
+19. `dinou/core/manifest-provider.js`
+20. `dinou/core/generate-static-rsc.js`
+21. `dinou/core/dinou-paths.js`
+22. `dinou/core/export-static.js`
+23. `dinou/node/dev.js`
+24. `dinou/node/build.js`
+25. `dinou/node/bundle-dual-engine.js`
+26. `dinou/bun/build.js`
+27. `dinou/deno/build.js`
+28. `dinou/cloudflare/build.js`
+29. `dinou/adapters/cloudflare.js`
 
 ---
 
@@ -455,20 +462,20 @@ export default copyStaticDirectoriesToOutdir;
 
 ---
 
-### 4.3. Esbuild Changes (`build.js`, `get-config-esbuild.js`, `get-config-esbuild-prod.js`, `manifest-generator-plugin.js`)
+### 4.3. Esbuild Changes (`build.js`, `dev.js`, `get-config-esbuild.js`, `get-config-esbuild-prod.js`, `manifest-generator-plugin.js`, `react-client-manifest-plugin.js`, `server-functions-plugin.js`)
 
 ```diff
 --- a/dinou/esbuild/build.js
 +++ b/dinou/esbuild/build.js
-@@ -18,6 +18,7 @@
+@@ -18,8 +18,7 @@
  
  const outdir = ".dinou/dist3";
  await fs.rm(outdir, { recursive: true, force: true });
+-await fs.rm(".dinou/react_client_manifest", { recursive: true, force: true });
+-await fs.rm(".dinou/server_functions_manifest", { recursive: true, force: true });
 +await fs.rm(".dinou/dist1", { recursive: true, force: true });
- await fs.rm(".dinou/react_client_manifest", { recursive: true, force: true });
- await fs.rm(".dinou/server_functions_manifest", { recursive: true, force: true });
  
-@@ -129,7 +130,7 @@
+@@ -129,7 +128,7 @@
      target: "node20",
      format: "esm",
      conditions: ["react-server", "node", "import"],
@@ -477,7 +484,7 @@ export default copyStaticDirectoriesToOutdir;
      external: [
        "express",
        "chokidar",
-@@ -146,7 +147,7 @@
+@@ -146,7 +145,7 @@
      sourcemap: true,
    });
    await fs.writeFile(
@@ -485,6 +492,24 @@ export default copyStaticDirectoriesToOutdir;
 +    path.resolve(process.cwd(), ".dinou/dist1/server/package.json"),
      JSON.stringify({ type: "module" }, null, 2)
    );
+```
+
+```diff
+--- a/dinou/esbuild/dev.js
++++ b/dinou/esbuild/dev.js
+@@ -34,8 +34,13 @@
+     delete globalThis.__DINOU_RAW_SERVER_FUNCTIONS_MANIFEST__;
+   }
+   await fs.rm(outdir, { recursive: true, force: true });
+-  await fs.rm(".dinou/react_client_manifest", { recursive: true, force: true });
+-  await fs.rm(".dinou/server_functions_manifest", { recursive: true, force: true });
++  for (const stale of [
++    "react-client-manifest.json",
++    "server-functions-manifest.json",
++    "manifest.json",
++  ]) {
++    await fs.rm(path.join(".dinou/node-dev", stale), { force: true });
++  }
 ```
 
 ```diff
@@ -503,7 +528,16 @@ export default copyStaticDirectoriesToOutdir;
  import fs from "node:fs";
  import path from "node:path";
  
-@@ -67,38 +67,20 @@
+@@ -49,7 +49,7 @@
+     serverFunctionsPlugin({ serverFiles }),
+     reactClientManifestPlugin({
+       manifest,
+-      manifestPath: ".dinou/react_client_manifest/react-client-manifest.json",
++      manifestPath: ".dinou/node-dev/react-client-manifest.json",
+       onManifestUpdated,
+     }),
+     assetsPlugin({ changedIds }),
+@@ -71,38 +71,20 @@
        : []),
    ];
  
@@ -578,6 +612,15 @@ export default copyStaticDirectoriesToOutdir;
  import { existsSync } from "node:fs";
  
  export default function getConfigEsbuildProd({
+@@ -25,7 +25,7 @@
+     cssProcessorPlugin({ outdir }),
+     reactClientManifestPlugin({
+       manifest,
+-      manifestPath: `.dinou/react_client_manifest/react-client-manifest.json`,
++      manifestPath: `.dinou/dist1/react-client-manifest.json`,
+     }),
+     assetsPlugin(),
+     manifestGeneratorPlugin(manifestData),
 @@ -33,31 +33,19 @@
      writePlugin(),
    ].filter(Boolean);
@@ -651,9 +694,58 @@ export default copyStaticDirectoriesToOutdir;
            );
 ```
 
+```diff
+--- a/dinou/esbuild/plugins-esbuild/react-client-manifest-plugin.js
++++ b/dinou/esbuild/plugins-esbuild/react-client-manifest-plugin.js
+@@ -7,7 +7,7 @@
+ import { useClientRegex } from "../../constants.js";
+ 
+ export default function reactClientManifestPlugin({
+-  manifestPath = ".dinou/react_client_manifest/react-client-manifest.json",
++  manifestPath = null,
+   manifest = {},
+   onManifestUpdated,
+ } = {}) {
+@@ -82,9 +82,15 @@
+           }
+ 
+           if (shouldWriteToDisk && manifestChanged) {
+-            await fs.mkdir(path.dirname(manifestPath), { recursive: true });
++            const targetPath =
++              manifestPath ||
++              path.join(
++                isDev ? ".dinou/node-dev" : ".dinou/dist1",
++                "react-client-manifest.json"
++              );
++            await fs.mkdir(path.dirname(targetPath), { recursive: true });
+             await fs.writeFile(
+-              manifestPath,
++              targetPath,
+               serialized,
+               "utf8"
+             );
+```
+
+```diff
+--- a/dinou/esbuild/plugins-esbuild/server-functions-plugin.js
++++ b/dinou/esbuild/plugins-esbuild/server-functions-plugin.js
+@@ -236,9 +236,9 @@
+           if (shouldWriteToDisk) {
+-            // Write the server functions manifest JSON file
++            // Write the server functions manifest JSON file outside public static webroot
+             const manifestPath = path.join(
+-              ".dinou/server_functions_manifest",
++              isDev ? ".dinou/node-dev" : ".dinou/dist1",
+               "server-functions-manifest.json"
+             );
+             await fs.mkdir(path.dirname(manifestPath), { recursive: true });
+             await fs.writeFile(manifestPath, JSON.stringify(manifestObj, null, 2));
+           }
+```
+
 ---
 
-### 4.4. Rollup Changes (`rollup.config.js`, `manifest-generator-plugin.js`)
+### 4.4. Rollup Changes (`rollup.config.js`, `manifest-generator-plugin.js`, `rollup-plugin-react-client-manifest.js`, `rollup-plugin-server-functions.js`)
 
 ```diff
 --- a/dinou/rollup/rollup.config.js
@@ -667,15 +759,21 @@ export default copyStaticDirectoriesToOutdir;
  import reactClientManifest from "./rollup-plugins/rollup-plugin-react-client-manifest.js";
  import createScopedName from "../core/createScopedName.js";
  import replace from "#rollup/plugin-replace";
-@@ -147,6 +147,7 @@
+@@ -147,9 +147,14 @@
          del({
            targets: [
              `${outputDirectory}/*`,
-+            ...(!isDevelopment ? [".dinou/dist1/*"] : []),
-             ".dinou/react_client_manifest/*",
-             ".dinou/server_functions_manifest/*",
+-            ".dinou/react_client_manifest/*",
+-            ".dinou/server_functions_manifest/*",
++            ...(isDevelopment
++              ? [
++                  ".dinou/node-dev/react-client-manifest.json",
++                  ".dinou/node-dev/server-functions-manifest.json",
++                  ".dinou/node-dev/manifest.json",
++                ]
++              : [".dinou/dist1/*"]),
            ],
-@@ -201,14 +202,12 @@
+@@ -201,18 +206,16 @@
            path: path.resolve(__dirname, "postcss.config.js"),
          },
        }),
@@ -695,8 +793,11 @@ export default copyStaticDirectoriesToOutdir;
 +      },
        reactClientManifest({
          manifestPath: path.join(
-           ".dinou/react_client_manifest",
-@@ -270,7 +269,7 @@
+-          ".dinou/react_client_manifest",
++          isDevelopment ? ".dinou/node-dev" : ".dinou/dist1",
+           "react-client-manifest.json",
+         ),
+@@ -270,7 +273,7 @@
        netlify: path.resolve(__dirname, "../adapters/netlify.js"),
      },
      output: {
@@ -705,7 +806,7 @@ export default copyStaticDirectoriesToOutdir;
        format: "esm",
        entryFileNames: "[name].js",
        chunkFileNames: "[name]-[hash].js",
-@@ -304,8 +303,10 @@
+@@ -304,8 +307,10 @@
        {
          name: "post-build-server",
          closeBundle() {
@@ -758,6 +859,70 @@ export { manifestGeneratorPlugin };
 export default manifestGeneratorPlugin;
 ```
 
+```diff
+--- a/dinou/rollup/rollup-plugins/rollup-plugin-react-client-manifest.js
++++ b/dinou/rollup/rollup-plugins/rollup-plugin-react-client-manifest.js
+@@ -76,10 +76,7 @@
+ 
+ function reactClientManifestPlugin({
+   srcDir = path.resolve("src"),
+-  manifestPath = path.join(
+-    ".dinou/react_client_manifest",
+-    "react-client-manifest.json"
+-  ),
++  manifestPath = null,
+   assetInclude = regex,
+   serverFiles = new Set(),
+ } = {}) {
+@@ -741,9 +738,15 @@
+       const isDev = process.env.NODE_ENV !== "production" || process.env.DINOU_DEV === "true";
+       const shouldWriteToDisk = process.env.DINOU_WRITE_TO_DISK === "true" || !isDev;
++      const resolvedManifestPath =
++        manifestPath ||
++        path.join(
++          isDev ? ".dinou/node-dev" : ".dinou/dist1",
++          "react-client-manifest.json"
++        );
+ 
+       let existingManifest = null;
+-      if (shouldWriteToDisk && existsSync(manifestPath)) {
++      if (shouldWriteToDisk && existsSync(resolvedManifestPath)) {
+         try {
+-          existingManifest = JSON.parse(readFileSync(manifestPath, "utf8"));
++          existingManifest = JSON.parse(readFileSync(resolvedManifestPath, "utf8"));
+         } catch (e) {}
+       }
+ 
+@@ -754,8 +757,8 @@
+           for (const k of Object.keys(manifest).sort()) {
+             sortedManifest[k] = manifest[k];
+           }
+-          mkdirSync(dirname(manifestPath), { recursive: true });
+-          writeFileSync(manifestPath, JSON.stringify(sortedManifest, null, 2));
++          mkdirSync(dirname(resolvedManifestPath), { recursive: true });
++          writeFileSync(resolvedManifestPath, JSON.stringify(sortedManifest, null, 2));
+         }
+         manifestUpdatedCallback?.();
+       }
+```
+
+```diff
+--- a/dinou/rollup/rollup-plugins/rollup-plugin-server-functions.js
++++ b/dinou/rollup/rollup-plugins/rollup-plugin-server-functions.js
+@@ -174,9 +174,9 @@
+       if (shouldWriteToDisk) {
+-        // Write the manifest to the root directory
++        // Write the manifest outside public static webroot
+         const manifestPath = path.join(
+-          ".dinou/server_functions_manifest",
++          isDev ? ".dinou/node-dev" : ".dinou/dist1",
+           "server-functions-manifest.json"
+         );
+         try {
+           await fs.mkdir(path.dirname(manifestPath), { recursive: true });
+           await fs.writeFile(manifestPath, JSON.stringify(manifestObj, null, 2));
+```
+
 ---
 
 ### 4.5. Webpack Changes (`webpack.config.js`, `manifest-generator-plugin.js`, `server-functions-plugin.js`, `webpack-memory-plugin.js`)
@@ -765,29 +930,37 @@ export default manifestGeneratorPlugin;
 ```diff
 --- a/dinou/webpack/webpack.config.js
 +++ b/dinou/webpack/webpack.config.js
-@@ -62,7 +62,10 @@
+@@ -62,6 +62,8 @@
  
  const outputDirs = [
    path.resolve(projectRoot, ".dinou/public"),
++  path.resolve(projectRoot, ".dinou/node-dev"),
 +  path.resolve(projectRoot, ".dinou/dist1"),
    path.resolve(projectRoot, ".dinou/dist3"),
-+  path.resolve(projectRoot, ".dinou/react_client_manifest"),
-+  path.resolve(projectRoot, ".dinou/server_functions_manifest"),
    path.resolve(projectRoot, "out"),
    path.resolve(projectRoot, "dist"),
- ];
-@@ -95,6 +98,11 @@
+@@ -95,6 +97,22 @@
    // 🔥 CLEAN HARD
    if (shouldWriteToDisk) {
      cleanDir(outputDir);
 +    if (!isDevelopment) {
 +      cleanDir(path.resolve(process.cwd(), ".dinou/dist1"));
-+      cleanDir(path.resolve(process.cwd(), ".dinou/react_client_manifest"));
-+      cleanDir(path.resolve(process.cwd(), ".dinou/server_functions_manifest"));
++    } else {
++      const nodeDevDir = path.resolve(process.cwd(), ".dinou/node-dev");
++      for (const stale of [
++        "react-client-manifest.json",
++        "react-ssr-manifest.json",
++        "server-functions-manifest.json",
++        "manifest.json",
++      ]) {
++        try {
++          fs.rmSync(path.join(nodeDevDir, stale), { force: true });
++        } catch (e) {}
++      }
 +    }
    }
    const [cssEntries, , serverFiles] = await getCSSEntries();
-@@ -129,7 +137,7 @@
+@@ -129,7 +147,7 @@
    function runPostBuild() {
      if (clientDone && serverDone && !ssgExecuted) {
        ssgExecuted = true;
@@ -796,7 +969,7 @@ export default manifestGeneratorPlugin;
        fs.mkdirSync(serverDir, { recursive: true });
        fs.writeFileSync(
          path.join(serverDir, "package.json"),
-@@ -311,6 +319,65 @@
+@@ -311,6 +329,68 @@
            ...Array.from(dependencyClientFiles),
          ],
        }),
@@ -823,13 +996,13 @@ export default manifestGeneratorPlugin;
 +                    } catch (e) {}
 +                  }
 +                  if (shouldWriteToDisk) {
-+                    const clientManifestDir = path.resolve(
++                    const manifestDir = path.resolve(
 +                      process.cwd(),
-+                      ".dinou/react_client_manifest"
++                      isDevelopment ? ".dinou/node-dev" : ".dinou/dist1"
 +                    );
-+                    fs.mkdirSync(clientManifestDir, { recursive: true });
++                    fs.mkdirSync(manifestDir, { recursive: true });
 +                    fs.writeFileSync(
-+                      path.join(clientManifestDir, "react-client-manifest.json"),
++                      path.join(manifestDir, "react-client-manifest.json"),
 +                      jsonText,
 +                      "utf8"
 +                    );
@@ -844,10 +1017,13 @@ export default manifestGeneratorPlugin;
 +                    const ssrText = Buffer.isBuffer(rawSsr)
 +                      ? rawSsr.toString("utf8")
 +                      : String(rawSsr);
-+                    const dist1Dir = path.resolve(process.cwd(), ".dinou/dist1");
-+                    fs.mkdirSync(dist1Dir, { recursive: true });
++                    const manifestDir = path.resolve(
++                      process.cwd(),
++                      isDevelopment ? ".dinou/node-dev" : ".dinou/dist1"
++                    );
++                    fs.mkdirSync(manifestDir, { recursive: true });
 +                    fs.writeFileSync(
-+                      path.join(dist1Dir, "react-ssr-manifest.json"),
++                      path.join(manifestDir, "react-ssr-manifest.json"),
 +                      ssrText,
 +                      "utf8"
 +                    );
@@ -862,7 +1038,7 @@ export default manifestGeneratorPlugin;
        isDevelopment && {
          apply(compiler) {
            compiler.hooks.thisCompilation.tap(
-@@ -346,16 +413,15 @@
+@@ -346,16 +426,15 @@
        new CopyWebpackPlugin({
          patterns: [
            {
@@ -881,7 +1057,7 @@ export default manifestGeneratorPlugin;
            },
          ],
        }),
-@@ -497,7 +563,7 @@
+@@ -497,7 +576,7 @@
        netlify: path.resolve(__dirname, "../adapters/netlify.js"),
      },
      output: {
@@ -939,10 +1115,13 @@ class ManifestGeneratorPlugin {
               : process.env.DINOU_WRITE_TO_DISK === "true" || !isDev;
 
           if (shouldWriteToDisk) {
-            const dist1Dir = path.resolve(process.cwd(), ".dinou/dist1");
-            fs.mkdirSync(dist1Dir, { recursive: true });
+            const targetDir = path.resolve(
+              process.cwd(),
+              isDev ? ".dinou/node-dev" : ".dinou/dist1"
+            );
+            fs.mkdirSync(targetDir, { recursive: true });
             fs.writeFileSync(
-              path.join(dist1Dir, "manifest.json"),
+              path.join(targetDir, "manifest.json"),
               JSON.stringify(this.manifestData, null, 2),
               "utf8"
             );
@@ -993,7 +1172,7 @@ export default instance;
 +            if (shouldWriteToDisk) {
 +              const sfDir = path.resolve(
 +                process.cwd(),
-+                ".dinou/server_functions_manifest"
++                isDev ? ".dinou/node-dev" : ".dinou/dist1"
 +              );
 +              fs.mkdirSync(sfDir, { recursive: true });
 +              fs.writeFileSync(
@@ -1082,7 +1261,7 @@ export function getAssetFromManifest(name) {
     if (typeof globalThis !== "undefined" && globalThis.__DINOU_RAW_ASSET_MANIFEST__) {
       return "/" + (globalThis.__DINOU_RAW_ASSET_MANIFEST__[name] || name);
     }
-    const manifestPath = path.resolve(process.cwd(), ".dinou/dist1/manifest.json");
+    const manifestPath = path.resolve(process.cwd(), ".dinou/node-dev/manifest.json");
     if (fs.existsSync(manifestPath)) {
       manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
     }
@@ -1096,7 +1275,7 @@ export default getAssetFromManifest;
 ```diff
 --- a/dinou/core/manifest-provider.js
 +++ b/dinou/core/manifest-provider.js
-@@ -17,31 +17,19 @@
+@@ -17,31 +17,21 @@
    );
  }
  
@@ -1112,7 +1291,9 @@ export default getAssetFromManifest;
 -  }
    return path.resolve(
      process.cwd(),
-     ".dinou/react_client_manifest/react-client-manifest.json"
+-    ".dinou/react_client_manifest/react-client-manifest.json"
++    isDevMode() ? ".dinou/node-dev" : ".dinou/dist1",
++    "react-client-manifest.json"
    );
  }
  
@@ -1128,7 +1309,9 @@ export default getAssetFromManifest;
 -  }
    return path.resolve(
      process.cwd(),
-     ".dinou/server_functions_manifest/server-functions-manifest.json"
+-    ".dinou/server_functions_manifest/server-functions-manifest.json"
++    isDevMode() ? ".dinou/node-dev" : ".dinou/dist1",
++    "server-functions-manifest.json"
    );
  }
 ```
@@ -1146,7 +1329,7 @@ export default getAssetFromManifest;
 -          isWebpack ? ".dinou/dist3" : ".dinou/react_client_manifest",
 -          "react-client-manifest.json"
 -        ),
-+        path.resolve(".dinou/react_client_manifest/react-client-manifest.json"),
++        path.resolve(".dinou/dist1/react-client-manifest.json"),
          "utf8"
        )
      );
@@ -1218,10 +1401,8 @@ export default getAssetFromManifest;
 
 #### `dinou/node/dev.js`
 - Imports `getStaticContentType`, `normalizePublicRequestPath`, and `resolveConfinedStaticFile` from `../core/static-assets.js`.
-- Simplifies `findManifest(filename, folder)` to resolve `.dinou/<folder>/<filename>` directly:
-  - `react-client-manifest.json` from `"react_client_manifest"`
-  - `server-functions-manifest.json` from `"server_functions_manifest"`
-  - `manifest.json` from `"dist1"` **only when `isWebpackBuild` is true** (so a leftover production `.dinou/dist1/manifest.json` never causes Esbuild or Rollup dev mode to request hashed production filenames).
+- Cleans any stale disk manifests (`react-client-manifest.json`, `react-ssr-manifest.json`, `server-functions-manifest.json`, `manifest.json`) inside `.dinou/node-dev` on startup (when `DINOU_STANDALONE_SERVER !== "true"`).
+- Simplifies `findManifest(filename, folder)` to resolve `.dinou/<folder>/<filename>` directly, reading dev disk fallback manifests exclusively from `"node-dev"` (`react-client-manifest.json`, `server-functions-manifest.json`, and `manifest.json` when `isWebpackBuild` is true) — never touching `.dinou/dist1`.
 - Removes legacy `favicons` from `watchTargets` and `candidateStaticDirs` (`candidateStaticDirs` is now `[path.resolve(projectRoot, "public"), path.resolve(projectRoot, ".dinou/public")]`).
 - Replaces raw URL-slicing static delivery with `normalizePublicRequestPath(pathname)`, `resolveConfinedStaticFile(baseDir, targetName)`, and `getStaticContentType(...)` (supporting `GET` and `HEAD`, URL-decoded spaces, `/.well-known/*`, and PWA `/manifest.json`, while blocking traversal and hidden dotfiles).
 
@@ -1238,7 +1419,23 @@ export default getAssetFromManifest;
 +  resolveConfinedStaticFile,
 +} from "../core/static-assets.js";
  import parseExports from "../core/parse-exports.js";
-@@ -251,18 +256,10 @@
+@@ -101,6 +106,18 @@
+ const isWebpackBuild = process.env.DINOU_BUILD_TOOL === "webpack";
+ const devDir = path.resolve(projectRoot, ".dinou/node-dev");
+ fs.mkdirSync(devDir, { recursive: true });
++if (process.env.DINOU_STANDALONE_SERVER !== "true") {
++  for (const stale of [
++    "react-client-manifest.json",
++    "react-ssr-manifest.json",
++    "server-functions-manifest.json",
++    "manifest.json",
++  ]) {
++    try {
++      fs.rmSync(path.join(devDir, stale), { force: true });
++    } catch (e) {}
++  }
++}
+@@ -251,18 +268,10 @@
  // Manifest paths and helpers
 -function findManifest(filename, standardFolder) {
 -  const candidates = isWebpackBuild
@@ -1260,20 +1457,29 @@ export default getAssetFromManifest;
 +  const candidate = path.resolve(projectRoot, ".dinou", folder, filename);
 +  return fs.existsSync(candidate) ? candidate : null;
  }
-@@ -305,7 +302,7 @@
+@@ -305,9 +314,9 @@
    const forceRescan = options.forceRescan || false;
-   const cPath = findManifest("react-client-manifest.json", "react_client_manifest");
-   const sfPath = findManifest("server-functions-manifest.json", "server_functions_manifest");
+-  const cPath = findManifest("react-client-manifest.json", "react_client_manifest");
+-  const sfPath = findManifest("server-functions-manifest.json", "server_functions_manifest");
 -  const aPath = findManifest("manifest.json", "public");
-+  const aPath = isWebpackBuild ? findManifest("manifest.json", "dist1") : null;
-@@ -2098,7 +2095,7 @@
++  const cPath = findManifest("react-client-manifest.json", "node-dev");
++  const sfPath = findManifest("server-functions-manifest.json", "node-dev");
++  const aPath = isWebpackBuild ? findManifest("manifest.json", "node-dev") : null;
+@@ -2094,11 +2103,11 @@
+ function checkClientFilesPresent() {
+   if (globalThis.__DINOU_MEM_FILES__ && globalThis.__DINOU_MEM_FILES__.has("main.js")) {
+     return true;
+   }
+-  const cPath = findManifest("react-client-manifest.json", "react_client_manifest");
++  const cPath = findManifest("react-client-manifest.json", "node-dev");
+   if (!globalThis.__DINOU_RAW_CLIENT_MANIFEST__ && !readJsonSafe(cPath)) return false;
    if (isWebpackBuild) {
      if (globalThis.__DINOU_RAW_ASSET_MANIFEST__) return true;
 -    const mPath = path.resolve(projectRoot, ".dinou/public/manifest.json");
-+    const mPath = path.resolve(projectRoot, ".dinou/dist1/manifest.json");
++    const mPath = path.resolve(projectRoot, ".dinou/node-dev/manifest.json");
      return fs.existsSync(mPath);
    }
-@@ -2181,8 +2178,7 @@
+@@ -2181,8 +2190,7 @@
  const candidateStaticDirs = [
    path.resolve(projectRoot, "public"),
 -  path.resolve(projectRoot, "favicons"),
@@ -1286,7 +1492,7 @@ export default getAssetFromManifest;
 ```diff
 --- a/dinou/node/bundle-dual-engine.js
 +++ b/dinou/node/bundle-dual-engine.js
-@@ -80,21 +80,10 @@
+@@ -80,24 +80,14 @@
    // 2. Discover manifests
    const isWebpackBuild = process.env.DINOU_BUILD_TOOL === "webpack";
  
@@ -1309,14 +1515,17 @@ export default getAssetFromManifest;
 +    return fs.existsSync(candidate) ? candidate : null;
    }
  
-   const clientManifestPath = findManifest("react-client-manifest.json", "react_client_manifest");
-   const sfManifestPath = findManifest("server-functions-manifest.json", "server_functions_manifest");
-@@ -323,7 +312,7 @@
+-  const clientManifestPath = findManifest("react-client-manifest.json", "react_client_manifest");
+-  const sfManifestPath = findManifest("server-functions-manifest.json", "server_functions_manifest");
++  const manifestFolder = isDev ? "node-dev" : "dist1";
++  const clientManifestPath = findManifest("react-client-manifest.json", manifestFolder);
++  const sfManifestPath = findManifest("server-functions-manifest.json", manifestFolder);
+@@ -323,7 +313,7 @@
      manifestInlines += `\nglobalThis.__DINOU_SERVER_FUNCTIONS_MANIFEST__ = {};\n`;
    }
  
 -  const assetManifestPath = findManifest("manifest.json", "dist3");
-+  const assetManifestPath = findManifest("manifest.json", "dist1");
++  const assetManifestPath = findManifest("manifest.json", manifestFolder);
    if (assetManifestPath && fs.existsSync(assetManifestPath)) {
      const content = fs.readFileSync(assetManifestPath, "utf8");
      manifestInlines += `\nglobalThis.__DINOU_ASSET_MANIFEST__ = ${content};\n`;
@@ -1392,7 +1601,7 @@ export default getAssetFromManifest;
 
 #### `dinou/bun/build.js` & `dinou/deno/build.js`
 Both `dinou/bun/build.js` and `dinou/deno/build.js` received the exact same two upgrades:
-1. `findManifest(filename, folder)` resolves `.dinou/<folder>/<filename>` directly, and `assetManifestPath` reads `findManifest("manifest.json", "dist1")`.
+1. `findManifest(filename, folder)` resolves `.dinou/<folder>/<filename>` directly, reading **all three** manifests (`react-client-manifest.json`, `server-functions-manifest.json`, and `manifest.json`) from `"dist1"`.
 2. Generated orchestrator `fetch(req)` imports `{ getStaticContentType, getStaticCacheControl, normalizePublicRequestPath, resolveConfinedStaticFile }` from `${dinouDirSlash}/core/static-assets.js` and serves `GET`/`HEAD` static files from `.dinou/dist3` (`Bun.file(filePath)` on Bun, `Deno.readFile(filePath)` on Deno) with confined paths, smart `Cache-Control`, and full MIME coverage (including extensionless `/.well-known/apple-app-site-association` and PWA `/manifest.json`).
 
 #### `dinou/cloudflare/build.js` & `dinou/adapters/cloudflare.js`
@@ -1409,13 +1618,16 @@ Both `dinou/bun/build.js` and `dinou/deno/build.js` received the exact same two 
 -// Ensure Cloudflare Assets never exposes internal server bundles or raw RSC slot payloads publicly
 -const assetsIgnorePath = path.join(dist3Dir, ".assetsignore");
 -...
--  // (Removed: /server and internal manifests now live in .dinou/dist1, .dinou/react_client_manifest, and .dinou/server_functions_manifest!)
-@@ -111,20 +111,9 @@
+-  // (Removed: /server and all internal manifests now live in .dinou/dist1!)
+@@ -111,23 +111,12 @@
 -function findManifest(filename, standardFolder) { ... }
 +function findManifest(filename, folder) {
 +  const candidate = path.resolve(projectRoot, ".dinou", folder, filename);
 +  return fs.existsSync(candidate) ? candidate : null;
 +}
++
++const clientManifestPath = findManifest("react-client-manifest.json", "dist1");
++const sfManifestPath = findManifest("server-functions-manifest.json", "dist1");
 @@ -375,7 +375,7 @@
 -const assetManifestPath = findManifest("manifest.json", "dist3");
 +const assetManifestPath = findManifest("manifest.json", "dist1");
@@ -1469,7 +1681,7 @@ if (!isRSCPayload && !isServerFunction && isStaticAsset && env && env.ASSETS && 
 
 ```markdown
 ### Changed
-- **Physical Static Webroot Isolation (`.dinou/dist1` vs `.dinou/dist3`)**: Isolated `.dinou/dist3` exclusively for publicly servable static assets (`public/*`, imported `/assets/*`, hashed client JS chunks, and `styles.css`). Relocated compiled server bundles (`handler.js`, `netlify.js`, `package.json`) and internal bundler manifests (`manifest.json`, Webpack `react-ssr-manifest.json`, `react-client-manifest.json`, and `server-functions-manifest.json`) out of `.dinou/dist3` into `.dinou/dist1`, `.dinou/react_client_manifest`, and `.dinou/server_functions_manifest` across Esbuild, Rollup, and Webpack. Note: Netlify deployments using `[functions]` in `netlify.toml` should point `directory = ".dinou/dist1/server"`.
+- **Physical Static Webroot Isolation (`.dinou/dist1` vs `.dinou/dist3`)**: Isolated `.dinou/dist3` exclusively for publicly servable static assets (`public/*`, imported `/assets/*`, hashed client JS chunks, and `styles.css`). Consolidated compiled server bundles (`.dinou/dist1/server/handler.js`, `netlify.js`, `package.json`) and **all** internal bundler/RSC manifests (`manifest.json`, `react-client-manifest.json`, `server-functions-manifest.json`, and Webpack `react-ssr-manifest.json`) directly into `.dinou/dist1` across Esbuild, Rollup, and Webpack (eliminating `.dinou/react_client_manifest` and `.dinou/server_functions_manifest`, and using `.dinou/node-dev` for optional disk manifests in dev mode). Note: Netlify deployments using `[functions]` in `netlify.toml` should point `directory = ".dinou/dist1/server"`.
 - **Unified `public/` Directory (Removed Legacy `favicons/`)**: Standardized on `public/` at the project root as the single directory for unhashed static files across dev and production builds, removing legacy `favicons/` directory copying and watching.
 
 ### Added
@@ -1482,7 +1694,7 @@ if (!isRSCPayload && !isServerFunction && isStaticAsset && env && env.ASSETS && 
 ### Fixed
 - **Multi-Bundler `public/` Parity**: Replaced `rollup-plugin-copy` (which flattened nested subdirectories in `public/**/*`) with recursive `copyStaticDirectoriesToOutdir` and enabled `dot: true` in Webpack's `CopyWebpackPlugin` so nested directories, filenames with spaces, and `public/.well-known/*` behave identically across Esbuild, Rollup, and Webpack.
 - **Cloudflare Workers `public/` Asset Routing**: Fixed `dinou/adapters/cloudflare.js` and `dinou/cloudflare/build.js` so `public/*` files of all extensions (`/sitemap.xml`, `/docs/*.pdf`, `/media/*.mp4`, `/google*.html`, `/.well-known/*`, `/manifest.json`) are served via `env.ASSETS` instead of falling through to the RSC router as `404`, and removed the obsolete `.assetsignore` hack that previously blocked user `/manifest.json` uploads.
-- **Dev Mode Asset Manifest Isolation**: Guarded `dinou/core/get-asset-from-manifest.js` and `dinou/node/dev.js` so a leftover production `.dinou/dist1/manifest.json` never causes Esbuild or Rollup dev mode to resolve hashed production chunk filenames.
+- **Dev vs Build Manifest Isolation**: Guarded `dinou/core/get-asset-from-manifest.js`, `dinou/core/manifest-provider.js`, `dinou/node/bundle-dual-engine.js`, and `dinou/node/dev.js` so `dinou dev` reads disk fallback manifests strictly from `.dinou/node-dev` while `dinou build` writes and reads strictly from `.dinou/dist1`.
 ```
 
 ---
@@ -1735,7 +1947,7 @@ describe("Public Static Assets & .dinou/dist1 Physical Isolation", () => {
     assert.equal(leakRes.status, 404);
   });
 
-  it("physically isolates .dinou/dist1 from .dinou/dist3 and preserves user public/manifest.json across Esbuild, Rollup, and Webpack", async () => {
+  it("consolidates all internal manifests & server bundles in .dinou/dist1, keeps .dinou/dist3 pure, and preserves user public/manifest.json across Esbuild, Rollup, and Webpack", async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dinou-dist1-parity-"));
     try {
       fs.writeFileSync(
@@ -1743,7 +1955,14 @@ describe("Public Static Assets & .dinou/dist1 Physical Isolation", () => {
         JSON.stringify({ name: "tmp-dist1-test", type: "module" }, null, 2)
       );
       fs.mkdirSync(path.join(tmpDir, "src"), { recursive: true });
-      fs.writeFileSync(path.join(tmpDir, "src/main.js"), "export const ok = 1;\n");
+      fs.writeFileSync(
+        path.join(tmpDir, "src/actions.js"),
+        '"use server";\nexport async function ping() { return "pong"; }\n'
+      );
+      fs.writeFileSync(
+        path.join(tmpDir, "src/main.js"),
+        'import { ping } from "./actions.js";\nexport const ok = ping;\n'
+      );
 
       // Legacy favicons/ directory must be ignored
       fs.mkdirSync(path.join(tmpDir, "favicons"), { recursive: true });
@@ -1789,6 +2008,24 @@ describe("Public Static Assets & .dinou/dist1 Physical Isolation", () => {
             bundlerManifest["main.js"].startsWith("main-"),
           `[${label}] .dinou/dist1/manifest.json must map main.js -> main-<hash>.js`
         );
+        assert.ok(
+          fs.existsSync(path.join(tmpDir, ".dinou/dist1/react-client-manifest.json")),
+          `[${label}] react-client-manifest.json must be written to .dinou/dist1/`
+        );
+        assert.ok(
+          fs.existsSync(path.join(tmpDir, ".dinou/dist1/server-functions-manifest.json")),
+          `[${label}] server-functions-manifest.json must be written to .dinou/dist1/`
+        );
+        assert.equal(
+          fs.existsSync(path.join(tmpDir, ".dinou/react_client_manifest")),
+          false,
+          `[${label}] legacy .dinou/react_client_manifest directory must NOT exist`
+        );
+        assert.equal(
+          fs.existsSync(path.join(tmpDir, ".dinou/server_functions_manifest")),
+          false,
+          `[${label}] legacy .dinou/server_functions_manifest directory must NOT exist`
+        );
         assert.equal(fs.existsSync(path.join(outDir, "server")), false);
         assert.equal(fs.existsSync(path.join(outDir, "react-client-manifest.json")), false);
         assert.equal(fs.existsSync(path.join(outDir, "react-ssr-manifest.json")), false);
@@ -1813,6 +2050,8 @@ describe("Public Static Assets & .dinou/dist1 Physical Isolation", () => {
       process.env.NODE_ENV = "production";
       process.chdir(tmpDir);
       try {
+        const serverFilesSet = new Set([path.join(tmpDir, "src/actions.js")]);
+
         // 1. Esbuild
         const esbuild = repoRequire("esbuild");
         const getConfigEsbuildProd = (
@@ -1826,10 +2065,13 @@ describe("Public Static Assets & .dinou/dist1 Physical Isolation", () => {
         const outEsbuild = path.join(tmpDir, ".dinou/dist3");
         await esbuild.build(
           getConfigEsbuildProd({
-            entryPoints: { main: path.join(tmpDir, "src/main.js") },
+            entryPoints: {
+              main: path.join(tmpDir, "src/main.js"),
+              serverFunctionProxy: path.join(tmpDir, "src/main.js"),
+            },
             outdir: outEsbuild,
             manifest: {},
-            serverFiles: new Set(),
+            serverFiles: serverFilesSet,
             reactCompiler: false,
           })
         );
@@ -1850,10 +2092,20 @@ describe("Public Static Assets & .dinou/dist1 Physical Isolation", () => {
         const rollupManifestPlugin = rollupClientCfg.plugins.find(
           (p) => p && p.name === "manifest-generator"
         );
+        const rollupRcmPlugin = rollupClientCfg.plugins.find(
+          (p) => p && p.name === "react-client-manifest"
+        );
+        const rollupSfPlugin = rollupClientCfg.plugins.find(
+          (p) => p && p.name === "server-functions-proxy"
+        );
         const outRollup = path.join(tmpDir, ".dinou/dist3");
         const bundle = await rollup({
-          input: { main: path.join(tmpDir, "src/main.js") },
-          plugins: [copyPlugin, rollupManifestPlugin],
+          input: {
+            main: path.join(tmpDir, "src/main.js"),
+            serverFunctionProxy: path.join(tmpDir, "src/actions.js"),
+          },
+          external: ["/__SERVER_FUNCTION_PROXY__"],
+          plugins: [copyPlugin, rollupRcmPlugin, rollupManifestPlugin, rollupSfPlugin],
         });
         await bundle.write({
           dir: outRollup,
@@ -1895,8 +2147,10 @@ describe("Public Static Assets & .dinou/dist1 Physical Isolation", () => {
               context: tmpDir,
               entry: {
                 main: path.join(tmpDir, "src/main.js"),
-                serverFunctionProxy: path.join(tmpDir, "src/main.js"),
+                serverFunctionProxy: path.join(tmpDir, "src/actions.js"),
               },
+              externalsType: "module",
+              externals: ["/__SERVER_FUNCTION_PROXY__"],
               output: {
                 path: outWebpack,
                 filename: "[name]-[contenthash].js",
@@ -1933,7 +2187,7 @@ describe("Public Static Assets & .dinou/dist1 Physical Isolation", () => {
                 wpManifestMod.default,
                 new wpServerFunctionsMod.WebpackServerFunctionsPluginSimple({
                   manifest: wpManifestMod.default.manifestData,
-                  serverFiles: new Set(),
+                  serverFiles: serverFilesSet,
                 }),
               ],
             },
@@ -1947,15 +2201,7 @@ describe("Public Static Assets & .dinou/dist1 Physical Isolation", () => {
           );
         });
         assertPureDist3AndDist1Manifest(outWebpack, "webpack");
-        assert.ok(
-          fs.existsSync(path.join(tmpDir, ".dinou/react_client_manifest/react-client-manifest.json"))
-        );
         assert.ok(fs.existsSync(path.join(tmpDir, ".dinou/dist1/react-ssr-manifest.json")));
-        assert.ok(
-          fs.existsSync(
-            path.join(tmpDir, ".dinou/server_functions_manifest/server-functions-manifest.json")
-          )
-        );
       } finally {
         if (prevNodeEnv === undefined) delete process.env.NODE_ENV;
         else process.env.NODE_ENV = prevNodeEnv;
@@ -2080,11 +2326,20 @@ test.describe("Public Static Assets & .dinou/dist1 Physical Isolation (E2E)", ()
       )
     );
 
-    // Create minimal Dinou app in src/
+    // Create minimal Dinou app in src/ (with a Client Component and a Server Function)
     fs.mkdirSync(path.join(appDir, "src"), { recursive: true });
     fs.writeFileSync(
+      path.join(appDir, "src/actions.ts"),
+      `"use server";\nexport async function pingAction() {\n  return "pong";\n}\n`
+    );
+    fs.writeFileSync(
+      path.join(appDir, "src/client-badge.tsx"),
+      `"use client";\nimport { pingAction } from "./actions";\nexport function ClientBadge() {\n  return <span data-action={typeof pingAction}>Client Ready</span>;\n}\n`
+    );
+    fs.writeFileSync(
       path.join(appDir, "src/page.tsx"),
-      `export default function HomePage() {
+      `import { ClientBadge } from "./client-badge";
+      export default function HomePage() {
         return (
           <html lang="en">
             <head>
@@ -2093,6 +2348,7 @@ test.describe("Public Static Assets & .dinou/dist1 Physical Isolation (E2E)", ()
             </head>
             <body>
               <h1>Public Assets E2E Ready</h1>
+              <ClientBadge />
             </body>
           </html>
         );
@@ -2168,12 +2424,18 @@ test.describe("Public Static Assets & .dinou/dist1 Physical Isolation (E2E)", ()
     }
   });
 
-  test("isolates server bundles & bundler manifest in .dinou/dist1 while keeping .dinou/dist3 pure", async () => {
+  test("consolidates server bundles & all internal manifests in .dinou/dist1 while keeping .dinou/dist3 pure", async () => {
     expect(fs.existsSync(path.join(appDir, ".dinou/dist1/server/handler.js"))).toBe(true);
     expect(fs.existsSync(path.join(appDir, ".dinou/dist1/server/netlify.js"))).toBe(true);
     expect(fs.existsSync(path.join(appDir, ".dinou/dist1/server/package.json"))).toBe(true);
     expect(fs.existsSync(path.join(appDir, ".dinou/dist1/manifest.json"))).toBe(true);
+    expect(fs.existsSync(path.join(appDir, ".dinou/dist1/react-client-manifest.json"))).toBe(true);
+    expect(fs.existsSync(path.join(appDir, ".dinou/dist1/server-functions-manifest.json"))).toBe(
+      true
+    );
 
+    expect(fs.existsSync(path.join(appDir, ".dinou/react_client_manifest"))).toBe(false);
+    expect(fs.existsSync(path.join(appDir, ".dinou/server_functions_manifest"))).toBe(false);
     expect(fs.existsSync(path.join(appDir, ".dinou/dist3/server"))).toBe(false);
     expect(fs.existsSync(path.join(appDir, ".dinou/dist3/react-client-manifest.json"))).toBe(false);
     expect(fs.existsSync(path.join(appDir, ".dinou/dist3/server-functions-manifest.json"))).toBe(
