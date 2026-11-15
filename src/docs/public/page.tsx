@@ -282,8 +282,11 @@ export default function Page() {
                     <code>.html</code> files, PDFs, and media) without waking the RSC renderer.
                   </li>
                   <li>
-                    <strong>Static Export (<code>dinou export</code>):</strong> Copied cleanly into <code>out/</code>{" "}
-                    while automatically excluding internal server bundles and build manifests.
+                    <strong>Static Export (<code>dinou export-static</code>):</strong> Copies <code>public/</code> assets
+                    and hashed client bundles from <code>.dinou/dist3</code> alongside pre-rendered SSG{" "}
+                    <code>index.html</code>, <code>page.rsc</code>, and <code>layout.rsc</code> files from{" "}
+                    <code>.dinou/dist2</code> into <code>out/</code> for full client-side SPA navigation on pure static
+                    hosts, while automatically excluding internal ISR/PPR/Slot cache metadata.
                   </li>
                 </ul>
 

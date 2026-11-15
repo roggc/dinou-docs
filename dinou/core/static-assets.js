@@ -80,6 +80,15 @@ const DIST2_INTERNAL_BASENAMES = new Set([
   "slot.json",
 ]);
 
+const DIST2_EXPORTABLE_BASENAMES = new Set([
+  "index.html",
+  "page.rsc",
+  "layout.rsc",
+]);
+
+export const STATIC_EXPORT_SCRIPT =
+  "<script>window.__DINOU_STATIC_EXPORT__=true;</script>";
+
 /**
  * Resolves the HTTP Content-Type header for a static file path or URL pathname.
  * Handles extensionless RFC / Universal Links files such as `apple-app-site-association`.
@@ -265,7 +274,7 @@ export function isPublicStaticAssetRequest(pathname) {
 }
 
 /**
- * Filter predicate for `dinou export` (`export-static.js`) when copying `.dinou/dist3`
+ * Filter predicate for `dinou export-static` (`export-static.js`) when copying `.dinou/dist3`
  * into `out/`. Excludes OS metadata and any `.dinou/dist2` internal cache metadata
  * (in case `build:cloudflare` previously synchronized `dist2` into `dist3`), while
  * preserving all `public/` files (including `.well-known/*` and `.nojekyll`) and client chunks.
@@ -307,4 +316,47 @@ export function shouldExportDist3Entry(relPosixPath) {
   }
 
   return true;
+}
+
+/**
+ * Filter predicate for `dinou export-static` (`export-static.js`) when copying
+ * pre-rendered SSG files from `.dinou/dist2` into `out/`.
+ * Strictly allowlists `index.html`, `page.rsc`, and `layout.rsc` (outside the
+ * internal `slots/` cache namespace) so internal ISR/PPR/Slot metadata JSONs,
+ * `shell.*` templates, `rsc.rsc`, `status-manifest.json`, and `._old.` files
+ * are never published to static hosts.
+ */
+export function shouldExportDist2File(relPosixPath) {
+  if (!relPosixPath || typeof relPosixPath !== "string") return false;
+  const clean = relPosixPath.replace(/\\/g, "/").replace(/^\/+/, "");
+  if (!clean) return false;
+
+  const segments = clean.split("/").filter(Boolean);
+  if (segments.length === 0) return false;
+
+  if (segments[0].toLowerCase() === "slots") {
+    return false;
+  }
+
+  const baseLower = segments[segments.length - 1].toLowerCase();
+  return DIST2_EXPORTABLE_BASENAMES.has(baseLower);
+}
+
+/**
+ * Injects `<script>window.__DINOU_STATIC_EXPORT__=true;</script>` into exported
+ * `index.html` documents so Dinou's client router resolves `/<route>/page.rsc`
+ * and `/<layout>/layout.rsc` directly from static hosting instead of hitting
+ * server-only `/____rsc_*` endpoints.
+ */
+export function injectStaticExportFlag(html) {
+  if (typeof html !== "string" || html.includes("__DINOU_STATIC_EXPORT__")) {
+    return html;
+  }
+  if (/<\/head>/i.test(html)) {
+    return html.replace(/<\/head>/i, (match) => `${STATIC_EXPORT_SCRIPT}${match}`);
+  }
+  if (/<\/body>/i.test(html)) {
+    return html.replace(/<\/body>/i, (match) => `${STATIC_EXPORT_SCRIPT}${match}`);
+  }
+  return `${STATIC_EXPORT_SCRIPT}${html}`;
 }
