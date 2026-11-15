@@ -395,7 +395,7 @@ dinou build:node:pure:compile:win        # Windows executable (.exe)`}
             <section id="netlify-serverless" className="mt-12">
               <h2>4. Netlify (Serverless Functions v2)</h2>
               <p>
-                In <strong>Dinou</strong>, Netlify is a first-class supported serverless target. During <code>npm run build</code>, Dinou automatically pre-bundles a specialized <strong>Netlify Functions v2 Adapter</strong> directly into <code>.dinou/dist3/server/netlify.js</code>.
+                In <strong>Dinou</strong>, Netlify is a first-class supported serverless target. During <code>npm run build</code>, Dinou automatically pre-bundles a specialized <strong>Netlify Functions v2 Adapter</strong> directly into <code>.dinou/dist1/server/netlify.js</code>, physically isolated from the public static webroot in <code>.dinou/dist3</code>.
               </p>
               
               <div className="space-y-4 my-4">
@@ -418,7 +418,7 @@ dinou build:node:pure:compile:win        # Windows executable (.exe)`}
   NODE_ENV = "production"
 
 [functions]
-  directory = ".dinou/dist3/server"
+  directory = ".dinou/dist1/server"
   node_bundler = "none"
   included_files = [
     "package.json",
@@ -462,7 +462,7 @@ npx netlify deploy --prod`}
                   <span>How Netlify Functions v2 Works in Dinou</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  The pre-bundled adapter in <code>.dinou/dist3/server/netlify.js</code> exports <code>config = &#123; path: &quot;/*&quot;, preferStatic: true &#125;</code>. Because <code>preferStatic: true</code> is active, Netlify serves all client assets, CSS, images, and pre-rendered pages directly from <code>.dinou/dist3</code> through its global edge CDN with zero compute cost. Dynamic routes, SSR streaming, and React Server Functions are routed to the serverless function automatically. With <code>node_bundler = &quot;none&quot;</code>, Netlify runs the pre-bundled adapter cleanly without double-bundling conflicts.
+                  The pre-bundled adapter in <code>.dinou/dist1/server/netlify.js</code> exports <code>config = &#123; path: &quot;/*&quot;, preferStatic: true &#125;</code>. Because <code>preferStatic: true</code> is active, Netlify serves all client assets, CSS, images, and <code>public/</code> files directly from <code>.dinou/dist3</code> through its global edge CDN with zero compute cost while server bundles remain isolated in <code>.dinou/dist1/server</code>. Dynamic routes, SSR streaming, and React Server Functions are routed to the serverless function automatically. With <code>node_bundler = &quot;none&quot;</code>, Netlify runs the pre-bundled adapter cleanly without double-bundling conflicts.
                 </p>
               </div>
             </section>

@@ -147,6 +147,7 @@ export default async function () {
         del({
           targets: [
             `${outputDirectory}/*`,
+            ...(!isDevelopment ? [".dinou/dist1/*"] : []),
             ".dinou/react_client_manifest/*",
             ".dinou/server_functions_manifest/*",
           ],
@@ -270,7 +271,7 @@ export default async function () {
       netlify: path.resolve(__dirname, "../adapters/netlify.js"),
     },
     output: {
-      dir: path.resolve(outputDirectory, "server"),
+      dir: path.resolve(process.cwd(), ".dinou/dist1/server"),
       format: "esm",
       entryFileNames: "[name].js",
       chunkFileNames: "[name]-[hash].js",
@@ -304,8 +305,10 @@ export default async function () {
       {
         name: "post-build-server",
         closeBundle() {
+          const serverDir = path.resolve(process.cwd(), ".dinou/dist1/server");
+          fs.mkdirSync(serverDir, { recursive: true });
           fs.writeFileSync(
-            path.resolve(process.cwd(), ".dinou/dist3/server/package.json"),
+            path.join(serverDir, "package.json"),
             JSON.stringify({ type: "module" }, null, 2)
           );
           execSync(`"${process.execPath}" --conditions=react-server "${path.resolve(__dirname, "../core/run-ssg.js")}"`, {

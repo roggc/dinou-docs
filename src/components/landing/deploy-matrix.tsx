@@ -110,8 +110,8 @@ run_worker_first = true
     terminalOutput: [
       "$ git push origin main",
       "⚡ Netlify CI build triggered: executing \"npm run build\"...",
-      "⚡ Pre-bundling Netlify Functions v2 adapter (.dinou/dist3/server)...",
-      "✔ Static assets & Functions v2 adapter published from .dinou/dist3",
+      "⚡ Pre-bundling Netlify Functions v2 adapter (.dinou/dist1/server)...",
+      "✔ Static assets (.dinou/dist3) & Functions v2 adapter (.dinou/dist1/server) ready",
       "🚀 Published to https://my-app.netlify.app (Global Edge CDN)",
     ],
     configFile: {
@@ -129,7 +129,7 @@ run_worker_first = true
   NODE_ENV = "production"
 
 [functions]
-  directory = ".dinou/dist3/server"
+  directory = ".dinou/dist1/server"
   node_bundler = "none"
   included_files = [
     "package.json",

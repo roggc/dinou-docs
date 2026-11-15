@@ -1,4 +1,7 @@
 // manifest-generator-plugin.js
+import fs from "node:fs";
+import path from "node:path";
+
 class ManifestGeneratorPlugin {
   constructor() {
     this.manifestData = {}; // same as in Rollup
@@ -16,7 +19,7 @@ class ManifestGeneratorPlugin {
           name: pluginName,
           stage: Compilation.PROCESS_ASSETS_STAGE_ANALYSE,
         },
-        (assets) => {
+        () => {
           this.manifestData = {};
           // Traverse chunks to generate manifest
           for (const chunk of compilation.chunks) {
@@ -30,13 +33,27 @@ class ManifestGeneratorPlugin {
             }
           }
 
-          // Emit manifest.json
-          const json = JSON.stringify(this.manifestData, null, 2);
+          if (typeof globalThis !== "undefined") {
+            globalThis.__DINOU_RAW_ASSET_MANIFEST__ = { ...this.manifestData };
+          }
 
-          compilation.emitAsset(
-            "manifest.json",
-            new compiler.webpack.sources.RawSource(json)
-          );
+          const isDev =
+            process.env.NODE_ENV !== "production" ||
+            process.env.DINOU_DEV === "true";
+          const shouldWriteToDisk =
+            process.env.DINOU_WRITE_TO_DISK === "false"
+              ? false
+              : process.env.DINOU_WRITE_TO_DISK === "true" || !isDev;
+
+          if (shouldWriteToDisk) {
+            const dist1Dir = path.resolve(process.cwd(), ".dinou/dist1");
+            fs.mkdirSync(dist1Dir, { recursive: true });
+            fs.writeFileSync(
+              path.join(dist1Dir, "manifest.json"),
+              JSON.stringify(this.manifestData, null, 2),
+              "utf8"
+            );
+          }
         }
       );
     });

@@ -299,9 +299,11 @@ export default function Page() {
                       bundler chunks) automatically receive <code>Cache-Control: public, max-age=31536000, immutable</code>.
                     </p>
                     <p>
-                      Hidden dotfiles (such as <code>.env</code> or <code>.git</code>) and internal engine artifacts in{" "}
-                      <code>.dinou/dist3/server/*</code> are strictly blocked from public HTTP access, while RFC 8615{" "}
-                      <code>/.well-known/*</code> routes remain publicly reachable.
+                      Server bundles and internal build manifests are physically isolated in <code>.dinou/dist1</code>{" "}
+                      so <code>.dinou/dist3</code> remains a pure public static webroot (meaning you can also place a
+                      PWA <code>public/manifest.json</code> in <code>public/</code> without naming conflicts). Hidden
+                      dotfiles (such as <code>.env</code> or <code>.git</code>) are strictly blocked from public HTTP
+                      access, while RFC 8615 <code>/.well-known/*</code> routes remain publicly reachable.
                     </p>
                   </AlertDescription>
                 </Alert>
