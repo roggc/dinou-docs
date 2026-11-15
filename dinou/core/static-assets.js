@@ -66,19 +66,18 @@ export const PUBLIC_STATIC_EXT_REGEX =
 const IMMUTABLE_CHUNK_REGEX =
   /^[^/]+-(?:[A-Z0-9]{8}|[a-f0-9]{16,32}|(?=[A-Za-z0-9_-]{8}\.)(?=[A-Za-z0-9_-]*[A-Z0-9])[A-Za-z0-9_-]{8})\.(?:js|mjs|cjs|css)(?:\.map)?$/;
 
-const ROOT_INTERNAL_MANIFESTS = new Set([
-  "react-client-manifest.json",
-  "react-ssr-manifest.json",
-  "server-functions-manifest.json",
-  "status-manifest.json",
-]);
-
-const ROUTE_INTERNAL_BASENAMES = new Set([
+// Pre-rendered SSG/ISR/PPR cache artifacts from `.dinou/dist2` (synchronized into
+// `.dinou/dist3` during Cloudflare Workers builds so `handler.js` can read them via
+// `env.ASSETS`). They must never bypass `handleRequest` as raw static files.
+const DIST2_INTERNAL_BASENAMES = new Set([
   "index.html",
   "shell.html",
   "metadata.json",
   "layout.metadata.json",
+  "slot.metadata.json",
   "shell.layout.json",
+  "shell.page.json",
+  "slot.json",
 ]);
 
 /**
@@ -103,9 +102,9 @@ export function getStaticContentType(pathnameOrFilePath) {
 }
 
 /**
- * Returns true when a normalized POSIX path (relative to `.dinou/dist3` or `.dinou/public`)
- * refers to an internal Dinou server bundle, manifest, or ISR/SSG/PPR engine artifact
- * that must never be served directly as a raw public asset.
+ * Returns true when a normalized POSIX path refers to an internal `.dinou/dist2`
+ * SSG/ISR/PPR cache artifact (synchronized into `.dinou/dist3` on Cloudflare Workers)
+ * that must never bypass `handleRequest` as a raw static asset.
  */
 export function isInternalDinouAssetPath(relPosixPath) {
   if (!relPosixPath || typeof relPosixPath !== "string") return true;
@@ -115,18 +114,17 @@ export function isInternalDinouAssetPath(relPosixPath) {
   const segments = clean.split("/").filter(Boolean);
   if (segments.length === 0) return true;
 
-  const firstLower = segments[0].toLowerCase();
-  if (firstLower === "server" || firstLower === "_slots") {
+  if (segments[0].toLowerCase() === "slots") {
     return true;
   }
 
   const relLower = segments.join("/").toLowerCase();
-  if (ROOT_INTERNAL_MANIFESTS.has(relLower)) {
+  if (relLower === "status-manifest.json") {
     return true;
   }
 
   const baseLower = segments[segments.length - 1].toLowerCase();
-  if (ROUTE_INTERNAL_BASENAMES.has(baseLower)) {
+  if (DIST2_INTERNAL_BASENAMES.has(baseLower)) {
     return true;
   }
   if (baseLower.endsWith(".rsc") || baseLower.includes("._old.")) {
@@ -268,8 +266,9 @@ export function isPublicStaticAssetRequest(pathname) {
 
 /**
  * Filter predicate for `dinou export` (`export-static.js`) when copying `.dinou/dist3`
- * into `out/`. Excludes server bundles (`server/*`), internal manifests, and OS metadata,
- * while preserving `public/` files (including `.well-known/*` and `.nojekyll`) and client chunks.
+ * into `out/`. Excludes OS metadata and any `.dinou/dist2` internal cache metadata
+ * (in case `build:cloudflare` previously synchronized `dist2` into `dist3`), while
+ * preserving all `public/` files (including `.well-known/*` and `.nojekyll`) and client chunks.
  */
 export function shouldExportDist3Entry(relPosixPath) {
   if (!relPosixPath || typeof relPosixPath !== "string") return false;
@@ -279,25 +278,28 @@ export function shouldExportDist3Entry(relPosixPath) {
   const segments = clean.split("/").filter(Boolean);
   if (segments.length === 0) return false;
 
-  const firstLower = segments[0].toLowerCase();
-  if (firstLower === "server" || firstLower === "_slots") {
-    return false;
-  }
-
-  const relLower = segments.join("/").toLowerCase();
-  if (ROOT_INTERNAL_MANIFESTS.has(relLower) || relLower === ".assetsignore") {
-    return false;
-  }
-
   const baseLower = segments[segments.length - 1].toLowerCase();
   if (baseLower === ".ds_store" || baseLower === "thumbs.db") {
     return false;
   }
+
+  if (segments[0].toLowerCase() === "slots") {
+    return false;
+  }
+
+  const relLower = segments.join("/").toLowerCase();
+  if (relLower === "status-manifest.json") {
+    return false;
+  }
+
   if (
     baseLower === "shell.html" ||
     baseLower === "metadata.json" ||
     baseLower === "layout.metadata.json" ||
+    baseLower === "slot.metadata.json" ||
     baseLower === "shell.layout.json" ||
+    baseLower === "shell.page.json" ||
+    baseLower === "slot.json" ||
     baseLower.endsWith(".rsc") ||
     baseLower.includes("._old.")
   ) {
