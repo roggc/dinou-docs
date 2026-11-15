@@ -114,7 +114,10 @@ Keep these invariants intact across all future audits and docs updates:
    - **`out/` (`dinou export-static`)**: Copies `.dinou/dist3` public assets + strictly allowlisted `index.html` (injected with `<script>window.__DINOU_STATIC_EXPORT__=true;</script>`), `page.rsc`, and `layout.rsc` from `.dinou/dist2` so both initial React 19 hydration and `<Link>` SPA navigation work serverlessly on static hosts without `/____rsc_*` endpoints.
 2. **Underscore-Prefixed Escape Convention (`_folder`)**:
    - Any folder prefixed with `_` inside `src/` (top-level `src/_foo` or nested `src/docs/_foo`) is ignored by Dinou's router and bundlers (`dinou/core/resolve-contextual-dinou.js`, `x-escape.md`).
-3. **Existing `x-*.md` Upstream Handoff Documents in Repo Root**:
+3. **`public/styles.css` Coexistence & Collision Precedence**:
+   - When no CSS files are imported in `src/`, `public/styles.css` is served raw at `/styles.css` across `dinou dev` and `dinou build` in all 3 bundlers (`esbuild`, `rollup`, `webpack`) with zero warnings.
+   - When CSS files are imported in `src/` alongside `public/styles.css`, Dinou's compiled `/styles.css` bundle wins deterministically in both dev and prod across all 3 bundlers (preserving nested `public/<subdir>/styles.css` untouched) and logs a deduplicated `console.warn`.
+4. **Existing `x-*.md` Upstream Handoff Documents in Repo Root**:
    - `x-bailout.md`, `x-cache-slot-bailout.md`, `x-escape.md`, `x-server-functions-fixes.md`, `x-revalidation-fixes.md`, `x-streaming-suspense-fixes.md`, `x-ssr-server-references-fixes.md`, `x-react-compiler-fixes.md`, `x-public-static-assets-fixes.md`, `x-styles-css-fixes.md`.
 
 ---

@@ -207,6 +207,20 @@ export default function Page() {
                     single <code>&lt;link&gt;</code> element in the DOM.
                   </li>
                 </ol>
+
+                <p className="text-xs text-muted-foreground pt-2">
+                  <strong>Note on <code>public/styles.css</code>:</strong> If your
+                  application does not import any CSS files inside <code>src/</code>,
+                  you can place a static <code>public/styles.css</code> file and
+                  serve it directly at <code>/styles.css</code>. However, whenever
+                  any stylesheet is imported in <code>src/</code>, Dinou&apos;s
+                  compiled stylesheet bundle always takes precedence at{" "}
+                  <code>/styles.css</code> in both <code>dinou dev</code> and{" "}
+                  <code>dinou build</code> (ignoring <code>public/styles.css</code>{" "}
+                  with a console warning—rename static stylesheets in{" "}
+                  <code>public/</code> to e.g. <code>public/custom.css</code> or
+                  import them from <code>src/</code>).
+                </p>
               </div>
             </section>
 

@@ -563,6 +563,30 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
                   </tbody>
                 </table>
               </div>
+
+              <Alert className="not-prose my-6 border-amber-500/20 bg-amber-50/40 dark:bg-amber-950/20">
+                <ShieldCheck className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <AlertTitle className="text-sm font-semibold">
+                  Precedence Rule for <code>public/styles.css</code>
+                </AlertTitle>
+                <AlertDescription className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  If your project imports <strong>no CSS files</strong> inside{" "}
+                  <code>src/</code>, placing a static <code>public/styles.css</code>{" "}
+                  serves it directly at <code>/styles.css</code>. Whenever any{" "}
+                  <code>.css</code> or <code>.module.css</code> file is imported in{" "}
+                  <code>src/</code>, Dinou&apos;s{" "}
+                  <Link
+                    href="/docs/styles#linking-stylesheet"
+                    className="font-medium underline underline-offset-4"
+                  >
+                    compiled stylesheet bundle
+                  </Link>{" "}
+                  takes precedence at <code>/styles.css</code> across both{" "}
+                  <code>dinou dev</code> and <code>dinou build</code>, ignoring root{" "}
+                  <code>public/styles.css</code> with a warning (rename static files
+                  in <code>public/</code> to e.g. <code>public/custom.css</code>).
+                </AlertDescription>
+              </Alert>
             </section>
 
             {/* Documentation Previous / Next Pager */}
