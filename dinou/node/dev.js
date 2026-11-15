@@ -2196,7 +2196,6 @@ if (!fs.existsSync(dotDinouDir)) {
 const candidateStaticDirs = [
   path.resolve(projectRoot, "public"),
   path.resolve(projectRoot, ".dinou/public"),
-  path.resolve(projectRoot, "favicons"),
 ];
 
 function isManifestReady() {
@@ -2622,7 +2621,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    // 2. Static files delivery from memory, public/, .dinou/public, or favicons/
+    // 2. Static files delivery from memory, public/, or .dinou/public
     const cleanPath =
       req.method === "GET" || req.method === "HEAD"
         ? normalizePublicRequestPath(pathname)

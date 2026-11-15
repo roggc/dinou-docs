@@ -9,9 +9,9 @@ While auditing `/docs/public` (`public/` static asset delivery) in `dinou-docs` 
    - Previously, `node/build.js`, `bun/build.js`, `deno/build.js`, and `cloudflare/build.js` served any file inside `.dinou/dist3` matching `url.pathname` (`GET /server/handler.js`, `GET /server/handler.js.map`, `GET /server-functions-manifest.json`), publicly leaking compiled server code, source maps, and absolute developer filesystem paths.
    - `core/export-static.js` (`dinou export`) recursively copied all of `.dinou/dist3` into `out/`, publishing `out/server/handler.js` and internal manifests to static hosts (GitHub Pages, Surge, Cloudflare Pages).
    - Static path resolution in `node/dev.js`, `node/build.js`, `bun/build.js`, and `deno/build.js` passed raw `url.pathname` to `path.join(dist3Dir, pathname)` without `decodeURIComponent` (breaking filenames with spaces/UTF-8 like `/docs/brochure%202026.pdf`) and without strict directory-containment checks (`resolved.startsWith(rootDir + path.sep)`) or hidden dotfile filtering.
-2. **Critical Multi-Bundler Parity Bug — Rollup Flattened Nested Subdirectories (`flatten: true`) & Dropped `public/.well-known/*` Dotfiles**:
+2. **Critical Multi-Bundler Parity Bug — Rollup Flattened Nested Subdirectories (`flatten: true`) & Dropped `public/.well-known/*` Dotfiles (+ Removal of Legacy v5 `favicons/` Fallback)**:
    - In `dinou/rollup/rollup.config.js`, `rollup-plugin-copy` was configured with `{ src: "public/*", dest: outputDirectory }` and `flatten: true`. This stripped subdirectory structure (flattening `public/images/og-image.png` into `.dinou/dist3/og-image.png`) and skipped dot-directories such as `public/.well-known/assetlinks.json` and `public/.well-known/apple-app-site-association` (`globby` defaults to `dot: false`).
-   - Legacy `favicons/` fallback precedence also differed across Esbuild, Rollup, Webpack, and `node/dev.js`.
+   - Removed legacy pre-v6 `favicons/` directory fallback across Esbuild, Rollup, and Webpack so `public/` is the single, unambiguous source of truth for unbundled static files.
 3. **High Multi-Runtime Delivery Bug — Cloudflare Workers 404s on `/sitemap.xml`, `/.well-known/*`, Verification `.html`, PDFs & Media + Incomplete MIME Types + Incorrect `immutable` `Cache-Control` on Unhashed `public/` Files**:
    - In `dinou/cloudflare/build.js` and `dinou/adapters/cloudflare.js`, `staticExtRegex` lacked `.xml`, `.pdf`, `.json`, standalone verification `.html` files (e.g. `/google1a2b3c4d5e6f.html`), media/archive extensions, and `/.well-known/*` paths (including extensionless `/.well-known/apple-app-site-association`), causing them to fall through to `handleRequest` and return `404`.
    - In `dinou/node/dev.js`, `dinou/node/build.js`, and `dinou/deno/build.js`, common web/SEO/media types (`.xml`, `.webmanifest`, `.html`, extensionless `apple-app-site-association` requiring `application/json`, `.pdf`, `.avif`, `.gif`, `.ttf`, `.otf`, `.wasm`, `.mp4`, `.webm`, `.mp3`) fell back to `application/octet-stream` (or omitted `content-type` in Deno).
@@ -31,7 +31,7 @@ While auditing `/docs/public` (`public/` static asset delivery) in `dinou-docs` 
    - `isPublicStaticAssetRequest(pathname)`: Edge static routing classifier for Cloudflare Workers `env.ASSETS`.
    - `shouldExportDist3Entry(relPosixPath)`: Filter predicate for `dinou export` (`core/export-static.js`).
 2. **`dinou/core/copy-static-dirs.js`** *(Node build-time helper)*:
-   - `copyStaticDirectoriesToOutdir(projectRoot, outdir)`: Recursively copies legacy `favicons/` (if present) followed by `public/` (if present, taking precedence on collisions) into `outdir`, preserving nested subdirectories and dotfiles (`.well-known/*`, `.nojekyll`) while ignoring OS junk files (`.DS_Store`, `Thumbs.db`).
+   - `copyStaticDirectoriesToOutdir(projectRoot, outdir)`: Recursively copies `public/` (if present) into `outdir`, preserving nested subdirectories and dotfiles (`.well-known/*`, `.nojekyll`) while ignoring OS junk files (`.DS_Store`, `Thumbs.db`).
 
 ### Modified Bundler, Runtime & Exporter Files
 3. `dinou/esbuild/helpers-esbuild/get-config-esbuild.js`
@@ -334,27 +334,24 @@ function shouldCopyStaticEntry(srcPath) {
 
 export function copyStaticDirectoriesToOutdir(projectRoot, outdir) {
   const rootDir = path.resolve(projectRoot || process.cwd());
-  const destDir = path.resolve(rootDir, outdir);
-  let copiedAny = false;
+  const srcDir = path.resolve(rootDir, "public");
+  if (!fs.existsSync(srcDir)) return false;
 
-  for (const dirName of ["favicons", "public"]) {
-    const srcDir = path.resolve(rootDir, dirName);
-    if (!fs.existsSync(srcDir)) continue;
-    try {
-      if (!fs.statSync(srcDir).isDirectory()) continue;
-      fs.mkdirSync(destDir, { recursive: true });
-      fs.cpSync(srcDir, destDir, {
-        recursive: true,
-        force: true,
-        dereference: true,
-        preserveTimestamps: true,
-        filter: shouldCopyStaticEntry,
-      });
-      copiedAny = true;
-    } catch (e) {}
+  try {
+    if (!fs.statSync(srcDir).isDirectory()) return false;
+    const destDir = path.resolve(rootDir, outdir);
+    fs.mkdirSync(destDir, { recursive: true });
+    fs.cpSync(srcDir, destDir, {
+      recursive: true,
+      force: true,
+      dereference: true,
+      preserveTimestamps: true,
+      filter: shouldCopyStaticEntry,
+    });
+    return true;
+  } catch (e) {
+    return false;
   }
-
-  return copiedAny;
 }
 
 export default copyStaticDirectoriesToOutdir;
@@ -373,14 +370,13 @@ export default copyStaticDirectoriesToOutdir;
  import fs from "node:fs";
  import path from "node:path";
  
-@@ -67,19 +68,17 @@ export default function getConfigEsbuild({
+@@ -67,19 +68,16 @@ export default function getConfigEsbuild({
    ];
  
    const shouldWriteToDisk = process.env.DINOU_WRITE_TO_DISK === "true";
 -  const staticDir = fs.existsSync("public") ? "public" : (fs.existsSync("favicons") ? "favicons" : null);
 -  if (staticDir && shouldWriteToDisk) {
-+  const hasStaticDir = fs.existsSync("public") || fs.existsSync("favicons");
-+  if (hasStaticDir && shouldWriteToDisk) {
++  if (fs.existsSync("public") && shouldWriteToDisk) {
      let staticCopied = false;
      plugins = [
        {
@@ -415,14 +411,13 @@ export default copyStaticDirectoriesToOutdir;
  import { existsSync } from "node:fs";
  
  export default function getConfigEsbuildProd({
-@@ -33,15 +33,18 @@ export default function getConfigEsbuildProd({
+@@ -33,15 +33,17 @@ export default function getConfigEsbuildProd({
      writePlugin(),
    ].filter(Boolean);
  
 -  const staticDir = existsSync("public") ? "public" : (existsSync("favicons") ? "favicons" : null);
 -  if (staticDir) {
-+  const hasStaticDir = existsSync("public") || existsSync("favicons");
-+  if (hasStaticDir) {
++  if (existsSync("public")) {
      plugins = [
 -      copyStaticFiles({
 -        src: staticDir,
@@ -485,12 +480,11 @@ export default copyStaticDirectoriesToOutdir;
 ```diff
 --- a/dinou/webpack/webpack.config.js
 +++ b/dinou/webpack/webpack.config.js
-@@ -346,15 +346,24 @@ export default async function getWebpackConfig() {
+@@ -346,15 +346,14 @@ export default async function getWebpackConfig() {
        new CopyWebpackPlugin({
          patterns: [
            {
--            from: "public",
-+            from: "favicons",
+             from: "public",
              to: ".",
              noErrorOnMissing: true,
 +            globOptions: {
@@ -498,17 +492,11 @@ export default copyStaticDirectoriesToOutdir;
 +              ignore: ["**/.DS_Store", "**/Thumbs.db"],
 +            },
            },
-           {
+-          {
 -            from: "favicons",
-+            from: "public",
-             to: ".",
-             noErrorOnMissing: true,
-+            force: true,
-+            globOptions: {
-+              dot: true,
-+              ignore: ["**/.DS_Store", "**/Thumbs.db"],
-+            },
-           },
+-            to: ".",
+-            noErrorOnMissing: true,
+-          },
          ],
        }),
 ```
@@ -528,7 +516,7 @@ export default copyStaticDirectoriesToOutdir;
 +} from "../core/static-assets.js";
  import parseExports from "../core/parse-exports.js";
  
-@@ -2188,26 +2193,10 @@ if (!fs.existsSync(dotDinouDir)) {
+@@ -2188,26 +2193,9 @@ if (!fs.existsSync(dotDinouDir)) {
    fs.mkdirSync(dotDinouDir, { recursive: true });
  }
  
@@ -552,10 +540,9 @@ export default copyStaticDirectoriesToOutdir;
 +  path.resolve(projectRoot, "public"),
    path.resolve(projectRoot, ".dinou/public"),
 -  path.resolve(projectRoot, "public"),
-+  path.resolve(projectRoot, "favicons"),
  ];
  
-@@ -2632,12 +2621,18 @@ const server = http.createServer(async (req, res) => {
+@@ -2632,12 +2620,18 @@ const server = http.createServer(async (req, res) => {
        return;
      }
  
@@ -564,7 +551,7 @@ export default copyStaticDirectoriesToOutdir;
 -      const cleanPath = pathname.startsWith("/") ? pathname.slice(1) : pathname;
 -      const mappedPath = (parsedAssetManifest && parsedAssetManifest[cleanPath]) || cleanPath;
 -      const ext = path.extname(cleanPath).toLowerCase();
-+    // 2. Static files delivery from memory, public/, .dinou/public, or favicons/
++    // 2. Static files delivery from memory, public/, or .dinou/public
 +    const cleanPath =
 +      req.method === "GET" || req.method === "HEAD"
 +        ? normalizePublicRequestPath(pathname)
@@ -974,7 +961,7 @@ export default copyStaticDirectoriesToOutdir;
 ### Security & Fixed (`public/` Static Assets)
 - **Block Public Exposure of Internal `.dinou/dist3/server/*` Bundles & Build Manifests**: Prevented standalone production servers (`node`, `bun`, `deno`), Cloudflare Workers (`env.ASSETS` + `.assetsignore`), and `dinou export` (`out/`) from publicly serving or exporting internal server bundles (`handler.js`, `handler.js.map`, `netlify.js`) and internal bundler/RSC manifests (`manifest.json`, `react-client-manifest.json`, `server-functions-manifest.json`).
 - **Safe URL Decoding, Dotfile Protection & Path-Traversal Confinement**: Added `decodeURIComponent` handling (supporting spaces and UTF-8 characters in `public/` filenames), strict directory-containment checks (`resolved.startsWith(rootDir + path.sep)`), and hidden dotfile blocking while preserving RFC 8615 `/.well-known/*` routes.
-- **Rollup, Esbuild & Webpack `public/` Copy Parity**: Fixed `rollup.config.js` where `rollup-plugin-copy` (`flatten: true`, `dot: false`) flattened nested subdirectories (`public/images/...`) and skipped `public/.well-known/*` files. Unified recursive static copying across Esbuild, Rollup, and Webpack.
+- **Rollup, Esbuild & Webpack `public/` Copy Parity**: Fixed `rollup.config.js` where `rollup-plugin-copy` (`flatten: true`, `dot: false`) flattened nested subdirectories (`public/images/...`) and skipped `public/.well-known/*` files. Unified recursive static copying exclusively from `public/` across Esbuild, Rollup, and Webpack (removing the legacy pre-v6 `favicons/` directory fallback).
 - **Cloudflare Workers Static Routing, Complete MIME Types & Smart `Cache-Control`**: Enabled Edge `env.ASSETS` delivery for `/sitemap.xml`, `/.well-known/*` (including extensionless `apple-app-site-association` served as `application/json; charset=utf-8`), standalone domain verification `.html` files, PDFs, and media; unified MIME types across Node, Bun, and Deno; and reserved `Cache-Control: public, max-age=31536000, immutable` strictly for content-hashed chunks and `/assets/*` while serving unhashed `public/` files with `public, max-age=0, must-revalidate`.
 ```
 
@@ -1229,7 +1216,6 @@ test("Esbuild, Rollup & Webpack copy nested public/ subdirectories and .well-kno
     fs.writeFileSync(path.join(tmpDir, "src/entry.js"), "export const ok = 1;\n");
 
     fs.mkdirSync(path.join(tmpDir, "favicons"), { recursive: true });
-    fs.writeFileSync(path.join(tmpDir, "favicons/favicon.ico"), "legacy-favicon");
     fs.writeFileSync(path.join(tmpDir, "favicons/legacy-only.png"), "legacy-png");
 
     fs.mkdirSync(path.join(tmpDir, "public/images/nested"), { recursive: true });
@@ -1252,12 +1238,12 @@ test("Esbuild, Rollup & Webpack copy nested public/ subdirectories and .well-kno
       assert.equal(
         fs.readFileSync(path.join(outDir, "favicon.ico"), "utf8"),
         "modern-public-favicon",
-        `[${label}] public/ must override favicons/`
+        `[${label}] public/favicon.ico must be copied`
       );
       assert.equal(
-        fs.readFileSync(path.join(outDir, "legacy-only.png"), "utf8"),
-        "legacy-png",
-        `[${label}] favicons/ fallback must work`
+        fs.existsSync(path.join(outDir, "legacy-only.png")),
+        false,
+        `[${label}] legacy favicons/ directory must be ignored`
       );
       assert.equal(
         fs.readFileSync(path.join(outDir, "images/nested/og-image.png"), "utf8"),

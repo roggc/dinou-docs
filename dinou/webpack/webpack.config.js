@@ -346,19 +346,9 @@ export default async () => {
       new CopyWebpackPlugin({
         patterns: [
           {
-            from: "favicons",
-            to: ".",
-            noErrorOnMissing: true,
-            globOptions: {
-              dot: true,
-              ignore: ["**/.DS_Store", "**/Thumbs.db"],
-            },
-          },
-          {
             from: "public",
             to: ".",
             noErrorOnMissing: true,
-            force: true,
             globOptions: {
               dot: true,
               ignore: ["**/.DS_Store", "**/Thumbs.db"],

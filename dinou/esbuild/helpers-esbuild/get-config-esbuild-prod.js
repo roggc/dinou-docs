@@ -33,8 +33,7 @@ export default function getConfigEsbuildProd({
     writePlugin(),
   ].filter(Boolean);
 
-  const hasStaticDir = existsSync("public") || existsSync("favicons");
-  if (hasStaticDir) {
+  if (existsSync("public")) {
     plugins = [
       ...plugins,
       {
