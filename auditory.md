@@ -120,8 +120,12 @@ Keep these invariants intact across all future audits and docs updates:
 4. **Unified Static Media & Custom `assetExtensions` Pipeline (`x-assets-fixes.md`)**:
    - All 26 built-in media/font formats (plus any custom `assetExtensions` configured in `dinou.config.*`, with auto-generated `declare module "*.<ext>"` in `.dinou/types/routes.d.ts`) resolve across RSC, SSR, Client Components, and CSS `url(...)` to `/assets/[name]-[8hex].[ext]` using an OS-independent SHA-256 digest of `relPosixPath + "\0" + fileBytes` across Esbuild, Rollup, Webpack, Node.js, Bun, Deno, and Cloudflare Workers.
    - Static asset servers (`node/dev.js`, `node/build.js`, `bun/build.js`, `deno/build.js`) support RFC 9110 `Range: bytes=...` (`206 Partial Content`, `416`, `Accept-Ranges: bytes`) for HTML5 `<video>` / `<audio>` scrubbing and Safari playback.
-5. **Existing `x-*.md` Upstream Handoff Documents in Repo Root**:
-   - `x-bailout.md`, `x-cache-slot-bailout.md`, `x-escape.md`, `x-server-functions-fixes.md`, `x-revalidation-fixes.md`, `x-streaming-suspense-fixes.md`, `x-ssr-server-references-fixes.md`, `x-react-compiler-fixes.md`, `x-public-static-assets-fixes.md`, `x-styles-css-fixes.md`, `x-assets-fixes.md`.
+5. **Environment Variables, `.env*` Hierarchy, `DINOU_PUBLIC_*` & Unified `getContext().env` (`x-env-vars-fixes.md`)**:
+   - `dinou/core/env.js` loads `.env.<mode>.local` → `.env.local` (skipped in `test`) → `.env.<mode>` → `.env` (never overriding real OS/CLI shell variables) across all bundlers, CLI commands, standalone Node/Bun/Deno servers, and live hot-reload in `dinou dev`, while emitting `NodeJS.ProcessEnv` key names (never values) into `.dinou/types/routes.d.ts`.
+   - `DINOU_PUBLIC_*` variables are safely inlined across Esbuild, Rollup, Webpack, and Pass B (`ssr-engine`), while remaining `process.env` accesses in Client Components & Pass B resolve to the sanitized public env object (preventing SSR/SSG secret leaks and browser `ReferenceError: process is not defined`).
+   - `dinou/core/runtime-env.js` (`createUnifiedEnv`) powers `getContext().env` across Cloudflare Workers (preserving live KV/D1/R2 bindings), Node.js, Bun, Deno, Netlify, and SSG, and `isBotEnvProbePath` + static asset filters block all `.env` / `.env.*` / `%2eenv` probes and prevent accidental `public/.env*` copying.
+6. **Existing `x-*.md` Upstream Handoff Documents in Repo Root**:
+   - `x-bailout.md`, `x-cache-slot-bailout.md`, `x-escape.md`, `x-server-functions-fixes.md`, `x-revalidation-fixes.md`, `x-streaming-suspense-fixes.md`, `x-ssr-server-references-fixes.md`, `x-react-compiler-fixes.md`, `x-public-static-assets-fixes.md`, `x-styles-css-fixes.md`, `x-assets-fixes.md`, `x-env-vars-fixes.md`.
 
 ---
 
@@ -149,8 +153,8 @@ Keep these invariants intact across all future audits and docs updates:
 - [x] `/docs/public` — Public Directory (`src/docs/public/page.tsx` • `x-public-static-assets-fixes.md`)
 - [x] `/docs/styles` — Styles (`src/docs/styles/page.tsx` • `x-styles-css-fixes.md`)
 - [x] `/docs/assets` — Assets (`src/docs/assets/page.tsx` • `x-assets-fixes.md`)
-- [ ] **`/docs/env-vars` — Env Vars (`src/docs/env-vars/page.tsx`)  ⬅️ NEXT ROUTE TO AUDIT**
-- [ ] `/docs/alias` — Alias (`src/docs/alias/page.tsx`)
+- [x] `/docs/env-vars` — Env Vars (`src/docs/env-vars/page.tsx` • `x-env-vars-fixes.md`)
+- [ ] **`/docs/alias` — Alias (`src/docs/alias/page.tsx`)  ⬅️ NEXT ROUTE TO AUDIT**
 - [ ] `/docs/plugins` — Plugins (`src/docs/plugins/page.tsx`)
 - [ ] `/docs/bundlers` — Bundlers (`src/docs/bundlers/page.tsx`)
 - [ ] `/docs/deployment` — Deployment (`src/docs/deployment/page.tsx`)
