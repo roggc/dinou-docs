@@ -117,8 +117,11 @@ Keep these invariants intact across all future audits and docs updates:
 3. **`public/styles.css` Coexistence & Collision Precedence**:
    - When no CSS files are imported in `src/`, `public/styles.css` is served raw at `/styles.css` across `dinou dev` and `dinou build` in all 3 bundlers (`esbuild`, `rollup`, `webpack`) with zero warnings.
    - When CSS files are imported in `src/` alongside `public/styles.css`, Dinou's compiled `/styles.css` bundle wins deterministically in both dev and prod across all 3 bundlers (preserving nested `public/<subdir>/styles.css` untouched) and logs a deduplicated `console.warn`.
-4. **Existing `x-*.md` Upstream Handoff Documents in Repo Root**:
-   - `x-bailout.md`, `x-cache-slot-bailout.md`, `x-escape.md`, `x-server-functions-fixes.md`, `x-revalidation-fixes.md`, `x-streaming-suspense-fixes.md`, `x-ssr-server-references-fixes.md`, `x-react-compiler-fixes.md`, `x-public-static-assets-fixes.md`, `x-styles-css-fixes.md`.
+4. **Unified Static Media & Custom `assetExtensions` Pipeline (`x-assets-fixes.md`)**:
+   - All 26 built-in media/font formats (plus any custom `assetExtensions` configured in `dinou.config.*`, with auto-generated `declare module "*.<ext>"` in `.dinou/types/routes.d.ts`) resolve across RSC, SSR, Client Components, and CSS `url(...)` to `/assets/[name]-[8hex].[ext]` using an OS-independent SHA-256 digest of `relPosixPath + "\0" + fileBytes` across Esbuild, Rollup, Webpack, Node.js, Bun, Deno, and Cloudflare Workers.
+   - Static asset servers (`node/dev.js`, `node/build.js`, `bun/build.js`, `deno/build.js`) support RFC 9110 `Range: bytes=...` (`206 Partial Content`, `416`, `Accept-Ranges: bytes`) for HTML5 `<video>` / `<audio>` scrubbing and Safari playback.
+5. **Existing `x-*.md` Upstream Handoff Documents in Repo Root**:
+   - `x-bailout.md`, `x-cache-slot-bailout.md`, `x-escape.md`, `x-server-functions-fixes.md`, `x-revalidation-fixes.md`, `x-streaming-suspense-fixes.md`, `x-ssr-server-references-fixes.md`, `x-react-compiler-fixes.md`, `x-public-static-assets-fixes.md`, `x-styles-css-fixes.md`, `x-assets-fixes.md`.
 
 ---
 
@@ -145,8 +148,8 @@ Keep these invariants intact across all future audits and docs updates:
 - [x] `/docs/compiler` — React Compiler (`src/docs/compiler/page.tsx` • `x-react-compiler-fixes.md`)
 - [x] `/docs/public` — Public Directory (`src/docs/public/page.tsx` • `x-public-static-assets-fixes.md`)
 - [x] `/docs/styles` — Styles (`src/docs/styles/page.tsx` • `x-styles-css-fixes.md`)
-- [ ] **`/docs/assets` — Assets (`src/docs/assets/page.tsx`)  ⬅️ NEXT ROUTE TO AUDIT**
-- [ ] `/docs/env-vars` — Env Vars (`src/docs/env-vars/page.tsx`)
+- [x] `/docs/assets` — Assets (`src/docs/assets/page.tsx` • `x-assets-fixes.md`)
+- [ ] **`/docs/env-vars` — Env Vars (`src/docs/env-vars/page.tsx`)  ⬅️ NEXT ROUTE TO AUDIT**
 - [ ] `/docs/alias` — Alias (`src/docs/alias/page.tsx`)
 - [ ] `/docs/plugins` — Plugins (`src/docs/plugins/page.tsx`)
 - [ ] `/docs/bundlers` — Bundlers (`src/docs/bundlers/page.tsx`)
