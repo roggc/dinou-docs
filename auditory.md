@@ -126,8 +126,11 @@ Keep these invariants intact across all future audits and docs updates:
    - `dinou/core/runtime-env.js` (`createUnifiedEnv`) powers `getContext().env` across Cloudflare Workers (preserving live KV/D1/R2 bindings), Node.js, Bun, Deno, Netlify, and SSG, and `isBotEnvProbePath` + static asset filters block all `.env` / `.env.*` / `%2eenv` probes and prevent accidental `public/.env*` copying.
 6. **Unified TypeScript-Spec `tsconfig.json` & `jsconfig.json` Path Aliases Engine (`x-alias-fixes.md`)**:
    - `dinou/core/tsconfig-aliases.js` is the single zero-dependency source of truth across Esbuild, Rollup, Webpack, PostCSS (`@import` & `url()`), `dinou.config.ts`, `_folder` escape guards, and Dual-Bundle RSC/SSR/Edge builds (`Node.js`, `Cloudflare Workers`, `Bun`, `Deno`) — supporting granular aliases, longest-prefix specificity sorting, exact/wildcard patterns, multi-target fallbacks, recursive `"extends"` chains (including parent `baseUrl`, TS 5+ arrays, `node_modules` presets, and `${configDir}`), `.js` → `.ts`/`.tsx` substitution, and live hot-reload in `dinou dev`.
-7. **Existing `x-*.md` Upstream Handoff Documents in Repo Root**:
-   - `x-bailout.md`, `x-cache-slot-bailout.md`, `x-escape.md`, `x-server-functions-fixes.md`, `x-revalidation-fixes.md`, `x-streaming-suspense-fixes.md`, `x-ssr-server-references-fixes.md`, `x-react-compiler-fixes.md`, `x-public-static-assets-fixes.md`, `x-styles-css-fixes.md`, `x-assets-fixes.md`, `x-env-vars-fixes.md`, `x-alias-fixes.md`.
+7. **AOT `dinou.config.*` Bundling, SPA-Safe `onRequest` Guards, `setupFiles` & `configureServer` Pipeline (`x-plugins-fixes.md`)**:
+   - `dinou.config.{ts,mjs,js,cjs}` and `setupFiles` (supporting `@/*` path aliases, extensionless paths, and npm package subpaths, executed once at Line 1 in `[...pluginSetupFiles, ...userSetupFiles]` order) are AOT-bundled across Node.js, Cloudflare Workers, Bun, Deno, standalone binaries, and `.dinou/dist1/server/` (`handler.js`, `netlify.js`), with live `dinou dev` hot-reload.
+   - `plugin.onRequest` skips build-time SSG (`isSSG === true`), runs at runtime ahead of all dynamic and cached SSG/ISR/PPR pages, normalizes `context.req.path` on `/____rsc_*` SPA fetches (`rawPath` + `isRscRequest`), translates `3xx` redirects into `x-rsc-redirect` (preserving `Set-Cookie` and `context.res` status/`Cache-Control`/headers), and `dinou/core/node-middleware-runner.js` powers sync/Promise/callback-async `(req, res, next)` middlewares with per-plugin fault isolation.
+8. **Existing `x-*.md` Upstream Handoff Documents in Repo Root**:
+   - `x-bailout.md`, `x-cache-slot-bailout.md`, `x-escape.md`, `x-server-functions-fixes.md`, `x-revalidation-fixes.md`, `x-streaming-suspense-fixes.md`, `x-ssr-server-references-fixes.md`, `x-react-compiler-fixes.md`, `x-public-static-assets-fixes.md`, `x-styles-css-fixes.md`, `x-assets-fixes.md`, `x-env-vars-fixes.md`, `x-alias-fixes.md`, `x-plugins-fixes.md`.
 
 ---
 
@@ -157,8 +160,8 @@ Keep these invariants intact across all future audits and docs updates:
 - [x] `/docs/assets` — Assets (`src/docs/assets/page.tsx` • `x-assets-fixes.md`)
 - [x] `/docs/env-vars` — Env Vars (`src/docs/env-vars/page.tsx` • `x-env-vars-fixes.md`)
 - [x] `/docs/alias` — Alias (`src/docs/alias/page.tsx` • `x-alias-fixes.md`)
-- [ ] **`/docs/plugins` — Plugins (`src/docs/plugins/page.tsx`)  ⬅️ NEXT ROUTE TO AUDIT**
-- [ ] `/docs/bundlers` — Bundlers (`src/docs/bundlers/page.tsx`)
+- [x] `/docs/plugins` — Plugins (`src/docs/plugins/page.tsx` • `x-plugins-fixes.md`)
+- [ ] **`/docs/bundlers` — Bundlers (`src/docs/bundlers/page.tsx`)  ⬅️ NEXT ROUTE TO AUDIT**
 - [ ] `/docs/deployment` — Deployment (`src/docs/deployment/page.tsx`)
 - [ ] `/docs/eject` — Eject (`src/docs/eject/page.tsx`)
 
