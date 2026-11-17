@@ -1,45 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { builtinModules, createRequire } from "node:module";
+import { BUILTIN_ASSET_REGEX as DEFAULT_ASSET_REGEX } from "./builtin-asset-extensions.js";
 
 const NODE_BUILTINS = new Set([
   ...builtinModules,
   ...builtinModules.map((b) => (b.startsWith("node:") ? b.slice(5) : `node:${b}`)),
 ]);
-
-const DEFAULT_BUILTIN_ASSET_EXTENSIONS = [
-  "png",
-  "jpg",
-  "jpeg",
-  "gif",
-  "svg",
-  "webp",
-  "avif",
-  "ico",
-  "bmp",
-  "tiff",
-  "tif",
-  "mp4",
-  "webm",
-  "ogg",
-  "mp3",
-  "wav",
-  "flac",
-  "aac",
-  "m4a",
-  "opus",
-  "woff",
-  "woff2",
-  "eot",
-  "ttf",
-  "otf",
-  "pdf",
-];
-
-const DEFAULT_ASSET_REGEX = new RegExp(
-  `\\.(?:${DEFAULT_BUILTIN_ASSET_EXTENSIONS.join("|")})$`,
-  "i"
-);
 
 export const DEFAULT_ALIAS_CODE_EXTENSIONS = [
   ".tsx",

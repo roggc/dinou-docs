@@ -34,48 +34,47 @@ During the pre-release audit of `/docs/alias` (`src/docs/alias/page.tsx`) agains
 
 ---
 
-## 2. Complete File Manifest (19 Files)
+## 2. Complete File Manifest (21 Files)
 
-### New Files (1)
-1. `dinou/core/tsconfig-aliases.js`
+### New Files (2)
+1. `dinou/core/builtin-asset-extensions.js`
+2. `dinou/core/tsconfig-aliases.js`
 
-### Modified Files (18)
-2. `dinou/core/get-abs-path-with-ext.js`
-3. `dinou/core/resolve-contextual-dinou.js`
-4. `dinou/core/load-dinou-config.js`
-5. `dinou/core/server-css-modules-plugin.js`
-6. `dinou/esbuild/helpers-esbuild/get-config-esbuild.js`
-7. `dinou/esbuild/helpers-esbuild/get-config-esbuild-prod.js`
-8. `dinou/esbuild/helpers-esbuild/get-esbuild-entries.js`
-9. `dinou/esbuild/helpers-esbuild/swc-disk-cache.js`
-10. `dinou/esbuild/build.js`
-11. `dinou/rollup/rollup.config.js`
-12. `dinou/rollup/rollup-plugins/rollup-plugin-react-client-manifest.js`
-13. `dinou/webpack/webpack.config.js`
-14. `dinou/webpack/helpers/get-webpack-entries.js`
-15. `dinou/node/dev.js`
-16. `dinou/node/bundle-dual-engine.js`
-17. `dinou/cloudflare/build.js`
-18. `dinou/bun/build.js`
-19. `dinou/deno/build.js`
+### Modified Files (19)
+3. `dinou/core/asset-extensions.js`
+4. `dinou/core/get-abs-path-with-ext.js`
+5. `dinou/core/resolve-contextual-dinou.js`
+6. `dinou/core/load-dinou-config.js`
+7. `dinou/core/server-css-modules-plugin.js`
+8. `dinou/esbuild/helpers-esbuild/get-config-esbuild.js`
+9. `dinou/esbuild/helpers-esbuild/get-config-esbuild-prod.js`
+10. `dinou/esbuild/helpers-esbuild/get-esbuild-entries.js`
+11. `dinou/esbuild/helpers-esbuild/swc-disk-cache.js`
+12. `dinou/esbuild/build.js`
+13. `dinou/rollup/rollup.config.js`
+14. `dinou/rollup/rollup-plugins/rollup-plugin-react-client-manifest.js`
+15. `dinou/webpack/webpack.config.js`
+16. `dinou/webpack/helpers/get-webpack-entries.js`
+17. `dinou/node/dev.js`
+18. `dinou/node/bundle-dual-engine.js`
+19. `dinou/cloudflare/build.js`
+20. `dinou/bun/build.js`
+21. `dinou/deno/build.js`
 
 ---
 
 ## 3. Complete Source Code & Unified Diffs
 
-### 3.1. [NEW] `dinou/core/tsconfig-aliases.js`
+### 3.0. [NEW] `dinou/core/builtin-asset-extensions.js`
+
+Canonical, zero-dependency leaf module keeping Dinou's 26 built-in static media, vector, audio/video, and font extensions as a single source of truth across `asset-extensions.js` and `tsconfig-aliases.js` while preserving a strictly acyclic `dinou/core/` dependency graph (DAG):
 
 ```js
-import fs from "node:fs";
-import path from "node:path";
-import { builtinModules, createRequire } from "node:module";
+// dinou/core/builtin-asset-extensions.js
+// Canonical, zero-dependency single source of truth for Dinou's built-in static
+// media, vector, audio/video, and font asset extensions.
 
-const NODE_BUILTINS = new Set([
-  ...builtinModules,
-  ...builtinModules.map((b) => (b.startsWith("node:") ? b.slice(5) : `node:${b}`)),
-]);
-
-const DEFAULT_BUILTIN_ASSET_EXTENSIONS = [
+export const extensions = [
   "png",
   "jpg",
   "jpeg",
@@ -84,30 +83,69 @@ const DEFAULT_BUILTIN_ASSET_EXTENSIONS = [
   "webp",
   "avif",
   "ico",
-  "bmp",
-  "tiff",
-  "tif",
   "mp4",
   "webm",
   "ogg",
+  "mov",
+  "avi",
+  "mkv",
   "mp3",
   "wav",
   "flac",
-  "aac",
   "m4a",
-  "opus",
+  "aac",
+  "mjpeg",
+  "mjpg",
   "woff",
   "woff2",
-  "eot",
   "ttf",
   "otf",
-  "pdf",
+  "eot",
 ];
 
-const DEFAULT_ASSET_REGEX = new RegExp(
-  `\\.(?:${DEFAULT_BUILTIN_ASSET_EXTENSIONS.join("|")})$`,
+export const BUILTIN_ASSET_EXTENSIONS = extensions;
+
+export const DEFAULT_EXTENSIONS_SET = new Set(extensions);
+
+const escapeRegExp = (str) =>
+  String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+export const globPattern = `**/*.{${extensions.join(",")}}`;
+
+// Regex useful for Rollup/Webpack/PostCSS/Esbuild asset matching
+export const regex = new RegExp(
+  `\\.(${extensions.map(escapeRegExp).join("|")})$`,
   "i"
 );
+
+export const BUILTIN_ASSET_REGEX = regex;
+
+// Version with leading dot for direct comparisons
+export const extensionsWithDot = extensions.map((ext) => `.${ext}`);
+
+export default {
+  extensions,
+  BUILTIN_ASSET_EXTENSIONS,
+  DEFAULT_EXTENSIONS_SET,
+  globPattern,
+  regex,
+  BUILTIN_ASSET_REGEX,
+  extensionsWithDot,
+};
+```
+
+### 3.1. [NEW] `dinou/core/tsconfig-aliases.js`
+
+```js
+import fs from "node:fs";
+import path from "node:path";
+import { builtinModules, createRequire } from "node:module";
+import { BUILTIN_ASSET_REGEX as DEFAULT_ASSET_REGEX } from "./builtin-asset-extensions.js";
+
+const NODE_BUILTINS = new Set([
+  ...builtinModules,
+  ...builtinModules.map((b) => (b.startsWith("node:") ? b.slice(5) : `node:${b}`)),
+]);
 
 export const DEFAULT_ALIAS_CODE_EXTENSIONS = [
   ".tsx",
@@ -1037,6 +1075,67 @@ export default {
   rollupTsconfigAliasesPlugin,
   createWebpackTsconfigAliasesResolvePlugin,
 };
+```
+
+### 3.1b. [MODIFIED] `dinou/core/asset-extensions.js`
+
+```diff
+--- a/dinou/core/asset-extensions.js
++++ b/dinou/core/asset-extensions.js
+@@ -6,46 +6,16 @@
+ import {
+   getAbsPathWithExt,
+   stripJsonCommentsAndTrailingCommas,
+ } from "./get-abs-path-with-ext.js";
++import {
++  extensions,
++  DEFAULT_EXTENSIONS_SET,
++  globPattern,
++  regex,
++  extensionsWithDot,
++} from "./builtin-asset-extensions.js";
+ 
+-export const extensions = [
+-  "png",
+-  "jpg",
+-  "jpeg",
+-  "gif",
+-  "svg",
+-  "webp",
+-  "avif",
+-  "ico",
+-  "mp4",
+-  "webm",
+-  "ogg",
+-  "mov",
+-  "avi",
+-  "mkv",
+-  "mp3",
+-  "wav",
+-  "flac",
+-  "m4a",
+-  "aac",
+-  "mjpeg",
+-  "mjpg",
+-  "woff",
+-  "woff2",
+-  "ttf",
+-  "otf",
+-  "eot",
+-];
+-
+-const DEFAULT_EXTENSIONS_SET = new Set(extensions);
++export { extensions, globPattern, regex, extensionsWithDot };
+ 
+ const escapeRegExp = (str) => String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+-
+-export const globPattern = `**/*.{${extensions.join(",")}}`;
+-
+-// Regex useful for Rollup/Webpack/PostCSS/Esbuild asset matching
+-export const regex = new RegExp(`\\.(${extensions.map(escapeRegExp).join("|")})$`, "i");
+-
+-// Version with leading dot for direct comparisons
+-export const extensionsWithDot = extensions.map((ext) => `.${ext}`);
 ```
 
 ### 3.2. [MODIFIED — Full Replacement] `dinou/core/get-abs-path-with-ext.js`
@@ -2028,6 +2127,12 @@ const DINOU_DIR = fs.existsSync(path.join(REPO_ROOT, "dinou", "cli.js"))
 const aliasesMod = await import(
   pathToFileURL(path.join(DINOU_DIR, "core/tsconfig-aliases.js")).href
 );
+const builtinAssetsMod = await import(
+  pathToFileURL(path.join(DINOU_DIR, "core/builtin-asset-extensions.js")).href
+);
+const assetExtensionsMod = await import(
+  pathToFileURL(path.join(DINOU_DIR, "core/asset-extensions.js")).href
+);
 const absPathMod = await import(
   pathToFileURL(path.join(DINOU_DIR, "core/get-abs-path-with-ext.js")).href
 );
@@ -2116,7 +2221,18 @@ function resolveBinScript(candidates) {
   throw new Error(`Could not locate binary script from: ${candidates.join(", ")}`);
 }
 
-test("1. TypeScript paths spec: specificity sorting, exact match, suffix wildcards, multi-target fallbacks, BOM/JSONC, .js->.ts substitution, and sibling .tsx vs .css", () => {
+test("1. TypeScript paths spec: specificity sorting, exact match, suffix wildcards, multi-target fallbacks, BOM/JSONC, .js->.ts substitution, sibling .tsx vs .css, and canonical builtin asset extensions", () => {
+  assert.strictEqual(
+    builtinAssetsMod.extensions,
+    assetExtensionsMod.extensions
+  );
+  assert.strictEqual(builtinAssetsMod.regex, assetExtensionsMod.regex);
+  const defaultRollupPlugin = aliasesMod.rollupTsconfigAliasesPlugin({
+    projectRoot: REPO_ROOT,
+  });
+  assert.equal(defaultRollupPlugin.resolveId("@/clip.mov", undefined, {}), null);
+  assert.equal(defaultRollupPlugin.resolveId("@/video.mkv", undefined, {}), null);
+
   const tmp = createTempDir("spec-");
   try {
     writeFiles(tmp, {
