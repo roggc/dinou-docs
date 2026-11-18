@@ -11,17 +11,36 @@ const DINOU_ROOT = path.resolve(__dirname, "..");
 const PROJECT_ROOT = process.cwd();
 const COMPILED_DIR = path.join(DINOU_ROOT, "compiled");
 
+const nmDinouDir = path.resolve(PROJECT_ROOT, "node_modules", "dinou");
+let realNmDinouDir = null;
+if (fsSync.existsSync(nmDinouDir)) {
+  try {
+    realNmDinouDir = fsSync.realpathSync(nmDinouDir);
+  } catch {}
+}
+
 const CANDIDATE_ROOTS = Array.from(
-  new Set([
-    PROJECT_ROOT,
-    DINOU_ROOT,
-    path.resolve(PROJECT_ROOT, "node_modules", "dinou"),
-    path.resolve(DINOU_ROOT, ".."),
-  ])
+  new Set(
+    [
+      PROJECT_ROOT,
+      DINOU_ROOT,
+      nmDinouDir,
+      realNmDinouDir,
+      path.resolve(DINOU_ROOT, ".."),
+    ].filter(Boolean)
+  )
 );
 
-const NODE_PATHS = CANDIDATE_ROOTS.map((r) => path.join(r, "node_modules")).filter(
-  (dir) => fsSync.existsSync(dir)
+const NODE_PATHS = Array.from(
+  new Set(
+    [
+      ...CANDIDATE_ROOTS.map((r) => path.join(r, "node_modules")),
+      realNmDinouDir &&
+      path.basename(path.dirname(realNmDinouDir)) === "node_modules"
+        ? path.dirname(realNmDinouDir)
+        : null,
+    ].filter((dir) => dir && fsSync.existsSync(dir))
+  )
 );
 
 const candidateRequires = CANDIDATE_ROOTS.map((rootDir) => {
