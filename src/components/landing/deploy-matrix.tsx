@@ -110,8 +110,8 @@ run_worker_first = true
     terminalOutput: [
       "$ git push origin main",
       "⚡ Netlify CI build triggered: executing \"npm run build\"...",
-      "⚡ Pre-bundling Netlify Functions v2 adapter (.dinou/dist1/server)...",
-      "✔ Static assets (.dinou/dist3) & Functions v2 adapter (.dinou/dist1/server) ready",
+      "⚡ Compiling AOT Dual-Bundle Netlify Functions v2 (.dinou/netlify/functions/ssr.mjs)...",
+      "✔ Static assets (.dinou/dist3) & Functions v2 bundle (.dinou/netlify/functions) ready",
       "🚀 Published to https://my-app.netlify.app (Global Edge CDN)",
     ],
     configFile: {
@@ -129,26 +129,9 @@ run_worker_first = true
   NODE_ENV = "production"
 
 [functions]
-  directory = ".dinou/dist1/server"
+  directory = ".dinou/netlify/functions"
   node_bundler = "none"
-  included_files = [
-    "package.json",
-    "tsconfig.json",
-    "dinou.config.*",
-    "src/**",
-    "dinou/**",
-    ".dinou/**",
-    "node_modules/**",
-    "!node_modules/@swc/**",
-    "!node_modules/typescript/**",
-    "!node_modules/webpack*/**",
-    "!node_modules/@esbuild/**",
-    "!node_modules/esbuild/**",
-    "!node_modules/@rollup/**",
-    "!node_modules/rollup/**",
-    "!node_modules/.cache/**",
-    "!node_modules/@types/**"
-  ]`,
+  included_files = [".dinou/dist2/**"]`,
     },
   },
   {
@@ -227,7 +210,7 @@ run_worker_first = true
     "build": "dinou build:deno",
     "start": "dinou start:deno",
     "compile": "dinou build:deno:compile",
-    "deploy": "deno deploy --project=my-app .dinou/deno/main.js"
+    "deploy": "deno deploy --project=my-app --include=.dinou/deno,.dinou/dist2,.dinou/dist3 .dinou/deno/main.js"
   },
   "compilerOptions": {
     "jsx": "react-jsx",

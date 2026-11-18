@@ -1,33 +1,25 @@
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/docs/components/ui/alert";
-import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
 } from "@/docs/components/ui/card";
 import { Badge } from "@/docs/components/ui/badge";
 import {
   Rocket,
   CheckCircle2,
   Zap,
-  Cpu,
   Server,
   Cloud,
   Globe,
   Terminal,
   Layers,
   ShieldCheck,
-  Boxes,
   Sparkles,
-  ArrowRight,
   Flame,
   Binary,
+  Database,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 import { Link } from "dinou";
@@ -48,8 +40,9 @@ const tocItems = [
   { id: "docker-guide", title: "9. Production Docker Setup", level: 2 },
   { id: "docker-pure-binary", title: "9.1 Ultra-Lightweight Standalone Binary Container (Recommended)", level: 3 },
   { id: "docker-standard-node", title: "9.2 Standard Node.js Multi-Stage Container", level: 3 },
-  { id: "environment-secrets", title: "10. Managing Production Environment Secrets", level: 2 },
-  { id: "deployment-checklist", title: "11. Production Pre-Flight Checklist", level: 2 },
+  { id: "distributed-cache-scaling", title: "10. Horizontal Scaling & Distributed ISR Cache", level: 2 },
+  { id: "environment-secrets", title: "11. Managing Production Environment Secrets", level: 2 },
+  { id: "deployment-checklist", title: "12. Production Pre-Flight Checklist", level: 2 },
 ];
 
 export default function Page() {
@@ -58,7 +51,7 @@ export default function Page() {
       <title>Deployment Guide | Dinou Docs</title>
       <meta
         name="description"
-        content="Universal deployment flexibility: deploy as standalone Node.js server, Docker container, Cloudflare Workers, Netlify v2, Deno, Bun, or single binary."
+        content="Universal deployment flexibility: deploy as a standalone Node.js server, Docker container, Netlify Functions v2, Cloudflare Workers, Deno Deploy, Bun, static export, or single native binary."
       />
       <link rel="canonical" href="https://dinou.dev/docs/deployment" />
 
@@ -74,7 +67,7 @@ export default function Page() {
                 Multi-Target Architecture
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
-                Dinou Complete Guide
+                Dinou v9.4 Complete Guide
               </Badge>
             </div>
             <div className="flex items-center space-x-2">
@@ -83,19 +76,19 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Dinou features universal deployment flexibility: deploy as a standalone Node.js server, on Netlify Serverless Functions v2, at the edge with Cloudflare Workers, on Deno or Bun, or compiled into single native binaries.
+              Dinou features universal deployment flexibility: deploy as an in-process Node.js server, on Netlify Serverless Functions v2, at the edge with Cloudflare Workers or Deno Deploy, on Bun, exported as 100% static HTML, or compiled into single zero-dependency native binaries.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
-            {/* Overview */}
+            {/* 1. Overview */}
             <section id="overview">
               <h2>1. Deploy Everywhere with Dinou</h2>
               <p>
-                Historically, deploying React Server Components to serverless platforms (like Netlify) was impossible due to the need to pass the <code>--conditions react-server</code> flag. While on a VPS or custom server (like DigitalOcean) you could configure Node runtime flags, serverless and edge environments offered no control over them.
+                Historically, deploying React Server Components to serverless and edge platforms was difficult because Node.js required runtime flags such as <code>--conditions=react-server</code>, custom JSX/TypeScript module loaders, or dual child processes. On managed serverless and V8 isolate runtimes, you rarely control how the underlying runtime process is spawned.
               </p>
               <p>
-                <strong>Dinou solves this completely</strong>: through its pre-bundled dual-engine architecture, server bundles are compiled with all React Server conditions pre-resolved at build time. You can now deploy Dinou to virtually any infrastructure:
+                <strong>Dinou solves this at build time</strong> through its <strong>Ahead-of-Time (AOT) Dual-Bundle Engine</strong>: Pass A compiles your Server Components, layouts, Server Functions, <Link href="/docs/plugins">plugins</Link>, and <code>setupFiles</code> with <code>react-server</code> conditions pre-resolved, while Pass B compiles streaming HTML SSR with client component manifests in isolated module scope. Production runtimes execute pure standard JavaScript with zero runtime transpilers and zero Node CLI flags:
               </p>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 not-prose my-6">
@@ -107,7 +100,7 @@ export default function Page() {
                     </div>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground">
-                    Standalone servers on Railway, Fly.io, Render, DigitalOcean, AWS, or Docker.
+                    In-process AOT servers and native binaries on Railway, Fly.io, Render, DigitalOcean, AWS, or Docker.
                   </CardContent>
                 </Card>
 
@@ -119,7 +112,7 @@ export default function Page() {
                     </div>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground">
-                    Native Functions v2 adapter with zero-config edge routing and static CDN caching.
+                    Self-contained Functions v2 bundle with <code>preferStatic: true</code> CDN routing and read-only Lambda safety.
                   </CardContent>
                 </Card>
 
@@ -131,7 +124,7 @@ export default function Page() {
                     </div>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground">
-                    Global sub-millisecond cold starts on Cloudflare Workers and Pages with KV &amp; D1.
+                    Sub-millisecond global cold starts on <code>workerd</code> with Workers Static Assets, KV, D1, and R2.
                   </CardContent>
                 </Card>
 
@@ -139,21 +132,21 @@ export default function Page() {
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold text-sm">
                       <Globe className="h-4 w-4" />
-                      <span>Deno Deploy (Edge)</span>
+                      <span>Deno &amp; Bun Runtimes</span>
                     </div>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground">
-                    Multi-region edge runtime targeting <code>deno-edge</code> with built-in Deno KV persistence.
+                    Deno Deploy global edge with native Deno KV, high-throughput Bun servers, and single-file executables.
                   </CardContent>
                 </Card>
               </div>
             </section>
 
-            {/* Targets Summary */}
+            {/* 2. Targets Summary */}
             <section id="targets-summary" className="mt-12">
               <h2>2. Supported Deployment Targets</h2>
               <p>
-                Dinou provides dedicated build commands and adapters for each target runtime:
+                Every production build command defaults to <strong>Esbuild</strong> and accepts explicit bundler suffixes (<code>:esbuild</code>, <code>:rollup</code>, or <code>:webpack</code> — see the <Link href="/docs/bundlers">Bundlers &amp; Dual-Mode Vendoring</Link> guide):
               </p>
 
               <div className="not-prose overflow-x-auto rounded-lg border border-border my-4">
@@ -168,8 +161,8 @@ export default function Page() {
                   <tbody className="divide-y divide-border bg-card text-xs">
                     <tr>
                       <td className="p-3.5 font-semibold text-foreground">Node.js Server</td>
-                      <td className="p-3.5 font-mono">dinou build:node</td>
-                      <td className="p-3.5 font-mono">dinou start:node</td>
+                      <td className="p-3.5 font-mono">dinou build / dinou build:node</td>
+                      <td className="p-3.5 font-mono">dinou start / dinou start:node</td>
                     </tr>
                     <tr>
                       <td className="p-3.5 font-semibold text-foreground">Node.js Standalone Binary</td>
@@ -188,8 +181,8 @@ export default function Page() {
                     </tr>
                     <tr>
                       <td className="p-3.5 font-semibold text-foreground">Netlify (Functions v2)</td>
-                      <td className="p-3.5 font-mono">dinou build:node</td>
-                      <td className="p-3.5 text-muted-foreground">Automated via <code>netlify.toml</code></td>
+                      <td className="p-3.5 font-mono">dinou build / dinou build:netlify</td>
+                      <td className="p-3.5 text-muted-foreground">Automated via <code>netlify.toml</code> (<code>.dinou/netlify/functions</code>)</td>
                     </tr>
                     <tr>
                       <td className="p-3.5 font-semibold text-foreground">Cloudflare Workers</td>
@@ -199,7 +192,7 @@ export default function Page() {
                     <tr>
                       <td className="p-3.5 font-semibold text-foreground">Deno Deploy (Edge / Cloud)</td>
                       <td className="p-3.5 font-mono">dinou build:deno</td>
-                      <td className="p-3.5 font-mono">deno deploy --project=&lt;app&gt; .dinou/deno/main.js</td>
+                      <td className="p-3.5 font-mono">deno deploy --project=&lt;app&gt; --include=.dinou/deno,.dinou/dist2,.dinou/dist3 .dinou/deno/main.js</td>
                     </tr>
                     <tr>
                       <td className="p-3.5 font-semibold text-foreground">Deno Standalone Server</td>
@@ -224,7 +217,7 @@ export default function Page() {
                     <tr>
                       <td className="p-3.5 font-semibold text-foreground">Static HTML Export (SSG)</td>
                       <td className="p-3.5 font-mono">dinou export-static</td>
-                      <td className="p-3.5 font-mono">out/ (Static HTML &amp; Assets)</td>
+                      <td className="p-3.5 font-mono">out/ (HTML, Assets &amp; .rsc Flight Payloads)</td>
                     </tr>
                   </tbody>
                 </table>
@@ -235,7 +228,7 @@ export default function Page() {
             <section id="node-vps-docker" className="mt-12">
               <h2>3. Node.js Targets &amp; Standalone Binaries</h2>
               <p>
-                Dinou provides four production compilation and packaging pipelines for Node.js environments, catering from traditional PaaS and VPS setups to zero-dependency standalone binaries:
+                Dinou provides four production compilation and packaging pipelines for Node.js environments, scaling from traditional PaaS and VPS deployments to zero-dependency standalone native executables:
               </p>
 
               <div className="space-y-8 my-6">
@@ -246,23 +239,23 @@ export default function Page() {
                     <h3 className="text-lg font-bold">3.1 Standard Node.js Server (build:node)</h3>
                   </div>
                   <p>
-                    The standard Node.js pipeline compiles your application into a pre-bundled orchestrator at <code>.dinou/node/server.mjs</code> using Node.js:
+                    Compiles your application into an in-process Dual-Bundle HTTP orchestrator at <code>.dinou/node/server.mjs</code> alongside pre-rendered SSG artifacts in <code>.dinou/dist2</code> and public static assets in <code>.dinou/dist3</code>:
                   </p>
                   <CodeBlock
                     language="bash"
                     containerClassName="w-full overflow-hidden rounded-lg"
                   >
-{`# 1. Compile for standard Node.js production
+{`# 1. Compile for standard Node.js production (alias: dinou build)
 dinou build:node
 
-# 2. Start the production server (defaults to PORT 3000)
+# 2. Start the production server (respects PORT=3000 and optional HOST=0.0.0.0)
 dinou start:node`}
                   </CodeBlock>
 
                   <div className="p-4 rounded-lg border bg-card space-y-1.5 not-prose">
                     <div className="font-semibold text-sm text-foreground">PaaS &amp; Cloud Hosts (Railway, Render, Fly.io, DigitalOcean App Platform)</div>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      Set <strong>Build Command</strong> to <code>npm run build:node</code> and <strong>Start Command</strong> to <code>npm run start:node</code>. Dinou automatically respects platform-assigned ports via <code>process.env.PORT</code>, and all React Server conditions are pre-resolved at build time.
+                      Set <strong>Build Command</strong> to <code>npm run build</code> (or <code>npx dinou build:node</code>) and <strong>Start Command</strong> to <code>npm start</code> (or <code>npx dinou start:node</code>). Dinou automatically binds to <code>process.env.PORT</code> (and <code>process.env.HOST</code> when specified), serves static assets with zero-copy streams and HTTP <code>Range</code> support, and executes without special Node flags.
                     </p>
                   </div>
                 </div>
@@ -274,7 +267,7 @@ dinou start:node`}
                     <h3 className="text-lg font-bold">3.2 Node Standalone Binary (build:node:compile)</h3>
                   </div>
                   <p>
-                    Dinou uses <strong>Node.js</strong> to build your application, then compiles the Node HTTP server orchestrator into a single, self-contained native executable in <code>dist/server</code> using Bun&apos;s compiler under the hood:
+                    Uses <strong>Node.js</strong> to build your application and then compiles <code>.dinou/node/server.mjs</code> (including both RSC and SSR engines) into a single self-contained native executable at <code>dist/server</code> via Bun&apos;s standalone compiler:
                   </p>
                   <CodeBlock
                     language="bash"
@@ -283,12 +276,12 @@ dinou start:node`}
 {`# Compile standalone binary for current OS (dist/server)
 dinou build:node:compile
 
-# Run the single binary directly (no Node or Bun required on the host!)
+# Run the single binary directly (no Node or Bun required on the production host!)
 ./dist/server`}
                   </CodeBlock>
 
                   <p>
-                    Unlike pure Bun runtime binaries which execute through Bun&apos;s HTTP engine, <code>build:node:compile</code> packages Dinou&apos;s <strong>Node.js server architecture</strong> (<code>http.createServer()</code>). This provides complete compatibility with Node WebSockets (<code>configureServer</code>), Connect/Express middlewares, and Node native modules.
+                    Unlike <code>build:bun:compile</code> (which runs on <code>Bun.serve</code>), <code>build:node:compile</code> packages Dinou&apos;s <strong>Node.js HTTP server architecture</strong> (<code>http.createServer()</code>), preserving full compatibility with Node <code>configureServer</code> hooks, WebSockets (<code>ws</code> / Socket.IO), and Express/Connect middlewares.
                   </p>
 
                   <div className="not-prose overflow-x-auto rounded-lg border border-border">
@@ -338,21 +331,18 @@ dinou build:node:compile
                     <h3 className="text-lg font-bold">3.3 Pure Bun Runner (build:node:pure)</h3>
                   </div>
                   <p>
-                    While standard <code>build:node</code> requires Node.js on the build host, <code>build:node:pure</code> runs the compilation pipeline using <strong>100% Bun</strong> to generate the Node orchestrator at <code>.dinou/node/server.mjs</code>:
+                    Executes the entire build pipeline (Esbuild, Rollup, or Webpack + SSG + Dual-Engine bundling) using <strong>100% Bun</strong> without requiring Node.js on the build machine, emitting the standard Node orchestrator at <code>.dinou/node/server.mjs</code>:
                   </p>
                   <CodeBlock
                     language="bash"
                     containerClassName="w-full overflow-hidden rounded-lg"
                   >
-{`# 1. Build Node orchestrator using 100% Bun (zero Node.js required)
+{`# 1. Build Node orchestrator using 100% Bun (zero Node.js required in CI)
 dinou build:node:pure
 
 # 2. Run the resulting Node server
 dinou start:node`}
                   </CodeBlock>
-                  <p className="text-xs text-muted-foreground">
-                    This mode is ideal for continuous integration pipelines and Docker builder stages where Bun is installed for hyper-fast dependency resolution and script execution.
-                  </p>
                 </div>
 
                 {/* 3.4 Pure Standalone Binary */}
@@ -362,7 +352,7 @@ dinou start:node`}
                     <h3 className="text-lg font-bold">3.4 Pure Standalone Binary (build:node:pure:compile)</h3>
                   </div>
                   <p>
-                    The ultimate production deployment pipeline: <strong>100% Bun build pipeline</strong> combined with <strong>Bun&apos;s standalone binary compiler</strong>. It compiles Dinou&apos;s Node.js orchestrator into a single zero-dependency native executable:
+                    Combines the <strong>100% Bun build pipeline</strong> with <strong>standalone native binary compilation</strong>:
                   </p>
                   <CodeBlock
                     language="bash"
@@ -371,20 +361,20 @@ dinou start:node`}
 {`# Compile standalone binary using 100% Bun pipeline
 dinou build:node:pure:compile
 
-# Cross-compilation targets:
+# Cross-compilation targets (also support :esbuild, :rollup, :webpack):
 dinou build:node:pure:compile:linux      # Linux x86_64
 dinou build:node:pure:compile:linux_arm  # Linux ARM64 (AWS Graviton)
-dinou build:node:pure:compile:mac        # Apple macOS
+dinou build:node:pure:compile:mac        # Apple macOS (ARM64)
 dinou build:node:pure:compile:win        # Windows executable (.exe)`}
                   </CodeBlock>
 
                   <div className="border rounded-xl p-4 bg-muted/20 not-prose text-xs text-muted-foreground space-y-2">
                     <div className="font-semibold text-foreground flex items-center gap-1.5">
                       <Zap className="h-3.5 w-3.5 text-amber-500" />
-                      Zero Node.js Runtime Required Anywhere
+                      Minimal Runtime Footprint
                     </div>
                     <p>
-                      Neither the build machine nor the production target require Node.js or Bun installed. The final binary in <code>dist/server</code> contains the entire JavaScript runtime and server logic. This is the <strong>recommended pattern for Docker deployments</strong> (see <a href="#docker-pure-binary" className="text-primary underline">Section 9.1</a>).
+                      At runtime, <code>dist/server</code> only needs <code>.dinou/dist2</code> (pre-rendered SSG cache) and <code>.dinou/dist3</code> (public static assets)—no <code>node_modules</code>, no <code>src/</code>, and no Node or Bun installation on the host. See <a href="#docker-pure-binary" className="text-primary underline">Section 9.1</a> for the production Docker recipe.
                     </p>
                   </div>
                 </div>
@@ -395,12 +385,12 @@ dinou build:node:pure:compile:win        # Windows executable (.exe)`}
             <section id="netlify-serverless" className="mt-12">
               <h2>4. Netlify (Serverless Functions v2)</h2>
               <p>
-                In <strong>Dinou</strong>, Netlify is a first-class supported serverless target. During <code>npm run build</code>, Dinou automatically pre-bundles a specialized <strong>Netlify Functions v2 Adapter</strong> directly into <code>.dinou/dist1/server/netlify.js</code>, physically isolated from the public static webroot in <code>.dinou/dist3</code>.
+                Netlify is a first-class serverless target in Dinou. During <code>npm run build</code> (or <code>npx dinou build:netlify</code>), Dinou compiles a self-contained <strong>AOT Dual-Bundle Netlify Functions v2</strong> entry into <code>.dinou/netlify/functions/ssr.mjs</code>, physically isolated from the public static webroot in <code>.dinou/dist3</code>.
               </p>
-              
+
               <div className="space-y-4 my-4">
                 <p>
-                  <strong>Step 1:</strong> Configure your project with a <code>netlify.toml</code> file in the repository root:
+                  <strong>Step 1:</strong> Create a <code>netlify.toml</code> file in your repository root:
                 </p>
                 <CodeBlock
                   language="toml"
@@ -418,30 +408,13 @@ dinou build:node:pure:compile:win        # Windows executable (.exe)`}
   NODE_ENV = "production"
 
 [functions]
-  directory = ".dinou/dist1/server"
+  directory = ".dinou/netlify/functions"
   node_bundler = "none"
-  included_files = [
-    "package.json",
-    "tsconfig.json",
-    "dinou.config.*",
-    "src/**",
-    "dinou/**",
-    ".dinou/**",
-    "node_modules/**",
-    "!node_modules/@swc/**",
-    "!node_modules/typescript/**",
-    "!node_modules/webpack*/**",
-    "!node_modules/@esbuild/**",
-    "!node_modules/esbuild/**",
-    "!node_modules/@rollup/**",
-    "!node_modules/rollup/**",
-    "!node_modules/.cache/**",
-    "!node_modules/@types/**"
-  ]`}
+  included_files = [".dinou/dist2/**"]`}
                 </CodeBlock>
 
                 <p>
-                  <strong>Step 2:</strong> Deploy to Netlify:
+                  <strong>Step 2:</strong> Deploy via Git push or Netlify CLI:
                 </p>
                 <CodeBlock
                   language="bash"
@@ -450,8 +423,8 @@ dinou build:node:pure:compile:win        # Windows executable (.exe)`}
 {`# Option A: Automatic Git-based CI/CD (Recommended)
 git push origin main
 
-# Option B: Manual deployment using Netlify CLI (requires local build)
-npm run build
+# Option B: Manual deployment using Netlify CLI
+npx dinou build:netlify
 npx netlify deploy --prod`}
                 </CodeBlock>
               </div>
@@ -462,7 +435,7 @@ npx netlify deploy --prod`}
                   <span>How Netlify Functions v2 Works in Dinou</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  The pre-bundled adapter in <code>.dinou/dist1/server/netlify.js</code> exports <code>config = &#123; path: &quot;/*&quot;, preferStatic: true &#125;</code>. Because <code>preferStatic: true</code> is active, Netlify serves all client assets, CSS, images, and <code>public/</code> files directly from <code>.dinou/dist3</code> through its global edge CDN with zero compute cost while server bundles remain isolated in <code>.dinou/dist1/server</code>. Dynamic routes, SSR streaming, and React Server Functions are routed to the serverless function automatically. With <code>node_bundler = &quot;none&quot;</code>, Netlify runs the pre-bundled adapter cleanly without double-bundling conflicts.
+                  The compiled <code>.dinou/netlify/functions/ssr.mjs</code> bundle embeds Pass A (RSC) and Pass B (Streaming SSR) together with your routes, Server Functions, and plugins—so <code>included_files</code> only needs <code>.dinou/dist2/**</code> (~1–2 MB instead of shipping <code>node_modules/**</code> or <code>src/**</code>). Because it exports <code>config = &#123; path: &quot;/*&quot;, preferStatic: true &#125;</code>, Netlify serves client chunks, CSS, and <code>public/</code> files directly from its global CDN at zero compute cost. On AWS Lambda&apos;s read-only <code>/var/task</code> filesystem, Dinou automatically uses <code>MemoryStorage(&#123; hydrateFromDisk: true &#125;)</code> (unless you configure <a href="#distributed-cache-scaling" className="text-primary underline">RedisStorage</a>), hydrating pre-rendered SSG pages from <code>.dinou/dist2</code> while running background ISR via <code>context.waitUntil()</code> and unifying <code>Netlify.env</code> with <code>getContext().env</code>.
                 </p>
               </div>
             </section>
@@ -471,23 +444,23 @@ npx netlify deploy --prod`}
             <section id="cloudflare-workers" className="mt-12">
               <h2>5. Cloudflare Workers &amp; Pages</h2>
               <p>
-                Dinou provides native ahead-of-time compilation for Cloudflare&apos;s V8-based <code>workerd</code> edge runtime. It compiles Server Components and SSR into standard W3C Web Streams with sub-millisecond cold starts across 300+ cities:
+                Dinou compiles Server Components and streaming HTML SSR directly for Cloudflare&apos;s V8-based <code>workerd</code> runtime using standard W3C Web Streams:
               </p>
 
               <div className="space-y-4 my-4">
                 <p>
-                  <strong>Step 1:</strong> Compile your application for Cloudflare Workers:
+                  <strong>Step 1:</strong> Build the Cloudflare Workers bundle and static asset staging tree:
                 </p>
                 <CodeBlock
                   language="bash"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`# Build edge worker bundle (.dinou/cloudflare/worker.js)
-npm run build:cloudflare`}
+{`# Build edge worker (.dinou/cloudflare/worker.js) & staged assets (.dinou/cloudflare/assets)
+dinou build:cloudflare`}
                 </CodeBlock>
 
                 <p>
-                  <strong>Step 2:</strong> Configure your project with a <code>wrangler.toml</code> file in the repository root:
+                  <strong>Step 2:</strong> Configure <code>wrangler.toml</code> in your repository root:
                 </p>
                 <CodeBlock
                   language="toml"
@@ -499,9 +472,6 @@ main = ".dinou/cloudflare/worker.js"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
-# ====================================================================
-# Cloudflare Workers Static Assets
-# ====================================================================
 # Serves public static assets from .dinou/cloudflare/assets while keeping
 # internal SSG/ISR/PPR cache files isolated under /__dinou_dist2/*.
 [assets]
@@ -509,26 +479,23 @@ directory = ".dinou/cloudflare/assets"
 binding = "ASSETS"
 run_worker_first = true
 
-# ====================================================================
-# Incremental Static Regeneration (ISR / ISG) Cache
-# ====================================================================
-# Un-comment to enable edge-cached pages across all Cloudflare POPs
+# Optional: Bind a Cloudflare KV namespace for persistent global ISR/ISG caching
 # [[kv_namespaces]]
 # binding = "DINOU_CACHE"
 # id = "<YOUR_KV_NAMESPACE_ID>"`}
                 </CodeBlock>
 
                 <p>
-                  <strong>Step 3:</strong> Test locally or deploy to Cloudflare:
+                  <strong>Step 3:</strong> Preview locally or deploy to the Cloudflare edge:
                 </p>
                 <CodeBlock
                   language="bash"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`# Preview locally with Wrangler (defaults to port 3000)
+{`# Preview locally with Wrangler
 npx wrangler dev
 
-# Deploy to Cloudflare Workers edge network
+# Deploy globally to Cloudflare Workers
 npx wrangler deploy`}
                 </CodeBlock>
               </div>
@@ -539,7 +506,7 @@ npx wrangler deploy`}
                   <span>How Cloudflare Workers Works in Dinou</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Dinou generates a self-contained Dual-Bundle orchestrator at <code>.dinou/cloudflare/worker.js</code> alongside a dedicated <code>.dinou/cloudflare/assets</code> directory (keeping <code>.dinou/dist3</code> 100% untouched). Public client bundles and <code>public/</code> files sit at the root of <code>.dinou/cloudflare/assets</code> and are served directly via <code>env.ASSETS</code>, while pre-rendered SSG/ISR/PPR route cache artifacts are isolated inside <code>.dinou/cloudflare/assets/__dinou_dist2</code> (blocked from direct external HTTP access). When bound to <code>env.DINOU_CACHE</code>, Dinou automatically activates <code>CloudflareKVStorage</code> to persist Incremental Static Regeneration (ISR) route caches across the edge. Secrets, D1 databases, and R2 buckets are injected seamlessly into Server Components via <code>getContext().env</code>.
+                  Dinou emits <code>.dinou/cloudflare/worker.js</code> alongside <code>.dinou/cloudflare/assets</code> (leaving <code>.dinou/dist3</code> untouched). Public client bundles and <code>public/</code> files are served via <code>env.ASSETS</code>, while pre-rendered SSG/ISR/PPR cache artifacts live inside <code>.dinou/cloudflare/assets/__dinou_dist2</code> (blocked from direct external HTTP access). When <code>env.DINOU_CACHE</code> is bound, Dinou activates <code>CloudflareKVStorage</code> automatically; secrets, KV namespaces, D1 databases, and R2 buckets are all accessible via <code>getContext().env</code>.
                 </p>
               </div>
             </section>
@@ -548,7 +515,7 @@ npx wrangler deploy`}
             <section id="deno-deploy-compile" className="mt-12">
               <h2>6. Deno Deploy (deno-edge) &amp; Standalone Binaries</h2>
               <p>
-                Dinou provides native compilation for the <strong>Deno Deploy</strong> global edge cloud (targeting the <code>deno-edge</code> runtime), standalone Deno server execution, and <strong>zero-dependency single-file binary compilation</strong>:
+                Dinou provides native compilation for <strong>Deno Deploy</strong>, self-hosted Deno servers, and <strong>single-file native executables</strong> via <code>deno compile</code>:
               </p>
 
               <div className="space-y-6 my-6 not-prose">
@@ -559,20 +526,18 @@ npx wrangler deploy`}
                     <span>A. Deno Deploy (Serverless Global Edge - <code>deno-edge</code>)</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    When running <code>dinou build:deno</code>, Dinou packages your RSC and SSR engines specifically optimized for the <code>deno-edge</code> runtime into <code>.dinou/deno/main.js</code>. Dinou integrates natively with <strong>Deno KV</strong> (<code>Deno.openKv()</code>), allowing ISR-cached pages, dynamic KV stores, and sessions to persist across Deno&apos;s global edge network (35+ regions) with zero database configuration.
+                    <code>dinou build:deno</code> compiles your RSC and SSR engines into <code>.dinou/deno/main.js</code> and integrates natively with <strong>Deno KV</strong> (<code>Deno.openKv()</code>). Because <code>.dinou</code> is typically listed in <code>.gitignore</code>, pass <code>--include=.dinou/deno,.dinou/dist2,.dinou/dist3</code> when deploying with the Deno CLI so static assets and pre-rendered SSG cache files are uploaded alongside <code>main.js</code>:
                   </p>
                   <CodeBlock
                     language="bash"
                     containerClassName="w-full overflow-hidden rounded-lg"
                   >
-{`# 1. Build bundle targeting Deno Edge (deno-edge)
+{`# 1. Build Deno bundle (.dinou/deno/main.js) & seed local KV (.dinou/kv.db)
+#    (Optional: set DENO_KV_URL=... to pre-seed remote Deno Deploy KV at build time)
 dinou build:deno
 
-# 2. Deploy directly to Deno Deploy using native Deno CLI (Deno 2+):
-deno deploy --project=<my-project> .dinou/deno/main.js
-
-# (Legacy Deno setups used the separate 'deployctl' CLI)
-# Or configure GitHub integration to deploy automatically on git push!`}
+# 2. Deploy to Deno Deploy (explicitly including gitignored .dinou build artifacts)
+deno deploy --project=<my-project> --include=.dinou/deno,.dinou/dist2,.dinou/dist3 .dinou/deno/main.js`}
                   </CodeBlock>
                 </div>
 
@@ -583,14 +548,13 @@ deno deploy --project=<my-project> .dinou/deno/main.js
                     <span>B. Deno Standalone Server (VPS / Docker)</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    To run your application using the standard Deno runtime locally or in self-hosted Linux containers:
+                    Run your pre-bundled application with the standard Deno runtime locally or in Linux containers (respects <code>PORT</code>, <code>HOST</code>, and <code>DENO_KV_PATH</code>):
                   </p>
                   <CodeBlock
                     language="bash"
                     containerClassName="w-full overflow-hidden rounded-lg"
                   >
-{`# Build and run with standard Deno runtime
-dinou build:deno
+{`dinou build:deno
 dinou start:deno`}
                   </CodeBlock>
                 </div>
@@ -602,7 +566,7 @@ dinou start:deno`}
                     <span>C. Zero-Dependency Standalone Binaries (<code>deno compile</code>)</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Compile your entire Dinou application, the V8 JavaScript engine, Deno runtime, and embedded Deno KV database into a single self-contained executable file. The target server does not need Node, Deno, or Bun installed:
+                    Package your Dinou app, V8, the Deno runtime, and embedded Deno KV support into a single executable:
                   </p>
                   <CodeBlock
                     language="bash"
@@ -612,11 +576,11 @@ dinou start:deno`}
 dinou build:deno:compile
 ./dist/deno-server
 
-# Cross-compile for any operating system / architecture:
+# Cross-compile for any target OS / architecture:
 dinou build:deno:compile:linux      # x86_64 Linux
 dinou build:deno:compile:linux_arm  # ARM64 Linux (AWS Graviton, Raspberry Pi)
-dinou build:deno:compile:mac        # Apple macOS binary
-dinou build:deno:compile:win        # Microsoft Windows executable`}
+dinou build:deno:compile:mac        # Apple macOS (ARM64)
+dinou build:deno:compile:win        # Windows x64 (.exe)`}
                   </CodeBlock>
                 </div>
               </div>
@@ -626,7 +590,7 @@ dinou build:deno:compile:win        # Microsoft Windows executable`}
             <section id="bun-runtime-compile" className="mt-12">
               <h2>7. Bun Runtime &amp; Standalone Executables</h2>
               <p>
-                Run your application under the high-performance Bun JavaScript runtime:
+                Run your application directly on <code>Bun.serve</code> with zero-copy <code>Bun.file()</code> static asset delivery (respecting <code>PORT</code>, <code>HOST</code>, and <code>IDLE_TIMEOUT</code>), or compile a native Bun executable:
               </p>
               <CodeBlock
                 language="bash"
@@ -636,7 +600,7 @@ dinou build:deno:compile:win        # Microsoft Windows executable`}
 dinou build:bun
 dinou start:bun
 
-# 2. Pure Bun (100% Bun execution, 0 Node.js on the machine)
+# 2. Pure Bun (100% Bun from bundler to runtime, 0 Node.js on the machine)
 dinou build:bun:pure
 dinou start:bun
 
@@ -644,15 +608,15 @@ dinou start:bun
 dinou build:bun:compile
 ./dist/server
 
-# 4. Pure Bun standalone binary compilation (100% Bun from build to exe)
+# 4. Pure Bun standalone binary compilation (100% Bun end-to-end)
 dinou build:bun:pure:compile
 ./dist/server
 
-# Cross-compilation targets:
+# Cross-compilation targets (also available for build:bun:pure:compile:*):
 dinou build:bun:compile:linux      # x86_64 Linux
 dinou build:bun:compile:linux_arm  # ARM64 Linux (AWS Graviton)
 dinou build:bun:compile:mac        # Apple macOS (Apple Silicon)
-dinou build:bun:compile:win        # Windows executable (.exe)`}
+dinou build:bun:compile:win        # Windows x64 (.exe)`}
               </CodeBlock>
             </section>
 
@@ -660,17 +624,17 @@ dinou build:bun:compile:win        # Windows executable (.exe)`}
             <section id="static-export" className="mt-12">
               <h2>8. Static Export (GitHub Pages, S3, CDN)</h2>
               <p>
-                If your application consists purely of static or pre-rendered pages without dynamic server-side computation, you can export 100% static HTML:
+                When your site consists purely of static routes and pre-rendered dynamic routes (via <code>getStaticPaths</code>), export a self-contained static site into <code>out/</code>:
               </p>
               <CodeBlock
                 language="bash"
                 containerClassName="w-full overflow-hidden rounded-lg"
               >
-{`# Generates complete static site in out/
+{`# Generates complete static site in out/ (also supports :esbuild, :rollup, :webpack)
 dinou export-static`}
               </CodeBlock>
               <p className="text-xs text-muted-foreground mt-2">
-                Deploy the generated <code>out/</code> directory directly to GitHub Pages, Cloudflare Pages, Amazon S3, Surge, or any static file server (Nginx/Apache).
+                <code>out/</code> includes pre-rendered <code>index.html</code> files, hashed client bundles, <code>public/</code> assets, and segmented <code>page.rsc</code> / <code>layout.rsc</code> Flight payloads—preserving instant client-side SPA transitions on GitHub Pages, Cloudflare Pages, AWS S3, Surge, or Nginx without any backend server.
               </p>
             </section>
 
@@ -678,7 +642,7 @@ dinou export-static`}
             <section id="docker-guide" className="mt-12">
               <h2>9. Production Docker Setup</h2>
               <p>
-                Containerization with Dinou offers multiple strategies depending on your architecture. You can choose between an <strong>ultra-lightweight compiled binary container</strong> (zero Node.js runtime, tiny image footprint) or a <strong>standard multi-stage Node container</strong>.
+                Containerizing Dinou supports two battle-tested patterns: an <strong>ultra-lightweight standalone binary container</strong> (zero JS runtime in the runner image) or a <strong>pruned multi-stage Node.js container</strong>.
               </p>
 
               <div className="space-y-8 my-6">
@@ -689,7 +653,7 @@ dinou export-static`}
                     <h3 className="text-lg font-bold">9.1 Ultra-Lightweight Standalone Binary Container (Recommended)</h3>
                   </div>
                   <p>
-                    This modern recipe uses <strong>Bun in the build stage</strong> with the <code>build:node:pure:compile</code> command, and drops into an ultra-lean <strong>Debian Bookworm Slim</strong> runner. It eliminates the Node.js runtime entirely from both build and production images, while providing full support for Prisma and OpenSSL:
+                    Uses <strong>Bun in the builder stage</strong> with <code>build:node:pure:compile</code> (or <code>build:bun:pure:compile</code>) and copies only the compiled executable plus <code>.dinou/dist2</code> and <code>.dinou/dist3</code> into a minimal <strong>Debian Bookworm Slim</strong> image:
                   </p>
 
                   <CodeBlock
@@ -702,17 +666,15 @@ dinou export-static`}
 FROM oven/bun:latest AS builder
 WORKDIR /app
 
-# Symlink so #!/usr/bin/env node (used by dinou bin & cross-env) executes Bun transparently
+# Symlink so #!/usr/bin/env node CLI shebangs execute Bun transparently
 RUN ln -s /usr/local/bin/bun /usr/local/bin/node
 
-# Install dependencies respecting package-lock.json versions
-COPY package.json package-lock.json* ./
-COPY prisma ./prisma/
+# Install dependencies cleanly
+COPY package.json package-lock.json* bun.lock* ./
 RUN bun install
 
-# Copy application source, generate Prisma Client, and compile standalone binary
+# Copy application source and compile standalone binary
 COPY . .
-RUN bunx prisma generate
 RUN bun run build:node:pure:compile
 
 # ==============================================================================
@@ -721,17 +683,13 @@ RUN bun run build:node:pure:compile
 FROM debian:bookworm-slim AS runner
 WORKDIR /app
 
-# Install CA certificates for secure HTTPS and OpenSSL for the Prisma engine
-RUN apt-get update && apt-get install -y ca-certificates openssl && rm -rf /var/lib/apt/lists/*
+# Install CA certificates for outbound HTTPS (add openssl if using Prisma)
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
-# Copy the compiled standalone executable and the full .dinou output directory
+# Copy ONLY the standalone binary, SSG cache (dist2), and static assets (dist3)
 COPY --from=builder /app/dist/server ./server
-COPY --from=builder /app/.dinou ./.dinou
-
-# Copy Prisma runtime and schema (if your project uses Prisma)
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/.dinou/dist2 ./.dinou/dist2
+COPY --from=builder /app/.dinou/dist3 ./.dinou/dist3
 
 RUN chmod +x ./server
 
@@ -744,17 +702,17 @@ CMD ["./server"]`}
                   <div className="rounded-xl border p-4 bg-card not-prose space-y-3 my-4">
                     <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
                       <Zap className="h-4 w-4 text-amber-500" />
-                      <span>Why This Dockerfile Architecture is Superior:</span>
+                      <span>Why This Dockerfile Architecture Excels</span>
                     </div>
                     <ul className="text-xs text-muted-foreground space-y-2 list-disc pl-5">
                       <li>
-                        <strong>Symlink Trick (<code>ln -s /usr/local/bin/bun /usr/local/bin/node</code>):</strong> NPM CLI tools (such as Dinou CLI and <code>cross-env</code>) specify <code>#!/usr/bin/env node</code> in their shebang. By symlinking Bun to <code>/usr/local/bin/node</code>, Bun executes these commands natively without needing to install Node.js in the builder stage.
+                        <strong>Shebang Compatibility (<code>ln -s /usr/local/bin/bun /usr/local/bin/node</code>):</strong> CLI binaries with <code>#!/usr/bin/env node</code> execute directly on Bun without installing Node.js in the builder image.
                       </li>
                       <li>
-                        <strong>Debian Bookworm Slim vs Alpine:</strong> Prisma and other native C++ bindings depend on standard GNU libc and OpenSSL. Debian Bookworm Slim provides official glibc stability, eliminating the musl libc crashes frequently encountered with Alpine Linux, while keeping total image size under ~150MB.
+                        <strong>Debian Bookworm Slim vs. Alpine:</strong> Standard GNU <code>glibc</code> avoids <code>musl</code> native-addon compatibility issues (such as Prisma engines — if your project uses Prisma, install <code>openssl</code> and copy <code>node_modules/.prisma</code>, <code>node_modules/@prisma</code>, and <code>prisma</code>).
                       </li>
                       <li>
-                        <strong>Zero Node.js Runtime in Production:</strong> The runner container does not need Node.js or Bun installed. The executable in <code>./server</code> boots instantaneously with minimal memory footprint and zero external package dependency vulnerabilities.
+                        <strong>Minimal Attack Surface:</strong> Neither Node.js, npm, Bun, <code>node_modules</code>, nor <code>.dinou/node</code> intermediate bundles are present in the final production container.
                       </li>
                     </ul>
                   </div>
@@ -767,7 +725,7 @@ CMD ["./server"]`}
                     <h3 className="text-lg font-bold">9.2 Standard Node.js Multi-Stage Container</h3>
                   </div>
                   <p>
-                    If your team relies on standard Node.js base images, use this optimized multi-stage build running <code>dinou build:node</code> and <code>dinou start:node</code>:
+                    Thanks to Dinou&apos;s <Link href="/docs/bundlers">Dual-Mode Vendoring</Link>, running <code>npm prune --omit=dev</code> strips development packages cleanly while keeping production startup instantaneous:
                   </p>
 
                   <CodeBlock
@@ -778,27 +736,23 @@ CMD ["./server"]`}
 FROM node:22-alpine AS builder
 WORKDIR /app
 
-# Install dependencies cleanly
 COPY package*.json ./
 RUN npm ci
 
-# Copy source code and compile Node orchestrator
 COPY . .
-RUN npm run build:node
+RUN npm run build:node && npm prune --omit=dev
 
-# Production Runner Stage
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production PORT=3000
 
-# Copy minimal production artifacts
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.dinou ./.dinou
+COPY --from=builder /app/.dinou/node ./.dinou/node
+COPY --from=builder /app/.dinou/dist2 ./.dinou/dist2
+COPY --from=builder /app/.dinou/dist3 ./.dinou/dist3
 
-# Run as non-root user for security
 USER node
-
 EXPOSE 3000
 CMD ["npm", "run", "start:node"]`}
                   </CodeBlock>
@@ -806,24 +760,64 @@ CMD ["npm", "run", "start:node"]`}
               </div>
             </section>
 
-            {/* 10. Environment Secrets */}
-            <section id="environment-secrets" className="mt-12">
-              <h2>10. Managing Production Environment Secrets</h2>
+            {/* 10. Horizontal Scaling & Distributed ISR Cache */}
+            <section id="distributed-cache-scaling" className="mt-12">
+              <h2>10. Horizontal Scaling &amp; Distributed ISR Cache</h2>
               <p>
-                In production, never ship a <code>.env</code> file inside your Docker container or git repository. Configure secrets directly in your hosting provider&apos;s dashboard or CLI:
+                Single-server Node and Bun deployments store Incremental Static Regeneration (ISR), ISG, Partial Prerendering (PPR) shells, and <Link href="/docs/3d-segmentation">Cache Slots</Link> in <code>.dinou/dist2</code> via <code>FileSystemStorage</code>. When scaling horizontally across <strong>multiple container replicas</strong> (Kubernetes, Fly.io, Railway, AWS ECS) or across <strong>serverless Netlify Function instances</strong>, configure <code>RedisStorage</code> in <code>dinou.config.ts</code> so all instances share one coherent cache and instant <Link href="/docs/revalidation"><code>revalidateTag()</code> / <code>revalidatePath()</code></Link> invalidations:
+              </p>
+
+              <CodeBlock
+                language="typescript"
+                containerClassName="w-full overflow-hidden rounded-lg"
+              >
+{`// dinou.config.ts
+import { defineConfig } from "dinou";
+import { RedisStorage } from "dinou/server";
+import Redis from "ioredis";
+
+const redis = process.env.REDIS_URL ? new Redis(process.env.REDIS_URL) : null;
+
+export default defineConfig({
+  ...(redis
+    ? {
+        storage: new RedisStorage(redis, {
+          prefix: "dinou:prod:",
+        }),
+      }
+    : {}),
+});`}
+              </CodeBlock>
+
+              <div className="rounded-xl border p-4 bg-card not-prose space-y-2 my-4">
+                <div className="flex items-center gap-2 font-semibold text-sm text-blue-600 dark:text-blue-400">
+                  <Database className="h-4 w-4" />
+                  <span>Automatic Build-Time SSG Hydration</span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  During <code>dinou build</code>, Dinou automatically writes build-time SSG pages to <code>.dinou/dist2</code> without touching your remote Redis cluster. At runtime, <code>RedisStorage</code> (as well as <code>CloudflareKVStorage</code> via <code>/__dinou_dist2</code> and <code>DenoKVStorage</code>) lazily hydrates missing build-time artifacts from disk while respecting tag/path invalidation timestamps across every replica.
+                </p>
+              </div>
+            </section>
+
+            {/* 11. Environment Secrets */}
+            <section id="environment-secrets" className="mt-12">
+              <h2>11. Managing Production Environment Secrets</h2>
+              <p>
+                Never commit <code>.env</code> secrets to Git or bake runtime secrets into Docker images. Remember that client-exposed variables prefixed with <code>DINOU_PUBLIC_</code> are statically inlined at build time, while server-only secrets are read dynamically at request time via <code>getContext().env</code> (see <Link href="/docs/env-vars">Environment Variables</Link>):
               </p>
               <ul>
-                <li><strong>Railway:</strong> Project Settings &rarr; Variables.</li>
+                <li><strong>Railway / Render:</strong> Project Settings &rarr; Environment Variables.</li>
                 <li><strong>Fly.io:</strong> <code>fly secrets set DATABASE_URL=&quot;...&quot;</code>.</li>
-                <li><strong>Netlify:</strong> Site Configuration &rarr; Environment variables.</li>
-                <li><strong>Cloudflare:</strong> <code>wrangler secret put MY_SECRET</code>.</li>
-                <li><strong>Deno Deploy:</strong> Project Settings &rarr; Environment Variables (or via <code>deno deploy</code>).</li>
+                <li><strong>Netlify:</strong> Site Configuration &rarr; Environment variables (unified automatically from <code>Netlify.env</code> &amp; <code>process.env</code>).</li>
+                <li><strong>Cloudflare Workers:</strong> <code>npx wrangler secret put DATABASE_URL</code>.</li>
+                <li><strong>Deno Deploy:</strong> Project Settings &rarr; Environment Variables (or <code>--env-file</code> in <code>deno deploy</code>).</li>
               </ul>
             </section>
 
-            {/* 11. Production Checklist */}
+            {/* 12. Production Checklist */}
             <section id="deployment-checklist" className="mt-12">
-              <h2>11. Production Pre-Flight Checklist</h2>
+              <h2>12. Production Pre-Flight Checklist</h2>
               <div className="border rounded-xl p-5 bg-card not-prose my-6 space-y-3">
                 <div className="flex items-center gap-2 font-semibold text-sm">
                   <ShieldCheck className="h-4 w-4 text-emerald-500" />
@@ -832,19 +826,23 @@ CMD ["npm", "run", "start:node"]`}
                 <ul className="space-y-2 text-xs text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span><strong>Validate Build Locally:</strong> Run <code>npm run build:node &amp;&amp; npm run start:node</code> locally to verify clean compilation before pushing to CI/CD.</span>
+                    <span><strong>Validate Production Build Locally:</strong> Run <code>npm run build &amp;&amp; npm start</code> locally to verify SSG routes, Server Functions, and production bundles before deploying.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span><strong>Environment Variables Configured:</strong> Verify database connection strings and third-party API keys are set in your platform dashboard.</span>
+                    <span><strong>Build-Time vs. Runtime Env Vars:</strong> Ensure <code>DINOU_PUBLIC_*</code> variables are available in your CI builder stage, and private secrets are set in your runtime platform dashboard.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span><strong>Static Asset Caching:</strong> Fast browser caching for instant subsequent loads (handled automatically by Dinou for all hashed bundles in <code>/assets/*</code>).</span>
+                    <span><strong>Immutable Asset Caching:</strong> Content-hashed client JS/CSS bundles and fingerprinted files in <code>/assets/*</code> are served with <code>Cache-Control: public, max-age=31536000, immutable</code> automatically across Dinou&apos;s Node, Bun, and Deno servers and edge CDNs.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                    <span><strong>SSL / HTTPS Active:</strong> Ensure your production domain uses HTTPS (automatic on Netlify, Cloudflare, Railway, and Fly.io; configure via Caddy or Nginx with Let&apos;s Encrypt if using a self-hosted VPS).</span>
+                    <span><strong>Distributed Cache for Multi-Replica / Edge:</strong> Bind <code>DINOU_CACHE</code> on Cloudflare Workers, enable Deno KV on Deno Deploy, or configure <code>RedisStorage</code> when running multiple Node/Bun/Netlify instances.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span><strong>HTTPS &amp; Reverse Proxy Headers:</strong> Ensure TLS termination is active (automatic on Netlify, Cloudflare, Deno Deploy, Railway, and Fly.io; use Caddy or Nginx with Let&apos;s Encrypt on self-hosted VPS hosts).</span>
                   </li>
                 </ul>
               </div>

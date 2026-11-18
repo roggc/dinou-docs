@@ -101,7 +101,7 @@ Keep these invariants intact across all future audits and docs updates:
 
 1. **`.dinou/` Directory Topology**:
    - **`.dinou/dist1/`**: **ALL** production internal build & server artifacts (never served publicly):
-     - `.dinou/dist1/server/` → `handler.js`, `netlify.js`, `.map` files, `package.json` (`netlify.toml` uses `[functions] directory = ".dinou/dist1/server"`).
+     - `.dinou/dist1/server/` → AOT Dual-Bundle `handler.js`, `netlify.js`, `.map` files, `package.json` (plus dedicated single-function `.dinou/netlify/functions/ssr.mjs` for `netlify.toml`).
      - `.dinou/dist1/manifest.json` → Bundler chunk asset map (`{"main.js": "main-<hash>.js", ...}`) across Esbuild, Rollup, and Webpack (freeing `/manifest.json` in `.dinou/dist3` for user PWA `public/manifest.json`!).
      - `.dinou/dist1/react-client-manifest.json` & `.dinou/dist1/server-functions-manifest.json` (plus `react-ssr-manifest.json` for Webpack). Legacy `.dinou/react_client_manifest/` and `.dinou/server_functions_manifest/` folders no longer exist.
    - **`.dinou/dist2/`**: Pre-rendered SSG / ISR / PPR HTML (`index.html`, `shell.html`), segmented RSC (`page.rsc`, `layout.rsc`, `shell.rsc`, `rsc.rsc`), metadata JSONs, `slots/*`, and `status-manifest.json`.
@@ -132,8 +132,11 @@ Keep these invariants intact across all future audits and docs updates:
 8. **Multi-Bundler CLI Execution, Pure Bun Compatibility, 31-Vendor Catalog & `-u` Unvendorized Mode (`x-bundlers-fixes.md`)**:
    - `dinou/cli.js` executes Esbuild, Rollup, and Webpack steps directly via `spawnSync` without `cross-env` or `npx`, propagating `DINOU_BUILD_TOOL` (`"esbuild"`, `"rollup"`, `"webpack"`) across all Node, Cloudflare, Deno, Bun, Pure Bun, and `export-static` targets, while `dinou/webpack/helpers/patch-webpack-internals.js` (`loadReactServerWebpackPlugin`) enables 100% Node-free Webpack 5.112+ builds under Bun.
    - `dinou/compiled/` consolidates 31 active pre-compiled vendor packages (including `#fast-glob`, `#resolve`, `#chokidar`, `#css-loader` + `runtime/`, and `#mini-css-extract-plugin` + `hmr/`) with full `dependencies` parity in `package.json` / `dinou/package.json` for strict `pnpm` workspaces, and `dinou/core/ensure-vendor-mode.js` activates `--conditions=unvendorized` across both Node.js and Bun.
-9. **Existing `x-*.md` Upstream Handoff Documents in Repo Root**:
-   - `x-bailout.md`, `x-cache-slot-bailout.md`, `x-escape.md`, `x-server-functions-fixes.md`, `x-revalidation-fixes.md`, `x-streaming-suspense-fixes.md`, `x-ssr-server-references-fixes.md`, `x-react-compiler-fixes.md`, `x-public-static-assets-fixes.md`, `x-styles-css-fixes.md`, `x-assets-fixes.md`, `x-env-vars-fixes.md`, `x-alias-fixes.md`, `x-plugins-fixes.md`, `x-bundlers-fixes.md`.
+9. **AOT Dual-Bundle Netlify Functions v2, Multi-Bundle React Isolation & Runtime Adapters (`x-deployment-fixes.md`)**:
+   - `dinou/node/bundle-dual-engine.js` (`bundleServerAndNetlifyAdapters`) compiles self-contained AOT Dual-Bundle server artifacts into `.dinou/netlify/functions/ssr.mjs` (`netlify.toml` `[functions] directory = ".dinou/netlify/functions"`, `included_files = [".dinou/dist2/**"]`, `MemoryStorage({ hydrateFromDisk: true })` default, `Netlify.env` unification, `context.waitUntil()` ISR) and `.dinou/dist1/server/{netlify.js,handler.js}` across Esbuild, Rollup, and Webpack, alongside new `dinou build:netlify[:esbuild|:rollup|:webpack]` CLI commands.
+   - `rsc-engine` and `ssr-engine` bind `globalThis.__DINOU_EDGE_RENDERER__` and `globalThis.__webpack_require__` per call across Node, Netlify, Cloudflare, Bun, and Deno so multiple compiled bundles can coexist in one process without `React` dispatcher collisions; `dinou/adapters/{netlify,cloudflare,bun,deno}.js` delegate cleanly to their pre-bundled AOT artifacts with `HOST` (`hostname`) propagation and CLI fail-fast checks.
+10. **Existing `x-*.md` Upstream Handoff Documents in Repo Root**:
+   - `x-bailout.md`, `x-cache-slot-bailout.md`, `x-escape.md`, `x-server-functions-fixes.md`, `x-revalidation-fixes.md`, `x-streaming-suspense-fixes.md`, `x-ssr-server-references-fixes.md`, `x-react-compiler-fixes.md`, `x-public-static-assets-fixes.md`, `x-styles-css-fixes.md`, `x-assets-fixes.md`, `x-env-vars-fixes.md`, `x-alias-fixes.md`, `x-plugins-fixes.md`, `x-bundlers-fixes.md`, `x-deployment-fixes.md`.
 
 ---
 
@@ -165,8 +168,8 @@ Keep these invariants intact across all future audits and docs updates:
 - [x] `/docs/alias` — Alias (`src/docs/alias/page.tsx` • `x-alias-fixes.md`)
 - [x] `/docs/plugins` — Plugins (`src/docs/plugins/page.tsx` • `x-plugins-fixes.md`)
 - [x] `/docs/bundlers` — Bundlers (`src/docs/bundlers/page.tsx` • `x-bundlers-fixes.md`)
-- [ ] **`/docs/deployment` — Deployment (`src/docs/deployment/page.tsx`)  ⬅️ NEXT ROUTE TO AUDIT**
-- [ ] `/docs/eject` — Eject (`src/docs/eject/page.tsx`)
+- [x] `/docs/deployment` — Deployment (`src/docs/deployment/page.tsx` • `x-deployment-fixes.md`)
+- [ ] **`/docs/eject` — Eject (`src/docs/eject/page.tsx`)  ⬅️ NEXT ROUTE TO AUDIT**
 
 ### Reference
 - [ ] `/docs/api-reference` — API Reference (`src/docs/api-reference/page.tsx`)

@@ -730,8 +730,8 @@ $env:DINOU_UNVENDORIZED="true"; npm run dev
                 <p>
                   Compiles your Dinou application into{" "}
                   <code>.dinou/node/server.mjs</code> (plus{" "}
-                  <code>.dinou/dist1/server/</code> handlers for custom or
-                  Netlify servers):
+                  <code>.dinou/netlify/functions/ssr.mjs</code> and{" "}
+                  <code>.dinou/dist1/server/</code> handlers):
                 </p>
                 <div className="not-prose overflow-x-auto rounded-lg border border-border">
                   <table className="w-full text-sm text-left">
