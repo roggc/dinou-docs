@@ -1,35 +1,24 @@
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/docs/components/ui/alert";
-import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
 } from "@/docs/components/ui/card";
 import { Badge } from "@/docs/components/ui/badge";
 import {
   Boxes,
   Zap,
-  Package,
   Server,
   Cpu,
   Layers,
   Terminal,
-  CheckCircle2,
-  ArrowRight,
   Cloud,
-  ShieldCheck,
-  Sparkles,
   Globe,
-  RefreshCw,
   Binary,
   Sliders,
   Lock,
+  FolderTree,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
@@ -40,8 +29,10 @@ const tocItems = [
   { id: "the-three-bundlers", title: "2. esbuild, Rollup, & Webpack Compared", level: 2 },
   { id: "esbuild", title: "2.1 esbuild (Default & Lightning Fast)", level: 3 },
   { id: "rollup", title: "2.2 Rollup (Optimized Tree-Shaking)", level: 3 },
-  { id: "webpack", title: "2.3 Webpack (Enterprise & React Compiler)", level: 3 },
-  { id: "dual-bundle-engine", title: "3. The Dual-Bundle Engine Architecture", level: 2 },
+  { id: "webpack", title: "2.3 Webpack (Enterprise Ecosystem & Interop)", level: 3 },
+  { id: "dual-bundle-engine", title: "3. Dual-Bundle Engine & .dinou/ Topology", level: 2 },
+  { id: "dinou-directory-topology", title: "3.1 Build Output Topology (.dinou/)", level: 3 },
+  { id: "three-pass-aot", title: "3.2 Three-Pass AOT Runtime Packaging", level: 3 },
   { id: "dual-mode-vendoring", title: "4. Dual-Mode Vendoring (Vendorized vs. -u)", level: 2 },
   { id: "vendorized-default", title: "4.1 Vendorized Mode (Default)", level: 3 },
   { id: "unvendorized-mode", title: "4.2 Unvendorized Mode (-u / --unvendorized)", level: 3 },
@@ -56,7 +47,7 @@ const tocItems = [
   { id: "cloudflare-scripts", title: "5.7 Cloudflare Workers & Pages", level: 3 },
   { id: "deno-scripts", title: "5.8 Deno & Standalone Compiles", level: 3 },
   { id: "bun-scripts", title: "5.9 Bun Runtime & Standalone Compiles", level: 3 },
-  { id: "static-export-scripts", title: "5.10 Static HTML Export (dinou export-static)", level: 3 },
+  { id: "static-export-scripts", title: "5.10 Static HTML Export & Utilities", level: 3 },
   { id: "package-json-setup", title: "6. Recommended package.json Setup", level: 2 },
   { id: "bundler-selection-guide", title: "7. Which Bundler & Target Should You Choose?", level: 2 },
 ];
@@ -64,10 +55,10 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Bundlers & Build Tooling | Dinou Docs</title>
+      <title>Bundlers &amp; Build Tooling | Dinou Docs</title>
       <meta
         name="description"
-        content="Dinou features first-class multi-bundler architecture supporting esbuild, Rollup, and Webpack across Node.js, Cloudflare, Deno, Bun, and binaries."
+        content="Dinou features first-class multi-bundler architecture supporting esbuild, Rollup, and Webpack across Node.js, Cloudflare Workers, Deno, Bun, and standalone compiled binaries."
       />
       <link rel="canonical" href="https://dinou.dev/docs/bundlers" />
 
@@ -83,7 +74,7 @@ export default function Page() {
                 Tri-Bundler Engine
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
-                Dinou Complete Guide
+                Dinou v9.4 Guide
               </Badge>
             </div>
             <div className="flex items-center space-x-2">
@@ -92,26 +83,43 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Dinou features first-class multi-bundler architecture supporting <strong>esbuild</strong>, <strong>Rollup</strong>, and <strong>Webpack</strong> across Node.js, Cloudflare, Deno, Bun, and standalone compiled binaries.
+              Dinou features a first-class multi-bundler architecture supporting{" "}
+              <strong>esbuild</strong>, <strong>Rollup</strong>, and{" "}
+              <strong>Webpack</strong> across Node.js, Cloudflare Workers, Deno,
+              Bun, static exports, and standalone compiled binaries.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
-            {/* Overview */}
-            <section id="overview">
+            {/* 1. Overview */}
+            <section id="overview" className="scroll-mt-20">
               <h2>1. Overview: Bundlers in Dinou</h2>
               <p>
-                Unlike rigid meta-frameworks that lock you into a single proprietary bundler, Dinou is architected with a pluggable, agnostic build core. Dinou provides native, pre-configured pipelines for three premier JavaScript bundlers:
+                Unlike rigid meta-frameworks that lock you into a single
+                proprietary bundler, Dinou separates its React 19 RSC/SSR
+                runtime from client compilation. Out of the box, Dinou provides
+                feature-complete, zero-config pipelines for three JavaScript
+                bundlers with full parity across{" "}
+                <Link href="/docs/styles">CSS &amp; Tailwind v4</Link>,{" "}
+                <Link href="/docs/assets">static media fingerprinting</Link>,{" "}
+                <Link href="/docs/alias">tsconfig path aliases</Link>,{" "}
+                <Link href="/docs/env-vars">environment variables</Link>, and
+                the <Link href="/docs/compiler">React Compiler</Link>:
               </p>
               <ul>
                 <li>
-                  <strong>esbuild (Default):</strong> Written in Go. Delivers sub-millisecond build cycles and instant HMR feedback loops in local development.
+                  <strong>esbuild (Default):</strong> Written in Go. Delivers
+                  near-instant startup, sub-second incremental HMR in local
+                  development, and native ESM chunks with browser Import Maps.
                 </li>
                 <li>
-                  <strong>Rollup:</strong> The industry benchmark for clean ES Module output, advanced tree-shaking, and surgical code splitting.
+                  <strong>Rollup:</strong> The industry benchmark for clean ES
+                  Module output, scope hoisting, and surgical tree-shaking.
                 </li>
                 <li>
-                  <strong>Webpack:</strong> The most battle-tested enterprise bundler with universal package compatibility and built-in React Compiler integration in dev and prod.
+                  <strong>Webpack:</strong> Battle-tested enterprise bundler
+                  with broad legacy CommonJS/ESM package compatibility and
+                  dedicated vendor chunk splitting.
                 </li>
               </ul>
 
@@ -124,7 +132,8 @@ export default function Page() {
                     </div>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground">
-                    10&times;&ndash;100&times; faster startup. The default for <code>dinou dev</code> and rapid local iterations.
+                    10&times;&ndash;100&times; faster cold start. Default for{" "}
+                    <code>dinou dev</code> and <code>dinou build</code>.
                   </CardContent>
                 </Card>
 
@@ -136,7 +145,8 @@ export default function Page() {
                     </div>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground">
-                    Maximum tree-shaking and ultra-clean ESM chunks. Ideal for modern edge deployments.
+                    Maximum dead-code elimination and ultra-clean native ESM
+                    chunks for lean client payloads.
                   </CardContent>
                 </Card>
 
@@ -148,117 +158,332 @@ export default function Page() {
                     </div>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground">
-                    Universal package compatibility and automatic React Compiler optimization in dev and prod.
+                    Universal npm CJS/ESM interop, dedicated{" "}
+                    <code>vendor-react</code> chunking, and enterprise tooling.
                   </CardContent>
                 </Card>
               </div>
             </section>
 
-            {/* The Three Bundlers Compared */}
-            <section id="the-three-bundlers" className="mt-12">
+            {/* 2. The Three Bundlers Compared */}
+            <section id="the-three-bundlers" className="mt-12 scroll-mt-20">
               <h2>2. esbuild, Rollup, &amp; Webpack Compared</h2>
-
-              <div id="esbuild" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">2.1 esbuild (Default &amp; Lightning Fast)</h3>
-                <p>
-                  <code>esbuild</code> is Dinou&apos;s default bundler. Because it is compiled to native Go machine code, it avoids JavaScript runtime overhead during compilation.
-                </p>
-                <ul>
-                  <li><strong>Strengths:</strong> Near-instant cold start, sub-second incremental rebuilds, and low memory usage.</li>
-                  <li><strong>React Compiler Behavior:</strong> In Dinou, esbuild skips the React Compiler in development for speed, but runs it during production builds.</li>
-                  <li><strong>Best Used For:</strong> Daily local development and rapid feature building.</li>
-                </ul>
-              </div>
-
-              <div id="rollup" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">2.2 Rollup (Optimized Tree-Shaking)</h3>
-                <p>
-                  <code>Rollup</code> excels at analyzing ES Module import/export graphs to eliminate dead code and produce minimal client payloads.
-                </p>
-                <ul>
-                  <li><strong>Strengths:</strong> Cleanest chunk output, excellent scope hoisting, and strict standard ESM alignment.</li>
-                  <li><strong>React Compiler Behavior:</strong> Runs the React Compiler during production builds.</li>
-                  <li><strong>Best Used For:</strong> Production builds where bundle size and edge execution efficiency are paramount.</li>
-                </ul>
-              </div>
-
-              <div id="webpack" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">2.3 Webpack (Enterprise &amp; React Compiler)</h3>
-                <p>
-                  <code>Webpack</code> provides deep compatibility with legacy npm packages, complex module interop, and full compiler transforms.
-                </p>
-                <ul>
-                  <li><strong>Strengths:</strong> Broadest package compatibility, robust source-map generation, and granular chunk splitting.</li>
-                  <li><strong>React Compiler Behavior:</strong> Runs the React Compiler in <strong>both development and production</strong>. If you want to test React Compiler memoization locally, use <code>dinou dev:webpack</code>.</li>
-                  <li><strong>Best Used For:</strong> Enterprise projects with diverse npm dependencies or teams validating React Compiler in dev.</li>
-                </ul>
-              </div>
-            </section>
-
-            {/* Dual Bundle Engine Architecture */}
-            <section id="dual-bundle-engine" className="mt-12">
-              <h2>3. The Dual-Bundle Engine Architecture</h2>
               <p>
-                React Server Components (RSC) require a specialized build architecture. For every build or development run, Dinou orchestrates two parallel pipelines:
+                All three bundlers follow Dinou&apos;s unified two-tier
+                transpilation strategy: fast native Go/Rust transforms during{" "}
+                <code>dinou dev</code> for instant Fast Refresh, and{" "}
+                <code>babel-plugin-react-compiler</code> across your entire
+                client component subgraph during production builds (configurable
+                via <code>reactCompiler?: boolean</code> in{" "}
+                <code>dinou.config.ts</code>; see{" "}
+                <Link href="/docs/compiler">React Compiler &amp; StrictMode</Link>
+                ).
               </p>
 
-              <div className="border rounded-xl p-5 bg-card not-prose my-4 space-y-4">
-                <div className="flex items-center gap-2 font-semibold text-sm">
-                  <Cpu className="h-4 w-4 text-amber-500" />
-                  <span>Dual Pipeline Flow</span>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2 text-xs">
-                  <div className="p-3 rounded-lg border bg-muted/30 space-y-1.5">
-                    <div className="font-semibold text-foreground flex items-center gap-1.5">
-                      <Server className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-                      <span>1. Server Pipeline (RSC &amp; Node)</span>
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Compiles Server Components, Server Functions (<code>&quot;use server&quot;</code>), and Page Functions for Node.js, Cloudflare, Deno, or Bun runtimes.
-                    </p>
-                  </div>
-                  <div className="p-3 rounded-lg border bg-muted/30 space-y-1.5">
-                    <div className="font-semibold text-foreground flex items-center gap-1.5">
-                      <Globe className="h-3.5 w-3.5 text-emerald-500" />
-                      <span>2. Client Pipeline (Browser &amp; CSS)</span>
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Extracts Client Components (<code>&quot;use client&quot;</code>), processes styles into <code>/styles.css</code>, fingerprints assets, and produces the React Client Manifest.
-                    </p>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground pt-1">
-                  The <strong>React Client Manifest</strong> connects the two: when the server encounters a <code>&lt;ClientComponent /&gt;</code>, it serializes a reference that the client browser hydrates seamlessly over Flight RPC.
+              <div id="esbuild" className="mt-8 space-y-3 scroll-mt-20">
+                <h3 className="text-lg font-bold">
+                  2.1 esbuild (Default &amp; Lightning Fast)
+                </h3>
+                <p>
+                  <code>esbuild</code> is Dinou&apos;s default bundler. Compiled
+                  to native Go machine code, it pairs an SWC disk mirror in
+                  development with multi-core ESM bundling in production.
                 </p>
+                <ul>
+                  <li>
+                    <strong>Flight Wire Protocol:</strong> Native browser ESM
+                    with an inline HTML{" "}
+                    <code>&lt;script type=&quot;importmap&quot;&gt;</code> and{" "}
+                    <code>@roggc/react-server-dom-esm</code>.
+                  </li>
+                  <li>
+                    <strong>Transpilation &amp; React Compiler:</strong> Uses
+                    SWC + native esbuild in <code>dinou dev</code>; runs{" "}
+                    <code>babel-plugin-react-compiler</code> across all client
+                    components and custom hooks in <code>dinou build</code>.
+                  </li>
+                  <li>
+                    <strong>Best Used For:</strong> Daily local development and
+                    fast CI/CD production builds.
+                  </li>
+                </ul>
+              </div>
+
+              <div id="rollup" className="mt-8 space-y-3 scroll-mt-20">
+                <h3 className="text-lg font-bold">
+                  2.2 Rollup (Optimized Tree-Shaking)
+                </h3>
+                <p>
+                  <code>Rollup</code> performs deep static ES Module graph
+                  analysis and scope hoisting to produce minimal browser chunks.
+                </p>
+                <ul>
+                  <li>
+                    <strong>Flight Wire Protocol:</strong> Native browser ESM
+                    with HTML{" "}
+                    <code>&lt;script type=&quot;importmap&quot;&gt;</code> and{" "}
+                    <code>@roggc/react-server-dom-esm</code>, preserving strict
+                    entry signatures.
+                  </li>
+                  <li>
+                    <strong>Transpilation &amp; React Compiler:</strong> Uses
+                    Dinou&apos;s in-memory <code>rollup-plugin-swc</code> cache
+                    in <code>dinou dev:rollup</code>; runs Babel + React
+                    Compiler in production builds.
+                  </li>
+                  <li>
+                    <strong>Best Used For:</strong> Production and edge builds
+                    where minimal client bundle size and tree-shaking matter
+                    most.
+                  </li>
+                </ul>
+              </div>
+
+              <div id="webpack" className="mt-8 space-y-3 scroll-mt-20">
+                <h3 className="text-lg font-bold">
+                  2.3 Webpack (Enterprise Ecosystem &amp; Interop)
+                </h3>
+                <p>
+                  <code>Webpack</code> provides deep compatibility with complex
+                  third-party CommonJS/ESM packages, automatic{" "}
+                  <code>runtimeChunk: &quot;single&quot;</code> module sharing,
+                  and a dedicated <code>vendor-react</code> cache group.
+                </p>
+                <ul>
+                  <li>
+                    <strong>Flight Wire Protocol:</strong> Webpack chunk runtime
+                    paired with <code>react-server-dom-webpack</code>.
+                  </li>
+                  <li>
+                    <strong>Transpilation &amp; React Compiler:</strong> Uses
+                    Dinou&apos;s custom Rust-backed <code>swc-loader</code> in{" "}
+                    <code>dinou dev:webpack</code> for fast rebuilds, and
+                    switches to <code>babel-loader</code> + React Compiler in
+                    production builds.
+                  </li>
+                  <li>
+                    <strong>Best Used For:</strong> Enterprise applications
+                    integrating legacy CommonJS libraries or non-standard npm
+                    packages.
+                  </li>
+                </ul>
               </div>
             </section>
 
-            {/* Section 4: Dual-Mode Additive Vendoring */}
+            {/* 3. Dual Bundle Engine Architecture */}
+            <section id="dual-bundle-engine" className="mt-12 scroll-mt-20">
+              <h2>3. Dual-Bundle Engine &amp; <code>.dinou/</code> Topology</h2>
+              <p>
+                React 19 Server Components require strict module isolation
+                between the <code>&quot;react-server&quot;</code> graph and the{" "}
+                <code>&quot;browser&quot;</code> SSR/client graph. Dinou
+                achieves this cleanly in two coordinated stages:
+              </p>
+
+              <div
+                id="dinou-directory-topology"
+                className="mt-6 space-y-3 scroll-mt-20"
+              >
+                <h3 className="text-lg font-bold">
+                  3.1 Build Output Topology (<code>.dinou/</code>)
+                </h3>
+                <p>
+                  Regardless of whether you choose <code>esbuild</code>,{" "}
+                  <code>rollup</code>, or <code>webpack</code>, Dinou writes
+                  deterministic artifacts into physically isolated directories
+                  inside <code>.dinou/</code>:
+                </p>
+                <div className="border rounded-xl p-5 bg-card not-prose my-4 space-y-3">
+                  <div className="flex items-center gap-2 font-semibold text-sm">
+                    <FolderTree className="h-4 w-4 text-blue-500" />
+                    <span>Physical Directory Isolation</span>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2 text-xs">
+                    <div className="p-3 rounded-lg border bg-muted/30 space-y-1">
+                      <div className="font-mono font-semibold text-foreground">
+                        .dinou/dist1/
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        <strong>Internal Build &amp; Server Artifacts</strong>{" "}
+                        (never served publicly): <code>manifest.json</code>,{" "}
+                        <code>react-client-manifest.json</code>,{" "}
+                        <code>server-functions-manifest.json</code>, and{" "}
+                        <code>server/&#123;handler.js,netlify.js&#125;</code>.
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg border bg-muted/30 space-y-1">
+                      <div className="font-mono font-semibold text-foreground">
+                        .dinou/dist2/
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        <strong>Pre-Rendered SSG / ISR / PPR Cache</strong>:{" "}
+                        <code>index.html</code>, <code>shell.html</code>,
+                        segmented RSC payloads (<code>page.rsc</code>,{" "}
+                        <code>layout.rsc</code>, <code>shell.rsc</code>),{" "}
+                        <code>slots/*</code>, and{" "}
+                        <code>status-manifest.json</code>.
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg border bg-muted/30 space-y-1">
+                      <div className="font-mono font-semibold text-foreground">
+                        .dinou/dist3/
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        <strong>Pure Public Static Webroot</strong>: hashed
+                        client JS chunks, compiled <code>styles.css</code>,
+                        fingerprinted <code>assets/[name]-[8hex].[ext]</code>,
+                        and copied <Link href="/docs/public">public/</Link>{" "}
+                        files.
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg border bg-muted/30 space-y-1">
+                      <div className="font-mono font-semibold text-foreground">
+                        .dinou/node-dev/
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        <strong>In-Memory Dev Workspace</strong>:{" "}
+                        <code>dinou dev</code> serves client chunks and
+                        manifests 100% from memory by default. Set{" "}
+                        <code>DINOU_WRITE_TO_DISK=true</code> to inspect{" "}
+                        <code>.dinou/public/</code> and{" "}
+                        <code>.dinou/node-dev/</code> on disk.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="three-pass-aot" className="mt-8 space-y-3 scroll-mt-20">
+                <h3 className="text-lg font-bold">
+                  3.2 Three-Pass AOT Runtime Packaging
+                </h3>
+                <p>
+                  After the selected client bundler finishes populating{" "}
+                  <code>.dinou/dist1/</code>, <code>.dinou/dist2/</code>, and{" "}
+                  <code>.dinou/dist3/</code>, Dinou&apos;s Dual-Bundle Engine
+                  compiles your server runtime in three AOT passes within a
+                  single process—eliminating React singleton collisions across
+                  Node.js, Cloudflare Workers, Bun, and Deno:
+                </p>
+
+                <div className="border rounded-xl p-5 bg-card not-prose my-4 space-y-4">
+                  <div className="flex items-center gap-2 font-semibold text-sm">
+                    <Cpu className="h-4 w-4 text-amber-500" />
+                    <span>Dual-Bundle Server Compilation Flow</span>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-3 text-xs">
+                    <div className="p-3 rounded-lg border bg-muted/30 space-y-1.5">
+                      <div className="font-semibold text-foreground flex items-center gap-1.5">
+                        <Server className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                        <span>Pass A: RSC Engine</span>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Bundles Server Components,{" "}
+                        <code>&quot;use server&quot;</code> actions,{" "}
+                        <code>dinou.config.*</code>, and{" "}
+                        <code>setupFiles</code> under{" "}
+                        <code>&quot;react-server&quot;</code> export conditions,
+                        replacing <code>&quot;use client&quot;</code> imports
+                        with Flight client module proxies.
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg border bg-muted/30 space-y-1.5">
+                      <div className="font-semibold text-foreground flex items-center gap-1.5">
+                        <Globe className="h-3.5 w-3.5 text-emerald-500" />
+                        <span>Pass B: SSR Engine</span>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Bundles Client Components and{" "}
+                        <code>ssr-client-manifest</code> under{" "}
+                        <code>&quot;browser&quot;</code> export conditions to
+                        stream initial HTML via{" "}
+                        <code>renderToReadableStream</code> while enforcing
+                        public-only <code>process.env</code> isolation.
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg border bg-muted/30 space-y-1.5">
+                      <div className="font-semibold text-foreground flex items-center gap-1.5">
+                        <Layers className="h-3.5 w-3.5 text-blue-500" />
+                        <span>Pass C: Orchestrator</span>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Emits the target server entrypoint:{" "}
+                        <code>.dinou/node/server.mjs</code>,{" "}
+                        <code>.dinou/cloudflare/worker.js</code>,{" "}
+                        <code>.dinou/bun/server.js</code>, or{" "}
+                        <code>.dinou/deno/main.js</code>.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 4. Dual-Mode Additive Vendoring */}
             <section id="dual-mode-vendoring" className="mt-12 scroll-mt-20">
-              <h2>4. Dual-Mode Additive Vendoring (Vendorized vs. <code>-u</code>)</h2>
+              <h2>
+                4. Dual-Mode Additive Vendoring (Vendorized vs. <code>-u</code>)
+              </h2>
               <p>
-                Dinou ships with a <strong>Dual-Mode Additive Vendoring System</strong> powered by native Node.js Subpath Imports (<code>#...</code>). Internal compiler, AST, and styling dependencies are pre-compiled into standalone ESM bundles inside <code>dinou/compiled/</code> while also remaining installed in standard <code>node_modules</code>.
+                Dinou ships with a{" "}
+                <strong>Dual-Mode Additive Vendoring System</strong> powered by
+                native Node.js and Bun Subpath Imports (<code>#...</code>).
+                Internal compiler, AST, styling, and file-discovery dependencies
+                are pre-compiled into standalone ESM bundles inside{" "}
+                <code>dinou/compiled/</code> while also remaining declared in
+                standard <code>node_modules</code>.
               </p>
 
-              <div id="vendorized-default" className="mt-6 space-y-3 scroll-mt-20">
-                <h3 className="text-lg font-bold">4.1 Vendorized Mode (Default — Instant Cold Starts)</h3>
+              <div
+                id="vendorized-default"
+                className="mt-6 space-y-3 scroll-mt-20"
+              >
+                <h3 className="text-lg font-bold">
+                  4.1 Vendorized Mode (Default — Instant Cold Starts)
+                </h3>
                 <p>
-                  Whenever you run <code>npm run dev</code>, <code>npm run build</code>, or <code>npm start</code> without extra flags, Dinou executes in <strong>Vendorized Mode</strong>:
+                  Whenever you run <code>npm run dev</code>,{" "}
+                  <code>npm run build</code>, or <code>npm start</code> without
+                  extra flags, Dinou executes in{" "}
+                  <strong>Vendorized Mode</strong>:
                 </p>
                 <ul>
                   <li>
-                    <strong>Zero File-System Bottlenecks:</strong> Avoids traversing and parsing thousands of small CommonJS/ESM files inside deep <code>node_modules</code> trees during startup.
+                    <strong>Zero File-System Bottlenecks:</strong> Avoids
+                    traversing and parsing thousands of small CommonJS/ESM files
+                    inside deep <code>node_modules</code> trees during startup.
                   </li>
                   <li>
-                    <strong>Deterministic Builds:</strong> Guarantees identical compiler behavior across local machines and CI runners without subtle regressions from transitive dependency drift.
+                    <strong>Strict Package Manager Isolation:</strong> Works
+                    seamlessly under strict non-hoisted <code>pnpm</code>{" "}
+                    workspaces and{" "}
+                    <Link href="/docs/eject">ejected projects</Link> without
+                    requiring users to hoist Babel, PostCSS, or Webpack loaders.
                   </li>
                 </ul>
               </div>
 
-              <div id="unvendorized-mode" className="mt-8 space-y-3 scroll-mt-20">
-                <h3 className="text-lg font-bold">4.2 Unvendorized Mode (<code>-u</code> / <code>--unvendorized</code>)</h3>
+              <div
+                id="unvendorized-mode"
+                className="mt-8 space-y-3 scroll-mt-20"
+              >
+                <h3 className="text-lg font-bold">
+                  4.2 Unvendorized Mode (<code>-u</code> /{" "}
+                  <code>--unvendorized</code>)
+                </h3>
                 <p>
-                  Because Dinou&apos;s vendoring is strictly <strong>additive</strong>, all 36 vendorized packages still reside in <code>node_modules</code>. If you need to debug an upstream library, test a local patch, or immediately use an upgraded dependency in <code>node_modules</code> without rebuilding vendor bundles, pass the <strong><code>-u</code></strong> (or <code>--unvendorized</code>) flag, or set <code>DINOU_UNVENDORIZED=true</code>:
+                  Because Dinou&apos;s vendoring is strictly{" "}
+                  <strong>additive</strong>, all 31 vendorized packages also
+                  reside in <code>node_modules</code>. If you want to debug an
+                  upstream package, test a local patch, or use an upgraded
+                  dependency directly from <code>node_modules</code> without
+                  rebuilding <code>dinou/compiled/</code>, pass{" "}
+                  <strong>
+                    <code>-u</code>
+                  </strong>{" "}
+                  (or <code>--unvendorized</code>), or set{" "}
+                  <code>DINOU_UNVENDORIZED=true</code> (via CLI or{" "}
+                  <code>.env.local</code>):
                 </p>
 
                 <div className="not-prose my-4">
@@ -283,19 +508,24 @@ npm start -- -u`,
                         id: "direct-cli",
                         label: "npx dinou (-u)",
                         language: "bash",
-                        code: `# Pass -u or --unvendorized directly to the Dinou CLI
+                        code: `# Pass -u or --unvendorized directly to any Dinou CLI command
 npx dinou dev -u
-npx dinou build:node:rollup --unvendorized`,
+npx dinou build:node:rollup --unvendorized
+npx dinou build:bun:pure:webpack -u
+npx dinou typegen -u`,
                       },
                       {
                         id: "env-var",
-                        label: "Environment Variable (CI / Docker)",
+                        label: "Environment Variable / .env",
                         language: "bash",
-                        code: `# Opt out of pre-compiled vendors via environment variable
+                        code: `# Opt out of pre-compiled vendors in CI / Docker
 DINOU_UNVENDORIZED=true npm run build
 
 # Windows PowerShell:
-$env:DINOU_UNVENDORIZED="true"; npm run dev`,
+$env:DINOU_UNVENDORIZED="true"; npm run dev
+
+# Or persist locally in .env.local:
+# DINOU_UNVENDORIZED=true`,
                       },
                     ]}
                   />
@@ -304,30 +534,71 @@ $env:DINOU_UNVENDORIZED="true"; npm run dev`,
                 <div className="p-4 rounded-lg bg-muted/20 border border-border text-xs text-muted-foreground space-y-1.5 not-prose">
                   <div className="font-semibold text-foreground flex items-center gap-1.5">
                     <Sliders className="h-4 w-4 text-blue-500" />
-                    <span>How <code>-u</code> Works Under the Hood</span>
+                    <span>
+                      How <code>-u</code> Works Across Node.js &amp; Bun
+                    </span>
                   </div>
                   <p className="leading-relaxed">
-                    When <code>-u</code> or <code>DINOU_UNVENDORIZED=true</code> is detected, Dinou automatically activates Node.js conditional exports resolution (<code>--conditions=unvendorized</code>), routing internal <code>#...</code> subpath imports directly to standard packages in <code>node_modules</code> instead of <code>dinou/compiled/</code>.
+                    When <code>-u</code>, <code>--unvendorized</code>, or{" "}
+                    <code>DINOU_UNVENDORIZED=true</code> is detected, Dinou
+                    activates conditional subpath resolution (
+                    <code>--conditions=unvendorized</code> in both{" "}
+                    <code>execArgv</code> and <code>NODE_OPTIONS</code>),
+                    routing internal <code>#...</code> imports directly to{" "}
+                    <code>node_modules</code> across Node.js and Pure Bun
+                    executions alike.
                   </p>
                 </div>
               </div>
 
               <div id="vendor-catalog" className="mt-8 space-y-3 scroll-mt-20">
-                <h3 className="text-lg font-bold">4.3 Compiled Vendors vs. External Exceptions</h3>
+                <h3 className="text-lg font-bold">
+                  4.3 Compiled Vendors vs. External Exceptions
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-4">
                   <Card className="border-blue-500/20 bg-blue-50/10 dark:bg-blue-950/10">
                     <CardHeader className="pb-2">
                       <div className="flex items-center gap-2 font-semibold text-blue-600 dark:text-blue-400 text-sm">
                         <Boxes className="h-4 w-4" />
-                        <span>36 Pre-Compiled Packages (dinou/compiled/)</span>
+                        <span>31 Pre-Compiled Packages (dinou/compiled/)</span>
                       </div>
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground space-y-1.5">
-                      <p>Bundled into standalone ESM for instant startup:</p>
+                      <p>Bundled into standalone ESM for instant cold starts:</p>
                       <ul className="list-disc pl-4 space-y-1">
-                        <li><strong>Babel &amp; React Compiler:</strong> <code>@babel/core</code>, <code>@babel/parser</code>, <code>@babel/traverse</code>, <code>babel-plugin-react-compiler</code></li>
-                        <li><strong>Rollup &amp; Webpack Plugins:</strong> <code>@rollup/plugin-*</code>, <code>babel-loader</code>, <code>css-loader</code>, <code>mini-css-extract-plugin</code></li>
-                        <li><strong>CSS &amp; Runtime Utilities:</strong> <code>postcss</code>, <code>autoprefixer</code>, <code>@tailwindcss/postcss</code>, <code>chokidar</code>, <code>commander</code>, <code>dotenv</code>, <code>ws</code></li>
+                        <li>
+                          <strong>Babel &amp; React Compiler (9):</strong>{" "}
+                          <code>@babel/core</code>, <code>@babel/parser</code>,{" "}
+                          <code>@babel/traverse</code>,{" "}
+                          <code>@babel/generator</code>,{" "}
+                          <code>@babel/types</code>,{" "}
+                          <code>@babel/preset-react</code>,{" "}
+                          <code>@babel/preset-typescript</code>,{" "}
+                          <code>@babel/plugin-syntax-import-meta</code>,{" "}
+                          <code>babel-plugin-react-compiler</code>
+                        </li>
+                        <li>
+                          <strong>PostCSS &amp; Styling (6):</strong>{" "}
+                          <code>postcss</code>, <code>postcss-import</code>,{" "}
+                          <code>postcss-modules</code>,{" "}
+                          <code>autoprefixer</code>, <code>generic-names</code>,{" "}
+                          <code>@tailwindcss/postcss</code>
+                        </li>
+                        <li>
+                          <strong>Rollup &amp; Webpack Plugins (11):</strong>{" "}
+                          <code>@rollup/plugin-*</code>,{" "}
+                          <code>rollup-plugin-delete</code>,{" "}
+                          <code>rollup-plugin-postcss</code>,{" "}
+                          <code>babel-loader</code>, <code>css-loader</code>,{" "}
+                          <code>mini-css-extract-plugin</code>,{" "}
+                          <code>copy-webpack-plugin</code>
+                        </li>
+                        <li>
+                          <strong>CLI &amp; Core Utilities (5):</strong>{" "}
+                          <code>commander</code>, <code>chokidar</code>,{" "}
+                          <code>fast-glob</code>, <code>resolve</code>,{" "}
+                          <code>ws</code>
+                        </li>
                       </ul>
                     </CardContent>
                   </Card>
@@ -340,11 +611,31 @@ $env:DINOU_UNVENDORIZED="true"; npm run dev`,
                       </div>
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground space-y-1.5">
-                      <p>Never vendorized to preserve native binaries and singletons:</p>
+                      <p>
+                        Kept external to preserve native binaries and
+                        singletons:
+                      </p>
                       <ul className="list-disc pl-4 space-y-1">
-                        <li><strong>Native Platform Binaries:</strong> <code>esbuild</code> (Go binary) and <code>@swc/core</code> (native Rust <code>.node</code> bindings)</li>
-                        <li><strong>React Singletons:</strong> <code>react</code>, <code>react-dom</code>, and <code>@roggc/react-server-dom-esm</code></li>
-                        <li><strong>Core Bundler Engines:</strong> <code>webpack</code> and <code>rollup</code></li>
+                        <li>
+                          <strong>Native Platform Binaries:</strong>{" "}
+                          <code>esbuild</code> (Go binary),{" "}
+                          <code>@swc/core</code>,{" "}
+                          <code>@tailwindcss/oxide</code>, and{" "}
+                          <code>lightningcss</code> (native Rust{" "}
+                          <code>.node</code> bindings)
+                        </li>
+                        <li>
+                          <strong>React Singletons:</strong> <code>react</code>,{" "}
+                          <code>react-dom</code>,{" "}
+                          <code>@roggc/react-server-dom-esm</code>, and{" "}
+                          <code>react-server-dom-webpack</code>
+                        </li>
+                        <li>
+                          <strong>Core Bundler Engines:</strong>{" "}
+                          <code>webpack</code>, <code>webpack-cli</code>,{" "}
+                          <code>webpack-dev-server</code>, <code>rollup</code>,
+                          and <code>postcss-loader</code>
+                        </li>
                       </ul>
                     </CardContent>
                   </Card>
@@ -352,18 +643,24 @@ $env:DINOU_UNVENDORIZED="true"; npm run dev`,
               </div>
             </section>
 
-            {/* Complete Dinou Scripts Matrix */}
-            <section id="cli-commands" className="mt-12">
+            {/* 5. Complete Dinou Scripts Matrix */}
+            <section id="cli-commands" className="mt-12 scroll-mt-20">
               <h2>5. Complete Dinou Scripts Matrix</h2>
               <p>
-                Dinou exposes a complete set of CLI commands. Every command supports specifying your bundler (<code>:esbuild</code>, <code>:rollup</code>, <code>:webpack</code>) or omitting it to use the default:
+                Every Dinou CLI command supports selecting your bundler (
+                <code>:esbuild</code>, <code>:rollup</code>,{" "}
+                <code>:webpack</code>) or omitting the suffix to use{" "}
+                <code>esbuild</code> by default:
               </p>
 
-              {/* Dev Scripts */}
-              <div id="dev-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">5.1 Development Scripts (dinou dev)</h3>
+              {/* 5.1 Dev Scripts */}
+              <div id="dev-scripts" className="mt-8 space-y-3 scroll-mt-20">
+                <h3 className="text-lg font-bold">
+                  5.1 Development Scripts (dinou dev)
+                </h3>
                 <p>
-                  Starts the development server with Hot Module Replacement (HMR) and in-memory compilation:
+                  Starts the incremental Dual-Bundle development server with Hot
+                  Module Replacement (HMR) and in-memory VFS compilation:
                 </p>
                 <div className="not-prose overflow-x-auto rounded-lg border border-border">
                   <table className="w-full text-sm text-left">
@@ -376,24 +673,49 @@ $env:DINOU_UNVENDORIZED="true"; npm run dev`,
                     </thead>
                     <tbody className="divide-y divide-border bg-card text-xs">
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou dev</td>
-                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">esbuild (Default)</td>
-                        <td className="p-3.5 text-muted-foreground">Fastest dev server startup with instant Fast Refresh.</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou dev
+                        </td>
+                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">
+                          esbuild (Default)
+                        </td>
+                        <td className="p-3.5 text-muted-foreground">
+                          Fastest cold start with SWC + esbuild Fast Refresh.
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou dev:esbuild</td>
-                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">esbuild</td>
-                        <td className="p-3.5 text-muted-foreground">Explicit esbuild development command.</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou dev:esbuild
+                        </td>
+                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">
+                          esbuild
+                        </td>
+                        <td className="p-3.5 text-muted-foreground">
+                          Explicit esbuild development command.
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou dev:rollup</td>
-                        <td className="p-3.5 font-semibold text-rose-600 dark:text-rose-400">Rollup</td>
-                        <td className="p-3.5 text-muted-foreground">Rollup-powered development server with ESM HMR.</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou dev:rollup
+                        </td>
+                        <td className="p-3.5 font-semibold text-rose-600 dark:text-rose-400">
+                          Rollup
+                        </td>
+                        <td className="p-3.5 text-muted-foreground">
+                          Rollup watcher with SWC transforms and native ESM HMR.
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou dev:webpack</td>
-                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">Webpack</td>
-                        <td className="p-3.5 text-muted-foreground">Webpack dev server with React Compiler active in dev.</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou dev:webpack
+                        </td>
+                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">
+                          Webpack
+                        </td>
+                        <td className="p-3.5 text-muted-foreground">
+                          Webpack Dev Server with SWC transpilation and maximum
+                          npm package compatibility.
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -401,10 +723,15 @@ $env:DINOU_UNVENDORIZED="true"; npm run dev`,
               </div>
 
               {/* 5.2 Node Standard Build */}
-              <div id="node-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">5.2 Node.js Standard Build &amp; Start (build:node)</h3>
+              <div id="node-scripts" className="mt-8 space-y-3 scroll-mt-20">
+                <h3 className="text-lg font-bold">
+                  5.2 Node.js Standard Build &amp; Start (build:node)
+                </h3>
                 <p>
-                  Compiles your Dinou application for a standard Node.js production server environment:
+                  Compiles your Dinou application into{" "}
+                  <code>.dinou/node/server.mjs</code> (plus{" "}
+                  <code>.dinou/dist1/server/</code> handlers for custom or
+                  Netlify servers):
                 </p>
                 <div className="not-prose overflow-x-auto rounded-lg border border-border">
                   <table className="w-full text-sm text-left">
@@ -417,58 +744,134 @@ $env:DINOU_UNVENDORIZED="true"; npm run dev`,
                     </thead>
                     <tbody className="divide-y divide-border bg-card text-xs">
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node</td>
-                        <td className="p-3.5">Compile for Node.js production server</td>
-                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">esbuild (Default)</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build
+                        </td>
+                        <td className="p-3.5">
+                          Default alias for <code>dinou build:node</code>
+                        </td>
+                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">
+                          esbuild (Default)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:esbuild</td>
-                        <td className="p-3.5">Compile for Node.js production server</td>
-                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">esbuild</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node
+                        </td>
+                        <td className="p-3.5">
+                          Compile for Node.js production server
+                        </td>
+                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">
+                          esbuild (Default)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:rollup</td>
-                        <td className="p-3.5">Compile for Node.js production server</td>
-                        <td className="p-3.5 font-semibold text-rose-600 dark:text-rose-400">Rollup</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:esbuild
+                        </td>
+                        <td className="p-3.5">
+                          Compile for Node.js production server
+                        </td>
+                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">
+                          esbuild
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:webpack</td>
-                        <td className="p-3.5">Compile for Node.js production server</td>
-                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">Webpack</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:rollup
+                        </td>
+                        <td className="p-3.5">
+                          Compile for Node.js production server
+                        </td>
+                        <td className="p-3.5 font-semibold text-rose-600 dark:text-rose-400">
+                          Rollup
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou start:node</td>
-                        <td className="p-3.5">Run built Node.js server (PORT=3000)</td>
-                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">Default</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:webpack
+                        </td>
+                        <td className="p-3.5">
+                          Compile for Node.js production server
+                        </td>
+                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">
+                          Webpack
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou start:node:esbuild</td>
-                        <td className="p-3.5">Run built Node.js server (esbuild bundle)</td>
-                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">esbuild</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou start / dinou start:node
+                        </td>
+                        <td className="p-3.5">
+                          Run built Node.js server (<code>PORT=3000</code>)
+                        </td>
+                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">
+                          Default
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou start:node:rollup</td>
-                        <td className="p-3.5">Run built Node.js server (Rollup bundle)</td>
-                        <td className="p-3.5 font-semibold text-rose-600 dark:text-rose-400">Rollup</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou start:node:esbuild
+                        </td>
+                        <td className="p-3.5">
+                          Run built Node.js server (esbuild bundle)
+                        </td>
+                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">
+                          esbuild
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou start:node:webpack</td>
-                        <td className="p-3.5">Run built Node.js server (Webpack bundle)</td>
-                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">Webpack</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou start:node:rollup
+                        </td>
+                        <td className="p-3.5">
+                          Run built Node.js server (Rollup bundle)
+                        </td>
+                        <td className="p-3.5 font-semibold text-rose-600 dark:text-rose-400">
+                          Rollup
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou start:node:webpack
+                        </td>
+                        <td className="p-3.5">
+                          Run built Node.js server (Webpack bundle)
+                        </td>
+                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">
+                          Webpack
+                        </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  <strong>Runtime Requirement:</strong> Requires Node.js (v20.6+) and your application&apos;s external <code>node_modules</code> dependencies on the host server.
+                  <strong>Runtime Tip:</strong>{" "}
+                  <code>.dinou/node/server.mjs</code> (paired with{" "}
+                  <code>rsc-engine.mjs</code> and <code>ssr-engine.mjs</code>)
+                  is pre-bundled and can also be started directly via{" "}
+                  <code>node .dinou/node/server.mjs</code> on Node.js v20.6+
+                  (keep <code>node_modules</code> if you invoke{" "}
+                  <code>dinou start</code> or use native binary addons like
+                  Prisma).
                 </p>
               </div>
 
               {/* 5.3 Node Compile Scripts */}
-              <div id="node-compile-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">5.3 Node Standalone Binary Compilation (build:node:compile)</h3>
+              <div
+                id="node-compile-scripts"
+                className="mt-8 space-y-3 scroll-mt-20"
+              >
+                <h3 className="text-lg font-bold">
+                  5.3 Node Standalone Binary Compilation (build:node:compile)
+                </h3>
                 <p>
-                  <strong>How it works:</strong> Dinou uses <strong>Node.js</strong> to build your application, and then invokes <strong>Bun&apos;s native compiler</strong> (<code>bun build --compile</code>) to package the resulting server into a single, self-contained executable binary in <code>dist/</code>:
+                  <strong>How it works:</strong> Dinou uses{" "}
+                  <strong>Node.js</strong> to build your application, and then
+                  invokes <strong>Bun&apos;s native compiler</strong> (
+                  <code>bun build --compile</code>) to package{" "}
+                  <code>.dinou/node/server.mjs</code> into a single executable
+                  binary in <code>dist/</code>:
                 </p>
                 <div className="border rounded-xl p-4 bg-muted/20 not-prose text-xs text-muted-foreground space-y-2">
                   <div className="flex items-center gap-2 font-semibold text-foreground text-sm">
@@ -476,11 +879,28 @@ $env:DINOU_UNVENDORIZED="true"; npm run dev`,
                     <span>The Node Orchestrator in a Single Binary</span>
                   </div>
                   <p>
-                    Unlike Bun runtime targets (<code>build:bun:compile</code>) which execute through Bun&apos;s HTTP engine, <code>build:node:compile</code> compiles Dinou&apos;s <strong>Node.js server architecture</strong> (<code>http.createServer()</code>). This provides the best of both worlds:
+                    Unlike Bun runtime targets (<code>build:bun:compile</code>)
+                    which serve through <code>Bun.serve</code>,{" "}
+                    <code>build:node:compile</code> compiles Dinou&apos;s{" "}
+                    <strong>Node.js HTTP server architecture</strong> (
+                    <code>http.createServer()</code>):
                   </p>
                   <ul className="list-disc pl-5 space-y-1">
-                    <li><strong>Full Node API Compatibility:</strong> Direct support for <code>configureServer</code>, WebSockets (Socket.IO, <code>ws</code>), and native Node HTTP middlewares <code>(req, res, next)</code>.</li>
-                    <li><strong>Zero Runtime Dependencies:</strong> Ships as a single binary executable (e.g. <code>dist/server</code> or <code>dist/server-win.exe</code>). The production container or bare-metal host does <strong>not</strong> need Node.js or <code>node_modules</code> installed.</li>
+                    <li>
+                      <strong>Full Node Plugin Compatibility:</strong> Direct
+                      support for{" "}
+                      <Link href="/docs/plugins">
+                        <code>configureServer</code>
+                      </Link>
+                      , WebSockets (Socket.IO, <code>ws</code>), and{" "}
+                      <code>(req, res, next)</code> middlewares.
+                    </li>
+                    <li>
+                      <strong>Zero Runtime Dependencies:</strong> Ships as a
+                      single binary executable alongside{" "}
+                      <code>.dinou/dist2</code> and <code>.dinou/dist3</code>{" "}
+                      without requiring Node.js on the production host.
+                    </li>
                   </ul>
                 </div>
 
@@ -495,53 +915,91 @@ $env:DINOU_UNVENDORIZED="true"; npm run dev`,
                     </thead>
                     <tbody className="divide-y divide-border bg-card text-xs">
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:compile</td>
-                        <td className="p-3.5">Host Architecture (Default bundler)</td>
-                        <td className="p-3.5 font-mono text-muted-foreground">dist/server</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:compile
+                        </td>
+                        <td className="p-3.5">
+                          Host Architecture (Default bundler)
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          dist/server
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:compile:linux</td>
-                        <td className="p-3.5">Linux x64 (<code>--target=bun-linux-x64</code>)</td>
-                        <td className="p-3.5 font-mono text-muted-foreground">dist/server-linux</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:compile:linux
+                        </td>
+                        <td className="p-3.5">
+                          Linux x64 (<code>--target=bun-linux-x64</code>)
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          dist/server-linux
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:compile:linux_arm</td>
-                        <td className="p-3.5">Linux ARM64 / Graviton (<code>--target=bun-linux-arm64</code>)</td>
-                        <td className="p-3.5 font-mono text-muted-foreground">dist/server-linux-arm</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:compile:linux_arm
+                        </td>
+                        <td className="p-3.5">
+                          Linux ARM64 / Graviton (
+                          <code>--target=bun-linux-arm64</code>)
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          dist/server-linux-arm
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:compile:mac</td>
-                        <td className="p-3.5">macOS ARM64 / Apple Silicon (<code>--target=bun-darwin-arm64</code>)</td>
-                        <td className="p-3.5 font-mono text-muted-foreground">dist/server-mac</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:compile:mac
+                        </td>
+                        <td className="p-3.5">
+                          macOS ARM64 / Apple Silicon (
+                          <code>--target=bun-darwin-arm64</code>)
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          dist/server-mac
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:compile:win</td>
-                        <td className="p-3.5">Windows x64 (<code>--target=bun-windows-x64</code>)</td>
-                        <td className="p-3.5 font-mono text-muted-foreground">dist/server-win.exe</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:compile:win
+                        </td>
+                        <td className="p-3.5">
+                          Windows x64 (<code>--target=bun-windows-x64</code>)
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          dist/server-win.exe
+                        </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Every command accepts bundler suffixes for explicit control (e.g. <code>dinou build:node:compile:linux:rollup</code> or <code>dinou build:node:compile:webpack</code>).
+                  Every command accepts bundler suffixes for explicit control
+                  (e.g. <code>dinou build:node:compile:linux:rollup</code> or{" "}
+                  <code>dinou build:node:compile:webpack</code>).
                 </p>
               </div>
 
               {/* 5.4 Pure Bun Runner */}
-              <div id="node-pure-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">5.4 Pure Bun Engine for Node.js (build:node:pure)</h3>
+              <div
+                id="node-pure-scripts"
+                className="mt-8 space-y-3 scroll-mt-20"
+              >
+                <h3 className="text-lg font-bold">
+                  5.4 Pure Bun Engine for Node.js (build:node:pure)
+                </h3>
                 <p>
-                  <strong>How it works:</strong> While standard <code>build:node</code> uses Node.js to execute the build, <code>build:node:pure</code> runs the build process using <strong>100% Bun</strong> to generate the Node.js production server.
+                  <strong>How it works:</strong> While standard{" "}
+                  <code>build:node</code> executes build scripts under Node.js,{" "}
+                  <code>build:node:pure</code> runs the entire build pipeline (
+                  <code>esbuild</code>, <code>rollup</code>, or{" "}
+                  <code>webpack</code>, SSG pre-rendering, and Dual-Bundle
+                  packaging) directly under <strong>100% Bun</strong>—with zero{" "}
+                  <code>npx</code> or Node.js runtime dependency—while still
+                  emitting the Node.js production server at{" "}
+                  <code>.dinou/node/server.mjs</code>.
                 </p>
-                <div className="border rounded-xl p-4 bg-muted/20 not-prose text-xs text-muted-foreground space-y-2">
-                  <div className="flex items-center gap-2 font-semibold text-foreground text-sm">
-                    <Zap className="h-4 w-4 text-amber-500" />
-                    <span>Why Use Pure Bun Mode?</span>
-                  </div>
-                  <p>
-                    In modern CI/CD pipelines and Docker builder containers where Bun is used as the primary package manager and runtime, you do <strong>not</strong> need to install Node.js inside the build image just to compile your project. Bun executes the build scripts with significantly reduced cold-start time and memory consumption while still generating the standard Node.js orchestrator bundle at <code>.dinou/node/server.mjs</code>.
-                  </p>
-                </div>
 
                 <div className="not-prose overflow-x-auto rounded-lg border border-border">
                   <table className="w-full text-sm text-left">
@@ -555,28 +1013,60 @@ $env:DINOU_UNVENDORIZED="true"; npm run dev`,
                     </thead>
                     <tbody className="divide-y divide-border bg-card text-xs">
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:pure</td>
-                        <td className="p-3.5 font-semibold text-purple-600 dark:text-purple-400">100% Bun</td>
-                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">esbuild (Default)</td>
-                        <td className="p-3.5 font-mono text-muted-foreground">.dinou/node/server.mjs</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:pure
+                        </td>
+                        <td className="p-3.5 font-semibold text-purple-600 dark:text-purple-400">
+                          100% Bun
+                        </td>
+                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">
+                          esbuild (Default)
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          .dinou/node/server.mjs
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:pure:esbuild</td>
-                        <td className="p-3.5 font-semibold text-purple-600 dark:text-purple-400">100% Bun</td>
-                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">esbuild</td>
-                        <td className="p-3.5 font-mono text-muted-foreground">.dinou/node/server.mjs</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:pure:esbuild
+                        </td>
+                        <td className="p-3.5 font-semibold text-purple-600 dark:text-purple-400">
+                          100% Bun
+                        </td>
+                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">
+                          esbuild
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          .dinou/node/server.mjs
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:pure:rollup</td>
-                        <td className="p-3.5 font-semibold text-purple-600 dark:text-purple-400">100% Bun</td>
-                        <td className="p-3.5 font-semibold text-rose-600 dark:text-rose-400">Rollup</td>
-                        <td className="p-3.5 font-mono text-muted-foreground">.dinou/node/server.mjs</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:pure:rollup
+                        </td>
+                        <td className="p-3.5 font-semibold text-purple-600 dark:text-purple-400">
+                          100% Bun
+                        </td>
+                        <td className="p-3.5 font-semibold text-rose-600 dark:text-rose-400">
+                          Rollup
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          .dinou/node/server.mjs
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:pure:webpack</td>
-                        <td className="p-3.5 font-semibold text-purple-600 dark:text-purple-400">100% Bun</td>
-                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">Webpack</td>
-                        <td className="p-3.5 font-mono text-muted-foreground">.dinou/node/server.mjs</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:pure:webpack
+                        </td>
+                        <td className="p-3.5 font-semibold text-purple-600 dark:text-purple-400">
+                          100% Bun
+                        </td>
+                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">
+                          Webpack
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          .dinou/node/server.mjs
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -584,13 +1074,22 @@ $env:DINOU_UNVENDORIZED="true"; npm run dev`,
               </div>
 
               {/* 5.5 Pure Compile Scripts */}
-              <div id="node-pure-compile-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">5.5 Pure Standalone Binary Compilation (build:node:pure:compile)</h3>
+              <div
+                id="node-pure-compile-scripts"
+                className="mt-8 space-y-3 scroll-mt-20"
+              >
+                <h3 className="text-lg font-bold">
+                  5.5 Pure Standalone Binary Compilation
+                  (build:node:pure:compile)
+                </h3>
                 <p>
-                  <strong>The Ultimate Zero-Dependency Pipeline:</strong> Combines 100% Bun build execution with Bun binary compilation. Bun builds the Node orchestrator and Bun compiles it into a standalone executable binary.
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  With <code>build:node:pure:compile</code>, <strong>Node.js is completely eliminated from both the build phase and the runtime phase</strong>. Your build stage requires only Bun, and your runtime stage requires only the standalone binary.
+                  <strong>The Zero-Node Pipeline:</strong> Combines 100% Bun
+                  build execution with <code>bun build --compile</code>.{" "}
+                  <strong>
+                    Node.js is not required in either the build image or the
+                    production container
+                  </strong>
+                  .
                 </p>
 
                 <div className="not-prose overflow-x-auto rounded-lg border border-border">
@@ -604,38 +1103,74 @@ $env:DINOU_UNVENDORIZED="true"; npm run dev`,
                     </thead>
                     <tbody className="divide-y divide-border bg-card text-xs">
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:pure:compile</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:pure:compile
+                        </td>
                         <td className="p-3.5">Host Architecture (100% Bun)</td>
-                        <td className="p-3.5 font-mono text-muted-foreground">dist/server</td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          dist/server
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:pure:compile:linux</td>
-                        <td className="p-3.5">Linux x64 (<code>--target=bun-linux-x64</code>)</td>
-                        <td className="p-3.5 font-mono text-muted-foreground">dist/server-linux</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:pure:compile:linux
+                        </td>
+                        <td className="p-3.5">
+                          Linux x64 (<code>--target=bun-linux-x64</code>)
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          dist/server-linux
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:pure:compile:linux_arm</td>
-                        <td className="p-3.5">Linux ARM64 (<code>--target=bun-linux-arm64</code>)</td>
-                        <td className="p-3.5 font-mono text-muted-foreground">dist/server-linux-arm</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:pure:compile:linux_arm
+                        </td>
+                        <td className="p-3.5">
+                          Linux ARM64 (<code>--target=bun-linux-arm64</code>)
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          dist/server-linux-arm
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:pure:compile:mac</td>
-                        <td className="p-3.5">macOS ARM64 (<code>--target=bun-darwin-arm64</code>)</td>
-                        <td className="p-3.5 font-mono text-muted-foreground">dist/server-mac</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:pure:compile:mac
+                        </td>
+                        <td className="p-3.5">
+                          macOS ARM64 (<code>--target=bun-darwin-arm64</code>)
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          dist/server-mac
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:node:pure:compile:win</td>
-                        <td className="p-3.5">Windows x64 (<code>--target=bun-windows-x64</code>)</td>
-                        <td className="p-3.5 font-mono text-muted-foreground">dist/server-win.exe</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:node:pure:compile:win
+                        </td>
+                        <td className="p-3.5">
+                          Windows x64 (<code>--target=bun-windows-x64</code>)
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          dist/server-win.exe
+                        </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
 
                 <div className="space-y-3 mt-5">
-                  <p className="font-semibold text-foreground text-sm">Production Multi-Stage Dockerfile Recipe:</p>
+                  <p className="font-semibold text-foreground text-sm">
+                    Production Multi-Stage Dockerfile Recipe:
+                  </p>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    This production Dockerfile compiles Dinou using <strong>100% Bun</strong> in the builder stage (using a symlink so that Node shebangs in CLI binaries run through Bun without installing Node.js), and produces an ultra-lean Debian Slim runner containing only the standalone binary, the <code>.dinou</code> build folder, and necessary runtime assets (such as Prisma Client and SSL certificates):
+                    Compiles Dinou using <strong>100% Bun</strong> in the
+                    builder stage (<code>bun --bun run</code> executes the{" "}
+                    <code>dinou</code> CLI shebang directly through Bun without
+                    installing Node.js) and copies only the standalone binary
+                    plus <code>.dinou/dist2</code> (SSG/ISR/PPR cache) and{" "}
+                    <code>.dinou/dist3</code> (public static webroot) into a
+                    minimal Debian Slim runner:
                   </p>
                   <CodeBlock
                     language="dockerfile"
@@ -645,34 +1180,22 @@ $env:DINOU_UNVENDORIZED="true"; npm run dev`,
 FROM oven/bun:latest AS builder
 WORKDIR /app
 
-# Symlink so that #!/usr/bin/env node (used by dinou CLI and cross-env) executes through bun
-RUN ln -s /usr/local/bin/bun /usr/local/bin/node
-
-# Install dependencies respecting package-lock.json
-COPY package.json package-lock.json* ./
-COPY prisma ./prisma/
+COPY package.json bun.lock* package-lock.json* ./
 RUN bun install
 
-# Copy application source, generate Prisma Client, and compile standalone binary
 COPY . .
-RUN bunx prisma generate
-RUN bun run build:node:pure:compile
+RUN bun --bun run build:node:pure:compile
 
 # 2. Minimal Production Runner Stage
 FROM debian:bookworm-slim AS runner
 WORKDIR /app
 
-# CA certificates for outgoing HTTPS requests and OpenSSL for database engines
-RUN apt-get update && apt-get install -y ca-certificates openssl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
-# Copy the standalone executable binary and the .dinou runtime artifacts
+# Copy standalone executable and runtime static/SSG directories
 COPY --from=builder /app/dist/server ./server
-COPY --from=builder /app/.dinou ./.dinou
-
-# Copy generated Prisma Client & query engine (if using Prisma ORM)
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/.dinou/dist2 ./.dinou/dist2
+COPY --from=builder /app/.dinou/dist3 ./.dinou/dist3
 
 RUN chmod +x ./server
 
@@ -686,66 +1209,101 @@ CMD ["./server"]`}
               </div>
 
               {/* 5.6 Comparison Matrix */}
-              <div id="node-build-matrix" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">5.6 Node Build Architecture &amp; Execution Matrix</h3>
-                <p>
-                  Summary comparison of all Node.js build strategies supported by Dinou:
-                </p>
+              <div
+                id="node-build-matrix"
+                className="mt-8 space-y-3 scroll-mt-20"
+              >
+                <h3 className="text-lg font-bold">
+                  5.6 Node Build Architecture &amp; Execution Matrix
+                </h3>
                 <div className="not-prose overflow-x-auto rounded-lg border border-border">
                   <table className="w-full text-xs text-left">
                     <thead className="bg-muted text-muted-foreground font-semibold">
                       <tr>
                         <th className="p-3">Command Family</th>
-                        <th className="p-3">Build Script Runner</th>
-                        <th className="p-3">Compilation Phase</th>
+                        <th className="p-3">Build Runner</th>
+                        <th className="p-3">Binary Compiler</th>
                         <th className="p-3">Output Artifact</th>
-                        <th className="p-3">Production Requirements</th>
-                        <th className="p-3">Ideal Use Case</th>
+                        <th className="p-3">Production Host Requirements</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border text-muted-foreground">
                       <tr>
-                        <td className="p-3 font-mono font-semibold text-foreground">build:node</td>
-                        <td className="p-3">Node.js (<code>node</code>)</td>
+                        <td className="p-3 font-mono font-semibold text-foreground">
+                          build:node
+                        </td>
+                        <td className="p-3">
+                          Node.js (<code>node</code>)
+                        </td>
                         <td className="p-3">None (ESM bundle)</td>
                         <td className="p-3 font-mono">.dinou/node/server.mjs</td>
-                        <td className="p-3">Node.js runtime + <code>node_modules</code></td>
-                        <td className="p-3">Standard Node.js hosting, PM2, Docker with full Node runtime.</td>
+                        <td className="p-3">
+                          Node.js v20.6+ (+ <code>.dinou/dist2</code> &amp;{" "}
+                          <code>dist3</code>)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3 font-mono font-semibold text-foreground">build:node:compile</td>
-                        <td className="p-3">Node.js (<code>node</code>)</td>
-                        <td className="p-3 text-purple-600 dark:text-purple-400 font-semibold">Bun Compiler (<code>bun build --compile</code>)</td>
+                        <td className="p-3 font-mono font-semibold text-foreground">
+                          build:node:compile
+                        </td>
+                        <td className="p-3">
+                          Node.js (<code>node</code>)
+                        </td>
+                        <td className="p-3 text-purple-600 dark:text-purple-400 font-semibold">
+                          <code>bun build --compile</code>
+                        </td>
                         <td className="p-3 font-mono">dist/server</td>
-                        <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">Self-contained executable (Zero Node required)</td>
-                        <td className="p-3">CI with Node.js needing single-file binary deployments without Node on production servers.</td>
+                        <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">
+                          Self-contained binary (Zero Node required)
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3 font-mono font-semibold text-foreground">build:node:pure</td>
-                        <td className="p-3 text-purple-600 dark:text-purple-400 font-semibold">Bun (<code>bun</code>)</td>
+                        <td className="p-3 font-mono font-semibold text-foreground">
+                          build:node:pure
+                        </td>
+                        <td className="p-3 text-purple-600 dark:text-purple-400 font-semibold">
+                          Bun (<code>bun</code>)
+                        </td>
                         <td className="p-3">None (ESM bundle)</td>
                         <td className="p-3 font-mono">.dinou/node/server.mjs</td>
-                        <td className="p-3">Node.js or Bun runtime</td>
-                        <td className="p-3">Bun-only CI/CD environments that build for standard Node server targets.</td>
+                        <td className="p-3">Node.js v20.6+ or Bun runtime</td>
                       </tr>
                       <tr>
-                        <td className="p-3 font-mono font-semibold text-foreground">build:node:pure:compile</td>
-                        <td className="p-3 text-purple-600 dark:text-purple-400 font-semibold">Bun (<code>bun</code>)</td>
-                        <td className="p-3 text-purple-600 dark:text-purple-400 font-semibold">Bun Compiler (<code>bun build --compile</code>)</td>
+                        <td className="p-3 font-mono font-semibold text-foreground">
+                          build:node:pure:compile
+                        </td>
+                        <td className="p-3 text-purple-600 dark:text-purple-400 font-semibold">
+                          Bun (<code>bun</code>)
+                        </td>
+                        <td className="p-3 text-purple-600 dark:text-purple-400 font-semibold">
+                          <code>bun build --compile</code>
+                        </td>
                         <td className="p-3 font-mono">dist/server</td>
-                        <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">Self-contained executable (Zero Node &amp; Zero Bun on runner)</td>
-                        <td className="p-3">Ultra-minimal Alpine/Distroless Docker images, bare-metal servers, embedded Linux/IoT.</td>
+                        <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">
+                          Self-contained binary (Zero Node &amp; Zero Bun on
+                          runner)
+                        </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
               </div>
 
-              {/* Cloudflare Scripts */}
-              <div id="cloudflare-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">5.7 Cloudflare Workers &amp; Pages</h3>
+              {/* 5.7 Cloudflare Scripts */}
+              <div
+                id="cloudflare-scripts"
+                className="mt-8 space-y-3 scroll-mt-20"
+              >
+                <h3 className="text-lg font-bold">
+                  5.7 Cloudflare Workers &amp; Pages
+                </h3>
                 <p>
-                  Compiles your application into an edge-native worker bundle:
+                  Compiles your application into a <code>workerd</code>-native
+                  Dual-Bundle worker (<code>.dinou/cloudflare/worker.js</code>)
+                  and synchronizes static assets into{" "}
+                  <code>.dinou/cloudflare/assets/</code> (isolating SSG cache
+                  files inside{" "}
+                  <code>.dinou/cloudflare/assets/__dinou_dist2/</code>):
                 </p>
                 <div className="not-prose overflow-x-auto rounded-lg border border-border">
                   <table className="w-full text-sm text-left">
@@ -758,35 +1316,64 @@ CMD ["./server"]`}
                     </thead>
                     <tbody className="divide-y divide-border bg-card text-xs">
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:cloudflare</td>
-                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">esbuild (Default)</td>
-                        <td className="p-3.5 text-muted-foreground">.dinou/cloudflare/</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:cloudflare
+                        </td>
+                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">
+                          esbuild (Default)
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          .dinou/cloudflare/worker.js
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:cloudflare:esbuild</td>
-                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">esbuild</td>
-                        <td className="p-3.5 text-muted-foreground">.dinou/cloudflare/</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:cloudflare:esbuild
+                        </td>
+                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">
+                          esbuild
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          .dinou/cloudflare/worker.js
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:cloudflare:rollup</td>
-                        <td className="p-3.5 font-semibold text-rose-600 dark:text-rose-400">Rollup</td>
-                        <td className="p-3.5 text-muted-foreground">.dinou/cloudflare/</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:cloudflare:rollup
+                        </td>
+                        <td className="p-3.5 font-semibold text-rose-600 dark:text-rose-400">
+                          Rollup
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          .dinou/cloudflare/worker.js
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:cloudflare:webpack</td>
-                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">Webpack</td>
-                        <td className="p-3.5 text-muted-foreground">.dinou/cloudflare/</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:cloudflare:webpack
+                        </td>
+                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">
+                          Webpack
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          .dinou/cloudflare/worker.js
+                        </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
               </div>
 
-              {/* Deno Scripts */}
-              <div id="deno-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">5.8 Deno &amp; Standalone Compiles</h3>
+              {/* 5.8 Deno Scripts */}
+              <div id="deno-scripts" className="mt-8 space-y-3 scroll-mt-20">
+                <h3 className="text-lg font-bold">
+                  5.8 Deno &amp; Standalone Compiles
+                </h3>
                 <p>
-                  Build for Deno KV runtime, or compile directly into a <strong>self-contained standalone executable binary</strong> with zero system dependencies:
+                  Builds <code>.dinou/deno/main.js</code>, pre-seeds Deno KV (
+                  <code>.dinou/kv.db</code> or remote <code>DENO_KV_URL</code>)
+                  with SSG/ISR/PPR payloads, and optionally cross-compiles a
+                  standalone native binary:
                 </p>
                 <div className="not-prose overflow-x-auto rounded-lg border border-border">
                   <table className="w-full text-sm text-left">
@@ -798,46 +1385,88 @@ CMD ["./server"]`}
                     </thead>
                     <tbody className="divide-y divide-border bg-card text-xs">
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:deno</td>
-                        <td className="p-3.5 text-muted-foreground">Builds Deno bundle with KV storage support. (Also <code>:esbuild</code>, <code>:rollup</code>, <code>:webpack</code>)</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:deno
+                        </td>
+                        <td className="p-3.5 text-muted-foreground">
+                          Builds Deno bundle + seeds KV cache (also{" "}
+                          <code>:esbuild</code>, <code>:rollup</code>,{" "}
+                          <code>:webpack</code>).
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou start:deno</td>
-                        <td className="p-3.5 text-muted-foreground">Runs the compiled Deno server with <code>--unstable-kv</code>.</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou start:deno
+                        </td>
+                        <td className="p-3.5 text-muted-foreground">
+                          Runs the compiled Deno server with{" "}
+                          <code>--unstable-kv</code>.
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:deno:compile</td>
-                        <td className="p-3.5 text-muted-foreground">Produces a standalone binary (<code>dist/deno-server</code>) for your current OS.</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:deno:compile
+                        </td>
+                        <td className="p-3.5 text-muted-foreground">
+                          Produces a standalone binary (
+                          <code>dist/deno-server</code>) for your host OS.
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:deno:compile:linux</td>
-                        <td className="p-3.5 text-muted-foreground">Cross-compiles x86_64 Linux standalone executable.</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:deno:compile:linux
+                        </td>
+                        <td className="p-3.5 text-muted-foreground">
+                          Cross-compiles x86_64 Linux executable (
+                          <code>dist/deno-server-linux</code>).
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:deno:compile:linux_arm</td>
-                        <td className="p-3.5 text-muted-foreground">Cross-compiles ARM64 Linux standalone executable (Raspberry Pi / Graviton).</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:deno:compile:linux_arm
+                        </td>
+                        <td className="p-3.5 text-muted-foreground">
+                          Cross-compiles ARM64 Linux executable (
+                          <code>dist/deno-server-linux-arm</code>).
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:deno:compile:mac</td>
-                        <td className="p-3.5 text-muted-foreground">Cross-compiles macOS standalone binary (Apple Silicon / Intel).</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:deno:compile:mac
+                        </td>
+                        <td className="p-3.5 text-muted-foreground">
+                          Cross-compiles Apple Silicon macOS binary (
+                          <code>dist/deno-server-mac</code>).
+                        </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-mono text-foreground font-semibold">dinou build:deno:compile:win</td>
-                        <td className="p-3.5 text-muted-foreground">Cross-compiles Windows standalone executable (<code>dist/deno-server-win.exe</code>).</td>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:deno:compile:win
+                        </td>
+                        <td className="p-3.5 text-muted-foreground">
+                          Cross-compiles Windows x64 executable (
+                          <code>dist/deno-server-win.exe</code>).
+                        </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Every compile command supports bundler suffixes (e.g. <code>dinou build:deno:compile:linux:rollup</code>).
+                  Every compile command supports bundler suffixes (e.g.{" "}
+                  <code>dinou build:deno:compile:linux:rollup</code>).
                 </p>
               </div>
 
-              {/* Bun Scripts */}
-              <div id="bun-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">5.9 Bun Runtime &amp; Standalone Compiles</h3>
+              {/* 5.9 Bun Scripts */}
+              <div id="bun-scripts" className="mt-8 space-y-3 scroll-mt-20">
+                <h3 className="text-lg font-bold">
+                  5.9 Bun Runtime &amp; Standalone Compiles
+                </h3>
                 <p>
-                  Target the ultra-fast Bun JavaScript runtime with standard or pure native modes:
+                  Target Bun&apos;s native <code>Bun.serve</code> + zero-copy{" "}
+                  <code>Bun.file</code> runtime (
+                  <code>.dinou/bun/server.js</code>) with standard or 100% Pure
+                  Bun build runners:
                 </p>
                 <div className="not-prose overflow-x-auto rounded-lg border border-border">
                   <table className="w-full text-sm text-left">
@@ -845,86 +1474,131 @@ CMD ["./server"]`}
                       <tr>
                         <th className="p-3.5">Category</th>
                         <th className="p-3.5">Commands</th>
-                        <th className="p-3.5">Build Script Runner</th>
+                        <th className="p-3.5">Build Runner</th>
                         <th className="p-3.5">Output &amp; Behavior</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border bg-card text-xs">
                       <tr>
-                        <td className="p-3.5 font-semibold text-foreground">Standard Bun</td>
+                        <td className="p-3.5 font-semibold text-foreground">
+                          Standard Bun
+                        </td>
                         <td className="p-3.5 font-mono text-foreground">
-                          dinou build:bun<br />
+                          dinou build:bun
+                          <br />
                           dinou start:bun
                         </td>
-                        <td className="p-3.5 font-semibold text-muted-foreground">Node.js</td>
+                        <td className="p-3.5 font-semibold text-muted-foreground">
+                          Node.js
+                        </td>
                         <td className="p-3.5 text-muted-foreground leading-relaxed">
-                          Uses Node.js to execute the build scripts, generating the Bun adapter bundle at <code>.dinou/bun/server.js</code>. Run with <code>dinou start:bun</code>.
+                          Executes build scripts under Node.js and outputs{" "}
+                          <code>.dinou/bun/server.js</code>. Supports{" "}
+                          <code>:esbuild</code>, <code>:rollup</code>, and{" "}
+                          <code>:webpack</code>.
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-semibold text-foreground">Standard Bun Compile</td>
+                        <td className="p-3.5 font-semibold text-foreground">
+                          Standard Bun Compile
+                        </td>
                         <td className="p-3.5 font-mono text-foreground">
                           dinou build:bun:compile
                         </td>
-                        <td className="p-3.5 font-semibold text-muted-foreground">Node.js + Bun Compiler</td>
+                        <td className="p-3.5 font-semibold text-muted-foreground">
+                          Node.js + Bun Compiler
+                        </td>
                         <td className="p-3.5 text-muted-foreground leading-relaxed">
-                          Uses Node.js for the build phase, then invokes <code>bun build --compile</code> to produce a standalone executable binary in <code>dist/server</code>. Supports cross-compilation (<code>:linux</code>, <code>:linux_arm</code>, <code>:mac</code>, <code>:win</code>).
+                          Builds with Node.js, then runs{" "}
+                          <code>bun build --compile</code> into{" "}
+                          <code>dist/server</code> (supports{" "}
+                          <code>:linux</code>, <code>:linux_arm</code>,{" "}
+                          <code>:mac</code>, <code>:win</code>).
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-semibold text-foreground">Pure Bun Mode</td>
+                        <td className="p-3.5 font-semibold text-foreground">
+                          Pure Bun Mode
+                        </td>
                         <td className="p-3.5 font-mono text-foreground">
                           dinou build:bun:pure
                         </td>
-                        <td className="p-3.5 font-semibold text-purple-600 dark:text-purple-400">100% Bun</td>
+                        <td className="p-3.5 font-semibold text-purple-600 dark:text-purple-400">
+                          100% Bun
+                        </td>
                         <td className="p-3.5 text-muted-foreground leading-relaxed">
-                          Runs the entire build process using Bun without requiring Node.js in the build environment. Generates the Bun runtime bundle at <code>.dinou/bun/server.js</code>.
+                          Runs <code>esbuild</code>, <code>rollup</code>, or{" "}
+                          <code>webpack</code> natively under Bun with zero
+                          Node.js required, outputting{" "}
+                          <code>.dinou/bun/server.js</code>.
                         </td>
                       </tr>
                       <tr>
-                        <td className="p-3.5 font-semibold text-foreground">Pure Bun Compile</td>
+                        <td className="p-3.5 font-semibold text-foreground">
+                          Pure Bun Compile
+                        </td>
                         <td className="p-3.5 font-mono text-foreground">
                           dinou build:bun:pure:compile
                         </td>
-                        <td className="p-3.5 font-semibold text-purple-600 dark:text-purple-400">100% Bun (Build &amp; Compile)</td>
+                        <td className="p-3.5 font-semibold text-purple-600 dark:text-purple-400">
+                          100% Bun (Build &amp; Compile)
+                        </td>
                         <td className="p-3.5 text-muted-foreground leading-relaxed">
-                          100% Bun pipeline from start to finish. Bun executes the build scripts and Bun compiles the standalone native binary in <code>dist/server</code>. Zero Node.js required at build-time or runtime. Supports cross-compilation (<code>:linux</code>, <code>:linux_arm</code>, <code>:mac</code>, <code>:win</code>).
+                          100% Bun pipeline end-to-end into a standalone native
+                          binary in <code>dist/server</code> (supports{" "}
+                          <code>:linux</code>, <code>:linux_arm</code>,{" "}
+                          <code>:mac</code>, <code>:win</code>).
                         </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  <strong>Standard vs. Pure in Bun:</strong> Standard Bun commands (<code>build:bun</code>) require Node.js installed in your build machine to execute the build scripts. In contrast, Pure Bun commands (<code>build:bun:pure</code>) run the entire build process natively with Bun—ideal for Bun-only CI/CD environments or Docker images (<code>FROM oven/bun</code>) where Node.js is not present.
-                </p>
               </div>
 
-              {/* Static Export Scripts */}
-              <div id="static-export-scripts" className="mt-8 space-y-3">
-                <h3 className="text-lg font-bold">5.10 Static HTML Export (dinou export-static)</h3>
+              {/* 5.10 Static Export & Utility Scripts */}
+              <div
+                id="static-export-scripts"
+                className="mt-8 space-y-3 scroll-mt-20"
+              >
+                <h3 className="text-lg font-bold">
+                  5.10 Static HTML Export &amp; Framework Utilities
+                </h3>
                 <p>
-                  Crawls and generates a 100% static HTML/CSS/JS export in <code>out/</code> ready to host on Surge.sh, GitHub Pages, Cloudflare Pages, AWS S3, Netlify, or Apache/Nginx:
+                  Generates a 100% serverless static export in <code>out/</code>{" "}
+                  (combining <code>.dinou/dist3</code> public assets with
+                  allowlisted <code>index.html</code>, <code>page.rsc</code>,
+                  and <code>layout.rsc</code> from <code>.dinou/dist2</code> so
+                  both React 19 hydration and <code>&lt;Link&gt;</code> SPA
+                  navigation work on any static host), plus type generation and{" "}
+                  <Link href="/docs/eject">eject</Link> helpers:
                 </p>
                 <CodeBlock
                   language="bash"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-{`# Static export with default bundler (esbuild)
+{`# Static export into out/ (default esbuild, or explicit bundler)
 dinou export-static
-
-# Static export with specific bundlers
 dinou export-static:esbuild
 dinou export-static:rollup
-dinou export-static:webpack`}
+dinou export-static:webpack
+
+# Generate .dinou/types/routes.d.ts and contextual "./dinou" modules
+dinou typegen
+
+# Eject the full Dinou toolchain into ./dinou (and optionally rebuild vendors)
+dinou eject
+dinou build:vendors`}
                 </CodeBlock>
               </div>
             </section>
 
-            {/* Recommended package.json Setup */}
-            <section id="package-json-setup" className="mt-12">
+            {/* 6. Recommended package.json Setup */}
+            <section id="package-json-setup" className="mt-12 scroll-mt-20">
               <h2>6. Recommended package.json Setup</h2>
               <p>
-                Copy and paste the complete <code>&quot;scripts&quot;</code> block directly into your project&apos;s <code>package.json</code>:
+                Copy and paste the complete <code>&quot;scripts&quot;</code>{" "}
+                block directly into your project&apos;s{" "}
+                <code>package.json</code>:
               </p>
               <CodeBlock
                 language="json"
@@ -1076,53 +1750,79 @@ dinou export-static:webpack`}
   "export-static:esbuild": "dinou export-static:esbuild",
   "export-static:rollup": "dinou export-static:rollup",
   "export-static:webpack": "dinou export-static:webpack",
+  "typegen": "dinou typegen",
   "eject": "dinou eject"
 }`}
               </CodeBlock>
             </section>
 
-            {/* Bundler Selection Guide */}
-            <section id="bundler-selection-guide" className="mt-12">
+            {/* 7. Bundler Selection Guide */}
+            <section
+              id="bundler-selection-guide"
+              className="mt-12 scroll-mt-20"
+            >
               <h2>7. Which Bundler &amp; Target Should You Choose?</h2>
 
               <div className="grid gap-4 sm:grid-cols-2 not-prose my-6">
                 <div className="p-4 rounded-lg border bg-card space-y-2">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
                     <Zap className="h-4 w-4 text-amber-500" />
-                    <span>Local Development &rarr; esbuild</span>
+                    <span>Daily Development &amp; Fast CI &rarr; esbuild</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Always use <code>dinou dev</code> (esbuild) for daily work. Its sub-millisecond compilation and memory caching provide the fastest iteration feedback.
+                    Use <code>dinou dev</code> and <code>dinou build</code>{" "}
+                    (esbuild) by default. Sub-second compilation, in-memory VFS
+                    caching, and full production{" "}
+                    <Link href="/docs/compiler" className="underline">
+                      React Compiler
+                    </Link>{" "}
+                    optimization deliver the fastest workflow.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-lg border bg-card space-y-2">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
                     <Cloud className="h-4 w-4 text-rose-500" />
-                    <span>Edge Deployments &rarr; Rollup</span>
+                    <span>Smallest Client Bundles &amp; Edge &rarr; Rollup</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    For Cloudflare Workers or serverless edge targets where cold start and payload size matter most, <code>dinou build:cloudflare:rollup</code> yields optimal tree-shaking.
+                    For{" "}
+                    <Link href="/docs/deployment" className="underline">
+                      Cloudflare Workers
+                    </Link>{" "}
+                    or bandwidth-sensitive apps where dead-code elimination
+                    matters most, <code>dinou build:cloudflare:rollup</code> or{" "}
+                    <code>dinou build:node:rollup</code> produces surgical ESM
+                    chunks.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-lg border bg-card space-y-2">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
                     <Boxes className="h-4 w-4 text-emerald-500" />
-                    <span>Enterprise &amp; React Compiler &rarr; Webpack</span>
+                    <span>Complex Legacy npm Interop &rarr; Webpack</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    If testing React Compiler memoization in dev or migrating enterprise code with non-standard CommonJS modules, <code>dinou dev:webpack</code> is your best choice.
+                    When integrating enterprise libraries with complex CommonJS
+                    patterns or custom module resolution,{" "}
+                    <code>dinou dev:webpack</code> and{" "}
+                    <code>dinou build:node:webpack</code> provide universal
+                    compatibility.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-lg border bg-card space-y-2">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
-                    <Terminal className="h-4 w-4 text-emerald-500" />
-                    <span>Node Binaries &amp; Minimal Containers &rarr; Bun Compile</span>
+                    <Terminal className="h-4 w-4 text-purple-500" />
+                    <span>
+                      Distroless Containers &amp; Bare-Metal &rarr; Pure Compile
+                    </span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    To deploy full Node.js apps (with WebSockets and middlewares) to bare-metal servers or minimal distroless Docker containers without Node installed, use <code>dinou build:node:pure:compile</code> or <code>dinou build:bun:compile</code> to produce a single binary file.
+                    To ship full Node.js apps (with WebSockets and{" "}
+                    <code>configureServer</code> middlewares) into minimal
+                    containers with zero Node.js installed, use{" "}
+                    <code>dinou build:node:pure:compile</code>.
                   </p>
                 </div>
               </div>
