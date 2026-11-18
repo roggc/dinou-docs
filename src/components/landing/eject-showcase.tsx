@@ -39,7 +39,7 @@ const coreEjectedModules = [
   {
     name: "compiled/",
     role: "Dual-Mode ESM Vendors",
-    desc: "36 pre-bundled toolchain packages for instant cold starts (or bypass via -u).",
+    desc: "31 pre-bundled toolchain packages for instant cold starts (or bypass via -u).",
   },
 ];
 
@@ -157,10 +157,10 @@ export function EjectShowcase() {
                   <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                      Zero Risk of Abandonment
+                      Zero Lock-In &amp; 1-Command Uneject
                     </h4>
                     <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
-                      You are never at the mercy of closed cloud vendors or breaking meta-framework changes. Your codebase is 100% self-contained.
+                      Ejecting is never a one-way door. Inspect or customize your stack freely, and run <code className="font-mono text-xs px-1 py-0.5 rounded bg-slate-200/70 dark:bg-slate-800">npm run uneject</code> anytime to return cleanly to <code className="font-mono text-xs px-1 py-0.5 rounded bg-slate-200/70 dark:bg-slate-800">node_modules/dinou</code>.
                     </p>
                   </div>
                 </div>

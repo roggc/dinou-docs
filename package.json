@@ -152,7 +152,8 @@
     "export-static:rollup": "node dinou/cli.js export-static:rollup",
     "export-static:webpack": "node dinou/cli.js export-static:webpack",
     "typegen": "node dinou/cli.js typegen",
-    "build:vendors": "node dinou/cli.js build:vendors"
+    "build:vendors": "node dinou/cli.js build:vendors",
+    "uneject": "node dinou/cli.js uneject"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",
