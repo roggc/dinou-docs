@@ -286,6 +286,111 @@ export function rewritePackageJsonForEject(pkg) {
 }
 
 /**
+ * Core implementation of `dinou eject`, parameterized by `sourceDinouDir` so:
+ * 1. Upstream `<pkgRoot>/eject.js` is a thin wrapper passing `path.resolve(__dirname, "dinou")`.
+ * 2. Ejected test workspaces (such as `dinou-e2e`, which contain `./dinou` without a root `eject.js`)
+ *    can test 100% of the eject implementation directly from `./dinou/core/uneject.js`.
+ *
+ * @param {object} [options]
+ * @param {string} options.sourceDinouDir Path to the source `dinou/` framework directory to copy from.
+ * @param {string} [options.projectRoot=process.cwd()] Target project root directory.
+ * @param {boolean} [options.force=false] Overwrite an existing `./dinou` directory.
+ * @param {boolean} [options.skipInstall=false] Skip running `<pm> install` after updating `package.json`.
+ */
+export function runEject(options = {}) {
+  const projectRoot = path.resolve(options.projectRoot || process.cwd());
+  const sourceDinouDir = path.resolve(
+    options.sourceDinouDir || path.resolve(projectRoot, "node_modules", "dinou", "dinou")
+  );
+  const targetDinouDir = path.resolve(projectRoot, "dinou");
+  const pkgPath = path.resolve(projectRoot, "package.json");
+  const force = Boolean(options.force);
+  const skipInstall =
+    Boolean(options.skipInstall) || process.env.DINOU_SKIP_INSTALL === "true";
+
+  if (!fs.existsSync(sourceDinouDir)) {
+    throw new Error(
+      `[Dinou Eject] Source framework directory not found at ${sourceDinouDir}`
+    );
+  }
+
+  if (!fs.existsSync(pkgPath)) {
+    throw new Error(
+      `[Dinou Eject] package.json not found in project root (${projectRoot})`
+    );
+  }
+
+  const normSource = sourceDinouDir.replace(/\\/g, "/").toLowerCase();
+  const normTarget = targetDinouDir.replace(/\\/g, "/").toLowerCase();
+  if (normSource === normTarget) {
+    console.log(
+      "ℹ️  [Dinou Eject] Project is already running from ./dinou. Skipping to protect local customizations."
+    );
+    return { skipped: true };
+  }
+
+  if (fs.existsSync(targetDinouDir) && !force) {
+    console.log(
+      'ℹ️  [Dinou Eject] Directory ./dinou already exists. Skipping to prevent overwriting local customizations (pass --force to overwrite, or run "npm run uneject" first).'
+    );
+    return { skipped: true };
+  }
+
+  console.log("🚀 Starting Dinou eject process...");
+
+  if (fs.existsSync(targetDinouDir) && force) {
+    fs.rmSync(targetDinouDir, { recursive: true, force: true });
+  }
+
+  fs.cpSync(sourceDinouDir, targetDinouDir, {
+    recursive: true,
+    filter: (src) => {
+      const base = path.basename(src);
+      return base !== "node_modules" && base !== ".DS_Store";
+    },
+  });
+
+  const cliDest = path.join(targetDinouDir, "cli.js");
+  if (fs.existsSync(cliDest)) {
+    try {
+      fs.chmodSync(cliDest, 0o755);
+    } catch {}
+  }
+  console.log("📁 Copied Dinou framework source into ./dinou");
+
+  const originalPkgContent = fs.readFileSync(pkgPath, "utf8");
+  const pkg = JSON.parse(originalPkgContent);
+  rewritePackageJsonForEject(pkg);
+
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf8");
+  console.log(
+    '✅ Updated package.json scripts (preserved custom scripts + added "build:vendors" and "uneject")'
+  );
+
+  if (!skipInstall) {
+    const pm = detectPackageManager(projectRoot);
+    console.log(`📦 Package manager detected: ${pm}`);
+    console.log(`🔄 Executing '${pm} install' to link ./dinou dependencies...`);
+
+    const res = runPackageManager(pm, ["install"], projectRoot);
+    if (res.error || res.status !== 0) {
+      const msg = res.error
+        ? res.error.message
+        : `exited with code ${res.status ?? 1}`;
+      console.warn(
+        `⚠️  [Dinou Eject] '${pm} install' did not complete cleanly (${msg}). Run '${pm} install' manually to finish linking ./dinou.`
+      );
+      return { skipped: false, installFailed: true };
+    }
+  }
+
+  console.log(
+    '🎉 Eject completed successfully! Edit ./dinou freely, or run "npm run uneject" anytime to revert.'
+  );
+  return { skipped: false, installFailed: false };
+}
+
+/**
  * Rewrites `package.json` in place for Uneject Mode (reverting back to `node_modules/dinou`).
  */
 export function rewritePackageJsonForUneject(pkg, options = {}) {

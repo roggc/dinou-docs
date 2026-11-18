@@ -42,6 +42,9 @@ The user periodically syncs upstream `dinou` fixes, tests `dinou-docs` in non-ej
    - Check if `c:\Users\roggc\dev\my-dinou-apps\dinou-docs\dinou` exists.
    - **If `./dinou/` exists (Ejected Mode)**: Read and edit framework files directly inside `./dinou/`. (`package.json` points `"dinou": "file:./dinou"` and scripts invoke `node dinou/cli.js ...`).
    - **If `./dinou/` does NOT exist (Library Mode)**: Read framework files from `./node_modules/dinou/` (note: check whether files live at `node_modules/dinou/` or `node_modules/dinou/dinou/`). Never silently edit `node_modules/` as a permanent fix—if a `dinou` bug fix is required while in library mode, inform the user or run `npx dinou eject` (with user alignment) so fixes are developed cleanly in `./dinou/` and documented in an `x-*.md` handoff file.
+2. **Upstream Sync & E2E Verification Pipeline (`dinou-docs` -> `dinou-e2e` -> `dinou`)**:
+   - After fixes are developed in `dinou-docs/dinou/` and documented in `x-<topic>-fixes.md`, the user copies ONLY the `./dinou/` folder into `dinou-e2e/dinou/` (where Dinou ALSO runs in ejected mode without root package files like `<pkgRoot>/eject.js`), runs all unit/Playwright tests and GitHub Actions in `dinou-e2e`, and once green, copies `dinou-e2e/dinou/` into the upstream `dinou` repository.
+   - Therefore, **all test suites in `x-<topic>-fixes.md` must resolve `./dinou/` first** (`path.resolve(process.cwd(), "dinou")`, with fallback to `node_modules/dinou/dinou`) and never depend on files outside `./dinou/` existing at the root of `dinou-e2e`.
 
 ---
 

@@ -26,120 +26,23 @@ During the deep architectural audit of `/docs/eject` (`src/docs/eject/page.tsx`)
 
 ## 2. File-by-File Upstream Changes
 
-### 2.1 `<pkgRoot>/eject.js` (Complete Replacement — Remains at Upstream Package Root Outside `dinou/`)
+### 2.1 `<pkgRoot>/eject.js` (Thin Wrapper at Upstream `dinou` Repo Root — Not Needed in `dinou-e2e`)
+
+> **Workflow Note (`dinou-docs` -> `dinou-e2e` -> `dinou`):**
+> All `eject` and `uneject` logic (`runEject`, `uneject`, `rewritePackageJsonForEject`, `rewritePackageJsonForUneject`, `promptConfirmation`) lives inside `dinou/core/uneject.js` so it travels automatically whenever `./dinou/` is copied to `dinou-e2e` and later to `dinou`. `dinou-e2e` does **not** need a root `eject.js` file — only apply this 13-line `<pkgRoot>/eject.js` wrapper in the final upstream `dinou` repository root.
 
 ```js
-import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  detectPackageManager,
-  runPackageManager,
-  rewritePackageJsonForEject,
-} from "./dinou/core/uneject.js";
+import { runEject } from "./dinou/core/uneject.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-/**
- * Copies the Dinou runtime/compiler directory (`<pkgRoot>/dinou`) into `<projectRoot>/dinou`,
- * selectively rewrites existing Dinou scripts in `<projectRoot>/package.json`, and links
- * `"dinou": "file:./dinou"` via the detected package manager.
- *
- * @param {object} [options]
- * @param {boolean} [options.force=false] Overwrite an existing `./dinou` directory.
- * @param {boolean} [options.skipInstall=false] Skip running `<pm> install` after updating `package.json`.
- * @param {string} [options.projectRoot=process.cwd()] Target project root directory.
- */
 export function eject(options = {}) {
-  const projectRoot = path.resolve(options.projectRoot || process.cwd());
-  const force = Boolean(options.force);
-  const skipInstall =
-    Boolean(options.skipInstall) || process.env.DINOU_SKIP_INSTALL === "true";
-
-  const sourceDinouDir = path.resolve(__dirname, "dinou");
-  const targetDinouDir = path.resolve(projectRoot, "dinou");
-  const pkgPath = path.resolve(projectRoot, "package.json");
-
-  if (!fs.existsSync(sourceDinouDir)) {
-    throw new Error(
-      `[Dinou Eject] Source framework directory not found at ${sourceDinouDir}`
-    );
-  }
-
-  if (!fs.existsSync(pkgPath)) {
-    throw new Error(
-      `[Dinou Eject] package.json not found in project root (${projectRoot})`
-    );
-  }
-
-  const normSource = sourceDinouDir.replace(/\\/g, "/").toLowerCase();
-  const normTarget = targetDinouDir.replace(/\\/g, "/").toLowerCase();
-  if (normSource === normTarget) {
-    console.log(
-      'ℹ️  [Dinou Eject] Project is already running from ./dinou. Skipping to protect local customizations.'
-    );
-    return;
-  }
-
-  if (fs.existsSync(targetDinouDir) && !force) {
-    console.log(
-      'ℹ️  [Dinou Eject] Directory ./dinou already exists. Skipping to prevent overwriting local customizations (pass --force to overwrite, or run "npm run uneject" first).'
-    );
-    return;
-  }
-
-  console.log("🚀 Starting Dinou eject process...");
-
-  if (fs.existsSync(targetDinouDir) && force) {
-    fs.rmSync(targetDinouDir, { recursive: true, force: true });
-  }
-
-  fs.cpSync(sourceDinouDir, targetDinouDir, {
-    recursive: true,
-    filter: (src) => {
-      const base = path.basename(src);
-      return base !== "node_modules" && base !== ".DS_Store";
-    },
+  return runEject({
+    ...options,
+    sourceDinouDir: path.resolve(__dirname, "dinou"),
   });
-
-  const cliDest = path.join(targetDinouDir, "cli.js");
-  if (fs.existsSync(cliDest)) {
-    try {
-      fs.chmodSync(cliDest, 0o755);
-    } catch {}
-  }
-  console.log("📁 Copied Dinou framework source into ./dinou");
-
-  const originalPkgContent = fs.readFileSync(pkgPath, "utf8");
-  const pkg = JSON.parse(originalPkgContent);
-  rewritePackageJsonForEject(pkg);
-
-  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf8");
-  console.log(
-    '✅ Updated package.json scripts (preserved custom scripts + added "build:vendors" and "uneject")'
-  );
-
-  if (!skipInstall) {
-    const pm = detectPackageManager(projectRoot);
-    console.log(`📦 Package manager detected: ${pm}`);
-    console.log(`🔄 Executing '${pm} install' to link ./dinou dependencies...`);
-
-    const res = runPackageManager(pm, ["install"], projectRoot);
-    if (res.error || res.status !== 0) {
-      const msg = res.error
-        ? res.error.message
-        : `exited with code ${res.status ?? 1}`;
-      console.warn(
-        `⚠️  [Dinou Eject] '${pm} install' did not complete cleanly (${msg}). Run '${pm} install' manually to finish linking ./dinou.`
-      );
-      return;
-    }
-  }
-
-  console.log(
-    '🎉 Eject completed successfully! Edit ./dinou freely, or run "npm run uneject" anytime to revert.'
-  );
 }
 
 export default eject;
@@ -435,6 +338,106 @@ export function rewritePackageJsonForEject(pkg) {
   pkg.dependencies.dinou = "file:./dinou";
 
   return pkg;
+}
+
+/**
+ * Core implementation of `dinou eject`, parameterized by `sourceDinouDir` so:
+ * 1. Upstream `<pkgRoot>/eject.js` is a thin wrapper passing `path.resolve(__dirname, "dinou")`.
+ * 2. Ejected test workspaces (such as `dinou-e2e`, which contain `./dinou` without a root `eject.js`)
+ *    can test 100% of the eject implementation directly from `./dinou/core/uneject.js`.
+ */
+export function runEject(options = {}) {
+  const projectRoot = path.resolve(options.projectRoot || process.cwd());
+  const sourceDinouDir = path.resolve(
+    options.sourceDinouDir ||
+      path.resolve(projectRoot, "node_modules", "dinou", "dinou")
+  );
+  const targetDinouDir = path.resolve(projectRoot, "dinou");
+  const pkgPath = path.resolve(projectRoot, "package.json");
+  const force = Boolean(options.force);
+  const skipInstall =
+    Boolean(options.skipInstall) || process.env.DINOU_SKIP_INSTALL === "true";
+
+  if (!fs.existsSync(sourceDinouDir)) {
+    throw new Error(
+      `[Dinou Eject] Source framework directory not found at ${sourceDinouDir}`
+    );
+  }
+
+  if (!fs.existsSync(pkgPath)) {
+    throw new Error(
+      `[Dinou Eject] package.json not found in project root (${projectRoot})`
+    );
+  }
+
+  const normSource = sourceDinouDir.replace(/\\/g, "/").toLowerCase();
+  const normTarget = targetDinouDir.replace(/\\/g, "/").toLowerCase();
+  if (normSource === normTarget) {
+    console.log(
+      "ℹ️  [Dinou Eject] Project is already running from ./dinou. Skipping to protect local customizations."
+    );
+    return { skipped: true };
+  }
+
+  if (fs.existsSync(targetDinouDir) && !force) {
+    console.log(
+      'ℹ️  [Dinou Eject] Directory ./dinou already exists. Skipping to prevent overwriting local customizations (pass --force to overwrite, or run "npm run uneject" first).'
+    );
+    return { skipped: true };
+  }
+
+  console.log("🚀 Starting Dinou eject process...");
+
+  if (fs.existsSync(targetDinouDir) && force) {
+    fs.rmSync(targetDinouDir, { recursive: true, force: true });
+  }
+
+  fs.cpSync(sourceDinouDir, targetDinouDir, {
+    recursive: true,
+    filter: (src) => {
+      const base = path.basename(src);
+      return base !== "node_modules" && base !== ".DS_Store";
+    },
+  });
+
+  const cliDest = path.join(targetDinouDir, "cli.js");
+  if (fs.existsSync(cliDest)) {
+    try {
+      fs.chmodSync(cliDest, 0o755);
+    } catch {}
+  }
+  console.log("📁 Copied Dinou framework source into ./dinou");
+
+  const originalPkgContent = fs.readFileSync(pkgPath, "utf8");
+  const pkg = JSON.parse(originalPkgContent);
+  rewritePackageJsonForEject(pkg);
+
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf8");
+  console.log(
+    '✅ Updated package.json scripts (preserved custom scripts + added "build:vendors" and "uneject")'
+  );
+
+  if (!skipInstall) {
+    const pm = detectPackageManager(projectRoot);
+    console.log(`📦 Package manager detected: ${pm}`);
+    console.log(`🔄 Executing '${pm} install' to link ./dinou dependencies...`);
+
+    const res = runPackageManager(pm, ["install"], projectRoot);
+    if (res.error || res.status !== 0) {
+      const msg = res.error
+        ? res.error.message
+        : `exited with code ${res.status ?? 1}`;
+      console.warn(
+        `⚠️  [Dinou Eject] '${pm} install' did not complete cleanly (${msg}). Run '${pm} install' manually to finish linking ./dinou.`
+      );
+      return { skipped: false, installFailed: true };
+    }
+  }
+
+  console.log(
+    '🎉 Eject completed successfully! Edit ./dinou freely, or run "npm run uneject" anytime to revert.'
+  );
+  return { skipped: false, installFailed: false };
 }
 
 /**
@@ -1265,21 +1268,60 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { eject } from "../../eject.js";
-import {
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+function resolveSourceDinouDir() {
+  const candidates = [
+    path.resolve(process.cwd(), "dinou"),
+    path.resolve(__dirname, "../../dinou"),
+    path.resolve(process.cwd(), "node_modules/dinou/dinou"),
+    path.resolve(__dirname, "../../node_modules/dinou/dinou"),
+  ];
+  for (const dinouDir of candidates) {
+    if (fs.existsSync(path.join(dinouDir, "cli.js"))) {
+      return dinouDir;
+    }
+  }
+  throw new Error(
+    "Unable to locate Dinou source directory containing cli.js (checked ./dinou and node_modules/dinou/dinou)."
+  );
+}
+
+const SOURCE_DINOU_DIR = resolveSourceDinouDir();
+
+const {
   DINOU_CLI_COMMANDS,
   detectPackageManager,
   rewritePackageJsonForEject,
   rewritePackageJsonForUneject,
+  runEject,
   uneject,
-} from "../../dinou/core/uneject.js";
-import { resolveEjectedDinouSpecifier } from "../../dinou/core/resolve-contextual-dinou.js";
+} = await import(
+  pathToFileURL(path.join(SOURCE_DINOU_DIR, "core/uneject.js")).href
+);
+const { resolveEjectedDinouSpecifier } = await import(
+  pathToFileURL(
+    path.join(SOURCE_DINOU_DIR, "core/resolve-contextual-dinou.js")
+  ).href
+);
+
+const EJECT_WRAPPER_SOURCE = `import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { runEject } from "./dinou/core/uneject.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(__dirname, "../..");
-const SOURCE_DINOU_DIR = path.join(REPO_ROOT, "dinou");
+
+export function eject(options = {}) {
+  return runEject({
+    ...options,
+    sourceDinouDir: path.resolve(__dirname, "dinou"),
+  });
+}
+
+export default eject;
+`;
 
 const createdTmpDirs = [];
 
@@ -1441,8 +1483,24 @@ test("Full eject -> already-ejected guard -> interactive (y/N) prompt -> transac
     "utf8"
   );
 
-  // 1. Eject with skipInstall
-  eject({ projectRoot: projectDir, skipInstall: true });
+  // 1. Build a simulated installed package (<simPkg>/eject.js + <simPkg>/dinou)
+  //    so this test exercises the real `cli.js eject` -> `../eject.js` -> `runEject` flow
+  //    even when running inside an ejected workspace like `dinou-e2e` (which has no root eject.js).
+  const simPkgDir = createTempDir("dinou-sim-pkg-");
+  fs.writeFileSync(
+    path.join(simPkgDir, "package.json"),
+    JSON.stringify({ name: "dinou", version: "9.4.0", type: "module" }, null, 2),
+    "utf8"
+  );
+  fs.writeFileSync(path.join(simPkgDir, "eject.js"), EJECT_WRAPPER_SOURCE, "utf8");
+  fs.cpSync(SOURCE_DINOU_DIR, path.join(simPkgDir, "dinou"), { recursive: true });
+
+  const firstEject = spawnSync(
+    process.execPath,
+    [path.join(simPkgDir, "dinou", "cli.js"), "eject", "--skip-install"],
+    { cwd: projectDir, encoding: "utf8" }
+  );
+  assert.equal(firstEject.status, 0, firstEject.stderr);
   const ejectedDir = path.join(projectDir, "dinou");
   assert.equal(fs.existsSync(path.join(ejectedDir, "cli.js")), true);
 
@@ -1558,7 +1616,42 @@ import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(__dirname, "../..");
+const WORKSPACE_ROOT = path.resolve(__dirname, "../..");
+
+function resolveSourceDinouDir(): string {
+  const candidates = [
+    path.resolve(process.cwd(), "dinou"),
+    path.resolve(WORKSPACE_ROOT, "dinou"),
+    path.resolve(process.cwd(), "node_modules/dinou/dinou"),
+    path.resolve(WORKSPACE_ROOT, "node_modules/dinou/dinou"),
+  ];
+  for (const dinouDir of candidates) {
+    if (fs.existsSync(path.join(dinouDir, "cli.js"))) {
+      return dinouDir;
+    }
+  }
+  throw new Error(
+    "Unable to locate Dinou source directory containing cli.js (checked ./dinou and node_modules/dinou/dinou)."
+  );
+}
+
+const SOURCE_DINOU_DIR = resolveSourceDinouDir();
+
+const EJECT_WRAPPER_SOURCE = `import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { runEject } from "./dinou/core/uneject.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export function eject(options = {}) {
+  return runEject({
+    ...options,
+    sourceDinouDir: path.resolve(__dirname, "dinou"),
+  });
+}
+
+export default eject;
+`;
 
 function getFreePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -1589,7 +1682,7 @@ async function waitForHttpReady(url: string, timeoutMs = 20000): Promise<void> {
 }
 
 test.describe("Dinou Eject & Uneject E2E Sovereignty Flow", () => {
-  const fixtureRoot = path.join(REPO_ROOT, ".dinou-e2e-eject-fixture");
+  const fixtureRoot = path.join(WORKSPACE_ROOT, ".dinou-e2e-eject-fixture");
   let serverProc: ChildProcess | null = null;
 
   test.afterEach(() => {
@@ -1632,13 +1725,26 @@ test.describe("Dinou Eject & Uneject E2E Sovereignty Flow", () => {
       "utf8"
     );
 
-    // 1. Eject Dinou into fixtureRoot/dinou via CLI (--skip-install since ancestor node_modules provides deps)
+    // 1. Stage a simulated npm package layout (<simPkg>/eject.js + <simPkg>/dinou)
+    //    inside fixtureRoot/.sim-pkg so `cli.js eject` works identically in ejected `dinou-e2e`
+    //    (where no root eject.js exists) and in non-ejected repos.
+    const simPkgDir = path.join(fixtureRoot, ".sim-dinou-pkg");
+    fs.mkdirSync(simPkgDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(simPkgDir, "package.json"),
+      JSON.stringify({ name: "dinou", version: "9.4.0", type: "module" }, null, 2),
+      "utf8"
+    );
+    fs.writeFileSync(path.join(simPkgDir, "eject.js"), EJECT_WRAPPER_SOURCE, "utf8");
+    fs.cpSync(SOURCE_DINOU_DIR, path.join(simPkgDir, "dinou"), { recursive: true });
+
     const ejectRun = spawnSync(
       process.execPath,
-      [path.join(REPO_ROOT, "dinou", "cli.js"), "eject", "--skip-install"],
+      [path.join(simPkgDir, "dinou", "cli.js"), "eject", "--skip-install"],
       { cwd: fixtureRoot, encoding: "utf8" }
     );
     expect(ejectRun.status).toBe(0);
+    fs.rmSync(simPkgDir, { recursive: true, force: true });
 
     const ejectedPkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
     expect(ejectedPkg.scripts.dev).toBe("node dinou/cli.js dev");
@@ -1652,7 +1758,7 @@ test.describe("Dinou Eject & Uneject E2E Sovereignty Flow", () => {
     const staleDir = path.join(fixtureRoot, "node_modules", "dinou");
     fs.mkdirSync(path.join(staleDir, "core"), { recursive: true });
     fs.copyFileSync(
-      path.join(REPO_ROOT, "dinou", "package.json"),
+      path.join(SOURCE_DINOU_DIR, "package.json"),
       path.join(staleDir, "package.json")
     );
     fs.writeFileSync(
