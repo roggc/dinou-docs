@@ -385,7 +385,10 @@ dinou build:node:pure:compile:win        # Windows executable (.exe)`}
             <section id="netlify-serverless" className="mt-12">
               <h2>4. Netlify (Serverless Functions v2)</h2>
               <p>
-                Netlify is a first-class serverless target in Dinou. During <code>npm run build</code> (or <code>npx dinou build:netlify</code>), Dinou compiles a self-contained <strong>AOT Dual-Bundle Netlify Functions v2</strong> entry into <code>.dinou/netlify/functions/ssr.mjs</code>, physically isolated from the public static webroot in <code>.dinou/dist3</code>.
+                Netlify is a first-class serverless target in Dinou. Both <code>npm run build</code> (<code>dinou build</code>) and <code>npm run build:netlify</code> (<code>dinou build:netlify</code>) compile a self-contained <strong>AOT Dual-Bundle Netlify Functions v2</strong> entry into <code>.dinou/netlify/functions/ssr.mjs</code>, physically isolated from the public static webroot in <code>.dinou/dist3</code>.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                <strong><code>build</code> vs. <code>build:netlify</code>:</strong> Both commands work interchangeably on Netlify. Standard <code>dinou build</code> (<code>npm run build</code>, Netlify&apos;s default CI command) generates all Netlify artifacts <em>plus</em> the standalone Node HTTP server (<code>.dinou/node/server.mjs</code>), whereas <code>dinou build:netlify</code> skips the Node HTTP server step for a slightly faster serverless-only build.
               </p>
 
               <div className="space-y-4 my-4">
@@ -398,7 +401,7 @@ dinou build:node:pure:compile:win        # Windows executable (.exe)`}
                 >
 {`# netlify.toml
 [build]
-  command = "npm run build"
+  command = "npm run build" # or "npx dinou build:netlify"
   publish = ".dinou/dist3"
 
 [build.environment]
@@ -424,7 +427,7 @@ dinou build:node:pure:compile:win        # Windows executable (.exe)`}
 git push origin main
 
 # Option B: Manual deployment using Netlify CLI
-npx dinou build:netlify
+npm run build:netlify # or: npx dinou build:netlify
 npx netlify deploy --prod`}
                 </CodeBlock>
               </div>

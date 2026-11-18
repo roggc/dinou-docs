@@ -58,6 +58,15 @@ During the exhaustive pre-release audit of `/docs/deployment` (`src/docs/deploym
 16. `dinou/cli.js` *(Modified — adds `build:netlify`, `build:netlify:esbuild`, `build:netlify:rollup`, `build:netlify:webpack`)*
 17. `dinou/index.d.ts` & `dinou/server.d.ts` *(Modified — uses explicit `.js` specifier on relative `.d.ts` cross-imports for strict `NodeNext` & `deno check` compatibility)*
 
+> **Note for `create-dinou` App Template (`package.json` `"scripts"`)**:
+> Add the matching convenience scripts alongside `"build:cloudflare*"` in starter templates:
+> ```json
+> "build:netlify": "dinou build:netlify",
+> "build:netlify:esbuild": "dinou build:netlify:esbuild",
+> "build:netlify:rollup": "dinou build:netlify:rollup",
+> "build:netlify:webpack": "dinou build:netlify:webpack",
+> ```
+
 ---
 
 ## 3. Complete Source Code & Unified Diffs
