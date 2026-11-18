@@ -969,6 +969,7 @@ program
   .description(
     "Revert an ejected ./dinou directory back to the node_modules dinou package"
   )
+  .option("-y, --yes", "Skip interactive confirmation prompt")
   .option(
     "--skip-install",
     "Update package.json and remove ./dinou without running package manager install"
@@ -979,8 +980,9 @@ program
   )
   .action(async (version, opts) => {
     const { uneject } = await import("./core/uneject.js");
-    uneject({
+    await uneject({
       spec: version || "latest",
+      yes: Boolean(opts.yes),
       skipInstall: Boolean(opts.skipInstall),
       keepDinouDir: Boolean(opts.keepDinou),
       projectRoot,

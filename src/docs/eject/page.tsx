@@ -464,12 +464,15 @@ export default function getConfigEsbuildProd(options) {
                 language="bash"
                 containerClassName="w-full overflow-hidden rounded-lg"
               >
-{`# Revert to the latest published dinou release on npm:
+{`# Revert to the latest published dinou release on npm (prompts for y/N confirmation):
 npm run uneject
+
+# Skip the interactive (y/N) prompt in CI or automated scripts with -y / --yes:
+npm run uneject -- -y
 
 # Or pin a specific version, tag, or local tarball:
 node dinou/cli.js uneject 9.4.0
-node dinou/cli.js uneject file:../dinou-9.4.0.tgz`}
+node dinou/cli.js uneject file:../dinou-9.4.0.tgz -y`}
               </CodeBlock>
 
               <div className="border rounded-xl p-5 bg-card not-prose space-y-3 my-6">
@@ -478,6 +481,9 @@ node dinou/cli.js uneject file:../dinou-9.4.0.tgz`}
                   <span>What <code>dinou uneject</code> Does Automatically (Transactionally)</span>
                 </div>
                 <ol className="space-y-2 text-xs text-muted-foreground list-decimal list-inside leading-relaxed">
+                  <li>
+                    <strong className="text-foreground">Confirms Before Deleting <code>./dinou</code>:</strong> Prompts <code>Are you sure you want to uneject? This will permanently delete your local ./dinou directory. (y/N)</code> (defaulting safely to <code>N</code> unless you confirm with <code>y</code> or pass <code>-y</code> / <code>--yes</code>).
+                  </li>
                   <li>
                     <strong className="text-foreground">Restores <code>package.json</code> Scripts:</strong> Rewrites every <code>node dinou/cli.js &lt;cmd&gt;</code> script back to <code>dinou &lt;cmd&gt;</code>, removes <code>uneject</code> and <code>build:vendors</code>, and restores <code>&quot;eject&quot;: &quot;dinou eject&quot;</code>—preserving all your custom scripts untouched.
                   </li>

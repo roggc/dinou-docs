@@ -12,6 +12,7 @@ During the deep architectural audit of `/docs/eject` (`src/docs/eject/page.tsx`)
    - `dinou/cli.js` now guards `dinou eject` with an explicit path/existence check (supporting `-f, --force` and `--skip-install` when run from `node_modules/dinou`) plus a `try/catch` around `await import("../eject.js")`, exiting cleanly (`0`) with a clear informational message instead of crashing with an unhandled `ERR_MODULE_NOT_FOUND` stack trace.
 3. **New Transactional `dinou uneject [version]` Command & `"uneject"` Script (`dinou/core/uneject.js` + `dinou/cli.js`)**:
    - Reverts an ejected project back to `node_modules/dinou` in a single command (`npm run uneject`, `node dinou/cli.js uneject 9.4.0`, or `node dinou/cli.js uneject file:../dinou.tgz`).
+   - Prompts interactively before making any destructive change (`⚠️  Are you sure you want to uneject? This will permanently delete your local ./dinou directory. (y/N): `, defaulting safely to `N`; pass `-y` / `--yes` in CI or scripts to skip the prompt).
    - Restores `node dinou/cli.js <cmd>` scripts back to `dinou <cmd>`, removes `uneject` and `build:vendors`, restores `"eject": "dinou eject"`, installs `dinou` via the detected package manager (`npm`, `pnpm`, `yarn`, or `bun`) without Node.js v24 `DEP0190` shell-argument deprecation warnings, **automatically rolls back `package.json` and preserves `./dinou` if package installation fails**, and deletes `./dinou` cleanly on success (including on Windows when invoked via `node dinou/cli.js uneject`).
 4. **Live `./dinou` Resolution Across `pnpm` / `yarn` / `npm` / `bun` + Webpack `"dinou/config"` Alias Fix**:
    - Under `pnpm` and `yarn` Classic, `"dinou": "file:./dinou"` copies a static snapshot into `node_modules/dinou` rather than creating a directory symlink, so client edits inside `./dinou/` did not take effect in Esbuild or Rollup without reinstalling. Meanwhile, Webpack's prefix alias `{ dinou: localDinouPath }` broke `import { defineConfig } from "dinou/config"` because `./config` maps to `./core/config.js`, not `./config.js`.
@@ -101,6 +102,13 @@ export function eject(options = {}) {
       return base !== "node_modules" && base !== ".DS_Store";
     },
   });
+
+  const cliDest = path.join(targetDinouDir, "cli.js");
+  if (fs.existsSync(cliDest)) {
+    try {
+      fs.chmodSync(cliDest, 0o755);
+    } catch {}
+  }
   console.log("📁 Copied Dinou framework source into ./dinou");
 
   const originalPkgContent = fs.readFileSync(pkgPath, "utf8");
@@ -144,6 +152,7 @@ export default eject;
 ```js
 import fs from "node:fs";
 import path from "node:path";
+import readline from "node:readline";
 import { spawnSync } from "node:child_process";
 
 export const DINOU_CLI_COMMANDS = [
@@ -482,18 +491,54 @@ export function rewritePackageJsonForUneject(pkg, options = {}) {
 }
 
 /**
+ * Prompts the user on stdin/stdout to confirm a destructive action (`(y/N)`).
+ * Defaults to `false` on Enter, `"n"`, EOF, or `Ctrl+C` / `Ctrl+D`.
+ */
+export function promptConfirmation(question) {
+  return new Promise((resolve) => {
+    if (process.stdin.destroyed || process.stdin.readableEnded) {
+      process.stdout.write(question + "\n");
+      return resolve(false);
+    }
+
+    let answered = false;
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    rl.question(question, (answer) => {
+      answered = true;
+      rl.close();
+      const normalized = String(answer || "").trim().toLowerCase();
+      resolve(normalized === "y" || normalized === "yes");
+    });
+
+    rl.on("close", () => {
+      if (!answered) {
+        process.stdout.write("\n");
+        resolve(false);
+      }
+    });
+  });
+}
+
+/**
  * Reverts an ejected Dinou project back to using the `dinou` package from `node_modules`.
  *
  * @param {object} [options]
  * @param {string} [options.spec="latest"] Version tag, semver range, or `file:...` tarball path.
+ * @param {boolean} [options.yes=false] Skip interactive `(y/N)` confirmation prompt.
  * @param {boolean} [options.skipInstall=false] Update `package.json` & remove `./dinou` without running package manager install.
  * @param {boolean} [options.keepDinouDir=false] Keep `./dinou` directory on disk instead of deleting it.
  * @param {string} [options.projectRoot=process.cwd()] Target project root directory.
  * @param {boolean} [options.hadBuildVendors=false] Preserve `build:vendors` if explicitly requested.
  * @param {boolean} [options.throwOnError=false] Throw an Error instead of calling `process.exit(1)` on install failure.
  */
-export function uneject(options = {}) {
+export async function uneject(options = {}) {
   const projectRoot = path.resolve(options.projectRoot || process.cwd());
+  const skipConfirm =
+    Boolean(options.yes) || process.env.DINOU_YES === "true";
   const skipInstall =
     Boolean(options.skipInstall) || process.env.DINOU_SKIP_INSTALL === "true";
   const keepDinouDir = Boolean(options.keepDinouDir);
@@ -504,6 +549,21 @@ export function uneject(options = {}) {
   }
 
   const localDinouDir = path.join(projectRoot, "dinou");
+
+  if (!skipConfirm) {
+    const promptMsg =
+      !keepDinouDir && fs.existsSync(localDinouDir)
+        ? "⚠️  Are you sure you want to uneject? This will permanently delete your local ./dinou directory. (y/N): "
+        : "⚠️  Are you sure you want to uneject and restore package.json scripts? (y/N): ";
+    const confirmed = await promptConfirmation(promptMsg);
+    if (!confirmed) {
+      console.log(
+        "🚫 Uneject cancelled. Your local ./dinou directory was not modified."
+      );
+      return { cancelled: true };
+    }
+  }
+
   const originalPkgContent = fs.readFileSync(pkgPath, "utf8");
   const pkg = JSON.parse(originalPkgContent);
 
@@ -554,6 +614,7 @@ export function uneject(options = {}) {
   console.log(
     "🎉 Uneject completed successfully! Dinou is now running from node_modules/dinou."
   );
+  return { cancelled: false };
 }
 
 export default uneject;
@@ -650,6 +711,7 @@ export default uneject;
 +  .description(
 +    "Revert an ejected ./dinou directory back to the node_modules dinou package"
 +  )
++  .option("-y, --yes", "Skip interactive confirmation prompt")
 +  .option(
 +    "--skip-install",
 +    "Update package.json and remove ./dinou without running package manager install"
@@ -660,8 +722,9 @@ export default uneject;
 +  )
 +  .action(async (version, opts) => {
 +    const { uneject } = await import("./core/uneject.js");
-+    uneject({
++    await uneject({
 +      spec: version || "latest",
++      yes: Boolean(opts.yes),
 +      skipInstall: Boolean(opts.skipInstall),
 +      keepDinouDir: Boolean(opts.keepDinou),
 +      projectRoot,
@@ -1332,7 +1395,7 @@ test("detectPackageManager honors lockfiles when npm_config_user_agent is unset"
   }
 });
 
-test("Full eject -> already-ejected guard -> transactional rollback -> CLI uneject lifecycle", () => {
+test("Full eject -> already-ejected guard -> interactive (y/N) prompt -> transactional rollback -> CLI uneject lifecycle", async () => {
   const projectDir = createTempDir("dinou-eject-lifecycle-");
   const pkgPath = path.join(projectDir, "package.json");
 
@@ -1364,7 +1427,7 @@ test("Full eject -> already-ejected guard -> transactional rollback -> CLI uneje
   const ejectedDir = path.join(projectDir, "dinou");
   assert.equal(fs.existsSync(path.join(ejectedDir, "cli.js")), true);
 
-  // Write a custom marker inside ./dinou to verify already-ejected guard never overwrites it
+  // Write a custom marker inside ./dinou to verify guards never overwrite or delete it accidentally
   const customFile = path.join(ejectedDir, "CUSTOM_MOD.txt");
   fs.writeFileSync(customFile, "USER_OWNED_CODE", "utf8");
 
@@ -1378,25 +1441,46 @@ test("Full eject -> already-ejected guard -> transactional rollback -> CLI uneje
   assert.match(secondEject.stdout, /already ejected in \.\/dinou/i);
   assert.equal(fs.readFileSync(customFile, "utf8"), "USER_OWNED_CODE");
 
-  // 3. Transactional rollback when package manager fails during uneject
+  // 3. Answering "n" (or pressing Enter) to interactive uneject prompt safely cancels
   const pkgSnapshotBeforeFail = fs.readFileSync(pkgPath, "utf8");
-  assert.throws(() => {
-    uneject({
-      projectRoot: projectDir,
-      spec: "file:./non-existent-dinou-999.tgz",
-      skipInstall: false,
-      throwOnError: true,
-    });
-  }, /Package installation failed/);
+  for (const input of ["n\n", "\n"]) {
+    const cancelRes = spawnSync(
+      process.execPath,
+      [path.join(ejectedDir, "cli.js"), "uneject", "--skip-install"],
+      { cwd: projectDir, input, encoding: "utf8" }
+    );
+    assert.equal(cancelRes.status, 0, cancelRes.stderr);
+    assert.match(
+      cancelRes.stdout,
+      /Are you sure you want to uneject\? This will permanently delete your local \.\/dinou directory\. \(y\/N\):/
+    );
+    assert.match(cancelRes.stdout, /Uneject cancelled/i);
+    assert.equal(fs.readFileSync(pkgPath, "utf8"), pkgSnapshotBeforeFail);
+    assert.equal(fs.existsSync(ejectedDir), true);
+  }
+
+  // 4. Transactional rollback when package manager fails during uneject
+  await assert.rejects(
+    async () => {
+      await uneject({
+        projectRoot: projectDir,
+        spec: "file:./non-existent-dinou-999.tgz",
+        yes: true,
+        skipInstall: false,
+        throwOnError: true,
+      });
+    },
+    /Package installation failed/
+  );
   assert.equal(fs.readFileSync(pkgPath, "utf8"), pkgSnapshotBeforeFail);
   assert.equal(fs.existsSync(ejectedDir), true);
   assert.equal(fs.readFileSync(customFile, "utf8"), "USER_OWNED_CODE");
 
-  // 4. Self-deleting CLI uneject (`node dinou/cli.js uneject ^9.4.0 --skip-install`)
+  // 5. Confirming with "y" on CLI uneject (`node dinou/cli.js uneject ^9.4.0 --skip-install`)
   const unejectRes = spawnSync(
     process.execPath,
     [path.join(ejectedDir, "cli.js"), "uneject", "^9.4.0", "--skip-install"],
-    { cwd: projectDir, encoding: "utf8" }
+    { cwd: projectDir, input: "y\n", encoding: "utf8" }
   );
   assert.equal(unejectRes.status, 0, unejectRes.stderr);
   assert.equal(fs.existsSync(ejectedDir), false);
@@ -1665,13 +1749,14 @@ export default function Page() {
     serverProc.kill("SIGTERM");
     serverProc = null;
 
-    // 6. Run `node dinou/cli.js uneject ^9.4.0 --skip-install` and verify clean reversal
+    // 6. Run `node dinou/cli.js uneject ^9.4.0 -y --skip-install` and verify clean reversal
     const unejectRun = spawnSync(
       process.execPath,
       [
         path.join(fixtureRoot, "dinou", "cli.js"),
         "uneject",
         "^9.4.0",
+        "-y",
         "--skip-install",
       ],
       { cwd: fixtureRoot, encoding: "utf8" }

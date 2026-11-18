@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import readline from "node:readline";
 import { spawnSync } from "node:child_process";
 
 export const DINOU_CLI_COMMANDS = [
@@ -338,18 +339,54 @@ export function rewritePackageJsonForUneject(pkg, options = {}) {
 }
 
 /**
+ * Prompts the user on stdin/stdout to confirm a destructive action (`(y/N)`).
+ * Defaults to `false` on Enter, `"n"`, EOF, or `Ctrl+C` / `Ctrl+D`.
+ */
+export function promptConfirmation(question) {
+  return new Promise((resolve) => {
+    if (process.stdin.destroyed || process.stdin.readableEnded) {
+      process.stdout.write(question + "\n");
+      return resolve(false);
+    }
+
+    let answered = false;
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+
+    rl.question(question, (answer) => {
+      answered = true;
+      rl.close();
+      const normalized = String(answer || "").trim().toLowerCase();
+      resolve(normalized === "y" || normalized === "yes");
+    });
+
+    rl.on("close", () => {
+      if (!answered) {
+        process.stdout.write("\n");
+        resolve(false);
+      }
+    });
+  });
+}
+
+/**
  * Reverts an ejected Dinou project back to using the `dinou` package from `node_modules`.
  *
  * @param {object} [options]
  * @param {string} [options.spec="latest"] Version tag, semver range, or `file:...` tarball path.
+ * @param {boolean} [options.yes=false] Skip interactive `(y/N)` confirmation prompt.
  * @param {boolean} [options.skipInstall=false] Update `package.json` & remove `./dinou` without running package manager install.
  * @param {boolean} [options.keepDinouDir=false] Keep `./dinou` directory on disk instead of deleting it.
  * @param {string} [options.projectRoot=process.cwd()] Target project root directory.
  * @param {boolean} [options.hadBuildVendors=false] Preserve `build:vendors` if explicitly requested.
  * @param {boolean} [options.throwOnError=false] Throw an Error instead of calling `process.exit(1)` on install failure.
  */
-export function uneject(options = {}) {
+export async function uneject(options = {}) {
   const projectRoot = path.resolve(options.projectRoot || process.cwd());
+  const skipConfirm =
+    Boolean(options.yes) || process.env.DINOU_YES === "true";
   const skipInstall =
     Boolean(options.skipInstall) || process.env.DINOU_SKIP_INSTALL === "true";
   const keepDinouDir = Boolean(options.keepDinouDir);
@@ -360,6 +397,21 @@ export function uneject(options = {}) {
   }
 
   const localDinouDir = path.join(projectRoot, "dinou");
+
+  if (!skipConfirm) {
+    const promptMsg =
+      !keepDinouDir && fs.existsSync(localDinouDir)
+        ? "⚠️  Are you sure you want to uneject? This will permanently delete your local ./dinou directory. (y/N): "
+        : "⚠️  Are you sure you want to uneject and restore package.json scripts? (y/N): ";
+    const confirmed = await promptConfirmation(promptMsg);
+    if (!confirmed) {
+      console.log(
+        "🚫 Uneject cancelled. Your local ./dinou directory was not modified."
+      );
+      return { cancelled: true };
+    }
+  }
+
   const originalPkgContent = fs.readFileSync(pkgPath, "utf8");
   const pkg = JSON.parse(originalPkgContent);
 
@@ -410,6 +462,7 @@ export function uneject(options = {}) {
   console.log(
     "🎉 Uneject completed successfully! Dinou is now running from node_modules/dinou."
   );
+  return { cancelled: false };
 }
 
 export default uneject;
