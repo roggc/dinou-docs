@@ -34,7 +34,7 @@ export function LinkSection() {
             <span>Soft Navigation &amp; Native Modifiers</span>
           </div>
           <p className="text-muted-foreground leading-relaxed">
-            Intercepts clicks to perform seamless client-side page transitions via <code>push()</code> without triggering full browser reloads. If modifier keys (<code>Cmd</code>, <code>Ctrl</code>, <code>Shift</code>, <code>Alt</code>) are pressed or an external destination is specified, it gracefully yields to standard browser navigation (e.g. opening in a new tab).
+            Intercepts primary left-clicks to perform seamless client-side page transitions via <code>push()</code> without triggering full browser reloads. If modifier keys (<code>Cmd</code>, <code>Ctrl</code>, <code>Shift</code>, <code>Alt</code>), non-primary mouse buttons, <code>target=&quot;_blank&quot;</code> (any target other than <code>_self</code>), <code>download</code>, or an external destination are used, it gracefully yields to native browser navigation.
           </p>
         </div>
         <div className="p-4 rounded-lg bg-card border border-border space-y-2">
@@ -97,7 +97,7 @@ export function LinkSection() {
               <td className="p-3 font-mono text-[11px] text-foreground align-top">boolean</td>
               <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">true</td>
               <td className="p-3 align-top leading-relaxed">
-                Whether to prefetch the destination RSC payload and code bundle on <code>onMouseEnter</code>. Ignored when <code>fresh={true}</code> or when targeting external URLs.
+                Whether to prefetch the destination RSC layout and page payloads on <code>onMouseEnter</code>. Automatically skipped when <code>fresh=&#123;true&#125;</code>, targeting external URLs, same-page <code>#hash</code> anchors, <code>download</code> links, or non-<code>_self</code> targets (such as <code>target=&quot;_blank&quot;</code>).
               </td>
             </tr>
             <tr>
@@ -199,7 +199,7 @@ export function NavigationBar() {
 "use client";
 
 import { Link } from "dinou";
-import { RefreshCw, ExternalLink } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 export function OrderQuickActions() {
   return (
@@ -230,24 +230,23 @@ export function OrderQuickActions() {
               id: "relative-and-events",
               label: "sub-nav.tsx (Relative & Events)",
               language: "tsx",
-              code: `// src/app/dashboard/settings/page.tsx
+              code: `// src/dashboard/settings/page.tsx
 "use client";
 
-import { Link } from "dinou";
+import { Link } from "./dinou"; // Route-contextual: pre-binds from="/dashboard/settings"
 
-export default function SettingsSubNav() {
+export default function SettingsSubNav({ postSlug }: { postSlug: string }) {
   const handleAuditClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     // Custom logging or analytics before navigation
     console.log("Navigating to security audit");
-    
-    // Calling e.preventDefault() here would cancel the soft navigation
+
+    // Calling e.preventDefault() here cancels soft navigation
   };
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Strict Relative Child navigation ("security" or "./security"): resolves to /dashboard/settings/security */}
+      {/* Contextual relative child ("security" or "./security"): resolves to /dashboard/settings/security */}
       <Link
-        from="/dashboard/settings"
         href="security"
         onClick={handleAuditClick}
         className="text-sm font-medium"
@@ -255,23 +254,31 @@ export default function SettingsSubNav() {
         Security Settings
       </Link>
 
-      {/* Strict Relative Sibling navigation: resolves to /dashboard/billing */}
+      {/* Contextual relative sibling: resolves to /dashboard/billing */}
       <Link
-        from="/dashboard/settings"
         href="../billing"
         className="text-sm text-muted-foreground"
       >
         Billing & Subscriptions
       </Link>
 
-      {/* External Link: automatically falls back to native browser navigation */}
+      {/* Dynamic route pattern with compile-time required params interpolation */}
       <Link
-        href="https://status.example.com"
+        href="/blog/[slug]"
+        params={{ slug: postSlug }}
+        className="text-sm text-primary"
+      >
+        Read Release Notes
+      </Link>
+
+      {/* Internal link in a new tab or external link: gracefully yields to native browser navigation */}
+      <Link
+        href="/reports/latest.pdf"
         target="_blank"
         rel="noopener noreferrer"
         className="text-xs text-blue-500 underline"
       >
-        System Status
+        Open Report in New Tab
       </Link>
     </div>
   );

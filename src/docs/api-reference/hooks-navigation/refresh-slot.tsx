@@ -143,7 +143,7 @@ export function RefreshSlotSection() {
               <span>Client vs. Server Revalidation</span>
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              <strong>Server-Side (<code>revalidateTag</code> / <code>revalidatePath</code> / <code>revalidatePage</code>):</strong> Purges cached HTML/JSON in storage during background jobs or server actions. Affects future incoming visits.
+              <strong>Server-Side (<code>revalidateTag</code> / <code>revalidatePath</code> / <code>revalidatePage</code> / <code>revalidateLayout</code>):</strong> Purges cached HTML, RSC payloads, and slot entries in storage during background jobs or Server Functions. Affects future incoming requests.
             </p>
             <p className="text-muted-foreground leading-relaxed">
               <strong>Client-Side (<code>refreshSlot</code>):</strong> Actively pulls and renders the new UI into the user&apos;s current browser session in real time without refreshing the page.

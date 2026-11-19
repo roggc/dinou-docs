@@ -70,7 +70,7 @@ export function RedirectSection() {
                 <strong>Clean TypeScript types:</strong> Satisfies <code>Promise&lt;ReactNode&gt;</code> in async Server Components without requiring type assertions or casting.
               </li>
               <li>
-                <strong>Safe inside <code>try/catch</code>:</strong> Because it is a normal declarative element and not an unhandled exception, your application error boundaries and <code>catch</code> blocks won&apos;t accidentally intercept or cancel the navigation.
+                <strong>Safe inside <code>try/catch</code> (Server &amp; Client Components):</strong> Inside Server Components and Client Components, <code>redirect()</code> returns a normal React element (<code>&lt;ClientRedirect /&gt;</code>) rather than throwing, so <code>catch</code> blocks will not accidentally intercept or cancel the navigation. <em>Exception in Server Functions (<code>&quot;use server&quot;</code>):</em> inside a Server Function, <code>redirect()</code> throws an internal control-flow signal (<code>&#123; $$type: &quot;dinou-internal-redirect&quot;, url &#125;</code>) to abort the mutation before streaming — always call <code>return redirect(...)</code> <strong>outside</strong> <code>try/catch</code> blocks (or rethrow when <code>err?.$$type === &quot;dinou-internal-redirect&quot;</code>).
               </li>
               <li>
                 <strong>Works inside <code>&lt;Suspense&gt;</code>:</strong> When an async component redirects after the HTTP stream has already started (<code>200 OK</code>), Dinou safely streams <code>&lt;ClientRedirect /&gt;</code> down to the browser to navigate upon hydration, avoiding unexpected Error Boundary crashes.
@@ -100,7 +100,7 @@ export function RedirectSection() {
               </span>
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              Occurs when called inside <code>getProps()</code> in <code>page_functions.ts</code>, at the top level of the root <code>page.tsx</code> Server Component (before stream initialization), or inside a global plugin hook (<code>onRequest</code>).
+              Occurs when called inside <code>getProps()</code> in <code>page_functions.ts</code> or <code>layout_functions.ts</code> (short-circuiting page, layout, and <code>@slot</code> rendering immediately), or at the top level of a Server Component before stream initialization. (Inside a global plugin <code>onRequest</code> hook, return a Web Standards <code>Response.redirect(url, status)</code> instead.)
             </p>
             <p className="text-muted-foreground leading-relaxed">
               Because zero HTML bytes have reached the wire (<code>headersSent === false</code>), Dinou issues an immediate <strong>HTTP 302 Found</strong> with a <code>Location</code> header. <strong>Critical for SEO crawlers and search indexers.</strong>
@@ -141,7 +141,7 @@ export function RedirectSection() {
               Invoked from browser form actions or event handlers via a dedicated HTTP <code>POST</code> request.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              The server executes the mutation and returns redirection metadata. The client RPC proxy intercepts it and drives an SPA router transition (<code>router.replace()</code>) <strong>without a full page reload</strong>, preserving client state and scroll position.
+              The server executes the mutation, intercepts the internal redirect signal before streaming, and returns redirection metadata (<code>X-Dinou-Redirect</code> / JSON payload). The client RPC proxy drives a smooth SPA push transition <strong>without a full page reload</strong>, preserving client state.
             </p>
           </div>
 
@@ -193,7 +193,7 @@ export function RedirectSection() {
             Calling <code>redirect()</code> directly inside a Server Component vs. calling an imported Server Function (e.g. <code>await requireAuth()</code>) from that Server Component is <strong>functionally identical</strong>.
           </p>
           <p className="text-muted-foreground leading-relaxed">
-            Because both execute inside the exact same Node.js SSR worker during the same request lifecycle, they share the identical <code>AsyncLocalStorage</code> context store and streaming pipeline.
+            Because both execute inside the exact same server runtime process (Node.js, Bun, Deno, or Cloudflare Workers) during the same request lifecycle, they share the identical <code>AsyncLocalStorage</code> context store and streaming pipeline.
           </p>
         </div>
 
@@ -203,10 +203,10 @@ export function RedirectSection() {
             <span>Built-in Open-Redirect Protection</span>
           </div>
           <p className="text-muted-foreground leading-relaxed">
-            Dinou&apos;s runtime includes automatic path sanitization. Target paths must resolve to a valid internal route (starting with a single <code>/</code>).
+            Dinou&apos;s runtime sanitizes redirect targets automatically before emitting <code>Location</code> or <code>x-rsc-redirect</code> headers. Protocol-relative URLs (e.g. <code>//evil.com</code>) and non-HTTP schemes (<code>javascript:</code>, <code>data:</code>) are rejected and fall back to <code>&quot;/&quot;</code>.
           </p>
           <p className="text-muted-foreground leading-relaxed">
-            Protocol-relative targets (e.g. <code>//evil.com</code>) or unauthorized external schemes are sanitized, safeguarding your application against open-redirect phishing vulnerabilities.
+            In <strong>SSR / RSC</strong> contexts, both single-slash internal paths (<code>/dashboard</code>) and explicit <code>http://</code> / <code>https://</code> destinations are permitted; inside <strong><code>&quot;use server&quot;</code> Server Functions</strong>, targets are strictly constrained to internal single-slash routes (<code>/...</code>).
           </p>
         </div>
       </div>
@@ -276,7 +276,7 @@ export function RedirectSection() {
                   <span className="text-muted-foreground font-sans">RPC redirect payload</span>
                 </td>
                 <td className="p-3 align-top">
-                  Soft SPA navigation (<code>router.replace</code>)
+                  Soft SPA navigation (<code>push</code>)
                 </td>
                 <td className="p-3 align-top">
                   Form mutations, cart checkout, login actions
@@ -469,7 +469,7 @@ export default defineConfig({
         </div>
         <div className="text-muted-foreground space-y-1.5 leading-relaxed">
           <p>
-            <strong>In Plugins &amp; Middlewares (<code>onRequest</code> in <code>dinou.config.js</code>):</strong> Return a native Web Standards <code>Response.redirect(url, status)</code>. Dinou detects <code>result instanceof Response</code> and terminates the request immediately (&lt;1ms) before route matching, file I/O, or React rendering starts.
+            <strong>In Plugins &amp; Middlewares (<code>onRequest</code> in <code>dinou.config.ts</code>):</strong> Return a native Web Standards <code>Response.redirect(url, status)</code>. Dinou detects <code>result instanceof Response</code>, terminates the request immediately (&lt;1ms) before route matching or React rendering starts, and automatically translates <code>3xx</code> redirects into <code>x-rsc-redirect</code> on SPA RSC fetches while preserving any <code>Set-Cookie</code> headers.
           </p>
           <p>
             <strong>In Server Components &amp; <code>page_functions.ts</code>:</strong> Use the universal <code>return redirect(&quot;/path&quot;)</code> helper (which automatically defaults to HTTP 302 on unsent headers). If you require an explicit status code (such as a permanent <code>301 Moved Permanently</code> for SEO canonical URLs), obtain the context via <code>const &#123; res &#125; = getContext();</code> and invoke <code>res.redirect(301, &quot;/path&quot;)</code>.

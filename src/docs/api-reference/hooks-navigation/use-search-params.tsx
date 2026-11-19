@@ -5,7 +5,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/docs/components/ui/alert";
-import { Server, AlertTriangle, CheckCircle2, Sliders } from "lucide-react";
+import { Server, CheckCircle2, Sliders } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
 export function UseSearchParamsSection() {
@@ -45,7 +45,7 @@ export function UseSearchParamsSection() {
             <tbody className="divide-y divide-border/50 text-muted-foreground">
               <tr>
                 <td className="py-2 px-3 font-semibold text-foreground w-1/3">Execution Environment</td>
-                <td className="py-2 px-3">100% backend (Node.js, Bun, Cloudflare Workers, Edge).</td>
+                <td className="py-2 px-3">100% backend (Node.js, Bun, Deno, Cloudflare Workers).</td>
               </tr>
               <tr>
                 <td className="py-2 px-3 font-semibold text-foreground">Client Bundle Impact</td>
@@ -60,8 +60,8 @@ export function UseSearchParamsSection() {
                 <td className="py-2 px-3"><strong>Data Fetching:</strong> Direct DB/ORM queries and private APIs with credentials.</td>
               </tr>
               <tr>
-                <td className="py-2 px-3 font-semibold text-foreground">Static Caching (SSG)</td>
-                <td className="py-2 px-3">Empty at build time; requires dynamic SSR (<code>revalidate = 0</code>) or PPR (<code>ppr = true</code> with <code>&lt;Suspense&gt;</code>).</td>
+                <td className="py-2 px-3 font-semibold text-foreground">Static Caching (SSG / PPR)</td>
+                <td className="py-2 px-3">Calling <code>useSearchParams()</code> in a Server Component accesses dynamic request query data: outside <code>&lt;Suspense&gt;</code> it triggers a <strong>Full-Route Dynamic Bailout</strong> (per-request SSR); inside <code>&lt;Suspense&gt;</code> on a <code>ppr = true</code> route it opens a <strong>Dynamic PPR Hole</strong> (even overriding <code>noDynamic()</code>).</td>
               </tr>
               <tr>
                 <td className="py-2 px-3 font-semibold text-foreground">Props Drilling</td>
@@ -105,14 +105,14 @@ export default async function ProductsPage() {
             <span>Handling Query Parameters on the Server (SSG, SSR &amp; PPR):</span>
           </p>
           <p>
-            Because static pre-rendering (SSG) compiles HTML at build time when no client query string exists, <code>searchParams</code> evaluates with empty parameters during build. If your Server Component requires live, per-visitor query parameters, choose one of two server strategies in <code>page_functions.ts</code>:
+            Reading query parameters in a Server Component is a dynamic request signal. Dinou handles it automatically depending on your route configuration:
           </p>
           <ul className="list-disc pl-4 space-y-1">
             <li>
-              <strong>Dynamic SSR:</strong> Set <code>export const revalidate = 0;</code> to execute and render the entire page dynamically per request on the server.
+              <strong>Partial Prerendering (PPR, <code>export const ppr = true;</code>):</strong> Wrap any sync or <code>async</code> Server Component calling <code>useSearchParams()</code> in React <code>&lt;Suspense&gt;</code>. Dinou bakes the fallback into <code>shell.html</code> (0ms TTFB) and automatically registers a <strong>Dynamic PPR Hole</strong> (overriding <code>noDynamic()</code> if present) that streams live query results per request.
             </li>
             <li>
-              <strong>Partial Prerendering (PPR):</strong> Set <code>export const ppr = true;</code> and wrap the query-dependent component in React <code>&lt;Suspense&gt;</code> to deliver an instant static shell from Edge CDN (0ms TTFB) while streaming the dynamic query results live over the open HTTP connection.
+              <strong>Automatic Dynamic Bailout / Explicit SSR (<code>export const revalidate = 0;</code>):</strong> Calling <code>useSearchParams()</code> in an unwrapped Server Component outside <code>&lt;Suspense&gt;</code> triggers a Full-Route Dynamic Bailout (rendering the route live per request on the server with immediate access to <code>ctx.req.query</code>).
             </li>
           </ul>
         </div>
@@ -206,43 +206,24 @@ export default function SearchFilter() {
 }`}
         </CodeBlock>
 
-        <Alert className="not-prose mt-4 border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900">
-          <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-          <AlertTitle className="text-amber-800 dark:text-amber-300 font-semibold text-xs">
-            SSG Hydration Best Practice
+        <Alert className="not-prose mt-4 border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-900">
+          <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+          <AlertTitle className="text-emerald-800 dark:text-emerald-300 font-semibold text-xs">
+            Built-In SSG, PPR &amp; Static-Export Hydration Safety (Zero <code>#418</code> Mismatch)
           </AlertTitle>
-          <AlertDescription className="text-amber-800 dark:text-amber-300 text-xs space-y-2 mt-1">
+          <AlertDescription className="text-emerald-800 dark:text-emerald-300 text-xs space-y-2 mt-1">
             <p>
-              On statically pre-rendered routes (SSG), HTML is generated at build time when no client query string is known (rendering with empty params). If a Client Component immediately renders query-dependent HTML on initial load, a React hydration mismatch error can occur.
-            </p>
-            <p>
-              To resolve this, choose one of the following two patterns:
+              On statically pre-rendered routes (SSG), Partial Prerendering shells (<code>ppr = true</code>), and static exports (<code>dinou export-static</code>), HTML is compiled at build time without a visitor query string. Dinou&apos;s <code>useSearchParams()</code> handles this <strong>automatically</strong> via React&apos;s <code>useSyncExternalStore</code>:
             </p>
             <ul className="list-disc pl-4 space-y-1">
               <li>
-                <strong>Pattern A (Deferred Hydration via useEffect):</strong> Keep the page 100% static on CDN Edge. Render deterministic markup initially, then synchronize the query parameters after mounting:
+                <strong>Zero boilerplate &amp; selective-hydration safe:</strong> During the initial hydration pass (including lazy <code>&lt;Suspense&gt;</code> selective hydration), <code>useSearchParams()</code> yields an empty <code>URLSearchParams</code> matching the static HTML, then immediately synchronizes with the live browser query string—eliminating React Error <code>#418</code> without requiring manual <code>useState</code> + <code>useEffect</code> guards.
               </li>
-            </ul>
-            <CodeBlock language="tsx" containerClassName="mt-2 rounded-md">
-              {`"use client";
-import { useSearchParams } from "dinou";
-import { useState, useEffect } from "react";
-
-export default function SafeSearchClient() {
-  const rawParams = useSearchParams();
-  const [query, setQuery] = useState("");
-
-  useEffect(() => {
-    // Synchronizes query strictly in the client after hydration
-    setQuery(rawParams.get("q") ?? "");
-  }, [rawParams]);
-
-  return <div>Query: {query}</div>;
-}`}
-            </CodeBlock>
-            <ul className="list-disc pl-4 space-y-1 mt-2">
               <li>
-                <strong>Pattern B (Dynamic SSR):</strong> If the initial server HTML must include the query parameter (e.g. for SEO or instant visual rendering without waiting for hydration), switch the route to dynamic SSR by setting <code>export const revalidate = 0;</code> in <code>page_functions.ts</code>. On dynamic routes, SSR has direct access to the visitor's request query, preventing hydration mismatches entirely.
+                <strong>Preserves Static Shells on PPR routes:</strong> Calling <code>useSearchParams()</code> inside a <code>&quot;use client&quot;</code> component (even wrapped in <code>&lt;Suspense&gt;</code>) does <strong>not</strong> open a server Dynamic PPR Hole; the component remains baked directly into <code>shell.html</code>.
+              </li>
+              <li>
+                <strong>When you need query-dependent initial HTML (SEO):</strong> Move the query read into a <strong>Server Component</strong> inside <code>&lt;Suspense&gt;</code> on a <code>ppr = true</code> route (streams live per request) or set <code>export const revalidate = 0;</code> in <code>page_functions.ts</code> for full dynamic SSR.
               </li>
             </ul>
           </AlertDescription>

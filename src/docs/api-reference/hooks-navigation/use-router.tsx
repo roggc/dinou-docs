@@ -49,7 +49,7 @@ export function UseRouterSection() {
           <span>Methods Reference</span>
         </h4>
         <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-          All navigation methods are fully typed. Routes are autocompleted and validated at compile time via the <code>DinouRoute</code> union type.
+          All navigation methods are fully typed. Routes are autocompleted and validated at compile time via <code>DinouLinkTarget</code> (and <code>DinouScopedLinkTarget</code> when <code>useRouter</code> is imported from route-contextual <code>&quot;./dinou&quot;</code>). The returned router object is memoized against <code>RouterContext</code> so local component state updates do not unnecessarily re-trigger <code>useEffect(..., [router])</code> hooks.
         </p>
 
         <div className="not-prose overflow-x-auto rounded-lg border border-border mt-3">
@@ -65,19 +65,19 @@ export function UseRouterSection() {
               <tr>
                 <td className="p-3 font-mono font-semibold text-primary align-top">push</td>
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">
-                  (href: DinouLinkTarget, options?: NavigationOptions) =&gt; void
+                  (href: DinouLinkTarget, options?: NavigationOptions &amp; &#123; params?; from? &#125;) =&gt; void
                 </td>
                 <td className="p-3 align-top leading-relaxed">
-                  Navigates to <code>href</code> and pushes a new entry onto the browser history stack. Autocompletes static and dynamic route patterns; requires <code>&#123; params &#125;</code> when <code>href</code> contains <code>[param]</code> placeholders, accepts <code>&#123; from &#125;</code> to anchor strict relative paths (<code>&quot;sub&quot;</code>, <code>&quot;./sub&quot;</code>, <code>&quot;../billing&quot;</code>)—or omits <code>&#123; from &#125;</code> automatically when <code>useRouter</code> is imported from route-contextual <code>&quot;./dinou&quot;</code>—and accepts <code>&#123; fresh: true &#125;</code> to bypass the client memory cache.
+                  Navigates to <code>href</code> and pushes a new entry onto the browser history stack (or delegates to <code>window.location.assign()</code> for external URLs such as <code>https://...</code>). Autocompletes static and dynamic route patterns; requires <code>&#123; params &#125;</code> when <code>href</code> contains <code>[param]</code> placeholders, accepts <code>&#123; from &#125;</code> to anchor strict relative paths (<code>&quot;sub&quot;</code>, <code>&quot;./sub&quot;</code>, <code>&quot;../billing&quot;</code>)—or omits <code>&#123; from &#125;</code> automatically when <code>useRouter</code> is imported from route-contextual <code>&quot;./dinou&quot;</code>—and accepts <code>&#123; fresh: true &#125;</code> to bypass the client memory cache.
                 </td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-semibold text-primary align-top">replace</td>
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">
-                  (href: DinouLinkTarget, options?: NavigationOptions) =&gt; void
+                  (href: DinouLinkTarget, options?: NavigationOptions &amp; &#123; params?; from? &#125;) =&gt; void
                 </td>
                 <td className="p-3 align-top leading-relaxed">
-                  Navigates to <code>href</code> by replacing the current browser history entry (preventing the back button from returning to the previous screen). Supports the exact same <code>&#123; params &#125;</code>, <code>&#123; from &#125;</code>, and <code>&#123; fresh: true &#125;</code> options as <code>push</code>.
+                  Navigates to <code>href</code> by replacing the current browser history entry (preventing the back button from returning to the previous screen; delegates to <code>window.location.replace()</code> for external URLs). Supports the exact same <code>&#123; params &#125;</code>, <code>&#123; from &#125;</code>, and <code>&#123; fresh: true &#125;</code> options as <code>push</code>.
                 </td>
               </tr>
               <tr>
@@ -234,8 +234,11 @@ export function CreateProductForm() {
       try {
         const result = await createProductAction(formData);
         
-        // Navigate with fresh: true to bypass client cache and show live data
-        router.push(\`/products/\${result.id}\`, { fresh: true });
+        // Navigate with typed dynamic pattern + fresh: true to bypass client cache
+        router.push("/products/[id]", {
+          params: { id: result.id },
+          fresh: true,
+        });
       } catch (err: any) {
         setError(err.message || "Failed to create product");
       }
