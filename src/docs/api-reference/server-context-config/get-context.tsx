@@ -14,12 +14,12 @@ export function GetContextSection() {
           Server-Only Primitive
         </span>
         <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
-          Returns: RequestContextStore | undefined
+          Returns: RequestContextStore
         </span>
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        Synchronously accesses the active HTTP request and response context via Node.js / V8 <code>AsyncLocalStorage</code>. In Dinou, <code>getContext()</code> operates across <strong>Server Components (RSC)</strong>, <strong>Server Functions (<code>&quot;use server&quot;</code>)</strong>, and route segment contracts in <strong><code>page_functions.ts</code></strong> and <strong><code>layout_functions.ts</code></strong> without prop drilling.
+        Synchronously accesses the active HTTP request, response proxy, and unified server environment via <code>AsyncLocalStorage</code> (exported from both <code>&quot;dinou&quot;</code> and <code>&quot;dinou/server&quot;</code>). In Dinou, <code>getContext()</code> operates across <strong>Server Components (RSC)</strong>, <strong>Server Functions (<code>&quot;use server&quot;</code>)</strong>, <code>plugin.onRequest</code>, and route segment contracts in <strong><code>page_functions.ts</code></strong> and <strong><code>layout_functions.ts</code></strong> without prop drilling. Outside an active HTTP request on the server, it returns a safe fallback <code>RequestContextStore</code> with <code>env</code> populated via <code>createUnifiedEnv()</code>.
       </p>
 
       {/* Sub-section 1: Request & Response Store Reference */}
@@ -56,19 +56,23 @@ export function GetContextSection() {
               </div>
               <div>
                 <strong className="text-foreground font-mono">req.path:</strong>
-                <div className="text-[11px]">Normalized request URL pathname (e.g. <code>&quot;/dashboard&quot;</code>).</div>
+                <div className="text-[11px]">Normalized logical route pathname (e.g. <code>&quot;/dashboard&quot;</code>, normalized even on internal <code>/____rsc_*</code> SPA wire fetches).</div>
+              </div>
+              <div>
+                <strong className="text-foreground font-mono">req.rawPath / req.isRscRequest:</strong>
+                <div className="text-[11px]">Raw HTTP wire pathname (e.g. <code>&quot;/____rsc_page____/dashboard&quot;</code>) and boolean flag indicating whether the current request is an internal RSC SPA wire fetch.</div>
               </div>
               <div>
                 <strong className="text-foreground font-mono">req.method:</strong>
                 <div className="text-[11px]">HTTP method (e.g. <code>&quot;GET&quot;</code>, <code>&quot;POST&quot;</code>).</div>
               </div>
               <div>
-                <strong className="text-foreground font-mono">req.env:</strong>
-                <div className="text-[11px]">Platform host bindings (Cloudflare D1, KV, R2, environment variables).</div>
+                <strong className="text-foreground font-mono">req.env / ctx.env:</strong>
+                <div className="text-[11px]">Unified server environment (<code>DinouEnv</code>): merges text env vars (<code>process.env</code>, <code>Deno.env</code>, Netlify env) with live Edge bindings (Cloudflare D1, KV, R2, Durable Objects).</div>
               </div>
               <div>
-                <strong className="text-foreground font-mono">req.ctx:</strong>
-                <div className="text-[11px]">Execution context for background work (e.g. <code>ctx.waitUntil()</code>).</div>
+                <strong className="text-foreground font-mono">req.ctx / ctx.ctx:</strong>
+                <div className="text-[11px]">Platform execution context for background work (e.g. Cloudflare / Netlify <code>ctx.waitUntil()</code>).</div>
               </div>
             </div>
           </div>
@@ -118,9 +122,9 @@ export function GetContextSection() {
               </p>
             </div>
             <div className="space-y-1.5">
-              <strong className="text-foreground font-mono">ctx.env &amp; ctx.ctx (Direct Host Bindings):</strong>
+              <strong className="text-foreground font-mono">ctx.env &amp; ctx.ctx (Direct Host Bindings &amp; <code>DinouEnv</code>):</strong>
               <p className="text-muted-foreground leading-relaxed">
-                In addition to <code>ctx.req.env</code>, platform host resources (Cloudflare D1 databases, KV namespaces, R2 buckets) and execution context methods (such as <code>ctx.waitUntil()</code>) are accessible directly at the root of the context object.
+                Accessible directly at the root of <code>getContext()</code> across Node.js, Bun, Deno, Cloudflare Workers, Netlify, and SSG. Augment <code>interface DinouEnv</code> in a <code>.d.ts</code> file to get full TypeScript autocompletion for KV, D1, R2 bindings, and secrets.
               </p>
             </div>
           </div>
@@ -131,10 +135,10 @@ export function GetContextSection() {
           <div className="p-4 rounded-lg bg-card border border-border space-y-2">
             <div className="font-semibold text-foreground flex items-center gap-1.5">
               <Zap className="h-4 w-4 text-amber-500" />
-              <span>Streaming &amp; Headers Sent Timing</span>
+              <span>Automatic Static Bailout &amp; Streaming Timing</span>
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              HTTP headers, status codes, and HTTP-only cookies can only be sent before the server flushes the initial response stream. In streaming Server Components or deferred <code>&lt;Suspense&gt;</code> blocks, invoke <code>return redirect(&quot;/path&quot;)</code> to trigger client-side SPA navigation instead of modifying raw headers.
+              Reading <code>ctx.req.cookies</code>, <code>ctx.req.headers</code>, or <code>ctx.req.query</code>—or calling <code>ctx.res.*</code>—inside a Server Component automatically triggers <strong>Automatic Static Bailout</strong> (or registers a <strong>Dynamic PPR Hole</strong> inside <code>&lt;Suspense&gt;</code> when <code>ppr = true</code>). HTTP headers, status codes, and <code>httpOnly</code> cookies can only be emitted before streaming starts; inside deferred <code>&lt;Suspense&gt;</code> blocks, use <code>return redirect(&quot;/path&quot;)</code>.
             </p>
           </div>
 
@@ -144,7 +148,7 @@ export function GetContextSection() {
               <span>Server-Only Security Sandbox</span>
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              Never invoke <code>getContext()</code> directly inside a Client Component running in the browser. In browser environments, Dinou logs an error and returns an empty object. Always read confidential cookies or database records in Server Components or <code>getProps</code>, sanitize the data, and pass only safe props to Client Components.
+              Never invoke <code>getContext()</code> directly inside a Client Component running in the browser. In browser environments, Dinou logs an error and returns an empty fallback object with no-op response methods. Always read confidential cookies, secrets, or database records on the server and pass only sanitized props to Client Components.
             </p>
           </div>
         </div>
@@ -168,17 +172,17 @@ export function GetContextSection() {
             tabs={[
               {
                 id: "server-component",
-                label: "profile.tsx (Server Component)",
+                label: "profile/page.tsx (Server Component)",
                 language: "tsx",
-                code: `// src/app/profile/page.tsx (Server Component)
+                code: `// src/profile/page.tsx (Server Component)
 import { getContext, redirect } from "dinou";
 import { db } from "@/lib/db";
 
 export default async function ProfilePage() {
   const ctx = getContext();
-  if (!ctx) return null;
 
   // Read authenticated session cookie securely on the server
+  // (reading cookies triggers Automatic Static Bailout on static routes)
   const sessionToken = ctx.req.cookies.auth_session;
   if (!sessionToken) {
     return redirect("/login?from=/profile");
@@ -193,14 +197,16 @@ export default async function ProfilePage() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold">Welcome, {user.name}</h1>
-      <p className="text-sm text-muted-foreground">Session active from IP: {clientIp}</p>
+      <p className="text-sm text-muted-foreground">
+        Session active from IP: {clientIp} ({userAgent})
+      </p>
     </div>
   );
 }`,
               },
               {
                 id: "server-function",
-                label: "theme.ts (Server Function)",
+                label: "preferences.ts (Server Function)",
                 language: "typescript",
                 code: `// src/actions/preferences.ts
 "use server";
@@ -209,9 +215,8 @@ import { getContext } from "dinou";
 
 export async function updateThemePreference(theme: "light" | "dark" | "system") {
   const ctx = getContext();
-  if (!ctx) throw new Error("Context unavailable");
 
-  // Mutate an outgoing HTTP response cookie from the server action
+  // Mutate an outgoing HTTP response cookie from the Server Function
   ctx.res.cookie("preferred_theme", theme, {
     path: "/",
     maxAge: 60 * 60 * 24 * 365, // 1 year
@@ -224,27 +229,27 @@ export async function updateThemePreference(theme: "light" | "dark" | "system") 
               },
               {
                 id: "page-functions",
-                label: "page_functions.ts (Route Lifecycle)",
+                label: "page_functions.ts (Route Lifecycle & Env)",
                 language: "typescript",
-                code: `// src/app/dashboard/page_functions.ts
+                code: `// src/dashboard/page_functions.ts
 import { getContext, redirect } from "dinou";
 
 // Evaluated before any JSX component rendering begins
 export async function getProps() {
   const ctx = getContext();
-  if (!ctx) return { tenant: null };
 
-  const tenantSlug = ctx.req.query.tenant as string;
+  const tenantSlug = ctx.req.query.tenant as string | undefined;
   if (!tenantSlug) {
     return redirect("/onboarding");
   }
 
-  // Read environment variable or platform binding
-  const apiSecret = ctx.req.env?.TENANT_API_KEY || process.env.TENANT_API_KEY;
+  // Read unified server secrets or Edge bindings (KV, D1, R2) via ctx.env
+  const apiSecret = ctx.env.TENANT_API_KEY;
 
   return {
     tenantSlug,
     hasApiKey: Boolean(apiSecret),
+    logicalPath: ctx.req.path, // Always "/dashboard" even on SPA RSC fetches
   };
 }`,
               },
@@ -252,8 +257,10 @@ export async function getProps() {
                 id: "plugin-state",
                 label: "plugin-state.tsx (Plugin Injected State)",
                 language: "tsx",
-                code: `// 1. Plugin attaches authenticated user to context (dinou.config.js)
-export const authPlugin = {
+                code: `// 1. Plugin attaches authenticated user to context (dinou.config.ts)
+import type { DinouPlugin } from "dinou";
+
+export const authPlugin: DinouPlugin = {
   name: "auth-guard",
   async onRequest(request, context) {
     const token = request.headers.get("Authorization");
@@ -265,14 +272,14 @@ export const authPlugin = {
 };
 
 // 2. Server Component retrieves plugin state with zero prop-drilling
-// src/app/dashboard/page.tsx (Server Component)
+// src/dashboard/page.tsx (Server Component)
 import { getContext } from "dinou";
 
 export default async function DashboardPage() {
   const ctx = getContext();
-  
+
   // Directly access custom plugin properties from the store
-  const currentUser = ctx?.user;
+  const currentUser = ctx.user;
 
   return (
     <div>

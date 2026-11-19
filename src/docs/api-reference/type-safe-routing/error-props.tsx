@@ -17,7 +17,7 @@ export function ErrorPropsSection() {
         </span>
       </div>
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        Official TypeScript interface for typing React Error Page components (<code>error.tsx</code>). In addition to inferred <code>params</code>, it strictly types the caught <code>error: Error</code>.
+        Official TypeScript interface for typing React Error Boundary components (<code>error.tsx</code>), constrained by <code>DinouErrorPattern</code> (covering page routes, intermediate folders, and parallel <code>@slot/error.tsx</code> boundaries). In addition to cumulative inferred <code>params: ErrorParams&lt;T&gt;</code>, it strictly types the caught <code>error: Error</code>.
       </p>
 
       <CodeBlock

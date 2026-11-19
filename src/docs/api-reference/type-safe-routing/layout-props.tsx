@@ -7,7 +7,7 @@ export function LayoutPropsSection() {
     <section id="layoutprops" className="scroll-mt-20 mt-8">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="m-0">
-          <code>LayoutProps&lt;T&gt;</code>
+          <code>LayoutProps&lt;T, TProps&gt;</code>
         </h3>
         <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
           TypeScript Generic
@@ -17,7 +17,7 @@ export function LayoutPropsSection() {
         </span>
       </div>
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        Official TypeScript interface for typing React Layout components (<code>layout.tsx</code>). In addition to inferred <code>params</code>, it strictly types <code>children: React.ReactNode</code>.
+        Official TypeScript generic for typing React Layout components (<code>layout.tsx</code>), constrained by <code>DinouLayoutPattern</code> (including intermediate horizontal layouts without a sibling <code>page.tsx</code>). Automatically types <code>children: ReactNode</code>, cumulative segment <code>params: LayoutParams&lt;T&gt;</code>, auto-inferred sibling parallel <code>@slot</code> props (via <code>LayoutSlots&lt;T&gt;</code>), and optional custom props <code>TProps</code> from <code>layout_functions.ts</code> (<code>getProps</code>).
       </p>
 
       <CodeBlock
@@ -26,11 +26,20 @@ export function LayoutPropsSection() {
       >
         {`import type { LayoutProps } from "dinou";
 
-export default function BlogLayout({ children, params }: LayoutProps<"/blog/[slug]">) {
+// Includes children, params.org, auto-inferred @sidebar slot, and custom layout_functions props
+export default function WorkspaceLayout({
+  children,
+  params,
+  sidebar,
+  orgName,
+}: LayoutProps<"/workspace/[org]", { orgName: string }>) {
   return (
     <section>
-      <header>Category: {params.slug}</header>
-      <main>{children}</main>
+      <header>{orgName} ({params.org})</header>
+      <div className="flex">
+        <aside>{sidebar}</aside>
+        <main>{children}</main>
+      </div>
     </section>
   );
 }`}
