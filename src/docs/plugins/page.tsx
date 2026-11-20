@@ -4,7 +4,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
 } from "@/docs/components/ui/card";
 import { Badge } from "@/docs/components/ui/badge";
 import {
@@ -93,7 +92,7 @@ export default function Page() {
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             {/* Overview */}
-            <section id="overview">
+            <section id="overview" className="scroll-mt-20">
               <h2>1. Configuration &amp; Plugin System</h2>
               <p>
                 In <strong>Dinou</strong>, the configuration and extensibility architecture is built around two complementary runtime hooks plus compile-time setup injection:
@@ -147,7 +146,7 @@ export default function Page() {
             </section>
 
             {/* Config File */}
-            <section id="config-file" className="mt-12">
+            <section id="config-file" className="mt-12 scroll-mt-20">
               <h2>2. The dinou.config.ts File</h2>
               <p>
                 Dinou automatically discovers your configuration file in the project root using a deterministic precedence order: <code>dinou.config.ts</code> &rarr; <code>dinou.config.mjs</code> &rarr; <code>dinou.config.js</code> &rarr; <code>dinou.config.cjs</code>. Use the typed <code>defineConfig</code> helper exported from <code>&quot;dinou&quot;</code> (or <code>&quot;dinou/config&quot;</code>):
@@ -189,7 +188,7 @@ export default defineConfig({
 });`}
               </CodeBlock>
 
-              <div id="config-bundling" className="mt-6 space-y-3">
+              <div id="config-bundling" className="mt-6 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   <Sliders className="h-5 w-5 text-blue-500" />
                   <span>2.1 AOT Bundling, Dev Hot-Reload &amp; Path Aliases</span>
@@ -199,10 +198,10 @@ export default defineConfig({
                 </p>
                 <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5">
                   <li>
-                    <strong>Native <code>tsconfig.json</code> &amp; <code>jsconfig.json</code> Path Aliases:</strong> Import plugin factories, shared constants, or polyfills using your configured aliases (for example, <code>import &#123; authPlugin &#125; from &quot;@/_plugins/auth&quot;;</code>)—including recursive <code>&quot;extends&quot;</code> chains—without Node <code>ERR_MODULE_NOT_FOUND</code> errors. See <Link href="/docs/alias">Path Aliases</Link> for details.
+                    <strong>Native <code>tsconfig.json</code> &amp; <code>jsconfig.json</code> Path Aliases:</strong> Import plugin factories, shared constants, or polyfills using your configured aliases (for example, <code>import &#123; authPlugin &#125; from &quot;@/plugins/auth&quot;;</code>)—including recursive <code>&quot;extends&quot;</code> chains—without Node <code>ERR_MODULE_NOT_FOUND</code> errors. See <Link href="/docs/alias">Path Aliases</Link> for details.
                   </li>
                   <li>
-                    <strong>Ahead-of-Time (AOT) Production Embedding:</strong> During <code>dinou build</code>, your configuration and plugins are statically bundled directly into the generated server artifacts (<code>.dinou/node/</code>, <code>.dinou/cloudflare/worker.js</code>, <code>.dinou/bun/server.js</code>, <code>.dinou/deno/main.js</code>, and <code>.dinou/dist1/server/</code>). Production containers (<code>npm ci --omit=dev</code>), Edge Workers, and single-file compiled binaries never require <code>esbuild</code> or raw <code>.ts</code> source files at runtime.
+                    <strong>Ahead-of-Time (AOT) Production Embedding:</strong> During <code>dinou build</code>, your configuration and plugins are statically bundled directly into the generated server artifacts (<code>.dinou/node/</code>, <code>.dinou/cloudflare/worker.js</code>, <code>.dinou/bun/server.js</code>, <code>.dinou/deno/main.js</code>, <code>.dinou/netlify/functions/ssr.mjs</code>, and <code>.dinou/dist1/server/</code>). Production containers (<code>npm ci --omit=dev</code>), Edge Workers, and single-file compiled binaries never require <code>esbuild</code> or raw <code>.ts</code> source files at runtime.
                   </li>
                   <li>
                     <strong>Live Development Hot-Reload:</strong> During <code>dinou dev</code>, editing <code>dinou.config.*</code> or root <code>dinou.setup.*</code> automatically reloads plugins, re-applies <code>configureServer</code> middlewares and listeners, refreshes <code>setupFiles</code>, regenerates route types, and triggers a clean browser reload without restarting the terminal process.
@@ -212,14 +211,14 @@ export default defineConfig({
             </section>
 
             {/* Top-Level Config Options */}
-            <section id="config-options" className="mt-12">
+            <section id="config-options" className="mt-12 scroll-mt-20">
               <h2>3. Top-Level Configuration Options</h2>
               <p>
                 The <code>DinouConfig</code> interface provides eight top-level controls for rendering, compilation, assets, caching, and plugins:
               </p>
 
               {/* PPR Option */}
-              <div id="ppr-option" className="mt-8 space-y-3">
+              <div id="ppr-option" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">3.1 Global Partial Prerendering Default (<code>ppr</code>)</h3>
                 <p>
                   Sets the project-wide default value for <strong>Partial Prerendering (PPR)</strong> across every route segment (<code>layout</code> and <code>page</code>). <strong>Defaults to <code>false</code>.</strong>
@@ -247,7 +246,7 @@ export default defineConfig({
               </div>
 
               {/* allowISG Option */}
-              <div id="allow-isg-option" className="mt-8 space-y-3">
+              <div id="allow-isg-option" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">3.2 Global ISG Default (<code>allowISG</code>)</h3>
                 <p>
                   Controls whether dynamic route segments (<code>[id]</code>, <code>[slug]</code>, <code>[...catchAll]</code>) not pre-rendered at build time by <code>getStaticPaths</code> are generated and cached on-demand at runtime. <strong>Defaults to <code>true</code>.</strong>
@@ -272,7 +271,7 @@ export default defineConfig({
               </div>
 
               {/* React Compiler Option */}
-              <div id="react-compiler-option" className="mt-8 space-y-3">
+              <div id="react-compiler-option" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">3.3 React Compiler (<code>reactCompiler</code>)</h3>
                 <p>
                   Enables or disables automatic memoization via <code>babel-plugin-react-compiler</code> during production client builds across Esbuild, Rollup, and Webpack. <strong>Defaults to <code>true</code>.</strong> Individual components or hooks can also opt out locally with the <code>&quot;use no memo&quot;</code> directive. See <Link href="/docs/compiler">React Compiler</Link>.
@@ -290,7 +289,7 @@ export default defineConfig({
               </div>
 
               {/* Strict Mode Option */}
-              <div id="strict-mode-option" className="mt-8 space-y-3">
+              <div id="strict-mode-option" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">3.4 React StrictMode (<code>reactStrictMode</code>)</h3>
                 <p>
                   Controls whether Dinou wraps your hydrated client tree in <code>&lt;React.StrictMode&gt;</code> during development. <strong>Defaults to <code>true</code>.</strong>
@@ -307,7 +306,7 @@ export default defineConfig({
               </div>
 
               {/* Asset Extensions Option */}
-              <div id="asset-extensions-option" className="mt-8 space-y-3">
+              <div id="asset-extensions-option" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">3.5 Custom Static Asset Extensions (<code>assetExtensions</code>)</h3>
                 <p>
                   Extends Dinou&apos;s 26 built-in media and font formats with custom binary or data extensions (with or without a leading dot, such as <code>[&quot;glb&quot;, &quot;gltf&quot;, &quot;hdr&quot;, &quot;wasm&quot;]</code>). Custom extensions are emitted to <code>/assets/[name]-[8hex].[ext]</code> across RSC, SSR, Client Components, and CSS <code>url(...)</code> in all three bundlers, and Dinou automatically generates ambient TypeScript module declarations in <code>.dinou/types/routes.d.ts</code>. See <Link href="/docs/assets">Static Assets</Link>.
@@ -324,10 +323,10 @@ export default defineConfig({
               </div>
 
               {/* Storage Option */}
-              <div id="storage-option" className="mt-8 space-y-3">
+              <div id="storage-option" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">3.6 Storage Adapter (<code>storage</code>)</h3>
                 <p>
-                  Supplies a custom ISR, ISG, and 3D cache-slot persistence adapter (implementing <code>StorageAdapter</code> from <code>&quot;dinou/server&quot;</code>). When omitted, Dinou defaults to <code>FileSystemStorage</code> (Node.js &amp; Bun), <code>CloudflareKVStorage</code> / <code>MemoryStorage</code> (Cloudflare Workers), or <code>DenoKVStorage</code> (Deno).
+                  Supplies a custom ISR, ISG, and 3D cache-slot persistence adapter (implementing <code>StorageAdapter</code> from <code>&quot;dinou/server&quot;</code>). When omitted, Dinou defaults to <code>FileSystemStorage</code> (Node.js &amp; Bun), <code>CloudflareKVStorage</code> / <code>MemoryStorage</code> (Cloudflare Workers), <code>DenoKVStorage</code> (Deno), or <code>MemoryStorage(&#123; hydrateFromDisk: true &#125;)</code> (Netlify Functions).
                 </p>
                 <CodeBlock
                   language="typescript"
@@ -345,7 +344,7 @@ export default defineConfig({
               </div>
 
               {/* Setup Files Option */}
-              <div id="setup-files-option" className="mt-8 space-y-3">
+              <div id="setup-files-option" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">3.7 Universal Setup Files (<code>setupFiles</code>)</h3>
                 <p>
                   An array of module specifiers (supporting relative paths, extensionless paths, <code>tsconfig.json</code> aliases like <code>&quot;@/polyfills&quot;</code>, and npm package subpaths) injected at <strong>Line 1</strong> across every server compilation pass before any application code evaluates.
@@ -362,7 +361,7 @@ export default defineConfig({
               </div>
 
               {/* Plugins Option */}
-              <div id="plugins-option" className="mt-8 space-y-3">
+              <div id="plugins-option" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">3.8 Plugins Array (<code>plugins</code>)</h3>
                 <p>
                   An ordered array of <code>DinouPlugin</code> objects executed sequentially during server bootstrap (<code>configureServer</code>) and on every runtime HTTP request (<code>onRequest</code>).
@@ -371,7 +370,7 @@ export default defineConfig({
             </section>
 
             {/* Plugin Architecture */}
-            <section id="plugin-architecture" className="mt-12">
+            <section id="plugin-architecture" className="mt-12 scroll-mt-20">
               <h2>4. Dinou Plugin Architecture</h2>
               <p>
                 A Dinou plugin is a plain object (or factory returning an object) conforming to the <code>DinouPlugin</code> interface:
@@ -408,7 +407,7 @@ export default defineConfig({
             </section>
 
             {/* configureServer */}
-            <section id="configure-server" className="mt-12">
+            <section id="configure-server" className="mt-12 scroll-mt-20">
               <h2>5. Low-Level Node Hook: <code>configureServer</code></h2>
               <p>
                 Applications requiring direct access to Node.js HTTP primitives—attaching WebSocket servers, reusing existing Connect/Express-style <code>(req, res, next)</code> middlewares like <code>cors</code> or <code>helmet</code>, or serving sub-millisecond <code>/healthz</code> probes—can use <code>configureServer</code> without ejecting Dinou.
@@ -417,7 +416,7 @@ export default defineConfig({
                 <code>configureServer</code> runs in <strong>Node.js</strong> environments (<code>dinou dev</code>, <code>dinou start</code>, and <code>build:node:compile</code> standalone binaries) where an underlying <code>node:http</code> <code>Server</code> exists. Non-Node runtimes that use native fetch servers (<code>Bun.serve</code>, <code>Deno.serve</code>, Cloudflare Workers, Netlify Functions) ignore <code>configureServer</code> and execute <code>onRequest</code> directly.
               </p>
 
-              <div id="configure-server-context" className="mt-8 space-y-4">
+              <div id="configure-server-context" className="mt-8 space-y-4 scroll-mt-20">
                 <h3 className="text-lg font-bold">5.1 Context Parameters: <code>&#123; server, isDev, use &#125;</code></h3>
                 <p>
                   The hook receives a <code>ServerHookContext</code> object:
@@ -460,7 +459,7 @@ export default defineConfig({
                 </div>
               </div>
 
-              <div id="configure-server-pipeline" className="mt-8 space-y-3">
+              <div id="configure-server-pipeline" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">5.2 The Node Middleware Pipeline (<code>use</code>)</h3>
                 <p>
                   Middlewares registered via <code>use</code> follow the standard Node/Connect signature <code>(req, res, next)</code>:
@@ -497,7 +496,7 @@ export default defineConfig({
                 </ul>
               </div>
 
-              <div id="configure-server-comparison" className="mt-8 space-y-4">
+              <div id="configure-server-comparison" className="mt-8 space-y-4 scroll-mt-20">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   <ArrowRightLeft className="h-5 w-5 text-emerald-500" />
                   <span>5.3 configureServer vs. onRequest Decision Matrix</span>
@@ -553,14 +552,14 @@ export default defineConfig({
             </section>
 
             {/* onRequest Lifecycle */}
-            <section id="on-request-lifecycle" className="mt-12">
+            <section id="on-request-lifecycle" className="mt-12 scroll-mt-20">
               <h2>6. Web Standards Hook: <code>onRequest</code></h2>
               <p>
                 The <code>onRequest</code> hook receives the standard WHATWG <code>Request</code> object and Dinou&apos;s mutable <code>RequestContextStore</code>, running inside <code>AsyncLocalStorage</code> so <code>getContext()</code> is also available inside any helper function called by your plugin.
               </p>
 
               {/* The context Object */}
-              <div id="context-reference" className="mt-8 space-y-4">
+              <div id="context-reference" className="mt-8 space-y-4 scroll-mt-20">
                 <h3 className="text-lg font-bold">6.1 The context Object (RequestContextStore)</h3>
                 <p>
                   The <code>context</code> parameter exposes normalized request metadata, outgoing response helpers, unified environment variables/bindings, and custom request-scoped state:
@@ -663,7 +662,7 @@ export default defineConfig({
               </div>
 
               {/* Pattern 1 */}
-              <div id="pattern-intercept" className="mt-8 space-y-3">
+              <div id="pattern-intercept" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">6.2 Pattern 1: Short-Circuit, Webhooks &amp; SPA-Safe Redirects</h3>
                 <p>
                   If <code>onRequest</code> returns a Web <code>Response</code> (or calls <code>context.res.redirect(...)</code>), Dinou <strong>immediately terminates the pipeline</strong> and skips downstream plugins and React rendering:
@@ -695,7 +694,7 @@ export const apiAndGuardPlugin: DinouPlugin = {
               </div>
 
               {/* Pattern 2 */}
-              <div id="pattern-context" className="mt-8 space-y-3">
+              <div id="pattern-context" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">6.3 Pattern 2: Middleware, Response Headers &amp; Context Mutation</h3>
                 <p>
                   If <code>onRequest</code> returns <code>void</code> (<code>undefined</code>), Dinou continues to route resolution. Any headers, cookies, status codes, or custom context properties set during <code>onRequest</code> are preserved on the outgoing response (including explicit <code>Cache-Control</code> and custom HTTP status codes):
@@ -723,7 +722,7 @@ export const securityAndSessionPlugin: DinouPlugin = {
               </div>
 
               {/* Context in Server Functions */}
-              <div id="context-server-functions" className="mt-8 space-y-3">
+              <div id="context-server-functions" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   <ShieldCheck className="h-5 w-5 text-emerald-500" />
                   <span>6.4 Context Sharing with Server Functions</span>
@@ -760,7 +759,7 @@ export async function updateProfile(formData: FormData) {
               </div>
 
               {/* SSG vs Runtime */}
-              <div id="ssg-vs-runtime" className="mt-8 space-y-3">
+              <div id="ssg-vs-runtime" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">6.5 Build-Time SSG vs. Runtime Cached Pages</h3>
                 <p>
                   Dinou maintains a clean boundary between build-time static generation and live runtime traffic:
@@ -777,7 +776,7 @@ export async function updateProfile(formData: FormData) {
             </section>
 
             {/* Deep Dive: Execution Points & Lifecycle Timeline */}
-            <section id="execution-timeline" className="mt-12">
+            <section id="execution-timeline" className="mt-12 scroll-mt-20">
               <div className="rounded-xl border border-blue-500/25 bg-blue-50/30 dark:bg-blue-950/20 p-6 not-prose space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
@@ -909,7 +908,7 @@ export async function updateProfile(formData: FormData) {
             </section>
 
             {/* Universal Setup Files */}
-            <section id="universal-setup-files" className="mt-12">
+            <section id="universal-setup-files" className="mt-12 scroll-mt-20">
               <h2>8. Compile-Time Setup Files (<code>setupFiles</code>)</h2>
               <p>
                 In ECMAScript Modules (ESM), static <code>import</code> graphs evaluate before module bodies execute. Libraries that expect globals such as <code>DOMMatrix</code> or OpenTelemetry SDK hooks at module evaluation time will fail with a <code>ReferenceError</code> if polyfilled inside a component or <code>dinou.config.ts</code>.
@@ -918,7 +917,7 @@ export async function updateProfile(formData: FormData) {
                 Dinou&apos;s <strong>Setup Files</strong> pipeline guarantees your initialization modules run at <strong>Line 1</strong> across Node.js, Cloudflare Workers, Bun, Deno, and Netlify Functions.
               </p>
 
-              <div id="setup-hierarchy" className="mt-8 space-y-3">
+              <div id="setup-hierarchy" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">8.1 Resolution &amp; Precedence Hierarchy</h3>
                 <p>
                   Setup file paths support relative paths (<code>&quot;./src/polyfills.ts&quot;</code>), extensionless paths (<code>&quot;./src/polyfills&quot;</code>), <code>tsconfig.json</code> / <code>jsconfig.json</code> path aliases (<code>&quot;@/polyfills&quot;</code>), and npm package subpaths (<code>&quot;my-plugin/setup&quot;</code>), deduplicated in exact execution order:
@@ -936,7 +935,7 @@ export async function updateProfile(formData: FormData) {
                 </ol>
               </div>
 
-              <div id="setup-polyfills" className="mt-8 space-y-3">
+              <div id="setup-polyfills" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">8.2 Environment Polyfills Recipe (DOMMatrix / Geometry)</h3>
                 <p>
                   To polyfill W3C geometry interfaces (required by packages like <code>pdfjs-dist</code>) in headless server runtimes and standalone compiled binaries:
@@ -971,10 +970,10 @@ if (typeof globalThis.ImageData === "undefined") {
             </section>
 
             {/* Real-World Examples */}
-            <section id="real-world-examples" className="mt-12">
+            <section id="real-world-examples" className="mt-12 scroll-mt-20">
               <h2>9. Real-World Plugin Examples (Socket.IO, Stripe &amp; Auth)</h2>
               <p>
-                Place internal plugin modules inside an underscore-prefixed directory such as <code>src/_plugins/</code> so Dinou&apos;s file-system router ignores them as URL routes while keeping full <code>@/*</code> alias support (see <Link href="/docs/routing">Routing</Link>):
+                Place plugin modules in a clean directory such as <code>src/plugins/</code>—any folder without a <code>page.tsx</code> is automatically ignored by Dinou&apos;s file-system router while retaining full <code>@/*</code> alias support and dev hot-reloading (avoid leading underscores like <code>_plugins/</code>, which Dinou reserves for parked/excluded directories; see <Link href="/docs/routing#private-folders">Routing</Link>):
               </p>
 
               <TabbedCodeBlock
@@ -986,9 +985,9 @@ if (typeof globalThis.ImageData === "undefined") {
                     language: "typescript",
                     code: `// dinou.config.ts
 import { defineConfig } from "dinou";
-import { socketServerPlugin } from "@/_plugins/socket-server";
-import { stripeWebhookPlugin } from "@/_plugins/stripe-webhook";
-import { authGuardPlugin } from "@/_plugins/auth-guard";
+import { socketServerPlugin } from "@/plugins/socket-server";
+import { stripeWebhookPlugin } from "@/plugins/stripe-webhook";
+import { authGuardPlugin } from "@/plugins/auth-guard";
 
 export default defineConfig({
   ppr: true,
@@ -1007,9 +1006,9 @@ export default defineConfig({
                   },
                   {
                     id: "socket-plugin",
-                    label: "src/_plugins/socket-server.ts",
+                    label: "src/plugins/socket-server.ts",
                     language: "typescript",
-                    code: `// src/_plugins/socket-server.ts
+                    code: `// src/plugins/socket-server.ts
 import type { DinouPlugin } from "dinou";
 import { Server as SocketIOServer } from "socket.io";
 import { createClient } from "redis";
@@ -1061,9 +1060,9 @@ export function socketServerPlugin(): DinouPlugin {
                   },
                   {
                     id: "stripe-plugin",
-                    label: "src/_plugins/stripe-webhook.ts",
+                    label: "src/plugins/stripe-webhook.ts",
                     language: "typescript",
-                    code: `// src/_plugins/stripe-webhook.ts
+                    code: `// src/plugins/stripe-webhook.ts
 import type { DinouPlugin } from "dinou";
 import { revalidateTag } from "dinou/server";
 import Stripe from "stripe";
@@ -1099,9 +1098,9 @@ export function stripeWebhookPlugin(): DinouPlugin {
                   },
                   {
                     id: "auth-plugin",
-                    label: "src/_plugins/auth-guard.ts",
+                    label: "src/plugins/auth-guard.ts",
                     language: "typescript",
-                    code: `// src/_plugins/auth-guard.ts
+                    code: `// src/plugins/auth-guard.ts
 import type { DinouPlugin } from "dinou";
 
 declare function verifyToken(token: string): Promise<{ id: string; email: string } | null>;
@@ -1136,7 +1135,7 @@ export function authGuardPlugin(): DinouPlugin {
             </section>
 
             {/* Registration & Execution Pipeline Order */}
-            <section id="plugin-registration-order" className="mt-12">
+            <section id="plugin-registration-order" className="mt-12 scroll-mt-20">
               <h2>10. Registration &amp; Execution Pipeline Order</h2>
               <p>
                 Plugins declared in the <code>plugins</code> array of <code>defineConfig</code> execute deterministically from top to bottom:
@@ -1172,7 +1171,7 @@ export function authGuardPlugin(): DinouPlugin {
             </section>
 
             {/* Fault Isolation */}
-            <section id="fault-isolation" className="mt-12">
+            <section id="fault-isolation" className="mt-12 scroll-mt-20">
               <h2>11. Fault Isolation &amp; Error Handling</h2>
               <p>
                 Dinou wraps both server-startup and per-request plugin hooks in isolated error boundaries:
