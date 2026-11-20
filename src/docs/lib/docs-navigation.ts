@@ -30,6 +30,7 @@ import {
   Shredder,
   ShieldCheck,
   Layers,
+  ArrowLeftRight,
 } from "lucide-react";
 
 export interface NavItem {
@@ -108,6 +109,11 @@ export const docsNavigation: NavSection[] = [
         title: "Server Functions",
         href: "/docs/server-functions",
         icon: Zap,
+      },
+      {
+        title: "Request Context",
+        href: "/docs/request-context",
+        icon: ArrowLeftRight,
       },
       {
         title: "On-Demand Revalidation",

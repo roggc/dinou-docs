@@ -1453,7 +1453,8 @@ beforeEach(() => {
                 <p className="mt-4 text-xs text-muted-foreground leading-relaxed">
                   <strong>Note for external worker scripts:</strong> If you run standalone background scripts or CLI tools outside
                   the Dinou web server that need to perform cache purges, you can imperatively bind the storage adapter using{" "}
-                  <code className="text-foreground font-mono">setStorageAdapter(adapter)</code> from{" "}
+                  <code className="text-foreground font-mono">setStorageAdapter(adapter)</code> or inspect the active instance via{" "}
+                  <code className="text-foreground font-mono">getStorageAdapter()</code> from{" "}
                   <code className="text-foreground font-mono">&quot;dinou/server&quot;</code>.
                 </p>
               </section>

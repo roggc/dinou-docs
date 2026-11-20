@@ -1231,7 +1231,12 @@ export async function toggleLikeAction(postId: string) {
                 <code>&quot;dinou/server&quot;</code>, <code>&quot;dinou&quot;</code>, and contextual{" "}
                 <code>&quot;./dinou&quot;</code>) to access the underlying request
                 and response lifecycle synchronously within any Server Function
-                or SSR component.
+                or SSR component. For the complete guide covering Server Components,
+                SSG/PPR bailout rules, unified multi-runtime <code>env</code> bindings,
+                and plugin state, see{" "}
+                <Link href="/docs/request-context" className="text-blue-500 hover:underline font-medium">
+                  Request Context (<code>getContext</code>)
+                </Link>.
               </p>
 
               <div className="border rounded-lg p-4 bg-card not-prose my-6">

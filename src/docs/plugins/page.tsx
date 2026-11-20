@@ -562,7 +562,7 @@ export default defineConfig({
               <div id="context-reference" className="mt-8 space-y-4 scroll-mt-20">
                 <h3 className="text-lg font-bold">6.1 The context Object (RequestContextStore)</h3>
                 <p>
-                  The <code>context</code> parameter exposes normalized request metadata, outgoing response helpers, unified environment variables/bindings, and custom request-scoped state:
+                  The <code>context</code> parameter exposes normalized request metadata, outgoing response helpers, unified environment variables/bindings, and custom request-scoped state (the exact same store returned by <Link href="/docs/request-context" className="text-blue-500 hover:underline font-medium"><code>getContext()</code></Link> in Server Components, loaders, and Server Functions):
                 </p>
 
                 <CodeBlock

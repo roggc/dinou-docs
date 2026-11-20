@@ -31,6 +31,7 @@
 - [Static & Dynamic Rendering](https://dinou.dev/docs/rendering): Static-by-default SSG, ISG, ISR, Dynamic SSR, Partial Prerendering (PPR), `noDynamic()`, Automatic Static Bailout, and progressive `<Suspense>` streaming.
 - [3D Layered Segmentation](https://dinou.dev/docs/3d-segmentation): Horizontal Layout Segmentation, Vertical `<DinouCacheSlot>` Micro-ISR, and PPR Dynamic Holes combined.
 - [Server Functions](https://dinou.dev/docs/server-functions): Module-level and inline `"use server"` RPC functions, form actions, streaming JSX/Server Components, `getContext()`, and error propagation.
+- [Request Context](https://dinou.dev/docs/request-context): Synchronous `getContext()` via `AsyncLocalStorage` for cookies, HTTP headers, normalized `req.path`, `res` mutations, SSG/PPR bailout rules, unified `env`/`ctx` bindings, and plugin state.
 - [On-Demand Revalidation](https://dinou.dev/docs/revalidation): `revalidatePath`, `revalidatePage`, `revalidateLayout`, `revalidateTag`, lazy HTML re-composition, and distributed storage adapters (`FileSystemStorage`, `RedisStorage`, `CloudflareKVStorage`, `DenoKVStorage`, `MemoryStorage`).
 - [Data Fetching](https://dinou.dev/docs/data-fetching): All 14 execution and data-fetching strategies in Dinou, including un-awaited `Promise` props with React 19 `use()`.
 - [The Dinou Pattern](https://dinou.dev/docs/pattern): Architectural design patterns combining Server Components, Client Components, 3D caching, and Server Functions.

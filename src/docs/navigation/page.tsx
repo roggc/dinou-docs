@@ -44,10 +44,10 @@ const tocItems = [
 export default function Page() {
   return (
     <div className="flex-1 flex flex-col xl:flex-row w-full max-w-[100vw]">
-      <title>Client Navigation & Transitions | Dinou Docs</title>
+      <title>Navigation &amp; URL Hooks | Dinou Docs</title>
       <meta
         name="description"
-        content="Master Dinou's universal and client-side SPA navigation: soft transitions, automatic hover prefetching, URL hooks, universal redirects, and the Client Router Cache."
+        content="Master Dinou's universal and client-side SPA navigation: soft transitions, automatic hover prefetching, URL hooks (usePathname & useSearchParams), universal redirects, and the Client Router Cache."
       />
       <link rel="canonical" href="https://dinou.dev/docs/navigation" />
 
@@ -60,14 +60,14 @@ export default function Page() {
                 variant="secondary"
                 className="font-mono text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border-blue-200 dark:border-blue-900"
               >
-                Client &amp; Universal Runtime
+                Universal &amp; Client Runtime
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
                 Dinou Complete Guide
               </Badge>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Client Navigation &amp; Transitions
+              Navigation &amp; URL Hooks
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
               Master Dinou&apos;s navigation system: smooth SPA soft transitions, automatic hover prefetching, universal URL hooks (<code>usePathname</code> &amp; <code>useSearchParams</code>), universal <code>redirect()</code>, the Client Router Cache lifecycle with <code>fresh</code>, imperative <code>useRouter</code> controls, and Directory-First relative routing.
@@ -327,10 +327,14 @@ export default function LoginButton() {
                     </div>
                   </CardHeader>
                   <CardContent className="p-4 pt-1 text-xs text-muted-foreground leading-relaxed">
-                    Returns a standard <code>URLSearchParams</code> instance for the current query string. Calling it in a <strong>Server Component</strong> triggers dynamic SSR bailout, while calling it in a <strong>Client Component</strong> preserves SSG, ISR, PPR, and <code>export-static</code> (hydrating with an empty <code>URLSearchParams</code> first before syncing live query params with zero hydration mismatch).
+                    Returns a standard <code>URLSearchParams</code> instance for the current query string. Calling it in a <strong>Server Component</strong> triggers dynamic SSR bailout (or registers a <strong>Dynamic PPR Hole</strong> when wrapped in <code>&lt;Suspense&gt;</code> on a <code>ppr = true</code> route), while calling it in a <strong>Client Component</strong> preserves SSG, ISR, PPR, and <code>export-static</code> (hydrating with an empty <code>URLSearchParams</code> first before syncing live query params with zero hydration mismatch).
                   </CardContent>
                 </Card>
               </div>
+
+              <p className="text-xs text-muted-foreground mb-4">
+                See full Server &amp; Client signatures in <Link href="/docs/api-reference#usepathname" className="text-blue-500 hover:underline font-medium">API Reference: <code>usePathname()</code></Link> and <Link href="/docs/api-reference#usesearchparams" className="text-blue-500 hover:underline font-medium"><code>useSearchParams()</code></Link>. For cookies, HTTP headers, response mutations, or server env bindings, see <Link href="/docs/request-context" className="text-blue-500 hover:underline font-medium">Request Context (<code>getContext</code>)</Link>.
+              </p>
 
               <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
                 {`// src/components/filter-tabs.tsx
