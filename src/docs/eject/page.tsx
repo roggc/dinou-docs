@@ -238,7 +238,7 @@ npm run eject`}
 │   ├── netlify.js                  # Netlify Functions v2 entry wrapper (.dinou/netlify/functions/ssr.mjs)
 │   ├── cloudflare.js               # Cloudflare Workers Fetch handler (.dinou/cloudflare/worker.js)
 │   ├── bun.js                      # Native Bun.serve() adapter (.dinou/bun/server.js)
-│   └── deno.js                     # Native Deno.serve() adapter (.dinou/deno/server.js)
+│   └── deno.js                     # Native Deno.serve() adapter (.dinou/deno/main.js)
 │
 ├── esbuild/ · rollup/ · webpack/   # Client Bundler Pipelines & Custom Plugins/Loaders
 │
@@ -401,7 +401,8 @@ npm run build:vendors`}
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
 {`// dinou/core/handler.js
-export async function handleRequest(request, platformContext = {}) {
+// Rename the built-in handleRequest() to runCorePipeline(), then wrap it:
+async function handleRequest(request, platformContext = {}) {
   const url = new URL(request.url);
 
   // 1. Ultra-fast zero-allocation health probe before static/RSC routing
