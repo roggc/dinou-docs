@@ -45,7 +45,7 @@ export default function Page() {
       <title>Path Aliases | Dinou Docs</title>
       <meta
         name="description"
-        content="Configure TypeScript and JavaScript path aliases in tsconfig.json or jsconfig.json with full parity across Esbuild, Rollup, Webpack, Node.js, Bun, Deno, and Cloudflare Workers."
+        content="Configure TypeScript and JavaScript path aliases in tsconfig.json or jsconfig.json with full parity across Esbuild, Rollup, Webpack, Node.js, Bun, Deno, Cloudflare Workers, and Netlify."
       />
       <link rel="canonical" href="https://dinou.dev/docs/alias" />
 
@@ -78,7 +78,7 @@ export default function Page() {
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             {/* Overview */}
-            <section id="overview">
+            <section id="overview" className="scroll-mt-20">
               <h2>Import Aliases in Dinou</h2>
               <p>
                 In growing codebases, deeply nested relative paths like{" "}
@@ -92,7 +92,7 @@ export default function Page() {
                 <code>extends</code> rules declared in your <code>tsconfig.json</code> (or{" "}
                 <code>jsconfig.json</code>) work identically across{" "}
                 <Link href="/docs/bundlers">Esbuild, Rollup, and Webpack</Link> as well as{" "}
-                <Link href="/docs/deployment">Node.js, Cloudflare Workers, Bun, Deno, and Static Export</Link>.
+                <Link href="/docs/deployment">Node.js, Bun, Deno, Cloudflare Workers, Netlify, and Static Export</Link>.
               </p>
 
               <div className="grid gap-6 md:grid-cols-2 not-prose my-6">
@@ -127,7 +127,7 @@ export default function Page() {
             </section>
 
             {/* tsconfig Setup */}
-            <section id="tsconfig-setup" className="mt-12">
+            <section id="tsconfig-setup" className="mt-12 scroll-mt-20">
               <h2>Configuring tsconfig.json &amp; jsconfig.json</h2>
               <p>
                 Declare your <code>compilerOptions.paths</code> mappings in your project root{" "}
@@ -141,6 +141,7 @@ export default function Page() {
               >
 {`{
   "compilerOptions": {
+    "rootDirs": ["src", ".dinou/routes"],
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -153,6 +154,7 @@ export default function Page() {
   },
   "include": [
     "src",
+    "dinou-env.d.ts",
     "dinou.config.ts",
     ".dinou/types/**/*.d.ts"
   ]
@@ -172,7 +174,7 @@ export default function Page() {
                 </AlertDescription>
               </Alert>
 
-              <div id="multiple-aliases" className="mt-8 space-y-3">
+              <div id="multiple-aliases" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">Granular Aliases &amp; Specificity</h3>
                 <p>
                   Beyond <code>@/*</code>, you can define domain-specific aliases, exact single-file aliases
@@ -207,7 +209,7 @@ export default function Page() {
                 </p>
               </div>
 
-              <div id="extends-and-fallbacks" className="mt-8 space-y-3">
+              <div id="extends-and-fallbacks" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">Config Inheritance (extends) &amp; Multi-Target Fallbacks</h3>
                 <p>
                   Monorepos and multi-package workspaces can inherit <code>baseUrl</code> and{" "}
@@ -242,7 +244,7 @@ export default function Page() {
             </section>
 
             {/* Universal Support */}
-            <section id="universal-support" className="mt-12">
+            <section id="universal-support" className="mt-12 scroll-mt-20">
               <h2>Where Aliases Work (Code, CSS, &amp; Assets)</h2>
               <p>
                 Dinou propagates the exact same alias rules across every compilation pass &mdash; RSC, SSR,
@@ -250,7 +252,7 @@ export default function Page() {
               </p>
 
               {/* Sub-section: Code Imports */}
-              <div id="code-imports" className="mt-8 space-y-3">
+              <div id="code-imports" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">1. TypeScript, JavaScript, &amp; JSON Modules</h3>
                 <p>
                   Use aliases across <Link href="/docs/server-client-components">Server Components</Link>,{" "}
@@ -285,7 +287,7 @@ export default async function DashboardPage(_props: PageProps) {
               </div>
 
               {/* Sub-section: CSS Imports */}
-              <div id="css-imports" className="mt-8 space-y-3">
+              <div id="css-imports" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">
                   2. Stylesheets, CSS Modules, @import, &amp; url()
                 </h3>
@@ -327,7 +329,7 @@ export function HighlightCard({ children }: { children: React.ReactNode }) {
               </div>
 
               {/* Sub-section: Asset Imports */}
-              <div id="asset-imports" className="mt-8 space-y-3">
+              <div id="asset-imports" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">3. Static Media &amp; Custom Assets</h3>
                 <p>
                   All 26 built-in <Link href="/docs/assets">media, vector, audio/video, and font formats</Link>{" "}
@@ -355,7 +357,7 @@ export function Hero() {
             </section>
 
             {/* Extension and Index Resolution */}
-            <section id="index-and-extensions" className="mt-12">
+            <section id="index-and-extensions" className="mt-12 scroll-mt-20">
               <h2>Extension, Index, &amp; ESM Resolution</h2>
               <p>
                 Dinou resolves extensionless imports, directory <code>index</code> files, and TypeScript
@@ -409,7 +411,7 @@ export function Hero() {
             </section>
 
             {/* Contextual ./dinou vs Aliases */}
-            <section id="contextual-dinou" className="mt-12">
+            <section id="contextual-dinou" className="mt-12 scroll-mt-20">
               <h2>Contextual ./dinou vs. Path Aliases</h2>
               <p>
                 Dinou combines your <code>tsconfig.json</code> aliases with its auto-generated{" "}
@@ -429,9 +431,10 @@ export function Hero() {
                     <p>
                       Inside <code>page.tsx</code>, <code>layout.tsx</code>, or{" "}
                       <code>page_functions.ts</code>, import <code>PageProps</code>,{" "}
-                      <code>LayoutProps</code>, <code>PageFunctions</code>, and <code>Link</code> from{" "}
-                      <code>&quot;./dinou&quot;</code> so TypeScript narrows dynamic route{" "}
-                      <code>params</code> and <code>searchParams</code> for that exact directory.
+                      <code>LayoutProps</code>, <code>PageFunctions</code>, <code>Link</code>, and{" "}
+                      <code>useRouter</code> from <code>&quot;./dinou&quot;</code> so TypeScript
+                      narrows dynamic route <code>params</code>, sibling <code>@slot</code> props,
+                      and relative navigation targets for that exact directory.
                     </p>
                   </CardContent>
                 </Card>
@@ -457,7 +460,7 @@ export function Hero() {
             </section>
 
             {/* IDE Setup & Hot Reload */}
-            <section id="ide-setup" className="mt-12">
+            <section id="ide-setup" className="mt-12 scroll-mt-20">
               <h2>IDE Autocomplete &amp; Live Dev Reload</h2>
               <p>
                 Because Dinou reads standard <code>tsconfig.json</code> and <code>jsconfig.json</code> files
@@ -503,7 +506,7 @@ export function Hero() {
             </section>
 
             {/* Troubleshooting */}
-            <section id="troubleshooting" className="mt-12">
+            <section id="troubleshooting" className="mt-12 scroll-mt-20">
               <h2>Best Practices &amp; Common Gotchas</h2>
 
               <div className="space-y-4 mt-4">
