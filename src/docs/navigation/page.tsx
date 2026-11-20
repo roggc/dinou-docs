@@ -153,7 +153,7 @@ export default function Page() {
                 2. The &lt;Link&gt; Component &amp; Prefetching
               </h2>
               <p>
-                The primary way to navigate between pages is the <code>&lt;Link&gt;</code> component imported from <code>&quot;dinou&quot;</code> (or from contextual <code>&quot;./dinou&quot;</code> inside route folders when using relative links). It intercepts standard left-clicks, preserves modifier clicks (<code>Cmd</code>/<code>Ctrl</code>/<code>Shift</code>/<code>Alt</code> to open in a new tab), skips external URLs and local <code>#hash</code> anchors, and prefetches on hover:
+                The primary way to navigate between pages is the <code>&lt;Link&gt;</code> component imported from <code>&quot;dinou&quot;</code> (or from contextual <code>&quot;./dinou&quot;</code> inside route folders when using relative links). It intercepts standard left-clicks, preserves modifier clicks (<code>Cmd</code>/<code>Ctrl</code>/<code>Shift</code>/<code>Alt</code>) and middle/right clicks, respects <code>target</code> (e.g. <code>target=&quot;_blank&quot;</code>) and <code>download</code>, skips external URLs and local <code>#hash</code> anchors, and prefetches internal routes on hover:
               </p>
 
               <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
@@ -194,7 +194,7 @@ export function NavigationBar({ post }: { post: { slug: string } }) {
                 <Globe className="h-4 w-4" />
                 <AlertTitle>Native HTML &lt;a&gt; Anchor Elements</AlertTitle>
                 <AlertDescription className="text-xs">
-                  Standard internal HTML <code>&lt;a&gt;</code> tags also trigger client-side soft navigation via global click delegation in Dinou. However, they do not provide compile-time route validation, hover prefetching, parameter interpolation, or the <code>fresh</code> prop offered by <code>&lt;Link&gt;</code>.
+                  Standard internal HTML <code>&lt;a&gt;</code> tags also trigger client-side soft navigation via global click delegation in Dinou (while respecting <code>target</code>, <code>download</code>, modifier keys, non-left clicks, and external URLs). However, they do not provide compile-time route validation, hover prefetching, parameter interpolation, or the <code>fresh</code> prop offered by <code>&lt;Link&gt;</code>.
                 </AlertDescription>
               </Alert>
             </section>
@@ -245,7 +245,7 @@ export default function LoginButton() {
                         router.push(href, options?)
                       </td>
                       <td className="p-3.5 text-muted-foreground">
-                        Navigates to the target route and pushes a new entry onto the browser history stack. Supports <code>&#123; fresh: true &#125;</code>, <code>&#123; params &#125;</code> when <code>href</code> is a dynamic pattern (e.g. <code>&quot;/blog/[slug]&quot;</code>), and <code>&#123; from &#125;</code> when resolving relative paths from global <code>&quot;dinou&quot;</code>.
+                        Navigates to the target route and pushes a new entry onto the browser history stack. Supports <code>&#123; fresh: true &#125;</code>, <code>&#123; params &#125;</code> for dynamic patterns (e.g. <code>&quot;/blog/[slug]&quot;</code>), <code>&#123; from &#125;</code> for relative paths, <code>#hash</code> scrolling, and external URLs (falling back cleanly to <code>window.location.assign()</code>).
                       </td>
                     </tr>
                     <tr>
@@ -253,7 +253,7 @@ export default function LoginButton() {
                         router.replace(href, options?)
                       </td>
                       <td className="p-3.5 text-muted-foreground">
-                        Navigates to the route, replacing the current history entry without pushing a new state. Supports <code>&#123; fresh: true &#125;</code>, <code>&#123; params &#125;</code>, and <code>&#123; from &#125;</code>.
+                        Navigates to the route, replacing the current history entry without pushing a new state. Supports <code>&#123; fresh: true &#125;</code>, <code>&#123; params &#125;</code>, <code>&#123; from &#125;</code>, <code>#hash</code> fragments, and external URLs (via <code>window.location.replace()</code>).
                       </td>
                     </tr>
                     <tr>
@@ -285,12 +285,16 @@ export default function LoginButton() {
                         router.refreshSlot(slotId, options?)
                       </td>
                       <td className="p-3.5 text-muted-foreground">
-                        Re-fetches and updates matching <code>&lt;DinouCacheSlot&gt;</code> boundaries without re-rendering the surrounding page, returning a <code>Promise&lt;void&gt;</code> that resolves once settled. Pass <code>&#123; fresh: true &#125;</code> to bypass server-side slot cache. Also exported standalone as <code>refreshSlot(slotId, options?)</code>.
+                        Re-fetches and updates matching <code>&lt;DinouCacheSlot&gt;</code> boundaries (by <code>id</code>, <code>tag</code>, or <code>&quot;*&quot;</code> wildcard) without re-rendering the surrounding page, returning a <code>Promise&lt;void&gt;</code> that resolves once settled. Pass <code>&#123; fresh: true &#125;</code> to bypass server-side slot cache. Also exported standalone as <code>refreshSlot(slotId, options?)</code>.
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
+
+              <p className="text-xs text-muted-foreground mt-3">
+                <strong>Referential Stability:</strong> The object returned by <code>useRouter()</code> (both from <code>&quot;dinou&quot;</code> and contextual <code>&quot;./dinou&quot;</code>) is memoized against router context, making it safe to include in <code>useEffect</code> or <code>useCallback</code> dependency arrays without triggering re-render loops.
+              </p>
             </section>
 
             {/* Section 4: Reading the URL (usePathname & useSearchParams) */}
@@ -323,7 +327,7 @@ export default function LoginButton() {
                     </div>
                   </CardHeader>
                   <CardContent className="p-4 pt-1 text-xs text-muted-foreground leading-relaxed">
-                    Returns a standard <code>URLSearchParams</code> instance for the current query string. On static/PPR shells, it safely yields an empty <code>URLSearchParams</code> during initial hydration before syncing on the client, avoiding hydration mismatches.
+                    Returns a standard <code>URLSearchParams</code> instance for the current query string. Calling it in a <strong>Server Component</strong> triggers dynamic SSR bailout, while calling it in a <strong>Client Component</strong> preserves SSG, ISR, PPR, and <code>export-static</code> (hydrating with an empty <code>URLSearchParams</code> first before syncing live query params with zero hydration mismatch).
                   </CardContent>
                 </Card>
               </div>
@@ -375,7 +379,7 @@ import { getContext, redirect } from "dinou";
 
 export default async function DashboardPage() {
   const ctx = getContext();
-  const sessionToken = ctx?.req.cookies.session;
+  const sessionToken = ctx.req.cookies.session;
 
   if (!sessionToken) {
     // ✅ Always use \`return redirect(...)\`
@@ -389,10 +393,10 @@ export default async function DashboardPage() {
 
               <Alert className="not-prose my-4">
                 <CornerDownRight className="h-4 w-4 text-blue-500" />
-                <AlertTitle>Adaptive HTTP 307 vs. Client SPA Fallback</AlertTitle>
+                <AlertTitle>Adaptive HTTP 302 vs. Client SPA Fallback</AlertTitle>
                 <AlertDescription className="text-xs space-y-1">
                   <p>
-                    <strong>Before headers are sent (Server):</strong> <code>redirect(&quot;/login&quot;)</code> issues a native <strong>HTTP 307</strong> redirect on initial document requests (optimal for SEO and zero-flash redirects) or sets <code>x-rsc-redirect</code> during soft RSC navigation.
+                    <strong>Before headers are sent (Server):</strong> <code>redirect(&quot;/login&quot;)</code> issues a native <strong>HTTP 302</strong> redirect on initial document requests (optimal for SEO and zero-flash redirects) or sets <code>x-rsc-redirect</code> during soft RSC navigation. Calling <code>redirect()</code> inside <code>page_functions.ts</code> or <code>layout_functions.ts</code> (<code>getProps</code>) immediately short-circuits rendering before any JSX executes.
                   </p>
                   <p>
                     <strong>After streaming starts or on the Client:</strong> If React has already flushed headers inside a streamed <code>&lt;Suspense&gt;</code> boundary—or if called on the client—Dinou automatically renders <code>&lt;ClientRedirect to=&quot;/login&quot; /&gt;</code> to replace the route seamlessly in the browser.
@@ -427,7 +431,7 @@ export default async function DashboardPage() {
                       </div>
                     </CardHeader>
                     <CardContent className="p-4 pt-1 text-xs text-muted-foreground leading-relaxed">
-                      Stores streaming promises for RSC page payloads, keyed by <code>pathname + search</code>.
+                      Stores streaming promises for RSC page payloads, keyed by <code>pathname + search</code> (with any <code>#hash</code> fragment stripped cleanly from cache keys and wire fetches).
                     </CardContent>
                   </Card>
 

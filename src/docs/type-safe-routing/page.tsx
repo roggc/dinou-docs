@@ -1119,10 +1119,10 @@ export default function WorkspaceSidebar({
                     <strong>Zero Route Strings on Types:</strong> <code>PageProps</code>, <code>LayoutProps</code> (including auto-inferred sibling <code>@slot</code> props!), <code>SlotProps</code>, <code>ErrorProps</code>, <code>NotFoundProps</code>, <code>PageFunctions</code>, <code>LayoutFunctions</code>, and <code>RouteParams</code> are pre-bound to that folder&apos;s exact route segment—no string generic needed! If you rename a folder, every type and relative link updates automatically.
                   </li>
                   <li>
-                    <strong>Automatic <code>from</code> on <code>&lt;Link&gt;</code> &amp; <code>useRouter()</code>:</strong> Both <code>Link</code> and <code>useRouter()</code> imported from <code>&quot;./dinou&quot;</code> are pre-bound to that folder&apos;s URL origin (<code>ROUTE</code>). Pressing <code>Ctrl + Space</code> inside <code>&lt;Link to=&quot;&quot;&gt;</code> or <code>router.push(&quot;&quot;)</code> immediately suggests and validates <strong>both</strong> strict relative targets (<code>&quot;sub&quot;</code>, <code>&quot;./sub&quot;</code>, <code>&quot;../..&quot;</code>) <strong>and</strong> absolute static/dynamic routes—without writing <code>from</code>!
+                    <strong>Automatic <code>from</code> on <code>&lt;Link&gt;</code> &amp; Memoized <code>useRouter()</code>:</strong> Both <code>Link</code> and <code>useRouter()</code> imported from <code>&quot;./dinou&quot;</code> are pre-bound to that folder&apos;s URL origin (<code>ROUTE</code>), with <code>useRouter()</code> memoized for referential stability across re-renders. Pressing <code>Ctrl + Space</code> inside <code>&lt;Link to=&quot;&quot;&gt;</code> or <code>router.push(&quot;&quot;)</code> immediately suggests and validates <strong>both</strong> strict relative targets (<code>&quot;sub&quot;</code>, <code>&quot;./sub&quot;</code>, <code>&quot;../..&quot;</code>) <strong>and</strong> absolute static/dynamic routes—without writing <code>from</code>!
                   </li>
                   <li>
-                    <strong>Full <code>&quot;dinou&quot;</code> Parity:</strong> <code>&quot;./dinou&quot;</code> also exports the folder&apos;s literal <code>ROUTE</code> constant alongside all standard runtime utilities (<code>redirect</code>, <code>ClientRedirect</code>, <code>usePathname</code>, <code>useSearchParams</code>, <code>getContext</code>, <code>noDynamic</code>, <code>refreshSlot</code>, <code>useNavigationLoading</code>, <code>defineConfig</code>), so route files only need one unified import.
+                    <strong>Full <code>&quot;dinou&quot;</code> Parity:</strong> <code>&quot;./dinou&quot;</code> also exports the folder&apos;s literal <code>ROUTE</code> constant alongside all standard runtime utilities (<code>redirect</code>, <code>ClientRedirect</code>, <code>usePathname</code>, <code>useSearchParams</code>, <code>getContext</code>, <code>noDynamic</code>, <code>refreshSlot</code>, <code>useNavigationLoading</code>, <code>defineConfig</code>) and TypeScript helper types (<code>DinouEnv</code>, <code>RequestContextStore</code>, <code>ResponseProxy</code>, <code>DinouConfig</code>, <code>DinouPlugin</code>, <code>DinouRoute</code>, <code>DinouLinkTarget</code>, <code>StaticPathParams</code>, etc.), so route files only need one unified import.
                   </li>
                   <li>
                     <strong>When to Choose <code>&quot;./dinou&quot;</code> vs. <code>&quot;dinou&quot;</code>:</strong> Reach for <code>&quot;./dinou&quot;</code> specifically when a route file needs <strong>folder-contextual types</strong> (<code>PageProps</code>, <code>LayoutProps</code>, <code>PageFunctions</code>, etc.) or <strong>relative navigation</strong> without repeating <code>from</code>. For shared UI components (<code>src/components/</code>), utilities (<code>src/lib/</code>), or components that only perform absolute navigation and universal hooks, prefer importing from <code>&quot;dinou&quot;</code> so those modules remain decoupled from any folder path. Global shared folders like <code>src/components/</code> intentionally do <strong>not</strong> receive <code>&quot;./dinou&quot;</code> (failing immediately with <code>TS2307</code> if misused), and you should avoid naming a local file or subfolder <code>dinou</code> inside a route folder so it does not shadow <code>&quot;./dinou&quot;</code>.
@@ -1470,6 +1470,7 @@ export default function WorkspaceRootLayout({ children, sidebar }: LayoutProps) 
                       <li><code>DinouRouteParamsMap</code>: Page &amp; <code>not_found.*</code> param dictionaries.</li>
                       <li><code>DinouLayoutParamsMap</code> &amp; <code>DinouLayoutSlotsMap</code>: Intermediate &amp; leaf layout params plus auto-inferred <code>@slot</code> props.</li>
                       <li><code>DinouSlotParamsMap</code> &amp; <code>DinouErrorParamsMap</code>: Parallel <code>@slot</code> and error boundary params.</li>
+                      <li><strong>Custom Assets &amp; Environment Keys:</strong> Ambient <code>declare module &quot;*.&lt;ext&gt;&quot;</code> entries for custom <code>assetExtensions</code> in <code>dinou.config.ts</code> plus <code>NodeJS.ProcessEnv</code> keys discovered from root <code>.env*</code> files.</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -1506,7 +1507,7 @@ export default function WorkspaceRootLayout({ children, sidebar }: LayoutProps) 
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground space-y-2">
                     <p>
-                      Global route declarations and virtual <code>&quot;./dinou&quot;</code> modules are wired cleanly in your root <code>tsconfig.json</code> via <code>rootDirs</code> and <code>include</code>:
+                      Global route declarations and virtual <code>&quot;./dinou&quot;</code> modules are wired cleanly in your root <code>tsconfig.json</code> (or <code>jsconfig.json</code>) via <code>rootDirs</code> and <code>include</code>:
                     </p>
                     <div className="font-mono text-[11px] bg-muted/80 p-2 rounded border border-border/60 whitespace-pre-wrap">
                       {`"compilerOptions": { "rootDirs": ["src", ".dinou/routes"], ... },
@@ -1547,11 +1548,11 @@ export default function WorkspaceRootLayout({ children, sidebar }: LayoutProps) 
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground space-y-2">
                     <p>
-                      Runs immediately at boot, then arms a low-overhead filesystem watcher on <code>src/</code>:
+                      Runs immediately at boot, then arms low-overhead filesystem watchers across <code>src/</code> and project root config files:
                     </p>
                     <ul className="list-disc pl-4 space-y-1">
-                      <li>Detects added, renamed, or deleted <code>page</code>, <code>page_functions</code>, <code>layout</code>, <code>layout_functions</code>, <code>error</code>, and <code>not_found</code> files (including inside <code>@slot</code> folders).</li>
-                      <li>Regenerates <code>.dinou/types/routes.d.ts</code> and syncs/prunes <code>.dinou/routes/**/dinou.&#123;js,d.ts&#125;</code> in under 2ms.</li>
+                      <li>Detects added, renamed, or deleted <code>page</code>, <code>page_functions</code>, <code>layout</code>, <code>layout_functions</code>, <code>error</code>, and <code>not_found</code> files (including inside <code>@slot</code> folders), plus changes to <code>dinou.config.&#123;ts,js,mjs&#125;</code>, <code>.env*</code>, and <code>tsconfig.json</code> / <code>jsconfig.json</code>.</li>
+                      <li>Regenerates <code>.dinou/types/routes.d.ts</code> (routes, custom <code>assetExtensions</code>, and <code>NodeJS.ProcessEnv</code> keys) and syncs/prunes <code>.dinou/routes/**/dinou.&#123;js,d.ts&#125;</code> in under 2ms.</li>
                       <li>IDE autocomplete reflects changes instantly with <strong>no server restarts</strong>.</li>
                     </ul>
                   </CardContent>
@@ -1601,10 +1602,10 @@ export default function WorkspaceRootLayout({ children, sidebar }: LayoutProps) 
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground space-y-2">
                     <p>
-                      All bundlers and target pipelines (esbuild, Rollup, Webpack, Node, Bun, Deno, Cloudflare) automatically invoke the topology scanner before bundling:
+                      All bundlers and target pipelines (esbuild, Rollup, Webpack, Node, Bun, Deno, Cloudflare, Netlify) automatically invoke the topology scanner before bundling:
                     </p>
                     <ul className="list-disc pl-4 space-y-1">
-                      <li>Generates <code>.dinou/types/routes.d.ts</code> deterministically as Step 0 of <code>npm run build</code>.</li>
+                      <li>Generates <code>.dinou/types/routes.d.ts</code> and <code>.dinou/routes/**/dinou.&#123;js,d.ts&#125;</code> deterministically as Step 0 of every production build.</li>
                       <li><strong>Type-stripping vs. Type-checking:</strong> Because Dinou&apos;s bundlers perform fast type-stripping without invoking <code>tsc</code>, <code>npm run build</code> alone will not fail on broken route types. Enforce strict verification in CI/CD (or pre-commit hooks) by running <code>npm run typegen &amp;&amp; npx tsc --noEmit</code> (before or independently of the build) or <code>npm run build &amp;&amp; npx tsc --noEmit</code>.</li>
                     </ul>
                   </CardContent>
