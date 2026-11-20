@@ -75,7 +75,7 @@ export default function Page() {
                 Tri-Bundler Engine
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
-                Dinou v9.4 Guide
+                Dinou v10 Guide
               </Badge>
             </div>
             <div className="flex items-center space-x-2">

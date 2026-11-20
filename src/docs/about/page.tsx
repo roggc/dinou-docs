@@ -318,7 +318,7 @@ export default function AboutPage() {
 
                           <div className="p-3 rounded-xl bg-background/80 border border-purple-500/40 bg-purple-50/20 dark:bg-purple-950/10 space-y-1">
                             <div className="flex items-center justify-between">
-                              <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">v7.0 &ndash; v9.x+</span>
+                              <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">v7.0 &ndash; v10.x+</span>
                               <Badge variant="outline" className="text-[10px] font-mono border-purple-500/40 text-purple-600 dark:text-purple-400 bg-purple-500/10 font-bold">100% Agentic</Badge>
                             </div>
                             <p className="text-[11px] text-muted-foreground leading-snug">

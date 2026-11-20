@@ -77,7 +77,7 @@ export default function Page() {
                 Web Standards Pipeline
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
-                Dinou v9.4 Complete Guide
+                Dinou v10 Complete Guide
               </Badge>
             </div>
             <div className="flex items-center space-x-2">
