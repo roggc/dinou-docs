@@ -11,7 +11,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
 } from "@/docs/components/ui/card";
 import {
   Puzzle,
@@ -92,14 +91,14 @@ export default function Page() {
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             {/* Concept Section */}
-            <section id="concept">
+            <section id="concept" className="scroll-mt-20">
               <h2>The Concept &amp; Architecture</h2>
               <p>
                 In full-stack React applications, mutations often trigger broad page re-renders or full route re-fetches. This can cause unnecessary re-renders of unrelated components, reset unsaved form inputs, or cause visible layout shifts.
               </p>
               <p>
                 The <strong>Dinou Pattern</strong> offers a modern alternative by leveraging the unique ability of{" "}
-                <Link href="/docs/server-functions">Server Functions</Link> to return Client Components directly over the React Flight RPC protocol. After executing a mutation securely on the server (across <strong>Node.js, Bun, Deno, or Cloudflare Workers</strong>), the server returns an invisible <strong>Headless State Updater</strong> component that:
+                <Link href="/docs/server-functions">Server Functions</Link> to return Client Components directly over the React Flight RPC protocol. After executing a mutation securely on the server (across <strong>Node.js, Bun, Deno, Cloudflare Workers, or Netlify</strong>), the server returns an invisible <strong>Headless State Updater</strong> component that:
               </p>
               <ol>
                 <li>
@@ -114,7 +113,7 @@ export default function Page() {
               </ol>
 
               {/* Sub-section: Flight RPC */}
-              <div id="flight-rpc" className="mt-8 space-y-3">
+              <div id="flight-rpc" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">Flight RPC &amp; Headless Updaters</h3>
                 <p>
                   Because Server Functions communicate using the React Flight protocol rather than plain JSON REST endpoints, the server can return serialized references to Client Components with custom props:
@@ -126,7 +125,7 @@ export default function Page() {
                       <span>Server Authority</span>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      The Server Function owns the business logic, validates inputs, and updates the database inside a secure server runtime (Node.js, Bun, Deno, or Cloudflare Workers).
+                      The Server Function owns the business logic, validates inputs, and updates the database inside a secure server runtime (Node.js, Bun, Deno, Cloudflare Workers, or Netlify).
                     </p>
                   </div>
                   <div className="rounded-lg border bg-card p-4 space-y-2">
@@ -142,7 +141,7 @@ export default function Page() {
               </div>
 
               {/* Sub-section: 5-Step Architecture Flow */}
-              <div id="architecture-flow" className="mt-8">
+              <div id="architecture-flow" className="mt-8 scroll-mt-20">
                 <h3 className="text-lg font-bold">5-Step Execution Lifecycle</h3>
                 <p>
                   The following flow illustrates how the mutation, stream, store update, and surgical re-render operate in unison:
@@ -194,7 +193,7 @@ export default function Page() {
               </div>
 
               {/* Sub-section: Architectural Positioning vs <DinouCacheSlot> */}
-              <div id="when-to-use" className="mt-8 space-y-3">
+              <div id="when-to-use" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">When to Use vs. <code>&lt;DinouCacheSlot&gt;</code></h3>
                 <p>
                   Dinou provides two complementary surgical reactivity models without full-route reloads. Choose the one that matches who owns the state:
@@ -223,14 +222,14 @@ export default function Page() {
             </section>
 
             {/* Implementation Walkthrough */}
-            <section id="implementation" className="mt-12">
+            <section id="implementation" className="mt-12 scroll-mt-20">
               <h2>Step-by-Step Implementation</h2>
               <p>
                 Here is the complete, modular implementation showing how Server Functions, Flight RPC, and Zustand orchestrate surgical reactivity without route revalidations:
               </p>
 
               {/* Step 1: Global Store */}
-              <div id="step-1-store" className="mt-8">
+              <div id="step-1-store" className="mt-8 scroll-mt-20">
                 <h3>1. The Global Store (Zustand)</h3>
                 <p>
                   A minimal store holding a reactive invalidation key. Any global state manager (such as Zustand, Jotai, or Redux) works identically:
@@ -258,7 +257,7 @@ export const useTaskStore = create<TaskStore>((set) => ({
               </div>
 
               {/* Step 2: Headless Updater */}
-              <div id="step-2-updater" className="mt-8">
+              <div id="step-2-updater" className="mt-8 scroll-mt-20">
                 <h3>2. The Headless Client Updater</h3>
                 <p>
                   An invisible Client Component that renders <code>null</code> (0 DOM elements), but invokes the store&apos;s invalidation action when mounted:
@@ -284,10 +283,10 @@ export default function PatternTaskUpdater({ id }: { id?: string }) {
               </div>
 
               {/* Step 3: Server Function Mutation */}
-              <div id="step-3-mutation" className="mt-8">
+              <div id="step-3-mutation" className="mt-8 scroll-mt-20">
                 <h3>3. The Server Function Mutation</h3>
                 <p>
-                  Performs the backend mutation on the server (Node.js, Bun, Deno, or Cloudflare Workers) and returns the Headless Updater component over Flight RPC:
+                  Performs the backend mutation on the server (Node.js, Bun, Deno, Cloudflare Workers, or Netlify) and returns the Headless Updater component over Flight RPC:
                 </p>
                 <CodeBlock
                   language="tsx"
@@ -318,7 +317,7 @@ export async function addPatternTask(text: string): Promise<ReactNode> {
               </div>
 
               {/* Step 4: Data Query Function */}
-              <div id="step-4-query" className="mt-8">
+              <div id="step-4-query" className="mt-8 scroll-mt-20">
                 <h3>4. Server Data Query Function</h3>
                 <p>Fetches and renders the updated list directly on the server:</p>
                 <CodeBlock
@@ -341,7 +340,7 @@ export async function fetchPatternTasks(): Promise<ReactNode> {
               </div>
 
               {/* Step 5: Display Component */}
-              <div id="step-5-display" className="mt-8">
+              <div id="step-5-display" className="mt-8 scroll-mt-20">
                 <h3>5. Display Component (Client Component)</h3>
                 <p>Renders the list of tasks received from the server query:</p>
                 <CodeBlock
@@ -377,7 +376,7 @@ export default function PatternTasksList({ tasks }: { tasks: PatternTaskItem[] }
               </div>
 
               {/* Step 6: Page Coordination */}
-              <div id="step-6-page" className="mt-8">
+              <div id="step-6-page" className="mt-8 scroll-mt-20">
                 <h3>6. Putting It All Together in the Page</h3>
                 <p>
                   The view coordinates mutation promises and queries with React 19&apos;s native <code>use()</code> hook and <code>&lt;Suspense&gt;</code>. Switch tabs below to explore each component in the unified architecture:
@@ -684,7 +683,7 @@ export default function PatternTasksList({ tasks }: { tasks: PatternTaskItem[] }
             </section>
 
             {/* Zero-Dependency Alternative */}
-            <section id="zero-dependency" className="mt-12">
+            <section id="zero-dependency" className="mt-12 scroll-mt-20">
               <h2>Zero-Dependency Option: Native <code>useSyncExternalStore</code></h2>
               <p>
                 If you prefer not to include any third-party state libraries in your client bundle, you can achieve the exact same surgical reactivity using React 19&apos;s native <code>useSyncExternalStore</code> hook:
@@ -728,7 +727,7 @@ export function useNativeTasksKey(): number {
             </section>
 
             {/* Comparison Section */}
-            <section id="comparison" className="mt-12">
+            <section id="comparison" className="mt-12 scroll-mt-20">
               <h2>Comparison &amp; Key Advantages</h2>
               <p>
                 Comparing the Dinou Pattern against cached 3D Server Slots (<code>&lt;DinouCacheSlot&gt;</code>) and traditional client-side data fetching (REST / React Query):
@@ -754,7 +753,7 @@ export function useNativeTasksKey(): number {
                     <tr>
                       <td className="p-3 font-medium">Form / Input Focus</td>
                       <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">100% Preserved (zero blur or reset)</td>
-                      <td className="p-3 text-blue-600 dark:text-blue-400 font-semibold">Preserved outside refreshed slot</td>
+                      <td className="p-3 text-blue-600 dark:text-blue-400 font-semibold">Preserved (in-place React reconciliation)</td>
                       <td className="p-3 text-emerald-600 dark:text-emerald-400">Preserved</td>
                     </tr>
                     <tr>
@@ -820,7 +819,7 @@ export function useNativeTasksKey(): number {
                 <div className="space-y-1">
                   <div className="font-semibold text-sm text-foreground flex items-center gap-1.5">
                     <Layers className="h-4 w-4 text-emerald-500" />
-                    <span>Explore All 13 Data Fetching &amp; Streaming Strategies</span>
+                    <span>Explore All 14 Data Fetching &amp; Streaming Strategies</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     See how The Dinou Pattern fits alongside Server Components, <code>getProps</code>, 3D Cache Slots, and PPR in the comprehensive Data Fetching guide.
