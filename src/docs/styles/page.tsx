@@ -78,14 +78,15 @@ export default function Page() {
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             {/* Overview */}
-            <section id="overview">
+            <section id="overview" className="scroll-mt-20">
               <h2>Styling in Dinou</h2>
               <p>
                 Dinou provides built-in, out-of-the-box support for the modern CSS
                 ecosystem across all three bundlers (<code>esbuild</code>,{" "}
-                <code>rollup</code>, and <code>webpack</code>) and all four
+                <code>rollup</code>, and <code>webpack</code>) and all five
                 production runtimes (<code>Node.js</code>, <code>Bun</code>,{" "}
-                <code>Deno</code>, and <code>Cloudflare Workers</code>). Under the
+                <code>Deno</code>, <code>Cloudflare Workers</code>, and{" "}
+                <code>Netlify</code>). Under the
                 hood, Dinou orchestrates PostCSS, <code>postcss-import</code>,{" "}
                 <code>@tailwindcss/postcss</code>, Autoprefixer,{" "}
                 <code>postcss-modules</code>, and its internal CSS asset resolver to:
@@ -134,7 +135,7 @@ export default function Page() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-amber-500/20 bg-amber-50/30 dark:bg-emerald-950/10">
+                <Card className="border-amber-500/20 bg-amber-50/30 dark:bg-amber-950/10">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold text-sm">
                       <FileCode className="h-4 w-4" />
@@ -164,7 +165,7 @@ export default function Page() {
             </section>
 
             {/* Linking Stylesheet */}
-            <section id="linking-stylesheet" className="mt-12">
+            <section id="linking-stylesheet" className="mt-12 scroll-mt-20">
               <h2>Linking /styles.css</h2>
               <p>
                 Because Dinou extracts all global styles, Tailwind utilities, and CSS
@@ -179,7 +180,7 @@ export default function Page() {
 {`<link href="/styles.css" rel="stylesheet" precedence="default" />`}
               </CodeBlock>
 
-              <div id="precedence-attribute" className="mt-6 space-y-3">
+              <div id="precedence-attribute" className="mt-6 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">React 19 precedence Attribute</h3>
                 <p>
                   In React 19 and React Server Components (RSC),{" "}
@@ -225,7 +226,7 @@ export default function Page() {
             </section>
 
             {/* Tailwind CSS v4 */}
-            <section id="tailwind-v4" className="mt-12">
+            <section id="tailwind-v4" className="mt-12 scroll-mt-20">
               <h2>Tailwind CSS (v4 Engine)</h2>
               <p>
                 Dinou ships with the official <strong>Tailwind CSS v4</strong> engine
@@ -245,7 +246,7 @@ export default function Page() {
 @import "tailwindcss";`}
               </CodeBlock>
 
-              <div id="tailwind-theme" className="mt-6 space-y-3">
+              <div id="tailwind-theme" className="mt-6 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">
                   Custom @theme &amp; Multi-Layout Setup
                 </h3>
@@ -312,7 +313,7 @@ export default function Page() {
             </section>
 
             {/* CSS Modules */}
-            <section id="css-modules" className="mt-12">
+            <section id="css-modules" className="mt-12 scroll-mt-20">
               <h2>CSS Modules (*.module.css)</h2>
               <p>
                 For component-scoped styling with zero selector collisions, name any
@@ -322,7 +323,7 @@ export default function Page() {
                 <code>dinou export-static</code>.
               </p>
 
-              <div id="scoped-classnames" className="mt-6 space-y-3">
+              <div id="scoped-classnames" className="mt-6 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">
                   Server &amp; Client Parity + Scoped Hashes
                 </h3>
@@ -390,7 +391,7 @@ export function FeatureCard({ title, badge }: { title: string; badge: string }) 
             </section>
 
             {/* Global CSS, Third-Party Styles & Aliases */}
-            <section id="global-css-imports" className="mt-12">
+            <section id="global-css-imports" className="mt-12 scroll-mt-20">
               <h2>Global CSS, Third-Party Styles &amp; Aliases</h2>
               <p>
                 Dinou automatically discovers stylesheets imported anywhere in your
@@ -431,7 +432,7 @@ export function FeatureCard({ title, badge }: { title: string; badge: string }) 
 @import "@/styles/typography.css";`}
               </CodeBlock>
 
-              <div id="css-url-assets" className="mt-8 space-y-3">
+              <div id="css-url-assets" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">
                   CSS url(...) Assets &amp; Fonts
                 </h3>
@@ -458,7 +459,7 @@ export function FeatureCard({ title, badge }: { title: string; badge: string }) 
                     Resolved from disk (including inside{" "}
                     <code>@import</code>-inlined partials and{" "}
                     <code>node_modules</code> fonts), hashed, and emitted to{" "}
-                    <code>/assets/&lt;hash&gt;&lt;ext&gt;</code> with immutable
+                    <code>/assets/&lt;name&gt;-&lt;hash&gt;.&lt;ext&gt;</code> with immutable
                     production caching while preserving SVG <code>#fragment</code>{" "}
                     identifiers.
                   </li>
@@ -476,7 +477,7 @@ export function FeatureCard({ title, badge }: { title: string; badge: string }) 
 
 .hero-surface {
   /* /noise.png -> served from public/noise.png */
-  /* @/assets/grid.svg#mask -> emitted to /assets/<hash>.svg#mask */
+  /* @/assets/grid.svg#mask -> emitted to /assets/grid-<hash>.svg#mask */
   background-image: url("/noise.png"), url("@/assets/grid.svg#mask");
 }`}
                 </CodeBlock>
@@ -484,7 +485,7 @@ export function FeatureCard({ title, badge }: { title: string; badge: string }) 
             </section>
 
             {/* CSS HMR */}
-            <section id="css-hmr" className="mt-12">
+            <section id="css-hmr" className="mt-12 scroll-mt-20">
               <h2>Instant CSS Hot Module Replacement</h2>
               <div className="rounded-xl border border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/10 p-4 not-prose my-4 space-y-2">
                 <div className="flex items-center gap-2 font-semibold text-sm text-emerald-700 dark:text-emerald-400">
@@ -507,7 +508,7 @@ export function FeatureCard({ title, badge }: { title: string; badge: string }) 
             </section>
 
             {/* TypeScript Types */}
-            <section id="typescript-types" className="mt-12">
+            <section id="typescript-types" className="mt-12 scroll-mt-20">
               <h2>TypeScript Declarations (dinou/env)</h2>
               <p>
                 Built-in ambient type declarations for <code>*.module.css</code>,
@@ -565,7 +566,7 @@ export function FeatureCard({ title, badge }: { title: string; badge: string }) 
             </section>
 
             {/* Complete Example */}
-            <section id="full-example" className="mt-12">
+            <section id="full-example" className="mt-12 scroll-mt-20">
               <h2>Complete End-to-End Example</h2>
               <p>
                 The following example combines a Server Component root layout,
