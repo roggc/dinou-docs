@@ -300,47 +300,57 @@ npm run build:vendors`}
             <section id="when-to-eject" className="mt-12 scroll-mt-20">
               <h2>When to Consider Ejecting</h2>
               <p>
-                Most applications never need to eject—Dinou&apos;s <Link href="/docs/plugins">Plugin System (<code>dinou.config.ts</code>)</Link> already covers request middleware, Express/Connect middlewares, startup <code>setupFiles</code>, and custom asset extensions. Ejecting shines when you want deeper architectural control:
+                Most applications never need to eject—Dinou&apos;s <Link href="/docs/plugins">Configuration &amp; Plugin System (<code>dinou.config.ts</code>)</Link> deliberately covers <code>onRequest</code> middleware, Node <code>configureServer</code> hooks, <code>setupFiles</code>, pluggable <code>storage</code> adapters, custom <code>assetExtensions</code>, <code>ppr</code>, <code>allowISG</code>, <code>reactCompiler</code>, and <code>reactStrictMode</code> without adding configuration bloat. Ejecting becomes genuinely valuable when you need capabilities that live below <code>dinou.config.ts</code>:
               </p>
 
               <div className="grid gap-4 sm:grid-cols-2 not-prose my-6">
                 <div className="p-4 rounded-lg border bg-card space-y-1.5">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
                     <Layers className="h-4 w-4 text-emerald-500" />
-                    <span>Custom Bundler Plugins &amp; Loaders</span>
+                    <span>Bundlers, PostCSS, Babel &amp; Source Maps</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Wire specialized compiler transforms (MDX AST plugins, GraphQL/WASM loaders, custom chunk splitting) directly into <code>dinou/esbuild/</code>, <code>dinou/rollup/</code>, or <code>dinou/webpack/</code>.
+                    Add specialized compiler plugins and loaders—such as <strong>MDX</strong>, <strong>SVGR</strong> (importing <code>.svg</code> as React components), <code>.graphql</code>, Sass/Less, bundle analyzers, or advanced <code>babel-plugin-react-compiler</code> options—or enable <strong>production source maps</strong> (for Sentry/Datadog) and custom JS targets directly inside <code>dinou/esbuild/</code>, <code>dinou/rollup/</code>, <code>dinou/webpack/</code>, and <code>dinou/core/postcss-pipeline.js</code>.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-lg border bg-card space-y-1.5">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
                     <Server className="h-4 w-4 text-amber-500" />
-                    <span>Core Flight &amp; Streaming Internals</span>
+                    <span>HTML Bootstrap, Streaming, Router &amp; Internal Policies</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Customize React 19 Flight wire serialization, HTML stream splicing, or custom cache invalidation protocols directly in <code>dinou/core/handler.js</code> and <code>dinou/core/edge-ssr.js</code>.
+                    Inject strict <strong>CSP <code>nonce</code> attributes</strong> onto Dinou&apos;s inline bootstrap scripts and <code>importmap</code>, attach post-stream <code>Server-Timing</code> headers, customize the client SPA router in <code>dinou/core/client.jsx</code> (scroll restoration, View Transitions, stale-chunk recovery after deploys), or tune internal <code>Cache-Control</code>, CSRF origin, and anti-bot policies in <code>dinou/core/handler.js</code> and <code>dinou/core/static-assets.js</code>.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-lg border bg-card space-y-1.5">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
                     <Cloud className="h-4 w-4 text-emerald-500" />
-                    <span>Bespoke Deployment Targets</span>
+                    <span>Unsupported Deployment Targets</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Target Electron, Tauri desktop shells, AWS Lambda Response Streaming, or custom internal microVMs by crafting a tailored adapter in <code>dinou/adapters/</code>.
+                    Package your app for <strong>Vercel</strong>, <strong>AWS Lambda Response Streaming</strong>, <strong>Fastly Compute</strong>, <strong>Electron / Tauri</strong> desktop shells, or custom internal microVMs by writing a dedicated runtime adapter in <code>dinou/adapters/</code> and Dual-Bundle build script.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-lg border bg-card space-y-1.5">
                   <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
                     <Hammer className="h-4 w-4 text-amber-500" />
-                    <span>Instant Debugging &amp; Hotfixes</span>
+                    <span>Instant Hotfixes, Deep Debugging &amp; Compliance Audits</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Stack traces point straight to readable files inside your repo instead of <code>node_modules</code>. Diagnose, patch, and ship a fix in minutes, then <code>uneject</code> once upstream lands it.
+                    Trace subtle hydration, PPR, or cache-slot edge cases straight into readable repository files instead of <code>node_modules</code>, satisfy regulated environments requiring 100% auditable server code in Git, or ship a critical framework hotfix immediately—then run <code>npm run uneject</code> once the upstream release lands.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-lg border bg-card space-y-1.5 sm:col-span-2">
+                  <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
+                    <Sparkles className="h-4 w-4 text-emerald-500" />
+                    <span>Reversible AI-Assisted Inspection &amp; Prototyping</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Give your coding agent full, grounded visibility into the exact server and compiler code your app runs—eliminating black-box guesswork during complex debugging or architectural prototyping—knowing you can cleanly return to the managed npm package anytime with <code>npm run uneject</code>.
                   </p>
                 </div>
               </div>
