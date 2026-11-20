@@ -12,7 +12,7 @@ export function RevalidateLayoutSection() {
           <code>revalidateLayout()</code>
         </h3>
         <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
-          Server Function
+          dinou/server
         </span>
         <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400 ring-1 ring-inset ring-purple-500/20">
           Target: Layout Segment Only (O(1))
@@ -23,7 +23,7 @@ export function RevalidateLayoutSection() {
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        Asynchronously invalidates and regenerates <strong>only the targeted layout segment</strong> (<code>layout.rsc</code> and <code>layout.metadata.json</code>) in <strong>O(1) time</strong> without re-executing any child <code>page.tsx</code> components. Affected child <code>index.html</code> documents and nested sub-layouts are lazily re-composed on demand when next visited, guaranteeing <strong>zero hydration mismatches</strong> on hard browser reloads (F5).
+        Asynchronously invalidates and regenerates <strong>only the targeted layout segment</strong> (<code>layout.rsc</code> and <code>layout.metadata.json</code>) in <strong>O(1) time</strong> without re-executing any child <code>page.tsx</code> components. Concurrent calls to the same layout are automatically deduplicated in-flight, previous snapshots are backed up to <code>layout._old.rsc</code>, and affected child <code>index.html</code> documents and nested sub-layouts are lazily re-composed on demand when next visited — guaranteeing <strong>zero hydration mismatches</strong> on hard browser reloads (F5).
       </p>
 
       {/* Sub-section 1: O(1) Scope & Lazy Re-composition */}
@@ -45,7 +45,7 @@ export function RevalidateLayoutSection() {
               <span>1. O(1) Layout Regeneration (0 Child Pages Executed)</span>
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              When a shared sidebar, header, or segment layout changes, calling <code>revalidateLayout(path)</code> re-runs strictly that segment&apos;s <code>layout_functions.ts</code> (<code>getProps</code>, <code>getCacheTags</code>) and <code>layout.tsx</code> to persist a fresh <code>layout.rsc</code> with a new monotonic <code>genTime</code>.
+              When a shared sidebar, header, or segment layout changes, calling <code>revalidateLayout(path)</code> re-runs strictly that segment&apos;s <code>layout_functions.ts</code> (<code>getProps</code>, <code>getCacheTags</code>) and <code>layout.tsx</code> to persist a fresh <code>layout.rsc</code> with monotonic <code>generatedAt</code> and <code>layoutGeneratedAt</code> timestamps.
             </p>
             <p className="text-muted-foreground leading-relaxed">
               On <code>ppr = true</code> routes, it regenerates only the <strong>Layout Static Shell</strong> while keeping dynamic <code>&lt;Suspense&gt;</code> holes in the layout streaming live per request.
@@ -58,10 +58,10 @@ export function RevalidateLayoutSection() {
               <span>2. Lazy On-Demand HTML Re-composition</span>
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              Soft SPA navigations immediately consume the fresh <code>layout.rsc</code>. When a child route (e.g. <code>/docs/routing</code>) is next requested via a hard reload (F5), Dinou detects that the ancestor layout&apos;s <code>genTime</code> is newer than the child&apos;s <code>layoutGenTime</code>.
+              Soft SPA navigations immediately consume the fresh <code>layout.rsc</code>. When a child route (e.g. <code>/docs/routing</code>) is next requested via a hard reload (F5), Dinou detects that an ancestor layout&apos;s <code>generatedAt</code> is newer than the child&apos;s cached <code>generatedAt</code>.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              Dinou then <strong>lazily re-composes</strong> the child&apos;s <code>index.html</code> on the fly by splicing its existing cached <code>page.rsc</code> into the fresh <code>layout.rsc</code> — without re-running the child&apos;s <code>page.tsx</code> or database queries.
+              Dinou then <strong>lazily re-composes</strong> the child&apos;s <code>index.html</code> on the fly by splicing its existing cached <code>page.rsc</code> into the fresh <code>layout.rsc</code> — without re-running the child&apos;s <code>page.tsx</code> or resetting its own <code>pageGeneratedAt</code> ISR countdown.
             </p>
           </div>
         </div>
@@ -83,7 +83,7 @@ export function RevalidateLayoutSection() {
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">string</td>
                 <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Required</td>
                 <td className="p-3 align-top leading-relaxed">
-                  The route segment path whose layout should be revalidated (e.g. <code>&quot;/&quot;</code> for the root layout, <code>&quot;/docs&quot;</code>, <code>&quot;/dashboard&quot;</code>, or <code>&quot;./&quot;</code> relative to the active request). Resolves to <code>true</code> if a layout existed at that segment and was regenerated, or <code>false</code> otherwise.
+                  The route segment path whose layout should be revalidated (e.g. <code>&quot;/&quot;</code> for the root layout, <code>&quot;/docs&quot;</code>, <code>&quot;/dashboard&quot;</code>, or relative paths like <code>&quot;./&quot;</code>, <code>&quot;..&quot;</code>, <code>&quot;../billing&quot;</code> inside Server Functions). Trailing slashes, <code>?query</code>, and <code>#hash</code> are automatically stripped. Resolves to <code>true</code> if a layout existed at that segment and was regenerated/evicted, or <code>false</code> otherwise.
                 </td>
               </tr>
             </tbody>

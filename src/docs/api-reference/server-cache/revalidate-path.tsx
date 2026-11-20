@@ -12,7 +12,7 @@ export function RevalidatePathSection() {
           <code>revalidatePath()</code>
         </h3>
         <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
-          Server Function
+          dinou/server
         </span>
         <span className="inline-flex items-center rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400 ring-1 ring-inset ring-purple-500/20">
           Target: Segment Layout + Page
@@ -23,7 +23,7 @@ export function RevalidatePathSection() {
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        Asynchronously invalidates and regenerates <strong>both the segment layout</strong> (<code>layout.rsc</code>, if a <code>layout.tsx</code> exists at that path) <strong>and the route page</strong> (<code>page.rsc</code> and <code>index.html</code> / <code>shell.html</code>) for the specified URL. Internally, it executes <code>revalidateLayout(path)</code> followed by <code>revalidatePage(path)</code>.
+        Asynchronously invalidates and regenerates <strong>both the segment layout</strong> (<code>layout.rsc</code>, whenever a layout is cached or a <code>layout.tsx</code> exists at that segment) <strong>and the route page</strong> (<code>page.rsc</code> and <code>index.html</code> / <code>shell.html</code>) for the specified URL. Internally, it executes <code>revalidateLayout(path)</code> first so <code>revalidatePage(path)</code> composes immediately against the fresh layout.
       </p>
 
       {/* Sub-section 1: Parameters & Lazy Re-composition */}
@@ -54,12 +54,12 @@ export function RevalidatePathSection() {
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">string</td>
                 <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Required</td>
                 <td className="p-3 align-top leading-relaxed">
-                  The target route path to revalidate (e.g. <code>&quot;/docs&quot;</code>, <code>&quot;/store&quot;</code>, or <code>&quot;./&quot;</code> relative to the active request). Regenerates that segment&apos;s <code>layout.rsc</code> (if present) and its <code>page.rsc</code> + <code>index.html</code>.
+                  The target route path to revalidate (e.g. <code>&quot;/docs&quot;</code>, <code>&quot;/store&quot;</code>, or relative paths like <code>&quot;./&quot;</code> / <code>&quot;../dashboard&quot;</code> inside Server Functions, resolved via <code>x-dinou-current-path</code>). Trailing slashes, <code>?query</code>, and <code>#hash</code> are stripped automatically. Regenerates that segment&apos;s <code>layout.rsc</code> (if present) and its <code>page.rsc</code> + <code>index.html</code>.
                 </td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-semibold text-muted-foreground line-through align-top">options</td>
-                <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">&#123; cascade?: boolean &#125;</td>
+                <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">&#123; cascade?: boolean &#125; | &quot;layout&quot;</td>
                 <td className="p-3 font-mono text-[11px] text-amber-600 dark:text-amber-400 align-top">Deprecated</td>
                 <td className="p-3 align-top leading-relaxed">
                   <strong>Deprecated &amp; ignored since v9.0.3.</strong> Zero hydration mismatch across child routes is now guaranteed automatically via lazy on-demand <code>index.html</code> re-composition. For layout-only invalidation without re-executing the index page, use <code>revalidateLayout(path)</code>.

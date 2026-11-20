@@ -20,7 +20,7 @@ export function NoDynamicSection() {
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        Opts an enclosing <code>&lt;Suspense&gt;</code> boundary out of becoming a Dynamic PPR Hole when wrapping an asynchronous Server Component on a <code>ppr = true</code> route. Calling <code>noDynamic()</code> synchronously at the top of an async component (before its first <code>await</code>) instructs Dinou to resolve the promise at build/revalidation time and bake the rendered output directly into the Static Shell (<code>shell.html</code>).
+        Opts an enclosing <code>&lt;Suspense&gt;</code> boundary out of becoming a Dynamic PPR Hole when wrapping an asynchronous Server Component on a <code>ppr = true</code> route. Exported from <code>&quot;dinou&quot;</code>, contextual <code>&quot;./dinou&quot;</code>, and <code>&quot;dinou/server&quot;</code> (safe no-op in browser environments). Calling <code>noDynamic()</code> synchronously at the top of an async component (before its first <code>await</code>) instructs Dinou to resolve the promise at build/revalidation time and bake the rendered output directly into the Static Shell (<code>shell.html</code>).
       </p>
 
       <div id="nodynamic-behavior" className="scroll-mt-20 mt-6 pt-4 border-t border-border/60">
@@ -34,7 +34,7 @@ export function NoDynamicSection() {
               On <code>ppr = true</code> routes, Dinou normally treats every <code>&lt;Suspense&gt;</code> boundary wrapping an async component as a dynamic hole to be streamed per request.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              When <code>noDynamic()</code> is called synchronously before the first <code>await</code>, Dinou records the boundary in the Static Shell metadata and skips it in <strong>0ms</strong> during runtime PPR hole traversal.
+              When <code>noDynamic()</code> is called synchronously before the first <code>await</code>, Dinou bakes the boundary into the Static Shell at build/revalidation time and immediately short-circuits it in <strong>0ms</strong> during runtime PPR hole traversal without re-running its async queries.
             </p>
           </div>
 

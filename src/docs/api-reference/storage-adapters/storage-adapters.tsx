@@ -88,47 +88,47 @@ export function StorageAdaptersSection() {
                   Writes companion <code>metadata.json</code>, <code>layout.metadata.json</code>, and <code>slot.metadata.json</code> files alongside cached payloads.
                 </td>
                 <td className="p-3 align-top leading-relaxed">
-                  Local development, single-node Docker containers, VPS servers (default: <code>.dinou/dist2</code>).
+                  Local development, single-node Node.js / Bun / Docker / VPS servers (default: <code>.dinou/dist2</code>). Always used internally during <code>dinou build</code> SSG generation so live Redis clusters are never polluted at build time.
                 </td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-semibold text-primary align-top">RedisStorage</td>
-                <td className="p-3 font-mono text-[11px] text-foreground align-top">new RedisStorage(redisClient: any, prefix?: string)</td>
+                <td className="p-3 font-mono text-[11px] text-foreground align-top">new RedisStorage(redisClient: any, prefixOrOptions?: string | RedisStorageOptions)</td>
                 <td className="p-3 align-top leading-relaxed">
-                  Serializes content and metadata together as JSON strings under configurable key prefix (default: <code>&quot;dinou:cache:&quot;</code>).
+                  Serializes content and metadata as JSON under a configurable key prefix (default: <code>&quot;dinou:cache:&quot;</code>), plus Redis-backed cluster tombstones (<code>__tombstone__:*</code>) and tag invalidation timestamps (<code>__tag_inv__:*</code>). Auto-detects <code>node-redis</code> v4/v5 (<code>scanIterator</code>), <code>ioredis</code> (<code>scanStream</code>), <code>@upstash/redis</code> (<code>keys</code>), and cursor <code>scan</code> clients.
                 </td>
                 <td className="p-3 align-top leading-relaxed">
-                  Multi-container Kubernetes clusters, AWS ECS, Google Cloud Run, distributed Node.js servers.
+                  Multi-container Kubernetes clusters, AWS ECS, Google Cloud Run, distributed Node.js / Bun servers. Lazily hydrates cold keys from <code>.dinou/dist2</code> by default (<code>hydrateFromDisk: true</code>).
                 </td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-semibold text-primary align-top">CloudflareKVStorage</td>
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">new CloudflareKVStorage(kvNamespace: any)</td>
                 <td className="p-3 align-top leading-relaxed">
-                  Leverages Cloudflare KV native metadata attributes via <code>getWithMetadata()</code> and <code>put(..., &#123; metadata &#125;)</code>.
+                  Leverages Cloudflare KV native metadata attributes via <code>getWithMetadata()</code> and <code>put(..., &#123; metadata &#125;)</code>, with automatic cursor pagination in <code>keys()</code> beyond 1,000 keys.
                 </td>
                 <td className="p-3 align-top leading-relaxed">
-                  Cloudflare Workers &amp; Pages at global edge scale.
+                  Cloudflare Workers at global edge scale (auto-selected from <code>env.DINOU_CACHE</code> when bound).
                 </td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-semibold text-primary align-top">DenoKVStorage</td>
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">new DenoKVStorage(kvInstance?: any)</td>
                 <td className="p-3 align-top leading-relaxed">
-                  Stores atomic key-value records with automatic 16KB payload chunking for large HTML/RSC artifacts.
+                  Stores atomic key-value records with automatic 16KB payload chunking for large HTML/RSC artifacts. Auto-opens via <code>DENO_KV_URL</code>, <code>DENO_DEPLOYMENT_ID</code>, or <code>DENO_KV_PATH</code> (default <code>.dinou/kv.db</code>) when omitted.
                 </td>
                 <td className="p-3 align-top leading-relaxed">
-                  Deno Deploy &amp; distributed edge runtimes.
+                  Deno Deploy &amp; Deno Edge runtimes (auto-selected when <code>Deno.openKv</code> is available).
                 </td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-semibold text-primary align-top">MemoryStorage</td>
-                <td className="p-3 font-mono text-[11px] text-foreground align-top">new MemoryStorage()</td>
+                <td className="p-3 font-mono text-[11px] text-foreground align-top">new MemoryStorage(options?: MemoryStorageOptions)</td>
                 <td className="p-3 align-top leading-relaxed">
-                  Maintains an in-memory JavaScript <code>Map</code> storing <code>&#123; content, metadata &#125;</code> tuples in memory.
+                  Maintains an in-memory JavaScript <code>Map</code> storing <code>&#123; content, metadata &#125;</code> tuples. Defaults to <code>hydrateFromDisk: false</code> for isolated unit tests; pass <code>&#123; hydrateFromDisk: true &#125;</code> to lazily hydrate pre-built <code>.dinou/dist2</code> files.
                 </td>
                 <td className="p-3 align-top leading-relaxed">
-                  Unit testing, ephemeral CI/CD runners, preview sandboxes.
+                  Unit testing, ephemeral CI/CD runners, preview sandboxes, and Netlify Functions v2 (auto-configured with <code>hydrateFromDisk: true</code>).
                 </td>
               </tr>
             </tbody>
@@ -139,10 +139,10 @@ export function StorageAdaptersSection() {
         <div className="p-4 rounded-lg bg-muted/40 border border-border text-xs space-y-1">
           <div className="font-semibold text-foreground flex items-center gap-1.5">
             <Code2 className="h-4 w-4 text-emerald-500" />
-            <span>Global Storage Utilities</span>
+            <span>Global Storage Utilities &amp; Build-Time SSG Isolation</span>
           </div>
           <p className="text-muted-foreground leading-relaxed">
-            Dinou exports <code>getStorageAdapter()</code> to access the active storage instance anywhere on the server, and <code>setStorageAdapter(adapter)</code> to dynamically swap the storage engine during initialization or test suites.
+            Dinou exports <code>getStorageAdapter()</code> to access the active storage instance anywhere on the server, and <code>setStorageAdapter(adapter)</code> to dynamically swap the storage engine during initialization or test suites. During <code>dinou build</code>, static generation always writes build artifacts into <code>.dinou/dist2</code> via <code>FileSystemStorage</code> — your configured production adapter (such as <code>RedisStorage</code>) is bound exclusively at runtime.
           </p>
         </div>
       </div>
@@ -156,15 +156,15 @@ export function StorageAdaptersSection() {
           </h3>
         </div>
         <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-          Abstract class methods required when implementing or interacting with storage engines.
+          Abstract class properties and methods defined on <code>StorageAdapter</code> (with <code>StorageItem = &#123; content: string; metadata?: Record&lt;string, any&gt; | null &#125;</code>).
         </p>
 
         <div className="not-prose overflow-x-auto rounded-lg border border-border mt-4">
           <table className="w-full text-xs text-left border-collapse min-w-[700px]">
             <thead className="bg-muted/50 border-b border-border text-muted-foreground font-semibold">
               <tr>
-                <th className="p-3">Method</th>
-                <th className="p-3">Signature</th>
+                <th className="p-3">Member</th>
+                <th className="p-3">Signature / Type</th>
                 <th className="p-3">Required?</th>
                 <th className="p-3">Description</th>
               </tr>
@@ -173,7 +173,7 @@ export function StorageAdaptersSection() {
               <tr>
                 <td className="p-3 font-mono font-semibold text-primary align-top">get(key)</td>
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">
-                  (key: string) =&gt; Promise&lt;&#123; content: string; metadata?: any &#125; | null&gt;
+                  (key: string) =&gt; Promise&lt;StorageItem | null&gt;
                 </td>
                 <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Yes</td>
                 <td className="p-3 align-top leading-relaxed">
@@ -207,7 +207,7 @@ export function StorageAdaptersSection() {
                 </td>
                 <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Yes</td>
                 <td className="p-3 align-top leading-relaxed">
-                  Removes the targeted cached artifact and associated metadata files or keys.
+                  Removes the targeted cached artifact and associated companion keys/metadata.
                 </td>
               </tr>
               <tr>
@@ -215,9 +215,39 @@ export function StorageAdaptersSection() {
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">
                   (prefix?: string) =&gt; Promise&lt;string[]&gt; | string[]
                 </td>
-                <td className="p-3 font-mono text-[11px] text-amber-600 dark:text-amber-400 align-top">Optional</td>
+                <td className="p-3 font-mono text-[11px] text-amber-600 dark:text-amber-400 align-top">Recommended</td>
                 <td className="p-3 align-top leading-relaxed">
-                  Enumerates stored artifact keys. Required for <code>revalidateTag()</code> scanning and <code>revalidatePath(&#123; cascade: true &#125;)</code> child discovery in Edge runtime environments.
+                  Enumerates stored artifact keys. Required for <code>revalidateTag()</code> scanning and <code>&lt;DinouCacheSlot&gt;</code> tag/ID resolution across distributed and Edge storage adapters.
+                </td>
+              </tr>
+              <tr>
+                <td className="p-3 font-mono font-semibold text-primary align-top">hydrateFromDisk</td>
+                <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                  boolean (default: true)
+                </td>
+                <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Inherited</td>
+                <td className="p-3 align-top leading-relaxed">
+                  When <code>true</code> on non-filesystem adapters, cache misses lazily hydrate pre-rendered build-time artifacts from <code>.dinou/dist2</code> (respecting deletion tombstones and tag invalidation timestamps). Set to <code>false</code> (default on <code>MemoryStorage</code>) to disable disk fallback.
+                </td>
+              </tr>
+              <tr>
+                <td className="p-3 font-mono font-semibold text-primary align-top">isDeleted / isKeyDeleted</td>
+                <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                  (key: string) =&gt; boolean | Promise&lt;boolean&gt;
+                </td>
+                <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Inherited</td>
+                <td className="p-3 align-top leading-relaxed">
+                  Tracks deletion tombstones so invalidated artifacts are never resurrected from <code>.dinou/dist2</code> or Edge assets. Distributed adapters (like <code>RedisStorage</code>) override <code>isKeyDeleted(key)</code> to check shared cluster tombstones.
+                </td>
+              </tr>
+              <tr>
+                <td className="p-3 font-mono font-semibold text-primary align-top">markTagInvalidated[Async] / getTagInvalidatedAt[Async]</td>
+                <td className="p-3 font-mono text-[11px] text-foreground align-top">
+                  (tag: string) =&gt; void | Promise&lt;void&gt; / number | Promise&lt;number&gt;
+                </td>
+                <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Inherited</td>
+                <td className="p-3 align-top leading-relaxed">
+                  Records and queries per-tag invalidation timestamps used during <code>revalidateTag()</code> and cold-pod disk hydration. Override the <code>*Async</code> variants in custom multi-node adapters to share tag invalidations across replicas.
                 </td>
               </tr>
             </tbody>
@@ -243,9 +273,9 @@ export function StorageAdaptersSection() {
             tabs={[
               {
                 id: "redis-storage",
-                label: "dinou.config.js (Redis Cluster)",
-                language: "javascript",
-                code: `// dinou.config.js
+                label: "dinou.config.ts (Redis Cluster)",
+                language: "typescript",
+                code: `// dinou.config.ts
 import { defineConfig } from "dinou/config";
 import { RedisStorage } from "dinou/server";
 import Redis from "ioredis";
@@ -255,7 +285,11 @@ const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
 
 export default defineConfig({
   // Share ISR pages and <DinouCacheSlot> fragments across all Docker / K8s replicas
-  storage: new RedisStorage(redis, "dinou:cache:"),
+  // Accepts either a prefix string or { prefix?, hydrateFromDisk? }
+  storage: new RedisStorage(redis, {
+    prefix: "dinou:cache:",
+    hydrateFromDisk: true,
+  }),
 });`,
               },
               {
@@ -357,20 +391,20 @@ console.log("Dinou active storage adapter:", activeStorage.constructor.name);`,
 
         <Alert className="not-prose mt-4">
           <Database className="h-4 w-4 text-amber-500" />
-          <AlertTitle>What is the Redis Key Prefix?</AlertTitle>
+          <AlertTitle>What is the Redis Key Prefix &amp; Options Object?</AlertTitle>
           <AlertDescription className="space-y-2 text-xs leading-relaxed">
             <p>
-              The <code>prefix</code> parameter in <code>new RedisStorage(redis, prefix)</code> defines the namespace added to the front of every key stored in Redis:
+              The optional second parameter in <code>new RedisStorage(redis, prefixOrOptions)</code> accepts either a namespace string (e.g. <code>&quot;dinou:prod:&quot;</code>) or a <code>RedisStorageOptions</code> object (<code>&#123; prefix?: string; hydrateFromDisk?: boolean &#125;</code>):
             </p>
             <ul className="list-disc pl-4 space-y-1">
               <li>
-                <strong>Concrete Example:</strong> When Dinou caches the page <code>/catalog</code>, the actual key stored in your Redis database is <code>dinou:cache:catalog/index.html</code>.
+                <strong>Concrete Example:</strong> When Dinou caches the page <code>/catalog</code> with the default prefix (<code>&quot;dinou:cache:&quot;</code>), the Redis key is <code>dinou:cache:catalog/index.html</code> (alongside cluster tombstones under <code>__tombstone__:</code> and tag invalidation timestamps under <code>__tag_inv__:</code>).
               </li>
               <li>
-                <strong>Avoid Collisions:</strong> If your Redis server is shared with user sessions, BullMQ queues, or database caches, this prefix guarantees that Dinou will never overwrite other application data.
+                <strong>Avoid Collisions:</strong> If your Redis server is shared with user sessions, BullMQ queues, or staging environments, customizing <code>prefix</code> isolates Dinou&apos;s keys completely.
               </li>
               <li>
-                <strong>It is Optional:</strong> It defaults to <code>&quot;dinou:cache:&quot;</code>, so writing <code>new RedisStorage(redis)</code> is usually sufficient. You only need to change it if you share Redis across environments (e.g. <code>&quot;dinou:prod:&quot;</code> vs <code>&quot;dinou:staging:&quot;</code>).
+                <strong>Disk Hydration (<code>hydrateFromDisk</code>):</strong> Defaults to <code>true</code> so cold pods lazily hydrate pre-rendered build-time <code>.dinou/dist2</code> artifacts on first read while honoring cluster tombstones. Set <code>hydrateFromDisk: false</code> if you want strict Redis-only reads.
               </li>
             </ul>
           </AlertDescription>

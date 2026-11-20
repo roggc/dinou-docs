@@ -11,7 +11,7 @@ export function RevalidatePageSection() {
           <code>revalidatePage()</code>
         </h3>
         <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
-          Server Function
+          dinou/server
         </span>
         <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
           Target: Page Component Only
@@ -22,7 +22,7 @@ export function RevalidatePageSection() {
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        Asynchronously invalidates and regenerates <strong>only the targeted page component</strong> (its <code>page.rsc</code> payload and static <code>index.html</code>, or its Page Static Shell <code>shell.html</code> on <code>ppr = true</code> routes), while leaving parent and ancestor layouts (<code>layout.rsc</code>) completely untouched.
+        Asynchronously invalidates and regenerates <strong>only the targeted page component</strong> (its <code>page.rsc</code> payload and static <code>index.html</code>, or its Page Static Shell <code>shell.html</code> / <code>shell.rsc</code> on <code>ppr = true</code> routes), while leaving parent and ancestor layouts (<code>layout.rsc</code>) completely untouched. Commits in causal order (<code>_old</code> snapshot &rarr; <code>metadata.json</code> &rarr; <code>page.rsc</code> &rarr; <code>index.html</code>) to guarantee zero React <code>#418</code> hydration mismatches under concurrent traffic.
       </p>
 
       {/* Sub-section 1: Scope & Behavior */}
@@ -47,20 +47,20 @@ export function RevalidatePageSection() {
               When updating an individual blog post or product price, re-rendering global headers, user navigation menus, and shared footer layouts is unnecessary overhead.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              <code>revalidatePage(path)</code> recalculates strictly the page JSX artifact and composes the updated <code>index.html</code> (or <code>shell.html</code>) against the existing cached <code>layout.rsc</code>.
+              <code>revalidatePage(path)</code> recalculates strictly the page JSX artifact and composes the updated <code>index.html</code> (or <code>shell.html</code>) against the existing cached <code>layout.rsc</code>. In standalone scripts, queue workers, or unit tests without an active RSC runtime, it cleanly evicts the target keys from the active <code>StorageAdapter</code>.
             </p>
           </div>
 
           <div className="p-4 rounded-lg bg-card border border-border space-y-2">
             <div className="font-semibold text-foreground flex items-center gap-1.5">
               <ArrowRightLeft className="h-4 w-4 text-blue-500" />
-              <span>Path Normalization</span>
+              <span>Path Normalization &amp; Relative Resolution</span>
             </div>
             <p className="text-muted-foreground leading-relaxed">
-              Supports absolute routes (e.g. <code>&quot;/products/laptop-pro&quot;</code>), parameterized URLs, or relative paths (e.g. <code>&quot;./&quot;</code> relative to the active request).
+              Supports absolute routes (e.g. <code>&quot;/products/laptop-pro&quot;</code>) as well as relative paths (e.g. <code>&quot;./&quot;</code>, <code>&quot;..&quot;</code>, <code>&quot;../overview&quot;</code>) inside Server Functions, resolved via <code>x-dinou-current-path</code> (falling back to <code>Referer</code>) without triggering Automatic Static Bailout.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              Trailing slashes are automatically normalized to guarantee consistent cache purging on both Node.js and Edge storage backends.
+              Trailing slashes, <code>?query</code> strings, and <code>#hash</code> fragments are automatically stripped to guarantee consistent cache keys across Node.js, Bun, Deno, Netlify, and Cloudflare Workers.
             </p>
           </div>
         </div>

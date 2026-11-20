@@ -12,7 +12,7 @@ export function RevalidateTagSection() {
           <code>revalidateTag()</code>
         </h3>
         <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 ring-1 ring-inset ring-emerald-500/20">
-          Server Function
+          dinou/server
         </span>
         <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
           Multi-Target Global Revalidation
@@ -23,7 +23,7 @@ export function RevalidateTagSection() {
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        Purges and regenerates all route pages, segment layouts, and independent <code>&lt;DinouCacheSlot&gt;</code> fragments matching the specified cache tag across the application.
+        Purges and regenerates all route pages, segment layouts, and independent <code>&lt;DinouCacheSlot&gt;</code> fragments matching the specified cache tag (or slot <code>id</code>) across the application. Records distributed invalidation timestamps via <code>storage.markTagInvalidatedAsync(tag)</code> so cold pods and sibling cluster replicas never resurrect stale build-time <code>.dinou/dist2</code> artifacts.
       </p>
 
       {/* Sub-section 1: Parameters Table */}
@@ -54,12 +54,12 @@ export function RevalidateTagSection() {
                 <td className="p-3 font-mono text-[11px] text-foreground align-top">string</td>
                 <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Required</td>
                 <td className="p-3 align-top leading-relaxed">
-                  The cache tag identifier to invalidate (e.g. <code>&quot;products&quot;</code>, <code>&quot;site-nav&quot;</code>, or dynamic entity tags like <code>&quot;product-42&quot;</code>). Matches against tags declared via <code>getCacheTags</code> in <code>page_functions.ts</code> and <code>layout_functions.ts</code>, as well as <code>tag</code> / <code>tags</code> props on <code>&lt;DinouCacheSlot&gt;</code>.
+                  The cache tag identifier to invalidate (e.g. <code>&quot;products&quot;</code>, <code>&quot;site-nav&quot;</code>, or dynamic entity tags like <code>&quot;product-42&quot;</code>). Matches against tags declared via <code>getCacheTags</code> (static arrays or dynamic <code>(params) =&gt; string[]</code> functions) in <code>page_functions.ts</code> and <code>layout_functions.ts</code>, as well as <code>id</code>, <code>tag</code>, and <code>tags</code> props on <code>&lt;DinouCacheSlot&gt;</code> — even across cold restarts and distributed pods.
                 </td>
               </tr>
               <tr>
                 <td className="p-3 font-mono font-semibold text-muted-foreground line-through align-top">options</td>
-                <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">&#123; cascade?: boolean &#125;</td>
+                <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">&#123; cascade?: boolean &#125; | &quot;layout&quot;</td>
                 <td className="p-3 font-mono text-[11px] text-amber-600 dark:text-amber-400 align-top">Deprecated</td>
                 <td className="p-3 align-top leading-relaxed">
                   <strong>Deprecated &amp; ignored since v9.0.3.</strong> Matched layouts automatically trigger lazy on-demand <code>index.html</code> re-composition across child routes to guarantee 0 hydration mismatch without eager cascading.
@@ -72,18 +72,18 @@ export function RevalidateTagSection() {
         {/* Multi-Target Mechanics Alert */}
         <Alert className="not-prose mt-4">
           <Flame className="h-4 w-4 text-emerald-500" />
-          <AlertTitle>Unified Cross-Tier Invalidation</AlertTitle>
+          <AlertTitle>Unified Cross-Tier Invalidation (Slot &rarr; Ancestor Layout &rarr; Page)</AlertTitle>
           <AlertDescription>
-            Unlike URL-bound invalidators, <code>revalidateTag()</code> resolves storage artifacts across all three segmentation axes simultaneously:
+            Unlike URL-bound invalidators, <code>revalidateTag()</code> resolves storage artifacts across all three segmentation axes in deterministic order:
             <ul className="list-disc pl-4 mt-2 space-y-1">
               <li>
-                <strong>Micro-ISR Slots (<code>&lt;DinouCacheSlot&gt;</code>):</strong> Matching cache slot payloads are immediately regenerated. If a matched slot resides inside a Static Shell (e.g. an unwrapped slot or a <code>&lt;Suspense&gt;</code> + <code>noDynamic()</code> slot on a <code>ppr = true</code> route), Dinou surgically splices the refreshed slot into the host page or layout shell without re-executing <code>page.tsx</code> or <code>layout.tsx</code>.
+                <strong>1. Micro-ISR Slots (<code>&lt;DinouCacheSlot&gt;</code>):</strong> Matching cache slot payloads (by <code>id</code>, <code>tag</code>, or <code>tags</code>) are evicted first. If a matched slot resides inside a Static Shell (e.g. an unwrapped slot or a <code>&lt;Suspense&gt;</code> + <code>noDynamic()</code> slot on a <code>ppr = true</code> route), Dinou surgically splices the refreshed slot into the host page or layout shell (<code>onlyRefreshSlots: true</code>) without re-executing <code>page.tsx</code> / <code>layout.tsx</code> or resetting host ISR TTLs (<code>pageGeneratedAt</code> / <code>layoutGeneratedAt</code>).
               </li>
               <li>
-                <strong>Route Pages (<code>page_functions.ts</code>):</strong> Routes declaring the tag via <code>export const getCacheTags = [...]</code> (including dynamic routes like <code>/products/[id]</code>) execute <code>revalidatePage()</code>, regenerating <code>page.rsc</code> and <code>index.html</code> while leaving parent layouts cached.
+                <strong>2. Segment Layouts (<code>layout_functions.ts</code>):</strong> Matched layouts execute <code>revalidateLayout()</code> in <strong>ancestor-first order</strong> (O(1) per segment), updating <code>layout.rsc</code> while child routes lazily re-compose their <code>index.html</code> on demand.
               </li>
               <li>
-                <strong>Segment Layouts (<code>layout_functions.ts</code>):</strong> Layouts declaring the tag via <code>export const getCacheTags = [...]</code> execute <code>revalidateLayout()</code> in O(1) time, updating <code>layout.rsc</code> while child routes lazily re-compose their <code>index.html</code> on demand.
+                <strong>3. Route Pages (<code>page_functions.ts</code>):</strong> Matched routes (including dynamic routes like <code>/products/[id]</code>) execute <code>revalidatePage()</code>, regenerating <code>page.rsc</code> and <code>index.html</code> while composing with the freshly updated layout chain.
               </li>
             </ul>
           </AlertDescription>
