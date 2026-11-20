@@ -283,7 +283,7 @@ function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
                         <div className="flex items-center gap-2">
                           <XCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                           <span>
-                            Development: <strong>Disabled</strong> (Native)
+                            Development: <strong>Disabled</strong> (SWC + Esbuild)
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -294,9 +294,11 @@ function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground mt-3 border-t pt-2">
-                        Uses native Esbuild JSX/TS transforms in dev for
-                        sub-millisecond HMR; runs Babel + React Compiler across
-                        the full client graph in production.
+                        Pre-compiles JSX/TS and Fast Refresh via a Rust SWC disk
+                        cache (<code>.dinou/swc</code>) and bundles natively
+                        with Esbuild in dev for sub-millisecond HMR; runs Babel
+                        + React Compiler across the full client graph in
+                        production.
                       </p>
                     </div>
 
@@ -378,9 +380,10 @@ function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
                     <li>
                       <strong>In Development (Esbuild, Rollup &amp; Webpack):</strong>{" "}
                       Running full Babel AST compilation on every keystroke slows
-                      down Hot Module Replacement (HMR). Dinou uses native
-                      Esbuild or Rust SWC transforms during <code>dinou dev</code>{" "}
-                      so edits reflect in the browser instantaneously.
+                      down Hot Module Replacement (HMR). Dinou uses Rust SWC
+                      transforms (paired with Esbuild, Rollup, or Webpack
+                      bundling) during <code>dinou dev</code> so edits reflect in
+                      the browser instantaneously.
                     </li>
                     <li>
                       <strong>In Production (<code>dinou build</code>):</strong>{" "}
@@ -408,7 +411,8 @@ function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
               </div>
               <p className="mt-4">
                 Dinou enables both <code>reactStrictMode: true</code> (in
-                development) and <code>reactCompiler: true</code> (in
+                development only—automatically omitted in production builds with
+                zero runtime overhead) and <code>reactCompiler: true</code> (in
                 production) by default.
               </p>
 
@@ -477,7 +481,8 @@ function OrderSummary({ items, filter }: { items: Item[]; filter: string }) {
                 <p>
                   Both <code>reactCompiler</code> and{" "}
                   <code>reactStrictMode</code> can be configured globally in{" "}
-                  <code>dinou.config.ts</code> (or <code>dinou.config.js</code>)
+                  <code>dinou.config.ts</code> (or <code>.mjs</code> /{" "}
+                  <code>.js</code> / <code>.cjs</code>)
                   using <code>defineConfig</code> from{" "}
                   <code>&quot;dinou/config&quot;</code> (also re-exported from{" "}
                   <code>&quot;dinou&quot;</code>):
