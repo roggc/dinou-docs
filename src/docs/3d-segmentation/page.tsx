@@ -414,7 +414,7 @@ export async function getProps() {
               <section id="horizontal-revalidation" className="mt-8 scroll-mt-20">
                 <h3>1.2. Surgical Layout Revalidation &amp; Lazy On-Demand Propagation</h3>
                 <p>
-                  Because layouts and pages are cached independently, you can invalidate just the page (<code>revalidatePage</code>), just the layout (<code>revalidateLayout</code>), both at once (<code>revalidatePath</code>), or target either by tag (<code>revalidateTag</code>)—see <Link href="/docs/revalidation">Revalidation</Link> for full API signatures and cascade options:
+                  Because layouts and pages are cached independently, you can invalidate just the page (<code>revalidatePage</code>), just the layout (<code>revalidateLayout</code>), both at once (<code>revalidatePath</code>), or target either by tag (<code>revalidateTag</code>)—see <Link href="/docs/revalidation">Revalidation</Link> for full API signatures and propagation details:
                 </p>
 
                 <CodeBlock
@@ -584,7 +584,7 @@ export function WorkspaceControls() {
                         <td className="py-2.5 px-3 font-mono font-semibold text-foreground whitespace-nowrap">tag?</td>
                         <td className="py-2.5 px-3 font-mono text-muted-foreground whitespace-nowrap">string</td>
                         <td className="py-2.5 px-3 text-muted-foreground leading-relaxed">
-                          Assigns a <strong>single</strong> cache tag to invalidate the slot on the server via <code>revalidateTag(tag)</code> (or refresh all slots sharing that tag in the browser via <code>refreshSlot(tag)</code>). Do not combine <code>tag</code> and <code>tags</code> on the same slot—if <code>tags</code> is provided, Dinou uses <code>tags</code> and ignores <code>tag</code>. If <code>id</code> is omitted, <code>tag || tags[0]</code> is used as the slot&apos;s <code>id</code>.
+                          Assigns a <strong>single</strong> cache tag to invalidate the slot on the server via <code>revalidateTag(tag)</code> (or refresh all slots sharing that tag in the browser via <code>refreshSlot(tag)</code>). If both <code>tag</code> and <code>tags</code> are provided, Dinou merges and deduplicates them (though preferring either <code>tag</code> for one or <code>tags</code> for multiple is cleanest). Note that <code>id</code> is also matched automatically by <code>revalidateTag(id)</code>; if <code>id</code> is omitted, <code>tag || tags[0]</code> becomes the slot&apos;s <code>id</code>.
                         </td>
                       </tr>
                       <tr>
@@ -596,13 +596,13 @@ export function WorkspaceControls() {
                       </tr>
                       <tr>
                         <td className="py-2.5 px-3 font-mono font-semibold text-foreground whitespace-nowrap">revalidate?</td>
-                        <td className="py-2.5 px-3 font-mono text-muted-foreground whitespace-nowrap">number</td>
+                        <td className="py-2.5 px-3 font-mono text-muted-foreground whitespace-nowrap">number | false</td>
                         <td className="py-2.5 px-3 text-muted-foreground leading-relaxed space-y-1">
                           <div>Controls how long (in seconds) the rendered Server Component output stays fresh in the server cache:</div>
                           <ul className="list-disc pl-4 space-y-1">
-                            <li><strong>Omitted (<code>undefined</code>):</strong> Cached indefinitely on the server until invalidated via <code>revalidateTag()</code> on the server or force-revalidated from the client via <code>refreshSlot(..., &#123; fresh: true &#125;)</code>.</li>
+                            <li><strong>Omitted (<code>undefined</code>) or <code>false</code>:</strong> Cached indefinitely on the server until invalidated via <code>revalidateTag()</code> on the server or force-revalidated from the client via <code>refreshSlot(..., &#123; fresh: true &#125;)</code>.</li>
                             <li><strong><code>&gt;= 1</code> (e.g., <code>revalidate=&#123;60&#125;</code>):</strong> Cached for that many seconds. Once expired, the next request immediately serves the cached HTML and updates the slot in the background (Stale-While-Revalidate).</li>
-                            <li><strong><code>0</code> (<code>revalidate=&#123;0&#125;</code>):</strong> <strong>Strict No-Cache</strong>. Never stores the output in the server cache (always renders fresh on every request), while still mounting a slot boundary in the browser so you can refresh just this widget on demand via <code>refreshSlot()</code>.</li>
+                            <li><strong><code>0</code> or <code>&lt; 1</code> (<code>revalidate=&#123;0&#125;</code>):</strong> <strong>Strict No-Cache</strong>. Never stores the output in the server cache (always renders fresh on every request), while still mounting a slot boundary in the browser so you can refresh just this widget on demand via <code>refreshSlot()</code>.</li>
                           </ul>
                         </td>
                       </tr>
@@ -631,7 +631,7 @@ export function WorkspaceControls() {
                       1. Unique <code>id</code> + Optional <code>tag</code> / <code>tags</code>
                     </div>
                     <p className="text-muted-foreground leading-relaxed">
-                      Always give each slot a unique, descriptive <code>id</code> (e.g., <code>&lt;DinouCacheSlot id=&quot;analytics-widget&quot;&gt;</code>)—this alone lets you cache the slot on the server and refresh it from the client via <code>refreshSlot(&quot;analytics-widget&quot;)</code>. When you also need server-side invalidation with <code>revalidateTag()</code> or want to invalidate several widgets together, add <code>tag</code> or <code>tags</code> (e.g., <code>tags=&#123;[&quot;sales&quot;, &quot;billing-group&quot;]&#125;</code>); if you also want the ability to revalidate by <code>id</code>, place the <code>id</code> in <code>tag || tags[0]</code>.
+                      Always give each slot a unique, descriptive <code>id</code> (e.g., <code>&lt;DinouCacheSlot id=&quot;analytics-widget&quot;&gt;</code>)—this alone caches the slot on the server, lets you refresh it from the client via <code>refreshSlot(&quot;analytics-widget&quot;)</code>, and lets you invalidate it on the server via <code>revalidateTag(&quot;analytics-widget&quot;)</code>. Add <code>tag</code> or <code>tags</code> whenever you want additional semantic or shared group tags to invalidate several widgets together (e.g., <code>tags=&#123;[&quot;sales&quot;, &quot;billing-group&quot;]&#125;</code>).
                     </p>
                   </div>
 
@@ -1168,7 +1168,7 @@ async function RealtimeInventoryTicker() {
 
 // 3. Request-aware Component (INSIDE <Suspense>, reads cookies) -> Dynamic PPR Hole!
 async function LiveCartBadge() {
-  const sessionToken = getContext()?.req.cookies["session_id"];
+  const sessionToken = getContext().req.cookies["session_id"];
   const cart = await db.carts.findActive(sessionToken);
   return <div className="cart-badge">Items: {cart?.itemCount ?? 0}</div>;
 }
@@ -1333,7 +1333,7 @@ export default function DocPage() {
                     <span>Per-Segment Lookup Order (No Cascading Across Segments)</span>
                   </div>
                   <div className="font-mono text-xs bg-muted/60 p-2.5 rounded-md text-purple-700 dark:text-purple-300 break-words">
-                    effectivePpr(segment) = (typeof segmentConfig.ppr === &quot;function&quot; ? await segmentConfig.ppr() : segmentConfig.ppr) ?? Boolean(dinouConfig.ppr) ?? false
+                    effectivePpr(segment) = (typeof segmentConfig.ppr === &quot;function&quot; ? await segmentConfig.ppr() : segmentConfig.ppr) ?? (dinouConfig.ppr ?? false)
                   </div>
                   <div className="grid gap-2 font-mono text-xs">
                     <div className="p-2.5 rounded bg-muted/80 flex items-center justify-between border-l-4 border-purple-500">
@@ -1563,7 +1563,7 @@ import { getContext } from "dinou/server";
 
 async function LiveUserHeaderHole() {
   // Dynamic Hole in Layout: Streams on every request & on router.refresh({ layout: true })
-  const user = getContext()?.req.cookies["session_user"] ?? "guest";
+  const user = getContext().req.cookies["session_user"] ?? "guest";
   return <span>Signed in as {user}</span>;
 }
 
@@ -1786,8 +1786,8 @@ import { DinouCacheSlot, getContext } from "dinou/server";
 async function PersonalizedDepartmentHole() {
   // Runs live on EVERY request with the user's cookies & query params
   const ctx = getContext();
-  const user = ctx?.req.cookies["session_user"] ?? "guest";
-  const dept = ctx?.req.cookies["dept_id"] ?? "general";
+  const user = ctx.req.cookies["session_user"] ?? "guest";
+  const dept = ctx.req.cookies["dept_id"] ?? "general";
 
   return (
     <section className="space-y-4">
@@ -1903,7 +1903,7 @@ import { DinouCacheSlot, getContext } from "dinou/server";
 import { GlobalStatusBanner, HeavyMetricsGraph, GraphSkeleton } from "./widgets";
 
 async function UserAuditTrail() {
-  const userId = getContext()?.req.cookies["user_id"] ?? "anon";
+  const userId = getContext().req.cookies["user_id"] ?? "anon";
   const logs = await db.audit.getRecentForUser(userId);
   return <pre>{JSON.stringify(logs, null, 2)}</pre>;
 }
