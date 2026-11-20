@@ -68,7 +68,7 @@ export const docsNavigation: NavSection[] = [
     ],
   },
   {
-    title: "Core Concepts",
+    title: "Routing & Components",
     items: [
       {
         title: "Routing",
@@ -90,6 +90,11 @@ export const docsNavigation: NavSection[] = [
         href: "/docs/server-client-components",
         icon: Server,
       },
+    ],
+  },
+  {
+    title: "Data, Rendering & Server",
+    items: [
       {
         title: "Page & Layout Functions",
         href: "/docs/page-functions",
@@ -130,6 +135,11 @@ export const docsNavigation: NavSection[] = [
         href: "/docs/pattern",
         icon: Brain,
       },
+    ],
+  },
+  {
+    title: "Styling, Assets & Config",
+    items: [
       {
         title: "React Compiler",
         href: "/docs/compiler",
@@ -165,6 +175,11 @@ export const docsNavigation: NavSection[] = [
         href: "/docs/plugins",
         icon: Settings,
       },
+    ],
+  },
+  {
+    title: "Build, Deploy & Sovereignty",
+    items: [
       {
         title: "Bundlers",
         href: "/docs/bundlers",

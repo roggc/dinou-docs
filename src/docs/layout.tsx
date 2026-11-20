@@ -12,6 +12,30 @@ export default function Layout({ children }: LayoutProps) {
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Dinou Docs" />
+        <meta
+          property="og:title"
+          content="Dinou Documentation — Full-Stack React 19 Framework"
+        />
+        <meta
+          property="og:description"
+          content="Official documentation for Dinou v10: Type-Safe Routing, React Server Components, 3D Layered Caching, Partial Prerendering, Server Functions, and multi-runtime deployments."
+        />
+        <meta property="og:image" content="https://dinou.dev/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Dinou v10 Documentation" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Dinou Documentation — Full-Stack React 19 Framework"
+        />
+        <meta
+          name="twitter:description"
+          content="Official documentation for Dinou v10: Type-Safe Routing, React Server Components, 3D Layered Caching, Partial Prerendering, Server Functions, and multi-runtime deployments."
+        />
+        <meta name="twitter:image" content="https://dinou.dev/og-image.png" />
         <link key="favicon" rel="icon" type="image/png" href="/favicon.ico" />
         <link
           key="apple-touch-icon"

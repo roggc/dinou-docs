@@ -328,7 +328,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/routing",
     "title": "Routing",
     "href": "/docs/routing",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "page",
     "description": "Master Dinou's file-system router: root and nested layouts, parallel slots with error isolation, route parameters, and layout control flags.",
@@ -356,7 +356,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#overview",
     "title": "1. Overview & Directory Conventions",
     "href": "/docs/routing#overview",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -364,7 +364,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#core-conventions",
     "title": "1.1. Core File Conventions",
     "href": "/docs/routing#core-conventions",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -372,7 +372,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#route-resolution",
     "title": "1.2. In-Memory Route Resolution",
     "href": "/docs/routing#route-resolution",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -380,7 +380,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#route-types",
     "title": "2. Route Types & Pattern Matching",
     "href": "/docs/routing#route-types",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -388,7 +388,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#static-dynamic",
     "title": "2.1. Static & Dynamic Segments",
     "href": "/docs/routing#static-dynamic",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -396,7 +396,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#catch-all",
     "title": "2.2. Catch-All & Optional Catch-All",
     "href": "/docs/routing#catch-all",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -404,7 +404,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#no-gap-rule",
     "title": "2.3. The Strict No-Gap Rule",
     "href": "/docs/routing#no-gap-rule",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -412,7 +412,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#route-precedence",
     "title": "2.4. Precedence & Branch Backtracking",
     "href": "/docs/routing#route-precedence",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -420,7 +420,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#route-props",
     "title": "3. Route Parameters & Validation",
     "href": "/docs/routing#route-props",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -428,7 +428,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#params-injection",
     "title": "3.1. Dynamic Params Prop Injection",
     "href": "/docs/routing#params-injection",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -436,7 +436,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#validate-params",
     "title": "3.2. Route Validation (validateParams)",
     "href": "/docs/routing#validate-params",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -444,7 +444,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#query-params",
     "title": "3.3. Query Parameters Access",
     "href": "/docs/routing#query-params",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -452,7 +452,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#layouts-special-files",
     "title": "4. Layouts & Special Files",
     "href": "/docs/routing#layouts-special-files",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -460,7 +460,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#root-layout",
     "title": "4.1. Root Layout (src/layout.tsx)",
     "href": "/docs/routing#root-layout",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -468,7 +468,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#nested-layouts",
     "title": "4.2. Nested Layouts (layout.tsx)",
     "href": "/docs/routing#nested-layouts",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -476,7 +476,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#layout-flags",
     "title": "4.3. Layout Control Flags (reset_layout, no_layout)",
     "href": "/docs/routing#layout-flags",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -484,7 +484,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#error-handling",
     "title": "4.4. Error Pages (error.tsx)",
     "href": "/docs/routing#error-handling",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -492,7 +492,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#not-found-pages",
     "title": "4.5. Custom 404 Pages (not_found.tsx)",
     "href": "/docs/routing#not-found-pages",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -500,7 +500,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#route-organization",
     "title": "5. Route Organization & Parallel Slots",
     "href": "/docs/routing#route-organization",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -508,7 +508,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#route-groups",
     "title": "5.1. Route Groups (folder)",
     "href": "/docs/routing#route-groups",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -516,7 +516,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#private-folders",
     "title": "5.2. Escaping Route & Bundler Scanning (_folder)",
     "href": "/docs/routing#private-folders",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -524,7 +524,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#parallel-routes",
     "title": "5.3. Parallel Routes & Slots (@slot)",
     "href": "/docs/routing#parallel-routes",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -532,7 +532,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/routing#error-containment",
     "title": "5.4. Slot Error Containment Architecture",
     "href": "/docs/routing#error-containment",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Routing",
     "kind": "section"
   },
@@ -540,7 +540,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/navigation",
     "title": "Navigation",
     "href": "/docs/navigation",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Navigation",
     "kind": "page",
     "description": "Master Dinou's universal and client-side SPA navigation: soft transitions, automatic hover prefetching, URL hooks (usePathname & useSearchParams), universal redirects, and the Client Router Cache.",
@@ -563,7 +563,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/navigation#overview",
     "title": "1. Navigation Overview",
     "href": "/docs/navigation#overview",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Navigation",
     "kind": "section"
   },
@@ -571,7 +571,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/navigation#link-component",
     "title": "2. The <Link> Component & Prefetching",
     "href": "/docs/navigation#link-component",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Navigation",
     "kind": "section"
   },
@@ -579,7 +579,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/navigation#programmatic-navigation",
     "title": "3. Programmatic Navigation (useRouter)",
     "href": "/docs/navigation#programmatic-navigation",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Navigation",
     "kind": "section"
   },
@@ -587,7 +587,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/navigation#url-hooks",
     "title": "4. Reading the URL (usePathname & useSearchParams)",
     "href": "/docs/navigation#url-hooks",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Navigation",
     "kind": "section"
   },
@@ -595,7 +595,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/navigation#universal-redirect",
     "title": "5. Universal Redirection (redirect)",
     "href": "/docs/navigation#universal-redirect",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Navigation",
     "kind": "section"
   },
@@ -603,7 +603,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/navigation#router-cache-fresh",
     "title": "6. Client Router Cache & The fresh Prop",
     "href": "/docs/navigation#router-cache-fresh",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Navigation",
     "kind": "section"
   },
@@ -611,7 +611,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/navigation#use-navigation-loading",
     "title": "7. Route Transitions (useNavigationLoading)",
     "href": "/docs/navigation#use-navigation-loading",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Navigation",
     "kind": "section"
   },
@@ -619,7 +619,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/navigation#relative-routing",
     "title": "8. Relative Routing Rules",
     "href": "/docs/navigation#relative-routing",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Navigation",
     "kind": "section"
   },
@@ -627,7 +627,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/type-safe-routing",
     "title": "Type-Safe Routing",
     "href": "/docs/type-safe-routing",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "page",
     "description": "Experience end-to-end static TypeScript route safety across your entire application with instant dev-time IDE autocomplete, typegen CLI, and typed Link components.",
@@ -653,7 +653,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#overview",
     "title": "1. Overview & Zero-Runtime Guarantee",
     "href": "/docs/type-safe-routing#overview",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -661,7 +661,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#core-pillars",
     "title": "1.1. Outward Navigation vs. Inward Consumption",
     "href": "/docs/type-safe-routing#core-pillars",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -669,7 +669,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#zero-cost",
     "title": "1.2. Zero Generated Route Table Overhead",
     "href": "/docs/type-safe-routing#zero-cost",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -677,7 +677,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#quick-start",
     "title": "2. Quick Start for Developers",
     "href": "/docs/type-safe-routing#quick-start",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -685,7 +685,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#level-1-navigation",
     "title": "2.1. Level 1: Links & Navigation",
     "href": "/docs/type-safe-routing#level-1-navigation",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -693,7 +693,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#level-2-components",
     "title": "2.2. Level 2: Pages, Horizontal Layouts & Parallel Slots",
     "href": "/docs/type-safe-routing#level-2-components",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -701,7 +701,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#core-types-table",
     "title": "2.3. Quick Reference: Core Types",
     "href": "/docs/type-safe-routing#core-types-table",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -709,7 +709,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#param-mapping",
     "title": "3. Parameter Mapping Reference Table",
     "href": "/docs/type-safe-routing#param-mapping",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -717,7 +717,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#advanced-recipes",
     "title": "4. Advanced Usage & Real-World Recipes",
     "href": "/docs/type-safe-routing#advanced-recipes",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -725,7 +725,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#route-pattern-picking",
     "title": "4.1. IDE Autocomplete Workflow (Ctrl + Space)",
     "href": "/docs/type-safe-routing#route-pattern-picking",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -733,7 +733,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#typed-error-pages",
     "title": "4.2. Error & Not-Found Pages (ErrorProps & NotFoundProps)",
     "href": "/docs/type-safe-routing#typed-error-pages",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -741,7 +741,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#custom-components",
     "title": "4.3. Custom Navigation Components with DinouRoute",
     "href": "/docs/type-safe-routing#custom-components",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -749,7 +749,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#dynamic-interpolation",
     "title": "4.4. Dynamic Navigation: Pattern + params vs. Template Strings",
     "href": "/docs/type-safe-routing#dynamic-interpolation",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -757,7 +757,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#relative-navigation",
     "title": "4.5. Strict Relative Navigation with from",
     "href": "/docs/type-safe-routing#relative-navigation",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -765,7 +765,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#contextual-dinou",
     "title": "4.6. Contextual \"./dinou\" (Zero Boilerplate)",
     "href": "/docs/type-safe-routing#contextual-dinou",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -773,7 +773,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#contextual-directory-rules",
     "title": "4.7. Deep Dive: \"./dinou\", \"../dinou\" & Folder Rules",
     "href": "/docs/type-safe-routing#contextual-directory-rules",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -781,7 +781,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#architecture",
     "title": "5. Technical Architecture: Under the Hood",
     "href": "/docs/type-safe-routing#architecture",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -789,7 +789,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#route-scanner",
     "title": "5.1. Ultra-Fast Route Scanner",
     "href": "/docs/type-safe-routing#route-scanner",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -797,7 +797,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#generated-definitions",
     "title": "5.2. Module Augmentation",
     "href": "/docs/type-safe-routing#generated-definitions",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -805,7 +805,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#compiler-plumbing",
     "title": "5.3. Internal Compiler Plumbing",
     "href": "/docs/type-safe-routing#compiler-plumbing",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -813,7 +813,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#tsconfig-wiring",
     "title": "5.4. tsconfig.json Integration",
     "href": "/docs/type-safe-routing#tsconfig-wiring",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -821,7 +821,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#lifecycle",
     "title": "6. Lifecycle: Dev, Typegen CLI & Production Builds",
     "href": "/docs/type-safe-routing#lifecycle",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -829,7 +829,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#dev-watcher",
     "title": "6.1. Local Dev: Hot Watcher",
     "href": "/docs/type-safe-routing#dev-watcher",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -837,7 +837,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#typegen-cli",
     "title": "6.2. Standalone CLI: npm run typegen",
     "href": "/docs/type-safe-routing#typegen-cli",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -845,7 +845,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#prod-builds",
     "title": "6.3. Production: Deterministic Builds",
     "href": "/docs/type-safe-routing#prod-builds",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -853,7 +853,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/type-safe-routing#backward-compat",
     "title": "7. Backward Compatibility Guarantee",
     "href": "/docs/type-safe-routing#backward-compat",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Type-Safe Routing",
     "kind": "section"
   },
@@ -861,7 +861,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/server-client-components",
     "title": "Component Architecture",
     "href": "/docs/server-client-components",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "page",
     "description": "Master the React 19 dual-component model, serializable flight boundaries, component micro-caching with DinouCacheSlot, and Partial Prerendering.",
@@ -878,7 +878,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#overview",
     "title": "1. Overview & Dual-Component Model",
     "href": "/docs/server-client-components#overview",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -886,7 +886,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#mental-model",
     "title": "1.1. The RSC Mental Model",
     "href": "/docs/server-client-components#mental-model",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -894,7 +894,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#server-components",
     "title": "2. Server Components (RSC)",
     "href": "/docs/server-client-components#server-components",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -902,7 +902,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#rsc-capabilities",
     "title": "2.1. Capabilities & Backend Access",
     "href": "/docs/server-client-components#rsc-capabilities",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -910,7 +910,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#rsc-constraints",
     "title": "2.2. Constraints & Limitations",
     "href": "/docs/server-client-components#rsc-constraints",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -918,7 +918,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#client-components",
     "title": "3. Client Components",
     "href": "/docs/server-client-components#client-components",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -926,7 +926,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#client-capabilities",
     "title": "3.1. Interactivity & Browser APIs",
     "href": "/docs/server-client-components#client-capabilities",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -934,7 +934,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#ssr-prerender-notice",
     "title": "3.2. Server Pre-Rendering Notice",
     "href": "/docs/server-client-components#ssr-prerender-notice",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -942,7 +942,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#use-client-directive",
     "title": "4. The 'use client' Directive",
     "href": "/docs/server-client-components#use-client-directive",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -950,7 +950,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#boundary-rules",
     "title": "4.1. Establishing Module Boundaries",
     "href": "/docs/server-client-components#boundary-rules",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -958,7 +958,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#import-cascading",
     "title": "4.2. Import Cascading Behavior",
     "href": "/docs/server-client-components#import-cascading",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -966,7 +966,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#serialization-boundary",
     "title": "5. Data Serialization Boundary",
     "href": "/docs/server-client-components#serialization-boundary",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -974,7 +974,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#serializable-types",
     "title": "5.1. Supported Data Types",
     "href": "/docs/server-client-components#serializable-types",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -982,7 +982,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#passing-promises",
     "title": "5.2. Passing Promises & React 19 use()",
     "href": "/docs/server-client-components#passing-promises",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -990,7 +990,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#best-practices",
     "title": "6. Architectural Patterns & Best Practices",
     "href": "/docs/server-client-components#best-practices",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -998,7 +998,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#pattern-leaves",
     "title": "6.1. Interactive Leaves at the Edges (Recommended)",
     "href": "/docs/server-client-components#pattern-leaves",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -1006,7 +1006,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#pattern-composition",
     "title": "6.2. Composition: Server Components as Children",
     "href": "/docs/server-client-components#pattern-composition",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -1014,7 +1014,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#pattern-client-first",
     "title": "6.3. Client-First with Server Data (getProps)",
     "href": "/docs/server-client-components#pattern-client-first",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -1022,7 +1022,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#pattern-cache-slots",
     "title": "6.4. Granular Caching with <DinouCacheSlot>",
     "href": "/docs/server-client-components#pattern-cache-slots",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -1030,7 +1030,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-client-components#anti-patterns",
     "title": "6.5. Common Traps & Anti-Patterns to Avoid",
     "href": "/docs/server-client-components#anti-patterns",
-    "section": "Core Concepts",
+    "section": "Routing & Components",
     "pageTitle": "Component Architecture",
     "kind": "section"
   },
@@ -1038,7 +1038,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/page-functions",
     "title": "Page & Layout Functions",
     "href": "/docs/page-functions",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "page",
     "description": "Dinou features 3D Horizontal Layered Segmentation. Route configuration and server lifecycles are decoupled into page_functions.ts and layout_functions.ts.",
@@ -1058,7 +1058,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#overview",
     "title": "Overview & Horizontal Segmentation",
     "href": "/docs/page-functions#overview",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1066,7 +1066,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#getprops",
     "title": "1. getProps (Direct Component Props)",
     "href": "/docs/page-functions#getprops",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1074,7 +1074,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#getstaticpaths",
     "title": "2. getStaticPaths (Static Generation)",
     "href": "/docs/page-functions#getstaticpaths",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1082,7 +1082,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#constant-vs-function",
     "title": "2.1. Constant Array vs Function Export",
     "href": "/docs/page-functions#constant-vs-function",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1090,7 +1090,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#return-formats",
     "title": "2.2. Return Formats",
     "href": "/docs/page-functions#return-formats",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1098,7 +1098,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#simple-routes",
     "title": "2.3. Simple Dynamic Routes",
     "href": "/docs/page-functions#simple-routes",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1106,7 +1106,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#catch-all-routes",
     "title": "2.4. Catch-all Routes",
     "href": "/docs/page-functions#catch-all-routes",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1114,7 +1114,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#route-propagation",
     "title": "2.5. Automatic Route Propagation (Recursion)",
     "href": "/docs/page-functions#route-propagation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1122,7 +1122,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#chain-of-responsibility",
     "title": "2.6. Nested Pages & 'Chain of Responsibility'",
     "href": "/docs/page-functions#chain-of-responsibility",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1130,7 +1130,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#nested-complex-routes",
     "title": "2.7. Nested & Pass-through Segments",
     "href": "/docs/page-functions#nested-complex-routes",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1138,7 +1138,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#async-support",
     "title": "2.8. Async Support (CMS & DB)",
     "href": "/docs/page-functions#async-support",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1146,7 +1146,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#validateparams",
     "title": "3. validateParams (Segment Parameter Validation)",
     "href": "/docs/page-functions#validateparams",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1154,7 +1154,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#allowisg",
     "title": "4. allowISG (On-Demand ISG Control)",
     "href": "/docs/page-functions#allowisg",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1162,7 +1162,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#revalidate",
     "title": "5. revalidate (ISR & Dynamic SSR Escape)",
     "href": "/docs/page-functions#revalidate",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1170,7 +1170,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#getcachetags",
     "title": "6. getCacheTags (Cache Tagging)",
     "href": "/docs/page-functions#getcachetags",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1178,7 +1178,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#ppr",
     "title": "7. ppr (Partial Prerendering)",
     "href": "/docs/page-functions#ppr",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1186,7 +1186,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#consolidated-config",
     "title": "8. Consolidated Config Object (export default)",
     "href": "/docs/page-functions#consolidated-config",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1194,7 +1194,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#config-advantages",
     "title": "8.1. Developer Experience & Advantages",
     "href": "/docs/page-functions#config-advantages",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1202,7 +1202,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#config-precedence",
     "title": "8.2. Hybrid Model & Precedence Rules",
     "href": "/docs/page-functions#config-precedence",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1210,7 +1210,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#config-generics",
     "title": "8.3. Flexible Generics Typing",
     "href": "/docs/page-functions#config-generics",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1218,7 +1218,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#config-layout",
     "title": "8.4. Applicability to layout_functions",
     "href": "/docs/page-functions#config-layout",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1226,7 +1226,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/page-functions#type-safe-example",
     "title": "9. End-to-End Type-Safe Example",
     "href": "/docs/page-functions#type-safe-example",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Page & Layout Functions",
     "kind": "section"
   },
@@ -1234,7 +1234,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/rendering",
     "title": "Static & Dynamic Rendering",
     "href": "/docs/rendering",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Static & Dynamic Rendering",
     "kind": "page",
     "description": "Dinou is Static by Default. Explore route-level build-time SSG, background ISR, on-demand ISG, and dynamic SSR streaming.",
@@ -1257,7 +1257,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/rendering#overview",
     "title": "Overview: Static by Default Architecture",
     "href": "/docs/rendering#overview",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Static & Dynamic Rendering",
     "kind": "section"
   },
@@ -1265,7 +1265,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/rendering#static-rendering",
     "title": "1. Static Site Generation (SSG) & Bailout",
     "href": "/docs/rendering#static-rendering",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Static & Dynamic Rendering",
     "kind": "section"
   },
@@ -1273,7 +1273,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/rendering#pure-ssg",
     "title": "1.1. Pure Static Pre-rendering",
     "href": "/docs/rendering#pure-ssg",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Static & Dynamic Rendering",
     "kind": "section"
   },
@@ -1281,7 +1281,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/rendering#automatic-bailout",
     "title": "1.2. Automatic Static Bailout",
     "href": "/docs/rendering#automatic-bailout",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Static & Dynamic Rendering",
     "kind": "section"
   },
@@ -1289,7 +1289,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/rendering#revalidate-strategy",
     "title": "2. The Unified revalidate Strategy (Seconds)",
     "href": "/docs/rendering#revalidate-strategy",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Static & Dynamic Rendering",
     "kind": "section"
   },
@@ -1297,7 +1297,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/rendering#forced-dynamic-ssr",
     "title": "2.1. Dynamic SSR (revalidate < 1)",
     "href": "/docs/rendering#forced-dynamic-ssr",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Static & Dynamic Rendering",
     "kind": "section"
   },
@@ -1305,7 +1305,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/rendering#isr-regeneration",
     "title": "2.2. Incremental Static Regeneration (revalidate >= 1)",
     "href": "/docs/rendering#isr-regeneration",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Static & Dynamic Rendering",
     "kind": "section"
   },
@@ -1313,7 +1313,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/rendering#isg",
     "title": "3. Incremental Static Generation (ISG on-demand)",
     "href": "/docs/rendering#isg",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Static & Dynamic Rendering",
     "kind": "section"
   },
@@ -1321,7 +1321,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/rendering#on-demand-generation",
     "title": "3.1. On-Demand Path Generation",
     "href": "/docs/rendering#on-demand-generation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Static & Dynamic Rendering",
     "kind": "section"
   },
@@ -1329,7 +1329,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/rendering#isg-governance",
     "title": "3.2. Governance APIs (validateParams & allowISG)",
     "href": "/docs/rendering#isg-governance",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Static & Dynamic Rendering",
     "kind": "section"
   },
@@ -1337,7 +1337,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/rendering#comparison-matrix",
     "title": "4. Route-Level Rendering Strategies Matrix",
     "href": "/docs/rendering#comparison-matrix",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Static & Dynamic Rendering",
     "kind": "section"
   },
@@ -1345,7 +1345,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/3d-segmentation",
     "title": "3D Layered Segmentation",
     "href": "/docs/3d-segmentation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "page",
     "description": "Escape all-or-nothing route rendering with Dinou's 3D Layered Segmentation across all 7 combinations: Horizontal (layout_functions.ts), Vertical (<DinouCacheSlot>), Temporal (PPR), their 3 pairwise synergies, and full Triple Synergy.",
@@ -1365,7 +1365,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#overview",
     "title": "Overview: The 3 Axes & 7 Combinations",
     "href": "/docs/3d-segmentation#overview",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1373,7 +1373,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#horizontal-segmentation",
     "title": "1. Horizontal Axis: Layout Isolation (layout_functions.ts)",
     "href": "/docs/3d-segmentation#horizontal-segmentation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1381,7 +1381,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#horizontal-artifacts",
     "title": "1.1. Independent Lifecycles: Layout vs. Page",
     "href": "/docs/3d-segmentation#horizontal-artifacts",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1389,7 +1389,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#horizontal-revalidation",
     "title": "1.2. Surgical Layout Revalidation & Lazy On-Demand Propagation",
     "href": "/docs/3d-segmentation#horizontal-revalidation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1397,7 +1397,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#horizontal-escape-hatches",
     "title": "1.3. Client Navigation & Targeted Refresh (router.refresh)",
     "href": "/docs/3d-segmentation#horizontal-escape-hatches",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1405,7 +1405,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#micro-isr",
     "title": "2. Vertical Axis: Micro-ISR (<DinouCacheSlot>)",
     "href": "/docs/3d-segmentation#micro-isr",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1413,7 +1413,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#slot-caching",
     "title": "2.1. Component Caching: Dynamic vs Static & Key Patterns",
     "href": "/docs/3d-segmentation#slot-caching",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1421,7 +1421,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#slot-invalidation",
     "title": "2.2. Interactive Refresh, Tag Purging & Background SWR",
     "href": "/docs/3d-segmentation#slot-invalidation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1429,7 +1429,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#slot-anti-patterns",
     "title": "2.3. Anti-Patterns: When NOT to Use <DinouCacheSlot>",
     "href": "/docs/3d-segmentation#slot-anti-patterns",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1437,7 +1437,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#partial-prerendering",
     "title": "3. Temporal Axis: Partial Prerendering (PPR)",
     "href": "/docs/3d-segmentation#partial-prerendering",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1445,7 +1445,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#ppr-architecture",
     "title": "3.1. Static Shell, Dynamic Holes & The <Suspense> Boundary Rule",
     "href": "/docs/3d-segmentation#ppr-architecture",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1453,7 +1453,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#ppr-no-dynamic",
     "title": "3.2. Static <Suspense> Opt-Out (noDynamic) & Runtime Performance",
     "href": "/docs/3d-segmentation#ppr-no-dynamic",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1461,7 +1461,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#ppr-activation",
     "title": "3.3. Per-Segment Resolution, Global Default & Mixed Routes",
     "href": "/docs/3d-segmentation#ppr-activation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1469,7 +1469,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#pairwise-hs-slot",
     "title": "4. Pairwise #1: Horizontal + Vertical (Layouts + <DinouCacheSlot>)",
     "href": "/docs/3d-segmentation#pairwise-hs-slot",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1477,7 +1477,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#hs-slot-capabilities",
     "title": "4.1. Layout Slots, @sidebar Slots & Cross-Axis Shared Tags",
     "href": "/docs/3d-segmentation#hs-slot-capabilities",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1485,7 +1485,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#hs-slot-client",
     "title": "4.2. Cross-Route Slot Persistence & Background Refresh",
     "href": "/docs/3d-segmentation#hs-slot-client",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1493,7 +1493,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#pairwise-hs-ppr",
     "title": "5. Pairwise #2: Horizontal + Temporal (Layouts + PPR)",
     "href": "/docs/3d-segmentation#pairwise-hs-ppr",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1501,7 +1501,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#hs-ppr-shells",
     "title": "5.1. Independent Layout & Page Static Shells with Parallel Holes",
     "href": "/docs/3d-segmentation#hs-ppr-shells",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1509,7 +1509,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#hs-ppr-revalidation",
     "title": "5.2. Refresh, Revalidation & Navigation Matrix (Layout vs. Page)",
     "href": "/docs/3d-segmentation#hs-ppr-revalidation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1517,7 +1517,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#pairwise-slot-ppr",
     "title": "6. Pairwise #3: Vertical + Temporal (<DinouCacheSlot> + PPR)",
     "href": "/docs/3d-segmentation#pairwise-slot-ppr",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1525,7 +1525,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#ppr-slot-nesting",
     "title": "6.1. Nesting-Order Semantics (<Suspense> vs. <DinouCacheSlot>)",
     "href": "/docs/3d-segmentation#ppr-slot-nesting",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1533,7 +1533,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#ppr-slot-patterns",
     "title": "6.2. Personalized Holes, Nested Slots & Live Holes",
     "href": "/docs/3d-segmentation#ppr-slot-patterns",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1541,7 +1541,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#ppr-slot-hs-synergy",
     "title": "7. The Triple Synergy: Horizontal + Vertical + Temporal",
     "href": "/docs/3d-segmentation#ppr-slot-hs-synergy",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1549,7 +1549,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#triple-synergy-example",
     "title": "7.1. Full-Stack 3D Composition Example",
     "href": "/docs/3d-segmentation#triple-synergy-example",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1557,7 +1557,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#triple-synergy-invalidation",
     "title": "7.2. 4-Way Surgical Invalidation Without Collateral Rebuilds",
     "href": "/docs/3d-segmentation#triple-synergy-invalidation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1565,7 +1565,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/3d-segmentation#comparison-matrix",
     "title": "8. Complete 7-Combination & PPR Decision Matrices",
     "href": "/docs/3d-segmentation#comparison-matrix",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "3D Layered Segmentation",
     "kind": "section"
   },
@@ -1573,7 +1573,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/server-functions",
     "title": "Server Functions",
     "href": "/docs/server-functions",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Server Functions",
     "kind": "page",
     "description": "Execute asynchronous server logic directly with Flight RPC. Dinou uniquely allows Server Functions to return live, rendered React component trees.",
@@ -1594,7 +1594,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-functions#overview",
     "title": "Overview & 'use server' Directive",
     "href": "/docs/server-functions#overview",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Server Functions",
     "kind": "section"
   },
@@ -1602,7 +1602,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-functions#declaration-modalities",
     "title": "1. Declaration Modalities (Module vs. Function Level)",
     "href": "/docs/server-functions#declaration-modalities",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Server Functions",
     "kind": "section"
   },
@@ -1610,7 +1610,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-functions#manifest-deep-dive",
     "title": "2. Deep Dive: Manifest Inclusion & Security Rules",
     "href": "/docs/server-functions#manifest-deep-dive",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Server Functions",
     "kind": "section"
   },
@@ -1618,7 +1618,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-functions#passing-as-props",
     "title": "3. Passing Server Functions as Props & Closures",
     "href": "/docs/server-functions#passing-as-props",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Server Functions",
     "kind": "section"
   },
@@ -1626,7 +1626,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-functions#ui-component-streaming",
     "title": "4. Returning Live React Components (UI Streaming)",
     "href": "/docs/server-functions#ui-component-streaming",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Server Functions",
     "kind": "section"
   },
@@ -1634,7 +1634,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-functions#server-actions",
     "title": "5. Server Actions & Form Mutations",
     "href": "/docs/server-functions#server-actions",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Server Functions",
     "kind": "section"
   },
@@ -1642,7 +1642,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-functions#server-form-actions",
     "title": "5.1. Server Actions in Forms",
     "href": "/docs/server-functions#server-form-actions",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Server Functions",
     "kind": "section"
   },
@@ -1650,7 +1650,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-functions#react-19-form-hooks",
     "title": "5.2. React 19 Hooks: useActionState & useFormStatus",
     "href": "/docs/server-functions#react-19-form-hooks",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Server Functions",
     "kind": "section"
   },
@@ -1658,7 +1658,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-functions#optimistic-updates",
     "title": "5.3. Optimistic Updates with useOptimistic",
     "href": "/docs/server-functions#optimistic-updates",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Server Functions",
     "kind": "section"
   },
@@ -1666,7 +1666,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-functions#request-context",
     "title": "6. Request Context, Cookies & Headers (getContext)",
     "href": "/docs/server-functions#request-context",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Server Functions",
     "kind": "section"
   },
@@ -1674,7 +1674,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-functions#reading-request",
     "title": "6.1. Reading Query, Headers & Cookies",
     "href": "/docs/server-functions#reading-request",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Server Functions",
     "kind": "section"
   },
@@ -1682,7 +1682,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-functions#mutating-cookies",
     "title": "6.2. Setting & Clearing Cookies",
     "href": "/docs/server-functions#mutating-cookies",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Server Functions",
     "kind": "section"
   },
@@ -1690,7 +1690,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/server-functions#redirects",
     "title": "7. Redirections (redirect)",
     "href": "/docs/server-functions#redirects",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Server Functions",
     "kind": "section"
   },
@@ -1698,7 +1698,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/request-context",
     "title": "Request Context",
     "href": "/docs/request-context",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Request Context",
     "kind": "page",
     "description": "Access cookies, HTTP headers, normalized paths, query parameters, outgoing response cookies/headers/status, unified multi-runtime env bindings, and plugin state synchronously anywhere on the server with getContext().",
@@ -1726,7 +1726,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/request-context#overview",
     "title": "1. Overview & AsyncLocalStorage",
     "href": "/docs/request-context#overview",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Request Context",
     "kind": "section"
   },
@@ -1734,7 +1734,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/request-context#where-it-works",
     "title": "1.1 Where getContext() Works",
     "href": "/docs/request-context#where-it-works",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Request Context",
     "kind": "section"
   },
@@ -1742,7 +1742,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/request-context#store-shape",
     "title": "2. The RequestContextStore Shape",
     "href": "/docs/request-context#store-shape",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Request Context",
     "kind": "section"
   },
@@ -1750,7 +1750,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/request-context#reading-request",
     "title": "3. Reading Request Data (req)",
     "href": "/docs/request-context#reading-request",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Request Context",
     "kind": "section"
   },
@@ -1758,7 +1758,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/request-context#mutating-response",
     "title": "4. Mutating Responses (res)",
     "href": "/docs/request-context#mutating-response",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Request Context",
     "kind": "section"
   },
@@ -1766,7 +1766,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/request-context#ssg-ppr-bailout",
     "title": "5. SSG, PPR & Static Bailout Rules",
     "href": "/docs/request-context#ssg-ppr-bailout",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Request Context",
     "kind": "section"
   },
@@ -1774,7 +1774,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/request-context#env-plugins-augmentation",
     "title": "6. Unified env, ctx & Plugin State",
     "href": "/docs/request-context#env-plugins-augmentation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Request Context",
     "kind": "section"
   },
@@ -1782,7 +1782,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/request-context#ts-augmentation",
     "title": "6.1 TypeScript Augmentation (dinou-env.d.ts)",
     "href": "/docs/request-context#ts-augmentation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Request Context",
     "kind": "section"
   },
@@ -1790,7 +1790,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/request-context#server-only-boundary",
     "title": "7. Server-Only Boundary & Client Props",
     "href": "/docs/request-context#server-only-boundary",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Request Context",
     "kind": "section"
   },
@@ -1798,7 +1798,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/revalidation",
     "title": "On-Demand Revalidation",
     "href": "/docs/revalidation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "page",
     "description": "Purge, regenerate, and promote static page caches, layout shells, and component subtrees on-demand in production when mutative events occur.",
@@ -1822,7 +1822,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#overview",
     "title": "Overview & Multi-Tier Architecture",
     "href": "/docs/revalidation#overview",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1830,7 +1830,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#revalidate-page",
     "title": "1. revalidatePage (Surgical Page Invalidation)",
     "href": "/docs/revalidation#revalidate-page",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1838,7 +1838,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#revalidate-page-usage",
     "title": "1.1. Usage in Server Functions",
     "href": "/docs/revalidation#revalidate-page-usage",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1846,7 +1846,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#revalidate-layout",
     "title": "2. revalidateLayout (Surgical Layout Invalidation)",
     "href": "/docs/revalidation#revalidate-layout",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1854,7 +1854,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#lazy-html-recomposition",
     "title": "2.1. O(1) Layout Update & Lazy HTML Re-composition",
     "href": "/docs/revalidation#lazy-html-recomposition",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1862,7 +1862,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#revalidate-path",
     "title": "3. revalidatePath & Granularity Comparison",
     "href": "/docs/revalidation#revalidate-path",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1870,7 +1870,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#revalidate-path-usage",
     "title": "3.1. Combined Segment Purge (revalidatePath)",
     "href": "/docs/revalidation#revalidate-path-usage",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1878,7 +1878,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#revalidate-page-vs-path",
     "title": "3.2. revalidatePage vs. revalidateLayout vs. revalidatePath",
     "href": "/docs/revalidation#revalidate-page-vs-path",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1886,7 +1886,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#absolute-and-relative",
     "title": "3.3. Absolute & Relative Route Paths",
     "href": "/docs/revalidation#absolute-and-relative",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1894,7 +1894,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#revalidate-tag",
     "title": "4. revalidateTag (Cross-Cutting Invalidation)",
     "href": "/docs/revalidation#revalidate-tag",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1902,7 +1902,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#tag-assignment",
     "title": "4.1. Tag Assignment (getCacheTags)",
     "href": "/docs/revalidation#tag-assignment",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1910,7 +1910,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#targeted-tag-resolution",
     "title": "4.2. Targeted Resolution (Layout vs Page vs Slot)",
     "href": "/docs/revalidation#targeted-tag-resolution",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1918,7 +1918,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#golden-rules",
     "title": "4.3. Golden Rules of Invalidation",
     "href": "/docs/revalidation#golden-rules",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1926,7 +1926,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#cache-slot-revalidation",
     "title": "4.4. Invalidating <DinouCacheSlot> Subtrees",
     "href": "/docs/revalidation#cache-slot-revalidation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1934,7 +1934,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#client-side-refresh",
     "title": "5. Client-Side Surgical Revalidation",
     "href": "/docs/revalidation#client-side-refresh",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1942,7 +1942,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#router-caches",
     "title": "5.1. The Router Caches (pageCache & layoutCache)",
     "href": "/docs/revalidation#router-caches",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1950,7 +1950,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#link-fresh",
     "title": "5.2. Bypassing Client Cache with <Link fresh>",
     "href": "/docs/revalidation#link-fresh",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1958,7 +1958,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#router-refresh",
     "title": "5.3. router.refresh() & Layout Invalidation",
     "href": "/docs/revalidation#router-refresh",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1966,7 +1966,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#refresh-slot",
     "title": "5.4. refreshSlot & router.refreshSlot",
     "href": "/docs/revalidation#refresh-slot",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1974,7 +1974,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#storage-adapters",
     "title": "6. Pluggable Storage Adapters",
     "href": "/docs/revalidation#storage-adapters",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1982,7 +1982,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#distributed-problem",
     "title": "6.1. Why Adapters Matter for Revalidation",
     "href": "/docs/revalidation#distributed-problem",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1990,7 +1990,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#adapter-catalog",
     "title": "6.2. Supported Storage Adapters & Configuration",
     "href": "/docs/revalidation#adapter-catalog",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -1998,7 +1998,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#security-and-webhooks",
     "title": "7. Webhook Integrations (Headless CMS)",
     "href": "/docs/revalidation#security-and-webhooks",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -2006,7 +2006,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#strategy-matrix",
     "title": "8. Strategy Comparison Matrix",
     "href": "/docs/revalidation#strategy-matrix",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -2014,7 +2014,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#server-matrix",
     "title": "8.1. Server-Side Invalidation",
     "href": "/docs/revalidation#server-matrix",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -2022,7 +2022,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/revalidation#client-matrix",
     "title": "8.2. Client-Side Router Refresh",
     "href": "/docs/revalidation#client-matrix",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "On-Demand Revalidation",
     "kind": "section"
   },
@@ -2030,7 +2030,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/data-fetching",
     "title": "Data Fetching",
     "href": "/docs/data-fetching",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "page",
     "description": "A comprehensive case-by-case engineering guide covering each of the 14 data fetching and rendering patterns available in Dinou.",
@@ -2049,7 +2049,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#overview",
     "title": "Overview: 14-Strategy Architecture",
     "href": "/docs/data-fetching#overview",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2057,7 +2057,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#strategy-1",
     "title": "1. RSC Direct await (SSG)",
     "href": "/docs/data-fetching#strategy-1",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2065,7 +2065,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#strategy-2",
     "title": "2. RSC Direct await (Dynamic SSR)",
     "href": "/docs/data-fetching#strategy-2",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2073,7 +2073,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#strategy-3",
     "title": "3. RSC with <Suspense> (SSG)",
     "href": "/docs/data-fetching#strategy-3",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2081,7 +2081,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#strategy-4",
     "title": "4. RSC with <Suspense> (Dynamic Streaming)",
     "href": "/docs/data-fetching#strategy-4",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2089,7 +2089,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#strategy-5",
     "title": "5. RSC + <DinouCacheSlot> (Static SSG / Asymmetric ISR)",
     "href": "/docs/data-fetching#strategy-5",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2097,7 +2097,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#strategy-6",
     "title": "6. RSC + <Suspense> + <DinouCacheSlot> (Dynamic Micro-ISR)",
     "href": "/docs/data-fetching#strategy-6",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2105,7 +2105,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#strategy-7",
     "title": "7. RSC with <Suspense> (PPR Hybrid)",
     "href": "/docs/data-fetching#strategy-7",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2113,7 +2113,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#strategy-8",
     "title": "8. PPR + <DinouCacheSlot> (Peak Performance Synergy)",
     "href": "/docs/data-fetching#strategy-8",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2121,7 +2121,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#strategy-9",
     "title": "9. RSC Promise ➔ Client use() (React 19)",
     "href": "/docs/data-fetching#strategy-9",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2129,7 +2129,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#strategy-10",
     "title": "10. Client-First getProps (SSG)",
     "href": "/docs/data-fetching#strategy-10",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2137,7 +2137,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#strategy-11",
     "title": "11. Client-First getProps (Dynamic SSR)",
     "href": "/docs/data-fetching#strategy-11",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2145,7 +2145,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#strategy-12",
     "title": "12. Client-First getProps Promise ➔ Client use() (React 19)",
     "href": "/docs/data-fetching#strategy-12",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2153,7 +2153,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#strategy-13",
     "title": "13. Client Calling Server Function (Initial Mount - Dynamic RPC)",
     "href": "/docs/data-fetching#strategy-13",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2161,7 +2161,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#strategy-14",
     "title": "14. Client Server Functions (User Actions & Mutations)",
     "href": "/docs/data-fetching#strategy-14",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2169,7 +2169,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/data-fetching#decision-guide",
     "title": "Architectural Decision Guide",
     "href": "/docs/data-fetching#decision-guide",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "Data Fetching",
     "kind": "section"
   },
@@ -2177,7 +2177,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/pattern",
     "title": "The Dinou Pattern",
     "href": "/docs/pattern",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "The Dinou Pattern",
     "kind": "page",
     "description": "Combine Server Functions, Headless Client Updaters, and React 19 primitives with your global store for surgical, optimistic UI state updates.",
@@ -2192,7 +2192,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/pattern#concept",
     "title": "The Concept & Architecture",
     "href": "/docs/pattern#concept",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "The Dinou Pattern",
     "kind": "section"
   },
@@ -2200,7 +2200,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/pattern#flight-rpc",
     "title": "Flight RPC & Headless Updaters",
     "href": "/docs/pattern#flight-rpc",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "The Dinou Pattern",
     "kind": "section"
   },
@@ -2208,7 +2208,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/pattern#architecture-flow",
     "title": "5-Step Execution Lifecycle",
     "href": "/docs/pattern#architecture-flow",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "The Dinou Pattern",
     "kind": "section"
   },
@@ -2216,7 +2216,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/pattern#when-to-use",
     "title": "When to Use vs. <DinouCacheSlot>",
     "href": "/docs/pattern#when-to-use",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "The Dinou Pattern",
     "kind": "section"
   },
@@ -2224,7 +2224,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/pattern#implementation",
     "title": "Step-by-Step Implementation",
     "href": "/docs/pattern#implementation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "The Dinou Pattern",
     "kind": "section"
   },
@@ -2232,7 +2232,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/pattern#step-1-store",
     "title": "1. The Global Store (Zustand)",
     "href": "/docs/pattern#step-1-store",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "The Dinou Pattern",
     "kind": "section"
   },
@@ -2240,7 +2240,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/pattern#step-2-updater",
     "title": "2. The Headless Client Updater",
     "href": "/docs/pattern#step-2-updater",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "The Dinou Pattern",
     "kind": "section"
   },
@@ -2248,7 +2248,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/pattern#step-3-mutation",
     "title": "3. Server Function Mutation",
     "href": "/docs/pattern#step-3-mutation",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "The Dinou Pattern",
     "kind": "section"
   },
@@ -2256,7 +2256,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/pattern#step-4-query",
     "title": "4. Server Data Query Function",
     "href": "/docs/pattern#step-4-query",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "The Dinou Pattern",
     "kind": "section"
   },
@@ -2264,7 +2264,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/pattern#step-5-display",
     "title": "5. Display Component",
     "href": "/docs/pattern#step-5-display",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "The Dinou Pattern",
     "kind": "section"
   },
@@ -2272,7 +2272,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/pattern#step-6-page",
     "title": "6. Putting It All Together in the Page",
     "href": "/docs/pattern#step-6-page",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "The Dinou Pattern",
     "kind": "section"
   },
@@ -2280,7 +2280,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/pattern#zero-dependency",
     "title": "Zero-Dependency Option (useSyncExternalStore)",
     "href": "/docs/pattern#zero-dependency",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "The Dinou Pattern",
     "kind": "section"
   },
@@ -2288,7 +2288,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/pattern#comparison",
     "title": "Comparison & Key Advantages",
     "href": "/docs/pattern#comparison",
-    "section": "Core Concepts",
+    "section": "Data, Rendering & Server",
     "pageTitle": "The Dinou Pattern",
     "kind": "section"
   },
@@ -2296,7 +2296,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/compiler",
     "title": "React Compiler",
     "href": "/docs/compiler",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "React Compiler",
     "kind": "page",
     "description": "Forget about manual useMemo and useCallback. Dinou integrates the React Compiler across Esbuild, Rollup, and Webpack to automatically optimize client renders at build time.",
@@ -2313,7 +2313,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/compiler#overview",
     "title": "Overview: Automatic Memoization",
     "href": "/docs/compiler#overview",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "React Compiler",
     "kind": "section"
   },
@@ -2321,7 +2321,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/compiler#dual-engine-scope",
     "title": "Dual-Engine Compilation Scope",
     "href": "/docs/compiler#dual-engine-scope",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "React Compiler",
     "kind": "section"
   },
@@ -2329,7 +2329,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/compiler#code-comparison",
     "title": "1. Code Comparison: Plain React vs Hooks",
     "href": "/docs/compiler#code-comparison",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "React Compiler",
     "kind": "section"
   },
@@ -2337,7 +2337,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/compiler#bundler-integration",
     "title": "2. Bundler Integration Matrix",
     "href": "/docs/compiler#bundler-integration",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "React Compiler",
     "kind": "section"
   },
@@ -2345,7 +2345,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/compiler#dev-vs-prod-strategy",
     "title": "2.1. Why Dev vs Prod Behavior Differs",
     "href": "/docs/compiler#dev-vs-prod-strategy",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "React Compiler",
     "kind": "section"
   },
@@ -2353,7 +2353,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/compiler#react-strict-mode",
     "title": "3. StrictMode & Compiler Configuration",
     "href": "/docs/compiler#react-strict-mode",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "React Compiler",
     "kind": "section"
   },
@@ -2361,7 +2361,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/compiler#strict-mode-react-compiler",
     "title": "3.1. Why StrictMode is Vital for React Compiler",
     "href": "/docs/compiler#strict-mode-react-compiler",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "React Compiler",
     "kind": "section"
   },
@@ -2369,7 +2369,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/compiler#configuring-strict-mode",
     "title": "3.2. Configuring dinou.config.ts",
     "href": "/docs/compiler#configuring-strict-mode",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "React Compiler",
     "kind": "section"
   },
@@ -2377,7 +2377,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/compiler#rules-of-react",
     "title": "4. Guidelines for Compiler Purity",
     "href": "/docs/compiler#rules-of-react",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "React Compiler",
     "kind": "section"
   },
@@ -2385,7 +2385,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/compiler#use-no-memo",
     "title": "4.1. Local Opt-Out with \"use no memo\"",
     "href": "/docs/compiler#use-no-memo",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "React Compiler",
     "kind": "section"
   },
@@ -2393,7 +2393,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/public",
     "title": "Public Directory",
     "href": "/docs/public",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Public Directory",
     "kind": "page",
     "description": "Static asset delivery in Dinou. Learn how the public/ directory serves favicons, robots.txt, sitemaps, and domain verification files.",
@@ -2416,7 +2416,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/public#overview",
     "title": "1. Overview & Architecture",
     "href": "/docs/public#overview",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Public Directory",
     "kind": "section"
   },
@@ -2424,7 +2424,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/public#direct-copy",
     "title": "Bypassing Bundlers (.dinou/dist3)",
     "href": "/docs/public#direct-copy",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Public Directory",
     "kind": "section"
   },
@@ -2432,7 +2432,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/public#directory-structure",
     "title": "Recommended Directory Structure",
     "href": "/docs/public#directory-structure",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Public Directory",
     "kind": "section"
   },
@@ -2440,7 +2440,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/public#url-mapping",
     "title": "2. URL Mapping & Multi-Runtime Serving",
     "href": "/docs/public#url-mapping",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Public Directory",
     "kind": "section"
   },
@@ -2448,7 +2448,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/public#runtime-delivery",
     "title": "Multi-Runtime Delivery & Cache-Control",
     "href": "/docs/public#runtime-delivery",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Public Directory",
     "kind": "section"
   },
@@ -2456,7 +2456,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/public#common-use-cases",
     "title": "3. Common Use Cases",
     "href": "/docs/public#common-use-cases",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Public Directory",
     "kind": "section"
   },
@@ -2464,7 +2464,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/public#favicons-icons",
     "title": "Favicons & App Icons",
     "href": "/docs/public#favicons-icons",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Public Directory",
     "kind": "section"
   },
@@ -2472,7 +2472,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/public#seo-crawlers",
     "title": "robots.txt & sitemap.xml",
     "href": "/docs/public#seo-crawlers",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Public Directory",
     "kind": "section"
   },
@@ -2480,7 +2480,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/public#domain-verification",
     "title": "Domain Verification & .well-known",
     "href": "/docs/public#domain-verification",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Public Directory",
     "kind": "section"
   },
@@ -2488,7 +2488,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/public#og-social",
     "title": "OpenGraph & Social Share Cards",
     "href": "/docs/public#og-social",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Public Directory",
     "kind": "section"
   },
@@ -2496,7 +2496,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/public#public-vs-assets",
     "title": "4. public/ vs Imported Assets",
     "href": "/docs/public#public-vs-assets",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Public Directory",
     "kind": "section"
   },
@@ -2504,7 +2504,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/styles",
     "title": "Styles",
     "href": "/docs/styles",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Styles",
     "kind": "page",
     "description": "Unified, zero-config styling pipeline in Dinou supporting Tailwind CSS v4, CSS Modules across Server and Client Components, CSS url(...) assets, and instant HMR.",
@@ -2522,7 +2522,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/styles#overview",
     "title": "Styling in Dinou",
     "href": "/docs/styles#overview",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Styles",
     "kind": "section"
   },
@@ -2530,7 +2530,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/styles#linking-stylesheet",
     "title": "Linking /styles.css",
     "href": "/docs/styles#linking-stylesheet",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Styles",
     "kind": "section"
   },
@@ -2538,7 +2538,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/styles#precedence-attribute",
     "title": "React 19 precedence Attribute",
     "href": "/docs/styles#precedence-attribute",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Styles",
     "kind": "section"
   },
@@ -2546,7 +2546,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/styles#tailwind-v4",
     "title": "Tailwind CSS (v4 Engine)",
     "href": "/docs/styles#tailwind-v4",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Styles",
     "kind": "section"
   },
@@ -2554,7 +2554,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/styles#tailwind-theme",
     "title": "Custom @theme & Multi-Layout Setup",
     "href": "/docs/styles#tailwind-theme",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Styles",
     "kind": "section"
   },
@@ -2562,7 +2562,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/styles#css-modules",
     "title": "CSS Modules (*.module.css)",
     "href": "/docs/styles#css-modules",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Styles",
     "kind": "section"
   },
@@ -2570,7 +2570,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/styles#scoped-classnames",
     "title": "Server & Client Parity + Scoped Hashes",
     "href": "/docs/styles#scoped-classnames",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Styles",
     "kind": "section"
   },
@@ -2578,7 +2578,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/styles#global-css-imports",
     "title": "Global CSS, Third-Party Styles & Aliases",
     "href": "/docs/styles#global-css-imports",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Styles",
     "kind": "section"
   },
@@ -2586,7 +2586,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/styles#css-url-assets",
     "title": "CSS url(...) Assets & Fonts",
     "href": "/docs/styles#css-url-assets",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Styles",
     "kind": "section"
   },
@@ -2594,7 +2594,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/styles#css-hmr",
     "title": "Instant CSS Hot Module Replacement",
     "href": "/docs/styles#css-hmr",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Styles",
     "kind": "section"
   },
@@ -2602,7 +2602,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/styles#typescript-types",
     "title": "TypeScript Declarations (dinou/env)",
     "href": "/docs/styles#typescript-types",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Styles",
     "kind": "section"
   },
@@ -2610,7 +2610,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/styles#full-example",
     "title": "Complete End-to-End Example",
     "href": "/docs/styles#full-example",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Styles",
     "kind": "section"
   },
@@ -2618,7 +2618,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/assets",
     "title": "Assets",
     "href": "/docs/assets",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Assets",
     "kind": "page",
     "description": "Import images, videos, audio, and fonts directly into your components with deterministic path-and-content hashing, HTTP Range streaming, and ambient TypeScript support.",
@@ -2639,7 +2639,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/assets#overview",
     "title": "Assets & Media in Dinou",
     "href": "/docs/assets#overview",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Assets",
     "kind": "section"
   },
@@ -2647,7 +2647,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/assets#imported-vs-public",
     "title": "Imported Assets vs Public Directory",
     "href": "/docs/assets#imported-vs-public",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Assets",
     "kind": "section"
   },
@@ -2655,7 +2655,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/assets#supported-formats",
     "title": "Supported Extensions (26 Formats)",
     "href": "/docs/assets#supported-formats",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Assets",
     "kind": "section"
   },
@@ -2663,7 +2663,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/assets#usage-examples",
     "title": "Usage in Server & Client Components",
     "href": "/docs/assets#usage-examples",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Assets",
     "kind": "section"
   },
@@ -2671,7 +2671,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/assets#path-aliases",
     "title": "Path Aliases & CSS url() Assets",
     "href": "/docs/assets#path-aliases",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Assets",
     "kind": "section"
   },
@@ -2679,7 +2679,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/assets#caching-bundling",
     "title": "Production Output, Caching & HTTP Range",
     "href": "/docs/assets#caching-bundling",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Assets",
     "kind": "section"
   },
@@ -2687,7 +2687,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/assets#typescript-support",
     "title": "TypeScript Declarations (dinou/env)",
     "href": "/docs/assets#typescript-support",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Assets",
     "kind": "section"
   },
@@ -2695,7 +2695,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/assets#custom-extensions",
     "title": "Extending Custom Formats (assetExtensions)",
     "href": "/docs/assets#custom-extensions",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Assets",
     "kind": "section"
   },
@@ -2703,7 +2703,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/env-vars",
     "title": "Env Vars",
     "href": "/docs/env-vars",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "page",
     "description": "Manage server secrets, DINOU_PUBLIC_* browser variables, .env* hierarchies, and Cloudflare/Netlify/Edge bindings securely across Esbuild, Rollup, Webpack, Node.js, Bun, Deno, Cloudflare Workers, and Netlify.",
@@ -2727,7 +2727,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#overview",
     "title": "Environment Variables in Dinou",
     "href": "/docs/env-vars#overview",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2735,7 +2735,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#server-security-model",
     "title": "Server Isolation & DINOU_PUBLIC_*",
     "href": "/docs/env-vars#server-security-model",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2743,7 +2743,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#where-they-work",
     "title": "Private Server Secrets",
     "href": "/docs/env-vars#where-they-work",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2751,7 +2751,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#public-prefix",
     "title": "Public Client Variables (DINOU_PUBLIC_*)",
     "href": "/docs/env-vars#public-prefix",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2759,7 +2759,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#client-safety",
     "title": "Build-Time Prefix vs. Runtime Props",
     "href": "/docs/env-vars#client-safety",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2767,7 +2767,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#env-files",
     "title": "Defining .env Files",
     "href": "/docs/env-vars#env-files",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2775,7 +2775,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#env-hierarchy",
     "title": ".env* Precedence Hierarchy & Hot-Reload",
     "href": "/docs/env-vars#env-hierarchy",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2783,7 +2783,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#framework-vars",
     "title": "Built-In Framework Variables",
     "href": "/docs/env-vars#framework-vars",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2791,7 +2791,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#platforms-runtimes",
     "title": "Multi-Platform Runtimes",
     "href": "/docs/env-vars#platforms-runtimes",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2799,7 +2799,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#node-bun",
     "title": "Node.js & Bun",
     "href": "/docs/env-vars#node-bun",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2807,7 +2807,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#cloudflare",
     "title": "Cloudflare Workers & Bindings",
     "href": "/docs/env-vars#cloudflare",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2815,7 +2815,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#deno",
     "title": "Deno (--allow-env & Deno KV)",
     "href": "/docs/env-vars#deno",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2823,7 +2823,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#netlify",
     "title": "Netlify (Functions v2)",
     "href": "/docs/env-vars#netlify",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2831,7 +2831,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#typed-validation",
     "title": "TypeScript & Zod Validation",
     "href": "/docs/env-vars#typed-validation",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2839,7 +2839,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/env-vars#security-shield",
     "title": "Anti-Leak Security & Bot Shield",
     "href": "/docs/env-vars#security-shield",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Env Vars",
     "kind": "section"
   },
@@ -2847,7 +2847,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/alias",
     "title": "Alias",
     "href": "/docs/alias",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Alias",
     "kind": "page",
     "description": "Configure TypeScript and JavaScript path aliases in tsconfig.json or jsconfig.json with full parity across Esbuild, Rollup, Webpack, Node.js, Bun, Deno, Cloudflare Workers, and Netlify.",
@@ -2866,7 +2866,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/alias#overview",
     "title": "Import Aliases in Dinou",
     "href": "/docs/alias#overview",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Alias",
     "kind": "section"
   },
@@ -2874,7 +2874,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/alias#tsconfig-setup",
     "title": "Configuring tsconfig.json & jsconfig.json",
     "href": "/docs/alias#tsconfig-setup",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Alias",
     "kind": "section"
   },
@@ -2882,7 +2882,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/alias#multiple-aliases",
     "title": "Granular Aliases & Specificity",
     "href": "/docs/alias#multiple-aliases",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Alias",
     "kind": "section"
   },
@@ -2890,7 +2890,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/alias#extends-and-fallbacks",
     "title": "Config Inheritance (extends) & Fallbacks",
     "href": "/docs/alias#extends-and-fallbacks",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Alias",
     "kind": "section"
   },
@@ -2898,7 +2898,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/alias#universal-support",
     "title": "Where Aliases Work (Code, CSS, & Assets)",
     "href": "/docs/alias#universal-support",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Alias",
     "kind": "section"
   },
@@ -2906,7 +2906,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/alias#code-imports",
     "title": "TypeScript, JavaScript, & JSON Modules",
     "href": "/docs/alias#code-imports",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Alias",
     "kind": "section"
   },
@@ -2914,7 +2914,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/alias#css-imports",
     "title": "Stylesheets, CSS Modules, @import, & url()",
     "href": "/docs/alias#css-imports",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Alias",
     "kind": "section"
   },
@@ -2922,7 +2922,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/alias#asset-imports",
     "title": "Static Media & Custom Assets",
     "href": "/docs/alias#asset-imports",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Alias",
     "kind": "section"
   },
@@ -2930,7 +2930,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/alias#index-and-extensions",
     "title": "Extension, Index, & ESM Resolution",
     "href": "/docs/alias#index-and-extensions",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Alias",
     "kind": "section"
   },
@@ -2938,7 +2938,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/alias#contextual-dinou",
     "title": "Contextual ./dinou vs. Path Aliases",
     "href": "/docs/alias#contextual-dinou",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Alias",
     "kind": "section"
   },
@@ -2946,7 +2946,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/alias#ide-setup",
     "title": "IDE Autocomplete & Live Dev Reload",
     "href": "/docs/alias#ide-setup",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Alias",
     "kind": "section"
   },
@@ -2954,7 +2954,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/alias#troubleshooting",
     "title": "Best Practices & Common Gotchas",
     "href": "/docs/alias#troubleshooting",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Alias",
     "kind": "section"
   },
@@ -2962,7 +2962,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/plugins",
     "title": "Plugins",
     "href": "/docs/plugins",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "page",
     "description": "Customize your Dinou application with dinou.config.ts, configureServer for native Node HTTP and WebSockets, setupFiles for compile-time polyfills, and Web Standards onRequest plugins.",
@@ -2987,7 +2987,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#overview",
     "title": "1. Configuration & Plugin System",
     "href": "/docs/plugins#overview",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -2995,7 +2995,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#config-file",
     "title": "2. The dinou.config.ts File",
     "href": "/docs/plugins#config-file",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3003,7 +3003,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#config-bundling",
     "title": "2.1 AOT Bundling, Dev Hot-Reload & Path Aliases",
     "href": "/docs/plugins#config-bundling",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3011,7 +3011,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#config-options",
     "title": "3. Top-Level Configuration Options",
     "href": "/docs/plugins#config-options",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3019,7 +3019,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#ppr-option",
     "title": "3.1 Global Partial Prerendering Default (ppr)",
     "href": "/docs/plugins#ppr-option",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3027,7 +3027,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#allow-isg-option",
     "title": "3.2 Global ISG Default (allowISG)",
     "href": "/docs/plugins#allow-isg-option",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3035,7 +3035,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#react-compiler-option",
     "title": "3.3 React Compiler (reactCompiler)",
     "href": "/docs/plugins#react-compiler-option",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3043,7 +3043,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#strict-mode-option",
     "title": "3.4 React StrictMode (reactStrictMode)",
     "href": "/docs/plugins#strict-mode-option",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3051,7 +3051,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#asset-extensions-option",
     "title": "3.5 Custom Static Asset Extensions (assetExtensions)",
     "href": "/docs/plugins#asset-extensions-option",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3059,7 +3059,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#storage-option",
     "title": "3.6 Storage Adapter (storage)",
     "href": "/docs/plugins#storage-option",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3067,7 +3067,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#setup-files-option",
     "title": "3.7 Universal Setup Files (setupFiles)",
     "href": "/docs/plugins#setup-files-option",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3075,7 +3075,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#plugins-option",
     "title": "3.8 Plugins Array (plugins)",
     "href": "/docs/plugins#plugins-option",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3083,7 +3083,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#plugin-architecture",
     "title": "4. Dinou Plugin Architecture",
     "href": "/docs/plugins#plugin-architecture",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3091,7 +3091,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#configure-server",
     "title": "5. Low-Level Node Hook: configureServer",
     "href": "/docs/plugins#configure-server",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3099,7 +3099,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#configure-server-context",
     "title": "5.1 Context Parameters: server, isDev, use",
     "href": "/docs/plugins#configure-server-context",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3107,7 +3107,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#configure-server-pipeline",
     "title": "5.2 The Node Middleware Pipeline (use)",
     "href": "/docs/plugins#configure-server-pipeline",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3115,7 +3115,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#configure-server-comparison",
     "title": "5.3 configureServer vs. onRequest Decision Matrix",
     "href": "/docs/plugins#configure-server-comparison",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3123,7 +3123,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#on-request-lifecycle",
     "title": "6. Web Standards Hook: onRequest",
     "href": "/docs/plugins#on-request-lifecycle",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3131,7 +3131,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#context-reference",
     "title": "6.1 The context Object (RequestContextStore)",
     "href": "/docs/plugins#context-reference",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3139,7 +3139,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#pattern-intercept",
     "title": "6.2 Pattern 1: Short-Circuit, Webhooks & SPA-Safe Redirects",
     "href": "/docs/plugins#pattern-intercept",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3147,7 +3147,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#pattern-context",
     "title": "6.3 Pattern 2: Middleware, Response Headers & Context Mutation",
     "href": "/docs/plugins#pattern-context",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3155,7 +3155,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#context-server-functions",
     "title": "6.4 Context Sharing with Server Functions",
     "href": "/docs/plugins#context-server-functions",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3163,7 +3163,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#ssg-vs-runtime",
     "title": "6.5 Build-Time SSG vs. Runtime Cached Pages",
     "href": "/docs/plugins#ssg-vs-runtime",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3171,7 +3171,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#execution-timeline",
     "title": "7. Deep Dive: Execution Points (configureServer vs. onRequest)",
     "href": "/docs/plugins#execution-timeline",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3179,7 +3179,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#universal-setup-files",
     "title": "8. Compile-Time Setup Files (setupFiles)",
     "href": "/docs/plugins#universal-setup-files",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3187,7 +3187,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#setup-hierarchy",
     "title": "8.1 Resolution & Precedence Hierarchy",
     "href": "/docs/plugins#setup-hierarchy",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3195,7 +3195,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#setup-polyfills",
     "title": "8.2 Environment Polyfills Recipe (DOMMatrix / Geometry)",
     "href": "/docs/plugins#setup-polyfills",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3203,7 +3203,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#real-world-examples",
     "title": "9. Real-World Plugin Examples (Socket.IO, Stripe & Auth)",
     "href": "/docs/plugins#real-world-examples",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3211,7 +3211,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#plugin-registration-order",
     "title": "10. Registration & Execution Pipeline Order",
     "href": "/docs/plugins#plugin-registration-order",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3219,7 +3219,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/plugins#fault-isolation",
     "title": "11. Fault Isolation & Error Handling",
     "href": "/docs/plugins#fault-isolation",
-    "section": "Core Concepts",
+    "section": "Styling, Assets & Config",
     "pageTitle": "Plugins",
     "kind": "section"
   },
@@ -3227,7 +3227,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/bundlers",
     "title": "Bundlers",
     "href": "/docs/bundlers",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "page",
     "description": "Dinou features first-class multi-bundler architecture supporting esbuild, Rollup, and Webpack across Node.js, Cloudflare Workers, Deno, Bun, Netlify Functions v2, and standalone compiled binaries.",
@@ -3251,7 +3251,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#overview",
     "title": "1. Overview: Bundlers in Dinou",
     "href": "/docs/bundlers#overview",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3259,7 +3259,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#the-three-bundlers",
     "title": "2. esbuild, Rollup, & Webpack Compared",
     "href": "/docs/bundlers#the-three-bundlers",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3267,7 +3267,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#esbuild",
     "title": "2.1 esbuild (Default & Lightning Fast)",
     "href": "/docs/bundlers#esbuild",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3275,7 +3275,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#rollup",
     "title": "2.2 Rollup (Optimized Tree-Shaking)",
     "href": "/docs/bundlers#rollup",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3283,7 +3283,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#webpack",
     "title": "2.3 Webpack (Enterprise Ecosystem & Interop)",
     "href": "/docs/bundlers#webpack",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3291,7 +3291,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#dual-bundle-engine",
     "title": "3. Dual-Bundle Engine & .dinou/ Topology",
     "href": "/docs/bundlers#dual-bundle-engine",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3299,7 +3299,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#dinou-directory-topology",
     "title": "3.1 Build Output Topology (.dinou/)",
     "href": "/docs/bundlers#dinou-directory-topology",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3307,7 +3307,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#three-pass-aot",
     "title": "3.2 Three-Pass AOT Runtime Packaging",
     "href": "/docs/bundlers#three-pass-aot",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3315,7 +3315,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#dual-mode-vendoring",
     "title": "4. Dual-Mode Vendoring (Vendorized vs. -u)",
     "href": "/docs/bundlers#dual-mode-vendoring",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3323,7 +3323,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#vendorized-default",
     "title": "4.1 Vendorized Mode (Default)",
     "href": "/docs/bundlers#vendorized-default",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3331,7 +3331,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#unvendorized-mode",
     "title": "4.2 Unvendorized Mode (-u / --unvendorized)",
     "href": "/docs/bundlers#unvendorized-mode",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3339,7 +3339,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#vendor-catalog",
     "title": "4.3 Compiled Vendors vs. External Exceptions",
     "href": "/docs/bundlers#vendor-catalog",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3347,7 +3347,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#cli-commands",
     "title": "5. Complete Dinou Scripts Matrix",
     "href": "/docs/bundlers#cli-commands",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3355,7 +3355,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#dev-scripts",
     "title": "5.1 Development Scripts (dinou dev)",
     "href": "/docs/bundlers#dev-scripts",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3363,7 +3363,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#node-scripts",
     "title": "5.2 Node.js Standard Build & Start (build:node)",
     "href": "/docs/bundlers#node-scripts",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3371,7 +3371,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#node-compile-scripts",
     "title": "5.3 Node Standalone Binary Compilation (build:node:compile)",
     "href": "/docs/bundlers#node-compile-scripts",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3379,7 +3379,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#node-pure-scripts",
     "title": "5.4 Pure Bun Engine for Node.js (build:node:pure)",
     "href": "/docs/bundlers#node-pure-scripts",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3387,7 +3387,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#node-pure-compile-scripts",
     "title": "5.5 Pure Standalone Binary Compilation (build:node:pure:compile)",
     "href": "/docs/bundlers#node-pure-compile-scripts",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3395,7 +3395,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#node-build-matrix",
     "title": "5.6 Node Build Architecture & Execution Matrix",
     "href": "/docs/bundlers#node-build-matrix",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3403,7 +3403,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#cloudflare-scripts",
     "title": "5.7 Cloudflare Workers & Pages",
     "href": "/docs/bundlers#cloudflare-scripts",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3411,7 +3411,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#deno-scripts",
     "title": "5.8 Deno & Standalone Compiles",
     "href": "/docs/bundlers#deno-scripts",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3419,7 +3419,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#bun-scripts",
     "title": "5.9 Bun Runtime & Standalone Compiles",
     "href": "/docs/bundlers#bun-scripts",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3427,7 +3427,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#netlify-scripts",
     "title": "5.10 Netlify Functions v2 (build:netlify)",
     "href": "/docs/bundlers#netlify-scripts",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3435,7 +3435,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#static-export-scripts",
     "title": "5.11 Static HTML Export & Utilities",
     "href": "/docs/bundlers#static-export-scripts",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3443,7 +3443,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#package-json-setup",
     "title": "6. Recommended package.json Setup",
     "href": "/docs/bundlers#package-json-setup",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3451,7 +3451,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/bundlers#bundler-selection-guide",
     "title": "7. Which Bundler & Target Should You Choose?",
     "href": "/docs/bundlers#bundler-selection-guide",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Bundlers",
     "kind": "section"
   },
@@ -3459,7 +3459,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/deployment",
     "title": "Deployment",
     "href": "/docs/deployment",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "page",
     "description": "Universal deployment flexibility: deploy as a standalone Node.js server, Docker container, Netlify Functions v2, Cloudflare Workers, Deno Deploy, Bun, static export, or single native binary.",
@@ -3485,7 +3485,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#overview",
     "title": "1. Deploy Everywhere with Dinou",
     "href": "/docs/deployment#overview",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3493,7 +3493,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#targets-summary",
     "title": "2. Supported Deployment Targets",
     "href": "/docs/deployment#targets-summary",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3501,7 +3501,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#node-vps-docker",
     "title": "3. Node.js Targets & Standalone Binaries",
     "href": "/docs/deployment#node-vps-docker",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3509,7 +3509,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#node-standard",
     "title": "3.1 Standard Node.js Server (build:node)",
     "href": "/docs/deployment#node-standard",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3517,7 +3517,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#node-compile",
     "title": "3.2 Node Standalone Binary (build:node:compile)",
     "href": "/docs/deployment#node-compile",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3525,7 +3525,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#node-pure",
     "title": "3.3 Pure Bun Runner (build:node:pure)",
     "href": "/docs/deployment#node-pure",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3533,7 +3533,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#node-pure-compile",
     "title": "3.4 Pure Standalone Binary (build:node:pure:compile)",
     "href": "/docs/deployment#node-pure-compile",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3541,7 +3541,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#netlify-serverless",
     "title": "4. Netlify (Serverless Functions v2)",
     "href": "/docs/deployment#netlify-serverless",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3549,7 +3549,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#cloudflare-workers",
     "title": "5. Cloudflare Workers & Pages",
     "href": "/docs/deployment#cloudflare-workers",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3557,7 +3557,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#deno-deploy-compile",
     "title": "6. Deno Deploy (deno-edge) & Standalone Binaries",
     "href": "/docs/deployment#deno-deploy-compile",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3565,7 +3565,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#bun-runtime-compile",
     "title": "7. Bun Runtime & Standalone Executables",
     "href": "/docs/deployment#bun-runtime-compile",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3573,7 +3573,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#static-export",
     "title": "8. Static Export (GitHub Pages, S3, CDN)",
     "href": "/docs/deployment#static-export",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3581,7 +3581,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#docker-guide",
     "title": "9. Production Docker Setup",
     "href": "/docs/deployment#docker-guide",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3589,7 +3589,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#docker-pure-binary",
     "title": "9.1 Ultra-Lightweight Standalone Binary Container (Recommended)",
     "href": "/docs/deployment#docker-pure-binary",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3597,7 +3597,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#docker-standard-node",
     "title": "9.2 Standard Node.js Multi-Stage Container",
     "href": "/docs/deployment#docker-standard-node",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3605,7 +3605,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#distributed-cache-scaling",
     "title": "10. Horizontal Scaling & Distributed ISR Cache",
     "href": "/docs/deployment#distributed-cache-scaling",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3613,7 +3613,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#environment-secrets",
     "title": "11. Managing Production Environment Secrets",
     "href": "/docs/deployment#environment-secrets",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3621,7 +3621,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/deployment#deployment-checklist",
     "title": "12. Production Pre-Flight Checklist",
     "href": "/docs/deployment#deployment-checklist",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Deployment",
     "kind": "section"
   },
@@ -3629,7 +3629,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "page:/docs/eject",
     "title": "Eject",
     "href": "/docs/eject",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Eject",
     "kind": "page",
     "description": "Gain complete ownership over your technology stack. Eject Dinou into ./dinou to customize the React 19 Dual-Bundle compiler, runtime adapters, and HTTP engine—and revert anytime with npm run uneject.",
@@ -3646,7 +3646,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/eject#eject-dinou",
     "title": "Ejecting Dinou: Framework Sovereignty",
     "href": "/docs/eject#eject-dinou",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Eject",
     "kind": "section"
   },
@@ -3654,7 +3654,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/eject#how-to-eject",
     "title": "How to Eject (CLI & Scripts)",
     "href": "/docs/eject#how-to-eject",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Eject",
     "kind": "section"
   },
@@ -3662,7 +3662,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/eject#what-happens",
     "title": "What Happens When You Eject?",
     "href": "/docs/eject#what-happens",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Eject",
     "kind": "section"
   },
@@ -3670,7 +3670,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/eject#directory-anatomy",
     "title": "Anatomy of the Ejected dinou/ Directory",
     "href": "/docs/eject#directory-anatomy",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Eject",
     "kind": "section"
   },
@@ -3678,7 +3678,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/eject#ejected-vendoring",
     "title": "Dual-Mode Vendoring (-u & build:vendors)",
     "href": "/docs/eject#ejected-vendoring",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Eject",
     "kind": "section"
   },
@@ -3686,7 +3686,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/eject#when-to-eject",
     "title": "When to Consider Ejecting",
     "href": "/docs/eject#when-to-eject",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Eject",
     "kind": "section"
   },
@@ -3694,7 +3694,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/eject#agentic-era",
     "title": "Ejection in the Agentic Era",
     "href": "/docs/eject#agentic-era",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Eject",
     "kind": "section"
   },
@@ -3702,7 +3702,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/eject#customization-examples",
     "title": "Practical Customization Examples",
     "href": "/docs/eject#customization-examples",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Eject",
     "kind": "section"
   },
@@ -3710,7 +3710,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/eject#custom-middleware",
     "title": "1. Low-Level HTTP Pipeline & Edge Guards",
     "href": "/docs/eject#custom-middleware",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Eject",
     "kind": "section"
   },
@@ -3718,7 +3718,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/eject#custom-bundler",
     "title": "2. Extending the Bundler Pipeline",
     "href": "/docs/eject#custom-bundler",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Eject",
     "kind": "section"
   },
@@ -3726,7 +3726,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/eject#reverting-eject",
     "title": "Reverting an Eject (npm run uneject)",
     "href": "/docs/eject#reverting-eject",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Eject",
     "kind": "section"
   },
@@ -3734,7 +3734,7 @@ export const docSearchIndex: DocSearchItem[] = [
     "id": "toc:/docs/eject#best-practices",
     "title": "Best Practices for Ejected Projects",
     "href": "/docs/eject#best-practices",
-    "section": "Core Concepts",
+    "section": "Build, Deploy & Sovereignty",
     "pageTitle": "Eject",
     "kind": "section"
   },

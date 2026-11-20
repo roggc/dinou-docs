@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { usePathname, Link } from "dinou";
+import { Bot, FileText } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -62,6 +63,31 @@ export function DocsSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+
+        {/* AI / LLM-friendly documentation endpoints */}
+        <SidebarGroup className="mt-2 pt-3 border-t border-border/60">
+          <SidebarGroupLabel>For AI &amp; LLMs</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <a href="/llms.txt" target="_blank" rel="noreferrer">
+                    <Bot className="h-4 w-4" />
+                    <span>llms.txt</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <a href="/llms-full.txt" target="_blank" rel="noreferrer">
+                    <FileText className="h-4 w-4" />
+                    <span>llms-full.txt</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   );

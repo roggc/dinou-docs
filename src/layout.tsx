@@ -16,6 +16,31 @@ export default function Layout({ children }: LayoutProps) {
           name="description"
           content="The ejectable React 19 framework built on web standards. Build full-stack apps and deploy anywhere with zero vendor lock-in."
         />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Dinou" />
+        <meta property="og:url" content="https://dinou.dev/" />
+        <meta
+          property="og:title"
+          content="Dinou — Full-Stack React 19 Framework (RSC, PPR, Zero Lock-In)"
+        />
+        <meta
+          property="og:description"
+          content="The ejectable React 19 framework built on web standards. 0-Fork Dual-Bundle engine, Type-Safe Routing, 3D Caching & PPR, Tri-Bundler freedom, and universal multi-runtime deployment."
+        />
+        <meta property="og:image" content="https://dinou.dev/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Dinou v10 — Full-Stack React 19 Framework" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Dinou — Full-Stack React 19 Framework (RSC, PPR, Zero Lock-In)"
+        />
+        <meta
+          name="twitter:description"
+          content="The ejectable React 19 framework built on web standards. Build full-stack apps and deploy anywhere with zero vendor lock-in."
+        />
+        <meta name="twitter:image" content="https://dinou.dev/og-image.png" />
         <link key="canonical" rel="canonical" href="https://dinou.dev/" />
         <link key="favicon" rel="icon" type="image/png" href="/favicon.ico" />
         <link

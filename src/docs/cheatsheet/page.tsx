@@ -1038,9 +1038,12 @@ export default function Page() {
                         <td className="py-2.5 px-3.5 text-muted-foreground">
                           Synchronous AsyncLocalStorage access (never <code>null</code>): <code>req</code> (<code>cookies</code>, <code>headers</code>, <code>path</code>, <code>rawPath</code>, <code>isRscRequest</code>), <code>res</code>, unified <code>env</code> (<code>DinouEnv</code> + KV/D1/R2), and <code>ctx</code>.
                         </td>
-                        <td className="py-2.5 px-3.5 text-right">
-                          <Link href="/docs/api-reference#getcontext" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
-                            Docs <ExternalLink className="h-3 w-3" />
+                        <td className="py-2.5 px-3.5 text-right whitespace-nowrap space-x-2">
+                          <Link href="/docs/request-context" className="text-primary hover:underline inline-flex items-center gap-1 font-medium">
+                            Guide <ExternalLink className="h-3 w-3" />
+                          </Link>
+                          <Link href="/docs/api-reference#getcontext" className="text-muted-foreground hover:text-primary hover:underline inline-flex items-center gap-1 font-medium">
+                            API <ExternalLink className="h-3 w-3" />
                           </Link>
                         </td>
                       </tr>
