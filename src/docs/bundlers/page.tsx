@@ -47,7 +47,8 @@ const tocItems = [
   { id: "cloudflare-scripts", title: "5.7 Cloudflare Workers & Pages", level: 3 },
   { id: "deno-scripts", title: "5.8 Deno & Standalone Compiles", level: 3 },
   { id: "bun-scripts", title: "5.9 Bun Runtime & Standalone Compiles", level: 3 },
-  { id: "static-export-scripts", title: "5.10 Static HTML Export & Utilities", level: 3 },
+  { id: "netlify-scripts", title: "5.10 Netlify Functions v2 (build:netlify)", level: 3 },
+  { id: "static-export-scripts", title: "5.11 Static HTML Export & Utilities", level: 3 },
   { id: "package-json-setup", title: "6. Recommended package.json Setup", level: 2 },
   { id: "bundler-selection-guide", title: "7. Which Bundler & Target Should You Choose?", level: 2 },
 ];
@@ -58,7 +59,7 @@ export default function Page() {
       <title>Bundlers &amp; Build Tooling | Dinou Docs</title>
       <meta
         name="description"
-        content="Dinou features first-class multi-bundler architecture supporting esbuild, Rollup, and Webpack across Node.js, Cloudflare Workers, Deno, Bun, and standalone compiled binaries."
+        content="Dinou features first-class multi-bundler architecture supporting esbuild, Rollup, and Webpack across Node.js, Cloudflare Workers, Deno, Bun, Netlify Functions v2, and standalone compiled binaries."
       />
       <link rel="canonical" href="https://dinou.dev/docs/bundlers" />
 
@@ -86,7 +87,8 @@ export default function Page() {
               Dinou features a first-class multi-bundler architecture supporting{" "}
               <strong>esbuild</strong>, <strong>Rollup</strong>, and{" "}
               <strong>Webpack</strong> across Node.js, Cloudflare Workers, Deno,
-              Bun, static exports, and standalone compiled binaries.
+              Bun, Netlify Functions v2, static exports, and standalone compiled
+              binaries.
             </p>
           </div>
 
@@ -363,7 +365,7 @@ export default function Page() {
                   <code>.dinou/dist3/</code>, Dinou&apos;s Dual-Bundle Engine
                   compiles your server runtime in three AOT passes within a
                   single process—eliminating React singleton collisions across
-                  Node.js, Cloudflare Workers, Bun, and Deno:
+                  Node.js, Cloudflare Workers, Bun, Deno, and Netlify:
                 </p>
 
                 <div className="border rounded-xl p-5 bg-card not-prose my-4 space-y-4">
@@ -410,8 +412,9 @@ export default function Page() {
                         Emits the target server entrypoint:{" "}
                         <code>.dinou/node/server.mjs</code>,{" "}
                         <code>.dinou/cloudflare/worker.js</code>,{" "}
-                        <code>.dinou/bun/server.js</code>, or{" "}
-                        <code>.dinou/deno/main.js</code>.
+                        <code>.dinou/bun/server.js</code>,{" "}
+                        <code>.dinou/deno/main.js</code>, or{" "}
+                        <code>.dinou/netlify/functions/ssr.mjs</code>.
                       </p>
                     </div>
                   </div>
@@ -1555,13 +1558,89 @@ CMD ["./server"]`}
                 </div>
               </div>
 
-              {/* 5.10 Static Export & Utility Scripts */}
+              {/* 5.10 Netlify Functions v2 Scripts */}
+              <div
+                id="netlify-scripts"
+                className="mt-8 space-y-3 scroll-mt-20"
+              >
+                <h3 className="text-lg font-bold">
+                  5.10 Netlify Functions v2 (build:netlify)
+                </h3>
+                <p>
+                  Compiles your application for Netlify Serverless Functions v2,
+                  emitting the standalone AOT handler at{" "}
+                  <code>.dinou/netlify/functions/ssr.mjs</code> (with{" "}
+                  <code>preferStatic: true</code> and{" "}
+                  <code>MemoryStorage(&#123; hydrateFromDisk: true &#125;)</code>{" "}
+                  for read-only AWS Lambda filesystems) while publishing{" "}
+                  <code>.dinou/dist3</code> to Netlify&apos;s edge CDN:
+                </p>
+                <div className="not-prose overflow-x-auto rounded-lg border border-border">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-muted text-muted-foreground font-medium">
+                      <tr>
+                        <th className="p-3.5">Command</th>
+                        <th className="p-3.5">Bundler</th>
+                        <th className="p-3.5">Output Target</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border bg-card text-xs">
+                      <tr>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:netlify
+                        </td>
+                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">
+                          esbuild (Default)
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          .dinou/netlify/functions/ssr.mjs
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:netlify:esbuild
+                        </td>
+                        <td className="p-3.5 font-semibold text-amber-600 dark:text-amber-400">
+                          esbuild
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          .dinou/netlify/functions/ssr.mjs
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:netlify:rollup
+                        </td>
+                        <td className="p-3.5 font-semibold text-rose-600 dark:text-rose-400">
+                          Rollup
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          .dinou/netlify/functions/ssr.mjs
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="p-3.5 font-mono text-foreground font-semibold">
+                          dinou build:netlify:webpack
+                        </td>
+                        <td className="p-3.5 font-semibold text-emerald-600 dark:text-emerald-400">
+                          Webpack
+                        </td>
+                        <td className="p-3.5 font-mono text-muted-foreground">
+                          .dinou/netlify/functions/ssr.mjs
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* 5.11 Static Export & Utility Scripts */}
               <div
                 id="static-export-scripts"
                 className="mt-8 space-y-3 scroll-mt-20"
               >
                 <h3 className="text-lg font-bold">
-                  5.10 Static HTML Export &amp; Framework Utilities
+                  5.11 Static HTML Export &amp; Framework Utilities
                 </h3>
                 <p>
                   Generates a 100% serverless static export in <code>out/</code>{" "}
@@ -1570,7 +1649,7 @@ CMD ["./server"]`}
                   and <code>layout.rsc</code> from <code>.dinou/dist2</code> so
                   both React 19 hydration and <code>&lt;Link&gt;</code> SPA
                   navigation work on any static host), plus type generation and{" "}
-                  <Link href="/docs/eject">eject</Link> helpers:
+                  <Link href="/docs/eject">eject / uneject</Link> helpers:
                 </p>
                 <CodeBlock
                   language="bash"
@@ -1585,8 +1664,9 @@ dinou export-static:webpack
 # Generate .dinou/types/routes.d.ts and contextual "./dinou" modules
 dinou typegen
 
-# Eject the full Dinou toolchain into ./dinou (and optionally rebuild vendors)
+# Eject into ./dinou, rebuild vendors, or revert back to node_modules
 dinou eject
+dinou uneject
 dinou build:vendors`}
                 </CodeBlock>
               </div>
@@ -1665,6 +1745,10 @@ dinou build:vendors`}
   "start:node:esbuild": "dinou start:node:esbuild",
   "start:node:rollup": "dinou start:node:rollup",
   "start:node:webpack": "dinou start:node:webpack",
+  "build:netlify": "dinou build:netlify",
+  "build:netlify:esbuild": "dinou build:netlify:esbuild",
+  "build:netlify:rollup": "dinou build:netlify:rollup",
+  "build:netlify:webpack": "dinou build:netlify:webpack",
   "build:cloudflare": "dinou build:cloudflare",
   "build:cloudflare:esbuild": "dinou build:cloudflare:esbuild",
   "build:cloudflare:rollup": "dinou build:cloudflare:rollup",
@@ -1751,7 +1835,8 @@ dinou build:vendors`}
   "export-static:rollup": "dinou export-static:rollup",
   "export-static:webpack": "dinou export-static:webpack",
   "typegen": "dinou typegen",
-  "eject": "dinou eject"
+  "eject": "dinou eject",
+  "uneject": "dinou uneject"
 }`}
               </CodeBlock>
             </section>
