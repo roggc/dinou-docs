@@ -711,8 +711,8 @@ export const getCacheTags: PageFunctions["getCacheTags"] = [
 import type { PageFunctions } from "./dinou";
 
 export const getCacheTags: PageFunctions["getCacheTags"] = (params) => {
-  // params.id is strictly inferred as string!
-  return ["products", \`product-\${params.id}\`];
+  // params?.id is inferred as string | undefined
+  return ["products", \`product-\${params?.id}\`];
 };`}
                       </CodeBlock>
                     </CardContent>
@@ -731,7 +731,7 @@ import type { PageFunctions } from "dinou";
 export const getCacheTags: PageFunctions<"/products/[id]">["getCacheTags"] = (
   params
 ) => {
-  return ["products", \`product-\${params.id}\`];
+  return ["products", \`product-\${params?.id}\`];
 };`}
                   </CodeBlock>
 
@@ -897,6 +897,7 @@ import { TrendingProducts, TrendingSkeleton } from "@/components/trending";
 import { revalidateTag } from "dinou/server";
 
 export async function refreshTrends() {
+  // Matches custom tag/tags ("trending") or the slot's id ("trending-grid") directly
   await revalidateTag("trending");
   // Only the <TrendingProducts> slot payload is purged; the parent page stays cached!
 }`}
@@ -1074,8 +1075,9 @@ export function RefreshControl() {
                   To refresh an isolated <code>&lt;DinouCacheSlot&gt;</code> subtree in place without re-rendering
                   sibling components or parent pages, use <code>refreshSlot(idOrTag, options)</code> (or{" "}
                   <code>router.refreshSlot(idOrTag, options)</code>). Both return a <code>Promise&lt;void&gt;</code>{" "}
-                  and accept a unique slot <code>id</code>, a shared cache <code>tag</code> (refreshing every mounted
-                  slot carrying that tag), or <code>&quot;*&quot;</code> (refreshing all mounted slots on the active view):
+                  and accept a unique slot <code>id</code>, a shared cache <code>tag</code> (refreshing every matching
+                  slot carrying that tag), or <code>&quot;*&quot;</code> (refreshing all mounted slots on the active view
+                  plus session-cached slots from previously visited pages):
                 </p>
 
                 <CodeBlock
@@ -1313,8 +1315,8 @@ export function LiveAnalyticsButton() {
                       </TableRow>
                       <TableRow>
                         <TableCell className="font-mono text-xs font-semibold">MemoryStorage</TableCell>
-                        <TableCell className="text-xs">Testing / CI / Mocks</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">Isolated in-memory ephemeral Map for unit tests and read-only containers (<code>hydrateFromDisk: false</code> by default).</TableCell>
+                        <TableCell className="text-xs">Testing / CI / Serverless Fallback</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">Isolated in-memory ephemeral Map for unit tests, read-only containers, and Netlify/Edge fallbacks (<code>hydrateFromDisk: false</code> by default; pass <code>&#123; hydrateFromDisk: true &#125;</code> to lazily hydrate pre-rendered <code>.dinou/dist2</code> artifacts on read-only filesystems).</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -1409,11 +1411,11 @@ export default defineConfig({
                     <div className="rounded-lg border border-border/60 bg-card/60 p-3 space-y-1">
                       <div className="flex items-center gap-1.5 font-semibold text-foreground text-[12px]">
                         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                        <span>4. Resilient Edge Worker Fallback</span>
+                        <span>4. Resilient Serverless &amp; Edge Fallback</span>
                       </div>
                       <p className="text-muted-foreground leading-relaxed text-[11px]">
-                        In Cloudflare Workers deployments where a <code className="text-foreground font-mono">DINOU_CACHE</code> KV
-                        binding is omitted, Dinou automatically falls back to MemoryStorage inside the isolate RAM without crashing.
+                        On Cloudflare Workers without a <code className="text-foreground font-mono">DINOU_CACHE</code> KV
+                        binding—or on Netlify Functions v2 (where Dinou initializes <code className="text-foreground font-mono">new MemoryStorage(&#123; hydrateFromDisk: true &#125;)</code> by default)—Dinou operates cleanly inside runtime memory without crashing.
                       </p>
                     </div>
                   </div>
