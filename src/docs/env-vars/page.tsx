@@ -40,6 +40,7 @@ const tocItems = [
   { id: "node-bun", title: "Node.js & Bun", level: 3 },
   { id: "cloudflare", title: "Cloudflare Workers & Bindings", level: 3 },
   { id: "deno", title: "Deno (--allow-env & Deno KV)", level: 3 },
+  { id: "netlify", title: "Netlify (Functions v2)", level: 3 },
   { id: "typed-validation", title: "TypeScript & Zod Validation", level: 2 },
   { id: "security-shield", title: "Anti-Leak Security & Bot Shield", level: 2 },
 ];
@@ -50,7 +51,7 @@ export default function Page() {
       <title>Environment Variables | Dinou Docs</title>
       <meta
         name="description"
-        content="Manage server secrets, DINOU_PUBLIC_* browser variables, .env* hierarchies, and Cloudflare/Edge bindings securely across Esbuild, Rollup, Webpack, Node.js, Bun, Deno, and Cloudflare Workers."
+        content="Manage server secrets, DINOU_PUBLIC_* browser variables, .env* hierarchies, and Cloudflare/Netlify/Edge bindings securely across Esbuild, Rollup, Webpack, Node.js, Bun, Deno, Cloudflare Workers, and Netlify."
       />
       <link rel="canonical" href="https://dinou.dev/docs/env-vars" />
 
@@ -75,13 +76,13 @@ export default function Page() {
               </h1>
             </div>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Manage database credentials, API tokens, <code>DINOU_PUBLIC_*</code> client constants, and Edge resource bindings securely across Node.js, Bun, Deno, and Cloudflare Workers.
+              Manage database credentials, API tokens, <code>DINOU_PUBLIC_*</code> client constants, and Edge resource bindings securely across Node.js, Bun, Deno, Cloudflare Workers, and Netlify.
             </p>
           </div>
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             {/* Overview */}
-            <section id="overview">
+            <section id="overview" className="scroll-mt-20">
               <h2>Environment Variables in Dinou</h2>
               <p>
                 Dinou isolates all environment variables to the server by default across Esbuild, Rollup, and Webpack. Private secrets (such as database passwords or payment API keys) are never bundled into browser JavaScript or leaked during Client Component SSR/SSG, while variables explicitly prefixed with <code>DINOU_PUBLIC_</code> are safely inlined for client use.
@@ -127,7 +128,7 @@ export default function Page() {
             </section>
 
             {/* Server Isolation & DINOU_PUBLIC_* */}
-            <section id="server-security-model" className="mt-12">
+            <section id="server-security-model" className="mt-12 scroll-mt-20">
               <h2>Server Isolation &amp; DINOU_PUBLIC_*</h2>
               <p>
                 Dinou enforces a strict compile-time and SSR boundary between private server credentials and public browser configuration:
@@ -142,7 +143,7 @@ export default function Page() {
               </ul>
 
               {/* Sub-section: Private Server Secrets */}
-              <div id="where-they-work" className="mt-8 space-y-3">
+              <div id="where-they-work" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">Private Server Secrets</h3>
                 <p>
                   Read private environment variables freely in any server-only execution context:
@@ -216,7 +217,7 @@ export async function createCheckoutSession(amount: number) {
               </div>
 
               {/* Sub-section: DINOU_PUBLIC_* */}
-              <div id="public-prefix" className="mt-8 space-y-3">
+              <div id="public-prefix" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">Public Client Variables (DINOU_PUBLIC_*)</h3>
                 <p>
                   To expose a non-sensitive value (such as an analytics ID, Sentry DSN, Supabase project URL, or Stripe publishable key) directly to <code>&quot;use client&quot;</code> modules without prop-drilling, prefix its name with <code>DINOU_PUBLIC_</code>:
@@ -243,7 +244,7 @@ export default function AnalyticsBanner() {
               </div>
 
               {/* Sub-section: Build-Time Prefix vs Runtime Props */}
-              <div id="client-safety" className="mt-8 space-y-3">
+              <div id="client-safety" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">Build-Time Prefix vs. Runtime Props</h3>
                 <p>
                   Dinou supports both ways of delivering public configuration to Client Components—choose the one that matches your deployment workflow:
@@ -279,7 +280,7 @@ export default function CheckoutPage() {
             </section>
 
             {/* Defining .env files */}
-            <section id="env-files" className="mt-12">
+            <section id="env-files" className="mt-12 scroll-mt-20">
               <h2>Defining .env Files</h2>
               <p>
                 Dinou automatically loads <code>.env</code> files from your project root across all bundlers (<code>esbuild</code>, <code>rollup</code>, <code>webpack</code>) and commands (<code>dinou dev</code>, <code>dinou build</code>, <code>dinou start</code>, <code>dinou export-static</code>, and <code>dinou typegen</code>). For most projects, a single <code>.env</code> file is all you need:
@@ -301,14 +302,14 @@ DINOU_PUBLIC_APP_URL="http://localhost:3000"`}
               </CodeBlock>
 
               {/* Sub-section: Hierarchy & Hot-Reload */}
-              <div id="env-hierarchy" className="mt-8 space-y-3">
+              <div id="env-hierarchy" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">.env* Precedence Hierarchy &amp; Live Hot-Reload</h3>
                 <p>
                   When separating team defaults from personal machine secrets or testing local development vs. production builds, Dinou resolves variables from highest priority to lowest priority:
                 </p>
                 <ol>
                   <li>
-                    <strong>OS / Shell / Hosting Environment</strong> (e.g. <code>PORT=4000 npx dinou dev</code>, Docker, Railway, Fly.io) — <em>always wins; never overwritten by <code>.env*</code> files</em>.
+                    <strong>OS / Shell / Hosting Environment</strong> (e.g. <code>PORT=4000 npx dinou dev</code>, Docker, Railway, Fly.io, Netlify) — <em>always wins; never overwritten by <code>.env*</code> files</em>.
                   </li>
                   <li>
                     <code>.env.development.local</code> (in <code>dinou dev</code>) or <code>.env.production.local</code> (in <code>dinou build</code> / <code>dinou start</code>).
@@ -336,7 +337,7 @@ DINOU_PUBLIC_APP_URL="http://localhost:3000"`}
               </div>
 
               {/* Sub-section: Built-in Framework Variables */}
-              <div id="framework-vars" className="mt-8 space-y-3">
+              <div id="framework-vars" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">Built-In Framework Variables</h3>
                 <p>
                   Dinou recognizes the following optional runtime and CLI environment variables out of the box:
@@ -372,14 +373,14 @@ DINOU_PUBLIC_APP_URL="http://localhost:3000"`}
             </section>
 
             {/* Multi-Platform Runtimes */}
-            <section id="platforms-runtimes" className="mt-12">
+            <section id="platforms-runtimes" className="mt-12 scroll-mt-20">
               <h2>Multi-Platform Runtimes</h2>
               <p>
-                Dinou provides a unified environment model across all four server runtimes. Plain-text secrets work via both <code>process.env</code> and <code>getContext().env</code> everywhere on the server:
+                Dinou provides a unified environment model across all five server runtimes. Plain-text secrets work via both <code>process.env</code> and <code>getContext().env</code> everywhere on the server:
               </p>
 
               {/* Sub-section: Node.js & Bun */}
-              <div id="node-bun" className="mt-8 space-y-3">
+              <div id="node-bun" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">Node.js &amp; Bun</h3>
                 <p>
                   On Node.js (<code>dinou start</code>) and Bun (<code>dinou start:bun</code>), Dinou loads your <code>.env*</code> hierarchy on startup and exposes variables on both <code>process.env</code> and <code>getContext().env</code>:
@@ -394,7 +395,7 @@ const port = Number(process.env.PORT || 3000);`}
               </div>
 
               {/* Sub-section: Cloudflare Workers */}
-              <div id="cloudflare" className="mt-8 space-y-3">
+              <div id="cloudflare" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">Cloudflare Workers &amp; Bindings</h3>
                 <p>
                   In Cloudflare Workers, configure non-secret variables under <code>[vars]</code> in <code>wrangler.toml</code>, local Worker secrets in <code>.dev.vars</code>, and production secrets via <code>npx wrangler secret put MY_API_SECRET</code>. With <code>compatibility_flags = [&quot;nodejs_compat&quot;]</code>, Dinou automatically bridges text bindings onto <code>process.env</code> and exposes both text secrets and live resource bindings on <code>getContext().env</code>:
@@ -425,7 +426,7 @@ export const getProps: PageFunctions["getProps"] = async (params) => {
 
   // 2. Cloudflare Resource Bindings (KV, D1, R2 live instances):
   const kv = env.MY_KV_NAMESPACE;
-  const cachedProfile = kv ? await kv.get(\`user:\${params.id}\`, "json") : null;
+  const cachedProfile = kv && params?.id ? await kv.get(\`user:\${params.id}\`, "json") : null;
 
   return { cachedProfile, hasSecret: Boolean(apiSecret) };
 };`}
@@ -452,7 +453,7 @@ declare module "dinou" {
               </div>
 
               {/* Sub-section: Deno */}
-              <div id="deno" className="mt-8 space-y-3">
+              <div id="deno" className="mt-8 space-y-3 scroll-mt-20">
                 <h3 className="text-lg font-bold">Deno (--allow-env &amp; Deno KV)</h3>
                 <p>
                   Deno sandboxes environment access behind the <code>--allow-env</code> flag. Dinou&apos;s CLI passes the required permissions automatically when running <code>npx dinou start:deno</code> (or standalone binaries compiled with <code>npx dinou build:deno:compile</code>):
@@ -471,10 +472,18 @@ deno run --unstable-kv --allow-net --allow-read --allow-write --allow-env --allo
                   Dinou loads your <code>.env*</code> hierarchy into both <code>Deno.env</code> and <code>process.env</code>, so <code>process.env.KEY</code>, <code>Deno.env.get(&quot;KEY&quot;)</code>, and <code>getContext().env.KEY</code> all behave identically.
                 </p>
               </div>
+
+              {/* Sub-section: Netlify */}
+              <div id="netlify" className="mt-8 space-y-3 scroll-mt-20">
+                <h3 className="text-lg font-bold">Netlify (Functions v2)</h3>
+                <p>
+                  On Netlify, configure environment variables in the Netlify Dashboard, <code>netlify.toml</code>, or via <code>netlify env:set MY_API_SECRET &quot;...&quot;</code>. Dinou&apos;s Functions v2 bundle automatically merges <code>process.env</code> with <code>Netlify.env.toObject()</code> on every request, making both build-time <code>DINOU_PUBLIC_*</code> constants and runtime secrets available via <code>process.env</code> and <code>getContext().env</code>.
+                </p>
+              </div>
             </section>
 
             {/* Typed Validation (Zod) */}
-            <section id="typed-validation" className="mt-12">
+            <section id="typed-validation" className="mt-12 scroll-mt-20">
               <h2>TypeScript &amp; Zod Validation</h2>
               <p>
                 Dinou&apos;s type generator (<code>dinou dev</code>, <code>dinou build</code>, and <Link href="/docs/type-safe-routing"><code>dinou typegen</code></Link>) automatically scans variable names in your root <code>.env*</code> and <code>.env.example</code> files and augments <code>NodeJS.ProcessEnv</code> inside <code>.dinou/types/routes.d.ts</code>—giving you instant IDE autocomplete on <code>process.env.*</code> without ever writing secret values to disk.
@@ -511,7 +520,7 @@ export function getServerEnv() {
             </section>
 
             {/* Security Shield & Bot Protection */}
-            <section id="security-shield" className="mt-12">
+            <section id="security-shield" className="mt-12 scroll-mt-20">
               <h2>Anti-Leak Security &amp; Bot Shield</h2>
               <p>
                 Automated vulnerability scanners routinely probe web servers for exposed environment files using direct, nested, and percent-encoded paths:
@@ -548,7 +557,7 @@ GET /%2eenv`}
                 <p className="font-semibold text-foreground">Production Deployment Checklist:</p>
                 <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
                   <li>Verify <code>.env</code>, <code>.env.local</code>, and <code>.env.*.local</code> are listed in <code>.gitignore</code> and <code>.dockerignore</code>.</li>
-                  <li>Inject production secrets via your host&apos;s secret manager (e.g. <code>wrangler secret put</code>, <code>fly secrets set</code>, <code>railway variables set</code>).</li>
+                  <li>Inject production secrets via your host&apos;s secret manager (e.g. <code>wrangler secret put</code>, <code>netlify env:set</code>, <code>fly secrets set</code>, <code>railway variables set</code>).</li>
                   <li>Use <code>DINOU_PUBLIC_*</code> strictly for public browser configuration—never for private credentials.</li>
                   <li>Validate required server secrets with a schema validator such as Zod.</li>
                 </ul>
