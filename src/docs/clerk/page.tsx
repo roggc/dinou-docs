@@ -11,10 +11,8 @@ import {
 } from "@/docs/components/ui/alert";
 import {
   Shield,
-  Key,
   Database,
   Fingerprint,
-  Zap,
   CheckCircle2,
   Lock,
 } from "lucide-react";
@@ -69,13 +67,13 @@ export default function Page() {
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             <blockquote>
-              <strong>In Dinou, Clerk integrates seamlessly via the Web Standards Plugin System (<code>dinou.config.js</code>). There is no need to eject the framework: the plugin intercepts incoming requests, verifies session tokens cryptographically, exposes auth state to <code>getContext()</code>, and handles webhooks directly.</strong>
+              <strong>In Dinou, Clerk integrates seamlessly via the Web Standards Plugin System (<code>dinou.config.ts</code>). There is no need to eject the framework: the plugin intercepts incoming requests, verifies session tokens cryptographically, exposes auth state to <code>getContext()</code>, and handles webhooks directly across Node.js, Bun, Deno, Cloudflare Workers, and Netlify.</strong>
             </blockquote>
 
             <hr className="my-8" />
 
             {/* CONCEPT */}
-            <section id="concept">
+            <section id="concept" className="scroll-mt-20">
               <h2>1. Core Concept</h2>
               <p>
                 Clerk integration in Dinou is structured around three main pillars:
@@ -120,7 +118,7 @@ export default function Page() {
             </section>
 
             {/* 1. INSTALLATION */}
-            <section id="installation">
+            <section id="installation" className="scroll-mt-20">
               <h2>2. Installation &amp; Environment</h2>
               <p>
                 First, install Clerk's backend SDK, React client SDK, localization packages, and Svix (for webhook signature verification):
@@ -140,31 +138,37 @@ CLERK_WEBHOOK_SECRET=whsec_...`}</CodeBlock>
             </section>
 
             {/* 2. PLUGIN SETUP */}
-            <section id="plugin-setup">
-              <h2>3. The Dinou Clerk Plugin (<code>dinou.config.js</code>)</h2>
+            <section id="plugin-setup" className="scroll-mt-20">
+              <h2>3. The Dinou Clerk Plugin (<code>dinou.config.ts</code>)</h2>
               <p>
-                In <strong>Dinou</strong>, plugins hook directly into the request lifecycle using the <code>onRequest(request, context)</code> hook. Create a reusable Clerk plugin to authenticate incoming requests and propagate session claims to <code>context</code>:
+                In <strong>Dinou</strong>, plugins hook directly into the request lifecycle using the <code>onRequest(request, context)</code> hook. Create a reusable Clerk plugin that reads keys from <code>context.env</code> (working identically across Node.js, Bun, Deno, Cloudflare Workers, and Netlify) and propagates verified session claims to <code>context</code>:
               </p>
 
               <TabbedCodeBlock
                 tabs={[
                   {
                     id: "plugin-file",
-                    label: "plugins/clerk.ts",
+                    label: "src/plugins/clerk.ts",
                     language: "typescript",
-                    code: `// plugins/clerk.ts
+                    code: `// src/plugins/clerk.ts
 import type { DinouPlugin } from "dinou";
 import { createClerkClient } from "@clerk/backend";
-
-const clerk = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY,
-  publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
-});
 
 export function clerkPlugin(): DinouPlugin {
   return {
     name: "clerk-auth",
     async onRequest(request, context) {
+      // Skip Clerk session verification on public webhook routes
+      if (context.req.path.startsWith("/api/webhooks/")) {
+        return;
+      }
+
+      // Read secrets from context.env for full Node/Bun/Deno/Cloudflare/Netlify parity
+      const clerk = createClerkClient({
+        secretKey: context.env.CLERK_SECRET_KEY,
+        publishableKey: context.env.CLERK_PUBLISHABLE_KEY,
+      });
+
       // Cryptographically verify session token using standard Web Request
       const requestState = await clerk.authenticateRequest(request);
       const auth = requestState.toAuth();
@@ -178,15 +182,16 @@ export function clerkPlugin(): DinouPlugin {
                   },
                   {
                     id: "config-file",
-                    label: "dinou.config.js",
-                    language: "javascript",
-                    code: `// dinou.config.js
+                    label: "dinou.config.ts",
+                    language: "typescript",
+                    code: `// dinou.config.ts
 import { defineConfig } from "dinou";
-import { clerkPlugin } from "./plugins/clerk";
+import { clerkWebhookPlugin } from "@/plugins/clerk-webhook";
+import { clerkPlugin } from "@/plugins/clerk";
 
 export default defineConfig({
-  ppr: true,
   plugins: [
+    clerkWebhookPlugin(),
     clerkPlugin(),
   ],
 });`,
@@ -206,13 +211,13 @@ export default defineConfig({
             </section>
 
             {/* 4. USAGE IN PAGES & SERVER FUNCTIONS */}
-            <section id="rsc-usage">
+            <section id="rsc-usage" className="scroll-mt-20">
               <h2>4. Usage in Pages &amp; Server Functions</h2>
               <p>
                 With the plugin registered, any Server Component, Page Function, or Server Action can read <code>userId</code> directly from <code>getContext()</code>:
               </p>
 
-              <h3 id="clerk-server-actions">4.1 Securing Server Functions (Server Actions)</h3>
+              <h3 id="clerk-server-actions" className="scroll-mt-20">4.1 Securing Server Functions (Server Actions)</h3>
               <p>
                 Server Functions run mutations on the server. You can protect them by fetching <code>userId</code> directly from the context:
               </p>
@@ -221,10 +226,10 @@ export default defineConfig({
 "use server";
 
 import { getContext } from "dinou";
+import { prisma } from "@/lib/prisma";
 
 export async function createPost(title: string, content: string) {
-  const context = getContext();
-  const userId = context?.userId;
+  const { userId } = getContext();
 
   // Security Check
   if (!userId) {
@@ -256,7 +261,7 @@ export async function createPost(title: string, content: string) {
                 </Alert>
               </div>
 
-              <h3 id="clerk-page-functions">4.2 Option A: Server Component (Zero Boilerplate with Direct <code>await</code>)</h3>
+              <h3 id="clerk-page-functions" className="scroll-mt-20">4.2 Option A: Server Component (Zero Boilerplate with Direct <code>await</code>)</h3>
               <p>
                 If your dashboard page does not require client-side React hooks (like <code>useState</code>), keep it as a Server Component. Declare <code>export const revalidate = 0;</code> inside <code>src/dashboard/page_functions.ts</code> to enforce dynamic execution at request-time, and query Prisma directly inside <code>src/dashboard/page.tsx</code> with native <code>async/await</code>:
               </p>
@@ -281,15 +286,14 @@ import { getContext, redirect } from "dinou";
 import { prisma } from "@/lib/prisma";
 
 export default async function DashboardPage() {
-  const context = getContext();
-  const userId = context?.userId;
+  const { userId } = getContext();
 
   // Protect route
   if (!userId) {
     return redirect("/login");
   }
 
-  // Direct database query on Node.js / Edge without getProps
+  // Direct database query on the server without getProps
   const posts = await prisma.post.findMany({
     where: { authorClerkId: userId },
   });
@@ -315,7 +319,7 @@ export default async function DashboardPage() {
                 />
               </div>
 
-              <h3 id="clerk-page-view">4.3 Option B: Client Component (<code>&quot;use client&quot;</code> with <code>getProps</code>)</h3>
+              <h3 id="clerk-page-view" className="scroll-mt-20">4.3 Option B: Client Component (<code>&quot;use client&quot;</code> with <code>getProps</code>)</h3>
               <p>
                 When <code>page.tsx</code> is an interactive Client Component (e.g. managing UI state with <code>useState</code> or using Clerk client hooks like <code>useUser()</code>), it runs in the browser and cannot connect to your database directly.
               </p>
@@ -338,8 +342,7 @@ import { prisma } from "@/lib/prisma";
 export const revalidate = 0;
 
 export async function getProps() {
-  const context = getContext();
-  const userId = context?.userId;
+  const { userId } = getContext();
 
   if (!userId) {
     return redirect("/login");
@@ -365,10 +368,13 @@ export async function getProps() {
 import type { PageProps } from "dinou";
 import { useState } from "react";
 
-interface DashboardProps extends PageProps<"/dashboard"> {
-  posts: Array<{ id: string; title: string; content: string }>;
-  userId: string;
-}
+type DashboardProps = PageProps<
+  "/dashboard",
+  {
+    posts: Array<{ id: string; title: string; content: string }>;
+    userId: string;
+  }
+>;
 
 export default function DashboardPage({ posts: initialPosts, userId }: DashboardProps) {
   const [posts, setPosts] = useState(initialPosts);
@@ -396,18 +402,18 @@ export default function DashboardPage({ posts: initialPosts, userId }: Dashboard
             </section>
 
             {/* 5. CLIENT SETUP */}
-            <section id="client-setup">
+            <section id="client-setup" className="scroll-mt-20">
               <h2>5. Client Setup (DinouClerkProvider)</h2>
               <p>
-                To enable smooth Client-side SPA navigation and dynamic language changes in Clerk's built-in login forms, create a custom wrapper around <code>ClerkProvider</code> using Dinou's <code>useRouter()</code> hook:
+                To enable smooth Client-side SPA navigation and dynamic language changes in Clerk's built-in login forms, create a custom wrapper around <code>ClerkProvider</code> wiring <code>routerPush</code> and <code>routerReplace</code> to Dinou's <code>useRouter()</code> hook:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="tsx">{`// src/components/DinouClerkProvider.tsx
 "use client";
 
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ClerkProvider } from "@clerk/react";
-import { useRouter } from "dinou";
+import { useRouter, type DinouLinkTarget } from "dinou";
 import { esES, enUS } from "@clerk/localizations";
 
 // Customize localization text to match your app's brand
@@ -457,7 +463,8 @@ export function DinouClerkProvider({
     <ClerkProvider
       publishableKey={publishableKey}
       // Integrate with Dinou client router for smooth SPA soft transitions
-      navigate={(to) => router.push(to)}
+      routerPush={(to) => router.push(to as DinouLinkTarget)}
+      routerReplace={(to) => router.replace(to as DinouLinkTarget)}
       // Dynamically select custom translations mapping the active locale
       localization={clerkLocales[locale]}
       appearance={{
@@ -472,24 +479,28 @@ export function DinouClerkProvider({
 }`}</CodeBlock>
               </div>
 
-              <h3 id="clerk-root-layout">5.1 Wrapping the Root Layout</h3>
+              <h3 id="clerk-root-layout" className="scroll-mt-20">5.1 Wrapping the Root Layout</h3>
               <p>
                 In your root <code>src/layout.tsx</code>, wrap the children tree with your custom provider:
               </p>
               <div className="not-prose my-4">
                 <CodeBlock language="tsx">{`// src/layout.tsx
+import type { ReactNode } from "react";
+import { getContext } from "dinou";
 import { DinouClerkProvider } from "@/components/DinouClerkProvider";
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
+  const { env } = getContext();
+
   return (
     <html lang="en">
       <body>
         <DinouClerkProvider
-          publishableKey={process.env.CLERK_PUBLISHABLE_KEY || ""}
+          publishableKey={env.CLERK_PUBLISHABLE_KEY ?? ""}
         >
           {children}
         </DinouClerkProvider>
@@ -501,26 +512,25 @@ export default function RootLayout({
             </section>
 
             {/* 6. WEBHOOKS */}
-            <section id="webhooks">
+            <section id="webhooks" className="scroll-mt-20">
               <h2>6. Webhooks &amp; Database Sync (Plugin Pattern)</h2>
               <p>
                 In <strong>Dinou</strong>, webhook endpoints are handled directly inside plugins using the <strong>Short-Circuit Pattern</strong>. When a plugin returns a Web <code>Response</code>, Dinou returns that response immediately and bypasses React Server Component rendering entirely:
               </p>
 
               <div className="not-prose my-4">
-                <CodeBlock language="typescript">{`// plugins/clerk-webhook.ts
+                <CodeBlock language="typescript">{`// src/plugins/clerk-webhook.ts
 import type { DinouPlugin } from "dinou";
 import { Webhook } from "svix";
+import { prisma } from "@/lib/prisma";
 
 export function clerkWebhookPlugin(): DinouPlugin {
   return {
     name: "clerk-webhook",
-    async onRequest(request) {
-      const url = new URL(request.url);
-
+    async onRequest(request, context) {
       // Intercept incoming Clerk webhook requests
-      if (url.pathname === "/api/webhooks/clerk" && request.method === "POST") {
-        const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+      if (context.req.path === "/api/webhooks/clerk" && request.method === "POST") {
+        const WEBHOOK_SECRET = context.env.CLERK_WEBHOOK_SECRET;
         const svix_id = request.headers.get("svix-id");
         const svix_timestamp = request.headers.get("svix-timestamp");
         const svix_signature = request.headers.get("svix-signature");
