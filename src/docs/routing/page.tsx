@@ -453,7 +453,7 @@ export default function BlogPost({
                   3.2. Route Validation (validateParams)
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Exporting a <code>validateParams(params)</code> function from <code>page_functions.ts</code> or <code>layout_functions.ts</code> lets you enforce semantic validation rules before data fetching or rendering begins. Returning <code>false</code> (or a Promise that resolves to <code>false</code>) immediately aborts the request and issues a clean 404 response:
+                  Exporting a <code>validateParams(params)</code> function from <code>page_functions.ts</code> or <code>layout_functions.ts</code> lets you enforce semantic validation rules in strict <strong>root-to-child order</strong> (ancestor layouts before child pages) before data fetching, rendering, or even serving cached HTML/RSC payloads. Returning <code>false</code> (or a Promise resolving to <code>false</code>) immediately vetoes the request and issues a clean 404 response:
                 </p>
 
                 <CodeBlock language="typescript" containerClassName="w-full rounded-lg mt-2">
@@ -473,14 +473,14 @@ export async function getProps(params: RouteParams) {
                 </CodeBlock>
                 <div className="rounded-xl border border-border/80 bg-muted/30 p-3.5 space-y-2 text-xs text-muted-foreground mt-3">
                   <div className="font-semibold text-foreground">
-                    Guaranteed behavior across all rendering modes:
+                    Guaranteed behavior across all rendering &amp; navigation modes:
                   </div>
                   <ul className="space-y-1.5 list-disc pl-4 leading-relaxed">
                     <li>
-                      <strong>Dynamic SSR:</strong> Returns an instant 404 without running <code>getProps</code>, preventing wasteful database queries on invalid URLs.
+                      <strong>Dynamic SSR &amp; SPA RSC Navigation:</strong> Returns an instant 404 on both hard HTML loads and client-side SPA fetches (<code>/____rsc_page____/*</code>, <code>/____rsc_layout____/*</code>) without running <code>getProps</code> or serving stale cached payloads.
                     </li>
                     <li>
-                      <strong>Incremental Static Generation (ISG / ISR):</strong> Prevents invalid URLs from triggering on-demand page generation or polluting edge caches with broken pages. (To disable on-demand ISG entirely and serve <em>only</em> paths returned by <code>getStaticPaths</code>, set <code>allowISG = false</code> in the segment or globally in <code>dinou.config.*</code>—see{" "}
+                      <strong>Incremental Static Generation (ISG / ISR):</strong> Prevents invalid URLs from triggering on-demand page generation or polluting edge caches with broken pages. (To disable on-demand ISG entirely and serve <em>only</em> paths returned by <code>getStaticPaths</code>, set <code>allowISG = false</code> in the segment or globally in <code>dinou.config.ts</code>—see{" "}
                       <Link href="/docs/page-functions" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
                         Page &amp; Layout Functions
                       </Link>
@@ -513,7 +513,7 @@ export async function getProps(params: RouteParams) {
                     <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
                       {`import { useSearchParams } from "./dinou";
 
-// Works identically in Server Components & "use client"!
+// Works in Server Components & "use client" components!
 export default function SearchPage() {
   const searchParams = useSearchParams();
   const q = searchParams.get("search") ?? "";
@@ -527,7 +527,7 @@ export default function SearchPage() {
                       page_functions.ts &amp; Server Functions
                     </div>
                     <p className="text-xs text-muted-foreground mb-3">
-                      Outside React components (where hooks cannot run), access the active query via <code>getContext()?.req.query</code>:
+                      Outside React components (where hooks cannot run), access the active query synchronously via <code>getContext().req.query</code>:
                     </p>
                     <TabbedCodeBlock
                       defaultTab="page-functions"
@@ -536,13 +536,13 @@ export default function SearchPage() {
                           id: "page-functions",
                           label: "page_functions.ts",
                           language: "tsx",
-                          code: `import { getContext } from "dinou/server";
+                          code: `import { getContext } from "dinou"; // also in "./dinou", "dinou/server", "dinou/config"
 
 // src/search/page_functions.ts
-// getContext() returns RequestContextStore | undefined
+// getContext() always returns RequestContextStore (never null/undefined)
 export async function getProps() {
   const ctx = getContext();
-  const search = ctx?.req.query?.search;
+  const search = ctx.req.query.search;
   return { search };
 }`,
                         },
@@ -552,12 +552,12 @@ export async function getProps() {
                           language: "tsx",
                           code: `"use server"; // Declared at the top of the file
 
-import { getContext } from "dinou/server";
+import { getContext } from "dinou";
 
 // src/actions/items.ts
 export async function filterItems() {
   const ctx = getContext();
-  const search = ctx?.req.query?.search;
+  const search = ctx.req.query.search;
   return db.items.find({ q: search });
 }`,
                         },
@@ -565,6 +565,16 @@ export async function filterItems() {
                     />
                   </div>
                 </div>
+
+                <Alert className="not-prose mt-4 border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-950/20">
+                  <Info className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <AlertTitle className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                    Static Optimization: Client vs. Server <code>useSearchParams()</code>
+                  </AlertTitle>
+                  <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1">
+                    Calling <code>useSearchParams()</code> inside a <strong>Server Component</strong> (or reading <code>getContext().req.query</code> on the server) opts that route into <strong>Dynamic SSR</strong>. Calling <code>useSearchParams()</code> inside a <strong>Client Component (<code>&quot;use client&quot;</code>)</strong> preserves <strong>SSG, ISR, PPR, and <code>dinou export-static</code></strong> without dynamic bailout—hydrating cleanly with an empty <code>URLSearchParams</code> first and immediately syncing live <code>window.location.search</code> on the client with zero hydration mismatch.
+                  </AlertDescription>
+                </Alert>
               </div>
             </section>
 
@@ -598,6 +608,7 @@ export default function RootLayout({ children }: LayoutProps) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
+        <link rel="stylesheet" href="/styles.css" precedence="default" />
       </head>
       <body className="min-h-screen bg-background text-foreground antialiased">
         {children}
@@ -649,7 +660,7 @@ export default function DashboardLayout({
                     Independent Layout Data Fetching &amp; Caching (layout_functions.ts)
                   </AlertTitle>
                   <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-1">
-                    Both root and nested layouts can pair with a companion <code>layout_functions.ts</code> file for server data fetching (<code>getProps</code>), independent ISR cache lifetimes (<code>revalidate</code>), cache tags (<code>getCacheTags</code>), and surgical revalidation via <code>revalidateLayout()</code>. See{" "}
+                    Both root and nested layouts can pair with a companion <code>layout_functions.ts</code> file for server data fetching (<code>getProps</code>), independent ISR lifetimes (<code>revalidate</code>), segment-isolated <code>ppr</code>, build-time path generation (<code>getStaticPaths</code> across <code>[p]</code>, <code>[[p]]</code>, <code>[...s]</code>, <code>[[...s]]</code>), <code>allowISG</code> / <code>validateParams</code> guards, cache tags (<code>getCacheTags</code>), and O(1) surgical revalidation via <code>revalidateLayout()</code>. See{" "}
                     <Link href="/docs/page-functions" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
                       Page &amp; Layout Functions
                     </Link>{" "}
@@ -949,7 +960,7 @@ export default function NotFound({
                   </AlertTitle>
                   <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-2 space-y-2">
                     <p>
-                      <strong>Yes.</strong> If you define a <code>page_functions.{`{ts,js}`}</code> file in the same route directory as <code>not_found.tsx</code>, Dinou executes its <code>getProps(params)</code> server lifecycle and merges the returned data directly into the component&apos;s props alongside <code>params</code> (as demonstrated in the <em>With Server Props</em> tab above).
+                      <strong>Yes.</strong> If you define a <code>page_functions.{`{ts,js,tsx,jsx,mjs}`}</code> file in the same route directory as <code>not_found.tsx</code>, Dinou executes its <code>getProps(params)</code> server lifecycle and merges the returned data directly into the component&apos;s props alongside <code>params</code> (as demonstrated in the <em>With Server Props</em> tab above).
                     </p>
                     <p>
                       This allows 404 views to dynamically query databases or external APIs (such as recommended articles, related categories, or search fallbacks) and type them cleanly via <code>NotFoundProps&lt;SuggestionsData&gt;</code> from <code>&quot;./dinou&quot;</code> (or <code>NotFoundProps&lt;&quot;/blog/[slug]&quot;, SuggestionsData&gt;</code> from <code>&quot;dinou&quot;</code>).

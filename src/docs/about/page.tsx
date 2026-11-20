@@ -1,7 +1,7 @@
 import { Link } from "./dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
-import { Card, CardContent, CardHeader, CardTitle } from "@/docs/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
 import { Badge } from "@/docs/components/ui/badge";
 import {
   Scale,
@@ -441,7 +441,7 @@ export default function AboutPage() {
                       <li className="flex items-start gap-2.5">
                         <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
                         <span>
-                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">React &amp; The React Team:</strong> For React 19, the React Server Components specification, Server Actions, and standard Suspense streaming primitives.
+                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">React &amp; The React Team:</strong> For React 19, the React Server Components specification, Server Functions &amp; Actions, the React Compiler, and standard Suspense streaming primitives.
                         </span>
                       </li>
                       <li className="flex items-start gap-2.5">
@@ -453,7 +453,13 @@ export default function AboutPage() {
                       <li className="flex items-start gap-2.5">
                         <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
                         <span>
-                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">Modern JavaScript Runtimes:</strong> For advancing standard Web APIs (Fetch API, W3C Streams, WinterCG) across <strong className="text-slate-800 dark:text-slate-200">Node.js</strong>, <strong className="text-slate-800 dark:text-slate-200">Bun</strong>, <strong className="text-slate-800 dark:text-slate-200">Deno</strong>, and <strong className="text-slate-800 dark:text-slate-200">Cloudflare Workers</strong>.
+                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">Modern JavaScript Runtimes &amp; Platforms:</strong> For advancing standard Web APIs (Fetch API, W3C Streams, WinterCG) across <strong className="text-slate-800 dark:text-slate-200">Node.js</strong>, <strong className="text-slate-800 dark:text-slate-200">Bun</strong>, <strong className="text-slate-800 dark:text-slate-200">Deno</strong>, <strong className="text-slate-800 dark:text-slate-200">Cloudflare Workers</strong>, and <strong className="text-slate-800 dark:text-slate-200">Netlify Functions</strong>.
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span>
+                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">GitHub &amp; GitHub Actions:</strong> For providing a rock-solid repository platform for open-source hosting, version history, and collaboration—and for <strong className="text-slate-800 dark:text-slate-200">GitHub Actions</strong>, which powers Dinou&apos;s continuous multi-bundler, multi-runtime, and cross-platform end-to-end verification pipelines.
                         </span>
                       </li>
                       <li className="flex items-start gap-2.5">

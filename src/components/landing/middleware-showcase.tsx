@@ -100,7 +100,7 @@ export default defineConfig({
     headline: "SPA-Safe Route Guards & Context Injection",
     description:
       "Inspect session cookies, verify JWTs, and mutate Dinou's request context store ahead of both dynamic and cached SSG/ISR/PPR routes. Access authenticated user records anywhere on the server with getContext().",
-    codeFile: "src/_plugins/auth-guard.ts",
+    codeFile: "src/plugins/auth-guard.ts",
     language: "typescript",
     codeSnippet: `import type { DinouPlugin } from "dinou";
 
@@ -152,7 +152,7 @@ export const authPlugin: DinouPlugin = {
     language: "typescript",
     codeSnippet: `import { defineConfig } from "dinou";
 import { redisStorage } from "@/lib/redis-storage";
-import { authPlugin } from "@/_plugins/auth-guard";
+import { authPlugin } from "@/plugins/auth-guard";
 
 export default defineConfig({
   // 1. Global Partial Prerendering & ISG defaults (overridable per segment)

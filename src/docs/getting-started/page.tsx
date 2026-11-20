@@ -281,9 +281,9 @@ export default function RootLayout({ children }: LayoutProps) {
 │   ├── page.tsx               # Root page component (RSC)
 │   ├── layout.tsx             # Root document layout (<html/head/body>)
 │   └── globals.css            # Styles / Tailwind CSS
-├── dinou.config.ts            # Optional config (.ts/.mjs/.js/.cjs: ppr, allowISG, storage, plugins)
-├── dinou-env.d.ts             # Ambient framework typings (assets & CSS)
-├── tsconfig.json              # TypeScript, rootDirs & path alias configuration
+├── dinou.config.ts            # Optional AOT config (ppr, allowISG, reactCompiler, assetExtensions, storage, plugins)
+├── dinou-env.d.ts             # Ambient framework typings (assets, CSS & ProcessEnv)
+├── tsconfig.json              # TypeScript / jsconfig, rootDirs & path alias configuration
 ├── package.json               # Includes "type": "module" & Dinou scripts
 └── .gitignore`}</code>
                       </pre>
@@ -310,7 +310,7 @@ export default function RootLayout({ children }: LayoutProps) {
                         <strong>Contextual <code>&quot;./dinou&quot;</code> Resolution:</strong> Mapping <code>&quot;rootDirs&quot;: [&quot;src&quot;, &quot;.dinou/routes&quot;]</code> lets TypeScript and IDEs resolve auto-generated route-contextual <code>&quot;./dinou&quot;</code> modules in every route folder with zero boilerplate.
                       </li>
                       <li>
-                        <strong>Import Aliases:</strong> Dinou&apos;s build engines (esbuild, Rollup, Webpack) automatically read <code>compilerOptions.paths</code> from <code>tsconfig.json</code> to resolve clean path aliases like <code>@/*</code> into <code>src/*</code>.
+                        <strong>Import Aliases:</strong> Dinou&apos;s build engines (esbuild, Rollup, Webpack), PostCSS pipeline, and AOT <code>dinou.config.ts</code> loader automatically read <code>compilerOptions.paths</code> from <code>tsconfig.json</code> (or <code>jsconfig.json</code>, including recursive <code>&quot;extends&quot;</code> chains) to resolve clean aliases like <code>@/*</code> into <code>src/*</code>.
                       </li>
                       <li>
                         <strong>IDE Autocomplete:</strong> With <code>&quot;allowJs&quot;: true</code>, code editors (VS Code, Cursor, Antigravity) use <code>tsconfig.json</code> to provide full route autocomplete, auto-imports, and path resolution across <code>.js</code> and <code>.jsx</code> files.
@@ -361,8 +361,8 @@ export default function RootLayout({ children }: LayoutProps) {
                         {`/// <reference types="dinou/env" />`}
                       </CodeBlock>
                       <p className="mt-2 text-xs text-muted-foreground">
-                        The <code>dinou/env</code> reference automatically declares ambient typings for static assets
-                        (SVGs, images, web fonts), CSS Modules (<code>*.module.css</code>), and global stylesheet imports (<code>*.css</code>) without manual type boilerplate.
+                        The <code>dinou/env</code> reference automatically declares ambient typings for all 26 built-in static asset formats
+                        (images, SVGs, audio/video, web fonts), CSS Modules (<code>*.module.css</code>), global stylesheets (<code>*.css</code>), and <code>NodeJS.ProcessEnv</code> (<code>DINOU_PUBLIC_*</code>, <code>PORT</code>, <code>HOST</code>, etc.). Custom <code>assetExtensions</code> and <code>.env*</code> keys are emitted automatically into <code>.dinou/types/routes.d.ts</code>.
                       </p>
                     </div>
                   </div>
@@ -375,7 +375,7 @@ export default function RootLayout({ children }: LayoutProps) {
                     3.4. Package Scripts
                   </h3>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Add the complete set of Dinou scripts to your <code>package.json</code> to control development, multi-runtime production builds (Node, Cloudflare, Deno, Bun), binary compilation, static exports, and ejecting (scroll through the block below to view all target combinations):
+                    Add the complete set of Dinou scripts to your <code>package.json</code> to control development, multi-runtime production builds (Node, Netlify, Cloudflare, Deno, Bun), binary compilation, static exports, typegen, and ejecting (scroll through the block below to view all target combinations):
                   </p>
                   <CodeBlock
                     language="json"
@@ -441,6 +441,10 @@ export default function RootLayout({ children }: LayoutProps) {
   "start:node:esbuild": "dinou start:node:esbuild",
   "start:node:rollup": "dinou start:node:rollup",
   "start:node:webpack": "dinou start:node:webpack",
+  "build:netlify": "dinou build:netlify",
+  "build:netlify:esbuild": "dinou build:netlify:esbuild",
+  "build:netlify:rollup": "dinou build:netlify:rollup",
+  "build:netlify:webpack": "dinou build:netlify:webpack",
   "build:cloudflare": "dinou build:cloudflare",
   "build:cloudflare:esbuild": "dinou build:cloudflare:esbuild",
   "build:cloudflare:rollup": "dinou build:cloudflare:rollup",
@@ -547,10 +551,13 @@ export default function RootLayout({ children }: LayoutProps) {
 out
 dist
 .wrangler
-.env`}
+.netlify
+.env
+.env.local
+.env.*.local`}
                   </CodeBlock>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    <code>.dinou/</code> holds auto-generated route types (<code>.dinou/types/</code>), contextual <code>&quot;./dinou&quot;</code> modules (<code>.dinou/routes/</code>), dev caches, and runtime builds; <code>out/</code> contains pages generated by <code>export-static</code>; <code>dist/</code> stores compiled single-executable binaries (Node / Bun / Deno); and <code>.wrangler/</code> stores local state when testing Cloudflare Workers.
+                    <code>.dinou/</code> holds auto-generated route types (<code>.dinou/types/</code>), contextual <code>&quot;./dinou&quot;</code> modules (<code>.dinou/routes/</code>), dev caches, and runtime builds; <code>out/</code> contains pages generated by <code>export-static</code>; <code>dist/</code> stores compiled single-executable binaries (Node / Bun / Deno); <code>.wrangler/</code> and <code>.netlify/</code> store local emulator state; and <code>.env*</code> keeps server secrets out of Git.
                   </p>
                 </div>
 
@@ -581,7 +588,7 @@ npm run dev -- -u`}
                       <span>Vendorized (Default) vs. Unvendorized Mode (<code>-u</code>)</span>
                     </div>
                     <p className="leading-relaxed">
-                      By default, Dinou boots using pre-compiled ESM toolchain vendors (<code>dinou/compiled/</code>) for instant cold starts. Passing <code>-- -u</code> (or setting <code>DINOU_UNVENDORIZED=true</code>) switches to <strong>Unvendorized Mode</strong>, resolving internal compiler packages directly from <code>node_modules</code>. Learn more in the <Link href="/docs/bundlers#dual-mode-vendoring" className="text-blue-500 hover:underline font-medium">Bundlers Guide &rarr;</Link>
+                      By default, Dinou boots using 31 pre-compiled ESM toolchain vendors (<code>dinou/compiled/</code>) for instant cold starts. Passing <code>-- -u</code> (or setting <code>DINOU_UNVENDORIZED=true</code>) switches to <strong>Unvendorized Mode</strong> on both Node.js and Bun, resolving internal compiler packages directly from <code>node_modules</code>. Learn more in the <Link href="/docs/bundlers#dual-mode-vendoring" className="text-blue-500 hover:underline font-medium">Bundlers Guide &rarr;</Link>
                     </p>
                   </div>
                 </div>
@@ -594,7 +601,7 @@ npm run dev -- -u`}
                 4. Building for Production &amp; Runtimes
               </h2>
               <p>
-                Dinou provides both <strong>bundler freedom</strong> (esbuild, Rollup, Webpack) and <strong>universal runtime deployment</strong> (Node.js, Cloudflare Workers, Deno, Bun, or Static SSG) from a single codebase in <code>src/</code> with zero code changes.
+                Dinou provides both <strong>bundler freedom</strong> (esbuild, Rollup, Webpack) and <strong>universal runtime deployment</strong> (Node.js, Netlify Functions v2, Cloudflare Workers, Deno, Bun, native binaries, or Static SSG) from a single codebase in <code>src/</code> with zero code changes.
               </p>
 
               {/* 4.1 Bundler Selection */}
@@ -604,7 +611,7 @@ npm run dev -- -u`}
                   4.1. Bundler Selection (esbuild, Rollup, Webpack)
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  By default, Dinou uses <strong>esbuild</strong> for lightning-fast production bundling. When enterprise plugins or custom loaders are required, you can compile with <strong>Rollup</strong> or <strong>Webpack</strong> with 100% feature parity:
+                  By default, Dinou uses <strong>esbuild</strong> for lightning-fast production bundling. You can switch to <strong>Rollup</strong> or <strong>Webpack</strong> anytime with 100% feature parity across Tailwind v4, static media fingerprinting, path aliases, and the <strong>React Compiler</strong> (enabled by default in production across all three bundlers):
                 </p>
                 <CodeBlock language="bash" containerClassName="w-full rounded-lg">
                   {`# Build for production with your preferred bundler
@@ -614,7 +621,7 @@ npm run build:node:rollup     # Dedicated Rollup production build
 npm run build:node:webpack    # Dedicated Webpack production build`}
                 </CodeBlock>
                 <p className="text-xs text-muted-foreground">
-                  For advanced compiler tuning, custom plugins, and SWC options, visit the <Link href="/docs/bundlers" className="text-blue-500 hover:underline font-medium">Bundlers Guide &rarr;</Link>
+                  For Dual-Bundle topology, React Compiler options, and Dual-Mode Vendoring details, visit the <Link href="/docs/bundlers" className="text-blue-500 hover:underline font-medium">Bundlers Guide &rarr;</Link>
                 </p>
               </div>
 
@@ -634,9 +641,20 @@ npm run build:node:webpack    # Dedicated Webpack production build`}
                       <Server className="h-4 w-4 text-blue-500" />
                       Node.js Server
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">Standalone <code>node:http</code> server with native Web <code>ReadableStream</code> SSR &amp; RSC streaming.</p>
+                    <p className="text-xs text-muted-foreground mb-2">In-process AOT <code>node:http</code> server with native Web <code>ReadableStream</code> SSR &amp; RSC streaming.</p>
                     <code className="text-xs font-mono block p-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
                       npm run build:node &amp;&amp; npm run start:node
+                    </code>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+                    <div className="flex items-center gap-2 font-semibold text-sm text-slate-900 dark:text-slate-100 mb-1">
+                      <Zap className="h-4 w-4 text-teal-500" />
+                      Netlify Serverless Functions v2
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">AOT Dual-Bundle function (<code>.dinou/netlify/functions/ssr.mjs</code>) with CDN <code>preferStatic</code> routing.</p>
+                    <code className="text-xs font-mono block p-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
+                      npm run build:netlify
                     </code>
                   </div>
 
@@ -645,9 +663,20 @@ npm run build:node:webpack    # Dedicated Webpack production build`}
                       <Cloud className="h-4 w-4 text-orange-500" />
                       Cloudflare Workers Edge
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">Edge worker with 0ms cold starts and global distribution.</p>
+                    <p className="text-xs text-muted-foreground mb-2">V8 <code>workerd</code> edge worker with sub-millisecond cold starts, CDN assets, and Cloudflare KV caching.</p>
                     <code className="text-xs font-mono block p-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
                       npm run build:cloudflare &amp;&amp; npx wrangler dev
+                    </code>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+                    <div className="flex items-center gap-2 font-semibold text-sm text-slate-900 dark:text-slate-100 mb-1">
+                      <Terminal className="h-4 w-4 text-purple-500" />
+                      Bun &amp; Deno Servers
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">Native <code>Bun.serve</code> (including 100% Pure Bun builds) and Deno Deploy / Deno KV edge runtimes.</p>
+                    <code className="text-xs font-mono block p-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
+                      npm run build:bun &amp;&amp; npm run start:bun # or build:deno
                     </code>
                   </div>
 
@@ -656,7 +685,7 @@ npm run build:node:webpack    # Dedicated Webpack production build`}
                       <Cpu className="h-4 w-4 text-emerald-500" />
                       Standalone Binaries (Node / Bun / Deno)
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">Self-contained executable binaries output directly to <code>dist/</code>.</p>
+                    <p className="text-xs text-muted-foreground mb-2">Self-contained cross-compiled executable binaries emitted directly to <code>dist/</code>.</p>
                     <code className="text-xs font-mono block p-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
                       npm run build:node:compile # or build:bun:compile / build:deno:compile
                     </code>
@@ -667,7 +696,7 @@ npm run build:node:webpack    # Dedicated Webpack production build`}
                       <Globe className="h-4 w-4 text-cyan-500" />
                       Static Site Export (SSG)
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">Pre-rendered HTML and RSC payloads output to <code>out/</code>.</p>
+                    <p className="text-xs text-muted-foreground mb-2">Pre-rendered HTML and segmented <code>page.rsc</code> / <code>layout.rsc</code> payloads in <code>out/</code> for zero-server SPA hosting.</p>
                     <code className="text-xs font-mono block p-2 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
                       npm run export-static
                     </code>

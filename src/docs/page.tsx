@@ -158,7 +158,7 @@ npm run dev`}
                     <li>Routes are pre-rendered statically by default (SSG) for maximum performance and instant CDN delivery, with <code>getStaticPaths</code> pre-generating known dynamic routes at build time.</li>
                     <li><strong>On-Demand Incremental Static Generation (ISG):</strong> Unseen dynamic parameters are generated and cached on first request by default (configurable globally via <code>allowISG</code> in <code>dinou.config.*</code> or per segment, paired with <code>validateParams</code>).</li>
                     <li>Incremental Static Regeneration (ISR) is declared simply with <code>revalidate</code> in <strong>seconds</strong> (e.g. <code>revalidate = 60</code>) in companion <code>page_functions.ts</code> or <code>layout_functions.ts</code> files.</li>
-                    <li>Live on-demand server rendering (SSR) activates whenever <code>revalidate = 0</code> or dynamic request APIs are read, while <code>getProps</code> passes typed server data directly to your component.</li>
+                    <li>Live on-demand server rendering (SSR) activates whenever <code>revalidate = 0</code> (or <code>&lt; 1</code>) or server request APIs are read (while Client <code>useSearchParams()</code> preserves SSG/ISR/PPR/static-export cleanly), and <code>getProps</code> passes typed server data directly to your component.</li>
                   </ul>
                 </div>
 
@@ -169,9 +169,9 @@ npm run dev`}
                     <span>3D Layered Segmentation</span>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5 leading-relaxed">
-                    <li><strong>Horizontal layout caching:</strong> Layouts define their own TTLs via <code>layout_functions.ts</code>, preserving layout state across route transitions without unmounting or re-rendering child trees.</li>
-                    <li><strong>Vertical component caching:</strong> Micro-cache expensive Server Components with <code>&lt;DinouCacheSlot&gt;</code> (<code>dinou/server</code>) and refresh individual slots on demand from the client via <code>refreshSlot()</code>.</li>
-                    <li><strong>Temporal segmentation — Partial Prerendering (PPR):</strong> Enabled globally in <code>dinou.config.*</code> or independently per layout/page segment, serving an instant cached static shell (~2.42ms TTFB) while dynamic components concurrently stream into <code>&lt;Suspense&gt;</code> holes.</li>
+                    <li><strong>Horizontal layout caching:</strong> Layouts define their own TTLs via <code>layout_functions.ts</code> and purge in O(1) via <code>revalidateLayout()</code>, preserving layout state across route transitions without unmounting or re-rendering child trees.</li>
+                    <li><strong>Vertical component caching:</strong> Micro-cache expensive Server Components with <code>&lt;DinouCacheSlot&gt;</code> (<code>dinou/server</code>), purge by tag via <code>revalidateTag()</code>, and refresh individual slots in place from the client via <code>refreshSlot()</code>.</li>
+                    <li><strong>Temporal segmentation — Partial Prerendering (PPR):</strong> Enabled globally in <code>dinou.config.ts</code> or independently per layout/page segment, serving an instant cached static shell (~2.42ms TTFB) while dynamic components concurrently stream into <code>&lt;Suspense&gt;</code> holes (with <code>noDynamic()</code> opt-out for static boundaries).</li>
                   </ul>
                 </div>
 
@@ -196,7 +196,7 @@ npm run dev`}
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5 leading-relaxed">
                     <li>Automatic TypeScript route generation (<code>npx dinou typegen</code>, synced live in dev and builds) emits <code>.dinou/types/routes.d.ts</code> and route-contextual <code>./dinou</code> modules mapped seamlessly via TypeScript <code>rootDirs</code>.</li>
-                    <li>Import <code>Link</code>, <code>useRouter</code>, <code>ROUTE</code>, <code>PageProps</code>, <code>LayoutProps</code> (with automatic sibling <code>@slot</code> prop inference), <code>SlotProps</code>, and <code>PageFunctions</code> directly from <code>&quot;./dinou&quot;</code> with zero manual route string literals.</li>
+                    <li>Import <code>Link</code>, <code>useRouter</code>, <code>ROUTE</code>, <code>PageProps</code>, <code>LayoutProps</code> (with automatic sibling <code>@slot</code> prop inference), <code>SlotProps</code>, <code>NotFoundProps</code>, <code>ErrorProps</code>, <code>PageFunctions</code>, and <code>LayoutFunctions</code> directly from <code>&quot;./dinou&quot;</code> with zero manual route string literals.</li>
                     <li>Compile-time dead-link detection, validated dynamic <code>params</code> interpolation, and strict relative navigation (<code>to=&quot;sub&quot;</code> / <code>from</code>) with zero type-declaration overhead in client bundles.</li>
                   </ul>
                 </div>
@@ -208,8 +208,8 @@ npm run dev`}
                     <span>Universal Multi-Runtime Deployment (Deploy Everywhere)</span>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5 leading-relaxed">
-                    <li>Deploy the exact same application code to Node.js servers, Bun standalone single-binary executables, Deno, or Cloudflare Workers at the edge.</li>
-                    <li>Supports pure static site export (SSG) for static hosts like Netlify, Vercel, or GitHub Pages.</li>
+                    <li>Deploy the exact same application code to <strong>Node.js</strong> servers, <strong>Netlify Functions v2</strong> (AOT Dual-Bundle), <strong>Cloudflare Workers</strong> (with KV), <strong>Deno Deploy</strong> (with Deno KV), <strong>Bun</strong>, or single-file zero-dependency compiled native binaries (<code>build:node:compile</code>, <code>build:bun:compile</code>, <code>build:deno:compile</code>).</li>
+                    <li>Supports pure static site export (<code>dinou export-static</code> &rarr; <code>out/</code>) with pre-rendered HTML and segmented <code>page.rsc</code> / <code>layout.rsc</code> payloads for GitHub Pages, Cloudflare Pages, AWS S3, or Surge—preserving SPA transitions without a server.</li>
                   </ul>
                 </div>
 
@@ -223,10 +223,10 @@ npm run dev`}
                     React 19 requires conflicting module conditions: <code>&quot;react-server&quot;</code> for Server Components vs. <code>&quot;browser&quot;</code> for SSR. Instead of spawning separate Node.js subprocesses via <code>child_process.fork()</code>, Dinou compiles both in a <strong>single in-memory process</strong> through a 3-pass pipeline:
                   </p>
                   <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5 leading-relaxed">
-                    <li><strong>Pass A (RSC Engine):</strong> Bundles via bundler with <code>[&quot;react-server&quot;]</code> package export conditions, binding Server Functions and generating client reference descriptors.</li>
-                    <li><strong>Pass B (SSR Engine):</strong> Bundles via bundler with <code>[&quot;browser&quot;]</code> package export conditions, packaging <code>react-dom/server.edge</code> and client hydration manifests.</li>
+                    <li><strong>Pass A (RSC Engine):</strong> Bundles with <code>[&quot;react-server&quot;]</code> package export conditions, binding Server Functions and generating client reference descriptors.</li>
+                    <li><strong>Pass B (SSR Engine):</strong> Bundles with <code>[&quot;browser&quot;]</code> package export conditions, packaging <code>react-dom/server.edge</code> and client hydration manifests.</li>
                     <li><strong>Pass C (Orchestration):</strong> Bridges RSC and SSR via standard W3C <code>ReadableStream</code> with zero disk I/O and zero IPC serialization latency.</li>
-                    <li><strong>Deploy Anywhere:</strong> Halves memory consumption and enables native execution on edge runtimes (Cloudflare Workers, Deno, Bun) where process spawning is strictly prohibited. <Link href="/docs/migration/v6-to-v7#dual-bundle-engine" className="text-blue-500 hover:underline font-medium">Read architectural specification &rarr;</Link></li>
+                    <li><strong>Deploy Anywhere:</strong> Halves memory consumption and enables native execution on serverless &amp; edge runtimes (Cloudflare Workers, Netlify Functions v2, Deno, Bun) where process spawning is prohibited. <Link href="/docs/bundlers#dual-bundle-engine" className="text-blue-500 hover:underline font-medium">Read architectural specification &rarr;</Link></li>
                   </ul>
                 </div>
 
@@ -237,8 +237,8 @@ npm run dev`}
                     <span>Zero-Fork In-Process Dev Experience (DX)</span>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5 leading-relaxed">
-                    <li>Runs RSC and SSR inside a single unified Node.js process with zero <code>child_process.fork()</code> overhead and persistent SWC transform caching.</li>
-                    <li>Instant React Fast Refresh over WebSockets, FOUC-free live CSS replacement, and automatic route type synchronization.</li>
+                    <li>Runs RSC and SSR inside a single unified Node.js process with an in-memory VFS, zero <code>child_process.fork()</code> overhead, and persistent SWC transform caching.</li>
+                    <li>Instant React Fast Refresh over WebSockets, FOUC-free live CSS replacement, automatic route type synchronization, and live hot-reload for <code>.env*</code>, <code>tsconfig.json</code> aliases, and <code>dinou.config.ts</code>.</li>
                   </ul>
                 </div>
 
@@ -249,8 +249,9 @@ npm run dev`}
                     <span>Tri-Bundler Freedom (esbuild, Rollup, Webpack)</span>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5 leading-relaxed">
-                    <li>Default to <strong>esbuild</strong> (<code>dinou dev</code>, <code>dinou build:node</code>) for blazing-fast development bundling and lightning-quick compilation.</li>
-                    <li>Switch seamlessly to <strong>Rollup</strong> (<code>dinou dev:rollup</code>, <code>dinou build:node:rollup</code>) or <strong>Webpack</strong> (<code>dinou dev:webpack</code>, <code>dinou build:node:webpack</code>) via CLI scripts whenever your application needs specialized plugins or legacy transforms with complete feature parity.</li>
+                    <li>Default to <strong>esbuild</strong> (<code>dinou dev</code>, <code>dinou build</code>) for blazing-fast development bundling and lightning-quick compilation.</li>
+                    <li>Switch seamlessly to <strong>Rollup</strong> (<code>dinou dev:rollup</code>, <code>dinou build:node:rollup</code>) or <strong>Webpack</strong> (<code>dinou dev:webpack</code>, <code>dinou build:node:webpack</code>) with full feature parity across Tailwind v4, static media fingerprinting, <code>tsconfig</code> aliases, and the <strong>React Compiler</strong> (enabled by default in production across all three bundlers).</li>
+                    <li>Powered by <strong>Dual-Mode Vendoring</strong>: 31 pre-bundled ESM toolchain packages for instant cold starts, or pass <code>-u</code> / <code>--unvendorized</code> to resolve directly from <code>node_modules</code>.</li>
                   </ul>
                 </div>
 
@@ -258,11 +259,11 @@ npm run dev`}
                 <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
                   <div className="flex items-center gap-2 font-semibold text-sm text-slate-900 dark:text-slate-100 mb-2">
                     <Box className="w-4 h-4 text-amber-500" />
-                    <span>100% Ejectable Architecture (Total Stack Ownership)</span>
+                    <span>100% Ejectable Architecture (Reversible Stack Ownership)</span>
                   </div>
                   <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5 leading-relaxed">
-                    <li>Run <code>npm run eject</code> at any time: Dinou copies its entire internal engine, server, and bundler configurations directly into your repository.</li>
-                    <li>Inspect, customize, or maintain the framework code on your own terms with zero vendor lock-in or dependency on closed-source packages.</li>
+                    <li>Run <code>npx dinou eject</code> (or <code>npm run eject</code>) at any time: Dinou copies its complete internal engine, adapters, and bundler pipelines into <code>./dinou/</code> and rewrites your scripts selectively.</li>
+                    <li>Inspect, customize, or recompile the 31 vendor bundles (<code>npm run build:vendors</code>) with zero lock-in—and revert cleanly back to <code>node_modules/dinou</code> anytime with transactional <code>npm run uneject</code>.</li>
                   </ul>
                 </div>
               </div>
@@ -290,7 +291,7 @@ npm run dev`}
                     Other frameworks either did not support this pattern directly or required extra boilerplate—creating separate API routes, calling <code>fetch</code> manually, and managing <code>isLoading</code> state by hand in the client.
                   </p>
                   <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    The initial mission of Dinou was simple and direct: build a clean execution engine where a Client Component could invoke an asynchronous server action naturally inside a standard React 19 <code>&lt;Suspense&gt;</code> boundary, letting React handle streaming and fallbacks the way it was designed to.
+                    The initial mission of Dinou was simple and direct: build a clean execution engine where a Client Component could invoke an asynchronous Server Function naturally inside a standard React 19 <code>&lt;Suspense&gt;</code> boundary, letting React handle streaming and fallbacks the way it was designed to.
                   </p>
                 </div>
 
@@ -334,7 +335,7 @@ npm run dev`}
                     <strong>Immediate Context Comprehension:</strong> Because Dinou avoids layers of hidden macros and convoluted runtime indirection, coding assistants can ingest the entire execution flow in a single prompt, diagnosing errors deterministically without hallucinations.
                   </li>
                   <li>
-                    <strong>Ejection for Edge-Case Fixes &amp; Unreleased Features:</strong> In the rare scenario where your application encounters an internal engine bug or requires an unreleased low-level feature, running <code>npm run eject</code> copies the complete, readable engine into your repository. Thanks to Dinou&apos;s lean codebase, an AI agent can ingest the internal engine in seconds, inspect the exact execution flow, and autonomously patch or implement the required feature directly in your project.
+                    <strong>Reversible Ejection for Edge-Case Fixes &amp; Customizations:</strong> In the rare scenario where your application encounters an internal engine bug or requires an unreleased low-level feature, running <code>npx dinou eject</code> copies the complete, readable engine into <code>./dinou/</code>. Thanks to Dinou&apos;s lean codebase, an AI agent can ingest the internal engine in seconds, inspect the exact execution flow, and autonomously patch or extend it—and you can always revert cleanly back to npm with <code>npm run uneject</code>.
                   </li>
                 </ul>
               </div>
@@ -386,7 +387,10 @@ npm run dev`}
 │       └── [slug]/
 │           ├── page.tsx       # Dynamic segment (/docs/:slug)
 │           └── page_functions.ts # getStaticPaths, allowISG, validateParams & ISR
-├── dinou.config.ts            # Optional config (.ts/.mjs/.js/.cjs: ppr, allowISG, storage, plugins)
+├── dinou.config.ts            # Optional AOT config (ppr, allowISG, reactCompiler, assetExtensions, storage, plugins)
+├── dinou.setup.ts             # Optional Line-1 pre-boot setup / polyfills
+├── .env / .env.local          # Server secrets & DINOU_PUBLIC_* client vars (auto-typed in routes.d.ts)
+├── .dinou/                    # Auto-generated build outputs (dist1/2/3), types & contextual ./dinou (gitignored)
 ├── package.json
 └── tsconfig.json              # Includes rootDirs: ["src", ".dinou/routes"]`}</code>
                   </pre>
