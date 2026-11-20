@@ -225,9 +225,11 @@ declare module "dinou" {
         language: "json",
         code: `{
   "compilerOptions": {
+    "target": "ES2022",
     "rootDirs": ["src", ".dinou/routes"],
     "paths": { "@/*": ["./src/*"] },
     "strict": true,
+    "skipLibCheck": true,
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "bundler"

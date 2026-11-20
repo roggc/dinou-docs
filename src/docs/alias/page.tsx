@@ -141,11 +141,13 @@ export default function Page() {
               >
 {`{
   "compilerOptions": {
+    "target": "ES2022",
     "rootDirs": ["src", ".dinou/routes"],
     "paths": {
       "@/*": ["./src/*"]
     },
     "allowJs": true,
+    "skipLibCheck": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,

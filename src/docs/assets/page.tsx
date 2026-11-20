@@ -408,6 +408,7 @@ import interWoff2 from "@fontsource/inter/files/inter-latin-400-normal.woff2";`}
               >
 {`{
   "compilerOptions": {
+    "target": "ES2022",
     "rootDirs": [
       "src",
       ".dinou/routes"
@@ -418,6 +419,7 @@ import interWoff2 from "@fontsource/inter/files/inter-latin-400-normal.woff2";`}
       ]
     },
     "allowJs": true,
+    "skipLibCheck": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
