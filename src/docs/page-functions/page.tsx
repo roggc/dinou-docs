@@ -405,7 +405,7 @@ export type LayoutFunctions<
                       </div>
                     </CardHeader>
                     <CardContent className="text-xs text-muted-foreground leading-relaxed">
-                      Reinforces Dinou&apos;s horizontal segment isolation: layouts have independent cacheLifetimes and props from child pages.
+                      Reinforces Dinou&apos;s horizontal segment isolation: layouts have independent cache lifetimes and props from child pages.
                     </CardContent>
                   </Card>
 
@@ -469,6 +469,13 @@ export type LayoutFunctions<
                     Component wrapped in <code>&lt;Suspense&gt;</code> can unwrap
                     them via React 19&apos;s <code>use(commentsPromise)</code>{" "}
                     without blocking initial TTFB.
+                  </li>
+                  <li>
+                    <strong>Short-Circuit Redirects:</strong> Calling{" "}
+                    <code>redirect(&quot;/login&quot;)</code> inside{" "}
+                    <code>getProps</code> immediately aborts rendering of the
+                    page/layout and responds with an HTTP <code>302</code>{" "}
+                    redirect (or <code>x-rsc-redirect</code> on SPA navigations).
                   </li>
                 </ul>
               </div>
@@ -669,7 +676,7 @@ export default function BlogLayout({
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-mono text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
-                            req.path, req.method
+                            req.path, req.method, env / Client useSearchParams()
                           </TableCell>
                           <TableCell>
                             <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
@@ -677,7 +684,7 @@ export default function BlogLayout({
                             </span>
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground">
-                            The normalized segment path is deterministic and safe during SSG/ISR generation.
+                            Normalized segment paths, server/Edge <code>env</code> bindings, and Client Component <code>useSearchParams()</code> stay deterministic and safe for SSG, ISR, PPR, and <code>export-static</code>.
                           </TableCell>
                         </TableRow>
                       </TableBody>
@@ -781,7 +788,7 @@ import { auth } from "@/lib/auth";
 // With ppr = true, isolating cookie & auth access inside <Suspense>
 // streams user state per request while keeping getProps & the post shell static!
 export async function UserSession() {
-  const sessionToken = getContext()?.req.cookies.session;
+  const sessionToken = getContext().req.cookies.session;
   const user = sessionToken ? await auth.verify(sessionToken) : null;
 
   if (!user) {
@@ -1567,7 +1574,7 @@ export const validateParams: PageFunctions<"/[org]/projects/[project]/tasks/[tas
                   <span>Universal Gatekeeper: Authority Across All Rendering Modes</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  <code>validateParams</code> is the <strong>first line of defense</strong> executed by the Dinou server engine on every incoming request. It has ultimate veto power regardless of whether the route uses pure static (SSG), on-demand (ISG), Partial Prerendering (PPR), or dynamic (SSR) rendering:
+                  <code>validateParams</code> is the <strong>first line of defense</strong> executed by the Dinou server engine in root-to-child order on every incoming request—running ahead of cached static HTML and SPA RSC payloads (<code>/____rsc_page____/*</code>, <code>/____rsc_layout____/*</code>). It has ultimate veto power regardless of whether the route uses pure static (SSG), on-demand (ISG), Partial Prerendering (PPR), or dynamic (SSR) rendering:
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs min-w-0">
@@ -2239,7 +2246,7 @@ export const revalidate: PageFunctions["revalidate"] = 0;
                 pages or layouts to be surgically purged and regenerated
                 on-demand using{" "}
                 <Link
-                  href="/docs/revalidation#revalidatetag"
+                  href="/docs/revalidation#revalidate-tag"
                   className="text-primary font-medium underline underline-offset-4 hover:opacity-80"
                 >
                   <code>revalidateTag(tag)</code> (On-Demand Revalidation)
@@ -2364,7 +2371,7 @@ export const getCacheTags: PageFunctions<"/products/[id]">["getCacheTags"] = asy
                 <div className="font-mono text-xs bg-muted/60 p-2.5 rounded-md text-purple-700 dark:text-purple-300 space-y-1 break-words">
                   <div>type PPRConfig = boolean | (() =&gt; boolean | Promise&lt;boolean&gt;);</div>
                   <div className="text-muted-foreground">
-                    effectivePpr(segment) = segmentConfig.ppr ?? Boolean(dinouConfig.ppr) ?? false
+                    effectivePpr(segment) = segmentConfig.ppr ?? (dinouConfig.ppr ?? false)
                   </div>
                 </div>
                 <ul className="text-sm text-muted-foreground space-y-1.5 list-disc pl-4">
