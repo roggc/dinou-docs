@@ -250,7 +250,7 @@ export default async function ProfilePage() {
 
   // ⚠️ Reading cookies triggers an Automatic Static Bailout
   // This page will now be rendered dynamically on every incoming request
-  const sessionToken = context?.req.cookies["session_token"];
+  const sessionToken = context.req.cookies["session_token"];
   const user = await db.users.findByToken(sessionToken);
 
   return <h1>Welcome back, {user?.name}</h1>;
@@ -264,8 +264,8 @@ export default async function ProfilePage() {
                     Automatic bailout occurs when reading properties on <code>context.req.cookies</code>,{" "}
                     <code>context.req.headers</code>, or <code>context.req.query</code>, calling{" "}
                     <code>useSearchParams()</code> inside a <strong>Server Component</strong>, or mutating the response (<code>context.res.cookie()</code>,{" "}
-                    <code>clearCookie()</code>, <code>setHeader()</code>, <code>redirect()</code>) during Server Component or <code>getProps</code> execution. Calling{" "}
-                    <code>getContext()</code> alone (or reading <code>context.req.path</code> / <code>context.req.method</code>) preserves static rendering. (To isolate a bailout to a single <code>&lt;Suspense&gt;</code> hole without de-optimizing the rest of the page, see{" "}
+                    <code>clearCookie()</code>, <code>setHeader()</code>, <code>status()</code>, <code>redirect()</code>) during Server Component or <code>getProps</code> execution. Calling{" "}
+                    <code>getContext()</code> alone (or reading <code>context.req.path</code>, <code>context.req.method</code>, or <code>context.env</code>) preserves static rendering. (To isolate a bailout to a single <code>&lt;Suspense&gt;</code> hole without de-optimizing the rest of the page, see{" "}
                     <Link href="/docs/3d-segmentation#partial-prerendering" className="underline font-medium">
                       Partial Prerendering (PPR)
                     </Link>
@@ -279,7 +279,7 @@ export default async function ProfilePage() {
                     <span>What about Client Components and <code>useSearchParams()</code>?</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Client Components (<code>&quot;use client&quot;</code>) that call <code>useSearchParams()</code> <strong>never trigger dynamic bailout</strong>. The route remains 100% eligible for static pre-rendering (SSG), on-demand ISG caching, background ISR regeneration, and static PPR shells.
+                    Client Components (<code>&quot;use client&quot;</code>) that call <code>useSearchParams()</code> <strong>never trigger dynamic bailout</strong>. The route remains 100% eligible for static pre-rendering (SSG), on-demand ISG caching, background ISR regeneration, static PPR shells, and pure static exports (<code>export-static</code>).
                   </p>
 
                   <div className="border-t border-border/60 pt-3 space-y-3">
@@ -432,7 +432,7 @@ export const revalidate: PageFunctions["revalidate"] = 60;
                       <code>3600</code> for 1 hour). If <code>false</code> or
                       omitted, the page remains cached until purged on demand via{" "}
                       <Link href="/docs/revalidation" className="underline font-medium">
-                        <code>revalidateTag</code> / <code>revalidatePath</code>
+                        <code>revalidatePage</code>, <code>revalidateLayout</code>, <code>revalidatePath</code>, or <code>revalidateTag</code>
                       </Link>
                       .
                     </CardContent>
@@ -596,7 +596,7 @@ export const allowISG: PageFunctions["allowISG"] = false; // Strict SSG only`}
                     <tr>
                       <td className="p-4 font-semibold text-foreground">Dynamic SSR</td>
                       <td className="p-4 text-xs font-mono text-muted-foreground">revalidate = 0 (or request data access)</td>
-                      <td className="p-4 text-xs text-rose-600 dark:text-rose-400 font-medium">Request-time (Blocked)</td>
+                      <td className="p-4 text-xs text-rose-600 dark:text-rose-400 font-medium">Request-time (Streams via &lt;Suspense&gt;)</td>
                       <td className="p-4 text-xs text-emerald-600 dark:text-emerald-400 font-medium">100% Real-time</td>
                       <td className="p-4 text-xs text-rose-600 dark:text-rose-400 font-medium">Heavy: 100% queries on every request</td>
                       <td className="p-4 text-xs text-muted-foreground">User settings, banking, checkout</td>
