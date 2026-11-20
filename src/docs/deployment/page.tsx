@@ -82,7 +82,7 @@ export default function Page() {
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             {/* 1. Overview */}
-            <section id="overview">
+            <section id="overview" className="scroll-mt-20">
               <h2>1. Deploy Everywhere with Dinou</h2>
               <p>
                 Historically, deploying React Server Components to serverless and edge platforms was difficult because Node.js required runtime flags such as <code>--conditions=react-server</code>, custom JSX/TypeScript module loaders, or dual child processes. On managed serverless and V8 isolate runtimes, you rarely control how the underlying runtime process is spawned.
@@ -143,7 +143,7 @@ export default function Page() {
             </section>
 
             {/* 2. Targets Summary */}
-            <section id="targets-summary" className="mt-12">
+            <section id="targets-summary" className="mt-12 scroll-mt-20">
               <h2>2. Supported Deployment Targets</h2>
               <p>
                 Every production build command defaults to <strong>Esbuild</strong> and accepts explicit bundler suffixes (<code>:esbuild</code>, <code>:rollup</code>, or <code>:webpack</code> — see the <Link href="/docs/bundlers">Bundlers &amp; Dual-Mode Vendoring</Link> guide):
@@ -225,7 +225,7 @@ export default function Page() {
             </section>
 
             {/* 3. Node.js Targets & Standalone Binaries */}
-            <section id="node-vps-docker" className="mt-12">
+            <section id="node-vps-docker" className="mt-12 scroll-mt-20">
               <h2>3. Node.js Targets &amp; Standalone Binaries</h2>
               <p>
                 Dinou provides four production compilation and packaging pipelines for Node.js environments, scaling from traditional PaaS and VPS deployments to zero-dependency standalone native executables:
@@ -233,7 +233,7 @@ export default function Page() {
 
               <div className="space-y-8 my-6">
                 {/* 3.1 Standard Node.js Server */}
-                <div id="node-standard" className="space-y-3">
+                <div id="node-standard" className="space-y-3 scroll-mt-20">
                   <div className="flex items-center gap-2">
                     <Server className="h-4 w-4 text-blue-500" />
                     <h3 className="text-lg font-bold">3.1 Standard Node.js Server (build:node)</h3>
@@ -261,7 +261,7 @@ dinou start:node`}
                 </div>
 
                 {/* 3.2 Node Standalone Binary */}
-                <div id="node-compile" className="space-y-3">
+                <div id="node-compile" className="space-y-3 scroll-mt-20">
                   <div className="flex items-center gap-2">
                     <Binary className="h-4 w-4 text-indigo-500" />
                     <h3 className="text-lg font-bold">3.2 Node Standalone Binary (build:node:compile)</h3>
@@ -325,7 +325,7 @@ dinou build:node:compile
                 </div>
 
                 {/* 3.3 Pure Bun Runner */}
-                <div id="node-pure" className="space-y-3">
+                <div id="node-pure" className="space-y-3 scroll-mt-20">
                   <div className="flex items-center gap-2">
                     <Flame className="h-4 w-4 text-orange-500" />
                     <h3 className="text-lg font-bold">3.3 Pure Bun Runner (build:node:pure)</h3>
@@ -346,7 +346,7 @@ dinou start:node`}
                 </div>
 
                 {/* 3.4 Pure Standalone Binary */}
-                <div id="node-pure-compile" className="space-y-3">
+                <div id="node-pure-compile" className="space-y-3 scroll-mt-20">
                   <div className="flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-purple-500" />
                     <h3 className="text-lg font-bold">3.4 Pure Standalone Binary (build:node:pure:compile)</h3>
@@ -382,7 +382,7 @@ dinou build:node:pure:compile:win        # Windows executable (.exe)`}
             </section>
 
             {/* 4. Netlify Target */}
-            <section id="netlify-serverless" className="mt-12">
+            <section id="netlify-serverless" className="mt-12 scroll-mt-20">
               <h2>4. Netlify (Serverless Functions v2)</h2>
               <p>
                 Netlify is a first-class serverless target in Dinou. Both <code>npm run build</code> (<code>dinou build</code>) and <code>npm run build:netlify</code> (<code>dinou build:netlify</code>) compile a self-contained <strong>AOT Dual-Bundle Netlify Functions v2</strong> entry into <code>.dinou/netlify/functions/ssr.mjs</code>, physically isolated from the public static webroot in <code>.dinou/dist3</code>.
@@ -406,9 +406,6 @@ dinou build:node:pure:compile:win        # Windows executable (.exe)`}
 
 [build.environment]
   NODE_VERSION = "22"
-
-[environment]
-  NODE_ENV = "production"
 
 [functions]
   directory = ".dinou/netlify/functions"
@@ -444,7 +441,7 @@ npx netlify deploy --prod`}
             </section>
 
             {/* 5. Cloudflare Workers Target */}
-            <section id="cloudflare-workers" className="mt-12">
+            <section id="cloudflare-workers" className="mt-12 scroll-mt-20">
               <h2>5. Cloudflare Workers &amp; Pages</h2>
               <p>
                 Dinou compiles Server Components and streaming HTML SSR directly for Cloudflare&apos;s V8-based <code>workerd</code> runtime using standard W3C Web Streams:
@@ -515,7 +512,7 @@ npx wrangler deploy`}
             </section>
 
             {/* 6. Deno Deploy (deno-edge) & Compile Target */}
-            <section id="deno-deploy-compile" className="mt-12">
+            <section id="deno-deploy-compile" className="mt-12 scroll-mt-20">
               <h2>6. Deno Deploy (deno-edge) &amp; Standalone Binaries</h2>
               <p>
                 Dinou provides native compilation for <strong>Deno Deploy</strong>, self-hosted Deno servers, and <strong>single-file native executables</strong> via <code>deno compile</code>:
@@ -590,7 +587,7 @@ dinou build:deno:compile:win        # Windows x64 (.exe)`}
             </section>
 
             {/* 7. Bun Target */}
-            <section id="bun-runtime-compile" className="mt-12">
+            <section id="bun-runtime-compile" className="mt-12 scroll-mt-20">
               <h2>7. Bun Runtime &amp; Standalone Executables</h2>
               <p>
                 Run your application directly on <code>Bun.serve</code> with zero-copy <code>Bun.file()</code> static asset delivery (respecting <code>PORT</code>, <code>HOST</code>, and <code>IDLE_TIMEOUT</code>), or compile a native Bun executable:
@@ -624,7 +621,7 @@ dinou build:bun:compile:win        # Windows x64 (.exe)`}
             </section>
 
             {/* 8. Static Export Target */}
-            <section id="static-export" className="mt-12">
+            <section id="static-export" className="mt-12 scroll-mt-20">
               <h2>8. Static Export (GitHub Pages, S3, CDN)</h2>
               <p>
                 When your site consists purely of static routes and pre-rendered dynamic routes (via <code>getStaticPaths</code>), export a self-contained static site into <code>out/</code>:
@@ -642,7 +639,7 @@ dinou export-static`}
             </section>
 
             {/* 9. Production Docker Setup */}
-            <section id="docker-guide" className="mt-12">
+            <section id="docker-guide" className="mt-12 scroll-mt-20">
               <h2>9. Production Docker Setup</h2>
               <p>
                 Containerizing Dinou supports two battle-tested patterns: an <strong>ultra-lightweight standalone binary container</strong> (zero JS runtime in the runner image) or a <strong>pruned multi-stage Node.js container</strong>.
@@ -650,7 +647,7 @@ dinou export-static`}
 
               <div className="space-y-8 my-6">
                 {/* 9.1 Ultra-Lightweight Standalone Binary Container */}
-                <div id="docker-pure-binary" className="space-y-3">
+                <div id="docker-pure-binary" className="space-y-3 scroll-mt-20">
                   <div className="flex items-center gap-2">
                     <Rocket className="h-4 w-4 text-emerald-500" />
                     <h3 className="text-lg font-bold">9.1 Ultra-Lightweight Standalone Binary Container (Recommended)</h3>
@@ -722,7 +719,7 @@ CMD ["./server"]`}
                 </div>
 
                 {/* 9.2 Standard Node.js Container */}
-                <div id="docker-standard-node" className="space-y-3">
+                <div id="docker-standard-node" className="space-y-3 scroll-mt-20">
                   <div className="flex items-center gap-2">
                     <Layers className="h-4 w-4 text-blue-500" />
                     <h3 className="text-lg font-bold">9.2 Standard Node.js Multi-Stage Container</h3>
@@ -752,7 +749,7 @@ ENV NODE_ENV=production PORT=3000
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.dinou/node ./.dinou/node
-COPY --from=builder /app/.dinou/dist2 ./.dinou/dist2
+COPY --from=builder --chown=node:node /app/.dinou/dist2 ./.dinou/dist2
 COPY --from=builder /app/.dinou/dist3 ./.dinou/dist3
 
 USER node
@@ -764,7 +761,7 @@ CMD ["npm", "run", "start:node"]`}
             </section>
 
             {/* 10. Horizontal Scaling & Distributed ISR Cache */}
-            <section id="distributed-cache-scaling" className="mt-12">
+            <section id="distributed-cache-scaling" className="mt-12 scroll-mt-20">
               <h2>10. Horizontal Scaling &amp; Distributed ISR Cache</h2>
               <p>
                 Single-server Node and Bun deployments store Incremental Static Regeneration (ISR), ISG, Partial Prerendering (PPR) shells, and <Link href="/docs/3d-segmentation">Cache Slots</Link> in <code>.dinou/dist2</code> via <code>FileSystemStorage</code>. When scaling horizontally across <strong>multiple container replicas</strong> (Kubernetes, Fly.io, Railway, AWS ECS) or across <strong>serverless Netlify Function instances</strong>, configure <code>RedisStorage</code> in <code>dinou.config.ts</code> so all instances share one coherent cache and instant <Link href="/docs/revalidation"><code>revalidateTag()</code> / <code>revalidatePath()</code></Link> invalidations:
@@ -804,7 +801,7 @@ export default defineConfig({
             </section>
 
             {/* 11. Environment Secrets */}
-            <section id="environment-secrets" className="mt-12">
+            <section id="environment-secrets" className="mt-12 scroll-mt-20">
               <h2>11. Managing Production Environment Secrets</h2>
               <p>
                 Never commit <code>.env</code> secrets to Git or bake runtime secrets into Docker images. Remember that client-exposed variables prefixed with <code>DINOU_PUBLIC_</code> are statically inlined at build time, while server-only secrets are read dynamically at request time via <code>getContext().env</code> (see <Link href="/docs/env-vars">Environment Variables</Link>):
@@ -819,7 +816,7 @@ export default defineConfig({
             </section>
 
             {/* 12. Production Checklist */}
-            <section id="deployment-checklist" className="mt-12">
+            <section id="deployment-checklist" className="mt-12 scroll-mt-20">
               <h2>12. Production Pre-Flight Checklist</h2>
               <div className="border rounded-xl p-5 bg-card not-prose my-6 space-y-3">
                 <div className="flex items-center gap-2 font-semibold text-sm">
