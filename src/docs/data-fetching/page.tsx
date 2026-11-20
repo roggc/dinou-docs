@@ -6,7 +6,6 @@ import { Badge } from "@/docs/components/ui/badge";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/docs/components/ui/card";
@@ -15,7 +14,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/docs/components/ui/alert";
-import { AlertTriangle, Info, Workflow } from "lucide-react";
+import { Info, Workflow } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 import {
@@ -967,7 +966,7 @@ export default async function BlogIndexPage() {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 <strong>How it works:</strong> The component performs an un-Suspended top-level <code>await</code> on a route that is dynamic
                 (e.g., due to reading request headers, cookies, or declaring <code>export const revalidate = 0</code> in <code>page_functions.ts</code>).
-                The Node.js server halts the HTTP response until the database returns the data.
+                The server runtime halts the HTTP response until the database returns the data.
               </p>
 
               <TabbedCodeBlock
@@ -987,7 +986,7 @@ export default async function BlogIndexPage() {
 import db from "@/lib/db";
 
 export default async function BillingPage() {
-  const sessionId = getContext()?.req.cookies.session_id;
+  const sessionId = getContext().req.cookies.session_id;
   if (!sessionId) throw new Error("Unauthorized");
 
   // BLOCKS TTFB: The browser receives 0 bytes until this query resolves
@@ -1221,7 +1220,7 @@ export default function AnalyticsPage() {
                     <li><strong>Identical HTTP Streaming Behavior:</strong> In both cases, the initial layout shell and <code>&lt;AnalyticsSkeleton /&gt;</code> are flushed immediately in chunk 1 (fast TTFB). When the query resolves, the server streams the rendered HTML/RSC payload into chunk 2.</li>
                     <li><strong>Zero Client JavaScript:</strong> Database logic, ORM queries, and credentials remain 100% on the server in both solutions.</li>
                     <li><strong>Versatility Bonus:</strong> Returning the JSX tree from a <Link href="/docs/server-functions" className="underline underline-offset-2 font-medium text-foreground">Server Function</Link> allows the exact same function to be triggered on-demand by Client Components later (e.g., a &quot;Refresh Metrics&quot; button or live filter) via Dinou&apos;s UI streaming RPC.</li>
-                    <li><strong>PPR Synchronous Request Nuance:</strong> On <Link href="/docs/rendering" className="underline underline-offset-2 font-medium text-foreground">PPR (<code>ppr = true</code>)</Link> routes, <code>&#123;getMetricsTable()&#125;</code> inside <code>&lt;Suspense&gt;</code> registers a dynamic hole automatically when it performs async I/O. However, if a helper reads <code>getContext()?.req</code> or <code>useSearchParams()</code> <strong>synchronously before its first <code>await</code></strong>, wrap it in a child Server Component (<code>&lt;SlowHeavyMetrics /&gt;</code>) inside <code>&lt;Suspense&gt;</code> so that synchronous request access executes inside the <code>&lt;Suspense&gt;</code> boundary rather than in the outer page frame.</li>
+                    <li><strong>PPR Synchronous Request Nuance:</strong> On <Link href="/docs/3d-segmentation#partial-prerendering" className="underline underline-offset-2 font-medium text-foreground">PPR (<code>ppr = true</code>)</Link> routes, <code>&#123;getMetricsTable()&#125;</code> inside <code>&lt;Suspense&gt;</code> registers a dynamic hole automatically when it performs async I/O. However, if a helper reads <code>getContext().req</code> or <code>useSearchParams()</code> <strong>synchronously before its first <code>await</code></strong>, wrap it in a child Server Component (<code>&lt;SlowHeavyMetrics /&gt;</code>) inside <code>&lt;Suspense&gt;</code> so that synchronous request access executes inside the <code>&lt;Suspense&gt;</code> boundary rather than in the outer page frame.</li>
                   </ul>
                 </AlertDescription>
               </Alert>
@@ -1255,7 +1254,7 @@ export default function AnalyticsPage() {
               </div>
 
               <p className="text-sm text-muted-foreground leading-relaxed">
-                <strong>How it works:</strong> Solves the &quot;all-or-nothing&quot; revalidation problem on Static/ISR routes (<code>ppr = false</code>). The base outer page and layout are pre-rendered at build time (<strong>SSG</strong>) or on-demand (<strong>ISG</strong>) and configured with long-term ISR (e.g., 24 hours) for <strong>0ms TTFB</strong>. Meanwhile, an inner volatile component is wrapped directly in an unwrapped <Link href="/docs/3d-segmentation" className="underline underline-offset-2 font-medium text-foreground"><code>&lt;DinouCacheSlot&gt;</code></Link> with a fast TTL (e.g., 60 seconds). Because the route is static, the slot is pre-rendered directly into the static HTML (no <code>&lt;Suspense&gt;</code> wrapper needed, as a fallback would never be shown). When the slot&apos;s 60-second TTL expires, Dinou serves the existing static HTML immediately (0ms, zero skeleton flash) and triggers <strong>Background SWR</strong> to re-execute only that slot and surgically splice the updated widget into the cached <code>index.html</code> and <code>page.rsc</code> artifacts in your configured <code>StorageAdapter</code> (Filesystem, Memory, Redis, or Cloudflare KV).
+                <strong>How it works:</strong> Solves the &quot;all-or-nothing&quot; revalidation problem on Static/ISR routes (<code>ppr = false</code>). The base outer page and layout are pre-rendered at build time (<strong>SSG</strong>) or on-demand (<strong>ISG</strong>) and configured with long-term ISR (e.g., 24 hours) for <strong>0ms TTFB</strong>. Meanwhile, an inner volatile component is wrapped directly in an unwrapped <Link href="/docs/3d-segmentation" className="underline underline-offset-2 font-medium text-foreground"><code>&lt;DinouCacheSlot&gt;</code></Link> with a fast TTL (e.g., 60 seconds). Because the route is static, the slot is pre-rendered directly into the static HTML (no <code>&lt;Suspense&gt;</code> wrapper needed, as a fallback would never be shown). When the slot&apos;s 60-second TTL expires, Dinou serves the existing static HTML immediately (0ms, zero skeleton flash) and triggers <strong>Background SWR</strong> to re-execute only that slot and surgically splice the updated widget into the cached <code>index.html</code> and <code>page.rsc</code> artifacts in your configured <code>StorageAdapter</code> (Filesystem, Memory, Redis, Deno KV, or Cloudflare KV).
               </p>
 
               <TabbedCodeBlock
@@ -1415,7 +1414,7 @@ import db from "@/lib/db";
 
 export async function UserGreeting() {
   // Runs live on every request (reads per-user session cookie)
-  const sessionId = getContext()?.req.cookies.session_id;
+  const sessionId = getContext().req.cookies.session_id;
   const user = await db.users.findBySession(sessionId);
   return <h1 className="text-2xl font-bold">Welcome back, {user.name}</h1>;
 }
@@ -1559,9 +1558,9 @@ async function LiveStockBalance() {
               </div>
 
               <p className="text-sm text-muted-foreground leading-relaxed">
-                <strong>How it works:</strong> The gold standard for high-traffic web applications. Combines <Link href="/docs/rendering" className="underline underline-offset-2 font-medium text-foreground">Partial Prerendering</Link>{" "}
-                with component-level <Link href="/docs/3d-segmentation" className="underline underline-offset-2 font-medium text-foreground">Micro-ISR</Link>. The Edge CDN delivers the static shell in <strong>0ms TTFB</strong>.
-                The server streams the dynamic hole almost instantly (~2ms) because the sub-tree is cached in Dinou&apos;s pluggable <code>StorageAdapter</code> (Memory, Filesystem, Redis, or Cloudflare KV).
+                <strong>How it works:</strong> The gold standard for high-traffic web applications. Combines <Link href="/docs/3d-segmentation#partial-prerendering" className="underline underline-offset-2 font-medium text-foreground">Partial Prerendering</Link>{" "}
+                with component-level <Link href="/docs/3d-segmentation#micro-isr" className="underline underline-offset-2 font-medium text-foreground">Micro-ISR</Link>. The Edge CDN delivers the static shell in <strong>0ms TTFB</strong>.
+                The server streams the dynamic hole almost instantly (~2ms) because the sub-tree is cached in Dinou&apos;s pluggable <code>StorageAdapter</code> (Memory, Filesystem, Redis, Deno KV, or Cloudflare KV).
                 Visitors see zero visible skeleton flicker, while database queries are reduced by 99.9%.
               </p>
 
@@ -2041,6 +2040,7 @@ export default function DocumentEditorPage({
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Unblocks TTFB in Client-First Pages:</strong> Eliminates the TTFB bottleneck of Strategy 11 while keeping <code>page.tsx</code> 100% <code>&quot;use client&quot;</code> and avoiding any client-side network waterfall.</p>
+                <p>• <strong>Optional 0ms PPR Shell:</strong> Switch <code>revalidate = 0</code> to <code>export const ppr = true</code> when you also want the outer Client Component shell pre-rendered statically at build time while the un-awaited <code>Promise</code> streams live as a Dynamic PPR Hole.</p>
                 <p>• <strong>Equivalent to Strategy 9:</strong> Achieves the exact same Flight Promise streaming as Strategy 9 (<code>RSC Promise ➔ Client use()</code>), using <code>page_functions.ts</code> (<code>getProps</code>) instead of a Server Component <code>page.tsx</code>.</p>
               </div>
             </section>
@@ -2230,7 +2230,7 @@ export function AddToCartButton({ productId }: { productId: string }) {
               />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
-                <p>• <strong>Strict Mutation Rule:</strong> Invoke <strong>mutative</strong> <Link href="/docs/server-functions" className="underline underline-offset-2 font-medium text-foreground">Server Functions</Link> (database writes, cookie updates, <Link href="/docs/revalidation" className="underline underline-offset-2 font-medium text-foreground"><code>revalidateTag</code> / <code>revalidatePath</code></Link>, <code>redirect</code>) exclusively from event handlers, <code>&lt;form action&gt;</code>, or <code>startTransition</code>—never during rendering. In Client Components, read-only Server Functions must also never be called bare in the render body without memoizing via <code>useState(() =&gt; fn())</code> (Strategy 13), or every render will spawn a new RPC request loop.</p>
+                <p>• <strong>Strict Mutation Rule:</strong> Invoke <strong>mutative</strong> <Link href="/docs/server-functions" className="underline underline-offset-2 font-medium text-foreground">Server Functions</Link> (database writes, cookie updates, <Link href="/docs/revalidation" className="underline underline-offset-2 font-medium text-foreground"><code>revalidatePage</code> / <code>revalidateLayout</code> / <code>revalidatePath</code> / <code>revalidateTag</code></Link>, <code>redirect</code>) exclusively from event handlers, <code>&lt;form action&gt;</code>, or <code>startTransition</code>—never during rendering. In Client Components, read-only Server Functions must also never be called bare in the render body without memoizing via <code>useState(() =&gt; fn())</code> (Strategy 13), or every render will spawn a new RPC request loop.</p>
                 <p>• <strong>Type Safety:</strong> Arguments and return types are inferred end-to-end between client and server without manual fetch boilerplate.</p>
               </div>
             </section>
