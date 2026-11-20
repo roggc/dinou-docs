@@ -320,7 +320,7 @@ export default async function ProfilePage({ params }: PageProps) {
     "use server";
     // Always read secrets & verify session auth INSIDE the server function body:
     const ctx = getContext();
-    const sessionUser = await verifySession(ctx?.req.cookies.session_token);
+    const sessionUser = await verifySession(ctx.req.cookies.session_token);
     if (!sessionUser || sessionUser.id !== params.userId) {
       throw new Error("Unauthorized");
     }
@@ -1280,7 +1280,6 @@ import { getContext } from "dinou/server";
 
 export async function getCurrentUser() {
   const context = getContext();
-  if (!context) return null;
 
   const sessionToken = context.req.cookies["session_token"];
   const userAgent = context.req.headers["user-agent"];
@@ -1311,7 +1310,7 @@ export async function loginAction(formData: FormData) {
   const session = await authenticateUser(email, password);
 
   // Set secure HTTP-only session cookie
-  context?.res.cookie("session_token", session.token, {
+  context.res.cookie("session_token", session.token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -1325,7 +1324,7 @@ export async function loginAction(formData: FormData) {
 export async function logoutAction() {
   const context = getContext();
   // Clear the cookie upon logout
-  context?.res.clearCookie("session_token", { path: "/" });
+  context.res.clearCookie("session_token", { path: "/" });
   return { success: true };
 }`}
                 </CodeBlock>
@@ -1414,7 +1413,7 @@ export async function completeOrder(orderId: string) {
                     <span>The Equivalence Principle in Server Components</span>
                   </div>
                   <p className="text-muted-foreground leading-relaxed">
-                    Calling <code>redirect()</code> directly inside a Server Component vs. calling an imported Server Function (e.g., <code>await verifyUser()</code>) from that Server Component is <strong>functionally identical</strong>. Because both run inside the same server Node.js process during the same SSR request lifecycle, they share the exact same request context and streaming state.
+                    Calling <code>redirect()</code> directly inside a Server Component vs. calling an imported Server Function (e.g., <code>await verifyUser()</code>) from that Server Component is <strong>functionally identical</strong>. Because both run inside the same server runtime during the same SSR request lifecycle, they share the exact same request context and streaming state.
                   </p>
                 </div>
 
@@ -1453,11 +1452,11 @@ import { redirect, getContext } from "./dinou";
 
 export async function getProps() {
   const ctx = getContext();
-  if (!ctx?.req.cookies.session_token) {
-    // Evaluated before page rendering -> HTTP 302 redirect
+  if (!ctx.req.cookies.session_token) {
+    // Evaluated before page rendering -> HTTP 302 redirect (or x-rsc-redirect on SPA nav)
     return redirect("/login");
   }
-  return { page: { user: { name: "Alex" } } };
+  return { user: { name: "Alex" } };
 }`,
                             },
                             {
@@ -1469,7 +1468,7 @@ import { redirect, getContext } from "./dinou";
 
 export default async function DashboardPage() {
   const ctx = getContext();
-  if (!ctx?.req.cookies.session_token) {
+  if (!ctx.req.cookies.session_token) {
     // At root before stream begins -> HTTP 302 redirect
     return redirect("/login");
   }
@@ -1489,10 +1488,9 @@ export default defineConfig({
     {
       name: "auth-guard",
       async onRequest(request, context) {
-        const url = new URL(request.url);
-        const cookieHeader = request.headers.get("cookie") || "";
-        // Runs pre-flight before SSR or route resolution
-        if (url.pathname.startsWith("/dashboard") && !cookieHeader.includes("session_token=")) {
+        // context.req.path is normalized ("/dashboard" even on SPA RSC fetches)
+        // and Response.redirect() auto-translates to x-rsc-redirect for <Link> navigations
+        if (context.req.path.startsWith("/dashboard") && !context.req.cookies.session_token) {
           return Response.redirect(new URL("/login", request.url), 302);
         }
       },
@@ -1746,7 +1744,7 @@ export function ClientGuard({ isAllowed }: { isAllowed: boolean }) {
                     <span>Looking for Cache Revalidation?</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Learn how to purge stale SSG pages and ISR cache slots on-demand using <code>revalidatePath</code> and <code>revalidateTag</code> in the dedicated guide.
+                    Learn how to purge stale SSG pages, layouts, and ISR cache slots on-demand using <code>revalidatePage</code>, <code>revalidateLayout</code>, <code>revalidatePath</code>, and <code>revalidateTag</code> in the dedicated guide.
                   </p>
                 </div>
                 <Link
