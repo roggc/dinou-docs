@@ -3,6 +3,7 @@
 import { Github } from "lucide-react";
 import { Button } from "@/docs/components/ui/button";
 import { ThemeToggle } from "@/docs/components/theme-toggle";
+import { DocsSearch } from "@/docs/components/docs-search";
 import { Badge } from "@/components/ui/badge";
 import { SidebarTrigger } from "@/docs/components/ui/sidebar";
 import dinou from "@/docs/images/dinou.png";
@@ -30,7 +31,8 @@ export function DocsHeader() {
           </div>
         </div>
 
-        <div className="flex flex-1 items-center justify-end pr-4 md:pr-6">
+        <div className="flex flex-1 items-center justify-end gap-2 sm:gap-3 pr-4 md:pr-6">
+          <DocsSearch variant="docs" />
           <div className="flex items-center space-x-2">
             <Tooltip>
               <TooltipTrigger asChild>

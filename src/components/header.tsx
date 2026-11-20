@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Github, BookOpen } from "lucide-react";
 import dinou from "@/images/dinou.png";
 import ModeToggle from "@/components/mode-toggle";
+import { DocsSearch } from "@/docs/components/docs-search";
 import { RiNpmjsFill } from "react-icons/ri";
 import {
   Tooltip,
@@ -254,6 +255,7 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center space-x-1.5 sm:space-x-2">
+          <DocsSearch variant="landing" />
           <Button
             variant="outline"
             size="sm"

@@ -152,6 +152,7 @@
     "export-static:rollup": "node dinou/cli.js export-static:rollup",
     "export-static:webpack": "node dinou/cli.js export-static:webpack",
     "typegen": "node dinou/cli.js typegen",
+    "search:index": "node scripts/generate-search-index.mjs",
     "build:vendors": "node dinou/cli.js build:vendors",
     "uneject": "node dinou/cli.js uneject"
   },
