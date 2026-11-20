@@ -102,7 +102,9 @@ export default function Page() {
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold text-slate-700 dark:text-slate-300">
                         <Zap className="h-5 w-5 text-slate-500" />
-                        <span>Development Mode (`dinou dev`)</span>
+                        <span>
+                          Development Mode (<code>dinou dev</code>)
+                        </span>
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground space-y-2">
@@ -117,7 +119,9 @@ export default function Page() {
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400">
                         <FolderTree className="h-5 w-5 text-emerald-500" />
-                        <span>Production Build (`dinou build`)</span>
+                        <span>
+                          Production Build (<code>dinou build</code>)
+                        </span>
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground space-y-2">
@@ -267,14 +271,16 @@ export default function Page() {
                 <ul>
                   <li>
                     <strong>Node.js:</strong> Streamed directly from <code>.dinou/dist3</code> via zero-copy{" "}
-                    <code>Readable.toWeb(fs.createReadStream(...))</code>.
+                    <code>Readable.toWeb(fs.createReadStream(...))</code> with full HTTP byte-range support (
+                    <code>Accept-Ranges: bytes</code> / <code>206 Partial Content</code> for video, audio, and PDFs).
                   </li>
                   <li>
-                    <strong>Bun:</strong> Served via kernel-level zero-copy <code>Bun.file()</code>.
+                    <strong>Bun:</strong> Served via kernel-level zero-copy <code>Bun.file()</code> (including byte-range
+                    slicing via <code>file.slice(...)</code>).
                   </li>
                   <li>
                     <strong>Deno:</strong> Delivered directly from <code>.dinou/dist3</code> inside{" "}
-                    <code>Deno.serve</code>.
+                    <code>Deno.serve</code> with full HTTP byte-range support.
                   </li>
                   <li>
                     <strong>Cloudflare Workers:</strong> Copied cleanly into <code>.dinou/cloudflare/assets</code> and
@@ -282,6 +288,12 @@ export default function Page() {
                     <code>/.well-known/*</code>, <code>/sitemap.xml</code>, standalone verification{" "}
                     <code>.html</code> files, PDFs, and media) without waking the RSC renderer, while internal SSG/ISR
                     cache files remain isolated inside <code>.dinou/cloudflare/assets/__dinou_dist2</code>.
+                  </li>
+                  <li>
+                    <strong>Netlify (Functions v2):</strong> Published directly from <code>.dinou/dist3</code> to
+                    Netlify&apos;s global edge CDN (<code>publish = &quot;.dinou/dist3&quot;</code>). Dinou&apos;s
+                    serverless handler sets <code>preferStatic: true</code>, so static assets in <code>public/</code>{" "}
+                    and hashed chunks are served straight from the edge without invoking the SSR function.
                   </li>
                   <li>
                     <strong>Static Export (<code>dinou export-static</code>):</strong> Copies <code>public/</code> assets
@@ -531,7 +543,7 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
                         <strong>Fixed, exact filename</strong> (e.g. <code>/favicon.ico</code>)
                       </td>
                       <td className="p-4 text-xs">
-                        <strong>Hashed filename</strong> (e.g. <code>/assets/a9f2bc.png</code>)
+                        <strong>Hashed filename</strong> (e.g. <code>/assets/hero-a9f2bc14.png</code>)
                       </td>
                     </tr>
                     <tr>
