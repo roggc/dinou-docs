@@ -171,7 +171,7 @@ export default function Page() {
                     <strong>Secure Secret Access:</strong> Database credentials, private API keys, and environment variables stay strictly on the server without risk of client exposure.
                   </li>
                   <li>
-                    <strong>Synchronous Request Context (<code>getContext()</code>):</strong> Read incoming <code>req.cookies</code>, <code>req.headers</code>, <code>req.query</code>, response helpers (<code>res</code>), and plugin/middleware data directly on the server via <code>getContext()</code> from <code>&quot;dinou&quot;</code> (or <code>&quot;dinou/server&quot;</code>).
+                    <strong>Synchronous Request Context (<code>getContext()</code>):</strong> Read incoming <code>req.cookies</code>, <code>req.headers</code>, <code>req.query</code>, response helpers (<code>res</code>), unified server/Edge bindings (<code>env</code>), and plugin/middleware data directly on the server via <code>getContext()</code> from <code>&quot;dinou&quot;</code>, <code>&quot;./dinou&quot;</code>, or <code>&quot;dinou/server&quot;</code>.
                   </li>
                   <li>
                     <strong>Automatic Streaming with &lt;Suspense&gt;:</strong> When slow asynchronous operations are wrapped in React <code>&lt;Suspense&gt;</code>, the layout shell and fallback UI can be delivered immediately without waiting for slow queries, while data streams progressively into the HTTP response.
@@ -369,7 +369,7 @@ async function UsersList() {
                   <li>Cannot add interactive client DOM event listeners (e.g. <code>onClick</code>, <code>onChange</code>, <code>onSubmit</code>).</li>
                   <li>Cannot access browser-only globals (<code>window</code>, <code>document</code>, <code>localStorage</code>, <code>navigator</code>).</li>
                   <li>
-                    Cannot consume (read) React Context with <code>useContext()</code> or <code>use(Context)</code>. (While Server Components can render <code>&lt;Context&gt;</code> providers for client children, they cannot read context values themselves).
+                    Cannot create or consume React Context (<code>createContext</code>, <code>useContext</code>, or <code>use(Context)</code>). To share React Context with client subtrees, define the context and provider inside a <code>&quot;use client&quot;</code> wrapper component and render that wrapper from your Server Component, passing Server Components through <code>children</code>.
                   </li>
                 </ul>
 
@@ -383,7 +383,7 @@ async function UsersList() {
                       <strong>1. React 19 Stateless Synchronous Hooks:</strong> Inside <strong>synchronous</strong> Server Components (never inside <code>async</code> Server Components), you can freely use <code>useId()</code>, <code>use(promise)</code>, <code>useMemo()</code>, <code>useCallback()</code>, and <code>useDebugValue()</code>. Dinou scopes server-generated <code>useId()</code> values deterministically across layouts, pages, <code>&lt;DinouCacheSlot&gt;</code> boundaries, and PPR dynamic holes with zero hydration mismatches.
                     </p>
                     <p>
-                      <strong>2. Dinou Universal Navigation Hooks:</strong> <code>usePathname()</code> and <code>useSearchParams()</code> (imported from <code>&quot;dinou&quot;</code>) work seamlessly in both Server Components (synchronous or <code>async</code>, reading the active server request) and Client Components.
+                      <strong>2. Dinou Universal Navigation Hooks:</strong> <code>usePathname()</code> and <code>useSearchParams()</code> (imported from <code>&quot;dinou&quot;</code> or <code>&quot;./dinou&quot;</code>) work seamlessly in both Server Components (synchronous or <code>async</code>) and Client Components. Note that calling <code>useSearchParams()</code> inside a <strong>Server Component</strong> reads the live request query string and opts the route into <strong>Dynamic SSR</strong>, whereas calling it inside a <strong>Client Component</strong> reads <code>window.location.search</code> in the browser and preserves static <strong>SSG, ISR, PPR, and <code>export-static</code></strong>.
                     </p>
                   </AlertDescription>
                 </Alert>
@@ -510,9 +510,9 @@ export function Counter({ initial = 0 }: { initial?: number }) {
                       <span>Serializable (Allowed across boundary)</span>
                     </div>
                     <ul className="text-xs space-y-2 list-disc pl-4 text-muted-foreground">
-                      <li><strong>Primitives:</strong> <code>string</code>, <code>number</code>, <code>boolean</code>, <code>null</code>, <code>undefined</code>.</li>
+                      <li><strong>Primitives:</strong> <code>string</code>, <code>number</code>, <code>bigint</code>, <code>boolean</code>, <code>null</code>, <code>undefined</code>, and global <code>Symbol.for(...)</code>.</li>
                       <li><strong>Plain Objects &amp; Arrays:</strong> Objects with serializable values (e.g. <code>&#123; id: 1, name: &quot;Dinou&quot; &#125;</code>).</li>
-                      <li><strong>Dates:</strong> <code>Date</code> objects are serialized and reconstructed by React.</li>
+                      <li><strong>Built-in Data Structures:</strong> <code>Date</code>, <code>Map</code>, <code>Set</code>, and <code>TypedArray</code>s (e.g. <code>Uint8Array</code>) are serialized and reconstructed by React 19 Flight.</li>
                       <li><strong>React Elements (JSX):</strong> Server Components passed as <code>children</code> or named slots.</li>
                       <li><strong>Promises (and Arrays of Promises):</strong> Passed directly without <code>await</code> from Server to Client (unwrapped with React 19 <code>use()</code>).</li>
                       <li><strong>Server Functions:</strong> Bound actions declared with <code>&quot;use server&quot;</code>.</li>
@@ -527,7 +527,7 @@ export function Counter({ initial = 0 }: { initial?: number }) {
                     <ul className="text-xs space-y-2 list-disc pl-4 text-muted-foreground">
                       <li><strong>Client Functions:</strong> Cannot pass client callbacks (e.g. <code>onClick=&#123;() =&gt; ...&#125;</code>) from Server Components.</li>
                       <li><strong>Class Instances:</strong> Complex prototypes, database connections, and class instances (e.g. Prisma models with methods) will lose their prototype.</li>
-                      <li><strong>Symbols &amp; WeakMaps:</strong> Non-enumerable or memory-bound JavaScript data structures.</li>
+                      <li><strong>Local Symbols, WeakMaps &amp; WeakSets:</strong> Unregistered <code>Symbol()</code> instances and memory-bound weak collections.</li>
                       <li><strong>Browser DOM Elements:</strong> Native HTML DOM nodes (<code>window</code>, <code>document.body</code>).</li>
                     </ul>
                   </div>
@@ -863,7 +863,7 @@ export function InteractiveChart({ data }: { data: any }) {
                       <strong>What about UserGreeting?</strong> Wrapping <code>UserGreeting</code> in <code>&lt;Suspense&gt;</code> ensures that fetching user session data does not delay flushing the outer page layout during SSR (and on PPR routes, keeps session/cookie access isolated inside a dynamic hole).
                     </p>
                     <p>
-                      <strong>In-Place Client Refresh &amp; State Preservation:</strong> Any Client Component can trigger an on-demand re-render of only this slot using <code>await refreshSlot(&quot;analytics-slot&quot;)</code> from <code>&quot;dinou&quot;</code> (or pass <code>&#123; fresh: true &#125;</code> to bypass the server slot cache as well). React reconciles the new server props in place <strong>without unmounting</strong> <code>&lt;InteractiveChart /&gt;</code>, preserving its local <code>zoom</code> state!
+                      <strong>In-Place Client Refresh &amp; State Preservation:</strong> Any Client Component can trigger an on-demand re-render of this slot by <code>id</code>, by cache tag, or across all mounted slots (<code>&quot;*&quot;</code>) using <code>await refreshSlot(&quot;analytics-slot&quot;)</code> from <code>&quot;dinou&quot;</code> (or pass <code>&#123; fresh: true &#125;</code> to bypass the server slot cache as well). React reconciles the new server props in place <strong>without unmounting</strong> <code>&lt;InteractiveChart /&gt;</code>, preserving its local <code>zoom</code> state!
                     </p>
                     <p>
                       <strong>On-Demand Server Invalidation:</strong> Server Functions and webhooks can purge and update the slot cache globally via <code>await revalidateTag(&quot;analytics&quot;)</code> from <code>&quot;dinou/server&quot;</code>.
