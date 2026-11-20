@@ -270,7 +270,7 @@ export function TypeSafeShowcase() {
     >
       <div className="container px-4 md:px-6 mx-auto">
         {/* Section Header */}
-        <div className="flex flex-col items-center space-y-4 text-center mb-10 sm:mb-12 max-w-3xl mx-auto">
+        <div className="flex flex-col items-center space-y-4 text-center mb-6 sm:mb-8 max-w-3xl mx-auto">
           <Badge
             variant="outline"
             className="px-3.5 py-1 border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10 backdrop-blur-sm font-medium"
@@ -287,29 +287,29 @@ export function TypeSafeShowcase() {
           <p className="text-slate-600 dark:text-slate-400 md:text-lg leading-relaxed">
             Eliminate dead links, catch route typos at compile time, and get instant IDE autocompletion for routes, parameters, parallel slots, and relative navigation.
           </p>
+        </div>
 
-          {/* Interactive Navigation Tabs */}
-          <div className="flex justify-center mt-4">
-            <div className="inline-flex items-center gap-1.5 p-1.5 bg-slate-200/60 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/60 backdrop-blur-sm max-w-full overflow-x-auto">
-              {(["navigation", "params", "architecture"] as TypeSafeTab[]).map((tab) => {
-                const cfg = tabConfigs[tab];
-                const isActive = activeTab === tab;
-                return (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
-                      isActive
-                        ? "bg-white dark:bg-slate-950 text-blue-600 dark:text-blue-400 shadow-sm"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                    }`}
-                  >
-                    {cfg.title}
-                  </button>
-                );
-              })}
-            </div>
+        {/* Interactive Navigation Tabs */}
+        <div className="flex justify-center w-full mb-8 sm:mb-10">
+          <div className="inline-flex items-center gap-1.5 p-1.5 bg-slate-200/60 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/60 backdrop-blur-sm max-w-full overflow-x-auto">
+            {(["navigation", "params", "architecture"] as TypeSafeTab[]).map((tab) => {
+              const cfg = tabConfigs[tab];
+              const isActive = activeTab === tab;
+              return (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+                    isActive
+                      ? "bg-white dark:bg-slate-950 text-blue-600 dark:text-blue-400 shadow-sm"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  {cfg.title}
+                </button>
+              );
+            })}
           </div>
         </div>
 
