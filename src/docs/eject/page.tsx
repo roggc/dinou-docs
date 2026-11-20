@@ -482,8 +482,8 @@ npm run uneject
 npm run uneject -- -y
 
 # Or pin a specific version, tag, or local tarball:
-node dinou/cli.js uneject 9.4.0
-node dinou/cli.js uneject file:../dinou-9.4.0.tgz -y`}
+npm run uneject -- 9.4.0
+npm run uneject -- ../dinou-9.4.0.tgz -y`}
               </CodeBlock>
 
               <div className="border rounded-xl p-5 bg-card not-prose space-y-3 my-6">
