@@ -155,6 +155,9 @@ import type { DinouPlugin } from "dinou";
 import { createClerkClient } from "@clerk/backend";
 
 export function clerkPlugin(): DinouPlugin {
+  let clerk: ReturnType<typeof createClerkClient> | null = null;
+  let cachedKeys = "";
+
   return {
     name: "clerk-auth",
     async onRequest(request, context) {
@@ -163,11 +166,16 @@ export function clerkPlugin(): DinouPlugin {
         return;
       }
 
-      // Read secrets from context.env for full Node/Bun/Deno/Cloudflare/Netlify parity
-      const clerk = createClerkClient({
-        secretKey: context.env.CLERK_SECRET_KEY,
-        publishableKey: context.env.CLERK_PUBLISHABLE_KEY,
-      });
+      // Lazily instantiate and reuse the client per isolate/process using context.env
+      // (full Node/Bun/Deno/Cloudflare/Netlify parity + automatic refresh if .env changes)
+      const secretKey = context.env.CLERK_SECRET_KEY;
+      const publishableKey = context.env.CLERK_PUBLISHABLE_KEY;
+      const keySignature = \`\${secretKey ?? ""}:\${publishableKey ?? ""}\`;
+
+      if (!clerk || cachedKeys !== keySignature) {
+        clerk = createClerkClient({ secretKey, publishableKey });
+        cachedKeys = keySignature;
+      }
 
       // Cryptographically verify session token using standard Web Request
       const requestState = await clerk.authenticateRequest(request);
