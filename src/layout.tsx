@@ -1,16 +1,11 @@
-import type { ReactNode } from "react";
 import { ViewTransition } from "react";
+import type { LayoutProps } from "./dinou";
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import Footer from "@/components/footer";
 import "@/globals.css";
 
-export default function Layout({
-  children,
-}: {
-  children: ReactNode;
-  sidebar?: ReactNode;
-}) {
+export default function Layout({ children }: LayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>

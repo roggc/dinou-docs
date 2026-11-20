@@ -52,14 +52,16 @@ const tabConfigs: Record<SsgTab, TabConfig> = {
       "Dinou is Static by Default: static routes compile into HTML and React Flight wire payloads at build time automatically, while getStaticPaths pre-renders specific pages on dynamic routes for instant delivery.",
     codeFile: "src/blog/[slug]/page_functions.ts",
     language: "typescript",
-    codeSnippet: `// 1. Pre-render known slugs at build time (Static by default)
+    codeSnippet: `import type { RouteParams } from "./dinou";
+
+// 1. Pre-render known slugs at build time (Static by default)
 export async function getStaticPaths() {
   const posts = await db.posts.findMany({ select: { slug: true } });
   return posts.map((post) => post.slug);
 }
 
 // 2. Fetch post data at build time and pass as props to page.tsx
-export async function getProps(params) {
+export async function getProps(params: RouteParams) {
   const post = await db.posts.findUnique({ where: { slug: params.slug } });
   return { post };
 }`,
@@ -97,11 +99,13 @@ export async function getProps(params) {
         badge: "ISR",
         language: "typescript",
         code: `
+import type { RouteParams } from "./dinou";
+
 // 1. Time-based background revalidation (seconds)
 export const revalidate = 60; // Refreshes in background every 1m
 
 // 2. Assign cache tags for programmatic webhook invalidation
-export const getCacheTags = (params) => [
+export const getCacheTags = (params: RouteParams) => [
   \`product-\${params.id}\`,
   "catalog",
 ];`,
@@ -115,7 +119,7 @@ export const getCacheTags = (params) => [
 
 import { revalidateTag, revalidatePath } from "dinou/server";
 
-// Trigger instant on-demand purge from Server Actions or webhooks
+// Trigger instant on-demand purge from Server Functions or webhooks
 export async function purgeCatalogCache(productId: string) {
   await revalidateTag("catalog");
   await revalidatePath(\`/products/\${productId}\`);
@@ -160,16 +164,18 @@ export async function purgeCatalogCache(productId: string) {
       "Eliminate hours of build time on massive catalogs. Pre-render your top pages at build time, and let Incremental Static Generation (ISG) compile remaining pages on first visit with built-in parameter validation.",
     codeFile: "src/docs/[...slug]/page_functions.ts",
     language: "typescript",
-    codeSnippet: `// 1. Pre-render only top popular articles at build time
+    codeSnippet: `import type { RouteParams } from "./dinou";
+
+// 1. Pre-render only top popular articles at build time
 export async function getStaticPaths() {
   return popularDocs.map((doc) => doc.slug.split("/"));
 }
 
-// 2. allowISG defaults to true (configurable globally in dinou.config.js or per segment)
+// 2. allowISG defaults to true (configurable globally in dinou.config.ts or per segment)
 // export const allowISG = false;
 
 // 3. Validate params to reject invalid routes & prevent cache poisoning
-export async function validateParams(params) {
+export async function validateParams(params: RouteParams) {
   return db.docs.exists({ slug: params.slug.join("/") });
 }`,
     features: [
@@ -369,7 +375,7 @@ export function SsgShowcase() {
               code={activeConfig.codeSnippet}
               files={activeConfig.files}
               language={activeConfig.language}
-              statusLeft="Dinou Static &amp; ISR Engine"
+              statusLeft="Dinou Static & ISR Engine"
               statusRight="1.18ms–1.45ms p50 TTFB"
               className="h-[500px] sm:h-[540px] lg:h-[630px] w-full shrink-0"
             />

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Sparkles, Github, Twitter } from "lucide-react";
+import { Github } from "lucide-react";
 import { RiNpmjsFill } from "react-icons/ri";
 import {
   Tooltip,

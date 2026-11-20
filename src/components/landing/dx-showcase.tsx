@@ -124,8 +124,8 @@ export function Counter() {
       },
       {
         icon: Sparkles,
-        title: "Instant Route Scanner",
-        desc: "Adding or removing files updates `.dinou/types/routes.d.ts` & `./dinou` shims in < 2ms.",
+        title: "Instant Typegen & Config Reload",
+        desc: "Live updates for `.dinou/types/routes.d.ts`, `./dinou` shims (< 2ms), `.env*`, `tsconfig` aliases, and `dinou.config.ts`.",
       },
     ],
     stat: "2.09s",

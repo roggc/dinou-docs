@@ -127,8 +127,8 @@ export default async function LiveUserFeed() {
       },
       {
         icon: ShieldCheck,
-        title: "Global or Per-Segment",
-        desc: "Set a project-wide default in dinou.config.js or configure ppr independently per layout and page segment.",
+        title: "Global, Per-Segment & noDynamic()",
+        desc: "Set a project-wide default in dinou.config.ts, toggle ppr per segment, or opt a <Suspense> boundary back into the static shell with noDynamic().",
       },
     ],
     visualPreview: {

@@ -17,7 +17,7 @@ export function EngineComparison() {
     },
     {
       dimension: "Deployment Flexibility",
-      implementation: "Universal: Cloudflare Workers, Bun, Deno, Node.js & native single binaries",
+      implementation: "Universal: Cloudflare Workers, Netlify v2, Bun, Deno, Node.js, native binaries & Static Export (SSG)",
     },
     {
       dimension: "Dev Server & DX",
@@ -98,7 +98,7 @@ export function EngineComparison() {
               </div>
               <div className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span className="font-medium">Deploy to Edge, Bun, Deno, Node.js, native binaries, and SSG</span>
+                <span className="font-medium">Deploy to Cloudflare, Netlify, Bun, Deno, Node.js, native binaries, and SSG</span>
               </div>
             </div>
           </div>

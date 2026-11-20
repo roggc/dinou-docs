@@ -50,19 +50,17 @@ const tabConfigs: Record<MiddlewareTab, TabConfig> = {
     headline: "Short-Circuit Webhooks with Zero SSR Overhead",
     description:
       "Handle high-frequency webhooks (Stripe, Clerk, GitHub) directly at the HTTP layer. Returning a standard Web Response short-circuits the request pipeline and completely bypasses React component rendering.",
-    codeFile: "dinou.config.js",
-    language: "javascript",
+    codeFile: "dinou.config.ts",
+    language: "typescript",
     codeSnippet: `import { defineConfig } from "dinou";
 
 export default defineConfig({
   plugins: [
     {
       name: "stripe-webhooks",
-      async onRequest(request) {
-        const url = new URL(request.url);
-
+      async onRequest(request, context) {
         // Fast-path webhooks: short-circuit before React renders
-        if (url.pathname === "/api/webhooks/stripe") {
+        if (context.req.path === "/api/webhooks/stripe") {
           const signature = request.headers.get("stripe-signature");
           const payload = await request.text();
           await stripe.events.verify(payload, signature);
@@ -88,7 +86,7 @@ export default defineConfig({
       {
         icon: Globe,
         title: "Universal Runtime",
-        desc: "Runs with identical behavior across Cloudflare, Node.js, Bun, and Deno.",
+        desc: "AOT-bundled with identical behavior across Cloudflare, Netlify, Node.js, Bun, and Deno.",
       },
     ],
     stat: "< 2ms",
@@ -99,22 +97,21 @@ export default defineConfig({
     title: "2. Global Auth & Context",
     badge: "AsyncLocalStorage Context",
     badgeColor: "border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10",
-    headline: "Route Protection & Request Context Injection",
+    headline: "SPA-Safe Route Guards & Context Injection",
     description:
-      "Inspect session cookies, verify JWTs, and mutate Dinou's request context store before React begins rendering. Access authenticated user records in any Server Component with getContext().",
-    codeFile: "plugins/auth-guard.ts",
+      "Inspect session cookies, verify JWTs, and mutate Dinou's request context store ahead of both dynamic and cached SSG/ISR/PPR routes. Access authenticated user records anywhere on the server with getContext().",
+    codeFile: "src/_plugins/auth-guard.ts",
     language: "typescript",
     codeSnippet: `import type { DinouPlugin } from "dinou";
 
 export const authPlugin: DinouPlugin = {
   name: "auth-guard",
   async onRequest(request, context) {
-    const url = new URL(request.url);
-
-    // Redirect unauthenticated visitors away from /dashboard
-    if (url.pathname.startsWith("/dashboard")) {
+    // context.req.path is normalized on BOTH hard loads & <Link> SPA fetches
+    if (context.req.path.startsWith("/dashboard")) {
       const token = context.req.cookies["session_token"];
       if (!token) {
+        // Automatically translated to x-rsc-redirect on SPA navigations!
         return Response.redirect(new URL("/login", request.url), 302);
       }
 
@@ -126,8 +123,8 @@ export const authPlugin: DinouPlugin = {
     features: [
       {
         icon: Lock,
-        title: "Edge Route Guards",
-        desc: "Redirect unauthorized visitors at the network edge before HTML generation starts.",
+        title: "SPA-Safe Route Guards",
+        desc: "Runs ahead of cached SSG/ISR/PPR routes; `3xx` redirects auto-translate to `x-rsc-redirect` on `<Link>` navigations.",
       },
       {
         icon: Layers,
@@ -137,7 +134,7 @@ export const authPlugin: DinouPlugin = {
       {
         icon: CheckCircle2,
         title: "Multi-Environment Binding",
-        desc: "Context automatically binds across SSR, Flight streams, and Server Functions.",
+        desc: "Context automatically binds across SSR, Flight streams, `page_functions`, and Server Functions.",
       },
     ],
     stat: "0 B",
@@ -146,46 +143,49 @@ export const authPlugin: DinouPlugin = {
   config: {
     id: "config",
     title: "3. Framework Extensibility",
-    badge: "dinou.config.js",
+    badge: "dinou.config.ts",
     badgeColor: "border-purple-500/30 text-purple-600 dark:text-purple-400 bg-purple-500/10",
-    headline: "Centralized Runtime & Compiler Control",
+    headline: "Centralized AOT Runtime & Compiler Control",
     description:
-      "A single type-safe configuration file controls global Partial Prerendering (PPR) and ISG defaults, React StrictMode development parity, pluggable ISR cache backends, and sequential plugin chains.",
-    codeFile: "dinou.config.js",
-    language: "javascript",
+      "A single AOT-bundled TypeScript configuration file (with full @/* path alias support and dev hot-reload) controls global PPR, ISG, React Compiler, custom static assets, storage backends, setupFiles, and plugins.",
+    codeFile: "dinou.config.ts",
+    language: "typescript",
     codeSnippet: `import { defineConfig } from "dinou";
-import { redisStorage } from "./src/lib/redis-storage";
-import { authPlugin } from "./plugins/auth-guard";
+import { redisStorage } from "@/lib/redis-storage";
+import { authPlugin } from "@/_plugins/auth-guard";
 
 export default defineConfig({
   // 1. Global Partial Prerendering & ISG defaults (overridable per segment)
   ppr: true,
   allowISG: true,
 
-  // 2. StrictMode development enforcement for React Compiler
+  // 2. React Compiler (prod) & StrictMode (dev) across all 3 bundlers
+  reactCompiler: true,
   reactStrictMode: true,
 
-  // 3. Pluggable distributed ISR cache adapter (Redis, Cloudflare KV)
-  storage: redisStorage,
+  // 3. Extra static binary/media assets & Line-1 pre-boot polyfills
+  assetExtensions: ["glb", "wasm"],
+  setupFiles: ["@/polyfills"],
 
-  // 4. Sequential middleware and lifecycle plugins
+  // 4. Pluggable ISR storage adapter & sequential plugins
+  storage: redisStorage,
   plugins: [authPlugin],
 });`,
     features: [
       {
         icon: Database,
-        title: "Pluggable Storage Adapters",
-        desc: "Swap local filesystem for Redis or edge KV with a single configuration option.",
+        title: "Pluggable Storage & Assets",
+        desc: "Swap filesystem for Redis or Edge KV (`storage`), and fingerprint custom binaries via `assetExtensions`.",
       },
       {
         icon: Sparkles,
-        title: "Global PPR & ISG Defaults",
-        desc: "Set project-wide defaults for Partial Prerendering (`ppr`) and Incremental Static Generation (`allowISG`).",
+        title: "AOT Bundled with Path Aliases",
+        desc: "TypeScript `dinou.config.ts` & `setupFiles` bundle AOT across all runtimes with live `dinou dev` hot-reload.",
       },
       {
         icon: Cpu,
-        title: "React Compiler Parity",
-        desc: "Enforce StrictMode in development to catch side-effects and hydration mismatches early.",
+        title: "React Compiler & Node Hooks",
+        desc: "Toggle `reactCompiler` / `reactStrictMode` globally, or attach WebSockets via `configureServer`.",
       },
     ],
     stat: "100%",
@@ -219,7 +219,7 @@ export function MiddlewareShowcase() {
             </span>
           </h2>
           <p className="text-slate-600 dark:text-slate-300 md:text-lg leading-relaxed">
-            Configure global runtime behavior, intercept webhooks, inject request contexts, and enforce security policies with standard Web APIs in <code className="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-cyan-600 dark:text-cyan-400">dinou.config.js</code>.
+            Configure global runtime behavior, intercept webhooks, inject request contexts, and enforce security policies with standard Web APIs in <code className="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-cyan-600 dark:text-cyan-400">dinou.config.ts</code>.
           </p>
         </div>
 
@@ -230,7 +230,7 @@ export function MiddlewareShowcase() {
               [
                 { id: "webhooks", label: "1. Fast-Path Webhooks", icon: Zap },
                 { id: "auth", label: "2. Auth Guards & Context", icon: Lock },
-                { id: "config", label: "3. dinou.config.js", icon: Sliders },
+                { id: "config", label: "3. dinou.config.ts", icon: Sliders },
               ] as const
             ).map((tab) => {
               const Icon = tab.icon;

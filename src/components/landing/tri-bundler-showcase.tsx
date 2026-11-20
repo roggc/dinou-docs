@@ -2,12 +2,8 @@
 
 import {
   Boxes,
-  Zap,
   ArrowRight,
-  CheckCircle2,
   Terminal,
-  Server,
-  Laptop,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,11 +43,11 @@ const bundlerCards = [
     badgeColor: "border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10",
     engineBadge: "Enterprise Battle-Tested",
     headline: "Maximum Package Compatibility",
-    description: "Full compatibility with legacy npm dependencies and seamless native React Compiler pipeline integration.",
+    description: "Universal CommonJS/ESM npm package compatibility, dedicated vendor-react chunk splitting, and battle-tested enterprise tooling.",
     speedMetric: "100%",
     speedLabel: "Ecosystem Coverage",
     sampleCommand: "dinou build:node:webpack",
-    idealFor: "Enterprise & React Compiler",
+    idealFor: "Enterprise & legacy CJS/ESM interop",
   },
 ];
 
@@ -147,10 +143,10 @@ export function TriBundlerShowcase() {
             </div>
             <div>
               <p className="text-sm font-bold text-slate-900 dark:text-white">
-                Identical Dual-Bundle Output Across All Three Engines
+                Identical Dual-Bundle &amp; React Compiler Parity Across All Three Engines
               </p>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                Swap bundlers anytime without refactoring application components or routing.
+                Swap bundlers anytime with full Tailwind v4, React Compiler, and Dual-Mode Vendoring (31 pre-bundled vendors or <code>-u</code>) parity.
               </p>
             </div>
           </div>

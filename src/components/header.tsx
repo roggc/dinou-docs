@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Sparkles, Github, BookOpen } from "lucide-react";
+import { ArrowRight, Github, BookOpen } from "lucide-react";
 import dinou from "@/images/dinou.png";
 import ModeToggle from "@/components/mode-toggle";
 import { RiNpmjsFill } from "react-icons/ri";
@@ -22,7 +22,7 @@ const navItems = [
   { href: "#type-safe", label: "Type-Safe", title: "Zero-Boilerplate Type-Safe Routing" },
   { href: "#ssg", label: "SSG", title: "Static by Default: SSG, ISR & ISG" },
   { href: "#segmentation", label: "3D-Segmentation", title: "Three-Dimensional Layered Segmentation" },
-  { href: "#middleware", label: "Middleware", title: "Universal Middleware & Webhooks (dinou.config.js)" },
+  { href: "#middleware", label: "Middleware", title: "Universal Middleware & Webhooks (dinou.config.ts)" },
   { href: "#dx", label: "DX", title: "Fast Developer Experience: ~260ms E2E HMR & 2.09s Cold Start" },
   { href: "#bundlers", label: "Bundlers", title: "Tri-Bundler Engine: esbuild, Rollup & Webpack" },
   { href: "#eject", label: "Eject", title: "Framework Sovereignty & Zero Lock-in" },
@@ -175,7 +175,7 @@ export default function Header() {
         clearTimeout(scrollEndTimerRef.current);
       }
     };
-  }, [navItems]);
+  }, []);
 
   // Update sliding indicator position based on activeSection
   useEffect(() => {
