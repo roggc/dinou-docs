@@ -141,8 +141,14 @@ Keep these invariants intact across all future audits and docs updates:
 10. **Selective Eject Script Rewriting, Transactional `dinou uneject` with `(y/N)` Confirmation, Live Ejected Specifier Resolution & Multi-Root `build:vendors` (`x-eject-fixes.md`)**:
    - `<pkgRoot>/eject.js` remains at package root (outside `./dinou/` to prevent accidental overwrites and junction self-copy issues) and uses `rewritePackageJsonForEject` from `dinou/core/uneject.js` to rewrite only Dinou scripts that already existed in the user's `package.json` (plus `"build:vendors"` and `"uneject"`, removing `"eject"` and `devDependencies.dinou`), while `dinou/cli.js` guards `dinou eject` cleanly when already ejected (`0` exit code, no `ERR_MODULE_NOT_FOUND` stack trace) and adds `dinou uneject [version] [-y|--yes]` with an interactive `(y/N)` safety prompt and automatic rollback if package installation fails.
    - `resolveEjectedDinouSpecifier` in `dinou/core/resolve-contextual-dinou.js` + Webpack `"dinou/config"` / `"dinou/server"` aliases resolve all `"dinou*"` imports directly to `<projectRoot>/dinou/...` across Esbuild, Rollup, and Webpack even under `pnpm` / `yarn` static `file:./dinou` snapshots, and `dinou/scripts/build-vendors.js` resolves vendor packages across `[projectRoot, dinouRoot, node_modules/dinou]`.
-11. **Existing `x-*.md` Upstream Handoff Documents in Repo Root**:
-   - `x-bailout.md`, `x-cache-slot-bailout.md`, `x-escape.md`, `x-server-functions-fixes.md`, `x-revalidation-fixes.md`, `x-streaming-suspense-fixes.md`, `x-ssr-server-references-fixes.md`, `x-react-compiler-fixes.md`, `x-public-static-assets-fixes.md`, `x-styles-css-fixes.md`, `x-assets-fixes.md`, `x-env-vars-fixes.md`, `x-alias-fixes.md`, `x-plugins-fixes.md`, `x-bundlers-fixes.md`, `x-deployment-fixes.md`, `x-eject-fixes.md`.
+11. **API Reference Audit Fixes & ISR Concurrency Hardening (`x-api-reference-fixes-{1..4}.md`, `x-isr-concurrency-fixes.md`)**:
+   - **Batch 1 (`x-api-reference-fixes-1.md`)**: Short-circuited `getProps()` / layout `redirect()` in `get-jsx.js` & `handler.js` via `_hasRedirected`; fixed external URL `SecurityError` and `#hash` cache/query handling in `client.jsx` & `client-webpack.jsx`; respected `target`, `download`, and `e.button !== 0` in `link.jsx` & global click listener; memoized `useRouter()` and guarded `window.__DINOU_STATIC_EXPORT__` in `useSearchParams()`.
+   - **ISR Concurrency (`x-isr-concurrency-fixes.md`)**: Added `{ onlyIfExpired: true }` re-check inside serialized `enqueueRevalidation` (`cache-revalidate.js`) + synchronous `regenerating.add(reqPath)` (`handler.js`) to eliminate duplicate concurrent HTML+RSC ISR regenerations.
+   - **Batch 2 (`x-api-reference-fixes-2.md`)**: Memoized generated contextual `"./dinou"` `useRouter()` safely under `react-server`; added `DinouEnv` and missing route helper re-exports to contextual `dinou.d.ts`; excluded `rawPath`/`isRscRequest` from `copyCustomContextProperties` and populated them across `createServerFunctionContext` & `getContext()` fallbacks.
+   - **Batch 3 (`x-api-reference-fixes-3.md`)**: Added cursor pagination in `CloudflareKVStorage.keys()` and folder fallback in `CloudflareKVStorage.has()`; stripped trailing slashes in `DenoKVStorage._cleanKey()`; merged `tag` + `tags` and unified `revalidate < 1` + `revalidate?: number | false` in `<DinouCacheSlot>`; matched cold-start `id`-only slots in `revalidateTag(slotId)` and cold segment layouts in `revalidatePath()`.
+   - **Batch 4 (`x-api-reference-fixes-4.md`)**: Enforced authoritative `validateParams()` & `allowISG: false` veto ahead of cached RSC responses (`/____rsc_page____/*`, `/____rsc_layout____/*`) in strict root-to-child order; normalized numeric/array `getStaticPaths` object values for `allowISG: false`; extended `buildStaticPages` `layout_functions.ts` `getStaticPaths` discovery to `[[param]]`, `[...slug]`, and `[[...slug]]`.
+12. **Existing `x-*.md` Upstream Handoff Documents in Repo Root**:
+   - `x-bailout.md`, `x-cache-slot-bailout.md`, `x-escape.md`, `x-server-functions-fixes.md`, `x-revalidation-fixes.md`, `x-streaming-suspense-fixes.md`, `x-ssr-server-references-fixes.md`, `x-react-compiler-fixes.md`, `x-public-static-assets-fixes.md`, `x-styles-css-fixes.md`, `x-assets-fixes.md`, `x-env-vars-fixes.md`, `x-alias-fixes.md`, `x-plugins-fixes.md`, `x-bundlers-fixes.md`, `x-deployment-fixes.md`, `x-eject-fixes.md`, `x-api-reference-fixes-1.md`, `x-isr-concurrency-fixes.md`, `x-api-reference-fixes-2.md`, `x-api-reference-fixes-3.md`, `x-api-reference-fixes-4.md`.
 
 ---
 
@@ -178,8 +184,8 @@ Keep these invariants intact across all future audits and docs updates:
 - [x] `/docs/eject` — Eject (`src/docs/eject/page.tsx` • `x-eject-fixes.md`)
 
 ### Reference
-- [ ] **`/docs/api-reference` — API Reference (`src/docs/api-reference/page.tsx`)  ⬅️ NEXT ROUTE TO AUDIT**
-- [ ] `/docs/cheatsheet` — Cheatsheet (`src/docs/cheatsheet/page.tsx`)
+- [x] `/docs/api-reference` — API Reference (`src/docs/api-reference/page.tsx` • `x-api-reference-fixes-{1..4}.md`, `x-isr-concurrency-fixes.md`)
+- [ ] **`/docs/cheatsheet` — Cheatsheet (`src/docs/cheatsheet/page.tsx`)  ⬅️ NEXT ROUTE TO AUDIT**
 
 ### Guides
 - [ ] `/docs/i18n` — Internationalization (`src/docs/i18n/page.tsx`)

@@ -27,11 +27,11 @@ export function AllowIsgContract() {
           Default: true
         </span>
         <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs font-mono font-medium text-muted-foreground ring-1 ring-inset ring-border">
-          layout_functions.ts &amp; page_functions.ts
+          dinou.config.ts, layout_functions.ts &amp; page_functions.ts
         </span>
       </div>
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        Controls whether dynamic route segments not pre-rendered during build time by <code>getStaticPaths</code> can be generated on-demand at runtime via Incremental Static Generation (ISG).
+        Controls whether dynamic route segments not pre-rendered during build time by <code>getStaticPaths</code> can be generated on-demand at runtime via Incremental Static Generation (ISG). Configure an application-wide baseline in <code>dinou.config.ts</code> (<code>defineConfig(&#123; allowISG: false &#125;)</code>) or override per segment in <code>layout_functions.ts</code> and <code>page_functions.ts</code>. Enforced authoritatively on both direct HTML requests and SPA RSC fetches (<code>/____rsc_page____/*</code> &amp; <code>/____rsc_layout____/*</code>) in root-to-child order.
       </p>
 
       <div className="not-prose grid gap-4 md:grid-cols-3 my-6">
@@ -113,12 +113,12 @@ export function AllowIsgContract() {
               id: "strict-enclave",
               label: "blog/[slug]/page_functions.ts",
               language: "typescript",
-              code: `// src/app/blog/[slug]/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/blog/[slug]/page_functions.ts
+import type { PageFunctions } from "./dinou";
 import { getPublishedSlugs } from "@/lib/content";
 
 // 1. Pre-render all published articles during the build phase
-export const getStaticPaths: PageFunctions<"/blog/[slug]">["getStaticPaths"] = async () => {
+export const getStaticPaths: PageFunctions["getStaticPaths"] = async () => {
   const slugs = await getPublishedSlugs();
   return slugs.map((slug) => ({ slug }));
 };
@@ -126,7 +126,7 @@ export const getStaticPaths: PageFunctions<"/blog/[slug]">["getStaticPaths"] = a
 // 2. Strict static enclave: unlisted slugs return 404 immediately
 export const allowISG: PageFunctions["allowISG"] = false;
 
-export const getProps: PageFunctions<"/blog/[slug]">["getProps"] = async (params) => {
+export const getProps: PageFunctions["getProps"] = async (params) => {
   return { slug: params.slug };
 };`,
             },
@@ -134,12 +134,12 @@ export const getProps: PageFunctions<"/blog/[slug]">["getProps"] = async (params
               id: "hybrid-on-demand",
               label: "products/[id]/page_functions.ts",
               language: "typescript",
-              code: `// src/app/products/[id]/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/products/[id]/page_functions.ts
+import type { PageFunctions } from "./dinou";
 import { getTopProductIds } from "@/lib/catalog";
 
 // 1. Pre-render the top 100 most popular products at build time
-export const getStaticPaths: PageFunctions<"/products/[id]">["getStaticPaths"] = async () => {
+export const getStaticPaths: PageFunctions["getStaticPaths"] = async () => {
   const topIds = await getTopProductIds(100);
   return topIds.map((id) => ({ id }));
 };
@@ -147,7 +147,7 @@ export const getStaticPaths: PageFunctions<"/products/[id]">["getStaticPaths"] =
 // 2. Allow on-demand generation for long-tail products on first visitor request
 export const allowISG: PageFunctions["allowISG"] = true;
 
-export const getProps: PageFunctions<"/products/[id]">["getProps"] = async (params) => {
+export const getProps: PageFunctions["getProps"] = async (params) => {
   return { id: params.id };
 };`,
             },
@@ -155,8 +155,8 @@ export const getProps: PageFunctions<"/products/[id]">["getProps"] = async (para
               id: "programmatic-toggle",
               label: "catalog/[category]/page_functions.ts",
               language: "typescript",
-              code: `// src/app/catalog/[category]/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/catalog/[category]/page_functions.ts
+import type { PageFunctions } from "./dinou";
 
 // Programmatic ISG flag toggled via environment configuration
 export const allowISG: PageFunctions["allowISG"] = () => {
@@ -164,7 +164,7 @@ export const allowISG: PageFunctions["allowISG"] = () => {
   return process.env.ENABLE_RUNTIME_ISG !== "false";
 };
 
-export const getStaticPaths: PageFunctions<"/catalog/[category]">["getStaticPaths"] = () => [
+export const getStaticPaths: PageFunctions["getStaticPaths"] = () => [
   { category: "electronics" },
   { category: "apparel" },
   { category: "books" },
@@ -174,11 +174,11 @@ export const getStaticPaths: PageFunctions<"/catalog/[category]">["getStaticPath
               id: "layout-enclave",
               label: "docs/[version]/layout_functions.ts",
               language: "typescript",
-              code: `// src/app/docs/[version]/layout_functions.ts
-import type { LayoutFunctions } from "dinou";
+              code: `// src/docs/[version]/layout_functions.ts
+import type { LayoutFunctions } from "./dinou";
 
 // Define the exact supported documentation versions at build time
-export const getStaticPaths: LayoutFunctions<"/docs/[version]">["getStaticPaths"] = () => [
+export const getStaticPaths: LayoutFunctions["getStaticPaths"] = () => [
   { version: "v1" },
   { version: "v2" },
   { version: "v3" },

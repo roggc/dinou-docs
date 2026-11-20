@@ -24,12 +24,12 @@ export function PprContract() {
           PPRConfig
         </span>
         <span className="inline-flex items-center rounded-md bg-slate-500/10 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400 ring-1 ring-inset ring-slate-500/20">
-          Default: false (Inherited)
+          Default: false (Segment-Isolated)
         </span>
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        Configures <strong>Partial Prerendering (PPR)</strong> for a route segment, layout subtree, or global application. PPR combines the instantaneous response time of static delivery with the flexibility of server-rendered dynamic data. Dinou immediately transmits a pre-rendered static HTML shell and streams dynamic <code>&lt;Suspense&gt;</code> holes concurrently over the same HTTP response stream as they resolve.
+        Configures <strong>Partial Prerendering (PPR)</strong> for an individual page segment, an individual layout segment, or globally in <code>dinou.config.ts</code>. PPR combines the instantaneous response time of static delivery with the flexibility of server-rendered dynamic data. Dinou immediately transmits a pre-rendered static HTML shell (<code>shell.html</code>) and streams dynamic <code>&lt;Suspense&gt;</code> holes concurrently over the same HTTP response stream as they resolve. (Call <code>noDynamic()</code> synchronously before the first <code>await</code> inside an async Server Component to bake a <code>&lt;Suspense&gt;</code> boundary into the static shell instead of streaming it.)
       </p>
 
       {/* Architecture Highlights */}
@@ -59,11 +59,11 @@ export function PprContract() {
         </Card>
       </div>
 
-      {/* Resolution & Cascade Hierarchy */}
+      {/* Resolution & Segment Isolation */}
       <div className="not-prose my-4 border rounded-lg overflow-hidden bg-card">
         <div className="px-4 py-2.5 bg-muted/50 border-b flex items-center gap-2 font-semibold text-xs text-foreground">
           <Layers className="h-4 w-4 text-primary" />
-          <span>Configuration Resolution &amp; Inheritance Hierarchy</span>
+          <span>Segment-Isolated Resolution (No Parent-to-Child Inheritance)</span>
         </div>
         <table className="w-full text-left text-xs border-collapse">
           <thead>
@@ -79,32 +79,32 @@ export function PprContract() {
                 1. Global Config
               </td>
               <td className="p-3 font-mono text-primary align-top">
-                <code>dinou.config.js</code>
+                <code>dinou.config.ts</code>
               </td>
               <td className="p-3 align-top leading-relaxed text-muted-foreground">
-                Sets application-wide default via <code>defineConfig(&#123; ppr: true &#125;)</code>. Serves as the fallback baseline for all routes when no segment defines an override.
+                Sets the application-wide default via <code>defineConfig(&#123; ppr: true &#125;)</code>. Every layout and page without an explicit own <code>ppr</code> export falls back directly to this global value (<code>false</code> if omitted).
               </td>
             </tr>
             <tr>
               <td className="p-3 font-semibold text-foreground align-top">
-                2. Layout Subtree
+                2. Layout Segment
               </td>
               <td className="p-3 font-mono text-primary align-top">
                 <code>layout_functions.ts</code>
               </td>
               <td className="p-3 align-top leading-relaxed text-muted-foreground">
-                Cascades downward to all nested layouts and child pages in that directory subtree. Enables activating PPR across entire feature sections such as <code>/dashboard/*</code>.
+                Controls PPR strictly for <strong>that specific layout segment</strong> (e.g. streaming dynamic <code>&lt;Suspense&gt;</code> holes in a header/sidebar). <strong>Does not cascade</strong> to nested child layouts or child pages; each segment evaluates <code>segment.ppr ?? Boolean(dinouConfig.ppr)</code> independently.
               </td>
             </tr>
             <tr>
               <td className="p-3 font-semibold text-foreground align-top">
-                3. Page Override
+                3. Page Segment
               </td>
               <td className="p-3 font-mono text-primary align-top">
                 <code>page_functions.ts</code>
               </td>
               <td className="p-3 align-top leading-relaxed text-muted-foreground">
-                Provides granular control. Explicitly opts into PPR (<code>true</code>) or opts out (<code>false</code>), taking final precedence over parent layouts and global settings.
+                Explicitly opts that page segment into PPR (<code>true</code>) or opts out (<code>false</code>) relative to <code>dinou.config.ts</code>. A composite HTML route streams via PPR whenever the page or any active layout segment resolves to <code>true</code>.
               </td>
             </tr>
           </tbody>
@@ -133,8 +133,8 @@ export function PprContract() {
               id: "page-ppr",
               label: "dashboard/page_functions.ts",
               language: "typescript",
-              code: `// src/app/dashboard/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/dashboard/page_functions.ts
+import type { PageFunctions } from "./dinou";
 
 // 1. Literal boolean activation
 export const ppr: PageFunctions["ppr"] = true;
@@ -148,9 +148,9 @@ export const ppr: PageFunctions["ppr"] = true;
               id: "page-markup",
               label: "dashboard/page.tsx",
               language: "tsx",
-              code: `// src/app/dashboard/page.tsx
+              code: `// src/dashboard/page.tsx
 import { Suspense } from "react";
-import { UserGreeting, UserStatsSkeleton } from "@/components/skeletons";
+import { UserStatsSkeleton } from "@/components/skeletons";
 import { RealtimeMetrics } from "@/components/realtime-metrics";
 
 export default function DashboardPage() {
@@ -173,25 +173,25 @@ export default function DashboardPage() {
 }`,
             },
             {
-              id: "layout-branch",
+              id: "layout-segment",
               label: "admin/layout_functions.ts",
               language: "typescript",
-              code: `// src/app/admin/layout_functions.ts
-import type { LayoutFunctions } from "dinou";
+              code: `// src/admin/layout_functions.ts
+import type { LayoutFunctions } from "./dinou";
 
-// Branch-level enablement
-// Automatically enables PPR for all nested pages under /admin/*
+// Segment-isolated enablement: enables PPR strictly for src/admin/layout.tsx
+// (e.g. streaming a live notification bell inside <Suspense> in the admin shell).
+// Child pages under /admin/* still fall back to dinou.config.ts unless they also opt in.
 export const ppr: LayoutFunctions["ppr"] = true;`,
             },
             {
               id: "page-optout",
               label: "admin/audit/page_functions.ts",
               language: "typescript",
-              code: `// src/app/admin/audit/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/admin/audit/page_functions.ts
+import type { PageFunctions } from "./dinou";
 
-// Explicit opt-out
-// Overrides the parent /admin layout and disables PPR for this specific route
+// Explicit opt-out when dinou.config.ts sets global defineConfig({ ppr: true })
 export const ppr: PageFunctions["ppr"] = false;
 
 // Force fresh Dynamic SSR rendering on every request

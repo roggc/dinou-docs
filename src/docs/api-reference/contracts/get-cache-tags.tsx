@@ -80,7 +80,7 @@ export function GetCacheTagsContract() {
             <strong>Tags in <code>page_functions.ts</code>:</strong> Targets individual route documents. Invoking <code>revalidateTag(tag)</code> executes a surgical <code>revalidatePage()</code>, regenerating exclusively <code>page.rsc</code> and <code>index.html</code> (or <code>shell.html</code>) for matching pages while leaving parent layouts completely untouched in cache.
           </div>
           <div>
-            <strong>Tags in <code>layout_functions.ts</code>:</strong> Targets the shared layout shell across an entire subtree. Invoking <code>revalidateTag(tag)</code> executes a surgical <code>revalidateLayout()</code> in O(1) time, regenerating exclusively <code>layout.rsc</code> while child routes lazily re-compose their <code>index.html</code> on demand (preserving their cached <code>page.rsc</code> payloads and guaranteeing zero hydration mismatch).
+            <strong>Tags in <code>layout_functions.ts</code>:</strong> Targets the shared layout shell across an entire subtree. Invoking <code>revalidateTag(tag)</code> executes <code>revalidateLayout()</code> in <strong>ancestor-first O(1) order</strong>, regenerating exclusively <code>layout.rsc</code> while child routes lazily re-compose their <code>index.html</code> on demand (preserving their cached <code>page.rsc</code> payloads and guaranteeing zero hydration mismatch). Distributed adapters (like <code>RedisStorage</code>) also record cluster-wide invalidation timestamps via <code>markTagInvalidatedAsync()</code>.
           </div>
         </AlertDescription>
       </Alert>

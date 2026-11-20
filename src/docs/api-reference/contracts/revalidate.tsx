@@ -155,19 +155,19 @@ export function RevalidateContract() {
               <div>
                 <strong className="text-foreground">Hard Reload (F5 / Direct Link):</strong>
                 <p className="mt-0.5 leading-relaxed">
-                  <code>Math.min()</code> forces <code>index.html</code> to regenerate every 10s so the layout shell stays fresh. Crucially, <strong><code>page.rsc</code> is also regenerated</strong>: because SSR executes the full tree at the moment of build, emitting a fresh <code>page.rsc</code> snapshot guarantees zero hydration mismatch.
+                  When the layout&apos;s 10s TTL expires (<code>layoutGeneratedAt</code>), Dinou regenerates strictly <code>layout.rsc</code> in O(1) time via <code>revalidateLayout()</code> and <strong>lazily re-composes <code>index.html</code></strong> by splicing the child&apos;s existing cached <code>page.rsc</code> into the fresh layout — <strong>0 child <code>page.tsx</code> executions</strong>, preserving the page&apos;s independent <code>pageGeneratedAt</code> 1h countdown!
                 </p>
               </div>
               <div>
                 <strong className="text-foreground">SPA Soft Navigation:</strong>
                 <p className="mt-0.5 leading-relaxed">
-                  <code>layout.rsc</code> expires every 10s on its own segmented endpoint. When a client performs a cross-segment transition, the server re-renders the layout without forcing re-renders on already-cached child pages.
+                  <code>layout.rsc</code> expires every 10s on its own segmented endpoint. When a client performs a cross-segment transition, the server re-renders only the layout without touching already-cached child pages.
                 </p>
               </div>
               <div>
                 <strong className="text-foreground">Scope:</strong>
                 <p className="mt-0.5 leading-relaxed">
-                  The layout&apos;s 10s interval <strong>cascades downward</strong>: no child route under this branch can serve an <code>index.html</code> older than 10s.
+                  The layout&apos;s 10s interval ensures no child route under this branch ever serves a stale layout shell in <code>index.html</code>, while each child page keeps its own 1h data lifetime.
                 </p>
               </div>
             </div>
@@ -181,7 +181,7 @@ export function RevalidateContract() {
             <span>The Atomic Parity Guarantee (Hydration Mismatch Prevention)</span>
           </div>
           <p className="text-muted-foreground leading-relaxed">
-            In full-stack React Server Components, pre-rendered HTML and client Flight streams cannot drift out of sync. Whenever Dinou&apos;s route-level ISR engine (<code>revalidating.js</code>) rebuilds an <code>index.html</code>, it <strong>always produces a synchronized <code>page.rsc</code> twin</strong>. This ensures that when React 19 calls <code>hydrateRoot()</code> in the browser, the virtual component tree exactly matches the serialized DOM, completely eliminating hydration crashes and layout flashes.
+            In full-stack React Server Components, pre-rendered HTML and client Flight streams cannot drift out of sync. Dinou&apos;s revalidation engine (<code>cache-revalidate.js</code>) commits artifacts in strict causal order (<code>_old</code> snapshot &rarr; <code>metadata.json</code> &rarr; <code>page.rsc</code> &rarr; <code>index.html</code>) with concurrent stampede deduplication, ensuring that when React 19 calls <code>hydrateRoot()</code> in the browser, the Flight stream matches the HTML <code>__DINOU_BUILD_ID__</code> cleanly with zero <code>#418</code> hydration mismatches.
           </p>
         </div>
       </div>
@@ -199,8 +199,8 @@ export function RevalidateContract() {
               id: "time-isr",
               label: "products/page_functions.ts",
               language: "typescript",
-              code: `// src/app/products/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/products/page_functions.ts
+import type { PageFunctions } from "./dinou";
 
 // Time-based ISR: Cache rendered HTML for 60 seconds
 // Next request after 60s triggers asynchronous background revalidation
@@ -210,8 +210,8 @@ export const revalidate: PageFunctions["revalidate"] = 60;`,
               id: "dynamic-ssr",
               label: "cart/page_functions.ts",
               language: "typescript",
-              code: `// src/app/cart/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/cart/page_functions.ts
+import type { PageFunctions } from "./dinou";
 
 // Dynamic SSR: Bypasses static cache completely
 // Freshly renders on every request with Cache-Control: no-store headers
@@ -221,8 +221,8 @@ export const revalidate: PageFunctions["revalidate"] = 0;`,
               id: "dynamic-fn",
               label: "pricing/page_functions.ts",
               language: "typescript",
-              code: `// src/app/pricing/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/pricing/page_functions.ts
+import type { PageFunctions } from "./dinou";
 
 // Dynamic evaluation: Switch caching strategy based on runtime environment
 export const revalidate: PageFunctions["revalidate"] = async () => {
@@ -239,11 +239,12 @@ export const revalidate: PageFunctions["revalidate"] = async () => {
               id: "layout-reconcile",
               label: "dashboard/layout_functions.ts",
               language: "typescript",
-              code: `// src/app/dashboard/layout_functions.ts
-import type { LayoutFunctions } from "dinou";
+              code: `// src/dashboard/layout_functions.ts
+import type { LayoutFunctions } from "./dinou";
 
-// Sets a baseline 5-minute cache for all routes within /dashboard
-// Child pages can shorten this interval (e.g. 60s) or force SSR (0) via Math.min()
+// Sets a 5-minute TTL for the /dashboard layout segment (layout.rsc).
+// Child pages reconcile initial HTML freshness via Math.min() while keeping
+// their own independent page.rsc TTLs (lazy HTML re-composition on layout refresh).
 export const revalidate: LayoutFunctions["revalidate"] = 300;`,
             },
           ]}
