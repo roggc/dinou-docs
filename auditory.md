@@ -185,10 +185,10 @@ Keep these invariants intact across all future audits and docs updates:
 
 ### Reference
 - [x] `/docs/api-reference` — API Reference (`src/docs/api-reference/page.tsx` • `x-api-reference-fixes-{1..4}.md`, `x-isr-concurrency-fixes.md`)
-- [ ] **`/docs/cheatsheet` — Cheatsheet (`src/docs/cheatsheet/page.tsx`)  ⬅️ NEXT ROUTE TO AUDIT**
+- [x] `/docs/cheatsheet` — Cheatsheet (`src/docs/cheatsheet/page.tsx` • docs audit complete, 0 framework bugs)
 
 ### Guides
-- [ ] `/docs/i18n` — Internationalization (`src/docs/i18n/page.tsx`)
+- [ ] **`/docs/i18n` — Internationalization (`src/docs/i18n/page.tsx`)  ⬅️ NEXT ROUTE TO AUDIT**
 - [ ] `/docs/clerk` — Clerk Authentication (`src/docs/clerk/page.tsx`)
 
 ### Upgrade Guides
