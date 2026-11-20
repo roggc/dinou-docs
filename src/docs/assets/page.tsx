@@ -69,7 +69,7 @@ export default function Page() {
 
           <div className="prose prose-slate dark:prose-invert max-w-none w-full break-words">
             {/* Overview */}
-            <section id="overview">
+            <section id="overview" className="scroll-mt-20">
               <h2>Assets &amp; Media in Dinou</h2>
               <p>
                 In Dinou, media and font files imported into JavaScript, TypeScript, or CSS are treated as first-class module dependencies. When you import an asset (e.g. <code>import logo from &quot;./logo.png&quot;</code>), the active bundler (Esbuild, Rollup, or Webpack) and runtime engine:
@@ -95,7 +95,7 @@ export default function Page() {
                     </div>
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground">
-                    Imports resolve to identical URL strings across Node.js, Bun, Deno, and Cloudflare Workers with zero hydration mismatch or Base64 bundle bloat.
+                    Imports resolve to identical URL strings across Node.js, Bun, Deno, Cloudflare Workers, and Netlify with zero hydration mismatch or Base64 bundle bloat.
                   </CardContent>
                 </Card>
 
@@ -126,7 +126,7 @@ export default function Page() {
             </section>
 
             {/* Imported vs Public Directory */}
-            <section id="imported-vs-public" className="mt-12">
+            <section id="imported-vs-public" className="mt-12 scroll-mt-20">
               <h2>Imported Assets vs. Public Directory</h2>
               <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 p-5 not-prose my-6 space-y-3">
                 <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
@@ -150,7 +150,7 @@ export default function Page() {
             </section>
 
             {/* Supported Extensions */}
-            <section id="supported-formats" className="mt-12">
+            <section id="supported-formats" className="mt-12 scroll-mt-20">
               <h2>Supported Extensions (26 Formats)</h2>
               <p>
                 Dinou recognizes <strong>26 media and font extensions</strong> out-of-the-box across images, video, audio, and web fonts:
@@ -169,37 +169,37 @@ export default function Page() {
                     <tr>
                       <td className="p-3.5 font-semibold flex items-center gap-2">
                         <ImageIcon className="h-4 w-4 text-emerald-500" />
-                        <span>Images (10)</span>
+                        <span>Images (8)</span>
                       </td>
                       <td className="p-3.5 font-mono text-foreground font-semibold">
-                        .png, .jpg, .jpeg, .gif, .svg, .webp, .avif, .ico, .mjpeg, .mjpg
+                        .png, .jpg, .jpeg, .gif, .svg, .webp, .avif, .ico
                       </td>
                       <td className="p-3.5 text-muted-foreground">
-                        image/png, image/jpeg, image/gif, image/svg+xml, image/webp, image/avif, image/x-icon, video/x-motion-jpeg
+                        image/png, image/jpeg, image/gif, image/svg+xml, image/webp, image/avif, image/x-icon
                       </td>
                     </tr>
                     <tr>
                       <td className="p-3.5 font-semibold flex items-center gap-2">
                         <Video className="h-4 w-4 text-amber-500" />
-                        <span>Video (6)</span>
+                        <span>Video (7)</span>
                       </td>
                       <td className="p-3.5 font-mono text-foreground font-semibold">
-                        .mp4, .webm, .ogg, .mov, .avi, .mkv
+                        .mp4, .webm, .mov, .avi, .mkv, .mjpeg, .mjpg
                       </td>
                       <td className="p-3.5 text-muted-foreground">
-                        video/mp4, video/webm, video/ogg, video/quicktime, video/x-msvideo, video/x-matroska
+                        video/mp4, video/webm, video/quicktime, video/x-msvideo, video/x-matroska, video/x-motion-jpeg
                       </td>
                     </tr>
                     <tr>
                       <td className="p-3.5 font-semibold flex items-center gap-2">
                         <Music className="h-4 w-4 text-emerald-500" />
-                        <span>Audio (5)</span>
+                        <span>Audio (6)</span>
                       </td>
                       <td className="p-3.5 font-mono text-foreground font-semibold">
-                        .mp3, .wav, .flac, .m4a, .aac
+                        .mp3, .wav, .ogg, .flac, .m4a, .aac
                       </td>
                       <td className="p-3.5 text-muted-foreground">
-                        audio/mpeg, audio/wav, audio/flac, audio/mp4, audio/aac
+                        audio/mpeg, audio/wav, audio/ogg, audio/flac, audio/mp4, audio/aac
                       </td>
                     </tr>
                     <tr>
@@ -220,7 +220,7 @@ export default function Page() {
             </section>
 
             {/* Usage Examples */}
-            <section id="usage-examples" className="mt-12">
+            <section id="usage-examples" className="mt-12 scroll-mt-20">
               <h2>Usage in Server &amp; Client Components</h2>
               <p>
                 Importing media and font files works identically in both Server Components (RSC) and Client Components (<code>&quot;use client&quot;</code>). Imported assets resolve to fingerprinted URL strings that can be passed directly to standard JSX elements like <code>&lt;img&gt;</code>, <code>&lt;video&gt;</code>, <code>&lt;audio&gt;</code>, <code>&lt;link rel=&quot;preload&quot;&gt;</code>, or Web Audio APIs:
@@ -308,7 +308,7 @@ import type { LayoutProps } from "./dinou";
 import interVariable from "@/assets/fonts/inter-latin.woff2";
 import "./globals.css";
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="en">
       <head>
@@ -319,7 +319,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           type="font/woff2"
           crossOrigin="anonymous"
         />
-        <link rel="stylesheet" href="/styles.css" precedence="dinou-styles" />
+        <link rel="stylesheet" href="/styles.css" precedence="default" />
       </head>
       <body>{children}</body>
     </html>
@@ -331,7 +331,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </section>
 
             {/* Path Aliases & CSS url() */}
-            <section id="path-aliases" className="mt-12">
+            <section id="path-aliases" className="mt-12 scroll-mt-20">
               <h2>Path Aliases &amp; CSS <code>url()</code> Assets</h2>
               <p>
                 Dinou resolves path aliases configured in <code>tsconfig.json</code> or <code>jsconfig.json</code> (as well as bare <code>node_modules</code> asset specifiers) identically across Esbuild, Rollup, Webpack, and all server/edge engines:
@@ -358,7 +358,7 @@ import interWoff2 from "@fontsource/inter/files/inter-latin-400-normal.woff2";`}
             </section>
 
             {/* Production Build Output */}
-            <section id="caching-bundling" className="mt-12">
+            <section id="caching-bundling" className="mt-12 scroll-mt-20">
               <h2>Production Output, Caching &amp; HTTP Range</h2>
               <p>
                 When building for production (<code>dinou build</code>), Dinou emits all imported media and font files into <code>.dinou/dist3/assets/</code> with sanitized names and 8-character path-and-content SHA-256 hashes:
@@ -384,7 +384,7 @@ import interWoff2 from "@fontsource/inter/files/inter-latin-400-normal.woff2";`}
             </section>
 
             {/* TypeScript Support */}
-            <section id="typescript-support" className="mt-12">
+            <section id="typescript-support" className="mt-12 scroll-mt-20">
               <h2>TypeScript Declarations (<code>dinou/env</code>)</h2>
               <p>
                 Ambient type declarations for all 26 built-in media and font extensions are packaged directly into <code>dinou/env</code>.
@@ -408,6 +408,10 @@ import interWoff2 from "@fontsource/inter/files/inter-latin-400-normal.woff2";`}
               >
 {`{
   "compilerOptions": {
+    "rootDirs": [
+      "src",
+      ".dinou/routes"
+    ],
     "paths": {
       "@/*": [
         "./src/*"
@@ -430,7 +434,7 @@ import interWoff2 from "@fontsource/inter/files/inter-latin-400-normal.woff2";`}
             </section>
 
             {/* Custom Extensions */}
-            <section id="custom-extensions" className="mt-12">
+            <section id="custom-extensions" className="mt-12 scroll-mt-20">
               <h2>Extending Custom Formats (<code>assetExtensions</code>)</h2>
               <p>
                 If your application imports specialized binary or 3D formats—such as <code>.glb</code>, <code>.gltf</code>, and <code>.hdr</code> for Three.js / WebGL scenes, or <code>.wasm</code> and <code>.pdf</code>—register them via <code>assetExtensions</code> in <code>dinou.config.ts</code> without ejecting:
@@ -452,14 +456,14 @@ export default defineConfig({
               </p>
               <ul>
                 <li>
-                  <strong>All 3 bundlers &amp; all 4 runtimes</strong> (Esbuild, Rollup, Webpack, Node.js, Bun, Deno, and Cloudflare Workers) automatically fingerprint and emit imports matching those extensions into <code>/assets/[name]-[hash].[ext]</code>.
+                  <strong>All 3 bundlers &amp; all 5 runtimes</strong> (Esbuild, Rollup, Webpack, Node.js, Bun, Deno, Cloudflare Workers, and Netlify) automatically fingerprint and emit imports matching those extensions into <code>/assets/[name]-[hash].[ext]</code>.
                 </li>
                 <li>
                   <strong>Automatic TypeScript Ambient Types:</strong> Running <code>npx dinou typegen</code> (or starting <code>dinou dev</code> / <code>dinou build</code>) automatically generates <code>declare module &quot;*.glb&quot;</code> declarations inside <code>.dinou/types/routes.d.ts</code>—no manual <code>.d.ts</code> boilerplate required.
                 </li>
               </ul>
               <p className="text-xs text-muted-foreground mt-2">
-                If you have <Link href="/docs/eject" className="underline font-semibold text-foreground">ejected Dinou</Link>, you can also inspect or customize the default 26 extensions directly in <code>dinou/core/asset-extensions.js</code> and <code>dinou/assets.d.ts</code>.
+                If you have <Link href="/docs/eject" className="underline font-semibold text-foreground">ejected Dinou</Link>, you can also inspect or customize the default 26 extensions directly in <code>dinou/core/builtin-asset-extensions.js</code> and <code>dinou/assets.d.ts</code>.
               </p>
             </section>
 
