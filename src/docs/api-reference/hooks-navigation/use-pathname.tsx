@@ -62,7 +62,7 @@ export function UsePathnameSection() {
             <tbody className="divide-y divide-border/50 text-muted-foreground">
               <tr>
                 <td className="py-2 px-3 font-semibold text-foreground w-1/3">Execution Environment</td>
-                <td className="py-2 px-3">100% backend (Node.js, Bun, Deno, Cloudflare Workers).</td>
+                <td className="py-2 px-3">100% backend (Node.js, Bun, Deno, Cloudflare Workers, Netlify).</td>
               </tr>
               <tr>
                 <td className="py-2 px-3 font-semibold text-foreground">Client Bundle Impact</td>
