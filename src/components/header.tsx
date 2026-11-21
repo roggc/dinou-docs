@@ -2,9 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Sparkles, Github, BookOpen } from "lucide-react";
+import { ArrowRight, Github, BookOpen } from "lucide-react";
 import dinou from "@/images/dinou.png";
 import ModeToggle from "@/components/mode-toggle";
+import { DocsSearch } from "@/docs/components/docs-search";
 import { RiNpmjsFill } from "react-icons/ri";
 import {
   Tooltip,
@@ -19,11 +20,11 @@ const navItems = [
   { href: "#react-19", label: "RSC", title: "Pure React 19 Engine: RSC & Server Functions" },
   { href: "#deploy-everywhere", label: "Deploy", title: "Universal Multi-Runtime Deploy" },
   { href: "#routing", label: "Routing", title: "Intuitive File-Based Routing" },
-  { href: "#type-safe", label: "Type-Safe", title: "Zero-Runtime Type-Safe Routing" },
+  { href: "#type-safe", label: "Type-Safe", title: "Zero-Boilerplate Type-Safe Routing" },
   { href: "#ssg", label: "SSG", title: "Static by Default: SSG, ISR & ISG" },
-  { href: "#segmentation", label: "Segmentation", title: "Two-Dimensional Layered Segmentation" },
-  { href: "#middleware", label: "Middleware", title: "Universal Middleware & Webhooks (dinou.config.js)" },
-  { href: "#dx", label: "DX", title: "Fast Developer Experience: Sub-5ms HMR" },
+  { href: "#segmentation", label: "3D-Segmentation", title: "Three-Dimensional Layered Segmentation" },
+  { href: "#middleware", label: "Middleware", title: "Universal Middleware & Webhooks (dinou.config.ts)" },
+  { href: "#dx", label: "DX", title: "Fast Developer Experience: ~260ms E2E HMR & 2.09s Cold Start" },
   { href: "#bundlers", label: "Bundlers", title: "Tri-Bundler Engine: esbuild, Rollup & Webpack" },
   { href: "#eject", label: "Eject", title: "Framework Sovereignty & Zero Lock-in" },
   { href: "#architecture", label: "Architecture", title: "Engine Architecture: Engineered for Pure Web Standards" },
@@ -36,7 +37,7 @@ export default function Header() {
   const navRef = useRef<HTMLElement>(null);
   const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const isClickScrollingRef = useRef(false);
-  const scrollEndTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearScrollLock = () => {
     isClickScrollingRef.current = false;
@@ -175,7 +176,7 @@ export default function Header() {
         clearTimeout(scrollEndTimerRef.current);
       }
     };
-  }, [navItems]);
+  }, []);
 
   // Update sliding indicator position based on activeSection
   useEffect(() => {
@@ -215,7 +216,7 @@ export default function Header() {
             <img src={dinou} className="w-8 h-8 sm:w-9 sm:h-9" alt="Dinou" width={36} height={36} />
           </Link>
           <Badge variant="outline" className="inline-flex text-[11px] font-mono px-2 py-0.5 border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/5">
-            v9
+            v10
           </Badge>
         </div>
 
@@ -254,6 +255,7 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center space-x-1.5 sm:space-x-2">
+          <DocsSearch variant="landing" />
           <Button
             variant="outline"
             size="sm"
@@ -270,7 +272,7 @@ export default function Header() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="sm" asChild>
-                <a href="https://www.npmjs.com/package/dinou" target="_blank">
+                <a href="https://www.npmjs.com/package/dinou" target="_blank" rel="noreferrer">
                   <RiNpmjsFill className="h-4 w-4" />
                   <span className="sr-only">npm</span>
                 </a>
@@ -284,7 +286,7 @@ export default function Header() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="sm" asChild>
-                <a href="https://github.com/roggc/dinou" target="_blank">
+                <a href="https://github.com/roggc/dinou" target="_blank" rel="noreferrer">
                   <Github className="h-4 w-4" />
                   <span className="sr-only">GitHub</span>
                 </a>

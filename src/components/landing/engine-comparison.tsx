@@ -13,19 +13,19 @@ export function EngineComparison() {
     },
     {
       dimension: "Process & Memory Model",
-      implementation: "Single-process unified memory-mapped engine with flat, predictable RAM",
+      implementation: "Single-process unified engine with low memory usage (275 MB idle / 492 MB peak @ 200 conns)",
     },
     {
       dimension: "Deployment Flexibility",
-      implementation: "Universal: Cloudflare Workers, Bun, Deno, Node.js & native single binaries",
+      implementation: "Universal: Cloudflare Workers, Netlify v2, Bun, Deno, Node.js, native binaries & Static Export (SSG)",
     },
     {
       dimension: "Dev Server & DX",
-      implementation: "In-memory 0-fork compilation with sub-5ms WebSocket HMR (< 150ms startup)",
+      implementation: "In-memory 0-fork compilation (~2.09s cold start, ~260ms E2E HMR, 6.5s prod build)",
     },
     {
       dimension: "Rendering & Caching Model",
-      implementation: "2D Layered Segmentation (PPR, layout_functions & <DinouCacheSlot>)",
+      implementation: "3D Layered Segmentation (PPR, layout_functions & <DinouCacheSlot>)",
     },
     {
       dimension: "State Persistence on Navigation",
@@ -55,7 +55,7 @@ export function EngineComparison() {
             </span>
           </h2>
           <p className="max-w-[760px] text-slate-600 dark:text-slate-400 md:text-lg leading-relaxed">
-            Dinou is built from the ground up on Web Standards and React 19. A unified in-process engine with direct memory streaming, flat RAM footprint, and zero subprocess overhead.
+            Dinou is built from the ground up on Web Standards and React 19. A unified in-process engine with direct memory streaming, low and predictable memory usage, and zero subprocess overhead.
           </p>
         </div>
 
@@ -98,7 +98,7 @@ export function EngineComparison() {
               </div>
               <div className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span className="font-medium">Deploy to Edge, Bun, Deno, Node.js, native binaries, and SSG</span>
+                <span className="font-medium">Deploy to Cloudflare, Netlify, Bun, Deno, Node.js, native binaries, and SSG</span>
               </div>
             </div>
           </div>

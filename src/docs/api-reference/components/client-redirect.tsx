@@ -60,7 +60,7 @@ export function ClientRedirectSection() {
               <td className="p-3 font-mono text-[11px] text-foreground align-top">string</td>
               <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">Required</td>
               <td className="p-3 align-top leading-relaxed">
-                The destination path to navigate to. Supports absolute internal paths (e.g. <code>&quot;/auth/sign-in&quot;</code>), relative paths (e.g. <code>&quot;./onboarding&quot;</code>), and query parameters (e.g. <code>&quot;/pricing?plan=pro&quot;</code>).
+                The destination path or URL to navigate to. Supports absolute internal paths (e.g. <code>&quot;/auth/sign-in&quot;</code>), relative paths (e.g. <code>&quot;./onboarding&quot;</code>), query parameters (e.g. <code>&quot;/pricing?plan=pro&quot;</code>), and external URLs (e.g. <code>&quot;https://checkout.stripe.com/...&quot;</code>, which automatically delegate to <code>window.location.replace()</code>).
               </td>
             </tr>
           </tbody>

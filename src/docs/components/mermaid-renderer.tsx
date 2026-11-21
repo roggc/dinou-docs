@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { MermaidConfig } from "mermaid";
 
-const mermaidConfig = {
+const mermaidConfig: MermaidConfig = {
   startOnLoad: false,
   theme: "dark",
   securityLevel: "loose",

@@ -3,14 +3,11 @@
 import { useState } from "react";
 import {
   FolderTree,
-  ShieldCheck,
   CheckCircle2,
   ArrowRight,
-  Code2,
   LockOpen,
   Copy,
   Check,
-  Server,
   Zap,
   Bot,
 } from "lucide-react";
@@ -20,29 +17,29 @@ import { Link } from "dinou";
 
 const coreEjectedModules = [
   {
-    name: "compiler/",
-    role: "Dual-Bundle AOT Compiler",
-    desc: "Pluggable build pipelines for esbuild, Rollup, and Webpack.",
+    name: "core/",
+    role: "Universal RSC & HTTP Engine",
+    desc: "Web Standards request pipeline, Flight serializer, PPR, ISR, and router.",
   },
   {
-    name: "server/",
-    role: "Universal Server Adapters",
-    desc: "Multi-runtime server loop for Cloudflare, Bun, Node, and Deno.",
+    name: "adapters/",
+    role: "Multi-Runtime Server Adapters",
+    desc: "Native entrypoints for Cloudflare Workers, Netlify, Bun, Deno, and Node.js.",
   },
   {
-    name: "client/",
-    role: "Hydration & Navigation",
-    desc: "Progressive client hydration runtime, <Link>, and router.",
+    name: "esbuild/ · rollup/ · webpack/",
+    role: "Tri-Bundler Pipelines",
+    desc: "Pre-configured Dual-Bundle client and server build pipelines.",
   },
   {
-    name: "rsc-context/",
-    role: "React Flight Wire Protocol",
-    desc: "Serializes Server Components and dispatches Server Functions.",
+    name: "node/ · bun/ · deno/ · cloudflare/",
+    role: "Runtime Builders & HMR",
+    desc: "Zero-fork dev server with WebSocket HMR and AOT target builders.",
   },
   {
-    name: "static-isr/",
-    role: "Hybrid Cache & ISR Engine",
-    desc: "Static site generation and granular layout revalidation.",
+    name: "compiled/",
+    role: "Dual-Mode ESM Vendors",
+    desc: "31 pre-bundled toolchain packages for instant cold starts (or bypass via -u).",
   },
 ];
 
@@ -108,11 +105,11 @@ export function EjectShowcase() {
                     key={mod.name}
                     className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800"
                   >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="font-mono text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400">
                         {mod.name}
                       </span>
-                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                      <span className="text-xs font-medium text-slate-500 dark:text-slate-400 text-right">
                         {mod.role}
                       </span>
                     </div>
@@ -160,10 +157,10 @@ export function EjectShowcase() {
                   <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                      Zero Risk of Abandonment
+                      Zero Lock-In &amp; 1-Command Uneject
                     </h4>
                     <p className="text-sm text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
-                      You are never at the mercy of closed cloud vendors or breaking meta-framework changes. Your codebase is 100% self-contained.
+                      Ejecting is never a one-way door. Inspect or customize your stack freely, and run <code className="font-mono text-xs px-1 py-0.5 rounded bg-slate-200/70 dark:bg-slate-800">npm run uneject</code> anytime to return cleanly to <code className="font-mono text-xs px-1 py-0.5 rounded bg-slate-200/70 dark:bg-slate-800">node_modules/dinou</code>.
                     </p>
                   </div>
                 </div>

@@ -1,28 +1,29 @@
-# 1. Etapa de compilación
+# 1. Compilation Stage (100% Bun, Zero Node.js required)
 FROM oven/bun:latest AS builder
 WORKDIR /app
 
-# Symlink para que #!/usr/bin/env node (usado por el bin de dinou y cross-env) ejecute bun
+# Symlink so #!/usr/bin/env node CLI shebangs execute Bun transparently
 RUN ln -s /usr/local/bin/bun /usr/local/bin/node
 
-# Instalar dependencias respetando las versiones de package-lock.json
+# Install dependencies cleanly
 COPY package.json package-lock.json* ./
 RUN bun install
 
-# Copiar proyecto y compilar binario
+# Copy application source and compile standalone binary
 COPY . .
 RUN bun run build:bun:pure:compile
 
-# 2. Etapa de ejecución (ligera)
+# 2. Minimal Production Runner Stage
 FROM debian:bookworm-slim AS runner
 WORKDIR /app
 
-# Certificados para conexiones HTTPS
+# Install CA certificates for outbound HTTPS connections
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
-# Copiar el ejecutable y la carpeta .dinou entera
+# Copy standalone executable + pre-rendered SSG cache (dist2) & public static assets (dist3)
 COPY --from=builder /app/dist/server ./server
-COPY --from=builder /app/.dinou ./.dinou
+COPY --from=builder /app/.dinou/dist2 ./.dinou/dist2
+COPY --from=builder /app/.dinou/dist3 ./.dinou/dist3
 
 RUN chmod +x ./server
 

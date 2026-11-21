@@ -8,10 +8,6 @@ import {
   Sparkles,
   FolderArchive,
   Layers,
-  Cpu,
-  Boxes,
-  Globe,
-  CheckCircle2,
 } from "lucide-react";
 
 export default function MigrationIndexPage() {
@@ -48,18 +44,44 @@ export default function MigrationIndexPage() {
 
         {/* Guides Grid */}
         <div className="grid gap-6 md:grid-cols-2 mt-8 not-prose">
-          {/* v8 to v9 */}
-          <Link href="/docs/migration/v8-to-v9" className="group md:col-span-2">
+          {/* v9 to v10 */}
+          <Link href="/docs/migration/v9-to-v10" className="group md:col-span-2">
             <Card className="h-full border-blue-500/30 bg-blue-50/20 dark:bg-blue-950/10 hover:border-blue-500 hover:shadow-lg transition-all duration-200 flex flex-col justify-between">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
-                    Latest Major • v9
+                    Latest Major • v10
                   </span>
                   <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
                 </div>
                 <CardTitle className="text-xl font-bold mt-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-blue-500 shrink-0" />
+                  Migration from v9 to v10
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground space-y-3 flex-1 flex flex-col justify-between">
+                <p className="leading-relaxed">
+                  End-to-end <strong>Type-Safe Routing</strong> with contextual <code>&quot;./dinou&quot;</code> modules, full <code>.env*</code> &amp; <code>DINOU_PUBLIC_*</code> isolation, unified <code>tsconfig.json</code> aliases, AOT <code>dinou.config.ts</code> &amp; Netlify Functions v2 bundles, inline RSC streaming, and <code>dinou uneject</code> — plus targeted breaking changes for <code>_folder</code> exclusion, per-segment <code>ppr</code>, deployment output paths, unified <code>public/</code>, and build-time <code>onRequest</code>.
+                </p>
+                <div className="text-xs font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1 pt-2">
+                  Read v9 to v10 migration guide &rarr;
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* v8 to v9 */}
+          <Link href="/docs/migration/v8-to-v9" className="group">
+            <Card className="h-full border-blue-500/30 bg-blue-50/20 dark:bg-blue-950/10 hover:border-blue-500 hover:shadow-lg transition-all duration-200 flex flex-col justify-between">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                    v9.0.0
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                </div>
+                <CardTitle className="text-xl font-bold mt-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex items-center gap-2">
+                  <RefreshCw className="h-5 w-5 text-blue-500 shrink-0" />
                   Migration from v8 to v9
                 </CardTitle>
               </CardHeader>

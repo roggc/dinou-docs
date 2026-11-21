@@ -1,0 +1,71 @@
+# Dinou
+
+> Dinou (v10) is a zero-boilerplate, Web Standards-native React 19 full-stack framework with a 0-fork in-memory Dual-Bundle engine, End-to-End Type-Safe Routing, 3D Layered Caching (Horizontal Layout Segmentation + Vertical `<DinouCacheSlot>` Micro-ISR + Partial Prerendering), Tri-Bundler freedom (Esbuild, Rollup, Webpack), universal deployment (Node.js, Netlify Functions v2, Cloudflare Workers, Deno, Bun, standalone binaries, and Static Export SPA), and 100% reversible eject/uneject sovereignty.
+
+## Full Documentation for LLMs
+
+- [Complete Condensed Dinou v10 Reference](https://dinou.dev/llms-full.txt): Single-file technical reference covering routing, contextual `"./dinou"` imports, `page_functions.ts` / `layout_functions.ts`, rendering/PPR/3D caching, Server Functions, plugins, environment variables, deployment, and CLI commands.
+
+## Key Dinou Conventions (Do Not Confuse with Next.js)
+
+- **Source root is `src/`**, not `app/`: routes live at `src/page.tsx`, `src/blog/[slug]/page.tsx`, etc.
+- **No `searchParams` prop**: read query strings universally in Server and Client Components with `useSearchParams()` from `"dinou"`.
+- **Route lifecycles live in sibling files**: `page_functions.ts` and `layout_functions.ts` export `revalidate` (in **seconds**: `0` = Dynamic SSR, `>= 1` = ISR, `false`/omitted = SSG), `ppr` (strictly **per-segment**, no parent-to-child inheritance), `allowISG`, `getProps`, `getStaticPaths`, `validateParams`, and `getCacheTags`.
+- **Underscore `_folder` directories in `src/` are completely excluded** from routing, bundlers, VFS, and Server Functions (`403`). Active helper/component/plugin folders do **not** use `_` (any folder without `page.tsx` is already ignored by the router: use `src/components/`, `src/lib/`, `src/plugins/`).
+- **Route-contextual `"./dinou"` virtual modules**: with `rootDirs: ["src", ".dinou/routes"]` and `dinou typegen`, import `{ Link, useRouter, ROUTE, type PageProps, type LayoutProps, type PageFunctions, type LayoutFunctions }` from `"./dinou"` with zero manual route string literals.
+- **Environment variables**: private by default; client-visible variables require the `DINOU_PUBLIC_` prefix. On the server, prefer `getContext().env` for Node, Bun, Deno, Cloudflare Workers (KV/D1/R2 bindings), and Netlify parity.
+- **Configuration & Web Standards middleware**: `dinou.config.ts` (`defineConfig`) with `plugins: [{ onRequest(request, context) }]` (skipped during build-time SSG; runs on all runtime requests).
+
+## Getting Started
+
+- [Introduction](https://dinou.dev/docs): Architectural overview, 0-fork Dual-Bundle engine, 3D caching, Tri-Bundler parity, and framework philosophy.
+- [Installation](https://dinou.dev/docs/getting-started): Project setup, `create-dinou`, directory structure, `tsconfig.json`, `dinou-env.d.ts`, and core CLI scripts.
+
+## Core Concepts
+
+- [Routing](https://dinou.dev/docs/routing): File-system routing in `src/`, dynamic/optional/catch-all segments, `(group)` route groups, parallel `@slots`, `layout.tsx`, `no_layout`, `reset_layout`, `error.tsx`, `not_found.tsx`, and `_folder` exclusion.
+- [Navigation](https://dinou.dev/docs/navigation): `<Link>`, `useRouter()`, `usePathname()`, `useSearchParams()`, `useNavigationLoading()`, `refreshSlot()`, `redirect()`, `<ClientRedirect>`, and client caching (`fresh`).
+- [Type-Safe Routing](https://dinou.dev/docs/type-safe-routing): `dinou typegen`, `.dinou/types/routes.d.ts`, route-contextual `"./dinou"` modules, `PageProps`, `LayoutProps`, `SlotProps`, `ErrorProps`, `NotFoundProps`, `PageFunctions`, `LayoutFunctions`, `RouteParams`, `params` interpolation, and relative `from` navigation.
+- [Component Architecture](https://dinou.dev/docs/server-client-components): React 19 Server Components (RSC) by default, `"use client"` boundaries, composition patterns, and inline RSC hydration.
+- [Page & Layout Functions](https://dinou.dev/docs/page-functions): `page_functions.ts` and `layout_functions.ts` contracts (`revalidate`, `ppr`, `allowISG`, `getProps`, `getStaticPaths`, `validateParams`, `getCacheTags`).
+- [Static & Dynamic Rendering](https://dinou.dev/docs/rendering): Static-by-default SSG, ISG, ISR, Dynamic SSR, Partial Prerendering (PPR), `noDynamic()`, Automatic Static Bailout, and progressive `<Suspense>` streaming.
+- [3D Layered Segmentation](https://dinou.dev/docs/3d-segmentation): Horizontal Layout Segmentation, Vertical `<DinouCacheSlot>` Micro-ISR, and PPR Dynamic Holes combined.
+- [Server Functions](https://dinou.dev/docs/server-functions): Module-level and inline `"use server"` RPC functions, form actions, streaming JSX/Server Components, `getContext()`, and error propagation.
+- [Request Context](https://dinou.dev/docs/request-context): Synchronous `getContext()` via `AsyncLocalStorage` for cookies, HTTP headers, normalized `req.path`, `res` mutations, SSG/PPR bailout rules, unified `env`/`ctx` bindings, and plugin state.
+- [On-Demand Revalidation](https://dinou.dev/docs/revalidation): `revalidatePath`, `revalidatePage`, `revalidateLayout`, `revalidateTag`, lazy HTML re-composition, and distributed storage adapters (`FileSystemStorage`, `RedisStorage`, `CloudflareKVStorage`, `DenoKVStorage`, `MemoryStorage`).
+- [Data Fetching](https://dinou.dev/docs/data-fetching): All 14 execution and data-fetching strategies in Dinou, including un-awaited `Promise` props with React 19 `use()`.
+- [The Dinou Pattern](https://dinou.dev/docs/pattern): Architectural design patterns combining Server Components, Client Components, 3D caching, and Server Functions.
+- [React Compiler](https://dinou.dev/docs/compiler): Automatic `babel-plugin-react-compiler` optimization across Esbuild, Rollup, and Webpack, `reactCompiler` config toggle, and `"use no memo"`.
+- [Public Directory](https://dinou.dev/docs/public): Unified `public/` static files, PWA `public/manifest.json`, `.well-known/*`, HTTP `206 Partial Content` media streaming, and security/caching rules.
+- [Styles](https://dinou.dev/docs/styles): Global CSS, Tailwind CSS v4, universal CSS Modules across RSC and SSR, and PostCSS `url(...)` asset fingerprinting.
+- [Assets](https://dinou.dev/docs/assets): Content+path hashed `/assets/[name]-[hash].[ext]` imports (images, video, audio, fonts), `dinou/env` types, and custom `assetExtensions` in `dinou.config.ts`.
+- [Environment Variables](https://dinou.dev/docs/env-vars): `.env*` precedence hierarchy, live dev hot-reload, server secret isolation, `DINOU_PUBLIC_*` client inlining, unified `getContext().env`, and Cloudflare/Deno/Netlify bindings.
+- [Path Aliases](https://dinou.dev/docs/alias): Unified `tsconfig.json` and `jsconfig.json` path aliases (`paths`, `extends`, `${configDir}`, CSS, `dinou.config.ts`) and contextual `"./dinou"` modules.
+- [Configuration & Plugins](https://dinou.dev/docs/plugins): `dinou.config.ts`, AOT config bundling, `onRequest(request, context)` Web Standards middleware/webhooks, `configureServer`, and `setupFiles`.
+- [Bundlers & Build Tooling](https://dinou.dev/docs/bundlers): Esbuild, Rollup, and Webpack pipelines, Dual-Mode Additive Vendoring (`-u` / `DINOU_UNVENDORIZED`), and complete CLI script reference.
+- [Deployment](https://dinou.dev/docs/deployment): Deploying to Node.js, Docker, Netlify Functions v2 (`build:netlify`), Cloudflare Workers (`.dinou/cloudflare/assets`), Deno Deploy, Bun, native binaries, and Static Export SPA (`export-static`).
+- [Eject & Uneject](https://dinou.dev/docs/eject): 100% reversible `dinou eject` and transactional `dinou uneject`, `build:vendors`, and real-world use cases for ejecting.
+
+## Reference
+
+- [API Reference](https://dinou.dev/docs/api-reference): Complete TypeScript signatures and runtime docs for `dinou`, `dinou/server`, `dinou/config`, `dinou/env`, and route contracts.
+- [Cheatsheet](https://dinou.dev/docs/cheatsheet): Condensed quick-reference tables for routing, caching, hooks, plugins, CLI commands, and deployment.
+
+## Guides
+
+- [Internationalization (i18n)](https://dinou.dev/docs/i18n): Multi-locale routing with `onRequest`, SPA-safe `context.req.path`, SSG-safe `getServerT()`, and typed language switchers.
+- [Clerk Authentication](https://dinou.dev/docs/clerk): Cryptographic JWT verification in `onRequest`, edge-safe `context.env`, Server Actions/Pages protection, `DinouClerkProvider` (`routerPush`/`routerReplace`), and Svix webhooks.
+
+## Upgrade Guides
+
+- [Upgrade Guides Overview](https://dinou.dev/docs/migration): Summary of major version migrations.
+- [Migration from v9 to v10](https://dinou.dev/docs/migration/v9-to-v10): v10 breaking changes (`_folder` exclusion, per-segment `ppr`, Cloudflare/Netlify output paths, `favicons/` removal, SSG `onRequest`, `DINOU_PUBLIC_*`, strict route types) and new features.
+
+## Optional
+
+- [About Dinou](https://dinou.dev/docs/about): Project background, versioning history, and community links.
+- [Migration from v8 to v9](https://dinou.dev/docs/migration/v8-to-v9): Dual-Mode Additive Vendoring (`-u`) upgrade guide.
+- [Migration from v7 to v8](https://dinou.dev/docs/migration/v7-to-v8): Pure ESM architectural migration guide.
+- [Migration from v6 to v7](https://dinou.dev/docs/migration/v6-to-v7): 0-Fork Dual-Bundle, 3D Segmentation, and `revalidate` in seconds migration guide.
+- [Migration from v5 to v6](https://dinou.dev/docs/migration/v5-to-v6): Consolidated `.dinou` build directory migration guide.
+- [Migration from v4 to v5](https://dinou.dev/docs/migration/v4-to-v5): React Flight streaming and plugin system migration guide.

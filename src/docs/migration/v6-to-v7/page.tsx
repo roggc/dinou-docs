@@ -664,7 +664,7 @@ globalThis.__DINOU_MEM_FILES__
                 3. Layered Segmentation Architecture
               </h2>
               <p>
-                Dinou v7 introduces a two-dimensional rendering model: <strong>Horizontal Segmentation</strong> (decoupling layout shells from dynamic child pages) and <strong>Vertical Segmentation</strong> (micro-caching individual components inside a page with <code>&lt;DinouCacheSlot&gt;</code> and PPR).
+                Dinou v7 introduces a three-dimensional rendering model: <strong>Horizontal Segmentation</strong> (decoupling layout shells from dynamic child pages), <strong>Vertical Segmentation</strong> (micro-caching individual components inside a page with <code>&lt;DinouCacheSlot&gt;</code>), and <strong>Temporal Segmentation</strong> (Partial Prerendering / PPR).
               </p>
 
               {/* 3.1 Horizontal Segmentation */}

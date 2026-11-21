@@ -92,7 +92,7 @@ export function UseNavigationLoadingSection() {
                 <td className="p-3 font-mono text-[11px] align-top">refreshSlot()</td>
                 <td className="p-3 align-top font-semibold text-muted-foreground">No</td>
                 <td className="p-3 align-top leading-relaxed">
-                  Localized slot revalidation uses its own internal <code>&lt;Suspense&gt;</code> boundary; does not toggle global navigation loading.
+                  Localized slot revalidation applies its update inside its own isolated <code>startTransition</code> in <code>DinouCacheSlotBoundary</code>; it does not toggle global navigation loading (wrap <code>await refreshSlot(...)</code> in a local <code>useTransition</code> for slot-specific spinners).
                 </td>
               </tr>
               <tr>
@@ -223,10 +223,10 @@ export function GlobalNavigationIndicator() {
                 code: `// src/components/nav-button.tsx (Client Component)
 "use client";
 
-import { useNavigationLoading, useRouter } from "dinou";
+import { useNavigationLoading, useRouter, type DinouRoute } from "dinou";
 
 interface NavButtonProps {
-  href: string;
+  href: DinouRoute;
   children: React.ReactNode;
 }
 

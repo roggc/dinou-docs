@@ -1,3 +1,4 @@
+import { Link } from "dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
 import { ClickableTableRow } from "@/docs/components/clickable-table-row";
@@ -5,7 +6,6 @@ import { Badge } from "@/docs/components/ui/badge";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/docs/components/ui/card";
@@ -14,7 +14,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/docs/components/ui/alert";
-import { AlertTriangle, Info, Workflow } from "lucide-react";
+import { Info, Workflow } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
 import {
@@ -29,7 +29,7 @@ import {
 const tocItems = [
   {
     id: "overview",
-    title: "Overview: 13-Strategy Architecture",
+    title: "Overview: 14-Strategy Architecture",
     level: 2,
   },
   {
@@ -54,7 +54,7 @@ const tocItems = [
   },
   {
     id: "strategy-5",
-    title: "5. RSC + <Suspense> + <DinouCacheSlot> (Static SSG / Asymmetric ISR)",
+    title: "5. RSC + <DinouCacheSlot> (Static SSG / Asymmetric ISR)",
     level: 2,
   },
   {
@@ -89,12 +89,17 @@ const tocItems = [
   },
   {
     id: "strategy-12",
-    title: "12. Client Calling Server Function (Initial Mount - Dynamic RPC)",
+    title: "12. Client-First getProps Promise ➔ Client use() (React 19)",
     level: 2,
   },
   {
     id: "strategy-13",
-    title: "13. Client Server Functions (User Actions & Mutations)",
+    title: "13. Client Calling Server Function (Initial Mount - Dynamic RPC)",
+    level: 2,
+  },
+  {
+    id: "strategy-14",
+    title: "14. Client Server Functions (User Actions & Mutations)",
     level: 2,
   },
   {
@@ -141,7 +146,7 @@ export default function DataFetchingPage() {
       <title>Data Fetching Strategies | Dinou Docs</title>
       <meta
         name="description"
-        content="A comprehensive case-by-case engineering guide covering each of the 13 data fetching and rendering patterns available in Dinou."
+        content="A comprehensive case-by-case engineering guide covering each of the 14 data fetching and rendering patterns available in Dinou."
       />
       <link rel="canonical" href="https://dinou.dev/docs/data-fetching" />
 
@@ -154,7 +159,7 @@ export default function DataFetchingPage() {
                 variant="secondary"
                 className="font-mono text-xs text-foreground bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
               >
-                13 Execution Strategies
+                14 Execution Strategies
               </Badge>
               <Badge variant="outline" className="font-mono text-xs">
                 Deep Dive Catalog
@@ -167,10 +172,10 @@ export default function DataFetchingPage() {
               </Badge>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Data Fetching: The 13 Strategies
+              Data Fetching: The 14 Strategies
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              A comprehensive case-by-case engineering guide covering each of the 13 data fetching and rendering patterns available in Dinou.
+              A comprehensive case-by-case engineering guide covering each of the 14 data fetching and rendering patterns available in Dinou.
               Every strategy is examined with concrete code snippets, runtime lifecycle behavior, TTFB metrics, server load characteristics, and production trade-offs.
             </p>
           </div>
@@ -179,12 +184,17 @@ export default function DataFetchingPage() {
             {/* Overview */}
             <section id="overview" className="scroll-mt-20">
               <h2 className="text-2xl font-bold tracking-tight border-b pb-2 mb-4">
-                Overview: The 13-Strategy Architecture
+                Overview: The 14-Strategy Architecture
               </h2>
               <p>
                 Dinou provides unprecedented flexibility by separating <strong>where code executes</strong> (Server Component vs Client Component),{" "}
                 <strong>when data is fetched</strong> (Build time vs Per-request vs On-demand), and{" "}
-                <strong>how it is delivered</strong> (Blocking TTFB vs Progressive HTTP Streaming vs Micro-ISR Caching).
+                <strong>how it is delivered</strong> (Blocking TTFB vs Progressive HTTP Streaming vs Micro-ISR Caching). For deep dives into the underlying primitives, see{" "}
+                <Link href="/docs/rendering">Rendering &amp; Caching</Link>,{" "}
+                <Link href="/docs/3d-segmentation">3D Cache Segmentation</Link>,{" "}
+                <Link href="/docs/page-functions">Page &amp; Layout Functions</Link>,{" "}
+                <Link href="/docs/server-functions">Server Functions</Link>, and{" "}
+                <Link href="/docs/revalidation">On-Demand Revalidation</Link>.
               </p>
 
               {/* Quick Jump Grid */}
@@ -195,7 +205,7 @@ export default function DataFetchingPage() {
                     <span>Interactive Strategy Index</span>
                   </div>
                   <span className="text-[11px] font-mono text-muted-foreground">
-                    13 Architecture Patterns
+                    14 Architecture Patterns
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
@@ -294,7 +304,7 @@ export default function DataFetchingPage() {
                       id: "strategy-11",
                       num: 11,
                       name: "Client-First getProps (Dynamic)",
-                      badge: "SSR Client",
+                      badge: "Blocked TTFB",
                       numBg: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
                       badgeClass: "border-rose-500/30 text-rose-700 dark:text-rose-400 bg-rose-50/60 dark:bg-rose-950/30",
                       hoverClass: "hover:border-rose-500/40 hover:bg-rose-50/30 dark:hover:bg-rose-950/20",
@@ -302,8 +312,8 @@ export default function DataFetchingPage() {
                     {
                       id: "strategy-12",
                       num: 12,
-                      name: "Client Calling Server Function",
-                      badge: "Mount RPC",
+                      name: "getProps Promise ➔ Client use()",
+                      badge: "React 19",
                       numBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
                       badgeClass: "border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-950/30",
                       hoverClass: "hover:border-amber-500/40 hover:bg-amber-50/30 dark:hover:bg-amber-950/20",
@@ -311,6 +321,15 @@ export default function DataFetchingPage() {
                     {
                       id: "strategy-13",
                       num: 13,
+                      name: "Client Calling Server Function",
+                      badge: "Mount RPC",
+                      numBg: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+                      badgeClass: "border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-50/60 dark:bg-amber-950/30",
+                      hoverClass: "hover:border-amber-500/40 hover:bg-amber-50/30 dark:hover:bg-amber-950/20",
+                    },
+                    {
+                      id: "strategy-14",
+                      num: 14,
                       name: "Client Server Functions (User)",
                       badge: "RPC Actions",
                       numBg: "bg-slate-500/10 text-slate-700 dark:text-slate-300",
@@ -507,11 +526,11 @@ export default function DataFetchingPage() {
                           <TableCell className="font-mono text-center text-muted-foreground group-hover:text-foreground font-bold">5</TableCell>
                           <TableCell>
                             <a href="#strategy-5" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
-                              RSC with &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Static / Asymmetric ISR)
+                              RSC + &lt;DinouCacheSlot&gt; (Static / Asymmetric ISR)
                             </a>
-                            <div className="text-[11px] text-muted-foreground">Pre-rendered static shell with decoupled slot TTL or <code>refreshSlot()</code></div>
+                            <div className="text-[11px] text-muted-foreground">Pre-rendered static page with unwrapped slot TTL, Background SWR &amp; <code>refreshSlot()</code></div>
                           </TableCell>
-                          <TableCell className="text-muted-foreground">Build Time (Pre-rendered) + On-Demand Slot Reval</TableCell>
+                          <TableCell className="text-muted-foreground">Build Time (Pre-rendered) + Background SWR / Slot Reval</TableCell>
                           <TableCell>
                             <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
                               0ms (CDN Edge)
@@ -519,7 +538,7 @@ export default function DataFetchingPage() {
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                              Instant (~0-2ms)
+                              0ms (In Static HTML)
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -529,7 +548,7 @@ export default function DataFetchingPage() {
                           </TableCell>
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-amber-600 dark:text-amber-400 font-medium">Decoupled TTL / refreshSlot()</TableCell>
-                          <TableCell className="text-muted-foreground">Static/ISR pages (e.g. 24h page revalidate) containing a widget (stock, pricing) needing fast updates (60s) or surgical in-place client refreshes.</TableCell>
+                          <TableCell className="text-muted-foreground">Static/ISR pages (e.g. 24h page revalidate) containing a widget (stock, pricing) needing fast background updates (60s) or surgical in-place client refreshes.</TableCell>
                         </ClickableTableRow>
 
                         {/* Row 6 */}
@@ -542,9 +561,9 @@ export default function DataFetchingPage() {
                             <a href="#strategy-6" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
                               RSC with &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Dynamic)
                             </a>
-                            <div className="text-[11px] text-muted-foreground">Dynamic streaming with vertical Micro-ISR (TTL cache)</div>
+                            <div className="text-[11px] text-muted-foreground">Dynamic SSR with vertical Micro-ISR (cold miss streams fallback; cache hits resolve in ~1–2ms)</div>
                           </TableCell>
-                          <TableCell className="text-muted-foreground">Per Request (Cache hit: ~2ms / Miss: async query)</TableCell>
+                          <TableCell className="text-muted-foreground">Per Request (Cache hit: ~1–2ms in SSR / Cold miss: async stream)</TableCell>
                           <TableCell>
                             <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
                               Fast (Early Layout)
@@ -552,7 +571,7 @@ export default function DataFetchingPage() {
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-mono text-[10px]">
-                              Instant (~2ms Cache)
+                              Instant (~1-2ms Cache)
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -562,7 +581,7 @@ export default function DataFetchingPage() {
                           </TableCell>
                           <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
                           <TableCell className="text-amber-600 dark:text-amber-400 font-medium">TTL / Tag Reval</TableCell>
-                          <TableCell className="text-muted-foreground">Dynamic routes (with session/cookies) containing heavy widgets (analytics, feeds). Flushes layout instantly; slot streams from cache without DB load.</TableCell>
+                          <TableCell className="text-muted-foreground">Dynamic routes (with session/cookies) containing heavy widgets (analytics, feeds). Streams fallback on cold miss; resolves directly from slot cache (~1–2ms) on hits without DB load.</TableCell>
                         </ClickableTableRow>
 
                         {/* Row 7 */}
@@ -741,6 +760,39 @@ export default function DataFetchingPage() {
                           <TableCell className="font-mono text-center text-amber-600 dark:text-amber-400 font-bold">12</TableCell>
                           <TableCell>
                             <a href="#strategy-12" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                              Client-First getProps Promise ➔ Client use() (Dynamic)
+                            </a>
+                            <div className="text-[11px] text-muted-foreground"><code>getProps</code> returns un-awaited Promise; Client Page unwraps via <code>use()</code></div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">Server starts query in <code>getProps</code>; Client suspends</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
+                              Fast (Early Shell)
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 font-mono text-[10px]">
+                              Waits for Promise
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-rose-600 dark:text-rose-400 border-rose-500/30 font-mono text-[10px]">
+                              Heavy (Live query)
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center font-semibold text-emerald-600 dark:text-emerald-400">None</TableCell>
+                          <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
+                          <TableCell className="text-muted-foreground">Client-First pages (<code>&quot;use client&quot;</code> <code>page.tsx</code>) needing live server data without blocking TTFB or causing client-side fetch waterfalls.</TableCell>
+                        </ClickableTableRow>
+
+                        {/* Row 13 */}
+                        <ClickableTableRow
+                          targetId="strategy-13"
+                          className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
+                        >
+                          <TableCell className="font-mono text-center text-amber-600 dark:text-amber-400 font-bold">13</TableCell>
+                          <TableCell>
+                            <a href="#strategy-13" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
                               Client Calling Server Function (Initial Mount - Dynamic RPC)
                             </a>
                             <div className="text-[11px] text-muted-foreground">Client Component calls <code>&quot;use server&quot;</code> during initial mount</div>
@@ -763,17 +815,17 @@ export default function DataFetchingPage() {
                           </TableCell>
                           <TableCell className="text-center font-semibold text-rose-600 dark:text-rose-400">Yes (Waterfall)</TableCell>
                           <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">100% Live</TableCell>
-                          <TableCell className="text-muted-foreground">Supported, but sub-optimal compared to pattern 9 (RSC Promise streaming) due to the second HTTP round trip.</TableCell>
+                          <TableCell className="text-muted-foreground">Supported, but sub-optimal compared to patterns 9 &amp; 12 (Server Promise streaming) due to the second HTTP round trip.</TableCell>
                         </ClickableTableRow>
 
-                        {/* Row 13 */}
+                        {/* Row 14 */}
                         <ClickableTableRow
-                          targetId="strategy-13"
+                          targetId="strategy-14"
                           className="cursor-pointer hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors group"
                         >
-                          <TableCell className="font-mono text-center text-slate-600 dark:text-slate-400 font-bold">13</TableCell>
+                          <TableCell className="font-mono text-center text-slate-600 dark:text-slate-400 font-bold">14</TableCell>
                           <TableCell>
-                            <a href="#strategy-13" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
+                            <a href="#strategy-14" className="font-bold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:underline">
                               Client Calling Server Function (User Action - Dynamic RPC)
                             </a>
                             <div className="text-[11px] text-muted-foreground">Invoked on user button click, form submission, or mutation</div>
@@ -878,7 +930,7 @@ export default async function BlogIndexPage() {
                     When a page is a <strong>Server Component</strong>, fetching data via <code>getProps</code> in <code>page_functions.ts</code> is <strong>functionally equivalent</strong> to executing queries directly with top-level <code>await</code> inside the component body (Strategies 1 &amp; 2).
                   </p>
                   <p>
-                    Both patterns run exclusively on the server prior to rendering, introduce zero client JavaScript bundle overhead, exhibit identical database latency, and produce the exact same static HTML and pre-compiled <code>.rsc</code> payload. The primary architectural purpose of <code>getProps</code> is when utilizing the <strong>Client-First Model</strong> (Strategies 10 &amp; 11), where it extracts data on the server to feed directly as initial props into interactive Client Component pages (<code>&quot;use client&quot;</code>).
+                    Both patterns run exclusively on the server prior to rendering, introduce zero client JavaScript bundle overhead, exhibit identical database latency, and produce the exact same static HTML and pre-compiled <code>.rsc</code> payload. The primary architectural purpose of <code>getProps</code> (see <Link href="/docs/page-functions" className="underline underline-offset-2 font-medium text-foreground">Page &amp; Layout Functions</Link>) is when utilizing the <strong>Client-First Model</strong> (Strategies 10–12), where it extracts data on the server to feed directly as initial props into interactive Client Component pages (<code>&quot;use client&quot;</code>).
                   </p>
                 </AlertDescription>
               </Alert>
@@ -914,7 +966,7 @@ export default async function BlogIndexPage() {
               <p className="text-sm text-muted-foreground leading-relaxed">
                 <strong>How it works:</strong> The component performs an un-Suspended top-level <code>await</code> on a route that is dynamic
                 (e.g., due to reading request headers, cookies, or declaring <code>export const revalidate = 0</code> in <code>page_functions.ts</code>).
-                The Node.js server halts the HTTP response until the database returns the data.
+                The server runtime halts the HTTP response until the database returns the data.
               </p>
 
               <TabbedCodeBlock
@@ -930,11 +982,11 @@ export default async function BlogIndexPage() {
                     id: "page",
                     label: "src/account/billing/page.tsx",
                     language: "tsx",
-                    code: `import { cookies } from "dinou/server";
+                    code: `import { getContext } from "dinou/server";
 import db from "@/lib/db";
 
 export default async function BillingPage() {
-  const sessionId = cookies().get("session_id");
+  const sessionId = getContext().req.cookies.session_id;
   if (!sessionId) throw new Error("Unauthorized");
 
   // BLOCKS TTFB: The browser receives 0 bytes until this query resolves
@@ -1167,7 +1219,8 @@ export default function AnalyticsPage() {
                     <li><strong>Direct Promise Children:</strong> In React Server Components, <code>&lt;Suspense&gt;</code> natively accepts a <code>Promise&lt;ReactNode&gt;</code> directly as children (<code>&#123;getMetricsTable()&#125;</code>), eliminating the need for boilerplate async wrapper components.</li>
                     <li><strong>Identical HTTP Streaming Behavior:</strong> In both cases, the initial layout shell and <code>&lt;AnalyticsSkeleton /&gt;</code> are flushed immediately in chunk 1 (fast TTFB). When the query resolves, the server streams the rendered HTML/RSC payload into chunk 2.</li>
                     <li><strong>Zero Client JavaScript:</strong> Database logic, ORM queries, and credentials remain 100% on the server in both solutions.</li>
-                    <li><strong>Versatility Bonus:</strong> Returning the JSX tree from a Server Function allows the exact same function to be triggered on-demand by Client Components later (e.g., a &quot;Refresh Metrics&quot; button or live filter) via Dinou&apos;s UI streaming RPC.</li>
+                    <li><strong>Versatility Bonus:</strong> Returning the JSX tree from a <Link href="/docs/server-functions" className="underline underline-offset-2 font-medium text-foreground">Server Function</Link> allows the exact same function to be triggered on-demand by Client Components later (e.g., a &quot;Refresh Metrics&quot; button or live filter) via Dinou&apos;s UI streaming RPC.</li>
+                    <li><strong>PPR Synchronous Request Nuance:</strong> On <Link href="/docs/3d-segmentation#partial-prerendering" className="underline underline-offset-2 font-medium text-foreground">PPR (<code>ppr = true</code>)</Link> routes, <code>&#123;getMetricsTable()&#125;</code> inside <code>&lt;Suspense&gt;</code> registers a dynamic hole automatically when it performs async I/O. However, if a helper reads <code>getContext().req</code> or <code>useSearchParams()</code> <strong>synchronously before its first <code>await</code></strong>, wrap it in a child Server Component (<code>&lt;SlowHeavyMetrics /&gt;</code>) inside <code>&lt;Suspense&gt;</code> so that synchronous request access executes inside the <code>&lt;Suspense&gt;</code> boundary rather than in the outer page frame.</li>
                   </ul>
                 </AlertDescription>
               </Alert>
@@ -1183,7 +1236,7 @@ export default function AnalyticsPage() {
                     5
                   </span>
                   <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-                    RSC + &lt;Suspense&gt; + &lt;DinouCacheSlot&gt; (Static SSG / Asymmetric ISR)
+                    RSC + &lt;DinouCacheSlot&gt; (Static SSG / Asymmetric ISR)
                   </h2>
                 </div>
                 <Badge variant="outline" className="text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-50/40 dark:bg-emerald-950/20 font-mono text-xs">
@@ -1194,14 +1247,14 @@ export default function AnalyticsPage() {
               {/* Metrics Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
                 <MetricCard label="TTFB" value="0ms (CDN Edge)" variant="emerald" />
-                <MetricCard label="Stream Ready" value="Instant (~0-2ms)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="0ms (In Static HTML)" variant="emerald" />
                 <MetricCard label="Server/DB Load" value="Near-Zero" variant="emerald" />
                 <MetricCard label="Waterfall" value="None" variant="emerald" />
                 <MetricCard label="Data Freshness" value="Decoupled TTL" variant="amber" className="col-span-2 sm:col-span-1" />
               </div>
 
               <p className="text-sm text-muted-foreground leading-relaxed">
-                <strong>How it works:</strong> Solves the &quot;all-or-nothing&quot; revalidation problem. The base outer page and layout are pre-rendered at build time (<strong>Static Site Generation - SSG</strong>) or configured with long-term ISR (e.g., 24 hours) delivered with <strong>0ms TTFB from Edge CDN</strong>. Meanwhile, an inner volatile component is wrapped in <code>&lt;DinouCacheSlot&gt;</code> with a fast TTL (e.g., 60 seconds). The heavy outer page remains immutable at the Edge CDN, while the slot revalidates independently in server memory/KV storage.
+                <strong>How it works:</strong> Solves the &quot;all-or-nothing&quot; revalidation problem on Static/ISR routes (<code>ppr = false</code>). The base outer page and layout are pre-rendered at build time (<strong>SSG</strong>) or on-demand (<strong>ISG</strong>) and configured with long-term ISR (e.g., 24 hours) for <strong>0ms TTFB</strong>. Meanwhile, an inner volatile component is wrapped directly in an unwrapped <Link href="/docs/3d-segmentation" className="underline underline-offset-2 font-medium text-foreground"><code>&lt;DinouCacheSlot&gt;</code></Link> with a fast TTL (e.g., 60 seconds). Because the route is static, the slot is pre-rendered directly into the static HTML (no <code>&lt;Suspense&gt;</code> wrapper needed, as a fallback would never be shown). When the slot&apos;s 60-second TTL expires, Dinou serves the existing static HTML immediately (0ms, zero skeleton flash) and triggers <strong>Background SWR</strong> to re-execute only that slot and surgically splice the updated widget into the cached <code>index.html</code> and <code>page.rsc</code> artifacts in your configured <code>StorageAdapter</code> (Filesystem, Memory, Redis, Deno KV, or Cloudflare KV).
               </p>
 
               <TabbedCodeBlock
@@ -1211,28 +1264,64 @@ export default function AnalyticsPage() {
                     id: "fn",
                     label: "src/products/[slug]/page_functions.ts",
                     language: "tsx",
-                    code: `export const revalidate = 86400; // Outer page revalidates once every 24 hours`,
+                    code: `import db from "@/lib/db";
+
+export const revalidate = 86400; // Outer page revalidates once every 24 hours
+
+// Pre-render top catalog slugs at build time (other slugs generate on-demand via ISG):
+export async function getStaticPaths() {
+  return await db.products.findFeaturedSlugs();
+}`,
                   },
                   {
                     id: "page",
                     label: "src/products/[slug]/page.tsx",
                     language: "tsx",
-                    code: `import { Suspense } from "react";
+                    code: `import type { PageProps } from "dinou";
 import { DinouCacheSlot } from "dinou/server";
 import { LivePriceTicker, StaticDescription } from "./components";
 
-export default function ProductDetailPage({ params }: { params: { slug: string } }) {
+export default function ProductDetailPage({ params }: PageProps<"/products/[slug]">) {
   return (
     <div className="product-view">
-      {/* Static product description: cached at Edge CDN for 24h */}
+      {/* Static product description: cached for 24h */}
       <StaticDescription slug={params.slug} />
 
-      {/* Asymmetric Micro-ISR: revalidates every 60s or via refreshSlot() */}
-      <Suspense fallback={<p>Checking live pricing...</p>}>
-        <DinouCacheSlot id={\`price-\${params.slug}\`} revalidate={60} tag="pricing">
-          <LivePriceTicker slug={params.slug} />
-        </DinouCacheSlot>
-      </Suspense>
+      {/* Unwrapped Static Slot: baked into static HTML at build time;
+          refreshes every 60s via Background SWR or on-demand via refreshSlot() */}
+      <DinouCacheSlot id={\`price-\${params.slug}\`} revalidate={60} tags={["pricing"]}>
+        <LivePriceTicker slug={params.slug} />
+      </DinouCacheSlot>
+    </div>
+  );
+}`,
+                  },
+                  {
+                    id: "components",
+                    label: "src/products/[slug]/components.tsx",
+                    language: "tsx",
+                    code: `import db from "@/lib/db";
+
+export async function StaticDescription({ slug }: { slug: string }) {
+  // Executed once every 24h (with the outer page ISR)
+  const product = await db.products.findBySlug(slug);
+  return (
+    <article>
+      <h1 className="text-2xl font-bold">{product.title}</h1>
+      <p className="text-muted-foreground">{product.description}</p>
+    </article>
+  );
+}
+
+export async function LivePriceTicker({ slug }: { slug: string }) {
+  // Executed independently every 60s (via <DinouCacheSlot> Background SWR)
+  const pricing = await db.pricing.getLiveQuote(slug);
+  return (
+    <div className="mt-4 p-3 rounded-lg border bg-emerald-50/40">
+      <span className="font-mono text-lg font-bold">\${pricing.amount}</span>
+      <span className="ml-2 text-xs text-muted-foreground">
+        ({pricing.stock} in stock · updated {pricing.updatedAt})
+      </span>
     </div>
   );
 }`,
@@ -1241,7 +1330,7 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
-                <p>• <strong>Targeted Invalidation:</strong> Calling <code>refreshSlot(&quot;price-prod-1&quot;)</code> from a client button refreshes only the price widget without rebuilding the 24-hour page cache.</p>
+                <p>• <strong>Surgical Static Splicing:</strong> When the slot expires or <Link href="/docs/revalidation" className="underline underline-offset-2 font-medium text-foreground"><code>revalidateTag(&quot;pricing&quot;)</code></Link> / <code>refreshSlot(&quot;price-prod-1&quot;)</code> is called, Dinou updates only the slot inside <code>shell.page.json</code>, <code>index.html</code>, and <code>page.rsc</code> across your configured <code>StorageAdapter</code> without re-running the outer 24-hour page (or resetting the host page&apos;s own 24-hour ISR timer).</p>
                 <p>• <strong>Massive Cost Savings:</strong> Prevents volatile widgets from causing full-page rebuild cascades across thousands of static pages.</p>
               </div>
             </section>
@@ -1267,16 +1356,16 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
               {/* Metrics Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
                 <MetricCard label="TTFB" value="Fast (Early Layout)" variant="emerald" />
-                <MetricCard label="Stream Ready" value="~2ms (Cache Hit)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="~1-2ms (Cache Hit)" variant="emerald" />
                 <MetricCard label="Server/DB Load" value="Near-Zero (99% Offload)" variant="emerald" />
                 <MetricCard label="Waterfall" value="None" variant="emerald" />
                 <MetricCard label="Data Freshness" value="TTL / Tag Reval" variant="amber" className="col-span-2 sm:col-span-1" />
               </div>
 
               <p className="text-sm text-muted-foreground leading-relaxed">
-                <strong>How it works:</strong> Used on dynamic routes that depend on user sessions, cookies, or headers.
-                The layout shell streams immediately. Inside the page, heavy components are protected by <code>&lt;DinouCacheSlot&gt;</code>.
-                On cache hit, the pre-computed RSC binary chunk is pulled from memory/KV in ~2ms and streamed down without querying PostgreSQL/MongoDB.
+                <strong>How it works:</strong> Used on Dynamic SSR routes (<code>ppr = false</code>) that render per-request using user sessions, cookies, or headers (where no static HTML artifact is cached).
+                Wrapping <code>&lt;DinouCacheSlot&gt;</code> in <code>&lt;Suspense&gt;</code> ensures that on a <strong>cold cache miss</strong> (the very first request), the outer layout and fallback skeleton stream immediately without blocking TTFB while the slot populates in the background.
+                On subsequent requests (<strong>cache hits</strong>)—and even when its TTL expires—Dinou reads the cached slot payload from your <code>StorageAdapter</code> (<code>slots/&lt;id&gt;/slot.json</code>) in ~1–2ms during the SSR pass, including the rendered widget directly in the streamed SSR response without suspending or flashing the skeleton fallback, while refreshing expired slots asynchronously via <strong>Background SWR</strong>.
               </p>
 
               <TabbedCodeBlock
@@ -1304,10 +1393,10 @@ export default function FeedPage() {
         <UserGreeting />
       </div>
 
-      {/* 2. Global trending feed: cached for 300s in server memory (Micro-ISR) */}
+      {/* 2. Global trending feed: cached for 300s in server storage (Micro-ISR) */}
       <aside className="col-span-1">
         <Suspense fallback={<p>Loading trends...</p>}>
-          <DinouCacheSlot id="global-trending" revalidate={300} tag="trends">
+          <DinouCacheSlot id="global-trending" revalidate={300} tags={["trends"]}>
             <GlobalTrendingWidget />
           </DinouCacheSlot>
         </Suspense>
@@ -1316,11 +1405,39 @@ export default function FeedPage() {
   );
 }`,
                   },
+                  {
+                    id: "components",
+                    label: "src/feed/components.tsx",
+                    language: "tsx",
+                    code: `import { getContext } from "dinou/server";
+import db from "@/lib/db";
+
+export async function UserGreeting() {
+  // Runs live on every request (reads per-user session cookie)
+  const sessionId = getContext().req.cookies.session_id;
+  const user = await db.users.findBySession(sessionId);
+  return <h1 className="text-2xl font-bold">Welcome back, {user.name}</h1>;
+}
+
+export async function GlobalTrendingWidget() {
+  // Heavy DB aggregation: executed once every 300s via <DinouCacheSlot>
+  const trends = await db.analytics.getGlobalTrending();
+  return (
+    <ul className="space-y-2">
+      {trends.map((item) => (
+        <li key={item.id} className="text-sm font-medium">
+          #{item.topic} ({item.postsCount} posts)
+        </li>
+      ))}
+    </ul>
+  );
+}`,
+                  },
                 ]}
               />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
-                <p>• <strong>Stream Speed:</strong> Instead of waiting 1.5 seconds for the DB on every page visit, the slot resolves in ~2ms from RAM.</p>
+                <p>• <strong>Zero Skeleton Flash on Cache Hits:</strong> Only a cold cache miss displays the <code>&lt;Suspense&gt;</code> fallback. Once cached (and across TTL expirations via Background SWR), the slot resolves in ~1–2ms during SSR without triggering the fallback.</p>
                 <p>• <strong>Ideal For:</strong> Social feeds, dashboards, recommendations, and search suggestions in authenticated web apps.</p>
               </div>
             </section>
@@ -1434,16 +1551,16 @@ async function LiveStockBalance() {
               {/* Metrics Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
                 <MetricCard label="TTFB" value="0ms (Edge CDN)" variant="emerald" />
-                <MetricCard label="Stream Ready" value="~2-5ms (RAM Cache)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="~2-5ms (Slot Cache)" variant="emerald" />
                 <MetricCard label="Server/DB Load" value="99.9% Offload" variant="emerald" />
                 <MetricCard label="Waterfall" value="None" variant="emerald" />
                 <MetricCard label="Data Freshness" value="TTL / Tag Reval" variant="amber" className="col-span-2 sm:col-span-1" />
               </div>
 
               <p className="text-sm text-muted-foreground leading-relaxed">
-                <strong>How it works:</strong> The gold standard for high-traffic web applications. Combines Partial Prerendering
-                with component-level Micro-ISR. The Edge CDN delivers the static shell in <strong>0ms TTFB</strong>.
-                The server streams the dynamic hole almost instantly (~2ms) because the sub-tree is cached in memory/KV storage.
+                <strong>How it works:</strong> The gold standard for high-traffic web applications. Combines <Link href="/docs/3d-segmentation#partial-prerendering" className="underline underline-offset-2 font-medium text-foreground">Partial Prerendering</Link>{" "}
+                with component-level <Link href="/docs/3d-segmentation#micro-isr" className="underline underline-offset-2 font-medium text-foreground">Micro-ISR</Link>. The Edge CDN delivers the static shell in <strong>0ms TTFB</strong>.
+                The server streams the dynamic hole almost instantly (~2ms) because the sub-tree is cached in Dinou&apos;s pluggable <code>StorageAdapter</code> (Memory, Filesystem, Redis, Deno KV, or Cloudflare KV).
                 Visitors see zero visible skeleton flicker, while database queries are reduced by 99.9%.
               </p>
 
@@ -1473,14 +1590,40 @@ export default function TrendingPage() {
         <p className="text-muted-foreground text-sm">Ultra-high traffic viral catalog.</p>
       </header>
 
-      {/* 2. Micro-ISR Slot: resolves in ~2ms from server memory/KV cache without DB query */}
+      {/* 2. Micro-ISR Slot: resolves in ~2ms from Dinou's slot cache without DB query */}
       <Suspense fallback={<TrendingSkeleton />}>
-        <DinouCacheSlot id="viral-trending" revalidate={120} tag="trending">
+        <DinouCacheSlot id="viral-trending" revalidate={120} tags={["trending"]}>
           <TrendingGrid />
         </DinouCacheSlot>
       </Suspense>
     </main>
   );
+}`,
+                  },
+                  {
+                    id: "components",
+                    label: "src/trending/components.tsx",
+                    language: "tsx",
+                    code: `import db from "@/lib/db";
+
+export async function TrendingGrid() {
+  // Heavy query: executed once every 120s across all visitors via <DinouCacheSlot>
+  const items = await db.products.getViralTrending({ limit: 12 });
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      {items.map((item) => (
+        <div key={item.id} className="p-4 border rounded-xl">
+          <h3 className="font-semibold">{item.name}</h3>
+          <p className="text-sm text-emerald-600 font-mono">\${item.price}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function TrendingSkeleton() {
+  // Pre-rendered into the 0ms PPR static shell at build time
+  return <div className="h-48 rounded-xl bg-muted animate-pulse" />;
 }`,
                   },
                 ]}
@@ -1489,6 +1632,7 @@ export default function TrendingPage() {
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-emerald-50/30 dark:bg-emerald-950/20 p-3 rounded-lg border border-emerald-500/20">
                 <p>• <strong>Benchmarked Throughput:</strong> Under a spike of 50,000 requests/minute, only 1 query hits the database every 120 seconds.</p>
                 <p>• <strong>User Experience:</strong> 0ms TTFB first paint + ~2ms content resolution = Feels like a static page with near-live freshness.</p>
+                <p>• <strong>Nesting Order in PPR:</strong> Placing <code>&lt;Suspense&gt;</code> outside <code>&lt;DinouCacheSlot&gt;</code> creates a <strong>Cached Dynamic PPR Hole</strong> (streams the fallback in the 0ms shell and resolves in ~2ms from the slot cache). Conversely, placing <code>&lt;DinouCacheSlot&gt;</code> outside <code>&lt;Suspense&gt;</code> (or calling <code>noDynamic()</code> inside it) bakes the slot directly into the <strong>0ms Static Shell</strong> with zero skeleton flash, refreshing it in the background via Background SWR.</p>
               </div>
             </section>
 
@@ -1530,27 +1674,41 @@ export default function TrendingPage() {
                 containerClassName="my-3"
                 tabs={[
                   {
+                    id: "fn",
+                    label: "src/search/page_functions.ts",
+                    language: "tsx",
+                    code: `export const ppr = true; // Pre-renders the outer search shell for 0ms TTFB`,
+                  },
+                  {
                     id: "server",
                     label: "src/search/page.tsx (Server Component)",
                     language: "tsx",
                     code: `import { Suspense } from "react";
+import { useSearchParams } from "dinou";
 import db from "@/lib/db";
-import { SearchResultsClient } from "./search-results-client";
+import { SearchResultsClient, type Product } from "./search-results-client";
 
-export default function SearchPage({ searchParams }: { searchParams: { q?: string } }) {
-  const query = searchParams.q || "";
-
-  // Start query WITHOUT awaiting! Passes un-awaited Promise to client:
-  const resultsPromise = db.products.search({ query });
-
+export default function SearchPage() {
   return (
     <main className="p-6 max-w-4xl mx-auto space-y-4">
+      {/* 0ms Static PPR Shell */}
       <h1 className="text-2xl font-bold">Search Catalog</h1>
-      <Suspense key={query} fallback={<p className="text-muted-foreground">Searching catalog...</p>}>
-        <SearchResultsClient promise={resultsPromise} />
+      <Suspense fallback={<p className="text-muted-foreground">Searching catalog...</p>}>
+        <SearchResultsLoader />
       </Suspense>
     </main>
   );
+}
+
+// Synchronous Server Component inside <Suspense>: reads query params and initiates the Promise
+function SearchResultsLoader() {
+  const searchParams = useSearchParams();
+  const query = searchParams.get("q") ?? "";
+
+  // Start query WITHOUT awaiting! Passes un-awaited Flight Promise to client:
+  const resultsPromise: Promise<Product[]> = db.products.search({ query });
+
+  return <SearchResultsClient key={query} promise={resultsPromise} />;
 }`,
                   },
                   {
@@ -1561,6 +1719,12 @@ export default function SearchPage({ searchParams }: { searchParams: { q?: strin
 
 import { use, useState } from "react";
 
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+}
+
 export function SearchResultsClient({ promise }: { promise: Promise<Product[]> }) {
   // Native React 19 hook: unwraps the Flight RPC promise directly
   const products = use(promise);
@@ -1568,11 +1732,20 @@ export function SearchResultsClient({ promise }: { promise: Promise<Product[]> }
 
   return (
     <div>
-      <input type="range" max={500} value={filterPrice} onChange={(e) => setFilterPrice(+e.target.value)} />
+      <input
+        type="range"
+        max={500}
+        value={filterPrice}
+        onChange={(e) => setFilterPrice(Number(e.target.value))}
+      />
       <ul>
-        {products.filter(p => p.price <= filterPrice).map((p) => (
-          <li key={p.id}>{p.name} - \${p.price}</li>
-        ))}
+        {products
+          .filter((p) => p.price <= filterPrice)
+          .map((p) => (
+            <li key={p.id}>
+              {p.name} - \${p.price}
+            </li>
+          ))}
       </ul>
     </div>
   );
@@ -1583,7 +1756,9 @@ export function SearchResultsClient({ promise }: { promise: Promise<Product[]> }
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Zero Waterfall:</strong> The server initiates the query before the client even finishes parsing JavaScript.</p>
+                <p>• <strong>Preserving 0ms PPR Shell:</strong> Reading <code>useSearchParams()</code> inside a child Server Component wrapped in <code>&lt;Suspense&gt;</code> (<code>SearchResultsLoader</code>) turns only that boundary into a dynamic PPR hole while keeping <code>&lt;SearchPage&gt;</code>&apos;s outer shell 100% static (<strong>0ms TTFB</strong>). Calling <code>useSearchParams()</code> at the top of <code>SearchPage</code> outside <code>&lt;Suspense&gt;</code> would opt the entire route into Dynamic Streaming SSR (<strong>Fast TTFB</strong>).</p>
                 <p>• <strong>Interactive State:</strong> The client component immediately has access to full client hooks (<code>useState</code>, <code>useMemo</code>) to filter or mutate UI state.</p>
+                <p>• <strong>Client-First Equivalent:</strong> If your entire <code>page.tsx</code> is a <code>&quot;use client&quot;</code> component, see <strong>Strategy 12 (<code>getProps</code> Promise ➔ Client <code>use()</code>)</strong> to initiate the promise in <code>page_functions.ts</code> instead.</p>
               </div>
             </section>
 
@@ -1628,8 +1803,9 @@ export function SearchResultsClient({ promise }: { promise: Promise<Product[]> }
                     label: "src/whiteboard/page_functions.ts",
                     language: "tsx",
                     code: `import db from "@/lib/db";
+import type { Template } from "./page";
 
-export async function getProps() {
+export async function getProps(): Promise<{ defaultTemplates: Template[] }> {
   const defaultTemplates = await db.templates.findDefaults();
   return { defaultTemplates };
 }`,
@@ -1641,10 +1817,21 @@ export async function getProps() {
                     code: `"use client";
 
 import { useState } from "react";
+import type { PageProps } from "dinou";
 import { CanvasStage, ToolPalette } from "@/components/canvas";
 
-export default function WhiteboardPage({ defaultTemplates }: { defaultTemplates: any[] }) {
-  const [selectedTemplate, setSelectedTemplate] = useState(defaultTemplates[0]);
+export interface Template {
+  id: string;
+  name: string;
+  nodes: unknown[];
+}
+
+export default function WhiteboardPage({
+  defaultTemplates,
+}: PageProps<"/whiteboard", { defaultTemplates: Template[] }>) {
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | undefined>(
+    defaultTemplates[0]
+  );
 
   return (
     <div className="h-screen flex flex-col">
@@ -1702,11 +1889,15 @@ export default function WhiteboardPage({ defaultTemplates }: { defaultTemplates:
                     id: "fn",
                     label: "src/editor/[docId]/page_functions.ts",
                     language: "tsx",
-                    code: `import db from "@/lib/db";
+                    code: `import type { RouteParams } from "dinou";
+import db from "@/lib/db";
+import type { DocumentData } from "./page";
 
 export const revalidate = 0; // Dynamic SSR
 
-export async function getProps(params: { docId: string }) {
+export async function getProps(
+  params: RouteParams<"/editor/[docId]">
+): Promise<{ document: DocumentData }> {
   const document = await db.documents.findById(params.docId);
   return { document };
 }`,
@@ -1718,8 +1909,17 @@ export async function getProps(params: { docId: string }) {
                     code: `"use client";
 
 import { useState } from "react";
+import type { PageProps } from "dinou";
 
-export default function DocumentEditor({ document }: { document: any }) {
+export interface DocumentData {
+  id: string;
+  title: string;
+  initialBody: string;
+}
+
+export default function DocumentEditor({
+  document,
+}: PageProps<"/editor/[docId]", { document: DocumentData }>) {
   const [content, setContent] = useState(document.initialBody);
 
   return (
@@ -1733,8 +1933,8 @@ export default function DocumentEditor({ document }: { document: any }) {
               />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
-                <p>• <strong>Trade-off:</strong> Because the server waits for <code>getProps</code> before sending the first byte, TTFB is slower compared to streaming patterns.</p>
-                <p>• <strong>Advantage:</strong> Eliminates client-side spinner flashing upon initial navigation compared to classic Single Page Apps.</p>
+                <p>• <strong>Blocking TTFB (Major Trade-off):</strong> Because the server must await <code>getProps()</code> on every request before rendering <code>page.tsx</code>, <strong>TTFB is completely blocked</strong>—the browser receives 0 bytes until your database or API query finishes.</p>
+                <p>• <strong>Why use it (vs. Strategy 12 &amp; 13):</strong> Allows <code>page.tsx</code> itself to be a <code>&quot;use client&quot;</code> component that receives live server data directly as synchronous initial props (e.g., <code>useState(document.initialBody)</code>) with full SSR HTML and no client-side fetch waterfall. To avoid blocking TTFB in a Client-First page, see <strong>Strategy 12 (<code>getProps</code> Promise ➔ Client <code>use()</code>)</strong>.</p>
               </div>
             </section>
 
@@ -1746,6 +1946,113 @@ export default function DocumentEditor({ document }: { document: any }) {
                 <div className="flex items-center gap-2">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-bold text-sm">
                     12
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+                    Client-First getProps Promise ➔ Client use() (React 19)
+                  </h2>
+                </div>
+                <Badge variant="outline" className="text-amber-600 dark:text-amber-400 border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20 font-mono text-xs">
+                  getProps Promise Streaming
+                </Badge>
+              </div>
+
+              {/* Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 not-prose my-3 text-[11px]">
+                <MetricCard label="TTFB" value="Fast (Early Shell)" variant="emerald" />
+                <MetricCard label="Stream Ready" value="Waits for Promise" variant="amber" />
+                <MetricCard label="Server/DB Load" value="Heavy (Live query)" variant="rose" />
+                <MetricCard label="Waterfall" value="None" variant="emerald" />
+                <MetricCard label="Data Freshness" value="100% Live" variant="emerald" className="col-span-2 sm:col-span-1" />
+              </div>
+
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <strong>How it works:</strong> The Client-First (<code>getProps</code>) equivalent of Strategy 9. Instead of awaiting the database query inside <code>getProps</code> (which blocks TTFB in Strategy 11), <code>getProps</code> in <code>page_functions.ts</code> starts the query <strong>without <code>await</code></strong> and returns the raw <code>Promise</code> inside the props object (<code>return &#123; documentPromise &#125;</code>). Because JavaScript only unwraps top-level promises, Dinou passes <code>documentPromise</code> immediately to your <code>&quot;use client&quot;</code> <code>page.tsx</code>. The outer client page shell streams immediately, while a child component inside <code>&lt;Suspense&gt;</code> unwraps the Flight promise using React 19&apos;s native <code>use()</code> hook.
+              </p>
+
+              <TabbedCodeBlock
+                containerClassName="my-3"
+                tabs={[
+                  {
+                    id: "fn",
+                    label: "src/editor/[docId]/page_functions.ts",
+                    language: "tsx",
+                    code: `import type { RouteParams } from "dinou";
+import db from "@/lib/db";
+import type { DocumentSummary } from "./page";
+
+export const revalidate = 0; // Dynamic SSR
+
+export function getProps(params: RouteParams<"/editor/[docId]">): {
+  documentPromise: Promise<DocumentSummary>;
+} {
+  // Start query WITHOUT awaiting! Returns raw Promise inside props object:
+  const documentPromise = db.documents.findById(params.docId);
+  return { documentPromise };
+}`,
+                  },
+                  {
+                    id: "page",
+                    label: "src/editor/[docId]/page.tsx (Client Component)",
+                    language: "tsx",
+                    code: `"use client";
+
+import { Suspense, use, useState } from "react";
+import type { PageProps } from "dinou";
+
+export interface DocumentSummary {
+  title: string;
+  initialBody: string;
+}
+
+function EditorCanvas({ promise }: { promise: Promise<DocumentSummary> }) {
+  // Unwraps the server-initiated Flight promise inside Suspense
+  const doc = use(promise);
+  const [content, setContent] = useState(doc.initialBody);
+
+  return (
+    <textarea
+      className="w-full h-64 p-3 border rounded-lg font-mono text-sm"
+      value={content}
+      onChange={(e) => setContent(e.target.value)}
+    />
+  );
+}
+
+export default function DocumentEditorPage({
+  documentPromise,
+}: PageProps<"/editor/[docId]", { documentPromise: Promise<DocumentSummary> }>) {
+  return (
+    <div className="p-6 max-w-4xl mx-auto space-y-4">
+      {/* Toolbar & shell stream immediately without waiting for DB */}
+      <header className="flex items-center justify-between border-b pb-3">
+        <h1 className="text-xl font-bold">Collaborative Editor</h1>
+      </header>
+
+      <Suspense fallback={<div className="h-64 rounded-lg bg-muted animate-pulse" />}>
+        <EditorCanvas promise={documentPromise} />
+      </Suspense>
+    </div>
+  );
+}`,
+                  },
+                ]}
+              />
+
+              <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
+                <p>• <strong>Unblocks TTFB in Client-First Pages:</strong> Eliminates the TTFB bottleneck of Strategy 11 while keeping <code>page.tsx</code> 100% <code>&quot;use client&quot;</code> and avoiding any client-side network waterfall.</p>
+                <p>• <strong>Optional 0ms PPR Shell:</strong> Switch <code>revalidate = 0</code> to <code>export const ppr = true</code> when you also want the outer Client Component shell pre-rendered statically at build time while the un-awaited <code>Promise</code> streams live as a Dynamic PPR Hole.</p>
+                <p>• <strong>Equivalent to Strategy 9:</strong> Achieves the exact same Flight Promise streaming as Strategy 9 (<code>RSC Promise ➔ Client use()</code>), using <code>page_functions.ts</code> (<code>getProps</code>) instead of a Server Component <code>page.tsx</code>.</p>
+              </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* STRATEGY 13 */}
+            {/* ============================================================ */}
+            <section id="strategy-13" className="scroll-mt-20 pt-6 border-t">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-bold text-sm">
+                    13
                   </span>
                   <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
                     Client Calling Server Function (Initial Mount - Dynamic RPC)
@@ -1835,18 +2142,18 @@ export function DashboardStatsWidget() {
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
                 <p>• <strong>Modern React 19 Ergonomics:</strong> Unrolls promises synchronously with <code>use()</code> inside <code>&lt;Suspense&gt;</code>. Eliminates legacy <code>useEffect</code> lifecycle hooks, manual loading flags (<code>isLoading</code>, <code>error</code>), and fetch boilerplate.</p>
-                <p>• <strong>Network Round Trip:</strong> Supported and idiomatic for client widgets, but incurs a second client-side HTTP round trip after hydration. When you control the parent route, prefer <strong>Strategy 9 (RSC Promise)</strong> to initiate the promise on the server and eliminate the extra round trip.</p>
+                <p>• <strong>Network Round Trip:</strong> Supported and idiomatic for client widgets, but incurs a second client-side HTTP round trip after hydration. When you control the parent route, prefer <strong>Strategy 9 (RSC Promise)</strong> or <strong>Strategy 12 (<code>getProps</code> Promise)</strong> to initiate the promise on the server and eliminate the extra round trip.</p>
               </div>
             </section>
 
             {/* ============================================================ */}
-            {/* STRATEGY 13 */}
+            {/* STRATEGY 14 */}
             {/* ============================================================ */}
-            <section id="strategy-13" className="scroll-mt-20 pt-6 border-t">
+            <section id="strategy-14" className="scroll-mt-20 pt-6 border-t">
               <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
                 <div className="flex items-center gap-2">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-500/10 text-slate-700 dark:text-slate-300 font-mono font-bold text-sm">
-                    13
+                    14
                   </span>
                   <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
                     Client Server Functions (User Actions &amp; Mutations)
@@ -1923,7 +2230,7 @@ export function AddToCartButton({ productId }: { productId: string }) {
               />
 
               <div className="not-prose text-xs text-muted-foreground space-y-1.5 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border">
-                <p>• <strong>Strict Rule:</strong> Only call Server Functions in mutative event contexts. Never invoke them during the render phase or inside components.</p>
+                <p>• <strong>Strict Mutation Rule:</strong> Invoke <strong>mutative</strong> <Link href="/docs/server-functions" className="underline underline-offset-2 font-medium text-foreground">Server Functions</Link> (database writes, cookie updates, <Link href="/docs/revalidation" className="underline underline-offset-2 font-medium text-foreground"><code>revalidatePage</code> / <code>revalidateLayout</code> / <code>revalidatePath</code> / <code>revalidateTag</code></Link>, <code>redirect</code>) exclusively from event handlers, <code>&lt;form action&gt;</code>, or <code>startTransition</code>—never during rendering. In Client Components, read-only Server Functions must also never be called bare in the render body without memoizing via <code>useState(() =&gt; fn())</code> (Strategy 13), or every render will spawn a new RPC request loop.</p>
                 <p>• <strong>Type Safety:</strong> Arguments and return types are inferred end-to-end between client and server without manual fetch boilerplate.</p>
               </div>
             </section>
@@ -1970,7 +2277,7 @@ export function AddToCartButton({ productId }: { productId: string }) {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-muted-foreground space-y-1">
-                    <p>➔ <strong>Strategy 10 / 11 (Client-First):</strong> Server gets data via <code>getProps</code>, page is 100% interactive client component.</p>
+                    <p>➔ <strong>Strategy 10 / 11 / 12 (Client-First):</strong> Server gets data (or starts a Promise) via <code>getProps</code>; page is a 100% interactive client component.</p>
                   </CardContent>
                 </Card>
 
@@ -1981,7 +2288,7 @@ export function AddToCartButton({ productId }: { productId: string }) {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-muted-foreground space-y-1">
-                    <p>➔ <strong>Strategy 9 (React 19 use()):</strong> Start query on server, stream raw promise to client component without waterfalls.</p>
+                    <p>➔ <strong>Strategy 9 / 12 (React 19 use()):</strong> Start query on server (in RSC or <code>getProps</code>), stream raw promise to client component without waterfalls.</p>
                   </CardContent>
                 </Card>
               </div>

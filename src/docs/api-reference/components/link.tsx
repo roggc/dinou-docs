@@ -34,7 +34,7 @@ export function LinkSection() {
             <span>Soft Navigation &amp; Native Modifiers</span>
           </div>
           <p className="text-muted-foreground leading-relaxed">
-            Intercepts clicks to perform seamless client-side page transitions via <code>push()</code> without triggering full browser reloads. If modifier keys (<code>Cmd</code>, <code>Ctrl</code>, <code>Shift</code>, <code>Alt</code>) are pressed or an external destination is specified, it gracefully yields to standard browser navigation (e.g. opening in a new tab).
+            Intercepts primary left-clicks to perform seamless client-side page transitions via <code>push()</code> without triggering full browser reloads. If modifier keys (<code>Cmd</code>, <code>Ctrl</code>, <code>Shift</code>, <code>Alt</code>), non-primary mouse buttons, <code>target=&quot;_blank&quot;</code> (any target other than <code>_self</code>), <code>download</code>, or an external destination are used, it gracefully yields to native browser navigation.
           </p>
         </div>
         <div className="p-4 rounded-lg bg-card border border-border space-y-2">
@@ -62,18 +62,34 @@ export function LinkSection() {
           <tbody className="divide-y divide-border bg-card text-muted-foreground">
             <tr>
               <td className="p-3 font-mono font-semibold text-primary align-top">href</td>
-              <td className="p-3 font-mono text-[11px] text-foreground align-top">DinouRoute | string</td>
+              <td className="p-3 font-mono text-[11px] text-foreground align-top">DinouLinkTarget</td>
               <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">—</td>
               <td className="p-3 align-top leading-relaxed">
-                Primary destination URL. Strongly typed with <code>DinouRoute</code> for compile-time route validation and IDE autocomplete. Supports absolute paths (<code>/dashboard</code>), relative paths (<code>./settings</code>, <code>../billing</code>), query strings, and external URLs.
+                Primary destination URL. Strongly typed for compile-time route validation and <code>Ctrl + Space</code> IDE autocomplete across static routes (<code>/dashboard</code>), dynamic route patterns (<code>/blog/[slug]</code> with <code>params</code>), relative paths when paired with <code>from</code> (<code>security</code>, <code>./security</code>, <code>../billing</code>), query/hash suffixes, and external URLs.
               </td>
             </tr>
             <tr>
               <td className="p-3 font-mono font-semibold text-primary align-top">to</td>
-              <td className="p-3 font-mono text-[11px] text-foreground align-top">DinouRoute | string</td>
+              <td className="p-3 font-mono text-[11px] text-foreground align-top">DinouLinkTarget</td>
               <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">—</td>
               <td className="p-3 align-top leading-relaxed">
-                Alias for <code>href</code> provided for compatibility with React Router and Remix codebases (evaluated as <code>href || to</code>).
+                Alias for <code>href</code> with identical type safety and autocomplete (evaluated as <code>href || to</code>).
+              </td>
+            </tr>
+            <tr>
+              <td className="p-3 font-mono font-semibold text-primary align-top">params</td>
+              <td className="p-3 font-mono text-[11px] text-foreground align-top">Record&lt;string, ...&gt;</td>
+              <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">—</td>
+              <td className="p-3 align-top leading-relaxed">
+                Conditionally required parameter dictionary whenever <code>href</code> or <code>to</code> contains dynamic <code>[param]</code> or <code>[...param]</code> placeholders (optional when all placeholders are <code>[[optional]]</code>). Values are interpolated and URL-encoded via <code>encodeURIComponent</code>.
+              </td>
+            </tr>
+            <tr>
+              <td className="p-3 font-mono font-semibold text-primary align-top">from</td>
+              <td className="p-3 font-mono text-[11px] text-foreground align-top">DinouFromRoute</td>
+              <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">—</td>
+              <td className="p-3 align-top leading-relaxed">
+                Source route pattern (e.g. <code>&quot;/dashboard/settings&quot;</code>) anchoring relative navigation in <code>href</code> / <code>to</code>. Enables strict compile-time validation and autocomplete for bare (<code>&quot;security&quot;</code>), dot-slash (<code>&quot;./security&quot;</code>), and parent (<code>&quot;../billing&quot;</code>) paths, and safely slices deeper browser pathnames when rendered inside a parent layout or <code>@slot</code>. <em>Tip:</em> Importing <code>&#123; Link &#125;</code> from route-contextual <code>&quot;./dinou&quot;</code> inside a route folder pre-binds <code>from</code> automatically so you can omit it!
               </td>
             </tr>
             <tr>
@@ -81,7 +97,7 @@ export function LinkSection() {
               <td className="p-3 font-mono text-[11px] text-foreground align-top">boolean</td>
               <td className="p-3 font-mono text-[11px] text-muted-foreground align-top">true</td>
               <td className="p-3 align-top leading-relaxed">
-                Whether to prefetch the destination RSC payload and code bundle on <code>onMouseEnter</code>. Ignored when <code>fresh={true}</code> or when targeting external URLs.
+                Whether to prefetch the destination RSC layout and page payloads on <code>onMouseEnter</code>. Automatically skipped when <code>fresh=&#123;true&#125;</code>, targeting external URLs, same-page <code>#hash</code> anchors, <code>download</code> links, or non-<code>_self</code> targets (such as <code>target=&quot;_blank&quot;</code>).
               </td>
             </tr>
             <tr>
@@ -115,10 +131,10 @@ export function LinkSection() {
               <strong>Absolute (<code>/</code>):</strong> Starts with a forward slash (e.g., <code>/dashboard</code>). Resolves strictly from the application root domain.
             </li>
             <li>
-              <strong>Relative Child (<code>./</code>):</strong> Resolves under the current segment (e.g., from <code>/products</code>, navigating to <code>./details</code> resolves to <code>/products/details</code>).
+              <strong>Relative Child (<code>details</code> or <code>./details</code>):</strong> With <code>from=&quot;/products&quot;</code>, both <code>details</code> and <code>./details</code> autocomplete and resolve under that route directory to <code>/products/details</code>.
             </li>
             <li>
-              <strong>Relative Sibling (<code>../</code>):</strong> Navigates up one directory level (e.g., from <code>/users/settings</code>, navigating to <code>../profile</code> resolves to <code>/users/profile</code>).
+              <strong>Relative Sibling / Parent (<code>../</code>):</strong> With <code>from=&quot;/users/settings&quot;</code>, navigating to <code>../profile</code> resolves up one directory level to <code>/users/profile</code>.
             </li>
           </ul>
         </AlertDescription>
@@ -183,7 +199,7 @@ export function NavigationBar() {
 "use client";
 
 import { Link } from "dinou";
-import { RefreshCw, ExternalLink } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 export function OrderQuickActions() {
   return (
@@ -214,39 +230,55 @@ export function OrderQuickActions() {
               id: "relative-and-events",
               label: "sub-nav.tsx (Relative & Events)",
               language: "tsx",
-              code: `// src/app/dashboard/settings/page.tsx
+              code: `// src/dashboard/settings/page.tsx
 "use client";
 
-import { Link } from "dinou";
+import { Link } from "./dinou"; // Route-contextual: pre-binds from="/dashboard/settings"
 
-export default function SettingsSubNav() {
+export default function SettingsSubNav({ postSlug }: { postSlug: string }) {
   const handleAuditClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     // Custom logging or analytics before navigation
     console.log("Navigating to security audit");
-    
-    // Calling e.preventDefault() here would cancel the soft navigation
+
+    // Calling e.preventDefault() here cancels soft navigation
   };
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Relative Child navigation: resolves to /dashboard/settings/security */}
-      <Link href="./security" onClick={handleAuditClick} className="text-sm font-medium">
+      {/* Contextual relative child ("security" or "./security"): resolves to /dashboard/settings/security */}
+      <Link
+        href="security"
+        onClick={handleAuditClick}
+        className="text-sm font-medium"
+      >
         Security Settings
       </Link>
 
-      {/* Relative Sibling navigation: resolves to /dashboard/billing */}
-      <Link href="../billing" className="text-sm text-muted-foreground">
+      {/* Contextual relative sibling: resolves to /dashboard/billing */}
+      <Link
+        href="../billing"
+        className="text-sm text-muted-foreground"
+      >
         Billing & Subscriptions
       </Link>
 
-      {/* External Link: automatically falls back to native browser navigation */}
+      {/* Dynamic route pattern with compile-time required params interpolation */}
       <Link
-        href="https://status.example.com"
+        href="/blog/[slug]"
+        params={{ slug: postSlug }}
+        className="text-sm text-primary"
+      >
+        Read Release Notes
+      </Link>
+
+      {/* Internal link in a new tab or external link: gracefully yields to native browser navigation */}
+      <Link
+        href="/reports/latest.pdf"
         target="_blank"
         rel="noopener noreferrer"
         className="text-xs text-blue-500 underline"
       >
-        System Status
+        Open Report in New Tab
       </Link>
     </div>
   );

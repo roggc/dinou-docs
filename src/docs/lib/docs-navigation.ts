@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import type { DinouLinkTarget } from "dinou";
 import {
   BookOpen,
   Route,
@@ -13,7 +14,6 @@ import {
   Rocket,
   ClipboardList,
   BookMarked,
-  Cpu,
   Compass,
   Atom,
   RefreshCw,
@@ -29,12 +29,14 @@ import {
   DraftingCompass,
   Shredder,
   ShieldCheck,
+  Layers,
+  ArrowLeftRight,
 } from "lucide-react";
 
 export interface NavItem {
   title: string;
-  href: string;
-  icon?: LucideIcon;
+  href: DinouLinkTarget;
+  icon: LucideIcon;
   badge?: string;
   external?: boolean;
 }
@@ -66,7 +68,7 @@ export const docsNavigation: NavSection[] = [
     ],
   },
   {
-    title: "Core Concepts",
+    title: "Routing & Components",
     items: [
       {
         title: "Routing",
@@ -88,6 +90,11 @@ export const docsNavigation: NavSection[] = [
         href: "/docs/server-client-components",
         icon: Server,
       },
+    ],
+  },
+  {
+    title: "Data, Rendering & Server",
+    items: [
       {
         title: "Page & Layout Functions",
         href: "/docs/page-functions",
@@ -99,9 +106,19 @@ export const docsNavigation: NavSection[] = [
         icon: Shredder,
       },
       {
+        title: "3D Layered Segmentation",
+        href: "/docs/3d-segmentation",
+        icon: Layers,
+      },
+      {
         title: "Server Functions",
         href: "/docs/server-functions",
         icon: Zap,
+      },
+      {
+        title: "Request Context",
+        href: "/docs/request-context",
+        icon: ArrowLeftRight,
       },
       {
         title: "On-Demand Revalidation",
@@ -118,6 +135,11 @@ export const docsNavigation: NavSection[] = [
         href: "/docs/pattern",
         icon: Brain,
       },
+    ],
+  },
+  {
+    title: "Styling, Assets & Config",
+    items: [
       {
         title: "React Compiler",
         href: "/docs/compiler",
@@ -153,6 +175,11 @@ export const docsNavigation: NavSection[] = [
         href: "/docs/plugins",
         icon: Settings,
       },
+    ],
+  },
+  {
+    title: "Build, Deploy & Sovereignty",
+    items: [
       {
         title: "Bundlers",
         href: "/docs/bundlers",
@@ -209,9 +236,14 @@ export const docsNavigation: NavSection[] = [
         icon: Compass,
       },
       {
+        title: "Migration from v9 to v10",
+        href: "/docs/migration/v9-to-v10",
+        icon: Sparkles,
+      },
+      {
         title: "Migration from v8 to v9",
         href: "/docs/migration/v8-to-v9",
-        icon: Sparkles,
+        icon: RefreshCw,
       },
       {
         title: "Migration from v7 to v8",

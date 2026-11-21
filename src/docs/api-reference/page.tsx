@@ -19,11 +19,13 @@ import {
 import {
   PagePropsSection,
   LayoutPropsSection,
+  SlotAndNotFoundPropsSection,
   ErrorPropsSection,
   PageFunctionsSection,
   RouteParamsSection,
   DinouRouteSection,
   DinouRoutePatternSection,
+  ContextualDinouSection,
 } from "./type-safe-routing";
 import {
   GetContextSection,
@@ -32,6 +34,8 @@ import {
 } from "./server-context-config";
 import {
   DinouCacheSlotSection,
+  NoDynamicSection,
+  RevalidateLayoutSection,
   RevalidatePageSection,
   RevalidatePathSection,
   RevalidateTagSection,
@@ -74,13 +78,15 @@ const tocItems = [
   { id: "usenavigationloading-architecture", title: "Non-Blocking Transitions", level: 4 },
   { id: "usenavigationloading-examples", title: "Production Indicators", level: 4 },
   { id: "type-safe-routing", title: "3. Type-Safe Routing (dinou)", level: 2 },
-  { id: "pageprops", title: "PageProps<T>", level: 3 },
-  { id: "layoutprops", title: "LayoutProps<T>", level: 3 },
+  { id: "pageprops", title: "PageProps<T, TProps>", level: 3 },
+  { id: "layoutprops", title: "LayoutProps<T, TProps>", level: 3 },
+  { id: "slot-notfound-props", title: "SlotProps & NotFoundProps", level: 3 },
   { id: "errorprops", title: "ErrorProps<T>", level: 3 },
   { id: "pagefunctions", title: "PageFunctions & LayoutFunctions", level: 3 },
   { id: "routeparams", title: "RouteParams<T>", level: 3 },
-  { id: "dinouroute", title: "DinouRoute", level: 3 },
-  { id: "dinouroutepattern", title: "DinouRoutePattern", level: 3 },
+  { id: "dinouroute", title: "DinouRoute & DinouLinkTarget", level: 3 },
+  { id: "dinouroutepattern", title: "DinouRoutePattern & Segments", level: 3 },
+  { id: "contextual-dinou", title: 'Contextual "./dinou"', level: 3 },
   { id: "server-context-config", title: "4. Server Context & Config (dinou)", level: 2 },
   { id: "getcontext", title: "getContext()", level: 3 },
   { id: "getcontext-store", title: "Request & Response Store", level: 4 },
@@ -93,11 +99,13 @@ const tocItems = [
   { id: "dinouplugin-examples", title: "Production Plugins", level: 4 },
   { id: "server-cache-revalidation", title: "5. Server Cache & Revalidation (dinou/server)", level: 2 },
   { id: "revalidatepage", title: "revalidatePage()", level: 3 },
+  { id: "revalidatelayout", title: "revalidateLayout()", level: 3 },
   { id: "revalidatepath", title: "revalidatePath()", level: 3 },
   { id: "revalidatetag", title: "revalidateTag()", level: 3 },
   { id: "dinoucacheslot", title: "<DinouCacheSlot>", level: 3 },
   { id: "dinoucacheslot-props", title: "Props & Micro-ISR", level: 4 },
   { id: "dinoucacheslot-examples", title: "Production Slot Patterns", level: 4 },
+  { id: "nodynamic", title: "noDynamic()", level: 3 },
   { id: "storage-adapters", title: "6. Storage Adapters (dinou/server)", level: 2 },
   { id: "storage-adapters-list", title: "Built-In Adapters", level: 3 },
   { id: "storage-adapters-interface", title: "StorageAdapter Interface", level: 3 },
@@ -215,11 +223,13 @@ export default function Page() {
 
               <PagePropsSection />
               <LayoutPropsSection />
+              <SlotAndNotFoundPropsSection />
               <ErrorPropsSection />
               <PageFunctionsSection />
               <RouteParamsSection />
               <DinouRouteSection />
               <DinouRoutePatternSection />
+              <ContextualDinouSection />
             </section>
 
             {/* ================================================================= */}
@@ -251,9 +261,11 @@ export default function Page() {
               </h2>
 
               <RevalidatePageSection />
+              <RevalidateLayoutSection />
               <RevalidatePathSection />
               <RevalidateTagSection />
               <DinouCacheSlotSection />
+              <NoDynamicSection />
             </section>
 
             {/* ================================================================= */}

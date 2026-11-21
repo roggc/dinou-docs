@@ -71,13 +71,13 @@ export function ValidateParamsContract() {
 
       <Alert className="not-prose my-4">
         <ShieldCheck className="h-4 w-4 text-rose-500" />
-        <AlertTitle>Authoritative 404 Response and Delivery Veto</AlertTitle>
+        <AlertTitle>Authoritative 404 Response and Delivery Veto (HTML &amp; SPA RSC)</AlertTitle>
         <AlertDescription className="space-y-1.5 text-xs">
           <div>
-            <strong>Immediate Request Termination.</strong> When <code>validateParams</code> returns <code>false</code> or resolves to <code>false</code>, Dinou halts route resolution immediately and responds with a clean 404 Not Found HTTP response.
+            <strong>Immediate Request Termination.</strong> When <code>validateParams</code> returns <code>false</code> or resolves to <code>false</code> (evaluated on any route or layout segment carrying dynamic parameters), Dinou halts route resolution immediately and responds with a clean <code>404 Not Found</code> HTTP response.
           </div>
           <div>
-            <strong>Perimeter Gatekeeper.</strong> Even if a pre-rendered HTML artifact or static cache entry already exists in the storage adapter, returning <code>false</code> acts as an authoritative veto that blocks delivery and returns a 404 response.
+            <strong>Authoritative Cache Veto.</strong> Even if a pre-rendered HTML document or cached RSC payload (<code>page.rsc</code> / <code>layout.rsc</code>) already exists in storage, returning <code>false</code> vetoes delivery on <strong>both</strong> direct HTML requests and SPA RSC fetches (<code>/____rsc_page____/*</code> &amp; <code>/____rsc_layout____/*</code>).
           </div>
         </AlertDescription>
       </Alert>
@@ -110,15 +110,15 @@ export function ValidateParamsContract() {
               id: "numeric-id",
               label: "users/[id]/page_functions.ts",
               language: "typescript",
-              code: `// src/app/users/[id]/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/users/[id]/page_functions.ts
+import type { PageFunctions } from "./dinou";
 
 // Synchronous perimeter guard rejecting non-numeric parameters
-export const validateParams: PageFunctions<"/users/[id]">["validateParams"] = (params) => {
+export const validateParams: PageFunctions["validateParams"] = (params) => {
   return /^[0-9]+$/.test(params.id);
 };
 
-export const getProps: PageFunctions<"/users/[id]">["getProps"] = async (params) => {
+export const getProps: PageFunctions["getProps"] = async (params) => {
   // params.id is guaranteed to be a valid numeric string here
   return { userId: Number(params.id) };
 };`,
@@ -127,13 +127,13 @@ export const getProps: PageFunctions<"/users/[id]">["getProps"] = async (params)
               id: "uuid-check",
               label: "documents/[uuid]/page_functions.ts",
               language: "typescript",
-              code: `// src/app/documents/[uuid]/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/documents/[uuid]/page_functions.ts
+import type { PageFunctions } from "./dinou";
 
 const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 // Rejects malformed UUID tokens before invoking backend loaders
-export const validateParams: PageFunctions<"/documents/[uuid]">["validateParams"] = (params) => {
+export const validateParams: PageFunctions["validateParams"] = (params) => {
   return UUID_V4_REGEX.test(params.uuid);
 };`,
             },
@@ -141,12 +141,12 @@ export const validateParams: PageFunctions<"/documents/[uuid]">["validateParams"
               id: "async-tenant",
               label: "[organization]/layout_functions.ts",
               language: "typescript",
-              code: `// src/app/[organization]/layout_functions.ts
-import type { LayoutFunctions } from "dinou";
+              code: `// src/[organization]/layout_functions.ts
+import type { LayoutFunctions } from "./dinou";
 import { db } from "@/lib/database";
 
 // Asynchronous perimeter guard protecting an entire organization branch
-export const validateParams: LayoutFunctions<"/[organization]">["validateParams"] = async (params) => {
+export const validateParams: LayoutFunctions["validateParams"] = async (params) => {
   const tenant = await db.organizations.findUnique({
     where: { slug: params.organization },
     select: { active: true },
@@ -159,13 +159,13 @@ export const validateParams: LayoutFunctions<"/[organization]">["validateParams"
               id: "multi-param",
               label: "shop/[category]/[slug]/page_functions.ts",
               language: "typescript",
-              code: `// src/app/shop/[category]/[slug]/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/shop/[category]/[slug]/page_functions.ts
+import type { PageFunctions } from "./dinou";
 
 const ALLOWED_CATEGORIES = new Set(["electronics", "clothing", "books", "home"]);
 
 // Multi-segment parameter validation ensuring valid taxonomy paths
-export const validateParams: PageFunctions<"/shop/[category]/[slug]">["validateParams"] = (params) => {
+export const validateParams: PageFunctions["validateParams"] = (params) => {
   if (!ALLOWED_CATEGORIES.has(params.category)) {
     return false;
   }

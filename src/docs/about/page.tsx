@@ -1,11 +1,7 @@
+import { Link } from "./dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/docs/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/docs/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
 import { Badge } from "@/docs/components/ui/badge";
 import {
   Scale,
@@ -111,7 +107,11 @@ export default function AboutPage() {
                     </li>
                     <li className="flex items-center gap-2.5">
                       <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                      <span><strong>Simple Condition:</strong> Only requires preserving the original copyright notice in distributions.</span>
+                      <span><strong>Simple Condition:</strong> Requires preserving the original copyright and license notice in copies or substantial portions of the software.</span>
+                    </li>
+                    <li className="flex items-center gap-2.5">
+                      <ShieldCheck className="h-4 w-4 text-slate-400 shrink-0" />
+                      <span><strong>Standard Limitation:</strong> Provided <code>&quot;AS IS&quot;</code> without warranty of any kind or author liability.</span>
                     </li>
                   </ul>
                 </div>
@@ -122,7 +122,7 @@ export default function AboutPage() {
                     1.2. Commercial &amp; Private Freedom
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Unlike modern web frameworks that adopt restrictive licensing (BSL, SSPL) or design their architectures to funnel workloads toward proprietary cloud platforms, Dinou will forever remain under the permissive MIT License. Your code, your build pipeline, and your deployment infrastructure remain entirely under your control.
+                    Unlike software projects that shift to restrictive source-available licenses (BSL, SSPL) or web frameworks designed to funnel workloads toward proprietary cloud platforms, Dinou will forever remain under the permissive MIT License. Your code, your build pipeline, and your deployment infrastructure remain entirely under your control.
                   </p>
 
                   <div className="not-prose pt-2">
@@ -183,7 +183,7 @@ export default function AboutPage() {
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground leading-relaxed">
-                      Each release includes detailed release notes, upgrade instructions, and commit diffs to ensure your production deployments remain completely reliable.
+                      Each release includes detailed release notes, <Link href="/docs/migration" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">upgrade instructions</Link>, and commit diffs to ensure your production deployments remain completely reliable.
                     </CardContent>
                   </Card>
                 </div>
@@ -268,13 +268,13 @@ export default function AboutPage() {
                           className="text-[11px] font-mono border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-500/5"
                         >
                           <Sparkles className="w-3 h-3 mr-1 text-indigo-500" />
-                          Antigravity-Gemini 3.8 Flash High
+                          Antigravity - Gemini
                         </Badge>
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm space-y-4">
                       <p className="text-muted-foreground text-xs leading-relaxed">
-                        Dinou has been crafted through an evolving <strong>human-agent engineering model</strong> between <strong>@roggc</strong> and <strong>Antigravity-Gemini 3.8 Flash High</strong> (by Google / Google DeepMind).
+                        Dinou has been crafted through an evolving <strong>human-agent engineering model</strong> between <strong>@roggc</strong> and <strong>Antigravity - Gemini</strong> (by Google / Google DeepMind).
                       </p>
                       <p className="text-muted-foreground text-xs leading-relaxed">
                         Up to <strong>version 4 (inclusive)</strong>, Dinou was engineered entirely by human hand without AI agents. In <strong>version 5</strong>, an AI agent was introduced for the first time to execute a major architectural codebase refactor. <strong>Version 6</strong> was subsequently authored directly by <strong>@roggc</strong> as it was a straightforward iteration. From <strong>version 7 onwards</strong>, Dinou has been developed <strong>exclusively through autonomous agent execution</strong> under human architectural direction and production quality standards.
@@ -318,7 +318,7 @@ export default function AboutPage() {
 
                           <div className="p-3 rounded-xl bg-background/80 border border-purple-500/40 bg-purple-50/20 dark:bg-purple-950/10 space-y-1">
                             <div className="flex items-center justify-between">
-                              <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">v7.0 &ndash; v9.x+</span>
+                              <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">v7.0 &ndash; v10.x+</span>
                               <Badge variant="outline" className="text-[10px] font-mono border-purple-500/40 text-purple-600 dark:text-purple-400 bg-purple-500/10 font-bold">100% Agentic</Badge>
                             </div>
                             <p className="text-[11px] text-muted-foreground leading-snug">
@@ -333,7 +333,7 @@ export default function AboutPage() {
                       </p>
                       <div className="p-3 rounded-lg bg-background/80 border border-indigo-500/20 text-xs text-slate-700 dark:text-slate-300 font-mono flex items-center gap-2">
                         <Bot className="h-4 w-4 text-indigo-500 shrink-0" />
-                        <span>Pair-programming synergy: Human direction + Antigravity-Gemini 3.8 Flash High execution</span>
+                        <span>Pair-programming synergy: Human direction + Antigravity - Gemini execution</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -368,7 +368,7 @@ export default function AboutPage() {
                         github.com/roggc/dinou
                       </a>
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-1 border-b border-slate-100 dark:border-slate-800/60">
                       <span className="font-medium text-slate-900 dark:text-slate-200">Issues &amp; Discussions</span>
                       <a
                         href="https://github.com/roggc/dinou/issues"
@@ -377,6 +377,17 @@ export default function AboutPage() {
                         className="font-mono text-xs text-blue-600 dark:text-blue-400 hover:underline"
                       >
                         github.com/roggc/dinou/issues
+                      </a>
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 py-1">
+                      <span className="font-medium text-slate-900 dark:text-slate-200">npm Package</span>
+                      <a
+                        href="https://www.npmjs.com/package/dinou"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        npmjs.com/package/dinou
                       </a>
                     </div>
                   </div>
@@ -430,7 +441,7 @@ export default function AboutPage() {
                       <li className="flex items-start gap-2.5">
                         <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
                         <span>
-                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">React &amp; The React Team:</strong> For React 19, the React Server Components specification, Server Actions, and standard Suspense streaming primitives.
+                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">React &amp; The React Team:</strong> For React 19, the React Server Components specification, Server Functions &amp; Actions, the React Compiler, and standard Suspense streaming primitives.
                         </span>
                       </li>
                       <li className="flex items-start gap-2.5">
@@ -442,7 +453,13 @@ export default function AboutPage() {
                       <li className="flex items-start gap-2.5">
                         <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
                         <span>
-                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">Modern JavaScript Runtimes:</strong> For advancing standard Web APIs (Fetch API, W3C Streams, WinterCG) across <strong className="text-slate-800 dark:text-slate-200">Node.js</strong>, <strong className="text-slate-800 dark:text-slate-200">Bun</strong>, <strong className="text-slate-800 dark:text-slate-200">Deno</strong>, and <strong className="text-slate-800 dark:text-slate-200">Cloudflare Workers</strong>.
+                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">Modern JavaScript Runtimes &amp; Platforms:</strong> For advancing standard Web APIs (Fetch API, W3C Streams, WinterCG) across <strong className="text-slate-800 dark:text-slate-200">Node.js</strong>, <strong className="text-slate-800 dark:text-slate-200">Bun</strong>, <strong className="text-slate-800 dark:text-slate-200">Deno</strong>, <strong className="text-slate-800 dark:text-slate-200">Cloudflare Workers</strong>, and <strong className="text-slate-800 dark:text-slate-200">Netlify Functions</strong>.
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2.5">
+                        <span className="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+                        <span>
+                          <strong className="text-slate-900 dark:text-slate-100 font-semibold">GitHub &amp; GitHub Actions:</strong> For providing a rock-solid repository platform for open-source hosting, version history, and collaboration—and for <strong className="text-slate-800 dark:text-slate-200">GitHub Actions</strong>, which powers Dinou&apos;s continuous multi-bundler, multi-runtime, and cross-platform end-to-end verification pipelines.
                         </span>
                       </li>
                       <li className="flex items-start gap-2.5">

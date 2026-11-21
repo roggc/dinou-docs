@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Check, Copy, Zap, Server, Globe, Cpu, Terminal, ArrowUpRight, Cloud, FileCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "dinou";
+import { Link, type DinouLinkTarget } from "dinou";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism/index.js";
 
@@ -41,7 +41,7 @@ interface TargetInfo {
   buildCommand: string;
   runCommand: string;
   highlights: string[];
-  docLink: string;
+  docLink: DinouLinkTarget;
   terminalOutput: string[];
   configFile?: ConfigFile;
 }
@@ -51,7 +51,7 @@ const targets: TargetInfo[] = [
     id: "cloudflare",
     name: "Cloudflare Workers",
     icon: Zap,
-    badge: "Edge Isolates",
+    badge: "Global Edge Runtime",
     tagline: "Sub-millisecond global cold starts across 300+ cities with native Cloudflare KV integration.",
     buildCommand: "npm run build:cloudflare",
     runCommand: "npx wrangler deploy",
@@ -82,7 +82,10 @@ compatibility_flags = ["nodejs_compat"]
 
 # Serve client bundles, CSS, and static assets directly via Cloudflare CDN
 [assets]
-directory = ".dinou/dist3"
+directory = ".dinou/cloudflare/assets"
+binding = "ASSETS"
+run_worker_first = true
+html_handling = "none"
 
 # Optional: Bind KV namespace for persistent ISR route caching
 # [[kv_namespaces]]
@@ -95,21 +98,21 @@ directory = ".dinou/dist3"
     name: "Netlify Serverless",
     icon: Cloud,
     badge: "Functions v2",
-    tagline: "Native Netlify Functions v2 adapter with zero-config edge routing and static CDN caching.",
-    buildCommand: "npm run build",
+    tagline: "Native AOT Dual-Bundle Netlify Functions v2 adapter with zero-config CDN routing and background ISR.",
+    buildCommand: "npm run build:netlify",
     runCommand: "git push origin main",
     highlights: [
-      "Native Netlify Functions v2 pre-bundled at .dinou/dist3/server",
-      "Built-in preferStatic: true serves assets directly from global CDN edge",
-      "Dynamic SSR streaming & Server Functions invoked serverless",
-      "Zero-config routing with node_bundler = 'none' in netlify.toml",
+      "Self-contained Functions v2 bundle (.dinou/netlify/functions/ssr.mjs) with preferStatic: true",
+      "Static assets served from Netlify CDN (.dinou/dist3) at zero compute cost",
+      "Read-only Lambda safe: MemoryStorage({ hydrateFromDisk: true }) + context.waitUntil() ISR",
+      "Pre-bundled by Dinou — deploys directly via git push with node_bundler = \"none\"",
     ],
     docLink: "/docs/deployment#netlify-serverless",
     terminalOutput: [
       "$ git push origin main",
-      "⚡ Netlify CI build triggered: executing \"npm run build\"...",
-      "⚡ Pre-bundling Netlify Functions v2 adapter (.dinou/dist3/server)...",
-      "✔ Assets published from .dinou/dist3 (preferStatic: true)",
+      "⚡ Netlify CI build triggered: executing \"npm run build:netlify\"...",
+      "⚡ Compiling AOT Dual-Bundle Netlify Functions v2 (.dinou/netlify/functions/ssr.mjs)...",
+      "✔ Static assets (.dinou/dist3) & Functions v2 bundle (.dinou/netlify/functions) ready",
       "🚀 Published to https://my-app.netlify.app (Global Edge CDN)",
     ],
     configFile: {
@@ -117,7 +120,7 @@ directory = ".dinou/dist3"
       language: "toml",
       badge: "Config",
       code: `[build]
-  command = "npm run build"
+  command = "npm run build:netlify" # or "npm run build"
   publish = ".dinou/dist3"
 
 [build.environment]
@@ -127,26 +130,9 @@ directory = ".dinou/dist3"
   NODE_ENV = "production"
 
 [functions]
-  directory = ".dinou/dist3/server"
+  directory = ".dinou/netlify/functions"
   node_bundler = "none"
-  included_files = [
-    "package.json",
-    "tsconfig.json",
-    "dinou.config.*",
-    "src/**",
-    "dinou/**",
-    ".dinou/**",
-    "node_modules/**",
-    "!node_modules/@swc/**",
-    "!node_modules/typescript/**",
-    "!node_modules/webpack*/**",
-    "!node_modules/@esbuild/**",
-    "!node_modules/esbuild/**",
-    "!node_modules/@rollup/**",
-    "!node_modules/rollup/**",
-    "!node_modules/.cache/**",
-    "!node_modules/@types/**"
-  ]`,
+  included_files = [".dinou/dist2/**"]`,
     },
   },
   {
@@ -160,7 +146,7 @@ directory = ".dinou/dist3"
     highlights: [
       "4 Flexible Modes: Standard Bun, Pure Bun (0 Node.js), and Compiled Binaries",
       "Self-contained native binary (bun build --compile) emitted at ./dist/server",
-      "Zero-copy asset streaming directly via native Bun.file() kernel bindings",
+      "Ideal for ultra-slim Docker containers and VPS hosts with zero runtime dependencies",
       "Cross-compilation targets: Linux x64/ARM64, macOS Apple Silicon, and Windows",
     ],
     docLink: "/docs/deployment#bun-runtime-compile",
@@ -223,9 +209,9 @@ directory = ".dinou/dist3"
       code: `{
   "tasks": {
     "build": "dinou build:deno",
-    "start": "deno run --unstable-kv -A dinou/adapters/deno.js",
+    "start": "dinou start:deno",
     "compile": "dinou build:deno:compile",
-    "deploy": "deno deploy --project=my-app .dinou/deno/main.js"
+    "deploy": "deno deploy --project=my-app --include=.dinou/deno,.dinou/dist2,.dinou/dist3 .dinou/deno/main.js"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
@@ -239,22 +225,22 @@ directory = ".dinou/dist3"
     name: "Node.js AOT In-Process",
     icon: Server,
     badge: "In-Process AOT",
-    tagline: "Runs React Server Components and SSR directly in-process with standard Web Streams and flat memory footprint.",
+    tagline: "Runs React Server Components and SSR directly in a single Node.js process with native Web Streams and optional standalone binary compilation.",
     buildCommand: "npm run build:node",
     runCommand: "npm run start:node",
     highlights: [
-      "Direct in-process execution with zero child processes",
-      "Native Web Streams piped directly through HTTP response",
-      "Docker & Kubernetes lightweight container friendly",
-      "Zero Express and zero runtime Babel overhead",
+      "Direct in-process execution with zero child processes and zero Express overhead",
+      "Native Web Streams piped directly through HTTP response with RFC 9110 Range support",
+      "Supports configureServer hooks, WebSockets (ws / Socket.IO) & Docker containers",
+      "Optional single-file binary compilation (build:node:compile & build:node:pure:compile)",
     ],
-    docLink: "/docs/deployment",
+    docLink: "/docs/deployment#node-vps-docker",
     terminalOutput: [
       "$ npm run build:node",
-      "✔ Server and client bundles compiled successfully",
-      "✔ Static assets optimized in .dinou/public",
+      "✔ Node.js AOT orchestrator compiled (.dinou/node/server.mjs)",
+      "✔ Client bundles & static assets emitted in .dinou/dist3",
       "$ npm run start:node",
-      "🚀 Node.js server listening on http://localhost:3000 (Flat memory)",
+      "🚀 Node.js server listening on http://localhost:3000 (In-Process AOT)",
     ],
   },
   {
@@ -262,20 +248,20 @@ directory = ".dinou/dist3"
     name: "Pure Static Site (SSG)",
     icon: Globe,
     badge: "100% Serverless",
-    tagline: "Pre-render all pages and RSC payloads at build time and deploy for free to GitHub Pages, Surge, or S3.",
+    tagline: "Pre-render all pages and segmented RSC payloads at build time and deploy for free to GitHub Pages, Cloudflare Pages, Surge, or S3.",
     buildCommand: "npm run export-static",
     runCommand: "npx surge out my-app.surge.sh",
     highlights: [
-      "Exports self-contained HTML and .rsc Flight binary payloads",
-      "Client-side soft SPA transitions without any backend server",
-      "Deploy for free on GitHub Pages, Cloudflare Pages, or AWS S3",
-      "Automatic dynamic bailout detection",
+      "Exports self-contained index.html and segmented page.rsc / layout.rsc Flight payloads",
+      "Client-side soft SPA transitions without any backend server or /____rsc_* endpoints",
+      "Deploy for free on GitHub Pages, Cloudflare Pages, Surge, Nginx, or AWS S3",
+      "Pre-renders static routes and dynamic paths via getStaticPaths() into ./out",
     ],
-    docLink: "/docs/deployment",
+    docLink: "/docs/deployment#static-export",
     terminalOutput: [
       "$ npm run export-static",
-      "✔ Pre-rendering 163 documentation routes and RSC payloads...",
-      "✔ Static export completed in 3.2s -> ./out",
+      "✔ Pre-rendering static routes and segmented RSC payloads...",
+      "✔ Static export completed -> ./out",
       "$ npx surge out my-docs.surge.sh",
       "🚀 Deployed static site: https://my-docs.surge.sh (0 compute cost)",
     ],
@@ -283,7 +269,9 @@ directory = ".dinou/dist3"
 ];
 
 export function DeployMatrix() {
-  const [selectedTarget, setSelectedTarget] = useState<TargetInfo>(targets[0]);
+  const [selectedTargetId, setSelectedTargetId] = useState<string>(targets[0].id);
+  const activeTargetId = typeof selectedTargetId === "string" ? selectedTargetId : (selectedTargetId as TargetInfo)?.id;
+  const selectedTarget = targets.find((t) => t.id === activeTargetId) ?? targets[0];
   const [copied, setCopied] = useState(false);
   const [activeRightTab, setActiveRightTab] = useState<"terminal" | "config">("terminal");
   const [copiedConfig, setCopiedConfig] = useState(false);
@@ -340,7 +328,7 @@ export function DeployMatrix() {
               <button
                 key={target.id}
                 type="button"
-                onClick={() => setSelectedTarget(target)}
+                onClick={() => setSelectedTargetId(target.id)}
                 className={`flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 border text-left cursor-pointer ${
                   isSelected
                     ? "bg-slate-900 text-white border-blue-500/50 shadow-md dark:bg-white dark:text-slate-950"

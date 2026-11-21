@@ -7,15 +7,7 @@ import {
   CardTitle,
 } from "@/docs/components/ui/card";
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/docs/components/ui/alert";
-import {
-  Sparkles,
   Zap,
-  Layers,
-  Database,
   Clock,
   ShieldCheck,
   TrendingDown,
@@ -107,10 +99,10 @@ export function PprCacheSlotSection() {
               • <strong>TTFB:</strong> 0ms from CDN edge (instant outer layout).
             </p>
             <p>
-              • <strong>Skeleton Duration:</strong> ~5ms! Subsequent visitors receive the cached RSC stream chunk almost immediately; the skeleton barely blinks.
+              • <strong>Skeleton Duration:</strong> ~2ms! Subsequent visitors receive the cached RSC stream chunk almost immediately; the skeleton barely blinks.
             </p>
             <p>
-              • <strong>Database Load:</strong> 10,000 visitors per minute with <code>duration=&#123;60&#125;</code> = <strong>1 database query</strong> per minute (99.99% reduction).
+              • <strong>Database Load:</strong> 10,000 visitors per minute with <code>revalidate=&#123;60&#125;</code> = <strong>1 database query</strong> per minute (99.99% reduction).
             </p>
           </CardContent>
         </Card>
@@ -128,7 +120,7 @@ export function PprCacheSlotSection() {
       <CodeBlock language="tsx" containerClassName="w-full rounded-lg">
         {`// src/dashboard/page.tsx - High-traffic operational dashboard
 import { Suspense } from "react";
-import { DinouCacheSlot } from "dinou";
+import { DinouCacheSlot } from "dinou/server";
 import { db } from "@/lib/db";
 import { MetricsSkeleton } from "./MetricsSkeleton";
 import { InteractiveMetricsChart } from "./InteractiveMetricsChart"; // "use client"
@@ -151,10 +143,10 @@ export default function DashboardPage() {
 
       {/* 2. PPR Dynamic Boundary + Cache Slot:
              - Fallback skeleton sent immediately in initial layout
-             - Dynamic hole streams from server cache in ~5ms for subsequent users
+             - Dynamic hole streams from server cache in ~2ms for subsequent users
              - Database query executes only ONCE every 60 seconds */}
       <Suspense fallback={<MetricsSkeleton />}>
-        <DinouCacheSlot id="operations-telemetry" duration={60} tags={["telemetry"]}>
+        <DinouCacheSlot id="operations-telemetry" revalidate={60} tags={["telemetry"]}>
           <HeavyMetricsSubtree />
         </DinouCacheSlot>
       </Suspense>

@@ -23,7 +23,7 @@ export function GetPropsContract() {
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        The primary server-side data loading contract for routes and layouts. Executes exclusively on the server during SSG build, on-demand ISG generation, or runtime request handling. The object returned by <code>getProps</code> is automatically injected as props into the companion <code>Page</code> or <code>Layout</code> component.
+        The primary server-side data loading contract for routes and layouts (declared in <code>page_functions.ts</code> or <code>layout_functions.ts</code> / <code>layout.functions.ts</code>). Executes exclusively on the server during SSG build, on-demand ISG generation, or runtime request handling (including custom <code>not_found.tsx</code> segments with a companion <code>page_functions.ts</code>). The object returned by <code>getProps</code> is automatically injected as props into the companion <code>Page</code>, <code>NotFound</code>, or <code>Layout</code> component. Calling <code>return redirect(...)</code> inside <code>getProps</code> short-circuits immediately before page or layout JSX renders.
       </p>
 
       {/* Sub-section 1: Parameters */}
@@ -66,9 +66,9 @@ export function GetPropsContract() {
         {/* Context Access Alert */}
         <Alert className="not-prose mt-4">
           <Server className="h-4 w-4 text-amber-500" />
-          <AlertTitle>Accessing Request Headers, Cookies &amp; Query</AlertTitle>
+          <AlertTitle>Accessing Request Headers, Cookies, Query &amp; Automatic Static Bailout</AlertTitle>
           <AlertDescription>
-            While <code>getProps</code> receives route parameters as its first argument, you can access incoming HTTP request headers, cookies, query parameters, or platform environment variables by calling <code>getContext()</code> directly inside the function.
+            While <code>getProps</code> receives route parameters as its first argument, you can access incoming HTTP request headers, cookies, query parameters, or platform environment bindings (<code>ctx.env</code>) by calling <code>getContext()</code> directly inside the function. Reading <code>ctx.req.cookies</code>, <code>ctx.req.headers</code>, or <code>ctx.req.query</code> triggers <strong>Automatic Static Bailout</strong> (switching the route to Dynamic SSR). On <code>ppr = true</code> routes, keep <code>getProps</code> deterministic and move personalized reads inside <code>&lt;Suspense&gt;</code>.
           </AlertDescription>
         </Alert>
 
@@ -85,9 +85,9 @@ export function GetPropsContract() {
                 id: "page-functions",
                 label: "products/[id]/page_functions.ts",
                 language: "typescript",
-                code: `// src/app/products/[id]/page_functions.ts
-import type { PageFunctions } from "dinou";
-import { getContext } from "dinou";
+                code: `// src/products/[id]/page_functions.ts
+import type { PageFunctions } from "./dinou";
+import { getContext } from "./dinou";
 import { db } from "@/lib/db";
 
 export interface ProductPageProps {
@@ -100,15 +100,15 @@ export interface ProductPageProps {
   preferredCurrency: string;
 }
 
-// Pass the route pattern directly: PageFunctions automatically infers params
-export const getProps: PageFunctions<
-  "/products/[id]",
-  ProductPageProps
->["getProps"] = async (params) => {
+// Contextual "./dinou" pre-binds params for "/products/[id]" automatically
+// (or import PageFunctions<"/products/[id]", ProductPageProps> from "dinou")
+export const getProps: PageFunctions<ProductPageProps>["getProps"] = async (
+  params
+) => {
   // 1. Fetch data on the server using route parameters (params.id is typed as string)
   const product = await db.products.findById(params.id);
 
-  // 2. Read cookies or headers from request context
+  // 2. Read cookies or headers from request context (triggers Dynamic SSR bailout)
   const ctx = getContext();
   const preferredCurrency = ctx.req.cookies["user_currency"] || "USD";
 
@@ -123,18 +123,16 @@ export const getProps: PageFunctions<
                 id: "page-view",
                 label: "products/[id]/page.tsx",
                 language: "tsx",
-                code: `// src/app/products/[id]/page.tsx
-import type { PageProps } from "dinou";
+                code: `// src/products/[id]/page.tsx
+import type { PageProps } from "./dinou";
 import type { ProductPageProps } from "./page_functions";
 
-// In Dinou, Page components receive route params plus props returned by getProps()
-type Props = PageProps<"/products/[id]"> & ProductPageProps;
-
+// PageProps accepts TProps directly (or PageProps<"/products/[id]", ProductPageProps> from "dinou")
 export default function ProductPage({
   params,
   product,
   preferredCurrency,
-}: Props) {
+}: PageProps<ProductPageProps>) {
   return (
     <main className="container mx-auto py-8">
       <h1 className="text-3xl font-bold">{product.title}</h1>
@@ -152,9 +150,9 @@ export default function ProductPage({
                 id: "layout-functions",
                 label: "[organization]/layout_functions.ts",
                 language: "typescript",
-                code: `// src/app/[organization]/layout_functions.ts
-import type { LayoutFunctions } from "dinou";
-import { getContext, redirect } from "dinou";
+                code: `// src/[organization]/layout_functions.ts
+import type { LayoutFunctions } from "./dinou";
+import { getContext, redirect } from "./dinou";
 import { db } from "@/lib/db";
 
 export interface OrgLayoutProps {
@@ -167,19 +165,22 @@ export interface OrgLayoutProps {
 }
 
 // Layouts receive route parameters defined at or above this segment level
-export const getProps: LayoutFunctions<
-  "/[organization]",
-  OrgLayoutProps
->["getProps"] = async (params) => {
+export const getProps: LayoutFunctions<OrgLayoutProps>["getProps"] = async (
+  params
+) => {
   const org = await db.organizations.findBySlug(params.organization);
   if (!org) {
-    redirect("/select-organization");
+    // Immediately short-circuits layout and page rendering
+    return redirect("/select-organization") as never;
   }
 
   const ctx = getContext();
-  const unreadCount = await db.notifications.countUnread(org.id, ctx.req.cookies["user_id"]);
+  const unreadCount = await db.notifications.countUnread(
+    org.id,
+    ctx.req.cookies["user_id"]
+  );
 
-  // Props are injected directly into src/app/[organization]/layout.tsx
+  // Props are injected directly into src/[organization]/layout.tsx
   return {
     organization: org,
     unreadCount,
@@ -190,19 +191,17 @@ export const getProps: LayoutFunctions<
                 id: "layout-view",
                 label: "[organization]/layout.tsx",
                 language: "tsx",
-                code: `// src/app/[organization]/layout.tsx
-import type { LayoutProps } from "dinou";
+                code: `// src/[organization]/layout.tsx
+import type { LayoutProps } from "./dinou";
 import type { OrgLayoutProps } from "./layout_functions";
 
-// Layout components receive children, segment params, and props returned by getProps()
-type Props = LayoutProps<"/[organization]"> & OrgLayoutProps;
-
+// LayoutProps includes children, segment params, @slots, and custom TProps
 export default function OrgLayout({
   children,
   params,
   organization,
   unreadCount,
-}: Props) {
+}: LayoutProps<OrgLayoutProps>) {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b px-6 py-4 flex items-center justify-between">

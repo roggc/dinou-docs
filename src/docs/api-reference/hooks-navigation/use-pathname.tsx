@@ -62,7 +62,7 @@ export function UsePathnameSection() {
             <tbody className="divide-y divide-border/50 text-muted-foreground">
               <tr>
                 <td className="py-2 px-3 font-semibold text-foreground w-1/3">Execution Environment</td>
-                <td className="py-2 px-3">100% backend (Node.js, Bun, Cloudflare Workers, Edge).</td>
+                <td className="py-2 px-3">100% backend (Node.js, Bun, Deno, Cloudflare Workers, Netlify).</td>
               </tr>
               <tr>
                 <td className="py-2 px-3 font-semibold text-foreground">Client Bundle Impact</td>
@@ -119,10 +119,13 @@ export default async function ServerHeader() {
         <div className="text-xs text-muted-foreground bg-muted/40 rounded-lg p-3 border border-border/60 space-y-1.5">
           <p className="font-semibold text-foreground flex items-center gap-1.5">
             <CheckCircle2 className="h-3.5 w-3.5 text-blue-500" />
-            <span>Zero Hydration Mismatch in SSG:</span>
+            <span>Zero Hydration Mismatch in SSG &amp; 3D Segmented Layouts:</span>
           </p>
           <p>
-            Unlike URL query parameters (which are unknown when pre-generating static pages at build time), the route pathname is completely deterministic. When Dinou pre-renders static HTML for <code>/blog/post-1</code>, <code>usePathname()</code> resolves to <code>&quot;/blog/post-1&quot;</code> during the build and hydrates with the exact same value in the browser.
+            Unlike URL query parameters (which are unknown when pre-generating static pages at build time), a page&apos;s route pathname is deterministic. When Dinou pre-renders static HTML for <code>/blog/post-1</code>, <code>usePathname()</code> inside <code>page.tsx</code> resolves to <code>&quot;/blog/post-1&quot;</code> during the build and hydrates with the exact same value in the browser.
+          </p>
+          <p>
+            <strong>Shared Layout Caveat:</strong> Under Dinou&apos;s 3D Segmented Rendering, a cached <code>layout.tsx</code> is compiled once per layout segment (<code>layout.rsc</code>) and reused across child routes. Therefore, a <strong>Server Component</strong> inside a shared cached <code>layout.tsx</code> reads the layout segment&apos;s own path (e.g. <code>&quot;/docs&quot;</code>), whereas a <strong>Client Component</strong> inside <code>layout.tsx</code> always reads the live active child pathname reactively on every navigation.
           </p>
         </div>
       </div>
@@ -179,10 +182,10 @@ export default async function ServerHeader() {
           {`// src/components/nav-link.tsx (Client Component)
 "use client";
 
-import { usePathname, Link } from "dinou";
+import { usePathname, Link, type DinouRoute } from "dinou";
 
 interface NavLinkProps {
-  href: string;
+  href: DinouRoute;
   children: React.ReactNode;
   exact?: boolean;
 }

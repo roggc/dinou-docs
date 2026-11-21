@@ -1,10 +1,6 @@
+import { Link } from "dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/docs/components/ui/alert";
 import { Card, CardContent, CardHeader } from "@/docs/components/ui/card";
 import { Badge } from "@/docs/components/ui/badge";
 import { TabbedCodeBlock } from "@/docs/components/tabbed-code-block";
@@ -18,17 +14,14 @@ import {
   Lock,
   Cookie,
   RefreshCw,
-  CheckCircle2,
   FileCode,
   ArrowRight,
-  Send,
   Sliders,
   Layers,
   Info,
   Globe,
   Check,
   X,
-  AlertTriangle,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -110,7 +103,7 @@ export default function Page() {
       />
       <link rel="canonical" href="https://dinou.dev/docs/server-functions" />
 
-      <main className="flex-1 py-6 lg:py-8 w-full min-w-0">
+      <div className="flex-1 py-6 lg:py-8 w-full min-w-0">
         <div className="container max-w-4xl px-4 md:px-6 mx-auto">
           {/* Header */}
           <div className="mb-8 space-y-4">
@@ -206,7 +199,7 @@ export default function Page() {
               id="declaration-modalities"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
-              <h3>1. Declaration Modalities (Module vs. Function Level)</h3>
+              <h2>1. Declaration Modalities (Module vs. Function Level)</h2>
               <p>
                 Dinou provides native compiler support for both declaration modalities across <strong>esbuild</strong>, <strong>Rollup</strong>, and <strong>Webpack</strong>:
               </p>
@@ -221,7 +214,7 @@ export default function Page() {
                   </CardHeader>
                   <CardContent className="text-xs text-muted-foreground space-y-2">
                     <p>
-                      Placed at the very first line of a file. Every exported function automatically becomes a public Server Action reference.
+                      Placed at the very first line of a file. Every exported function (named or <code>export default</code>) automatically becomes a public Server Function reference.
                     </p>
                     <ul className="list-disc pl-4 space-y-1">
                       <li><strong>Client Bundler:</strong> Replaces the entire module with client RPC stubs (no database or server imports leak into the browser).</li>
@@ -246,7 +239,7 @@ export default function Page() {
                     <ul className="list-disc pl-4 space-y-1">
                       <li><strong>Granular Shielding:</strong> Co-exists with regular server utilities. Only functions containing the directive are exposed via RPC.</li>
                       <li><strong>Auto-Exporting:</strong> Unexported functions with <code>&quot;use server&quot;</code> are automatically exported by Dinou&apos;s AST compiler.</li>
-                      <li><strong>Lexical Closures:</strong> Inside Server Components, functions capture props, local state, and secrets (hoisted with <code>.bind()</code>).</li>
+                      <li><strong>Lexical Closures:</strong> Inside Server Components, functions capture serializable route params and IDs (hoisted with <code>.bind()</code>), while module-scope bindings stay strictly on the server.</li>
                       <li><strong>Best for:</strong> Component-specific handlers, form submissions, and mixed utility modules.</li>
                     </ul>
                   </CardContent>
@@ -311,22 +304,29 @@ async function internalAuditLog(event: string) {
                     },
                     {
                       id: "closure",
-                      label: "routes/profile/page.tsx (Inline Closure)",
+                      label: "profile/[userId]/page.tsx (Inline Closure)",
                       language: "tsx",
-                      code: `// src/routes/profile/page.tsx (Server Component)
+                      code: `// src/profile/[userId]/page.tsx (Server Component)
+import type { PageProps } from "./dinou";
+import { getContext } from "dinou/server";
 import { db } from "@/server/db";
 import { ProfileForm } from "./profile-form"; // Client Component
 
-export default async function ProfilePage({ params }: { params: { userId: string } }) {
+export default async function ProfilePage({ params }: PageProps) {
   const user = await db.users.find(params.userId);
-  const tenantSecret = await getTenantSecret();
 
-  // Inline Server Function capturing \`params.userId\` and \`tenantSecret\`
+  // Inline Server Function capturing public \`params.userId\` via closure
   async function updateBio(formData: FormData) {
     "use server";
+    // Always read secrets & verify session auth INSIDE the server function body:
+    const ctx = getContext();
+    const sessionUser = await verifySession(ctx.req.cookies.session_token);
+    if (!sessionUser || sessionUser.id !== params.userId) {
+      throw new Error("Unauthorized");
+    }
+
     const bio = formData.get("bio") as string;
-    // Captures outer scope variables transparently:
-    await db.users.update(params.userId, { bio, verifiedWith: tenantSecret });
+    await db.users.update(params.userId, { bio });
     return { ok: true };
   }
 
@@ -344,7 +344,7 @@ export default async function ProfilePage({ params }: { params: { userId: string
               id="manifest-deep-dive"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
-              <h3>2. Deep Dive: Manifest Inclusion &amp; Security Rules</h3>
+              <h2>2. Deep Dive: Manifest Inclusion &amp; Security Rules</h2>
               <p>
                 Every client-invoked Server Function in Dinou routes through an internal, optimized Flight RPC bridge. To prevent arbitrary code execution and protect private backend utilities, Dinou strictly validates every incoming request against a compiled <strong><code>server-functions-manifest.json</code></strong>.
               </p>
@@ -356,9 +356,9 @@ export default async function ProfilePage({ params }: { params: { userId: string
                     <ShieldCheck className="h-6 w-6" />
                   </div>
                   <div>
-                    <h4 className="text-base sm:text-lg font-bold text-foreground">
+                    <h3 className="text-base sm:text-lg font-bold text-foreground">
                       Deep Dive: When Does a Function End Up in the Manifest?
-                    </h4>
+                    </h3>
                     <p className="text-xs text-muted-foreground">
                       Reachability, tree-shaking, and the boundary rules governing <code>server-functions-manifest.json</code>
                     </p>
@@ -369,17 +369,17 @@ export default async function ProfilePage({ params }: { params: { userId: string
                 <div className="p-4 rounded-lg bg-background border border-border space-y-2 text-xs">
                   <div className="font-semibold text-foreground flex items-center gap-1.5 text-sm">
                     <ShieldAlert className="h-4 w-4 text-amber-500" />
-                    <span>Rule 0: The Orphan Module Pruning Rule (Foundational Reachability)</span>
+                    <span>Rule 0: The Orphan Module &amp; Escaped Folder Rule (Foundational Reachability)</span>
                   </div>
                   <p className="text-muted-foreground leading-relaxed">
-                    During build and development, Dinou&apos;s AST entry crawler traverses the application dependency tree starting strictly from:
+                    During build and development, Dinou&apos;s AST entry crawler traverses the application dependency tree (ignoring underscore-escaped <code>_folder</code> directories) starting strictly from:
                   </p>
                   <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
-                    <li>Route entries (<code>page.tsx</code> and <code>layout.tsx</code> files).</li>
+                    <li>Route entries (<code>page.tsx</code>, <code>layout.tsx</code>, <code>page_functions.ts</code>, and <code>layout_functions.ts</code>).</li>
                     <li>Client Components (files marked with <code>&quot;use client&quot;</code>).</li>
                   </ol>
                   <div className="p-2.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-200 mt-2 font-medium">
-                    ⚠️ <strong>If a file is never imported anywhere in the reachable graph, it is an Orphan Module:</strong> Nothing in that file is ever added to the manifest. It does not matter if the file has <code>&quot;use server&quot;</code> at the top or inside its functions—unreachable code has a <strong>0% HTTP attack surface</strong>.
+                    ⚠️ <strong>If a file is never imported anywhere in the reachable graph (or lives inside an underscore-escaped <code>_folder</code>), it is excluded:</strong> Nothing in an orphan file is ever added to the manifest, and underscore-escaped paths inside <code>src/_private/...</code> are blocked at both compile time and runtime (<code>403 Forbidden</code>)—unreachable code has a <strong>0% HTTP attack surface</strong>.
                   </div>
                 </div>
 
@@ -623,24 +623,24 @@ export default async function ProfilePage({ params }: { params: { userId: string
                     <span>The HTTP Security Dispatcher Pipeline</span>
                   </div>
                   <p className="text-muted-foreground leading-relaxed">
-                    When the browser submits a Server Function call with action identifier and payload arguments:
+                    When the browser submits a Server Function call to <code>POST /____server_function____</code> with the action identifier and payload arguments:
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-[11px]">
                     <div className="p-2.5 rounded bg-muted/40 border border-border space-y-1">
-                      <div className="font-semibold text-foreground">1. Path Check</div>
-                      <p className="text-muted-foreground">Verifies path starts with <code>src/</code> and prevents directory traversal attacks (<code>../</code>).</p>
+                      <div className="font-semibold text-foreground">1. Origin &amp; CSRF Guard (403)</div>
+                      <p className="text-muted-foreground">Validates <code>Origin</code> against <code>Host</code> / <code>X-Forwarded-Host</code> in production and requires <code>x-server-function-call: &quot;1&quot;</code>.</p>
                     </div>
                     <div className="p-2.5 rounded bg-muted/40 border border-border space-y-1">
-                      <div className="font-semibold text-foreground">2. Module Registry</div>
-                      <p className="text-muted-foreground">Ensures the file is registered in <code>server-functions-manifest.json</code>.</p>
+                      <div className="font-semibold text-foreground">2. Path &amp; _folder Guard (403)</div>
+                      <p className="text-muted-foreground">Verifies target stays inside <code>src/</code>, blocks <code>../</code> traversal, and rejects underscore-escaped <code>_folder</code> segments.</p>
                     </div>
                     <div className="p-2.5 rounded bg-muted/40 border border-border space-y-1">
-                      <div className="font-semibold text-foreground">3. Export Whitelist</div>
-                      <p className="text-muted-foreground">Checks that the exact export name exists in the allowed exports set for that file.</p>
+                      <div className="font-semibold text-foreground">3. Manifest Whitelist (400)</div>
+                      <p className="text-muted-foreground">Ensures both the module path and exact export name exist in <code>server-functions-manifest.json</code>.</p>
                     </div>
                     <div className="p-2.5 rounded bg-muted/40 border border-border space-y-1">
-                      <div className="font-semibold text-foreground">4. Dynamic Import</div>
-                      <p className="text-muted-foreground">Dynamically imports the module and executes the function with passed and bound arguments.</p>
+                      <div className="font-semibold text-foreground">4. Context &amp; Flight Stream</div>
+                      <p className="text-muted-foreground">Executes inside <code>AsyncLocalStorage</code> (<code>getContext()</code>) and streams the result via React Flight (<code>text/x-component</code>).</p>
                     </div>
                   </div>
                 </div>
@@ -665,8 +665,8 @@ export default async function ProfilePage({ params }: { params: { userId: string
                       If you no longer use an action, remove <code>&quot;use server&quot;</code> or delete the function. Leaving the directive in a reachable file keeps it registered in the manifest even if uncalled.
                     </div>
                     <div className="p-3 rounded-lg bg-background border border-border space-y-1">
-                      <strong className="text-foreground block">4. Closure Scope Prudence:</strong>
-                      In inline server functions, only close over necessary variables. Avoid capturing massive in-memory objects or master encryption keys in component scope.
+                      <strong className="text-foreground block">4. Never Capture Secrets or Pricing via <code>.bind()</code>:</strong>
+                      Component-scope variables captured by inline closures are serialized into the client Flight stream via <code>.bind()</code> and echoed back on invocation. Read secrets at module scope (<code>process.env.*</code>) and compute sensitive pricing or authorization <strong>inside</strong> the <code>&quot;use server&quot;</code> body.
                     </div>
                   </div>
                 </div>
@@ -678,7 +678,7 @@ export default async function ProfilePage({ params }: { params: { userId: string
               id="passing-as-props"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
-              <h3>3. Passing Server Functions as Props &amp; Closures</h3>
+              <h2>3. Passing Server Functions as Props &amp; Closures</h2>
               <p>
                 A core design pattern in Dinou and React 19 is passing Server Functions as props from <strong>Server Components</strong> down to <strong>Client Components</strong>.
               </p>
@@ -692,28 +692,30 @@ export default async function ProfilePage({ params }: { params: { userId: string
                   tabs={[
                     {
                       id: "server-comp",
-                      label: "product/page.tsx (Server Component)",
+                      label: "product/[id]/page.tsx (Server Component)",
                       language: "tsx",
-                      code: `// src/product/page.tsx (Server Component)
+                      code: `// src/product/[id]/page.tsx (Server Component)
+import type { PageProps } from "./dinou";
 import { ProductView } from "./client-view";
 import { revalidatePathAction } from "@/actions/revalidate";
 import { db } from "@/server/db";
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
+export default async function ProductPage({ params }: PageProps) {
   const product = await db.products.find(params.id);
-  const userDiscount = await getCustomerDiscount();
 
-  // 1. Inline Server Function capturing lexical scope (params.id & userDiscount)
+  // 1. Inline Server Function capturing public route param (params.id)
   async function purchaseProduct(paymentToken: string) {
     "use server";
+    // Compute trusted pricing & discounts inside the server boundary (not via .bind!)
+    const verifiedDiscount = await getCustomerDiscountFromSession();
     return await db.orders.create({
       productId: params.id,
-      discount: userDiscount,
+      discount: verifiedDiscount,
       token: paymentToken,
     });
   }
 
-  // 2. Bound Server Function attaching static argument
+  // 2. Bound Server Function attaching a non-sensitive route path argument
   const refreshProduct = revalidatePathAction.bind(null, \`/product/\${params.id}\`);
 
   return (
@@ -727,9 +729,9 @@ export default async function ProductPage({ params }: { params: { id: string } }
                     },
                     {
                       id: "client-comp",
-                      label: "product/client-view.tsx (Client Component)",
+                      label: "product/[id]/client-view.tsx (Client Component)",
                       language: "tsx",
-                      code: `// src/product/client-view.tsx
+                      code: `// src/product/[id]/client-view.tsx
 "use client";
 
 import { useTransition } from "react";
@@ -780,10 +782,10 @@ export function ProductView({ product, onPurchase, onRefresh }: Props) {
                   When Dinou&apos;s AST compiler detects <code>&quot;use server&quot;</code> inside a component function:
                 </p>
                 <ol className="list-decimal pl-5 space-y-1">
-                  <li>It runs scope analysis with <code>@babel/traverse</code> to determine which outer variables are referenced (e.g. <code>params.id</code> and <code>userDiscount</code>).</li>
-                  <li>It extracts and hoists the function to the module top level with a generated symbol: <code>export async function $$dinou_action_purchaseProduct_0(params, userDiscount, paymentToken)</code>.</li>
-                  <li>It replaces the original declaration with <code>$$dinou_action_purchaseProduct_0.bind(null, params, userDiscount)</code>.</li>
-                  <li>React 19 serializes both the action reference ID and bound variables into the Flight stream. When the client invokes <code>onPurchase(token)</code>, the client runtime sends both the bound and new arguments to the server.</li>
+                  <li>It runs scope analysis with <code>@babel/traverse</code> to distinguish <strong>module-level bindings</strong> (such as <code>db</code> or <code>process.env.*</code>, which stay 100% private on the server) from <strong>component-level outer variables</strong> (such as <code>params</code>).</li>
+                  <li>It extracts and hoists the function to the module top level with a generated symbol: <code>export async function $$dinou_action_purchaseProduct_0(params, paymentToken)</code>.</li>
+                  <li>It replaces the inline declaration with <code>$$dinou_action_purchaseProduct_0.bind(null, params)</code>.</li>
+                  <li>React 19 serializes both the action reference ID and bound component arguments into the Flight stream, and the browser sends them back when invoking <code>onPurchase(token)</code>. Always verify session authorization and sensitive calculations inside the action body.</li>
                 </ol>
               </div>
             </section>
@@ -795,11 +797,11 @@ export function ProductView({ product, onPurchase, onRefresh }: Props) {
             >
               <div id="component-vs-data" className="scroll-mt-20" />
               <div id="suspense-integration" className="scroll-mt-20" />
-              <h3>
+              <h2>
                 4. Returning Live React Components (UI Streaming)
-              </h3>
+              </h2>
               <p>
-                Dinou uniquely allows Server Functions to return fully rendered React component trees directly over Flight RPC. In Server Components, the component is awaited directly inside native <code>&lt;Suspense&gt;</code>; in Client Components, the returned promise is unwrapped with React 19&apos;s <code>use()</code> hook:
+                Dinou uniquely allows Server Functions to return fully rendered React component trees directly over Flight RPC—including interactive Client Components and nested Server Actions inside the streamed UI. In Server Components, the component is awaited directly inside native <code>&lt;Suspense&gt;</code>; in Client Components, the returned promise is unwrapped with React 19&apos;s <code>use()</code> hook:
               </p>
 
               <div className="not-prose my-6">
@@ -926,9 +928,9 @@ export default function BlogPage() {
               id="server-actions"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
-              <h3>
+              <h2>
                 5. Server Actions &amp; Form Mutations
-              </h3>
+              </h2>
               <p>
                 Server Functions passed to the <code>action</code> prop of a{" "}
                 <code>&lt;form&gt;</code> or <code>formAction</code> of a button
@@ -940,7 +942,7 @@ export default function BlogPage() {
                 id="server-form-actions"
                 className="mt-6 scroll-mt-20"
               >
-                <h4>5.1. Server Actions in Forms</h4>
+                <h3>5.1. Server Actions in Forms</h3>
                 <p>
                   Server Actions can be declared either as dedicated action files or inline within Server Components and mixed modules. You can pass them directly to the <code>action</code> attribute of a <code>&lt;form&gt;</code> in both <strong>Server Components</strong> and <strong>Client Components</strong>:
                 </p>
@@ -1010,10 +1012,10 @@ export async function subscribeNewsletter(formData: FormData) {
                 id="react-19-form-hooks"
                 className="mt-8 scroll-mt-20"
               >
-                <h4>
+                <h3>
                   5.2. React 19 Hooks: <code>useActionState</code> &amp;{" "}
                   <code>useFormStatus</code>
-                </h4>
+                </h3>
                 <p>
                   For rich interactive forms with validation feedback and loading
                   spinners, use React 19&apos;s standard hooks:
@@ -1137,7 +1139,7 @@ export async function createPostAction(
                 id="optimistic-updates"
                 className="mt-8 scroll-mt-20"
               >
-                <h4>5.3. Optimistic Updates with <code>useOptimistic</code></h4>
+                <h3>5.3. Optimistic Updates with <code>useOptimistic</code></h3>
                 <p>
                   With React 19&apos;s <code>useOptimistic</code>, you can update
                   the user interface immediately before the server responds:
@@ -1221,14 +1223,20 @@ export async function toggleLikeAction(postId: string) {
               id="request-context"
               className="mt-12 pt-8 border-t scroll-mt-20"
             >
-              <h3>
+              <h2>
                 6. Request Context, Cookies &amp; Headers (<code>getContext</code>)
-              </h3>
+              </h2>
               <p>
                 Dinou provides <code>getContext()</code> (exported from{" "}
-                <code>&quot;dinou&quot;</code>) to access the underlying request
+                <code>&quot;dinou/server&quot;</code>, <code>&quot;dinou&quot;</code>, and contextual{" "}
+                <code>&quot;./dinou&quot;</code>) to access the underlying request
                 and response lifecycle synchronously within any Server Function
-                or SSR component.
+                or SSR component. For the complete guide covering Server Components,
+                SSG/PPR bailout rules, unified multi-runtime <code>env</code> bindings,
+                and plugin state, see{" "}
+                <Link href="/docs/request-context" className="text-blue-500 hover:underline font-medium">
+                  Request Context (<code>getContext</code>)
+                </Link>.
               </p>
 
               <div className="border rounded-lg p-4 bg-card not-prose my-6">
@@ -1250,19 +1258,22 @@ export async function toggleLikeAction(postId: string) {
                   </li>
                   <li>
                     <code>context.res.cookie(name, value, options)</code>: Sets an
-                    HTTP cookie with options (<code>httpOnly</code>,{" "}
-                    <code>secure</code>, <code>maxAge</code>, etc.).
+                    HTTP <code>Set-Cookie</code> header before streaming begins (supporting{" "}
+                    <code>httpOnly</code>, <code>secure</code>, <code>sameSite</code>, <code>maxAge</code>, etc.; if invoked mid-stream after headers are sent, non-<code>httpOnly</code> cookies still sync automatically via Flight stream commands).
                   </li>
                   <li>
                     <code>context.res.clearCookie(name, options)</code>: Clears a
                     cookie from the client.
+                  </li>
+                  <li>
+                    <code>context.env</code> / <code>context.ctx</code> &amp; Plugin State: Exposes Edge/Cloudflare bindings as well as custom properties attached by <code>onRequest</code> plugins.
                   </li>
                 </ul>
               </div>
 
               {/* 6.1 Reading */}
               <section id="reading-request" className="mt-6 scroll-mt-20">
-                <h4>6.1. Reading Query, Headers &amp; Cookies</h4>
+                <h3>6.1. Reading Query, Headers &amp; Cookies</h3>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
@@ -1270,11 +1281,10 @@ export async function toggleLikeAction(postId: string) {
 {`// src/actions/auth-check.ts
 "use server";
 
-import { getContext } from "dinou";
+import { getContext } from "dinou/server";
 
 export async function getCurrentUser() {
   const context = getContext();
-  if (!context) return null;
 
   const sessionToken = context.req.cookies["session_token"];
   const userAgent = context.req.headers["user-agent"];
@@ -1287,7 +1297,7 @@ export async function getCurrentUser() {
 
               {/* 6.2 Mutating Cookies */}
               <section id="mutating-cookies" className="mt-8 scroll-mt-20">
-                <h4>6.2. Setting &amp; Clearing Cookies</h4>
+                <h3>6.2. Setting &amp; Clearing Cookies</h3>
                 <CodeBlock
                   language="typescript"
                   containerClassName="w-full overflow-hidden rounded-lg"
@@ -1295,7 +1305,7 @@ export async function getCurrentUser() {
 {`// src/actions/login.ts
 "use server";
 
-import { getContext } from "dinou";
+import { getContext } from "dinou/server";
 
 export async function loginAction(formData: FormData) {
   const context = getContext();
@@ -1305,7 +1315,7 @@ export async function loginAction(formData: FormData) {
   const session = await authenticateUser(email, password);
 
   // Set secure HTTP-only session cookie
-  context?.res.cookie("session_token", session.token, {
+  context.res.cookie("session_token", session.token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -1319,7 +1329,7 @@ export async function loginAction(formData: FormData) {
 export async function logoutAction() {
   const context = getContext();
   // Clear the cookie upon logout
-  context?.res.clearCookie("session_token", { path: "/" });
+  context.res.clearCookie("session_token", { path: "/" });
   return { success: true };
 }`}
                 </CodeBlock>
@@ -1328,12 +1338,12 @@ export async function logoutAction() {
 
             {/* 7. Redirects */}
             <section id="redirects" className="mt-12 pt-8 border-t scroll-mt-20">
-              <h3>
+              <h2>
                 7. Redirections (<code>redirect</code>)
-              </h3>
+              </h2>
               <p>
                 Dinou provides a universal <code>redirect(destination)</code>{" "}
-                utility exported from <code>&quot;dinou&quot;</code>:
+                utility exported from <code>&quot;dinou&quot;</code> (and contextual <code>&quot;./dinou&quot;</code>):
               </p>
 
               <div className="border rounded-lg p-4 bg-card not-prose my-6">
@@ -1367,10 +1377,28 @@ import db from "@/lib/db";
 export async function completeOrder(orderId: string) {
   await db.orders.updateStatus(orderId, "PAID");
 
-  // Automatically navigates the client router to the success page
+  // Supports both absolute internal paths ("/checkout/...") and relative paths ("./success")
   return redirect(\`/checkout/\${orderId}/success\`);
 }`}
               </CodeBlock>
+
+              <div className="border rounded-lg p-3.5 bg-muted/20 border-border text-xs text-muted-foreground space-y-1.5 not-prose my-4">
+                <div className="font-semibold text-foreground flex items-center gap-1.5">
+                  <Info className="h-4 w-4 text-blue-500" />
+                  <span>Practical Rules When Calling <code>redirect()</code> in Server Functions</span>
+                </div>
+                <ul className="list-disc pl-5 space-y-1 leading-relaxed">
+                  <li>
+                    <strong>Avoid swallowing inside <code>try / catch</code>:</strong> Inside a Server Function, <code>redirect()</code> throws an internal control-flow signal (<code>dinou-internal-redirect</code>). Call <code>return redirect(...)</code> <strong>outside</strong> <code>try / catch</code> blocks (or rethrow if <code>err?.$$type === &quot;dinou-internal-redirect&quot;</code>).
+                  </li>
+                  <li>
+                    <strong>Relative path resolution:</strong> You can pass relative paths such as <code>redirect(&quot;./success&quot;)</code>; Dinou resolves them automatically against the caller&apos;s current route (<code>x-dinou-current-path</code>).
+                  </li>
+                  <li>
+                    <strong>Built-in Open-Redirect guard:</strong> <code>redirect()</code> enforces internal application paths (<code>/path</code>, rejecting protocol-relative <code>//evil.com</code> or external origins by falling back to <code>&quot;/&quot;</code>).
+                  </li>
+                </ul>
+              </div>
 
               {/* Deep Dive Callout Box */}
               <div className="border rounded-lg p-5 bg-muted/20 not-prose my-6 space-y-4 min-w-0">
@@ -1390,7 +1418,7 @@ export async function completeOrder(orderId: string) {
                     <span>The Equivalence Principle in Server Components</span>
                   </div>
                   <p className="text-muted-foreground leading-relaxed">
-                    Calling <code>redirect()</code> directly inside a Server Component vs. calling an imported Server Function (e.g., <code>await verifyUser()</code>) from that Server Component is <strong>functionally identical</strong>. Because both run inside the same server Node.js process during the same SSR request lifecycle, they share the exact same request context and streaming state.
+                    Calling <code>redirect()</code> directly inside a Server Component vs. calling an imported Server Function (e.g., <code>await verifyUser()</code>) from that Server Component is <strong>functionally identical</strong>. Because both run inside the same server runtime during the same SSR request lifecycle, they share the exact same request context and streaming state.
                   </p>
                 </div>
 
@@ -1410,7 +1438,7 @@ export async function completeOrder(orderId: string) {
                           </span>
                         </div>
                         <p className="text-muted-foreground leading-relaxed">
-                          Occurs inside <code>getProps()</code> in <code>page_functions.ts</code>, at the top level of the root <code>page.tsx</code> Server Component (outside any <code>&lt;Suspense&gt;</code> boundary), or in a global plugin hook (<code>onRequest</code>) in <code>dinou.config.js</code>.
+                          Occurs inside <code>getProps()</code> in <code>page_functions.ts</code>, at the top level of the root <code>page.tsx</code> Server Component (outside any <code>&lt;Suspense&gt;</code> boundary), or in a global plugin hook (<code>onRequest</code>) in <code>dinou.config.ts</code>.
                         </p>
                         <p className="text-muted-foreground leading-relaxed">
                           Because zero HTML bytes have reached the wire (<code>headersSent === false</code>), Dinou issues a clean <strong>HTTP 302</strong> with a <code>Location</code> header. <strong>Crucial for SEO crawlers and search indexers.</strong>
@@ -1425,12 +1453,12 @@ export async function completeOrder(orderId: string) {
                               label: "page_functions.ts",
                               language: "typescript",
                               code: `// src/dashboard/page_functions.ts
-import { redirect, getContext } from "dinou";
+import { redirect, getContext } from "./dinou";
 
 export async function getProps() {
-  const { req } = getContext();
-  if (!req.cookies.session_token) {
-    // Evaluated before page rendering -> HTTP 302 redirect
+  const ctx = getContext();
+  if (!ctx.req.cookies.session_token) {
+    // Evaluated before page rendering -> HTTP 302 redirect (or x-rsc-redirect on SPA nav)
     return redirect("/login");
   }
   return { user: { name: "Alex" } };
@@ -1441,11 +1469,11 @@ export async function getProps() {
                               label: "page.tsx (Server Component)",
                               language: "tsx",
                               code: `// src/dashboard/page.tsx (Server Component root)
-import { redirect, getContext } from "dinou";
+import { redirect, getContext } from "./dinou";
 
 export default async function DashboardPage() {
-  const { req } = getContext();
-  if (!req.cookies.session_token) {
+  const ctx = getContext();
+  if (!ctx.req.cookies.session_token) {
     // At root before stream begins -> HTTP 302 redirect
     return redirect("/login");
   }
@@ -1455,9 +1483,9 @@ export default async function DashboardPage() {
                             },
                             {
                               id: "plugin",
-                              label: "dinou.config.js (Plugin)",
-                              language: "javascript",
-                              code: `// dinou.config.js (Global Plugin Hook)
+                              label: "dinou.config.ts (Plugin)",
+                              language: "typescript",
+                              code: `// dinou.config.ts (Global Plugin Hook)
 import { defineConfig } from "dinou/config";
 
 export default defineConfig({
@@ -1465,10 +1493,9 @@ export default defineConfig({
     {
       name: "auth-guard",
       async onRequest(request, context) {
-        const url = new URL(request.url);
-        const cookieHeader = request.headers.get("cookie") || "";
-        // Runs pre-flight before SSR or route resolution
-        if (url.pathname.startsWith("/dashboard") && !cookieHeader.includes("session_token=")) {
+        // context.req.path is normalized ("/dashboard" even on SPA RSC fetches)
+        // and Response.redirect() auto-translates to x-rsc-redirect for <Link> navigations
+        if (context.req.path.startsWith("/dashboard") && !context.req.cookies.session_token) {
           return Response.redirect(new URL("/login", request.url), 302);
         }
       },
@@ -1722,16 +1749,16 @@ export function ClientGuard({ isAllowed }: { isAllowed: boolean }) {
                     <span>Looking for Cache Revalidation?</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Learn how to purge stale SSG pages and ISR cache slots on-demand using <code>revalidatePath</code> and <code>revalidateTag</code> in the dedicated guide.
+                    Learn how to purge stale SSG pages, layouts, and ISR cache slots on-demand using <code>revalidatePage</code>, <code>revalidateLayout</code>, <code>revalidatePath</code>, and <code>revalidateTag</code> in the dedicated guide.
                   </p>
                 </div>
-                <a
+                <Link
                   href="/docs/revalidation"
                   className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline whitespace-nowrap px-3 py-1.5 rounded-md border border-border bg-background hover:bg-muted transition-colors flex-shrink-0"
                 >
                   <span>Revalidation Guide</span>
                   <ArrowRight className="h-3.5 w-3.5" />
-                </a>
+                </Link>
               </div>
             </section>
 
@@ -1739,7 +1766,7 @@ export function ClientGuard({ isAllowed }: { isAllowed: boolean }) {
             <DocsPager />
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Sidebar TOC - Hidden on Mobile */}
       <aside className="hidden xl:block w-64 pl-8 py-6 lg:py-8 shrink-0">

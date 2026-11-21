@@ -74,7 +74,7 @@ export default function Page() {
             </blockquote>
 
             {/* OVERVIEW */}
-            <section id="overview">
+            <section id="overview" className="scroll-mt-20">
               <h2>1. Overview</h2>
               <p>
                 Organizing routes under dynamic language folders (such as <code>src/[lang]/about/page.tsx</code>) provides a clean, predictable mental model for both developers and search engine crawlers.
@@ -118,7 +118,7 @@ export default function Page() {
                 </Card>
               </div>
 
-              <h3 id="overview-how-it-works">1.1 How it Works</h3>
+              <h3 id="overview-how-it-works" className="scroll-mt-20">1.1 How it Works</h3>
               <p>
                 When a request arrives for <code>/es/about</code>, Dinou matches the dynamic route <code>src/[lang]/about</code>. Your page component (<code>page.tsx</code>) automatically receives <code>{"{ params: { lang: 'es' } }"}</code> via standard React props (typed with <code>PageProps</code>). If defined, server contracts like <code>getProps(params)</code> or <code>validateParams(params)</code> also receive <code>params.lang</code> directly to load localized data or validate the route. For pre-rendering at build time, <code>getStaticPaths</code> can be exported in <code>layout_functions.ts</code> (or <code>page_functions.ts</code>) to declare the supported locales.
               </p>
@@ -127,20 +127,20 @@ export default function Page() {
             <hr className="my-8" />
 
             {/* COMPLETE IMPLEMENTATION GUIDE */}
-            <section id="implementation-guide">
+            <section id="implementation-guide" className="scroll-mt-20">
               <h2>2. Complete Implementation Guide</h2>
               <p>
-                Dinou integrates seamlessly with the industry-standard <code>i18next</code> and <code>react-i18next</code> ecosystem. This setup gives you the best of both worlds: Server Components render translations directly on Node.js using <strong><code>getFixedT()</code></strong> with <strong>0 kB client JavaScript bundle impact</strong>, while deeply nested Client Components consume reactive translations anywhere using the <strong><code>useTranslation()</code> hook</strong> without prop drilling.
+                Dinou integrates seamlessly with the industry-standard <code>i18next</code> and <code>react-i18next</code> ecosystem. This setup gives you the best of both worlds: Server Components render translations directly on the server (Node.js, Bun, Deno, Cloudflare Workers, or Netlify) using <strong><code>getFixedT()</code></strong> with <strong>0 kB client JavaScript bundle impact</strong>, while deeply nested Client Components consume reactive translations anywhere using the <strong><code>useTranslation()</code> hook</strong> without prop drilling.
               </p>
 
-              <h3 id="i18next-install">2.1 Installation</h3>
+              <h3 id="i18next-install" className="scroll-mt-20">2.1 Installation</h3>
               <div className="not-prose my-4">
                 <CodeBlock language="bash">{`npm install i18next react-i18next`}</CodeBlock>
               </div>
 
-              <h3 id="i18next-config">2.2 Shared Configuration &amp; Server Helpers (<code>src/lib/i18n.ts</code>)</h3>
+              <h3 id="i18next-config" className="scroll-mt-20">2.2 Shared Configuration &amp; Server Helpers (<code>src/lib/i18n.ts</code>)</h3>
               <p>
-                Create a shared configuration file with your translation resources. Export <code>getFixedT(lang)</code> for explicit route language bindings, and <code>getServerT()</code> for zero-prop-drilling in nested Server Components:
+                Create a shared configuration file with your translation resources. Export <code>getFixedT(lang)</code> for explicit route language bindings, and <code>getServerT()</code> for zero-prop-drilling in nested Server Components (working seamlessly across both runtime requests and build-time SSG):
               </p>
 
               <div className="not-prose my-4">
@@ -148,11 +148,14 @@ export default function Page() {
 import i18next from "i18next";
 import { getContext } from "dinou";
 
+export const SUPPORTED_LOCALES = ["en", "es"] as const;
+export const DEFAULT_LOCALE = "en";
+
 export const resources = {
   en: {
     translation: {
       title: "Interactive i18n Demo",
-      serverMessage: "Rendered directly on Node.js with getFixedT() (0 kB client JS)!",
+      serverMessage: "Rendered directly on the server with getFixedT() (0 kB client JS)!",
       serverNested: "Rendered deep in the RSC tree with getServerT() (zero prop drilling)!",
       clientMessage: "Translated inside a Client Component using useTranslation()!",
       save: "Save Changes",
@@ -168,7 +171,7 @@ export const resources = {
   es: {
     translation: {
       title: "Demostración Interactiva de i18n",
-      serverMessage: "¡Renderizado directamente en Node.js con getFixedT() (0 kB de JS cliente)!",
+      serverMessage: "¡Renderizado directamente en el servidor con getFixedT() (0 kB de JS cliente)!",
       serverNested: "¡Renderizado profundo en el árbol RSC con getServerT() (cero prop drilling)!",
       clientMessage: "¡Traducido dentro de un Client Component usando useTranslation()!",
       save: "Guardar Cambios",
@@ -186,7 +189,7 @@ export const resources = {
 if (!i18next.isInitialized) {
   i18next.init({
     resources,
-    fallbackLng: "en",
+    fallbackLng: DEFAULT_LOCALE,
     interpolation: { escapeValue: false },
   });
 }
@@ -196,80 +199,93 @@ export function getFixedT(lang: string) {
   return i18next.getFixedT(lang);
 }
 
-// 2. Zero-Prop-Drilling Server Helper: automatically resolves context.lang from AsyncLocalStorage.
-// Deeply nested Server Components can call this anywhere without needing props from parent pages!
+// 2. Zero-Prop-Drilling Server Helper: reads context.lang set by onRequest, and
+//    falls back to context.req.path during build-time SSG (without bailing out of static generation!)
 export function getServerT() {
-  const { lang = "en" } = getContext() as { lang?: string };
+  const ctx = getContext() as { lang?: string; req?: { path?: string } };
+  if (ctx.lang) return getFixedT(ctx.lang);
+
+  const firstSegment = ctx.req?.path?.split("/").filter(Boolean)[0];
+  const lang =
+    firstSegment && (SUPPORTED_LOCALES as readonly string[]).includes(firstSegment)
+      ? firstSegment
+      : DEFAULT_LOCALE;
   return getFixedT(lang);
 }`}</CodeBlock>
               </div>
 
-              <h3 id="i18next-plugin">2.3 Plugin Configuration: Root Redirection &amp; Context Extension (<code>dinou.config.js</code>)</h3>
+              <h3 id="i18next-plugin" className="scroll-mt-20">2.3 Plugin Configuration: Root Redirection &amp; Context Extension (<code>dinou.config.ts</code>)</h3>
               <p>
-                In <strong>Dinou</strong>, you can configure both <strong>Root URL Redirection</strong> (<code>/</code> ➔ <code>/[lang]</code>) and <strong>Context Extension</strong> (attaching <code>context.lang</code> for <code>getContext()</code>) using a single Web Standards plugin:
+                In <strong>Dinou</strong>, you can configure both <strong>Root URL Redirection</strong> (<code>/</code> ➔ <code>/[lang]</code>) and <strong>Context Extension</strong> (attaching <code>context.lang</code> for <code>getContext()</code>) using a single Web Standards plugin. Always inspect <code>context.req.path</code> (not raw <code>new URL(request.url).pathname</code>) so redirects and locale resolution work identically on hard loads and <code>&lt;Link&gt;</code> SPA navigations:
               </p>
 
               <div className="not-prose my-4">
-                <CodeBlock language="javascript">{`// dinou.config.js
+                <CodeBlock language="typescript">{`// dinou.config.ts
 import { defineConfig } from "dinou";
+
+const SUPPORTED_LOCALES = ["en", "es"];
+const DEFAULT_LOCALE = "en";
 
 export default defineConfig({
   plugins: [
     {
       name: "i18n-plugin",
       onRequest(request, context) {
-        const url = new URL(request.url);
+        // Normalized logical route pathname (strips internal /____rsc_* SPA prefixes)
+        const pathname = context.req.path;
 
         // 1. Root URL Redirection: / -> /[lang]
-        if (url.pathname === "/") {
-          const supportedLocales = ["en", "es"];
-          const defaultLocale = "en";
-
+        if (pathname === "/") {
           // Check saved user cookie from context.req.cookies
           const cookieLocale = context.req.cookies["locale"];
-          if (cookieLocale && supportedLocales.includes(cookieLocale)) {
+          if (cookieLocale && SUPPORTED_LOCALES.includes(cookieLocale)) {
             return Response.redirect(new URL(\`/\${cookieLocale}\`, request.url), 307);
           }
 
           // Check browser Accept-Language header
           const acceptLang = request.headers.get("accept-language") || "";
-          const browserLocale = supportedLocales.find((l) =>
+          const browserLocale = SUPPORTED_LOCALES.find((l) =>
             acceptLang.toLowerCase().includes(l)
           );
 
-          const targetLocale = browserLocale || defaultLocale;
+          const targetLocale = browserLocale || DEFAULT_LOCALE;
           return Response.redirect(new URL(\`/\${targetLocale}\`, request.url), 307);
         }
 
         // 2. Context Extension: Resolve active language for getContext()
-        const supported = ["en", "es"];
-        let lang = null;
+        let lang: string | null = null;
 
-        // A. From URL path (e.g. /es/about, /en/contact)
-        const segments = url.pathname.split("/").filter(Boolean);
-        if (segments[0] && supported.includes(segments[0])) {
+        // A. From normalized route path (hard loads, SPA <Link>, and slot refreshes)
+        const segments = pathname.split("/").filter(Boolean);
+        if (segments[0] && SUPPORTED_LOCALES.includes(segments[0])) {
           lang = segments[0];
         }
 
-        // B. From Referer header (e.g. when triggered from Server Actions or client fetch)
-        if (!lang && request.headers.get("referer")) {
-          try {
-            const refPath = new URL(request.headers.get("referer")).pathname;
-            const refSegments = refPath.split("/").filter(Boolean);
-            if (refSegments[0] && supported.includes(refSegments[0])) {
-              lang = refSegments[0];
-            }
-          } catch {}
+        // B. From x-dinou-current-path or Referer (e.g. Server Functions POST /____server_function____)
+        if (!lang) {
+          const clientPath =
+            request.headers.get("x-dinou-current-path") ||
+            (() => {
+              try {
+                return new URL(request.headers.get("referer") || "").pathname;
+              } catch {
+                return "";
+              }
+            })();
+          const refSegments = clientPath.split("/").filter(Boolean);
+          if (refSegments[0] && SUPPORTED_LOCALES.includes(refSegments[0])) {
+            lang = refSegments[0];
+          }
         }
 
         // C. From saved user cookie
         if (!lang && context.req.cookies["locale"]) {
           const cookieLocale = context.req.cookies["locale"];
-          if (supported.includes(cookieLocale)) lang = cookieLocale;
+          if (SUPPORTED_LOCALES.includes(cookieLocale)) lang = cookieLocale;
         }
 
         // Attached directly to context: accessible anywhere via getContext()!
-        context.lang = lang || "en";
+        context.lang = lang || DEFAULT_LOCALE;
       },
     },
   ],
@@ -279,15 +295,16 @@ export default defineConfig({
               <div className="not-prose my-4">
                 <Alert>
                   <Sparkles className="h-4 w-4" />
-                  <AlertTitle>Why HTTP 307 &amp; AsyncLocalStorage?</AlertTitle>
+                  <AlertTitle>Why HTTP 307, <code>context.req.path</code> &amp; AsyncLocalStorage?</AlertTitle>
                   <AlertDescription className="text-xs text-muted-foreground mt-1 space-y-1">
                     <p>• <strong>HTTP 307 (Temporary Redirect):</strong> Prevents search engines and browsers from permanently caching the redirect, allowing visitors to switch locales dynamically without getting locked in.</p>
-                    <p>• <strong>AsyncLocalStorage Propagation:</strong> Any custom property attached to <code>context</code> (like <code>context.lang</code>) is preserved across the entire asynchronous execution chain on Node.js and accessible via <code>getContext()</code>.</p>
+                    <p>• <strong>SPA-Safe Normalization:</strong> Reading <code>context.req.path</code> works on both hard loads and client <code>&lt;Link&gt;</code> fetches, and Dinou automatically translates <code>307</code> redirects into <code>x-rsc-redirect</code> on RSC wire requests.</p>
+                    <p>• <strong>AsyncLocalStorage Propagation:</strong> Any custom property attached to <code>context</code> (like <code>context.lang</code>) is preserved across the entire asynchronous execution chain across all server runtimes and accessible via <code>getContext()</code>.</p>
                   </AlertDescription>
                 </Alert>
               </div>
 
-              <h3 id="i18next-provider">2.4 Client Provider (<code>src/components/i18n-provider.tsx</code>)</h3>
+              <h3 id="i18next-provider" className="scroll-mt-20">2.4 Client Provider (<code>src/components/i18n-provider.tsx</code>)</h3>
               <p>
                 Wrap the client tree in an <code>I18nextProvider</code> that synchronizes its active language whenever <code>locale</code> changes:
               </p>
@@ -329,7 +346,7 @@ export function I18nProvider({
 }`}</CodeBlock>
               </div>
 
-              <h3 id="i18next-layout">2.5 Root Locale Layout (<code>src/[lang]/layout.tsx</code>)</h3>
+              <h3 id="i18next-layout" className="scroll-mt-20">2.5 Root Locale Layout (<code>src/[lang]/layout.tsx</code>)</h3>
               <p>
                 Instead of manually wrapping <code>&lt;I18nProvider&gt;</code> inside every individual page, mount it once in the localized route segment layout (<code>src/[lang]/layout.tsx</code>). It receives the active language directly via <code>LayoutProps&lt;&quot;/[lang]&quot;&gt;</code>:
               </p>
@@ -365,9 +382,9 @@ export default function LocaleLayout({
                 </Alert>
               </div>
 
-              <h3 id="i18next-integration">2.6 Translating in Server &amp; Client Components</h3>
+              <h3 id="i18next-integration" className="scroll-mt-20">2.6 Translating in Server &amp; Client Components</h3>
               <p>
-                In Dinou and React 19, you can author pages and components as either <strong>Server Components</strong> (Node.js) or <strong>Client Components</strong> (browser). Because <code>src/[lang]/layout.tsx</code> wraps the route subtree in <code>&lt;I18nProvider&gt;</code> and our plugin preserves <code>context.lang</code> in <code>AsyncLocalStorage</code>, translations work seamlessly across all environments:
+                In Dinou and React 19, you can author pages and components as either <strong>Server Components</strong> (server runtime) or <strong>Client Components</strong> (browser). Because <code>src/[lang]/layout.tsx</code> wraps the route subtree in <code>&lt;I18nProvider&gt;</code> and our plugin preserves <code>context.lang</code> in <code>AsyncLocalStorage</code> (with <code>context.req.path</code> fallback for build-time SSG), translations work seamlessly across all environments:
               </p>
 
               <div className="not-prose my-4">
@@ -375,8 +392,8 @@ export default function LocaleLayout({
                   <Sparkles className="h-4 w-4 text-primary text-blue-600 dark:text-blue-400" />
                   <AlertTitle>Server vs. Client Translation Patterns</AlertTitle>
                   <AlertDescription className="text-xs text-muted-foreground mt-1 space-y-1">
-                    <p>• <strong>Server Component Pages (Zero Client JS):</strong> Server components cannot run hooks like <code>useTranslation()</code>. Call <code>getFixedT(params.lang)</code> to translate synchronously on Node.js during SSR, shipping pure HTML with <strong>0 kB client bundle impact</strong>.</p>
-                    <p>• <strong>Deeply Nested Server Components (Zero Prop Drilling):</strong> In other frameworks, nested RSCs require passing <code>lang</code> or <code>t</code> down through every layer. In Dinou, any nested Server Component can simply call <strong><code>getServerT()</code></strong> (the helper we created in step 2.2 in <code>src/lib/i18n.ts</code>) to read the active locale directly from <code>AsyncLocalStorage</code> with <strong>zero prop drilling</strong>.</p>
+                    <p>• <strong>Server Component Pages (Zero Client JS):</strong> Server components cannot run hooks like <code>useTranslation()</code>. Call <code>getFixedT(params.lang)</code> to translate synchronously on the server during SSG/SSR, shipping pure HTML with <strong>0 kB client bundle impact</strong>.</p>
+                    <p>• <strong>Deeply Nested Server Components (Zero Prop Drilling):</strong> In other frameworks, nested RSCs require passing <code>lang</code> or <code>t</code> down through every layer. In Dinou, any nested Server Component can simply call <strong><code>getServerT()</code></strong> (the helper we created in step 2.2 in <code>src/lib/i18n.ts</code>) to read the active locale directly from <code>AsyncLocalStorage</code> (or <code>req.path</code> during SSG) with <strong>zero prop drilling</strong>.</p>
                     <p>• <strong>Client Component Pages (&quot;use client&quot;):</strong> When an entire page requires client-side state (such as interactive dashboards, forms, or tabs), mark <code>page.tsx</code> with <code>&quot;use client&quot;</code> and call <code>const &#123; t &#125; = useTranslation()</code> directly at the page level.</p>
                     <p>• <strong>Nested Client Components:</strong> Any leaf component (buttons, modals, toolbars) can call <code>useTranslation()</code> anywhere in the tree with zero prop drilling.</p>
                   </AlertDescription>
@@ -391,7 +408,7 @@ export default function LocaleLayout({
                       label: "page.tsx (Server Component Page)",
                       language: "tsx",
                       code: `// src/[lang]/interactive/page.tsx
-// Server Component: zero client JS overhead, translations rendered directly on Node.js
+// Server Component: zero client JS overhead, translations rendered directly on the server
 import { getFixedT } from "@/lib/i18n";
 import { ServerStats } from "@/components/server-stats";
 import { FeedbackBox } from "@/components/feedback-box";
@@ -441,7 +458,7 @@ export default function InteractivePage({
 import { getServerT } from "@/lib/i18n";
 
 export function ServerStats() {
-  // Reads context.lang automatically from Node.js AsyncLocalStorage
+  // Reads context.lang from AsyncLocalStorage (or req.path during build-time SSG)
   const t = getServerT();
 
   return (
@@ -461,12 +478,9 @@ export function ServerStats() {
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { PageProps } from "dinou";
 
 // Entire page marked with "use client" for client state and event handlers
-export default function DashboardPage({
-  params,
-}: PageProps<"/[lang]/dashboard">) {
+export default function DashboardPage() {
   // Inherits I18nProvider from src/[lang]/layout.tsx!
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("overview");
@@ -479,6 +493,7 @@ export default function DashboardPage({
       <div className="flex gap-2">
         <button
           onClick={() => setActiveTab("overview")}
+          aria-pressed={activeTab === "overview"}
           className="px-3 py-1.5 rounded bg-primary text-primary-foreground text-xs font-semibold"
         >
           {t("save")}
@@ -515,16 +530,16 @@ export function FeedbackBox() {
                 />
               </div>
 
-              <h3 id="language-switcher">2.7 Language Switcher Component</h3>
+              <h3 id="language-switcher" className="scroll-mt-20">2.7 Language Switcher Component</h3>
               <p>
-                Below is a reusable language switcher component for your app. It uses Dinou&apos;s <code>usePathname()</code> to swap the leading language prefix while preserving the user&apos;s active sub-path (e.g. switching from <code>/en/interactive</code> to <code>/es/interactive</code>). It also updates the <code>locale</code> cookie on click so that future visits to the root URL (<code>/</code>) seamlessly remember the user&apos;s preferred language via our plugin in <code>dinou.config.js</code>:
+                Below is a reusable language switcher component for your app. It uses Dinou&apos;s <code>usePathname()</code> to swap the leading language prefix while preserving the user&apos;s active sub-path (e.g. switching from <code>/en/interactive</code> to <code>/es/interactive</code>). It also updates the <code>locale</code> cookie on click so that future visits to the root URL (<code>/</code>) seamlessly remember the user&apos;s preferred language via our plugin in <code>dinou.config.ts</code>:
               </p>
 
               <div className="not-prose my-4">
                 <CodeBlock language="tsx">{`// src/components/language-switcher.tsx
 "use client";
 
-import { usePathname, Link } from "dinou";
+import { usePathname, Link, type DinouLinkTarget } from "dinou";
 
 const LOCALES = [
   { code: "en", label: "English" },
@@ -541,14 +556,14 @@ export function LanguageSwitcher() {
     : "en";
 
   // 2. Helper to replace the leading language prefix (e.g. /en/about -> /es/about)
-  const getLocalizedPath = (targetLocale: string) => {
+  const getLocalizedPath = (targetLocale: string): DinouLinkTarget => {
     const nextSegments = [...segments];
     if (nextSegments.length > 0 && LOCALES.some((l) => l.code === nextSegments[0])) {
       nextSegments[0] = targetLocale;
     } else {
       nextSegments.unshift(targetLocale);
     }
-    return "/" + nextSegments.join("/");
+    return ("/" + nextSegments.join("/")) as DinouLinkTarget;
   };
 
   return (
@@ -558,7 +573,7 @@ export function LanguageSwitcher() {
           key={code}
           href={getLocalizedPath(code)}
           onClick={() => {
-            // 3. Persist locale cookie so dinou.config.js remembers it on root "/" visits
+            // 3. Persist locale cookie so dinou.config.ts remembers it on root "/" visits
             document.cookie = \`locale=\${code}; path=/; max-age=31536000; SameSite=Lax\`;
           }}
           className={\`px-2.5 py-1 rounded-md transition-colors \${
@@ -575,7 +590,7 @@ export function LanguageSwitcher() {
 }`}</CodeBlock>
               </div>
 
-              <h3 id="i18next-ssg">2.8 Cascading SSG with <code>layout_functions.ts</code></h3>
+              <h3 id="i18next-ssg" className="scroll-mt-20">2.8 Cascading SSG with <code>layout_functions.ts</code></h3>
               <p>
                 In Dinou, when a layout introduces a dynamic route segment (such as <code>src/[lang]/layout.tsx</code>), define <code>getStaticPaths</code> directly in <strong><code>src/[lang]/layout_functions.ts</code></strong>.
               </p>
@@ -607,7 +622,7 @@ export const allowISG: LayoutFunctions<"/[lang]">["allowISG"] = false;`}</CodeBl
                 </Alert>
               </div>
 
-              <h3 id="server-functions">2.9 Server Functions (Server Actions) with i18n</h3>
+              <h3 id="server-functions" className="scroll-mt-20">2.9 Server Functions (Server Actions) with i18n</h3>
               <p>
                 Server Functions (<code>&quot;use server&quot;</code>) execute in an isolated backend Flight RPC context. In production web applications, having the active locale available on the server is critical for multiple backend operations.
               </p>
@@ -630,7 +645,7 @@ export const allowISG: LayoutFunctions<"/[lang]">["allowISG"] = false;`}</CodeBl
                   <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   <AlertTitle>Zero-Boilerplate Access via <code>getContext()</code></AlertTitle>
                   <AlertDescription className="text-xs text-muted-foreground mt-1 space-y-1">
-                    <p>Because our plugin in <code>dinou.config.js</code> attaches <code>context.lang</code>, any Server Function can read it directly from <code>AsyncLocalStorage</code> via <code>const &#123; lang &#125; = getContext()</code>. You don&apos;t need to pass <code>lang</code> through form inputs or client function parameters!</p>
+                    <p>Because our plugin in <code>dinou.config.ts</code> attaches <code>context.lang</code>, any Server Function can read it directly from <code>AsyncLocalStorage</code> via <code>const &#123; lang &#125; = getContext()</code>. You don&apos;t need to pass <code>lang</code> through form inputs or client function parameters!</p>
                   </AlertDescription>
                 </Alert>
               </div>
@@ -674,7 +689,7 @@ export async function subscribeNewsletter(email: string) {
                       code: `// src/components/newsletter-form.tsx
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { subscribeNewsletter } from "@/actions/newsletter";
 
@@ -684,7 +699,7 @@ export function NewsletterForm() {
   const [status, setStatus] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     startTransition(async () => {
       // Call the action cleanly without passing locale arguments

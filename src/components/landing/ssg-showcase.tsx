@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   FileCheck,
   Zap,
@@ -17,7 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "dinou";
-import { CodeWindow } from "./code-window";
+import { CodeWindow, type CodeFile } from "./code-window";
 
 type SsgTab = "ssg" | "isr" | "isg";
 
@@ -28,13 +28,14 @@ interface TabConfig {
   badgeColor: string;
   headline: string;
   description: string;
-  codeFile: string;
-  codeSnippet: string;
-  language: string;
+  codeFile?: string;
+  codeSnippet?: string;
+  files?: CodeFile[];
+  language?: string;
   features: {
     icon: typeof Zap;
     title: string;
-    desc: string;
+    desc: ReactNode;
   }[];
   stat: string;
   statLabel: string;
@@ -46,41 +47,43 @@ const tabConfigs: Record<SsgTab, TabConfig> = {
     title: "1. Pure Static (SSG)",
     badge: "Build-Time Pre-rendering",
     badgeColor: "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10",
-    headline: "Maximum Velocity with Zero Origin Execution",
+    headline: "Maximum Velocity with Zero Component Re-Execution",
     description:
-      "Dinou is Static by Default. Routes compile into static HTML and React Flight wire payloads at build time. Use getStaticPaths to pre-render marketing pages, blogs, and documentation for instant 0ms TTFB edge delivery.",
+      "Dinou is Static by Default: static routes compile into HTML and React Flight wire payloads at build time automatically, while getStaticPaths pre-renders specific pages on dynamic routes for instant delivery.",
     codeFile: "src/blog/[slug]/page_functions.ts",
     language: "typescript",
-    codeSnippet: `// 1. Pre-render known slugs at build time
+    codeSnippet: `import type { RouteParams } from "./dinou";
+
+// 1. Pre-render known slugs at build time (Static by default)
 export async function getStaticPaths() {
   const posts = await db.posts.findMany({ select: { slug: true } });
-
-  return posts.map((post) => ({
-    params: { slug: post.slug },
-  }));
+  return posts.map((post) => post.slug);
 }
 
-// 2. Pure static route: served permanently from edge cache
-export const revalidate = false; // Never expires automatically`,
+// 2. Fetch post data at build time and pass as props to page.tsx
+export async function getProps(params: RouteParams) {
+  const post = await db.posts.findUnique({ where: { slug: params.slug } });
+  return { post };
+}`,
     features: [
       {
         icon: Zap,
-        title: "0ms Time-to-First-Byte",
-        desc: "Served directly as static files from memory or CDN with zero runtime execution.",
+        title: "Instant Static Delivery",
+        desc: "Dinou serves pre-rendered HTML and RSC payloads directly from disk, memory, or KV without re-running React.",
       },
       {
         icon: Globe,
-        title: "Global Edge Distribution",
-        desc: "Deploy statically to Cloudflare Workers, Netlify, or any standard static host.",
+        title: "Pre-Built HTML & RSC Payloads",
+        desc: "Generates both full HTML for initial page loads and Flight payloads for instant client-side navigation.",
       },
       {
         icon: CheckCircle2,
-        title: "Zero Origin Load",
-        desc: "Traffic spikes and viral surges never touch your origin server or database.",
+        title: "Rendered Once at Build Time",
+        desc: "Components and database queries run only during the build, never on incoming user requests.",
       },
     ],
-    stat: "0ms",
-    statLabel: "Origin Server Execution",
+    stat: "1.45ms",
+    statLabel: "TTFB p50 (1,432 req/s @ 200 conns)",
   },
   isr: {
     id: "isr",
@@ -89,21 +92,40 @@ export const revalidate = false; // Never expires automatically`,
     badgeColor: "border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10",
     headline: "Fresh Content Without Slowing Down Visitors",
     description:
-      "Set a simple numeric revalidate in seconds. Dinou serves stale cached assets in under 5ms, triggers a background re-render, and performs an atomic swap without dropping incoming requests.",
-    codeFile: "src/products/[id]/page_functions.ts",
-    language: "typescript",
-    codeSnippet: `// 1. Time-based background revalidation (seconds)
+      "Set a simple numeric revalidate in seconds. Dinou serves stale cached assets instantly, triggers a background re-render, and performs an atomic swap without dropping incoming requests.",
+    files: [
+      {
+        filename: "src/products/[id]/page_functions.ts",
+        badge: "ISR",
+        language: "typescript",
+        code: `
+import type { RouteParams } from "./dinou";
+
+// 1. Time-based background revalidation (seconds)
 export const revalidate = 60; // Refreshes in background every 1m
 
 // 2. Assign cache tags for programmatic webhook invalidation
-export const getCacheTags = ({ params }) => [
+export const getCacheTags = (params: RouteParams) => [
   \`product-\${params.id}\`,
   "catalog",
-];
+];`,
+      },
+      {
+        filename: "src/products/actions.ts",
+        badge: '"use server"',
+        language: "typescript",
+        code: `
+"use server";
 
-// 3. Trigger instant on-demand purge from headless CMS or Server Actions:
-// await revalidateTag("catalog");
-// await revalidatePath("/products/laptop");`,
+import { revalidateTag, revalidatePath } from "dinou/server";
+
+// Trigger instant on-demand purge from Server Functions or webhooks
+export async function purgeCatalogCache(productId: string) {
+  await revalidateTag("catalog");
+  await revalidatePath(\`/products/\${productId}\`);
+}`,
+      },
+    ],
     features: [
       {
         icon: RefreshCw,
@@ -113,15 +135,23 @@ export const getCacheTags = ({ params }) => [
       {
         icon: Tag,
         title: "Tag-Based Purges",
-        desc: "Invalidate single records or entire collections instantly using `revalidateTag()`.",
+        desc: (
+          <>
+            Invalidate single records or entire collections instantly using{" "}
+            <code className="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-xs">
+              revalidateTag()
+            </code>
+            .
+          </>
+        ),
       },
       {
         icon: Timer,
-        title: "Intuitive Seconds API",
-        desc: "Clear numeric durations without complex cron strings or cache headers.",
+        title: "Unified Revalidate Contract",
+        desc: "Set >= 1 seconds for background ISR, 0 for dynamic SSR, or omit for permanent static caching.",
       },
     ],
-    stat: "< 5ms",
+    stat: "1.18ms",
     statLabel: "Cached SWR Response Time",
   },
   isg: {
@@ -134,30 +164,37 @@ export const getCacheTags = ({ params }) => [
       "Eliminate hours of build time on massive catalogs. Pre-render your top pages at build time, and let Incremental Static Generation (ISG) compile remaining pages on first visit with built-in parameter validation.",
     codeFile: "src/docs/[...slug]/page_functions.ts",
     language: "typescript",
-    codeSnippet: `// 1. Pre-render only top popular articles at build time
+    codeSnippet: `import type { RouteParams } from "./dinou";
+
+// 1. Pre-render only top popular articles at build time
 export async function getStaticPaths() {
-  return popularDocs.map((doc) => ({
-    params: { slug: doc.slug.split("/") },
-  }));
+  return popularDocs.map((doc) => doc.slug.split("/"));
 }
 
-// 2. Allow on-demand static generation for the long tail
-export const allowISG = true;
+// 2. allowISG defaults to true (configurable globally in dinou.config.ts or per segment)
+// export const allowISG = false;
 
 // 3. Validate params to reject invalid routes & prevent cache poisoning
-export async function validateParams({ params }) {
+export async function validateParams(params: RouteParams) {
   return db.docs.exists({ slug: params.slug.join("/") });
 }`,
     features: [
       {
         icon: Cpu,
-        title: "10x Faster Build Times",
+        title: "Lean Build Times",
         desc: "Pre-render critical routes at build; let ISG generate the long tail on demand.",
       },
       {
         icon: ShieldCheck,
         title: "Anti-Poisoning Guard",
-        desc: "`validateParams` checks route existence before wasting CPU or disk space.",
+        desc: (
+          <>
+            <code className="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-xs">
+              validateParams
+            </code>{" "}
+            checks route existence before wasting CPU or disk space.
+          </>
+        ),
       },
       {
         icon: Layers,
@@ -165,8 +202,8 @@ export async function validateParams({ params }) {
         desc: "Once compiled, the page is cached and served statically to all subsequent visitors.",
       },
     ],
-    stat: "10x",
-    statLabel: "Build Time Acceleration",
+    stat: "0ms",
+    statLabel: "Build-Time Cost for Long-Tail Routes",
   },
 };
 
@@ -336,10 +373,11 @@ export function SsgShowcase() {
             <CodeWindow
               filename={activeConfig.codeFile}
               code={activeConfig.codeSnippet}
+              files={activeConfig.files}
               language={activeConfig.language}
-              statusLeft="Dinou Static &amp; ISR Engine"
-              statusRight="0ms TTFB Edge Cache"
-              className="h-[500px] sm:h-[540px] lg:h-full"
+              statusLeft="Dinou Static & ISR Engine"
+              statusRight="1.18ms–1.45ms p50 TTFB"
+              className="h-[500px] sm:h-[540px] lg:h-[630px] w-full shrink-0"
             />
           </div>
         </div>

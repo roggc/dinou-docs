@@ -1,3 +1,4 @@
+import { Link } from "dinou";
 import { TableOfContents } from "@/docs/components/table-of-contents";
 import { DocsPager } from "@/docs/components/docs-pager";
 import {
@@ -9,7 +10,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
 } from "@/docs/components/ui/card";
 import { Badge } from "@/docs/components/ui/badge";
 import {
@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   ArrowRight,
   Layers,
+  Globe,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -25,7 +26,8 @@ const tocItems = [
   { id: "overview", title: "1. Overview & Architecture", level: 2 },
   { id: "direct-copy", title: "Bypassing Bundlers (.dinou/dist3)", level: 3 },
   { id: "directory-structure", title: "Recommended Directory Structure", level: 3 },
-  { id: "url-mapping", title: "2. URL Mapping & Serving", level: 2 },
+  { id: "url-mapping", title: "2. URL Mapping & Multi-Runtime Serving", level: 2 },
+  { id: "runtime-delivery", title: "Multi-Runtime Delivery & Cache-Control", level: 3 },
   { id: "common-use-cases", title: "3. Common Use Cases", level: 2 },
   { id: "favicons-icons", title: "Favicons & App Icons", level: 3 },
   { id: "seo-crawlers", title: "robots.txt & sitemap.xml", level: 3 },
@@ -100,7 +102,9 @@ export default function Page() {
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold text-slate-700 dark:text-slate-300">
                         <Zap className="h-5 w-5 text-slate-500" />
-                        <span>Development Mode (`dinou dev`)</span>
+                        <span>
+                          Development Mode (<code>dinou dev</code>)
+                        </span>
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground space-y-2">
@@ -115,14 +119,17 @@ export default function Page() {
                     <CardHeader>
                       <div className="flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400">
                         <FolderTree className="h-5 w-5 text-emerald-500" />
-                        <span>Production Build (`dinou build`)</span>
+                        <span>
+                          Production Build (<code>dinou build</code>)
+                        </span>
                       </div>
                     </CardHeader>
                     <CardContent className="text-sm text-muted-foreground space-y-2">
                       <p>
-                        During the build process, Dinou executes a direct recursive copy from <code>./public</code> into{" "}
-                        <code className="font-mono text-xs">.dinou/dist3</code>. The runtime web engine serves these files
-                        directly with optimal HTTP headers (ETag, Content-Type, Cache-Control).
+                        During the build process (across Esbuild, Rollup, and Webpack), Dinou executes a direct recursive
+                        copy from <code>./public</code> into <code className="font-mono text-xs">.dinou/dist3</code>,
+                        preserving nested subdirectories and <code>.well-known/</code> files with accurate{" "}
+                        <code>Content-Type</code> and <code>Cache-Control</code> headers.
                       </p>
                     </CardContent>
                   </Card>
@@ -190,10 +197,9 @@ export default function Page() {
 │       ├── og-image.png            # OpenGraph / Twitter social card
 │       └── logo-transparent.png    # Unbundled high-res brand marks
 ├── src/
-│   └── app/
-│       ├── layout.tsx              # Root HTML shell linking public assets
-│       └── page.tsx
-├── dinou.config.js
+│   ├── layout.tsx                  # Root HTML shell linking public assets
+│   └── page.tsx                    # Root route (/)
+├── dinou.config.ts
 └── package.json`}
                 </CodeBlock>
               </section>
@@ -204,14 +210,16 @@ export default function Page() {
             {/* ================================================================= */}
             <section id="url-mapping" className="scroll-mt-20 mt-12 pt-8 border-t">
               <h2 className="flex flex-wrap items-center gap-2.5 sm:gap-3">
-                <span>2. URL Mapping &amp; Serving</span>
+                <span>2. URL Mapping &amp; Multi-Runtime Serving</span>
                 <span className="inline-flex items-center shrink-0 rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-700 dark:text-slate-300 ring-1 ring-inset ring-slate-200 dark:ring-slate-700">
-                  Routing
+                  Zero-RSC Fast Path
                 </span>
               </h2>
               <p>
-                Every file and nested folder inside <code>public/</code> is served directly from the root URL (<code>/</code>).
-                <strong>You must never include <code>/public/</code> in the URL path</strong>.
+                Every file and nested folder inside <code>public/</code> is served directly from the root URL (<code>/</code>).{" "}
+                <strong>You must never include <code>/public/</code> in the URL path</strong>. URL-encoded filenames
+                (such as spaces in <code>/docs/brochure%202026.pdf</code>) are automatically decoded and confined safely
+                within the static root.
               </p>
 
               <div className="not-prose overflow-x-auto rounded-lg border border-border my-4 w-full min-w-0">
@@ -239,6 +247,11 @@ export default function Page() {
                       <td className="p-4 font-mono text-xs text-primary font-semibold">/images/og-image.png</td>
                       <td className="p-4 text-xs font-medium text-emerald-600 dark:text-emerald-400">✓ Correct</td>
                     </tr>
+                    <tr>
+                      <td className="p-4 font-mono text-xs">public/.well-known/assetlinks.json</td>
+                      <td className="p-4 font-mono text-xs text-primary font-semibold">/.well-known/assetlinks.json</td>
+                      <td className="p-4 text-xs font-medium text-emerald-600 dark:text-emerald-400">✓ Correct</td>
+                    </tr>
                     <tr className="bg-rose-500/5">
                       <td className="p-4 font-mono text-xs text-muted-foreground">public/favicon.ico</td>
                       <td className="p-4 font-mono text-xs text-rose-600 dark:text-rose-400 line-through">/public/favicon.ico</td>
@@ -247,6 +260,71 @@ export default function Page() {
                   </tbody>
                 </table>
               </div>
+
+              <section id="runtime-delivery" className="scroll-mt-20 mt-8">
+                <h3>Multi-Runtime Delivery &amp; <code>Cache-Control</code> Policy</h3>
+                <p>
+                  In production, Dinou intercepts <code>GET</code> and <code>HEAD</code> static asset requests{" "}
+                  <strong>before</strong> invoking the React Server Components engine across every deployment target
+                  (see <Link href="/docs/deployment" className="font-medium underline underline-offset-4">Deployment</Link>):
+                </p>
+                <ul>
+                  <li>
+                    <strong>Node.js:</strong> Streamed directly from <code>.dinou/dist3</code> via zero-copy{" "}
+                    <code>Readable.toWeb(fs.createReadStream(...))</code> with full HTTP byte-range support (
+                    <code>Accept-Ranges: bytes</code> / <code>206 Partial Content</code> for video, audio, and PDFs).
+                  </li>
+                  <li>
+                    <strong>Bun:</strong> Served via kernel-level zero-copy <code>Bun.file()</code> (including byte-range
+                    slicing via <code>file.slice(...)</code>).
+                  </li>
+                  <li>
+                    <strong>Deno:</strong> Delivered directly from <code>.dinou/dist3</code> inside{" "}
+                    <code>Deno.serve</code> with full HTTP byte-range support.
+                  </li>
+                  <li>
+                    <strong>Cloudflare Workers:</strong> Copied cleanly into <code>.dinou/cloudflare/assets</code> and
+                    served at the edge through the <code>env.ASSETS</code> static binding (including{" "}
+                    <code>/.well-known/*</code>, <code>/sitemap.xml</code>, standalone verification{" "}
+                    <code>.html</code> files, PDFs, and media) without waking the RSC renderer, while internal SSG/ISR
+                    cache files remain isolated inside <code>.dinou/cloudflare/assets/__dinou_dist2</code>.
+                  </li>
+                  <li>
+                    <strong>Netlify (Functions v2):</strong> Published directly from <code>.dinou/dist3</code> to
+                    Netlify&apos;s global edge CDN (<code>publish = &quot;.dinou/dist3&quot;</code>). Dinou&apos;s
+                    serverless handler sets <code>preferStatic: true</code>, so static assets in <code>public/</code>{" "}
+                    and hashed chunks are served straight from the edge without invoking the SSR function.
+                  </li>
+                  <li>
+                    <strong>Static Export (<code>dinou export-static</code>):</strong> Copies <code>public/</code> assets
+                    and hashed client bundles from <code>.dinou/dist3</code> alongside pre-rendered SSG{" "}
+                    <code>index.html</code>, <code>page.rsc</code>, and <code>layout.rsc</code> files from{" "}
+                    <code>.dinou/dist2</code> into <code>out/</code> for full client-side SPA navigation on pure static
+                    hosts, while automatically excluding internal ISR/PPR/Slot cache metadata.
+                  </li>
+                </ul>
+
+                <Alert className="not-prose mt-4">
+                  <Globe className="h-4 w-4 text-blue-500" />
+                  <AlertTitle>Smart Cache-Control &amp; Path Hardening</AlertTitle>
+                  <AlertDescription className="text-xs space-y-1.5 mt-1">
+                    <p>
+                      Because files in <code>public/</code> have fixed, unhashed filenames, Dinou serves them with{" "}
+                      <code>Cache-Control: public, max-age=0, must-revalidate</code> so updates to{" "}
+                      <code>/sitemap.xml</code>, <code>/robots.txt</code>, or <code>/images/og-image.png</code> take
+                      effect immediately on redeploy. Content-hashed build outputs (<code>/assets/*</code> and hashed
+                      bundler chunks) automatically receive <code>Cache-Control: public, max-age=31536000, immutable</code>.
+                    </p>
+                    <p>
+                      Server bundles and internal build manifests are physically isolated in <code>.dinou/dist1</code>{" "}
+                      so <code>.dinou/dist3</code> remains a pure public static webroot (meaning you can also place a
+                      PWA <code>public/manifest.json</code> in <code>public/</code> without naming conflicts). Hidden
+                      dotfiles (such as <code>.env</code> or <code>.git</code>) are strictly blocked from public HTTP
+                      access, while RFC 8615 <code>/.well-known/*</code> routes remain publicly reachable.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+              </section>
             </section>
 
             {/* ================================================================= */}
@@ -274,7 +352,9 @@ export default function Page() {
                     Place the generated icon files directly in <code>public/</code>.
                   </li>
                   <li>
-                    Reference them in your Root Layout (<code>src/app/layout.tsx</code>) inside the <code>&lt;head&gt;</code> element:
+                    Reference them in your Root Layout (<code>src/layout.tsx</code>) inside the <code>&lt;head&gt;</code> element
+                    (alongside your global stylesheet—see{" "}
+                    <Link href="/docs/styles" className="font-medium underline underline-offset-4">Styles</Link>):
                   </li>
                 </ol>
 
@@ -282,7 +362,7 @@ export default function Page() {
                   language="tsx"
                   containerClassName="w-full overflow-hidden rounded-lg"
                 >
-                  {`// src/app/layout.tsx
+                  {`// src/layout.tsx
 import type { ReactNode } from "react";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -370,7 +450,10 @@ Sitemap: https://mydinouapp.com/sitemap.xml`}
                 </CodeBlock>
 
                 <p className="mt-4">
-                  For mobile deep-linking protocols (Universal Links on iOS and App Links on Android), create a <code>.well-known</code> directory inside <code>public/</code>:
+                  For mobile deep-linking protocols (Universal Links on iOS and App Links on Android), create a{" "}
+                  <code>.well-known</code> directory inside <code>public/</code>. Dinou automatically serves extensionless{" "}
+                  <code>apple-app-site-association</code> files with <code>Content-Type: application/json; charset=utf-8</code>{" "}
+                  as required by Apple&apos;s Universal Links specification:
                 </p>
                 <CodeBlock
                   language="bash"
@@ -397,7 +480,7 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
                 >
                   {`// Inside your root layout <head>
 <meta property="og:title" content="Dinou - High Performance Full-Stack Framework" />
-<meta property="og:description" content="Next-generation React framework with 2D micro-segmentation and in-process execution." />
+<meta property="og:description" content="Next-generation React framework with 3D micro-segmentation and in-process execution." />
 <meta property="og:image" content="https://mydinouapp.com/images/og-image.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
@@ -419,7 +502,10 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
                 </span>
               </h2>
               <p>
-                Dinou provides two distinct mechanisms for handling assets. Choose the right pattern for your use case:
+                Dinou provides two distinct mechanisms for handling assets: unbundled static files in <code>public/</code>{" "}
+                and bundler-imported modules in{" "}
+                <Link href="/docs/assets" className="font-medium underline underline-offset-4">Imported Assets (<code>src/</code>)</Link>.
+                Choose the right pattern for your use case:
               </p>
 
               <div className="not-prose overflow-x-auto rounded-lg border border-border my-6 w-full min-w-0">
@@ -443,7 +529,7 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
                         None (Bypasses bundlers entirely)
                       </td>
                       <td className="p-4 text-xs font-medium text-slate-700 dark:text-slate-300">
-                        Processed by Webpack, Rollup, or Esbuild
+                        Processed by Esbuild, Rollup, or Webpack
                       </td>
                     </tr>
                     <tr>
@@ -457,7 +543,16 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
                         <strong>Fixed, exact filename</strong> (e.g. <code>/favicon.ico</code>)
                       </td>
                       <td className="p-4 text-xs">
-                        <strong>Path-hashed filename</strong> (e.g. <code>/assets/logo-a9f2bc.png</code>)
+                        <strong>Hashed filename</strong> (e.g. <code>/assets/hero-a9f2bc14.png</code>)
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 font-semibold text-xs">Default <code>Cache-Control</code></td>
+                      <td className="p-4 font-mono text-xs">
+                        <code>public, max-age=0, must-revalidate</code>
+                      </td>
+                      <td className="p-4 font-mono text-xs">
+                        <code>public, max-age=31536000, immutable</code>
                       </td>
                     </tr>
                     <tr>
@@ -480,6 +575,30 @@ public/.well-known/assetlinks.json -> https://mydinouapp.com/.well-known/assetli
                   </tbody>
                 </table>
               </div>
+
+              <Alert className="not-prose my-6 border-amber-500/20 bg-amber-50/40 dark:bg-amber-950/20">
+                <ShieldCheck className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <AlertTitle className="text-sm font-semibold">
+                  Precedence Rule for <code>public/styles.css</code>
+                </AlertTitle>
+                <AlertDescription className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  If your project imports <strong>no CSS files</strong> inside{" "}
+                  <code>src/</code>, placing a static <code>public/styles.css</code>{" "}
+                  serves it directly at <code>/styles.css</code>. Whenever any{" "}
+                  <code>.css</code> or <code>.module.css</code> file is imported in{" "}
+                  <code>src/</code>, Dinou&apos;s{" "}
+                  <Link
+                    href="/docs/styles#linking-stylesheet"
+                    className="font-medium underline underline-offset-4"
+                  >
+                    compiled stylesheet bundle
+                  </Link>{" "}
+                  takes precedence at <code>/styles.css</code> across both{" "}
+                  <code>dinou dev</code> and <code>dinou build</code>, ignoring root{" "}
+                  <code>public/styles.css</code> with a warning (rename static files
+                  in <code>public/</code> to e.g. <code>public/custom.css</code>).
+                </AlertDescription>
+              </Alert>
             </section>
 
             {/* Documentation Previous / Next Pager */}

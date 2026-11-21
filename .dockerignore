@@ -1,19 +1,20 @@
-# Dependencias locales (se instalarán dentro de Linux con bun install)
+# Local dependencies (installed cleanly inside the Linux builder stage)
 node_modules
 
-# Control de versiones (evita subir cientos de MB de historial)
+# Version control metadata
 .git
 .gitignore
 
-# Compilaciones locales previas de Windows
+# Previous local build outputs
 .dinou
 dist
 out
 .wrangler
 
-# Variables de entorno y secretos
+# Environment files and local secrets
 .env
 .env.*
+!.env.example
 
-# Logs y documentación interna
+# Logs
 *.log

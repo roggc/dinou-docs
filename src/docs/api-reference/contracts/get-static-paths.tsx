@@ -135,7 +135,7 @@ export function GetStaticPathsContract() {
             <strong>Optional Single Segments (<code>[[category]]</code>).</strong> When visiting the root path, <code>params.category</code> is strictly <code>undefined</code> rather than an empty string or <code>null</code>. This allows JavaScript ES6 default destructuring to apply cleanly in <code>page.tsx</code>.
           </div>
           <div>
-            <strong>Optional Catch-all Routes (<code>[[...slug]]</code>).</strong> <code>params.slug</code> is guaranteed to always be an array (<code>string[]</code>). For the root path, Dinou supplies an empty array <code>[]</code> instead of <code>undefined</code>, allowing safe execution of array operations such as <code>params.slug.join(&quot;/&quot;)</code> without defensive guards. In <code>getStaticPaths</code>, pre-render the root route by passing <code>[]</code>, never <code>[undefined]</code>.
+            <strong>Optional Catch-all Routes (<code>[[...slug]]</code>).</strong> <code>params.slug</code> is guaranteed to always be an array (<code>string[]</code>). For the root path, Dinou supplies an empty array <code>[]</code> instead of <code>undefined</code>, allowing safe execution of array operations such as <code>params.slug.join(&quot;/&quot;)</code> without defensive guards. In <code>getStaticPaths</code>, pre-render the root route with <code>[]</code> (or <code>undefined</code>, which Dinou normalizes to <code>[]</code>), never <code>[undefined]</code>.
           </div>
         </AlertDescription>
       </Alert>
@@ -183,7 +183,7 @@ export function GetStaticPathsContract() {
         <AlertTitle>Architectural Roles of getStaticPaths in layout_functions.ts</AlertTitle>
         <AlertDescription className="space-y-1.5 text-xs">
           <div>
-            In Dinou, defining <code>getStaticPaths</code> in <code>layout_functions.ts</code> is essential whenever a layout resides in a dynamic directory segment (such as <code>/[lang]/layout.tsx</code>, <code>/docs/[version]/layout.tsx</code>, or <code>/[category]/layout.tsx</code>). It fulfills three critical engine functions.
+            In Dinou, defining <code>getStaticPaths</code> in <code>layout_functions.ts</code> is supported across all dynamic bracket types (<code>[param]</code>, <code>[[param]]</code>, <code>[...slug]</code>, and <code>[[...slug]]</code>, such as <code>/[lang]/layout.tsx</code>, <code>/[[locale]]/layout.tsx</code>, or <code>/docs/[version]/layout.tsx</code>). It fulfills three critical engine functions.
           </div>
           <div>
             <strong>1. Hierarchical Propagation to Child Pages.</strong> During build-time static discovery, Dinou traverses the route tree. When a layout exports <code>getStaticPaths</code>, Dinou automatically injects those parameter combinations into all nested child pages (such as <code>/[lang]/page.tsx</code>, <code>/[lang]/about/page.tsx</code>, and <code>/[lang]/contact/page.tsx</code>). Child pages do not need to duplicate <code>getStaticPaths</code> exports to inherit layout parameters.
@@ -263,15 +263,15 @@ export function GetStaticPathsContract() {
               id: "single-segment",
               label: "blog/[slug]/page_functions.ts",
               language: "typescript",
-              code: `// src/app/blog/[slug]/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/blog/[slug]/page_functions.ts
+import type { PageFunctions } from "./dinou";
 import { cmsClient } from "@/lib/cms";
 
 // Asynchronous loader fetching dynamic slugs from an external CMS
-export const getStaticPaths: PageFunctions<"/blog/[slug]">["getStaticPaths"] = async () => {
+export const getStaticPaths: PageFunctions["getStaticPaths"] = async () => {
   const articles = await cmsClient.getAllArticleSlugs();
 
-  // Return an array of strings or parameter objects
+  // Return an array of strings, numbers, or parameter objects
   return articles.map((article) => ({
     slug: article.slug,
   }));
@@ -281,11 +281,11 @@ export const getStaticPaths: PageFunctions<"/blog/[slug]">["getStaticPaths"] = a
               id: "optional-single",
               label: "products/[[category]]/page_functions.ts",
               language: "typescript",
-              code: `// src/app/products/[[category]]/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/products/[[category]]/page_functions.ts
+import type { PageFunctions } from "./dinou";
 
 // Optional single segment: pre-renders root /products and category variations
-export const getStaticPaths: PageFunctions<"/products/[[category]]">["getStaticPaths"] = [
+export const getStaticPaths: PageFunctions["getStaticPaths"] = [
   undefined, // Pre-renders /products (category is undefined)
   "electronics", // Pre-renders /products/electronics
   "fashion", // Pre-renders /products/fashion
@@ -295,13 +295,13 @@ export const getStaticPaths: PageFunctions<"/products/[[category]]">["getStaticP
               id: "multi-segment",
               label: "shop/[category]/[id]/page_functions.ts",
               language: "typescript",
-              code: `// src/app/shop/[category]/[id]/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/shop/[category]/[id]/page_functions.ts
+import type { PageFunctions } from "./dinou";
 
-// Parameter objects mapping multiple dynamic segments
-export const getStaticPaths: PageFunctions<"/shop/[category]/[id]">["getStaticPaths"] = [
+// Parameter objects mapping multiple dynamic segments (strings or numbers)
+export const getStaticPaths: PageFunctions["getStaticPaths"] = [
   { category: "electronics", id: "pro-laptop" },
-  { category: "electronics", id: "wireless-mouse" },
+  { category: "electronics", id: 42 },
   { category: "apparel", id: "hoodie" },
 ];`,
             },
@@ -309,12 +309,12 @@ export const getStaticPaths: PageFunctions<"/shop/[category]/[id]">["getStaticPa
               id: "catchall",
               label: "docs/[...slug]/page_functions.ts",
               language: "typescript",
-              code: `// src/app/docs/[...slug]/page_functions.ts
-import type { PageFunctions } from "dinou";
+              code: `// src/docs/[...slug]/page_functions.ts
+import type { PageFunctions } from "./dinou";
 import { getAllDocPaths } from "@/lib/content";
 
-// Catch-all segment returning nested string arrays
-export const getStaticPaths: PageFunctions<"/docs/[...slug]">["getStaticPaths"] = async () => {
+// Catch-all segment returning nested string arrays (or { slug: string[] }[])
+export const getStaticPaths: PageFunctions["getStaticPaths"] = async () => {
   const docRoutes = await getAllDocPaths();
 
   // Example: [["installation"], ["routing", "pages"], ["api", "reference"]]
@@ -325,12 +325,12 @@ export const getStaticPaths: PageFunctions<"/docs/[...slug]">["getStaticPaths"] 
               id: "layout-paths",
               label: "org/[tenant]/layout_functions.ts",
               language: "typescript",
-              code: `// src/app/org/[tenant]/layout_functions.ts
-import type { LayoutFunctions } from "dinou";
+              code: `// src/org/[tenant]/layout_functions.ts
+import type { LayoutFunctions } from "./dinou";
 import { db } from "@/lib/database";
 
 // Pre-render static paths at the layout level for multi-tenant segments
-export const getStaticPaths: LayoutFunctions<"/org/[tenant]">["getStaticPaths"] = async () => {
+export const getStaticPaths: LayoutFunctions["getStaticPaths"] = async () => {
   const tenants = await db.tenants.findMany({ select: { slug: true } });
   return tenants.map((t) => ({ tenant: t.slug }));
 };`,

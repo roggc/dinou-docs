@@ -17,7 +17,7 @@ export function RouteParamsSection() {
         </span>
       </div>
       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-        A standalone utility type representing the inferred parameters dictionary of a given route pattern. While <code>PageProps</code> and <code>PageFunctions</code> resolve route strings directly, <code>RouteParams</code> is ideal for typing Server Actions, services, or custom helper functions that do not inherit framework props automatically.
+        A standalone utility type representing the runtime-resolved parameters dictionary of any registered segment pattern (constrained by <code>DinouSegmentPattern</code>: pages, layouts, parallel <code>@slots</code>, and error boundaries). Companion helpers <code>LayoutParams&lt;T&gt;</code>, <code>SlotParams&lt;T&gt;</code>, and <code>ErrorParams&lt;T&gt;</code> target those specific segment families. Ideal for typing Server Functions, services, or helper functions outside framework components.
       </p>
 
       {/* Parameter Mapping Table */}
@@ -27,7 +27,8 @@ export function RouteParamsSection() {
             <tr>
               <th className="p-2.5">Pattern Segment</th>
               <th className="p-2.5">Route Example</th>
-              <th className="p-2.5">Inferred <code>RouteParams&lt;T&gt;</code></th>
+              <th className="p-2.5">Runtime <code>RouteParams&lt;T&gt;</code></th>
+              <th className="p-2.5">Navigation / <code>getStaticPaths</code> Input</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border bg-card">
@@ -35,21 +36,25 @@ export function RouteParamsSection() {
               <td className="p-2.5 font-mono text-blue-600 dark:text-blue-400">[id]</td>
               <td className="p-2.5 font-mono text-muted-foreground">/products/[id]</td>
               <td className="p-2.5 font-mono">&#123; id: string &#125;</td>
+              <td className="p-2.5 font-mono text-muted-foreground">&#123; id: string | number &#125;</td>
             </tr>
             <tr>
               <td className="p-2.5 font-mono text-purple-600 dark:text-purple-400">[...slug]</td>
               <td className="p-2.5 font-mono text-muted-foreground">/docs/[...slug]</td>
               <td className="p-2.5 font-mono">&#123; slug: string[] &#125;</td>
+              <td className="p-2.5 font-mono text-muted-foreground">&#123; slug: (string | number)[] &#125;</td>
             </tr>
             <tr>
               <td className="p-2.5 font-mono text-amber-600 dark:text-amber-400">[[...slug]]</td>
               <td className="p-2.5 font-mono text-muted-foreground">/shop/[[...slug]]</td>
-              <td className="p-2.5 font-mono">&#123; slug?: string[] &#125;</td>
+              <td className="p-2.5 font-mono">&#123; slug: string[] &#125; <span className="font-sans text-[11px] text-muted-foreground">(<code>[]</code> on root)</span></td>
+              <td className="p-2.5 font-mono text-muted-foreground">&#123; slug?: (string | number)[] &#125;</td>
             </tr>
             <tr>
               <td className="p-2.5 font-mono text-emerald-600 dark:text-emerald-400">[[tab]]</td>
               <td className="p-2.5 font-mono text-muted-foreground">/settings/[[tab]]</td>
               <td className="p-2.5 font-mono">&#123; tab?: string &#125;</td>
+              <td className="p-2.5 font-mono text-muted-foreground">&#123; tab?: string | number &#125;</td>
             </tr>
           </tbody>
         </table>

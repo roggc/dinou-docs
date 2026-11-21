@@ -1,22 +1,41 @@
-import type { ReactNode } from "react";
 import { ViewTransition } from "react";
 import { ThemeProvider } from "@/docs/components/theme-provider";
 import { DocsHeader } from "@/docs/components/docs-header";
 import { DocsSidebar } from "@/docs/components/docs-sidebar";
 import { SidebarProvider } from "@/docs/components/ui/sidebar";
+import type { LayoutProps } from "./dinou";
 import "@/docs/globals.css";
 
-export default function Layout({
-  children,
-}: {
-  children: ReactNode;
-  sidebar?: ReactNode;
-}) {
+export default function Layout({ children }: LayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Dinou Docs" />
+        <meta
+          property="og:title"
+          content="Dinou Documentation — Full-Stack React 19 Framework"
+        />
+        <meta
+          property="og:description"
+          content="Official documentation for Dinou v10: Type-Safe Routing, React Server Components, 3D Layered Caching, Partial Prerendering, Server Functions, and multi-runtime deployments."
+        />
+        <meta property="og:image" content="https://dinou.dev/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Dinou v10 Documentation" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Dinou Documentation — Full-Stack React 19 Framework"
+        />
+        <meta
+          name="twitter:description"
+          content="Official documentation for Dinou v10: Type-Safe Routing, React Server Components, 3D Layered Caching, Partial Prerendering, Server Functions, and multi-runtime deployments."
+        />
+        <meta name="twitter:image" content="https://dinou.dev/og-image.png" />
         <link key="favicon" rel="icon" type="image/png" href="/favicon.ico" />
         <link
           key="apple-touch-icon"
@@ -39,7 +58,6 @@ export default function Layout({
           href="/favicon-16x16.png"
         />
         <link key="manifest" rel="manifest" href="/site.webmanifest" />
-        {/* <link rel="preload" href="/styles.css" as="style" /> */}
         <link key="styles" rel="stylesheet" href="/styles.css" precedence="default" />
       </head>
       <body className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-500/20 selection:text-blue-600 dark:selection:text-blue-400">
@@ -55,11 +73,11 @@ export default function Layout({
               <div className="sidebar-layout w-full max-w-[1728px] mx-auto flex-1">
                 <DocsSidebar />
                 <div className="sidebar-content flex-1">
-                  <main className="flex-1 w-full">
+                  <div className="flex-1 w-full">
                     <ViewTransition name="docs-content">
                       {children}
                     </ViewTransition>
-                  </main>
+                  </div>
                 </div>
               </div>
             </div>

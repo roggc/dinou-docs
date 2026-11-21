@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Sparkles, Github, Twitter } from "lucide-react";
+import { Github } from "lucide-react";
 import { RiNpmjsFill } from "react-icons/ri";
 import {
   Tooltip,
@@ -30,7 +30,7 @@ export default function Footer() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="sm" asChild>
-                  <a href="https://www.npmjs.com/package/dinou" target="_blank">
+                  <a href="https://www.npmjs.com/package/dinou" target="_blank" rel="noreferrer">
                     <RiNpmjsFill className="h-4 w-4" />
                     <span className="sr-only">npm</span>
                   </a>
@@ -43,7 +43,7 @@ export default function Footer() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="sm" asChild>
-                  <a href="https://github.com/roggc/dinou">
+                  <a href="https://github.com/roggc/dinou" target="_blank" rel="noreferrer">
                     <Github className="h-4 w-4" />
                     <span className="sr-only">GitHub</span>
                   </a>
@@ -63,7 +63,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="grid gap-8 ">
+        <div className="grid grid-cols-2 gap-8 sm:gap-12">
           <div className="space-y-3">
             <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
               Documentation
@@ -82,7 +82,7 @@ export default function Footer() {
                   href="/docs/routing"
                   className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                 >
-                  Core Concepts
+                  Routing &amp; Architecture
                 </Link>
               </li>
               <li>
@@ -90,7 +90,31 @@ export default function Footer() {
                   href="/docs/api-reference"
                   className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                 >
-                  Reference
+                  API Reference
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/docs/cheatsheet"
+                  className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                >
+                  Cheatsheet
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              Resources
+            </h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link
+                  href="/docs/migration/v9-to-v10"
+                  className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                >
+                  Upgrade to v10
                 </Link>
               </li>
               <li>
@@ -100,6 +124,26 @@ export default function Footer() {
                 >
                   Guides
                 </Link>
+              </li>
+              <li>
+                <a
+                  href="/llms.txt"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-mono text-xs"
+                >
+                  llms.txt
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/llms-full.txt"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 font-mono text-xs"
+                >
+                  llms-full.txt
+                </a>
               </li>
             </ul>
           </div>

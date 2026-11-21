@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { usePathname, Link } from "dinou";
+import { Bot, FileText } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -13,372 +14,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/docs/components/ui/sidebar";
-import {
-  BookOpen,
-  Route,
-  Server,
-  Database,
-  Settings,
-  Zap,
-  Code,
-  ImageIcon,
-  Palette,
-  Globe,
-  Copyright,
-  Atom,
-  AtSign,
-  Fingerprint,
-  Plug,
-  Hexagon,
-  Star,
-  Sparkles,
-  Rocket,
-  DraftingCompass,
-  Package,
-  Boxes,
-  BookMarked,
-  Brain,
-  Shredder,
-  ClipboardList,
-  RefreshCw,
-  Cpu,
-  FolderTree,
-  Terminal,
-  Compass,
-  ArrowLeft,
-  ArrowRight,
-  ShieldCheck,
-} from "lucide-react";
 import { docsNavigation } from "@/docs/lib/docs-navigation";
-
-
-const ejectedNavigation = [
-  {
-    title: "Ejected Reference",
-    items: [
-      {
-        title: "Overview",
-        href: "/docs/ejected-reference",
-        icon: BookOpen,
-      },
-      {
-        title: "Virtual Filesystem & Bootstrap",
-        href: "/docs/ejected-reference/bootstrap-vfs",
-        icon: Terminal,
-        subItems: [
-          {
-            title: "Overview",
-            href: "/docs/ejected-reference/bootstrap-vfs",
-          },
-          {
-            title: "Path Aliases (register-paths.js)",
-            href: "/docs/ejected-reference/bootstrap-vfs/path-register",
-          },
-          {
-            title: "Virtual File System (vfs.js)",
-            href: "/docs/ejected-reference/bootstrap-vfs/vfs",
-          },
-        ],
-      },
-      {
-        title: "Server & SSR Architecture",
-        href: "/docs/ejected-reference/server",
-        icon: Server,
-        subItems: [
-          {
-            title: "Overview",
-            href: "/docs/ejected-reference/server",
-          },
-          {
-            title: "Main Server (server.js)",
-            href: "/docs/ejected-reference/server/main-server",
-          },
-          {
-            title: "HTML Renderer (render-html.js)",
-            href: "/docs/ejected-reference/server/render-html",
-          },
-        ],
-      },
-      {
-        title: "Routing & Path Resolvers",
-        href: "/docs/ejected-reference/routing-resolvers",
-        icon: Compass,
-        subItems: [
-          {
-            title: "Overview",
-            href: "/docs/ejected-reference/routing-resolvers",
-          },
-          {
-            title: "Route Mapper (get-file-path-and-dynamic-params.js)",
-            href: "/docs/ejected-reference/routing-resolvers/path-resolver",
-          },
-          {
-            title: "Relative URL Resolver (url-resolver.js)",
-            href: "/docs/ejected-reference/routing-resolvers/url-resolver",
-          },
-          {
-            title: "Asset Manifest Loader (get-asset-from-manifest.js)",
-            href: "/docs/ejected-reference/routing-resolvers/asset-resolver",
-          },
-        ],
-      },
-      {
-        title: "RSC Render & Context Utilities",
-        href: "/docs/ejected-reference/rsc-context",
-        icon: Atom,
-        subItems: [
-          {
-            title: "Overview",
-            href: "/docs/ejected-reference/rsc-context",
-          },
-          {
-            title: "JSX Compiler (render-jsx-to-client-jsx.js)",
-            href: "/docs/ejected-reference/rsc-context/jsx-compiler",
-          },
-          {
-            title: "Context Proxy (context-proxy.js)",
-            href: "/docs/ejected-reference/rsc-context/context-proxy",
-          },
-          {
-            title: "Concurrency Manager (concurrency-manager.js)",
-            href: "/docs/ejected-reference/rsc-context/concurrency-manager",
-          },
-          {
-            title: "Error Boundaries Handler (get-error-jsx.js)",
-            href: "/docs/ejected-reference/rsc-context/error-handler",
-          },
-          {
-            title: "RSC Tree Builder (get-jsx.js)",
-            href: "/docs/ejected-reference/rsc-context/get-jsx",
-          },
-          {
-            title: "HTML App Renderer (render-app-to-html.js)",
-            href: "/docs/ejected-reference/rsc-context/render-app-to-html",
-          },
-          {
-            title: "Request Context Store (request-context.js)",
-            href: "/docs/ejected-reference/rsc-context/request-context",
-          },
-          {
-            title: "Redirect Engine (redirect.jsx)",
-            href: "/docs/ejected-reference/rsc-context/redirect-helpers",
-          },
-        ],
-      },
-      {
-        title: "ESM Loader Integration",
-        href: "/docs/ejected-reference/loader",
-        icon: Cpu,
-        subItems: [
-          {
-            title: "Overview",
-            href: "/docs/ejected-reference/loader",
-          },
-          {
-            title: "Module Importer (import-module.js)",
-            href: "/docs/ejected-reference/loader/import-module",
-          },
-          {
-            title: "Path Resolver (get-abs-path-with-ext.js)",
-            href: "/docs/ejected-reference/loader/get-abs-path-with-ext",
-          },
-          {
-            title: "Exports Parser (parse-exports.js)",
-            href: "/docs/ejected-reference/loader/parse-exports",
-          },
-          {
-            title: "Path Normalizer (path-utils.js)",
-            href: "/docs/ejected-reference/loader/path-utils",
-          },
-        ],
-      },
-      {
-        title: "Static & ISR Engines",
-        href: "/docs/ejected-reference/static-isr",
-        icon: RefreshCw,
-        subItems: [
-          {
-            title: "Overview",
-            href: "/docs/ejected-reference/static-isr",
-          },
-          {
-            title: "Static Crawler (build-static-pages.js)",
-            href: "/docs/ejected-reference/static-isr/build-static-pages",
-          },
-          {
-            title: "Background ISR (revalidating.js)",
-            href: "/docs/ejected-reference/static-isr/revalidating",
-          },
-          {
-            title: "On-Demand Purge (cache-revalidate.js)",
-            href: "/docs/ejected-reference/static-isr/cache-revalidate",
-          },
-          {
-            title: "ISG Engine (generating-isg.js)",
-            href: "/docs/ejected-reference/static-isr/generating-isg",
-          },
-          {
-            title: "Orchestrator Entry (generate-static.js)",
-            href: "/docs/ejected-reference/static-isr/generate-static",
-          },
-          {
-            title: "RSC Builder (generate-static-rsc.js)",
-            href: "/docs/ejected-reference/static-isr/generate-static-rsc",
-          },
-          {
-            title: "RSCs Pipeline (generate-static-rscs.js)",
-            href: "/docs/ejected-reference/static-isr/generate-static-rscs",
-          },
-          {
-            title: "HTML Builder (generate-static-page.js)",
-            href: "/docs/ejected-reference/static-isr/generate-static-page",
-          },
-          {
-            title: "HTML Pipeline (generate-static-pages.js)",
-            href: "/docs/ejected-reference/static-isr/generate-static-pages",
-          },
-          {
-            title: "Atomic Committer (safe-rename.js)",
-            href: "/docs/ejected-reference/static-isr/safe-rename",
-          },
-          {
-            title: "Cache Side-Effects (get-ssg-metadata.js)",
-            href: "/docs/ejected-reference/static-isr/get-ssg-metadata",
-          },
-          {
-            title: "Status Manifest (status-manifest.js)",
-            href: "/docs/ejected-reference/static-isr/status-manifest",
-          },
-        ],
-      },
-      {
-        title: "Client & Routing",
-        href: "/docs/ejected-reference/client-runtime",
-        icon: Globe,
-        subItems: [
-          {
-            title: "Overview",
-            href: "/docs/ejected-reference/client-runtime",
-          },
-          {
-            title: "SPA Hydration (client.jsx)",
-            href: "/docs/ejected-reference/client-runtime/client",
-          },
-          {
-            title: "Recovery Hydration (client-error.jsx)",
-            href: "/docs/ejected-reference/client-runtime/client-error",
-          },
-          {
-            title: "Router Hooks & Context (navigation.js)",
-            href: "/docs/ejected-reference/client-runtime/navigation",
-          },
-          {
-            title: "Link Click Hijacking (link.jsx)",
-            href: "/docs/ejected-reference/client-runtime/link",
-          },
-          {
-            title: "Server Functions Connection (server-function-proxy.js)",
-            href: "/docs/ejected-reference/client-runtime/server-actions",
-          },
-          {
-            title: "Navigation Utilities (navigation-utils.js)",
-            href: "/docs/ejected-reference/client-runtime/navigation-utils",
-          },
-        ],
-      },
-      {
-        title: "Styles & Assets Hooks",
-        href: "/docs/ejected-reference/assets-styling",
-        icon: Settings,
-      },
-      {
-        title: "esbuild Integration",
-        href: "/docs/ejected-reference/bundlers/esbuild",
-        icon: Zap,
-        subItems: [
-          {
-            title: "1. Overview & Configs",
-            href: "/docs/ejected-reference/bundlers/esbuild",
-          },
-          {
-            title: "2. Build & Dev Runners",
-            href: "/docs/ejected-reference/bundlers/esbuild/runners",
-          },
-          {
-            title: "3. Core RSC Plugins",
-            href: "/docs/ejected-reference/bundlers/esbuild/rsc-plugins",
-          },
-          {
-            title: "4. Style & Asset Plugins",
-            href: "/docs/ejected-reference/bundlers/esbuild/asset-plugins",
-          },
-          {
-            title: "5. Optimization Plugins",
-            href: "/docs/ejected-reference/bundlers/esbuild/opt-plugins",
-          },
-          {
-            title: "6. ESM React Refresh",
-            href: "/docs/ejected-reference/bundlers/esbuild/react-refresh",
-          },
-          {
-            title: "7. Entry & File Helpers",
-            href: "/docs/ejected-reference/bundlers/esbuild/helpers",
-          },
-        ],
-      },
-      {
-        title: "Rollup Integration",
-        href: "/docs/ejected-reference/bundlers/rollup",
-        icon: RefreshCw,
-        subItems: [
-          {
-            title: "1. Overview & Config",
-            href: "/docs/ejected-reference/bundlers/rollup",
-          },
-          {
-            title: "2. RSC Manifest Plugin",
-            href: "/docs/ejected-reference/bundlers/rollup/rsc-manifest",
-          },
-          {
-            title: "3. Server Functions Plugin",
-            href: "/docs/ejected-reference/bundlers/rollup/server-functions",
-          },
-          {
-            title: "4. Asset & Helpers Plugins",
-            href: "/docs/ejected-reference/bundlers/rollup/assets-helpers",
-          },
-          {
-            title: "5. ESM React Refresh",
-            href: "/docs/ejected-reference/bundlers/rollup/react-refresh",
-          },
-        ],
-      },
-      {
-        title: "Webpack Integration",
-        href: "/docs/ejected-reference/bundlers/webpack",
-        icon: Boxes,
-        subItems: [
-          {
-            title: "1. Overview & Config",
-            href: "/docs/ejected-reference/bundlers/webpack",
-          },
-          {
-            title: "2. Dynamic Entry Resolver",
-            href: "/docs/ejected-reference/bundlers/webpack/entry-resolver",
-          },
-          {
-            title: "3. Server Functions Loader",
-            href: "/docs/ejected-reference/bundlers/webpack/server-functions",
-          },
-          {
-            title: "4. Manifest Plugin",
-            href: "/docs/ejected-reference/bundlers/webpack/manifest-generator",
-          },
-        ],
-      },
-    ],
-  },
-];
 
 export function DocsSidebar() {
   const pathname = usePathname();
@@ -386,8 +22,7 @@ export function DocsSidebar() {
   const { setOpenMobile } = useSidebar();
   const prevPathname = useRef(pathname);
 
-  const isEjected = pathname.startsWith("/docs/ejected-reference");
-  const activeNavigation = isEjected ? ejectedNavigation : docsNavigation;
+  const normalizedPath = pathname ? pathname.replace(/\/$/, "") : "";
 
   useEffect(() => {
     setMounted(true);
@@ -404,62 +39,23 @@ export function DocsSidebar() {
   return (
     <Sidebar collapsible="none" className="border-r z-30">
       <SidebarContent className="scrollbar-thin pt-2">
-        {/* Ejected mode back button */}
-        {isEjected && (
-          <div className="px-3 pt-3 pb-1">
-            <Link
-              href="/docs"
-              className="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg text-slate-600 dark:text-slate-400 hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200/80 dark:border-slate-800"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Back to Documentation</span>
-            </Link>
-          </div>
-        )}
-
-        {activeNavigation.map((section) => (
+        {docsNavigation.map((section) => (
           <SidebarGroup key={section.title}>
             <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {section.items.map((item) => {
-                  // Custom cast to handle typings dynamically or handle optional subItems
-                  const anyItem = item as any;
-                  const hasSubItems = anyItem.subItems && anyItem.subItems.length > 0;
-                  const isParentActive = mounted && (
-                    pathname === item.href || 
-                    (hasSubItems && anyItem.subItems.some((sub: any) => pathname === sub.href))
-                  );
+                  const Icon = item.icon;
+                  const isActive = mounted && normalizedPath === item.href;
 
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isParentActive && (!hasSubItems || pathname === item.href)}
-                      >
+                      <SidebarMenuButton asChild isActive={isActive}>
                         <Link href={item.href}>
-                          <item.icon className="h-4 w-4" />
+                          <Icon className="h-4 w-4" />
                           <span>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
-
-                      {hasSubItems && (
-                        <div className="pl-6 border-l border-slate-200 dark:border-slate-800 ml-4 my-1 space-y-1">
-                          {anyItem.subItems.map((sub: any) => (
-                            <Link
-                              key={sub.href}
-                              href={sub.href}
-                              className={`block text-xs py-1 px-2 rounded-md transition-colors ${
-                                mounted && pathname === sub.href
-                                  ? "bg-slate-100 dark:bg-slate-800 font-semibold text-foreground"
-                                  : "text-muted-foreground hover:text-foreground hover:bg-slate-50 dark:hover:bg-slate-900"
-                              }`}
-                            >
-                              {sub.title}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
                     </SidebarMenuItem>
                   );
                 })}
@@ -467,6 +63,31 @@ export function DocsSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+
+        {/* AI / LLM-friendly documentation endpoints */}
+        <SidebarGroup className="mt-2 pt-3 border-t border-border/60">
+          <SidebarGroupLabel>For AI &amp; LLMs</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <a href="/llms.txt" target="_blank" rel="noreferrer">
+                    <Bot className="h-4 w-4" />
+                    <span>llms.txt</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <a href="/llms-full.txt" target="_blank" rel="noreferrer">
+                    <FileText className="h-4 w-4" />
+                    <span>llms-full.txt</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   );

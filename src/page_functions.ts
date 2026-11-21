@@ -1,3 +1,1 @@
-export function dynamic() {
-  return false;
-}
+export const revalidate = false;

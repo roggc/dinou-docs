@@ -1,30 +1,12 @@
 import { Badge } from "@/docs/components/ui/badge";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/docs/components/ui/card";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/docs/components/ui/alert";
-import {
   CheckCircle2,
   XCircle,
   HelpCircle,
-  Sparkles,
-  Layers,
-  Split,
   RefreshCw,
   Clock,
-  Database,
-  ShieldAlert,
   Check,
   X,
-  ArrowRight,
 } from "lucide-react";
 import { CodeBlock } from "@/docs/components/code-block";
 
@@ -74,10 +56,10 @@ export function CacheSlotGuideSection() {
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="p-3 bg-background/80 rounded-lg border border-rose-500/20 text-xs space-y-1.5">
             <span className="font-bold text-rose-600 dark:text-rose-400 block">
-              1. 100% Static Pages (SSG)
+              1. Uniform Static Subtrees
             </span>
             <p className="text-muted-foreground leading-normal">
-              If an entire route is pre-rendered at build time with no revalidation, it is already cached as immutable HTML at the CDN Edge. Wrapping parts of it in a slot adds zero caching benefit.
+              If a component inside a static route shares the exact same lifecycle as the page and never needs its own TTL, tag invalidation, or <code>refreshSlot()</code>, wrapping it in a slot adds zero benefit.
             </p>
           </div>
 
@@ -127,9 +109,9 @@ export function CacheSlotGuideSection() {
           </p>
 
           <CodeBlock language="tsx" containerClassName="rounded-lg overflow-hidden">
-{`// src/routes/dashboard/page.tsx (Dynamic authenticated SSR)
+{`// src/dashboard/page.tsx (Dynamic authenticated SSR)
 import { Suspense } from "react";
-import { DinouCacheSlot } from "dinou";
+import { DinouCacheSlot } from "dinou/server";
 import { getSession } from "@/lib/auth";
 import { GlobalMetricsWidget } from "./metrics";
 
@@ -142,7 +124,7 @@ export default async function DashboardPage() {
 
       {/* Global widget: cached for 10 minutes on the server across all users */}
       <Suspense fallback={<div>Loading global telemetry...</div>}>
-        <DinouCacheSlot id="global-metrics" duration={600} tags={["metrics"]}>
+        <DinouCacheSlot id="global-metrics" revalidate={600} tags={["metrics"]}>
           <GlobalMetricsWidget />
         </DinouCacheSlot>
       </Suspense>
@@ -167,12 +149,8 @@ export default async function DashboardPage() {
           </div>
 
           <p className="text-xs text-muted-foreground leading-relaxed">
-            In PPR, the static shell ships instantly from CDN (0ms TTFB), while dynamic holes stream in via React Suspense. Without a slot, <strong>100,000 visitors trigger 100,000 database hits</strong>. Placing <code>&lt;DinouCacheSlot&gt;</code> inside the hole means only the first request queries the DB; the other 99,999 stream the cached RSC Flight payload in <strong>~2-5ms</strong>:
+            In PPR, the static shell ships instantly from CDN (0ms TTFB), while dynamic holes stream in via React Suspense. Without a slot, <strong>100,000 visitors trigger 100,000 database hits</strong>. Placing <code>&lt;DinouCacheSlot&gt;</code> inside the hole means only the first request queries the DB; the other 99,999 stream the cached RSC Flight payload in <strong>~2ms</strong>.
           </p>
-
-          <div className="p-3 bg-indigo-50/30 dark:bg-indigo-950/20 rounded-lg border border-indigo-500/20 text-xs text-muted-foreground">
-            👉 <em>See full breakdown and benchmark diagrams in Section 6.5 above.</em>
-          </div>
         </div>
 
         {/* Scenario 3 */}
@@ -217,7 +195,7 @@ export default async function DashboardPage() {
 
           <CodeBlock language="tsx" containerClassName="rounded-lg overflow-hidden mt-2">
 {`// 1. In your Page (Server Component): Asymmetric slot inside static route
-<DinouCacheSlot id={\`price-\${product.id}\`} duration={60} tags={["pricing"]}>
+<DinouCacheSlot id={\`price-\${product.id}\`} revalidate={60} tags={["pricing"]}>
   <LivePriceCalculator productId={product.id} />
 </DinouCacheSlot>
 

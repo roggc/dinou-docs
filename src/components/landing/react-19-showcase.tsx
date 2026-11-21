@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Link } from "dinou";
+import { Link, type DinouLinkTarget } from "dinou";
 import { CodeWindow, type CodeFile } from "./code-window";
 
 type React19Tab = "actions" | "rsc";
@@ -26,7 +26,7 @@ interface TabConfig {
   codeSnippet?: string;
   files?: CodeFile[];
   benefits: string[];
-  docLink: string;
+  docLink: DinouLinkTarget;
   docLabel: string;
   statusLeft?: string;
   statusRight?: string;
@@ -46,7 +46,7 @@ const configs: Record<React19Tab, TabConfig> = {
         filename: "src/dashboard/page.tsx",
         badge: "RSC",
         language: "tsx",
-        code: `// src/dashboard/page.tsx
+        code: `
 // Pure Server Component: 0kb sent to browser
 import { db } from "@/lib/db";
 import { MarkdownParser } from "@/lib/heavy-parser";
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
         filename: "src/dashboard/client-chart.tsx",
         badge: '"use client"',
         language: "tsx",
-        code: `// src/dashboard/client-chart.tsx
+        code: `
 "use client";
 
 import { useState } from "react";
@@ -135,7 +135,7 @@ export function InteractiveChart({ data }: { data: Metric[] }) {
         filename: "src/actions/get-product.tsx",
         badge: '"use server"',
         language: "tsx",
-        code: `// src/actions/get-product.tsx
+        code: `
 "use server";
 
 import { db } from "@/lib/db";
@@ -156,7 +156,7 @@ export async function getFeaturedProduct(id: string) {
         filename: "src/components/product-feed.tsx",
         badge: '"use client"',
         language: "tsx",
-        code: `// src/components/product-feed.tsx
+        code: `
 "use client";
 
 import { useState, use, Suspense } from "react";
@@ -195,7 +195,7 @@ export function ProductFeed() {
         filename: "src/components/product-card.tsx",
         badge: '"use client"',
         language: "tsx",
-        code: `// src/components/product-card.tsx
+        code: `
 "use client";
 
 import { useState } from "react";
@@ -237,7 +237,7 @@ export function ProductCard({ item }: { item: Product }) {
     benefits: [
       "Return Client & Server Components directly over the Flight RPC wire",
       "Stream interactive UI with native React 19 use() and <Suspense>",
-      "Pass server-fetched data as props with zero manual JSON boilerplate",
+      "Declare 'use server' at the module level or inline inside individual functions",
       "Also fully supports standard mutations with useActionState & useOptimistic",
     ],
     docLink: "/docs/server-functions",

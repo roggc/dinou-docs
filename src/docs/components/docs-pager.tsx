@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, Link } from "dinou";
+import { usePathname, Link, type DinouLinkTarget } from "dinou";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { docsNavigation } from "@/docs/lib/docs-navigation";
 
@@ -12,7 +12,7 @@ export function DocsPager() {
   }
 
   // Flatten active navigation items across all sections
-  const flatItems: { title: string; href: string; sectionTitle: string }[] = [];
+  const flatItems: { title: string; href: DinouLinkTarget; sectionTitle: string }[] = [];
   for (const section of docsNavigation) {
     for (const item of section.items) {
       flatItems.push({

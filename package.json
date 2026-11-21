@@ -62,6 +62,10 @@
     "start:node:esbuild": "dinou start:node:esbuild",
     "start:node:rollup": "dinou start:node:rollup",
     "start:node:webpack": "dinou start:node:webpack",
+    "build:netlify": "dinou build:netlify",
+    "build:netlify:esbuild": "dinou build:netlify:esbuild",
+    "build:netlify:rollup": "dinou build:netlify:rollup",
+    "build:netlify:webpack": "dinou build:netlify:webpack",
     "build:cloudflare": "dinou build:cloudflare",
     "build:cloudflare:esbuild": "dinou build:cloudflare:esbuild",
     "build:cloudflare:rollup": "dinou build:cloudflare:rollup",
@@ -147,6 +151,8 @@
     "export-static:esbuild": "dinou export-static:esbuild",
     "export-static:rollup": "dinou export-static:rollup",
     "export-static:webpack": "dinou export-static:webpack",
+    "typegen": "dinou typegen",
+    "search:index": "node scripts/generate-search-index.mjs",
     "eject": "dinou eject"
   },
   "dependencies": {
@@ -178,7 +184,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
-    "dinou": "^9.0.0",
+    "dinou": "^10.0.1",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.518.0",
