@@ -356,6 +356,7 @@ compatibility_flags = ["nodejs_compat"]
 directory = ".dinou/cloudflare/assets"
 binding = "ASSETS"
 run_worker_first = true
+html_handling = "none"
 ```
 
 **Netlify Functions v2 (`netlify.toml`)**:

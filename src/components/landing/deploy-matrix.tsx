@@ -85,6 +85,7 @@ compatibility_flags = ["nodejs_compat"]
 directory = ".dinou/cloudflare/assets"
 binding = "ASSETS"
 run_worker_first = true
+html_handling = "none"
 
 # Optional: Bind KV namespace for persistent ISR route caching
 # [[kv_namespaces]]

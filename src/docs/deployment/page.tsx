@@ -401,7 +401,7 @@ dinou build:node:pure:compile:win        # Windows executable (.exe)`}
                 >
 {`# netlify.toml
 [build]
-  command = "npm run build" # or "npx dinou build:netlify"
+  command = "npm run build:netlify" # or "npm run build"
   publish = ".dinou/dist3"
 
 [build.environment]
@@ -478,6 +478,7 @@ compatibility_flags = ["nodejs_compat"]
 directory = ".dinou/cloudflare/assets"
 binding = "ASSETS"
 run_worker_first = true
+html_handling = "none"
 
 # Optional: Bind a Cloudflare KV namespace for persistent global ISR/ISG caching
 # [[kv_namespaces]]

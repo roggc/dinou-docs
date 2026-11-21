@@ -420,7 +420,8 @@ compatibility_flags = ["nodejs_compat"]
 # Updated in v10 (was ".dinou/dist3" in v9)
 directory = ".dinou/cloudflare/assets"
 binding = "ASSETS"
-run_worker_first = true`,
+run_worker_first = true
+html_handling = "none"`,
                       },
                       {
                         id: "netlify",
