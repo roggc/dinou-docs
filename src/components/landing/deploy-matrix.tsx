@@ -5,8 +5,7 @@ import { Check, Copy, Zap, Server, Globe, Cpu, Terminal, ArrowUpRight, Cloud, Fi
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link, type DinouLinkTarget } from "dinou";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism/index.js";
+import { SyntaxHighlighter, oneDark } from "@/components/syntax-highlighter";
 
 const cleanOneDark = {
   ...oneDark,

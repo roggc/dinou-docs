@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Check, Copy } from "lucide-react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism/index.js";
+import { SyntaxHighlighter, oneDark } from "@/components/syntax-highlighter";
 
 // Clean One Dark theme ensuring no unwanted line backgrounds/highlights
 const cleanOneDark = {
